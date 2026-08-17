@@ -667,10 +667,10 @@ const PERF_TAGS = ["Abschluss", "Chancenverwertung", "Chancenkreation", "Passspi
 function scoreColor(s) {
   return s >= 85 ? "#149a59" : s >= 70 ? "#27b567" : s >= 55 ? "#b9860b" : "#b04a3a";
 }
-const STRIPE_LINK = "https://buy.stripe.com/4gM28r7qS1NUgfjee2gIo01"; // Stripe: TransferWire Abo 60 EUR/Monat
+const STRIPE_LINK = "https://buy.stripe.com/cNieVd6mObouaUZ9XMgIo03"; // Stripe: TransferWire Standard 49 EUR/Monat (alter 60er-Link abgeloest)
 const STRIPE_LINK_YEAR = ""; // Stripe: TransferWire Jahres-Abo 600 EUR/Jahr — Link eintragen, sobald in Stripe angelegt; Buttons erscheinen dann automatisch
 const STRIPE_PORTAL = "https://billing.stripe.com/p/login/cNi14n6mO2RY3sxfi6gIo00"; // Stripe-Kundenportal (Kündigung/Zahlungsmethoden)
-const STRIPE_LINK_STANDARD = "__STANDARD49__"; // Stripe: TransferWire Standard 49 EUR/Monat
+const STRIPE_LINK_STANDARD = "https://buy.stripe.com/cNieVd6mObouaUZ9XMgIo03"; // Stripe: TransferWire Standard 49 EUR/Monat
 const STRIPE_LINK_PREMIUM = "https://buy.stripe.com/dRm7sL6mOgIO6EJgmagIo02"; // Stripe: TransferWire Premium 99 EUR/Monat
 const PRICE_STANDARD = "49";
 const PRICE_PREMIUM = "99";
@@ -3102,6 +3102,10 @@ const PRICING_I18N = {
     f_ki: "KI-Scout-Chat (30 Fragen/Tag)",
     f_kontakte: "Vereins-Kontakte: Sportdirektoren & Gesch\u00e4ftsf\u00fchrer",
     lock_hint: "Nur in Premium",
+    lock_title: "Premium-Funktion",
+    lock_body: "Vereins-Kontakte \u2014 Sportdirektoren und Gesch\u00e4ftsf\u00fchrer mit direktem Draht \u2014 sind dem Premium-Zugang vorbehalten.",
+    lock_btn: "Premium freischalten \u2014 99 \u20ac/Monat",
+    lock_up: "Bestehendes Standard-Abo? Nach dem Premium-Kauf einfach das alte Abo im Kundenportal beenden \u2014 oder kurz per Mail melden, wir stellen um.",
     t_btn: "Jetzt gratis testen",
     s_btn: "Standard w\u00e4hlen",
     p_btn: "Premium w\u00e4hlen",
@@ -3127,6 +3131,10 @@ const PRICING_I18N = {
     f_ki: "AI scout chat (30 questions/day)",
     f_kontakte: "Club contacts: sporting directors & CEOs",
     lock_hint: "Premium only",
+    lock_title: "Premium feature",
+    lock_body: "Club contacts \u2014 sporting directors and CEOs with a direct line \u2014 are reserved for Premium access.",
+    lock_btn: "Unlock Premium \u2014 \u20ac99/month",
+    lock_up: "Already on Standard? After purchasing Premium, simply end your old plan in the customer portal \u2014 or drop us a line and we\u2019ll switch you over.",
     t_btn: "Start free trial",
     s_btn: "Choose Standard",
     p_btn: "Choose Premium",
@@ -3157,6 +3165,21 @@ function TierCard({ name, price, per, tag, feats, btn, onClick, dark, badge, acc
   }, btn));
 }
 
+function PremiumLock({ small }) {
+  const L = PRICING_I18N[LANG];
+  return React.createElement("div", {
+    style: { background: small ? "#f6faf7" : "#fff", border: "1.5px dashed " + LGREEN, borderRadius: 12, padding: small ? "14px 14px" : "22px 20px", textAlign: small ? "left" : "center", margin: small ? "2px 0 12px" : 0 }
+  }, React.createElement("div", {
+    style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: 1.5, color: LGREEN, marginBottom: 6 }
+  }, "\ud83d\udd12 " + L.lock_title.toUpperCase()), React.createElement("div", {
+    style: { fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.6, color: "#3a3a38", marginBottom: 12 }
+  }, L.lock_body), React.createElement("button", {
+    onClick: () => window.open(STRIPE_LINK_PREMIUM, "_blank"),
+    style: { cursor: "pointer", background: LGREEN, color: "#fff", border: "none", borderRadius: 9, padding: "11px 18px", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800 }
+  }, L.lock_btn), React.createElement("div", {
+    style: { fontFamily: FONT_BODY, fontSize: 11, lineHeight: 1.5, color: MUTED, marginTop: 10 }
+  }, L.lock_up));
+}
 function LandingPage({
   onTest,
   onAbo,
@@ -4591,6 +4614,8 @@ function TransferApp({
   onNavigate,
   onLogout
 }) {
+  const isPrem = !!account && account.plan === "premium";
+  const authQ = account ? "&email=" + encodeURIComponent(account.email || "") + "&code=" + encodeURIComponent(account.code || "") : "";
   const [sport, setSport] = useState("alle");
   const [type, setType] = useState("alle");
   const [query, setQuery] = useState("");
@@ -4738,10 +4763,15 @@ function TransferApp({
   const [ktLoading, setKtLoading] = useState(false);
   useEffect(() => {
     if (view !== "kontakte") return;
+    if (!isPrem) {
+      setKtItems("locked");
+      setKtLoading(false);
+      return;
+    }
     let alive = true;
     setKtLoading(true);
     const timer = setTimeout(() => {
-      fetch(MARKT_URL + "?bereich=kontakte" + (ktQ.trim().length >= 2 ? "&q=" + encodeURIComponent(ktQ.trim()) : ""), {
+      fetch(MARKT_URL + "?bereich=kontakte" + authQ + (ktQ.trim().length >= 2 ? "&q=" + encodeURIComponent(ktQ.trim()) : ""), {
         credentials: "omit",
         cache: "no-store"
       }).then(r => r.json()).then(raw => {
@@ -4903,7 +4933,7 @@ function TransferApp({
     if (!name || name === "\u2014") return;
     setVereinName(name);
     setVereinData(null);
-    fetch(VEREIN_URL + "?name=" + encodeURIComponent(name), {
+    fetch(VEREIN_URL + "?name=" + encodeURIComponent(name) + authQ, {
       credentials: "omit",
       cache: "no-store"
     }).then(r => r.json()).then(raw => {
@@ -4919,8 +4949,12 @@ function TransferApp({
   const [contactList, setContactList] = useState(null);
   const openContacts = club => {
     setContactClub(club);
+    if (!isPrem) {
+      setContactList("locked");
+      return;
+    }
     setContactList(null);
-    fetch(MARKT_URL + "?bereich=kontakte&q=" + encodeURIComponent(club), {
+    fetch(MARKT_URL + "?bereich=kontakte&q=" + encodeURIComponent(club) + authQ, {
       credentials: "omit",
       cache: "no-store"
     }).then(r => r.json()).then(raw => {
@@ -7775,7 +7809,9 @@ function TransferApp({
       color: "#4a4a48",
       lineHeight: 1.5
     }
-  }, d.grund))), vereinData.kontakte && vereinData.kontakte.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, d.grund))), !isPrem && /*#__PURE__*/React.createElement(PremiumLock, {
+    small: true
+  }), isPrem && vereinData.kontakte && vereinData.kontakte.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 11,
@@ -8359,7 +8395,7 @@ function TransferApp({
       textTransform: "uppercase",
       marginBottom: 10
     }
-  }, t("kt_btn"), " — ", contactClub), contactList === null ? /*#__PURE__*/React.createElement("div", {
+  }, t("kt_btn"), " — ", contactClub), contactList === "locked" ? /*#__PURE__*/React.createElement(PremiumLock, null) : contactList === null ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 13,
