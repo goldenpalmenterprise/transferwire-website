@@ -3088,6 +3088,7 @@ const PRICING_I18N = {
     sub: "Monatlich k\u00fcndbar. Zugangscode kommt nach der Zahlung automatisch per E-Mail. Der Test endet von selbst \u2014 ganz ohne Zahlungsdaten.",
     per: "/Monat",
     days: "3 Tage",
+    badge_test: "3 TAGE GRATIS",
     badge_std: "BELIEBT",
     badge_prm: "ALLES DRIN",
     t_name: "Test", s_name: "Standard", p_name: "Premium",
@@ -3117,6 +3118,7 @@ const PRICING_I18N = {
     sub: "Cancel monthly. Your access code arrives by email right after payment. The trial ends automatically \u2014 no payment details required.",
     per: "/month",
     days: "3 days",
+    badge_test: "3 DAYS FREE",
     badge_std: "POPULAR",
     badge_prm: "EVERYTHING",
     t_name: "Trial", s_name: "Standard", p_name: "Premium",
@@ -3141,30 +3143,32 @@ const PRICING_I18N = {
     note: "All prices include VAT. Subscriptions can be cancelled monthly via the customer portal."
   }
 };
-function TierFeat({ text, locked, dark, hint }) {
+function TierFeat({ text, locked, dark, hint, ac }) {
+  const col = ac || LGREEN;
   return React.createElement("div", {
     style: { display: "flex", alignItems: "flex-start", gap: 8, fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.5, color: locked ? (dark ? "rgba(255,255,255,.38)" : "#9a9a96") : (dark ? "rgba(255,255,255,.92)" : "#3a3a38") }
   }, React.createElement("span", {
-    style: { flexShrink: 0, width: 17, height: 17, borderRadius: 9, marginTop: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 10.5, fontWeight: 800, background: locked ? (dark ? "rgba(255,255,255,.12)" : "#ececea") : "rgba(20,154,89,.14)", color: locked ? (dark ? "rgba(255,255,255,.45)" : "#9a9a96") : LGREEN }
+    style: { flexShrink: 0, width: 17, height: 17, borderRadius: 9, marginTop: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 10.5, fontWeight: 800, background: locked ? (dark ? "rgba(255,255,255,.12)" : "#ececea") : col + "26", color: locked ? (dark ? "rgba(255,255,255,.45)" : "#9a9a96") : col }
   }, locked ? "\u2013" : "\u2713"), React.createElement("span", null, text, locked && hint ? React.createElement("span", { style: { display: "block", fontSize: 11, color: dark ? "rgba(255,255,255,.35)" : "#b0b0ac" } }, hint) : null));
 }
-function TierCard({ name, price, per, tag, feats, btn, onClick, dark, badge, accent }) {
+function TierCard({ name, price, per, tag, feats, btn, onClick, dark, badge, color }) {
+  const ac = color || LGREEN;
+  const gold = ac === "#d9a441";
   return React.createElement("div", {
-    style: { position: "relative", background: dark ? INK : "#fff", color: dark ? "#fff" : INK, border: dark ? "2px solid " + INK : accent ? "2px solid " + LGREEN : "1px solid " + HAIR, borderRadius: 16, padding: "26px 22px 22px", display: "flex", flexDirection: "column", gap: 0, boxShadow: dark ? "0 14px 40px rgba(23,23,26,.28)" : accent ? "0 10px 30px rgba(20,154,89,.10)" : "none" }
+    style: { position: "relative", background: dark ? INK : "#fff", color: dark ? "#fff" : INK, border: dark ? "2px solid " + INK : "1px solid " + HAIR, borderTop: "5px solid " + ac, borderRadius: 16, padding: "26px 22px 22px", display: "flex", flexDirection: "column", gap: 0, boxShadow: dark ? "0 16px 44px rgba(23,23,26,.32)" : "0 8px 26px rgba(23,23,26,.06)" }
   }, badge ? React.createElement("div", {
-    style: { position: "absolute", top: -11, left: 20, background: dark ? LGREEN : ORANGE, color: "#fff", fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: 1.5, padding: "4px 10px", borderRadius: 999 }
+    style: { position: "absolute", top: -12, left: 20, background: ac, color: gold || ac === ORANGE ? "#1d1d1f" : "#fff", fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: 1.5, padding: "4px 11px", borderRadius: 999 }
   }, badge) : null, React.createElement("div", {
     style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 21, textTransform: "uppercase", letterSpacing: .5 }
   }, name), React.createElement("div", {
-    style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 38, color: dark ? LGREEN : accent ? LGREEN : INK, margin: "4px 0 6px" }
+    style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 38, color: ac, margin: "4px 0 6px" }
   }, price, React.createElement("span", { style: { fontSize: 15, fontWeight: 600, color: dark ? "rgba(255,255,255,.55)" : MUTED } }, " ", per)), React.createElement("p", {
     style: { fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.55, color: dark ? "rgba(255,255,255,.68)" : "#4a4a48", margin: "0 0 16px", minHeight: 40 }
-  }, tag), React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 9, marginBottom: 20, flex: 1 } }, feats.map((f, i) => React.createElement(TierFeat, { key: i, text: f.t, locked: !!f.l, dark: dark, hint: f.h }))), React.createElement("button", {
+  }, tag), React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 9, marginBottom: 20, flex: 1 } }, feats.map((f, i) => React.createElement(TierFeat, { key: i, text: f.t, locked: !!f.l, dark: dark, hint: f.h, ac: ac }))), React.createElement("button", {
     onClick: onClick,
-    style: { cursor: "pointer", width: "100%", background: dark ? LGREEN : accent ? LGREEN : "transparent", color: dark || accent ? "#fff" : INK, border: dark || accent ? "none" : "1.5px solid " + INK, borderRadius: 10, padding: "13px 14px", fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800 }
+    style: { cursor: "pointer", width: "100%", background: ac, color: gold || ac === ORANGE ? "#1d1d1f" : "#fff", border: "none", borderRadius: 10, padding: "13px 14px", fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800 }
   }, btn));
 }
-
 const LP2 = {
   de: {
     show_kick: "LIVE-EINBLICK",
@@ -3373,7 +3377,7 @@ function LandingPage({
     style: {
       maxWidth: 1100,
       margin: "0 auto",
-      padding: "64px 20px 56px"
+      padding: "56px 20px 26px"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -3411,38 +3415,6 @@ function LandingPage({
       margin: "22px 0 26px"
     }
   }, t("l_sub")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 12,
-      flexWrap: "wrap"
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: onTest,
-    style: {
-      cursor: "pointer",
-      background: ORANGE,
-      color: "#fff",
-      border: "none",
-      borderRadius: 9,
-      padding: "14px 22px",
-      fontFamily: FONT_BODY,
-      fontSize: 14.5,
-      fontWeight: 700
-    }
-  }, t("l_try")), /*#__PURE__*/React.createElement("button", {
-    onClick: onAbo,
-    style: {
-      cursor: "pointer",
-      background: "transparent",
-      color: "#fff",
-      border: "1px solid rgba(255,255,255,.3)",
-      borderRadius: 9,
-      padding: "14px 22px",
-      fontFamily: FONT_BODY,
-      fontSize: 14.5,
-      fontWeight: 700
-    }
-  }, t("l_abo_long"))), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12.5,
@@ -3497,6 +3469,30 @@ function LandingPage({
       color: LGREEN
     }
   }, "+++")))))))), /*#__PURE__*/React.createElement("section", {
+    style: { background: PAGE, color: INK, padding: "30px 20px 40px" }
+  }, /*#__PURE__*/React.createElement("div", { style: { maxWidth: 1100, margin: "0 auto" } }, /*#__PURE__*/React.createElement("div", { id: "tw-preise", style: { paddingTop: 8 } }, /*#__PURE__*/React.createElement("div", {
+    style: { fontFamily: mono, fontSize: 11.5, letterSpacing: 2.5, color: MUTED, margin: "26px 0 10px" }
+  }, PRICING_I18N[LANG].kicker), /*#__PURE__*/React.createElement("h2", {
+    style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: "clamp(24px, 3.6vw, 36px)", margin: "0 0 10px", textTransform: "uppercase" }
+  }, PRICING_I18N[LANG].h2), /*#__PURE__*/React.createElement("p", {
+    style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "#4a4a48", maxWidth: 620, margin: "0 0 30px" }
+  }, PRICING_I18N[LANG].sub), /*#__PURE__*/React.createElement("div", {
+    style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(255px, 1fr))", gap: 16, alignItems: "stretch", marginBottom: 18 }
+  }, /*#__PURE__*/React.createElement(TierCard, {
+    name: PRICING_I18N[LANG].t_name, price: "0 \u20ac", per: PRICING_I18N[LANG].days, tag: PRICING_I18N[LANG].t_tag,
+    feats: [{ t: PRICING_I18N[LANG].f_feed }, { t: PRICING_I18N[LANG].f_sucht }, { t: PRICING_I18N[LANG].f_db }, { t: PRICING_I18N[LANG].f_listen }, { t: PRICING_I18N[LANG].f_watch }, { t: PRICING_I18N[LANG].f_ki }, { t: PRICING_I18N[LANG].f_kontakte, l: true, h: PRICING_I18N[LANG].lock_hint }],
+    btn: PRICING_I18N[LANG].t_btn, onClick: onTest, color: ORANGE, badge: PRICING_I18N[LANG].badge_test
+  }), /*#__PURE__*/React.createElement(TierCard, {
+    name: PRICING_I18N[LANG].s_name, price: PRICE_STANDARD + " \u20ac", per: PRICING_I18N[LANG].per, tag: PRICING_I18N[LANG].s_tag, color: LGREEN, badge: PRICING_I18N[LANG].badge_std,
+    feats: [{ t: PRICING_I18N[LANG].f_feed }, { t: PRICING_I18N[LANG].f_sucht }, { t: PRICING_I18N[LANG].f_db }, { t: PRICING_I18N[LANG].f_listen }, { t: PRICING_I18N[LANG].f_watch }, { t: PRICING_I18N[LANG].f_ki }, { t: PRICING_I18N[LANG].f_kontakte, l: true, h: PRICING_I18N[LANG].lock_hint }],
+    btn: PRICING_I18N[LANG].s_btn, onClick: () => { if (STRIPE_LINK_STANDARD && STRIPE_LINK_STANDARD.indexOf("http") === 0) { window.open(STRIPE_LINK_STANDARD, "_blank"); } else { onAbo(); } }
+  }), /*#__PURE__*/React.createElement(TierCard, {
+    name: PRICING_I18N[LANG].p_name, price: PRICE_PREMIUM + " \u20ac", per: PRICING_I18N[LANG].per, tag: PRICING_I18N[LANG].p_tag, dark: true, color: "#d9a441", badge: PRICING_I18N[LANG].badge_prm,
+    feats: [{ t: PRICING_I18N[LANG].f_feed }, { t: PRICING_I18N[LANG].f_sucht }, { t: PRICING_I18N[LANG].f_db }, { t: PRICING_I18N[LANG].f_listen }, { t: PRICING_I18N[LANG].f_watch }, { t: PRICING_I18N[LANG].f_ki }, { t: PRICING_I18N[LANG].f_kontakte }],
+    btn: PRICING_I18N[LANG].p_btn, onClick: () => window.open(STRIPE_LINK_PREMIUM, "_blank")
+  })), /*#__PURE__*/React.createElement("p", {
+    style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, margin: "0 0 40px" }
+  }, PRICING_I18N[LANG].note))))), /*#__PURE__*/React.createElement("section", {
     style: {
       background: DARK2,
       color: "#fff",
@@ -3647,29 +3643,7 @@ function LandingPage({
       maxWidth: 640,
       margin: "0 0 34px"
     }
-  }, t("l_h2sub")), /*#__PURE__*/React.createElement("div", { id: "tw-preise", style: { paddingTop: 8 } }, /*#__PURE__*/React.createElement("div", {
-    style: { fontFamily: mono, fontSize: 11.5, letterSpacing: 2.5, color: MUTED, margin: "26px 0 10px" }
-  }, PRICING_I18N[LANG].kicker), /*#__PURE__*/React.createElement("h2", {
-    style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: "clamp(24px, 3.6vw, 36px)", margin: "0 0 10px", textTransform: "uppercase" }
-  }, PRICING_I18N[LANG].h2), /*#__PURE__*/React.createElement("p", {
-    style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "#4a4a48", maxWidth: 620, margin: "0 0 30px" }
-  }, PRICING_I18N[LANG].sub), /*#__PURE__*/React.createElement("div", {
-    style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(255px, 1fr))", gap: 16, alignItems: "stretch", marginBottom: 18 }
-  }, /*#__PURE__*/React.createElement(TierCard, {
-    name: PRICING_I18N[LANG].t_name, price: "0 \u20ac", per: PRICING_I18N[LANG].days, tag: PRICING_I18N[LANG].t_tag,
-    feats: [{ t: PRICING_I18N[LANG].f_feed }, { t: PRICING_I18N[LANG].f_sucht }, { t: PRICING_I18N[LANG].f_db }, { t: PRICING_I18N[LANG].f_listen }, { t: PRICING_I18N[LANG].f_watch }, { t: PRICING_I18N[LANG].f_ki }, { t: PRICING_I18N[LANG].f_kontakte, l: true, h: PRICING_I18N[LANG].lock_hint }],
-    btn: PRICING_I18N[LANG].t_btn, onClick: onTest
-  }), /*#__PURE__*/React.createElement(TierCard, {
-    name: PRICING_I18N[LANG].s_name, price: PRICE_STANDARD + " \u20ac", per: PRICING_I18N[LANG].per, tag: PRICING_I18N[LANG].s_tag, accent: true, badge: PRICING_I18N[LANG].badge_std,
-    feats: [{ t: PRICING_I18N[LANG].f_feed }, { t: PRICING_I18N[LANG].f_sucht }, { t: PRICING_I18N[LANG].f_db }, { t: PRICING_I18N[LANG].f_listen }, { t: PRICING_I18N[LANG].f_watch }, { t: PRICING_I18N[LANG].f_ki }, { t: PRICING_I18N[LANG].f_kontakte, l: true, h: PRICING_I18N[LANG].lock_hint }],
-    btn: PRICING_I18N[LANG].s_btn, onClick: () => { if (STRIPE_LINK_STANDARD && STRIPE_LINK_STANDARD.indexOf("http") === 0) { window.open(STRIPE_LINK_STANDARD, "_blank"); } else { onAbo(); } }
-  }), /*#__PURE__*/React.createElement(TierCard, {
-    name: PRICING_I18N[LANG].p_name, price: PRICE_PREMIUM + " \u20ac", per: PRICING_I18N[LANG].per, tag: PRICING_I18N[LANG].p_tag, dark: true, badge: PRICING_I18N[LANG].badge_prm,
-    feats: [{ t: PRICING_I18N[LANG].f_feed }, { t: PRICING_I18N[LANG].f_sucht }, { t: PRICING_I18N[LANG].f_db }, { t: PRICING_I18N[LANG].f_listen }, { t: PRICING_I18N[LANG].f_watch }, { t: PRICING_I18N[LANG].f_ki }, { t: PRICING_I18N[LANG].f_kontakte }],
-    btn: PRICING_I18N[LANG].p_btn, onClick: () => window.open(STRIPE_LINK_PREMIUM, "_blank")
-  })), /*#__PURE__*/React.createElement("p", {
-    style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, margin: "0 0 40px" }
-  }, PRICING_I18N[LANG].note))), /*#__PURE__*/React.createElement("div", { style: { maxWidth: 1100, margin: "0 auto 40px" } }, /*#__PURE__*/React.createElement("div", {
+  }, t("l_h2sub")), /*#__PURE__*/React.createElement("div", { style: { maxWidth: 1100, margin: "0 auto 40px" } }, /*#__PURE__*/React.createElement("div", {
     style: { fontFamily: mono, fontSize: 11.5, letterSpacing: 2.5, color: MUTED, margin: "14px 0 10px" }
   }, LP2[LANG].faq_kick), /*#__PURE__*/React.createElement("h2", {
     style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: "clamp(22px, 3.2vw, 32px)", margin: "0 0 18px", textTransform: "uppercase" }
