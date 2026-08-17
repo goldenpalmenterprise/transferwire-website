@@ -3165,6 +3165,84 @@ function TierCard({ name, price, per, tag, feats, btn, onClick, dark, badge, acc
   }, btn));
 }
 
+const LP2 = {
+  de: {
+    show_kick: "LIVE-EINBLICK",
+    show_cap: "Echter Screenshot, echte Daten \u2014 so sieht dein Arbeitsplatz aus.",
+    f_kick: "FUNKTIONEN",
+    f_h2: "Alles, was den Markt sichtbar macht",
+    f_sub: "Zehn Werkzeuge, ein Ziel: dass du fr\u00fcher wei\u00dft, was der Markt vorhat \u2014 und direkt handeln kannst.",
+    feats: [
+      { i: "\ud83d\udcf0", t: "Newsfeed in Echtzeit", d: "Meldungen aus 410+ Quellen und 20+ Ligen \u2014 st\u00fcndlich gepr\u00fcft, mit Zuverl\u00e4ssigkeits-Einstufung und Quellenlink." },
+      { i: "\ud83c\udfaf", t: "\u201eVerein sucht\u201c", d: "Welcher Klub sucht gerade welchen Spielertyp \u2014 mit Grund, Altersfenster und passenden Kandidaten aus der Datenbank." },
+      { i: "\ud83c\udfc6", t: "Scout-Ranking", d: "TW-Leistungsscore 0\u2013100 nach jedem Spieltag, Formkurven und Einsatzminuten f\u00fcr 7.000+ Profile." },
+      { i: "\ud83d\udcc4", t: "Vertrags-Radar", d: "Auslaufende Vertr\u00e4ge werden automatisch erkannt und flie\u00dfen als Chancen in deine Ansichten ein." },
+      { i: "\ud83d\udd14", t: "Merkliste & Alarme", d: "Spieler, Vereine oder Positionen beobachten \u2014 Treffer kommen per E-Mail und im t\u00e4glichen Morgen-Briefing." },
+      { i: "\ud83e\udd1d", t: "Vereins-Kontakte", d: "Sportdirektoren und Gesch\u00e4ftsf\u00fchrer aller Vereine \u2014 der direkte Draht f\u00fcr dein n\u00e4chstes Gesch\u00e4ft.", p: true }
+    ],
+    faq_kick: "FAQ",
+    faq_h2: "H\u00e4ufige Fragen",
+    faq: [
+      { q: "Wie funktioniert der 3-Tage-Test?", a: "Einfach mit deiner E-Mail-Adresse registrieren \u2014 ohne Zahlungsdaten. Du bekommst sofort deinen Zugangscode per E-Mail und vollen Standard-Zugriff. Nach drei Tagen endet der Test automatisch; es entsteht keine Verpflichtung." },
+      { q: "Was ist der Unterschied zwischen Standard und Premium?", a: "Standard (49\u00a0\u20ac/Monat) enth\u00e4lt die komplette Plattform: Newsfeed, \u201eVerein sucht\u201c, Spieler-Datenbank, Ranking, Listen, Merkliste, Alarme und KI-Scout. Premium (99\u00a0\u20ac/Monat) schaltet zus\u00e4tzlich die Vereins-Kontakte frei \u2014 Sportdirektoren und Gesch\u00e4ftsf\u00fchrer mit Ansprechpartner-Funktion in jedem Dossier." },
+      { q: "Kann ich monatlich k\u00fcndigen?", a: "Ja. Beide Abos laufen monatlich und sind jederzeit \u00fcber das Stripe-Kundenportal k\u00fcndbar \u2014 der Link steht auf der Website und in jeder Rechnung. Nach der K\u00fcndigung endet der Zugang zum n\u00e4chsten Abrechnungstermin." },
+      { q: "Woher kommen die Daten?", a: "Aus 410+ \u00f6ffentlichen Quellen, offiziellen Vereinskan\u00e4len und Sportdaten-Partnern, kombiniert mit KI-Aufbereitung. Jede Meldung tr\u00e4gt eine Zuverl\u00e4ssigkeits-Einstufung und einen Quellenlink \u2014 du siehst immer, worauf sich eine Information st\u00fctzt." },
+      { q: "Wie schnell habe ich nach dem Kauf Zugriff?", a: "Sofort: Nach der Zahlung \u00fcber Stripe erzeugt das System automatisch deinen pers\u00f6nlichen Zugangscode und schickt ihn per E-Mail. Einloggen, fertig. Die Rechnung kommt separat von Stripe." }
+    ],
+    cta_h2: "Bereit f\u00fcr den vollen \u00dcberblick?",
+    cta_sub: "Teste TransferWire 3 Tage kostenlos \u2014 ohne Zahlungsdaten, endet automatisch.",
+    cta_btn: "Jetzt gratis testen",
+    cta_btn2: "Preise ansehen"
+  },
+  en: {
+    show_kick: "LIVE PREVIEW",
+    show_cap: "Real screenshot, real data \u2014 this is what your workspace looks like.",
+    f_kick: "FEATURES",
+    f_h2: "Everything that makes the market visible",
+    f_sub: "Ten tools, one goal: knowing earlier what the market is about to do \u2014 and acting on it directly.",
+    feats: [
+      { i: "\ud83d\udcf0", t: "Real-time news feed", d: "Reports from 410+ sources and 20+ leagues \u2014 checked hourly, with reliability rating and source link." },
+      { i: "\ud83c\udfaf", t: "\u201cClub seeks\u201d", d: "Which club is looking for which player type \u2014 with reason, age range and matching candidates from the database." },
+      { i: "\ud83c\udfc6", t: "Scout ranking", d: "TW performance score 0\u2013100 after every matchday, form curves and minutes for 7,000+ profiles." },
+      { i: "\ud83d\udcc4", t: "Contract radar", d: "Expiring contracts are detected automatically and appear as opportunities across your views." },
+      { i: "\ud83d\udd14", t: "Watchlist & alerts", d: "Follow players, clubs or positions \u2014 hits arrive by email and in the daily morning briefing." },
+      { i: "\ud83e\udd1d", t: "Club contacts", d: "Sporting directors and CEOs of every club \u2014 the direct line to your next deal.", p: true }
+    ],
+    faq_kick: "FAQ",
+    faq_h2: "Frequently asked questions",
+    faq: [
+      { q: "How does the 3-day trial work?", a: "Register with your email address \u2014 no payment details. You instantly receive your access code by email plus full Standard access. After three days the trial ends automatically; there is no obligation." },
+      { q: "What is the difference between Standard and Premium?", a: "Standard (\u20ac49/month) includes the full platform: news feed, \u201cClub seeks\u201d, player database, ranking, lists, watchlist, alerts and the AI scout. Premium (\u20ac99/month) additionally unlocks club contacts \u2014 sporting directors and CEOs, with a contact button in every dossier." },
+      { q: "Can I cancel monthly?", a: "Yes. Both plans run monthly and can be cancelled anytime via the Stripe customer portal \u2014 the link is on the website and in every invoice. After cancelling, access ends at the next billing date." },
+      { q: "Where does the data come from?", a: "From 410+ public sources, official club channels and sports data partners, combined with AI processing. Every report carries a reliability rating and a source link \u2014 you always see what an item is based on." },
+      { q: "How fast do I get access after purchase?", a: "Instantly: after payment via Stripe the system automatically generates your personal access code and emails it to you. Log in, done. The invoice arrives separately from Stripe." }
+    ],
+    cta_h2: "Ready for the full picture?",
+    cta_sub: "Try TransferWire free for 3 days \u2014 no payment details, ends automatically.",
+    cta_btn: "Start free trial",
+    cta_btn2: "See pricing"
+  }
+};
+function FeatCard({ f }) {
+  return React.createElement("div", {
+    style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 14, padding: "20px 18px", position: "relative" }
+  }, f.p ? React.createElement("span", {
+    style: { position: "absolute", top: 14, right: 14, background: INK, color: "#fff", fontFamily: FONT_BODY, fontSize: 9.5, fontWeight: 800, letterSpacing: 1.2, padding: "3px 8px", borderRadius: 999 }
+  }, "PREMIUM") : null, React.createElement("div", { style: { fontSize: 24, marginBottom: 8 } }, f.i), React.createElement("div", {
+    style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 16.5, textTransform: "uppercase", letterSpacing: .4, marginBottom: 6 }
+  }, f.t), React.createElement("p", {
+    style: { fontFamily: FONT_BODY, fontSize: 12.5, lineHeight: 1.6, color: "#4a4a48", margin: 0 }
+  }, f.d));
+}
+function FaqItem({ q, a }) {
+  return React.createElement("details", {
+    style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 12, padding: "14px 18px", marginBottom: 10 }
+  }, React.createElement("summary", {
+    style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, listStyle: "none" }
+  }, q), React.createElement("p", {
+    style: { fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.65, color: "#4a4a48", margin: "10px 0 2px" }
+  }, a));
+}
 function PremiumLock({ small }) {
   const L = PRICING_I18N[LANG];
   return React.createElement("div", {
@@ -3464,6 +3542,20 @@ function LandingPage({
       marginTop: 16
     }
   }, t("l_proof_trust"), " kicker · Sky Sport · Transfermarkt · Gazzetta dello Sport · Marca · L'Équipe · TuttoMercatoWeb · Foot Mercato · Romano- & Di-Marzio-Echos · API-Football"))), /*#__PURE__*/React.createElement("section", {
+    style: { background: DARK, color: "#fff", padding: "10px 20px 64px" }
+  }, /*#__PURE__*/React.createElement("div", { style: { maxWidth: 1100, margin: "0 auto" } }, /*#__PURE__*/React.createElement("div", {
+    style: { fontFamily: mono, fontSize: 11.5, letterSpacing: 2.5, color: "rgba(255,255,255,.55)", margin: "26px 0 14px" }
+  }, LP2[LANG].show_kick), /*#__PURE__*/React.createElement("div", {
+    style: { borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,.14)", boxShadow: "0 30px 80px rgba(0,0,0,.5)" }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: { display: "flex", alignItems: "center", gap: 6, background: "#0e0f13", padding: "10px 14px" }
+  }, /*#__PURE__*/React.createElement("span", { style: { width: 10, height: 10, borderRadius: 5, background: "#ff5f57", display: "inline-block" } }), /*#__PURE__*/React.createElement("span", { style: { width: 10, height: 10, borderRadius: 5, background: "#febc2e", display: "inline-block" } }), /*#__PURE__*/React.createElement("span", { style: { width: 10, height: 10, borderRadius: 5, background: "#28c840", display: "inline-block" } }), /*#__PURE__*/React.createElement("span", {
+    style: { flex: 1, textAlign: "center", fontFamily: mono, fontSize: 11, color: "rgba(255,255,255,.45)" }
+  }, "transferwire.de")), /*#__PURE__*/React.createElement("img", {
+    src: "og-image.png", alt: "TransferWire Plattform", style: { display: "block", width: "100%", height: "auto" }
+  })), /*#__PURE__*/React.createElement("p", {
+    style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "rgba(255,255,255,.55)", margin: "14px 0 0", textAlign: "center" }
+  }, LP2[LANG].show_cap))), /*#__PURE__*/React.createElement("section", {
     style: {
       background: PAGE,
       color: INK,
@@ -3510,6 +3602,16 @@ function LandingPage({
     key: item.id,
     item: item
   }))))), /*#__PURE__*/React.createElement("section", {
+    style: { background: "#eceded", color: INK, padding: "56px 20px 50px" }
+  }, /*#__PURE__*/React.createElement("div", { style: { maxWidth: 1100, margin: "0 auto" } }, /*#__PURE__*/React.createElement("div", {
+    style: { fontFamily: mono, fontSize: 11.5, letterSpacing: 2.5, color: MUTED, marginBottom: 10 }
+  }, LP2[LANG].f_kick), /*#__PURE__*/React.createElement("h2", {
+    style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: "clamp(26px, 4vw, 40px)", margin: "0 0 10px", textTransform: "uppercase" }
+  }, LP2[LANG].f_h2), /*#__PURE__*/React.createElement("p", {
+    style: { fontFamily: FONT_BODY, fontSize: 14, lineHeight: 1.65, color: "#4a4a48", maxWidth: 640, margin: "0 0 28px" }
+  }, LP2[LANG].f_sub), /*#__PURE__*/React.createElement("div", {
+    style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 14 }
+  }, LP2[LANG].feats.map((f, i) => /*#__PURE__*/React.createElement(FeatCard, { key: i, f: f }))))), /*#__PURE__*/React.createElement("section", {
     style: {
       background: PAGE,
       color: INK,
@@ -3567,7 +3669,23 @@ function LandingPage({
     btn: PRICING_I18N[LANG].p_btn, onClick: () => window.open(STRIPE_LINK_PREMIUM, "_blank")
   })), /*#__PURE__*/React.createElement("p", {
     style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, margin: "0 0 40px" }
-  }, PRICING_I18N[LANG].note))), /*#__PURE__*/React.createElement("div", {
+  }, PRICING_I18N[LANG].note))), /*#__PURE__*/React.createElement("div", { style: { maxWidth: 1100, margin: "0 auto 40px" } }, /*#__PURE__*/React.createElement("div", {
+    style: { fontFamily: mono, fontSize: 11.5, letterSpacing: 2.5, color: MUTED, margin: "14px 0 10px" }
+  }, LP2[LANG].faq_kick), /*#__PURE__*/React.createElement("h2", {
+    style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: "clamp(22px, 3.2vw, 32px)", margin: "0 0 18px", textTransform: "uppercase" }
+  }, LP2[LANG].faq_h2), /*#__PURE__*/React.createElement("div", { style: { maxWidth: 760 } }, LP2[LANG].faq.map((f, i) => /*#__PURE__*/React.createElement(FaqItem, { key: i, q: f.q, a: f.a })))), /*#__PURE__*/React.createElement("div", { style: { maxWidth: 1100, margin: "0 auto 46px" } }, /*#__PURE__*/React.createElement("div", {
+    style: { background: INK, color: "#fff", borderRadius: 18, padding: "38px 28px", textAlign: "center" }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: "clamp(24px, 3.6vw, 36px)", margin: "0 0 8px", textTransform: "uppercase" }
+  }, LP2[LANG].cta_h2), /*#__PURE__*/React.createElement("p", {
+    style: { fontFamily: FONT_BODY, fontSize: 14, color: "rgba(255,255,255,.65)", margin: "0 0 20px" }
+  }, LP2[LANG].cta_sub), /*#__PURE__*/React.createElement("div", { style: { display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" } }, /*#__PURE__*/React.createElement("button", {
+    onClick: onTest,
+    style: { cursor: "pointer", background: ORANGE, color: "#fff", border: "none", borderRadius: 10, padding: "14px 28px", fontFamily: FONT_BODY, fontSize: 14.5, fontWeight: 800 }
+  }, LP2[LANG].cta_btn), /*#__PURE__*/React.createElement("button", {
+    onClick: () => { const el = document.getElementById("tw-preise"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); },
+    style: { cursor: "pointer", background: "transparent", color: "#fff", border: "1.5px solid rgba(255,255,255,.35)", borderRadius: 10, padding: "14px 24px", fontFamily: FONT_BODY, fontSize: 14.5, fontWeight: 800 }
+  }, LP2[LANG].cta_btn2)))), /*#__PURE__*/React.createElement("div", {
     style: {
       maxWidth: 1100,
       margin: "0 auto",
