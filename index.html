@@ -3088,6 +3088,7 @@ const PRICING_I18N = {
     sub: "Monatlich k\u00fcndbar. Zugangscode kommt nach der Zahlung automatisch per E-Mail. Der Test endet von selbst \u2014 ganz ohne Zahlungsdaten.",
     per: "/Monat",
     days: "3 Tage",
+    badge_test: "3 TAGE GRATIS",
     badge_std: "BELIEBT",
     badge_prm: "ALLES DRIN",
     t_name: "Test", s_name: "Standard", p_name: "Premium",
@@ -3117,6 +3118,7 @@ const PRICING_I18N = {
     sub: "Cancel monthly. Your access code arrives by email right after payment. The trial ends automatically \u2014 no payment details required.",
     per: "/month",
     days: "3 days",
+    badge_test: "3 DAYS FREE",
     badge_std: "POPULAR",
     badge_prm: "EVERYTHING",
     t_name: "Trial", s_name: "Standard", p_name: "Premium",
@@ -3141,30 +3143,46 @@ const PRICING_I18N = {
     note: "All prices include VAT. Subscriptions can be cancelled monthly via the customer portal."
   }
 };
-function TierFeat({ text, locked, dark, hint }) {
-  return React.createElement("div", {
-    style: { display: "flex", alignItems: "flex-start", gap: 8, fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.5, color: locked ? (dark ? "rgba(255,255,255,.38)" : "#9a9a96") : (dark ? "rgba(255,255,255,.92)" : "#3a3a38") }
-  }, React.createElement("span", {
-    style: { flexShrink: 0, width: 17, height: 17, borderRadius: 9, marginTop: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 10.5, fontWeight: 800, background: locked ? (dark ? "rgba(255,255,255,.12)" : "#ececea") : "rgba(20,154,89,.14)", color: locked ? (dark ? "rgba(255,255,255,.45)" : "#9a9a96") : LGREEN }
-  }, locked ? "\u2013" : "\u2713"), React.createElement("span", null, text, locked && hint ? React.createElement("span", { style: { display: "block", fontSize: 11, color: dark ? "rgba(255,255,255,.35)" : "#b0b0ac" } }, hint) : null));
+const LP3 = {
+  de: { t_for: "F\u00fcr den ersten Blick ins System", s_for: "F\u00fcr Berater & Scouts im Tagesgesch\u00e4ft", p_for: "F\u00fcr Macher mit direktem Draht",
+    t_box: ["Voller Standard-Umfang \u2014 3 Tage", "Endet automatisch, keine K\u00fcndigung n\u00f6tig", "Keine Zahlungsdaten erforderlich"],
+    s_box: ["Alle Kernfunktionen inklusive", "410+ Quellen \u00b7 20+ Ligen \u00b7 st\u00fcndlich frisch", "KI-Scout: 30 Fragen pro Tag"],
+    p_box: ["Alles aus Standard \u2014 plus:", "750+ Vereins-Kontakte mit Suche", "Sportdirektoren & Gesch\u00e4ftsf\u00fchrer"],
+    lock_head: "\ud83d\udd12 VEREINS-KONTAKTE", lock_no: "Nicht enthalten", lock_yes: "Voll enthalten", chip_p: "DIREKTER DRAHT",
+    per2: "pro Monat", cancel2: "monatlich k\u00fcndbar", free2: "f\u00fcr 3 Tage" },
+  en: { t_for: "For a first look at the system", s_for: "For agents & scouts in daily business", p_for: "For dealmakers with a direct line",
+    t_box: ["Full Standard scope \u2014 3 days", "Ends automatically, no cancellation needed", "No payment details required"],
+    s_box: ["All core features included", "410+ sources \u00b7 20+ leagues \u00b7 hourly updates", "AI scout: 30 questions per day"],
+    p_box: ["Everything in Standard \u2014 plus:", "750+ club contacts with search", "Sporting directors & CEOs"],
+    lock_head: "\ud83d\udd12 CLUB CONTACTS", lock_no: "Not included", lock_yes: "Fully included", chip_p: "DIRECT LINE",
+    per2: "per month", cancel2: "cancel monthly", free2: "for 3 days" }
+};
+function TRow({ text, ok, ac }) {
+  return React.createElement("div", { style: { display: "flex", alignItems: "flex-start", gap: 8, fontFamily: FONT_BODY, fontSize: 12.5, lineHeight: 1.5, color: ok ? "rgba(255,255,255,.88)" : "rgba(255,255,255,.35)" } },
+    React.createElement("span", { style: { color: ok ? ac : "rgba(255,255,255,.3)", fontWeight: 800, width: 14, flexShrink: 0 } }, ok ? "\u2713" : "\u2715"),
+    React.createElement("span", null, text));
 }
-function TierCard({ name, price, per, tag, feats, btn, onClick, dark, badge, accent }) {
-  return React.createElement("div", {
-    style: { position: "relative", background: dark ? INK : "#fff", color: dark ? "#fff" : INK, border: dark ? "2px solid " + INK : accent ? "2px solid " + LGREEN : "1px solid " + HAIR, borderRadius: 16, padding: "26px 22px 22px", display: "flex", flexDirection: "column", gap: 0, boxShadow: dark ? "0 14px 40px rgba(23,23,26,.28)" : accent ? "0 10px 30px rgba(20,154,89,.10)" : "none" }
-  }, badge ? React.createElement("div", {
-    style: { position: "absolute", top: -11, left: 20, background: dark ? LGREEN : ORANGE, color: "#fff", fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: 1.5, padding: "4px 10px", borderRadius: 999 }
-  }, badge) : null, React.createElement("div", {
-    style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 21, textTransform: "uppercase", letterSpacing: .5 }
-  }, name), React.createElement("div", {
-    style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 38, color: dark ? LGREEN : accent ? LGREEN : INK, margin: "4px 0 6px" }
-  }, price, React.createElement("span", { style: { fontSize: 15, fontWeight: 600, color: dark ? "rgba(255,255,255,.55)" : MUTED } }, " ", per)), React.createElement("p", {
-    style: { fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.55, color: dark ? "rgba(255,255,255,.68)" : "#4a4a48", margin: "0 0 16px", minHeight: 40 }
-  }, tag), React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 9, marginBottom: 20, flex: 1 } }, feats.map((f, i) => React.createElement(TierFeat, { key: i, text: f.t, locked: !!f.l, dark: dark, hint: f.h }))), React.createElement("button", {
-    onClick: onClick,
-    style: { cursor: "pointer", width: "100%", background: dark ? LGREEN : accent ? LGREEN : "transparent", color: dark || accent ? "#fff" : INK, border: dark || accent ? "none" : "1.5px solid " + INK, borderRadius: 10, padding: "13px 14px", fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800 }
-  }, btn));
+function TierCard({ name, forWho, price, priceSub, priceNote, box, lockOk, feats, btn, onClick, ac, btnBg, btnColor, badge, glow }) {
+  return React.createElement("div", { style: { position: "relative", background: glow ? "linear-gradient(175deg, " + ac + "1f 0%, #121316 34%, #0f1013 100%)" : "linear-gradient(175deg, #1c1d21 0%, #121316 60%)", color: "#fff", border: "1px solid " + (glow ? ac + "55" : "rgba(255,255,255,.12)"), borderRadius: 18, padding: "22px 20px 20px", display: "flex", flexDirection: "column", boxShadow: glow ? "0 18px 50px " + ac + "2e" : "0 14px 36px rgba(0,0,0,.35)" } },
+    React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" } },
+      React.createElement("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 22, textTransform: "uppercase", letterSpacing: .6 } }, name),
+      badge ? React.createElement("span", { style: { background: ac, color: "#101010", fontFamily: FONT_BODY, fontSize: 10, fontWeight: 800, letterSpacing: 1.2, padding: "3px 9px", borderRadius: 6 } }, badge) : null),
+    React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "rgba(255,255,255,.5)", margin: "3px 0 14px" } }, forWho),
+    React.createElement("div", { style: { background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 12, padding: "12px 14px", marginBottom: 16 } },
+      box.map((b, i) => React.createElement("div", { key: i, style: { fontFamily: FONT_BODY, fontSize: i === 0 ? 13.5 : 12, fontWeight: i === 0 ? 800 : 500, color: i === 0 ? "#fff" : "rgba(255,255,255,.6)", lineHeight: 1.6 } }, i === 0 ? "\u2726 " + b : b))),
+    React.createElement("div", { style: { margin: "0 0 14px" } },
+      React.createElement("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 800, fontSize: 40, color: "#fff" } }, price),
+      React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "rgba(255,255,255,.55)", marginLeft: 8 } }, priceSub),
+      priceNote ? React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "rgba(255,255,255,.4)", marginTop: 2 } }, priceNote) : null),
+    React.createElement("button", { onClick: onClick, style: { cursor: "pointer", width: "100%", background: btnBg, color: btnColor, border: "none", borderRadius: 11, padding: "14px 14px", fontFamily: FONT_BODY, fontSize: 14.5, fontWeight: 800, marginBottom: 16 } }, btn),
+    React.createElement("div", { style: { background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.09)", borderRadius: 12, padding: "11px 13px", marginBottom: 14 } },
+      React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: 1.4, color: "rgba(255,255,255,.55)", marginBottom: 7 } }, LP3[LANG].lock_head),
+      React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8 } },
+        React.createElement("span", { style: { color: lockOk ? ac : "rgba(255,255,255,.3)", fontWeight: 800, fontSize: 13 } }, lockOk ? "\u2713" : "\u2715"),
+        React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: lockOk ? "rgba(255,255,255,.9)" : "rgba(255,255,255,.4)" } }, lockOk ? LP3[LANG].lock_yes : LP3[LANG].lock_no),
+        lockOk ? React.createElement("span", { style: { marginLeft: "auto", background: ac, color: "#101010", fontFamily: FONT_BODY, fontSize: 9.5, fontWeight: 800, letterSpacing: 1, padding: "2px 8px", borderRadius: 5 } }, LP3[LANG].chip_p) : null)),
+    React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 8, flex: 1 } }, feats.map((f, i) => React.createElement(TRow, { key: i, text: f, ok: true, ac: ac }))));
 }
-
 const LP2 = {
   de: {
     show_kick: "LIVE-EINBLICK",
@@ -3373,7 +3391,7 @@ function LandingPage({
     style: {
       maxWidth: 1100,
       margin: "0 auto",
-      padding: "64px 20px 56px"
+      padding: "56px 20px 26px"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -3411,38 +3429,6 @@ function LandingPage({
       margin: "22px 0 26px"
     }
   }, t("l_sub")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 12,
-      flexWrap: "wrap"
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: onTest,
-    style: {
-      cursor: "pointer",
-      background: ORANGE,
-      color: "#fff",
-      border: "none",
-      borderRadius: 9,
-      padding: "14px 22px",
-      fontFamily: FONT_BODY,
-      fontSize: 14.5,
-      fontWeight: 700
-    }
-  }, t("l_try")), /*#__PURE__*/React.createElement("button", {
-    onClick: onAbo,
-    style: {
-      cursor: "pointer",
-      background: "transparent",
-      color: "#fff",
-      border: "1px solid rgba(255,255,255,.3)",
-      borderRadius: 9,
-      padding: "14px 22px",
-      fontFamily: FONT_BODY,
-      fontSize: 14.5,
-      fontWeight: 700
-    }
-  }, t("l_abo_long"))), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12.5,
@@ -3496,7 +3482,7 @@ function LandingPage({
     style: {
       color: LGREEN
     }
-  }, "+++")))))))), /*#__PURE__*/React.createElement("section", {
+  }, "+++")))))))), /*#__PURE__*/React.createElement("section", { style: { background: DARK, color: "#fff", padding: "18px 20px 56px" } }, /*#__PURE__*/React.createElement("div", { id: "tw-preise", style: { maxWidth: 1100, margin: "0 auto" } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: mono, fontSize: 11.5, letterSpacing: 2.5, color: "rgba(255,255,255,.5)", margin: "20px 0 8px" } }, PRICING_I18N[LANG].kicker), /*#__PURE__*/React.createElement("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: "clamp(24px, 3.6vw, 36px)", margin: "0 0 8px", textTransform: "uppercase", color: "#fff" } }, PRICING_I18N[LANG].h2), /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.6, color: "rgba(255,255,255,.55)", maxWidth: 620, margin: "0 0 26px" } }, PRICING_I18N[LANG].sub), /*#__PURE__*/React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, alignItems: "stretch", marginBottom: 14 } }, /*#__PURE__*/React.createElement(TierCard, { name: PRICING_I18N[LANG].t_name, forWho: LP3[LANG].t_for, price: "0 \u20ac", priceSub: LP3[LANG].free2, priceNote: "", lockOk: false, box: LP3[LANG].t_box, feats: [PRICING_I18N[LANG].f_feed, PRICING_I18N[LANG].f_sucht, PRICING_I18N[LANG].f_db, PRICING_I18N[LANG].f_listen, PRICING_I18N[LANG].f_watch, PRICING_I18N[LANG].f_ki], btn: PRICING_I18N[LANG].t_btn , onClick: onTest, ac: "#e8e8e4", btnBg: "#ffffff", btnColor: "#141414", badge: PRICING_I18N[LANG].badge_test, glow: false }), /*#__PURE__*/React.createElement(TierCard, { name: PRICING_I18N[LANG].s_name, forWho: LP3[LANG].s_for, price: PRICE_STANDARD + " \u20ac", priceSub: LP3[LANG].per2, priceNote: LP3[LANG].cancel2, lockOk: false, box: LP3[LANG].s_box, feats: [PRICING_I18N[LANG].f_feed, PRICING_I18N[LANG].f_sucht, PRICING_I18N[LANG].f_db, PRICING_I18N[LANG].f_listen, PRICING_I18N[LANG].f_watch, PRICING_I18N[LANG].f_ki], btn: PRICING_I18N[LANG].s_btn , onClick: () => { if (STRIPE_LINK_STANDARD && STRIPE_LINK_STANDARD.indexOf("http") === 0) { window.open(STRIPE_LINK_STANDARD, "_blank"); } else { onAbo(); } }, ac: LGREEN, btnBg: LGREEN, btnColor: "#08130d", badge: PRICING_I18N[LANG].badge_std, glow: true }), /*#__PURE__*/React.createElement(TierCard, { name: PRICING_I18N[LANG].p_name, forWho: LP3[LANG].p_for, price: PRICE_PREMIUM + " \u20ac", priceSub: LP3[LANG].per2, priceNote: LP3[LANG].cancel2, lockOk: true, box: LP3[LANG].p_box, feats: [PRICING_I18N[LANG].f_feed, PRICING_I18N[LANG].f_sucht, PRICING_I18N[LANG].f_db, PRICING_I18N[LANG].f_listen, PRICING_I18N[LANG].f_watch, PRICING_I18N[LANG].f_ki], btn: PRICING_I18N[LANG].p_btn , onClick: () => window.open(STRIPE_LINK_PREMIUM, "_blank"), ac: "#e3b34e", btnBg: "linear-gradient(90deg,#efc25e,#d9963a)", btnColor: "#1c1508", badge: PRICING_I18N[LANG].badge_prm, glow: true })), /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "rgba(255,255,255,.4)", margin: 0 } }, PRICING_I18N[LANG].note))), /*#__PURE__*/React.createElement("section", {
     style: {
       background: DARK2,
       color: "#fff",
@@ -3622,54 +3608,7 @@ function LandingPage({
       maxWidth: 1100,
       margin: "0 auto"
     }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: mono,
-      fontSize: 11.5,
-      letterSpacing: 2.5,
-      color: MUTED,
-      marginBottom: 10
-    }
-  }, t("l_what")), /*#__PURE__*/React.createElement("h2", {
-    style: {
-      fontFamily: FONT_DISPLAY,
-      fontWeight: 700,
-      fontSize: "clamp(28px, 4.5vw, 44px)",
-      margin: "0 0 12px",
-      textTransform: "uppercase"
-    }
-  }, t("l_h2")), /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 14.5,
-      lineHeight: 1.65,
-      color: "#4a4a48",
-      maxWidth: 640,
-      margin: "0 0 34px"
-    }
-  }, t("l_h2sub")), /*#__PURE__*/React.createElement("div", { id: "tw-preise", style: { paddingTop: 8 } }, /*#__PURE__*/React.createElement("div", {
-    style: { fontFamily: mono, fontSize: 11.5, letterSpacing: 2.5, color: MUTED, margin: "26px 0 10px" }
-  }, PRICING_I18N[LANG].kicker), /*#__PURE__*/React.createElement("h2", {
-    style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: "clamp(24px, 3.6vw, 36px)", margin: "0 0 10px", textTransform: "uppercase" }
-  }, PRICING_I18N[LANG].h2), /*#__PURE__*/React.createElement("p", {
-    style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "#4a4a48", maxWidth: 620, margin: "0 0 30px" }
-  }, PRICING_I18N[LANG].sub), /*#__PURE__*/React.createElement("div", {
-    style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(255px, 1fr))", gap: 16, alignItems: "stretch", marginBottom: 18 }
-  }, /*#__PURE__*/React.createElement(TierCard, {
-    name: PRICING_I18N[LANG].t_name, price: "0 \u20ac", per: PRICING_I18N[LANG].days, tag: PRICING_I18N[LANG].t_tag,
-    feats: [{ t: PRICING_I18N[LANG].f_feed }, { t: PRICING_I18N[LANG].f_sucht }, { t: PRICING_I18N[LANG].f_db }, { t: PRICING_I18N[LANG].f_listen }, { t: PRICING_I18N[LANG].f_watch }, { t: PRICING_I18N[LANG].f_ki }, { t: PRICING_I18N[LANG].f_kontakte, l: true, h: PRICING_I18N[LANG].lock_hint }],
-    btn: PRICING_I18N[LANG].t_btn, onClick: onTest
-  }), /*#__PURE__*/React.createElement(TierCard, {
-    name: PRICING_I18N[LANG].s_name, price: PRICE_STANDARD + " \u20ac", per: PRICING_I18N[LANG].per, tag: PRICING_I18N[LANG].s_tag, accent: true, badge: PRICING_I18N[LANG].badge_std,
-    feats: [{ t: PRICING_I18N[LANG].f_feed }, { t: PRICING_I18N[LANG].f_sucht }, { t: PRICING_I18N[LANG].f_db }, { t: PRICING_I18N[LANG].f_listen }, { t: PRICING_I18N[LANG].f_watch }, { t: PRICING_I18N[LANG].f_ki }, { t: PRICING_I18N[LANG].f_kontakte, l: true, h: PRICING_I18N[LANG].lock_hint }],
-    btn: PRICING_I18N[LANG].s_btn, onClick: () => { if (STRIPE_LINK_STANDARD && STRIPE_LINK_STANDARD.indexOf("http") === 0) { window.open(STRIPE_LINK_STANDARD, "_blank"); } else { onAbo(); } }
-  }), /*#__PURE__*/React.createElement(TierCard, {
-    name: PRICING_I18N[LANG].p_name, price: PRICE_PREMIUM + " \u20ac", per: PRICING_I18N[LANG].per, tag: PRICING_I18N[LANG].p_tag, dark: true, badge: PRICING_I18N[LANG].badge_prm,
-    feats: [{ t: PRICING_I18N[LANG].f_feed }, { t: PRICING_I18N[LANG].f_sucht }, { t: PRICING_I18N[LANG].f_db }, { t: PRICING_I18N[LANG].f_listen }, { t: PRICING_I18N[LANG].f_watch }, { t: PRICING_I18N[LANG].f_ki }, { t: PRICING_I18N[LANG].f_kontakte }],
-    btn: PRICING_I18N[LANG].p_btn, onClick: () => window.open(STRIPE_LINK_PREMIUM, "_blank")
-  })), /*#__PURE__*/React.createElement("p", {
-    style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, margin: "0 0 40px" }
-  }, PRICING_I18N[LANG].note))), /*#__PURE__*/React.createElement("div", { style: { maxWidth: 1100, margin: "0 auto 40px" } }, /*#__PURE__*/React.createElement("div", {
+  }, ), /*#__PURE__*/React.createElement("div", { style: { maxWidth: 1100, margin: "0 auto 40px" } }, /*#__PURE__*/React.createElement("div", {
     style: { fontFamily: mono, fontSize: 11.5, letterSpacing: 2.5, color: MUTED, margin: "14px 0 10px" }
   }, LP2[LANG].faq_kick), /*#__PURE__*/React.createElement("h2", {
     style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: "clamp(22px, 3.2vw, 32px)", margin: "0 0 18px", textTransform: "uppercase" }
