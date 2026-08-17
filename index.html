@@ -670,6 +670,11 @@ function scoreColor(s) {
 const STRIPE_LINK = "https://buy.stripe.com/4gM28r7qS1NUgfjee2gIo01"; // Stripe: TransferWire Abo 60 EUR/Monat
 const STRIPE_LINK_YEAR = ""; // Stripe: TransferWire Jahres-Abo 600 EUR/Jahr — Link eintragen, sobald in Stripe angelegt; Buttons erscheinen dann automatisch
 const STRIPE_PORTAL = "https://billing.stripe.com/p/login/cNi14n6mO2RY3sxfi6gIo00"; // Stripe-Kundenportal (Kündigung/Zahlungsmethoden)
+const STRIPE_LINK_STANDARD = "__STANDARD49__"; // Stripe: TransferWire Standard 49 EUR/Monat
+const STRIPE_LINK_PREMIUM = "https://buy.stripe.com/dRm7sL6mOgIO6EJgmagIo02"; // Stripe: TransferWire Premium 99 EUR/Monat
+const PRICE_STANDARD = "49";
+const PRICE_PREMIUM = "99";
+const isPremiumPlan = p => p === "premium";
 const TEST_MS = 3 * 24 * 60 * 60 * 1000;
 const store = (() => {
   try {
@@ -744,8 +749,8 @@ const I18N = {
     l_demo_h2: "So sieht TransferWire aus",
     l_demo_sub: "Originalkarten aus dem Feed: bestätigte Deals mit Quellen-Bewertung, sauber eingeordnete Gerüchte — und die Bedarfs-Karten, die kein anderes Tool hat: welcher Verein welche Position sucht, immer mit Begründung.",
     l_try: "3 Tage gratis testen",
-    l_abo_btn: "Abo — 60 €/Monat",
-    l_abo_long: "Abo abschließen — 60 €/Monat",
+    l_abo_btn: "Preise & Abos",
+    l_abo_long: "Abo abschließen — 49 €/Monat",
     l_note: "Gebaut für Spielervermittler, Scouts und Vereine. Test endet automatisch — keine Zahlungsdaten nötig.",
     l_what: "WAS TRANSFERWIRE KANN",
     l_h2: "Drei Kontinente. Ein Feed.",
@@ -980,10 +985,10 @@ const I18N = {
     r_btn: "Test jetzt starten",
     r_busy: "Wird gestartet …",
     s_title: "TransferWire Abo",
-    s_sub: "60 € pro Monat · unbegrenzter Zugriff · monatlich kündbar über die Website. Zahlung per Kreditkarte oder SEPA-Lastschrift — sicher über Stripe.",
+    s_sub: "49 € pro Monat · unbegrenzter Zugriff · monatlich kündbar über die Website. Zahlung per Kreditkarte oder SEPA-Lastschrift — sicher über Stripe.",
     s_section: "Konto anlegen & Abo abschließen",
     s_sofort: "Ich verlange die sofortige Bereitstellung des Dienstes nach Freischaltung und weiß, dass mein Widerrufsrecht damit erlischt.",
-    s_pay: "Jetzt zahlungspflichtig abonnieren — 60 €/Monat",
+    s_pay: "Jetzt zahlungspflichtig abonnieren — 49 €/Monat",
     s_pay_note: "Kreditkarte oder SEPA-Lastschrift · sichere Zahlung über Stripe · automatische monatliche Abbuchung · monatlich kündbar",
     s_msg: "Weiter geht es im sicheren Stripe-Fenster. Nach erfolgreicher Zahlung erhältst du deinen Zugangscode per E-Mail und kannst dich unten mit E-Mail + Code freischalten.",
     s_code_title: "Zugangscode bereits erhalten?",
@@ -1007,8 +1012,8 @@ const I18N = {
     c_busy: "Wird gesendet …",
     e_c_email: "Bitte die E-Mail-Adresse deines Kontos angeben.",
     x_title: "Dein Testzeitraum ist abgelaufen",
-    x_txt: "Sichere dir mit dem TransferWire-Abo unbegrenzten Zugriff auf alle Meldungen und die „Verein sucht“-Ansicht — 60 € pro Monat, jederzeit über die Website kündbar.",
-    x_btn: "Abo abschließen — 60 €/Monat",
+    x_txt: "Sichere dir mit dem TransferWire-Abo unbegrenzten Zugriff auf alle Meldungen und die „Verein sucht“-Ansicht — 49 € pro Monat, jederzeit über die Website kündbar.",
+    x_btn: "Abo abschließen — 49 €/Monat",
     logout: "Abmelden",
     st_title: "Einstellungen",
     st_account: "Account",
@@ -1017,7 +1022,7 @@ const I18N = {
     st_role: "Rolle",
     st_plan: "Plan",
     st_plan_test: "Testzugang (3 Tage)",
-    st_plan_abo: "TransferWire Abo — 60 €/Monat",
+    st_plan_abo: "TransferWire Standard — 49 €/Monat",
     st_abos: "Abos",
     st_test_a: "Dein kostenloser Test läuft bis ",
     st_test_b: " und endet automatisch. Sichere dir jetzt unbegrenzten Zugriff.",
@@ -1053,8 +1058,8 @@ const I18N = {
     l_demo_h2: "This is what TransferWire looks like",
     l_demo_sub: "Original cards from the feed: confirmed deals with source ratings, properly labelled rumours — and the demand cards no other tool has: which club is looking for which position, always with the reasoning.",
     l_try: "Try 3 days for free",
-    l_abo_btn: "Subscribe — €60/month",
-    l_abo_long: "Subscribe — €60/month",
+    l_abo_btn: "Pricing & plans",
+    l_abo_long: "Subscribe — €49/month",
     l_note: "Built for player agents, scouts and clubs. The trial ends automatically — no payment details required.",
     l_what: "WHAT TRANSFERWIRE DOES",
     l_h2: "Three continents. One feed.",
@@ -1289,10 +1294,10 @@ const I18N = {
     r_btn: "Start trial now",
     r_busy: "Starting …",
     s_title: "TransferWire subscription",
-    s_sub: "€60 per month · unlimited access · cancel monthly via the website. Payment by credit card or SEPA direct debit — secure via Stripe.",
+    s_sub: "€49 per month · unlimited access · cancel monthly via the website. Payment by credit card or SEPA direct debit — secure via Stripe.",
     s_section: "Create account & subscribe",
     s_sofort: "I request immediate provision of the service after activation and acknowledge that my right of withdrawal expires once the service has been provided.",
-    s_pay: "Subscribe now — €60/month (obligation to pay)",
+    s_pay: "Subscribe now — €49/month (obligation to pay)",
     s_pay_note: "Credit card or SEPA direct debit · secure payment via Stripe · automatic monthly billing · cancel monthly",
     s_msg: "Continue in the secure Stripe window. After successful payment you will receive your access code by e-mail and can activate below with e-mail + code.",
     s_code_title: "Already received an access code?",
@@ -1316,8 +1321,8 @@ const I18N = {
     c_busy: "Sending …",
     e_c_email: "Please enter the e-mail address of your account.",
     x_title: "Your trial has ended",
-    x_txt: "Get unlimited access to all news and the “Club seeks” view with the TransferWire subscription — €60 per month, cancel anytime via the website.",
-    x_btn: "Subscribe — €60/month",
+    x_txt: "Get unlimited access to all news and the “Club seeks” view with the TransferWire subscription — €49 per month, cancel anytime via the website.",
+    x_btn: "Subscribe — €49/month",
     logout: "Log out",
     st_title: "Settings",
     st_account: "Account",
@@ -1326,7 +1331,7 @@ const I18N = {
     st_role: "Role",
     st_plan: "Plan",
     st_plan_test: "Trial access (3 days)",
-    st_plan_abo: "TransferWire subscription — €60/month",
+    st_plan_abo: "TransferWire Standard — €49/month",
     st_abos: "Subscription",
     st_test_a: "Your free trial runs until ",
     st_test_b: " and ends automatically. Get unlimited access now.",
@@ -2797,7 +2802,7 @@ function AgbContent() {
     style: {
       margin: 0
     }
-  }, "Das Abo kostet 60 € pro Monat inkl. gesetzlicher Umsatzsteuer, soweit anfallend. Die Laufzeit beträgt einen Monat und verlängert sich jeweils um einen weiteren Monat, wenn nicht zum Ende des laufenden Abrechnungsmonats gekündigt wird. Die Kündigung ist jederzeit über den Bereich „Verträge hier kündigen\" auf dieser Website oder per E-Mail an game_seven@web.de möglich.")), /*#__PURE__*/React.createElement(LegalSection, {
+  }, "Das Standard-Abo kostet 49 € pro Monat, das Premium-Abo 99 € pro Monat, jeweils inkl. gesetzlicher Umsatzsteuer, soweit anfallend. Die Laufzeit beträgt einen Monat und verlängert sich jeweils um einen weiteren Monat, wenn nicht zum Ende des laufenden Abrechnungsmonats gekündigt wird. Die Kündigung ist jederzeit über den Bereich „Verträge hier kündigen\" auf dieser Website oder per E-Mail an game_seven@web.de möglich.")), /*#__PURE__*/React.createElement(LegalSection, {
     title: "5. Zahlung und Freischaltung"
   }, /*#__PURE__*/React.createElement("p", {
     style: {
@@ -3076,6 +3081,82 @@ function FormShell({
     }
   }, children)));
 }
+const PRICING_I18N = {
+  de: {
+    kicker: "PREISE",
+    h2: "W\u00e4hle deinen Zugang",
+    sub: "Monatlich k\u00fcndbar. Zugangscode kommt nach der Zahlung automatisch per E-Mail. Der Test endet von selbst \u2014 ganz ohne Zahlungsdaten.",
+    per: "/Monat",
+    days: "3 Tage",
+    badge_std: "BELIEBT",
+    badge_prm: "ALLES DRIN",
+    t_name: "Test", s_name: "Standard", p_name: "Premium",
+    t_tag: "Die komplette Plattform 3 Tage lang kennenlernen.",
+    s_tag: "Das volle Werkzeug f\u00fcr Berater, Scouts und Vereine.",
+    p_tag: "Alles aus Standard \u2014 plus der direkte Draht zu den Vereinen.",
+    f_feed: "Newsfeed aus 410+ Quellen und 20+ Ligen",
+    f_sucht: "\u201eVerein sucht\u201c mit Spieler-Matching",
+    f_db: "Spieler-Datenbank, Formkurven & Scout-Ranking",
+    f_listen: "Scouting-Listen & Marktchancen",
+    f_watch: "Merkliste, E-Mail-Alerts & Morgen-Briefing",
+    f_ki: "KI-Scout-Chat (30 Fragen/Tag)",
+    f_kontakte: "Vereins-Kontakte: Sportdirektoren & Gesch\u00e4ftsf\u00fchrer",
+    lock_hint: "Nur in Premium",
+    t_btn: "Jetzt gratis testen",
+    s_btn: "Standard w\u00e4hlen",
+    p_btn: "Premium w\u00e4hlen",
+    note: "Alle Preise inkl. gesetzlicher Umsatzsteuer. Abos monatlich k\u00fcndbar \u00fcber das Kundenportal."
+  },
+  en: {
+    kicker: "PRICING",
+    h2: "Choose your access",
+    sub: "Cancel monthly. Your access code arrives by email right after payment. The trial ends automatically \u2014 no payment details required.",
+    per: "/month",
+    days: "3 days",
+    badge_std: "POPULAR",
+    badge_prm: "EVERYTHING",
+    t_name: "Trial", s_name: "Standard", p_name: "Premium",
+    t_tag: "Get to know the full platform for 3 days.",
+    s_tag: "The complete toolkit for agents, scouts and clubs.",
+    p_tag: "Everything in Standard \u2014 plus a direct line to the clubs.",
+    f_feed: "News feed from 410+ sources and 20+ leagues",
+    f_sucht: "\u201cClub seeks\u201d with player matching",
+    f_db: "Player database, form curves & scout ranking",
+    f_listen: "Scouting lists & market opportunities",
+    f_watch: "Watchlist, email alerts & morning briefing",
+    f_ki: "AI scout chat (30 questions/day)",
+    f_kontakte: "Club contacts: sporting directors & CEOs",
+    lock_hint: "Premium only",
+    t_btn: "Start free trial",
+    s_btn: "Choose Standard",
+    p_btn: "Choose Premium",
+    note: "All prices include VAT. Subscriptions can be cancelled monthly via the customer portal."
+  }
+};
+function TierFeat({ text, locked, dark, hint }) {
+  return React.createElement("div", {
+    style: { display: "flex", alignItems: "flex-start", gap: 8, fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.5, color: locked ? (dark ? "rgba(255,255,255,.38)" : "#9a9a96") : (dark ? "rgba(255,255,255,.92)" : "#3a3a38") }
+  }, React.createElement("span", {
+    style: { flexShrink: 0, width: 17, height: 17, borderRadius: 9, marginTop: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 10.5, fontWeight: 800, background: locked ? (dark ? "rgba(255,255,255,.12)" : "#ececea") : "rgba(20,154,89,.14)", color: locked ? (dark ? "rgba(255,255,255,.45)" : "#9a9a96") : LGREEN }
+  }, locked ? "\u2013" : "\u2713"), React.createElement("span", null, text, locked && hint ? React.createElement("span", { style: { display: "block", fontSize: 11, color: dark ? "rgba(255,255,255,.35)" : "#b0b0ac" } }, hint) : null));
+}
+function TierCard({ name, price, per, tag, feats, btn, onClick, dark, badge, accent }) {
+  return React.createElement("div", {
+    style: { position: "relative", background: dark ? INK : "#fff", color: dark ? "#fff" : INK, border: dark ? "2px solid " + INK : accent ? "2px solid " + LGREEN : "1px solid " + HAIR, borderRadius: 16, padding: "26px 22px 22px", display: "flex", flexDirection: "column", gap: 0, boxShadow: dark ? "0 14px 40px rgba(23,23,26,.28)" : accent ? "0 10px 30px rgba(20,154,89,.10)" : "none" }
+  }, badge ? React.createElement("div", {
+    style: { position: "absolute", top: -11, left: 20, background: dark ? LGREEN : ORANGE, color: "#fff", fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: 1.5, padding: "4px 10px", borderRadius: 999 }
+  }, badge) : null, React.createElement("div", {
+    style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 21, textTransform: "uppercase", letterSpacing: .5 }
+  }, name), React.createElement("div", {
+    style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 38, color: dark ? LGREEN : accent ? LGREEN : INK, margin: "4px 0 6px" }
+  }, price, React.createElement("span", { style: { fontSize: 15, fontWeight: 600, color: dark ? "rgba(255,255,255,.55)" : MUTED } }, " ", per)), React.createElement("p", {
+    style: { fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.55, color: dark ? "rgba(255,255,255,.68)" : "#4a4a48", margin: "0 0 16px", minHeight: 40 }
+  }, tag), React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 9, marginBottom: 20, flex: 1 } }, feats.map((f, i) => React.createElement(TierFeat, { key: i, text: f.t, locked: !!f.l, dark: dark, hint: f.h }))), React.createElement("button", {
+    onClick: onClick,
+    style: { cursor: "pointer", width: "100%", background: dark ? LGREEN : accent ? LGREEN : "transparent", color: dark || accent ? "#fff" : INK, border: dark || accent ? "none" : "1.5px solid " + INK, borderRadius: 10, padding: "13px 14px", fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800 }
+  }, btn));
+}
+
 function LandingPage({
   onTest,
   onAbo,
@@ -3162,7 +3243,7 @@ function LandingPage({
       fontWeight: 700
     }
   }, t("login_btn")), /*#__PURE__*/React.createElement("button", {
-    onClick: onAbo,
+    onClick: () => { const el = document.getElementById("tw-preise"); if (el) { el.scrollIntoView({ behavior: "smooth", block: "start" }); } else { onAbo(); } },
     style: {
       cursor: "pointer",
       background: "transparent",
@@ -3441,100 +3522,29 @@ function LandingPage({
       maxWidth: 640,
       margin: "0 0 34px"
     }
-  }, t("l_h2sub")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-      gap: 14,
-      marginBottom: 44
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "#fff",
-      border: `1px solid ${HAIR}`,
-      borderRadius: 14,
-      padding: "22px 20px"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_DISPLAY,
-      fontWeight: 700,
-      fontSize: 22,
-      textTransform: "uppercase"
-    }
-  }, t("l_trial")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_DISPLAY,
-      fontWeight: 700,
-      fontSize: 34,
-      color: LGREEN,
-      margin: "6px 0 8px"
-    }
-  }, "0 €"), /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 13,
-      color: "#4a4a48",
-      lineHeight: 1.6,
-      margin: "0 0 16px"
-    }
-  }, t("l_trial_txt")), /*#__PURE__*/React.createElement(PBtn, {
-    onClick: onTest,
-    full: true
-  }, t("l_trial_btn"))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "#fff",
-      border: `2px solid ${INK}`,
-      borderRadius: 14,
-      padding: "22px 20px"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_DISPLAY,
-      fontWeight: 700,
-      fontSize: 22,
-      textTransform: "uppercase"
-    }
-  }, t("l_abo_card")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_DISPLAY,
-      fontWeight: 700,
-      fontSize: 34,
-      margin: "6px 0 8px"
-    }
-  }, "60 €", /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 16,
-      color: MUTED
-    }
-  }, " ", t("l_month"))), /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 13,
-      color: "#4a4a48",
-      lineHeight: 1.6,
-      margin: "0 0 16px"
-    }
-  }, t("l_abo_txt")), /*#__PURE__*/React.createElement(PBtn, {
-    onClick: onAbo,
-    kind: "green",
-    full: true
-  }, t("l_abo_card_btn")), STRIPE_LINK_YEAR && /*#__PURE__*/React.createElement("button", {
-    onClick: () => window.open(STRIPE_LINK_YEAR, "_blank"),
-    style: {
-      width: "100%",
-      marginTop: 9,
-      cursor: "pointer",
-      background: "none",
-      border: `1.5px solid ${LGREEN}`,
-      color: LGREEN,
-      borderRadius: 10,
-      padding: "11px 14px",
-      fontFamily: FONT_BODY,
-      fontSize: 13,
-      fontWeight: 800
-    }
-  }, t("yr_btn"))))), /*#__PURE__*/React.createElement("div", {
+  }, t("l_h2sub")), /*#__PURE__*/React.createElement("div", { id: "tw-preise", style: { paddingTop: 8 } }, /*#__PURE__*/React.createElement("div", {
+    style: { fontFamily: mono, fontSize: 11.5, letterSpacing: 2.5, color: MUTED, margin: "26px 0 10px" }
+  }, PRICING_I18N[LANG].kicker), /*#__PURE__*/React.createElement("h2", {
+    style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: "clamp(24px, 3.6vw, 36px)", margin: "0 0 10px", textTransform: "uppercase" }
+  }, PRICING_I18N[LANG].h2), /*#__PURE__*/React.createElement("p", {
+    style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "#4a4a48", maxWidth: 620, margin: "0 0 30px" }
+  }, PRICING_I18N[LANG].sub), /*#__PURE__*/React.createElement("div", {
+    style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(255px, 1fr))", gap: 16, alignItems: "stretch", marginBottom: 18 }
+  }, /*#__PURE__*/React.createElement(TierCard, {
+    name: PRICING_I18N[LANG].t_name, price: "0 \u20ac", per: PRICING_I18N[LANG].days, tag: PRICING_I18N[LANG].t_tag,
+    feats: [{ t: PRICING_I18N[LANG].f_feed }, { t: PRICING_I18N[LANG].f_sucht }, { t: PRICING_I18N[LANG].f_db }, { t: PRICING_I18N[LANG].f_listen }, { t: PRICING_I18N[LANG].f_watch }, { t: PRICING_I18N[LANG].f_ki }, { t: PRICING_I18N[LANG].f_kontakte, l: true, h: PRICING_I18N[LANG].lock_hint }],
+    btn: PRICING_I18N[LANG].t_btn, onClick: onTest
+  }), /*#__PURE__*/React.createElement(TierCard, {
+    name: PRICING_I18N[LANG].s_name, price: PRICE_STANDARD + " \u20ac", per: PRICING_I18N[LANG].per, tag: PRICING_I18N[LANG].s_tag, accent: true, badge: PRICING_I18N[LANG].badge_std,
+    feats: [{ t: PRICING_I18N[LANG].f_feed }, { t: PRICING_I18N[LANG].f_sucht }, { t: PRICING_I18N[LANG].f_db }, { t: PRICING_I18N[LANG].f_listen }, { t: PRICING_I18N[LANG].f_watch }, { t: PRICING_I18N[LANG].f_ki }, { t: PRICING_I18N[LANG].f_kontakte, l: true, h: PRICING_I18N[LANG].lock_hint }],
+    btn: PRICING_I18N[LANG].s_btn, onClick: () => { if (STRIPE_LINK_STANDARD && STRIPE_LINK_STANDARD.indexOf("http") === 0) { window.open(STRIPE_LINK_STANDARD, "_blank"); } else { onAbo(); } }
+  }), /*#__PURE__*/React.createElement(TierCard, {
+    name: PRICING_I18N[LANG].p_name, price: PRICE_PREMIUM + " \u20ac", per: PRICING_I18N[LANG].per, tag: PRICING_I18N[LANG].p_tag, dark: true, badge: PRICING_I18N[LANG].badge_prm,
+    feats: [{ t: PRICING_I18N[LANG].f_feed }, { t: PRICING_I18N[LANG].f_sucht }, { t: PRICING_I18N[LANG].f_db }, { t: PRICING_I18N[LANG].f_listen }, { t: PRICING_I18N[LANG].f_watch }, { t: PRICING_I18N[LANG].f_ki }, { t: PRICING_I18N[LANG].f_kontakte }],
+    btn: PRICING_I18N[LANG].p_btn, onClick: () => window.open(STRIPE_LINK_PREMIUM, "_blank")
+  })), /*#__PURE__*/React.createElement("p", {
+    style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, margin: "0 0 40px" }
+  }, PRICING_I18N[LANG].note))), /*#__PURE__*/React.createElement("div", {
     style: {
       maxWidth: 1100,
       margin: "0 auto",
@@ -3772,7 +3782,7 @@ function LoginPage({
         onDone({
           email: em,
           code: code.trim(),
-          plan: d.plan === "test" ? "test" : "abo",
+          plan: d.plan === "test" ? "test" : d.plan === "premium" ? "premium" : "abo",
           start: start,
           gueltig_bis: d.gueltig_bis || "",
           name: d.name || "",
@@ -3899,7 +3909,7 @@ function SubscribePage({
         const start = d.test_start ? Date.parse(d.test_start) || Date.now() : Date.now();
         onCodeOk({
           email: em,
-          plan: d.plan === "test" ? "test" : "abo",
+          plan: d.plan === "test" ? "test" : d.plan === "premium" ? "premium" : "abo",
           code: code.trim(),
           gueltig_bis: d.gueltig_bis || "",
           start: start,
@@ -9618,7 +9628,7 @@ function TransferWire() {
   };
   useEffect(() => {
     const a = loadAccount();
-    if (a && a.plan === "abo" && a.code) {
+    if (a && (a.plan === "abo" || a.plan === "premium") && a.code) {
       fetch(CODE_URL + "?code=" + encodeURIComponent(a.code) + "&email=" + encodeURIComponent(a.email || ""), {
         credentials: "omit",
         cache: "no-store"
@@ -9636,7 +9646,7 @@ function TransferWire() {
     }
   }, []);
   const testLeft = account && account.plan === "test" ? account.start + TEST_MS - Date.now() : 0;
-  const active = !!account && (account.plan === "test" && testLeft > 0 || account.plan === "abo");
+  const active = !!account && (account.plan === "test" && testLeft > 0 || account.plan === "abo" || account.plan === "premium");
   let content;
   if (page === "register") content = /*#__PURE__*/React.createElement(RegisterForm, {
     onDone: a => {
