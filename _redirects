@@ -1,1 +1,2 @@
+/db/*  https://auto.transferwire.de/db/:splat  200!
 /api/*  https://auto.transferwire.de/webhook/:splat  200
