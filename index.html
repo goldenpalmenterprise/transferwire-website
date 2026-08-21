@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <title>TransferWire — Transfermeldungen & Vereinsbedarfe</title>
-<!-- tw-build: 2026-08-21-b talente-tab -->
+<!-- tw-build: 2026-08-21-c feed-trennung -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -5190,6 +5190,7 @@ function TransferApp({
     const q = query.trim().toLowerCase();
     return news.filter(n => {
       if (view === "talente" && n.talent !== true) return false;
+      if (view === "feed" && String(n.id || "").startsWith("tal-")) return false;
       if (sport !== "alle" && n.sport !== sport) return false;
       if (type !== "alle" && n.type !== type) return false;
       if (club && n.fromClub !== club && n.toClub !== club) return false;
