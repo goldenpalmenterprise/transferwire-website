@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <title>TransferWire — Transfermeldungen & Vereinsbedarfe</title>
+<!-- tw-build: 2026-08-21-a sport-fix -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -1419,7 +1420,7 @@ function profilOverlap(p, it) {
 }
 function profilPasst(p, it) {
   if (!p || !p.p) return false;
-  const meta = POSITION_SETS.fussball.find(x => x.key === p.p);
+  const meta = POSITION_SETS.fussball.find(x => x.key === p.p) || { key: p.p, label: String(p.p || "?"), color: "#6b6b68", soft: "#ececea" };
   const pn = ((it.positionNeeded || "") + "").toLowerCase().trim();
   if (!pn) return false;
   if (meta) {
@@ -1657,6 +1658,11 @@ const FONT_DISPLAY = "'Barlow Condensed', 'Arial Narrow', sans-serif";
 const FONT_BODY = "'Inter', system-ui, -apple-system, sans-serif";
 
 /* ── Beispieldaten (Schema-konform) ─────────────────────────────────────── */
+const normSport = s => {
+  const k = String(s || "").toLowerCase().replace(/ß/g, "ss").replace(/[^a-z]/g, "");
+  return SPORT[k] ? k : "fussball";
+};
+const normItem = it => it && typeof it === "object" ? { ...it, sport: normSport(it.sport), type: TYPE[it.type] ? it.type : "geruecht" } : it;
 const NEWS = [{
   id: "n1",
   sport: "fussball",
@@ -2113,7 +2119,7 @@ function NewsCard({
   onWatch,
   item
 }) {
-  const sport = SPORT[item.sport];
+  const sport = SPORT[normSport(item.sport)] || SPORT.fussball;
   const type = TYPE[item.type] || TYPE.geruecht;
   const isNeed = item.type === "verein_sucht";
   return /*#__PURE__*/React.createElement("article", {
@@ -5155,7 +5161,7 @@ function TransferApp({
       }
       const items = Array.isArray(payload) ? payload : payload && payload.items;
       if (Array.isArray(items) && items.length > 0) {
-        setNews(items);
+        setNews(items.map(normItem));
         setDataState("live");
         setUpdatedAt(payload && payload.updated || new Date().toISOString());
       } else {
