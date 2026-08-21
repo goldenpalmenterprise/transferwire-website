@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <title>TransferWire — Transfermeldungen & Vereinsbedarfe</title>
-<!-- tw-build: 2026-08-21-a sport-fix -->
+<!-- tw-build: 2026-08-21-b talente-tab -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -730,6 +730,8 @@ const I18N = {
     connecting: "Verbinde …",
     demo: "Demo-Daten (Webhook inaktiv/leer)",
     tab_feed: "Newsfeed",
+    tal_tab: "Talente",
+    tal_banner: "Talent-Radar U17–U21 — Nachwuchs aus Deutschland, England, Frankreich \u0026 Spanien. Gleiche Analyse-Qualität wie der Profi-Feed; Meldungen unter 16 nur bei breiter öffentlicher Berichterstattung.",
     tab_seek: "Verein sucht",
     search_ph: "Spieler, Verein, Liga …",
     imprint: "Impressum",
@@ -1039,6 +1041,8 @@ const I18N = {
     connecting: "Connecting …",
     demo: "Demo data (webhook inactive/empty)",
     tab_feed: "News feed",
+    tal_tab: "Talents",
+    tal_banner: "Talent radar U17–U21 — youth coverage from Germany, England, France \u0026 Spain with the same analysis quality as the pro feed.",
     tab_seek: "Club seeks",
     search_ph: "Search player, club, league …",
     imprint: "Imprint",
@@ -5185,6 +5189,7 @@ function TransferApp({
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return news.filter(n => {
+      if (view === "talente" && n.talent !== true) return false;
       if (sport !== "alle" && n.sport !== sport) return false;
       if (type !== "alle" && n.type !== type) return false;
       if (club && n.fromClub !== club && n.toClub !== club) return false;
@@ -5194,7 +5199,7 @@ function TransferApp({
       }
       return true;
     });
-  }, [sport, type, query, club, news]);
+  }, [sport, type, query, club, news, view]);
   const needs = news.filter(n => n.type === "verein_sucht");
   const fixCount = news.filter(n => n.type === "fix").length;
   const rumorCount = news.filter(n => n.type === "geruecht").length;
@@ -5645,9 +5650,9 @@ function TransferApp({
       alignSelf: "center",
       flexWrap: "wrap"
     }
-  }, [["feed", t("tab_feed")], ["gesucht", t("tab_seek")], ["ranking", t("rank_tab")], ["listen", t("li_tab")], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["watch", t("watch_tab")]].map(([k, label]) => {
+  }, [["feed", t("tab_feed")], ["talente", t("tal_tab")], ["gesucht", t("tab_seek")], ["ranking", t("rank_tab")], ["listen", t("li_tab")], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["watch", t("watch_tab")]].map(([k, label]) => {
     const active = view === k;
-    const col = k === "gesucht" ? TYPE.verein_sucht.color : k === "ranking" ? "#b9860b" : k === "watch" ? "#6b4fd8" : k === "players" ? "#1a6dc0" : k === "chancen" ? "#c2410c" : k === "listen" ? "#be123c" : "#149a59";
+    const col = k === "talente" ? "#0e7490" : k === "gesucht" ? TYPE.verein_sucht.color : k === "ranking" ? "#b9860b" : k === "watch" ? "#6b4fd8" : k === "players" ? "#1a6dc0" : k === "chancen" ? "#c2410c" : k === "listen" ? "#be123c" : "#149a59";
     return /*#__PURE__*/React.createElement("button", {
       key: k,
       onClick: () => setView(k),
@@ -7442,7 +7447,9 @@ function TransferApp({
       fontSize: 12.5,
       color: MUTED
     }
-  }, t("watch_nohits")))), (view === "feed" || view === "watch") && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", null, cascade && /*#__PURE__*/React.createElement("div", {
+  }, t("watch_nohits")))), (view === "feed" || view === "watch" || view === "talente") && /*#__PURE__*/React.createElement(React.Fragment, null, view === "talente" && /*#__PURE__*/React.createElement("div", {
+    style: { background: "#e6f6f9", border: "1.5px solid #0e7490", borderRadius: 14, padding: "12px 18px", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 600, color: "#0e7490", gridColumn: "1 / -1" }
+  }, "\uD83C\uDFAF ", t("tal_banner")), /*#__PURE__*/React.createElement("div", null, cascade && /*#__PURE__*/React.createElement("div", {
     style: {
       background: "#fff",
       border: `1px solid ${HAIR}`,
