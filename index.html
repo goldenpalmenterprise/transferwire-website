@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <title>TransferWire — Transfermeldungen & Vereinsbedarfe</title>
-<!-- tw-build: 2026-08-22-c vertragsenden -->
+<!-- tw-build: 2026-08-22-e app-umbau -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -1547,12 +1547,6 @@ const TYPE = {
     color: "#6d4bc7",
     soft: "#ece6fa"
   },
-  verfuegbar: {
-    label: "Verfügbar",
-    en: "Available",
-    color: "#1f74c4",
-    soft: "#e2eefb"
-  },
   leihe: {
     label: "Leihe",
     en: "Loan",
@@ -1703,6 +1697,34 @@ function TalentScouting() {
       React.createElement("div", { style: { fontWeight: 800, color: "#0e7490", whiteSpace: "nowrap" } }, kat === "tore" ? ((r.goals || 0) + " Tore") : kat === "assists" ? ((r.assists || 0) + " Vorl.") : ("Score " + (r.scout_score != null ? Number(r.scout_score).toFixed(1) : "-")))))));
 }
 
+
+function FeedSuche({ q, setQ, club, setClub, alle }) {
+  const vereine = React.useMemo(() => {
+    const z = {};
+    for (const n of (alle || [])) { for (const c of [n.to_club, n.from_club]) { if (c && c.length > 2) z[c] = (z[c] || 0) + 1; } }
+    return Object.entries(z).sort((a, b) => b[1] - a[1]).slice(0, 8).map(e => e[0]);
+  }, [alle]);
+  const chip = (label, aktiv, onClick, key) => React.createElement("button", { key: key || label, onClick, style: { padding: "6px 12px", borderRadius: 999, border: "1.5px solid " + (aktiv ? "#149a59" : "#e2e2de"), background: aktiv ? "#149a59" : "#fff", color: aktiv ? "#fff" : "#3b3b38", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, cursor: "pointer", maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, label);
+  return React.createElement("div", { style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 14, position: "sticky", top: 64, padding: "14px 16px" } },
+    React.createElement("div", { style: { fontFamily: FONT_BODY, fontWeight: 800, fontSize: 14.5, marginBottom: 10 } }, "\uD83D\uDD0E Feed durchsuchen"),
+    React.createElement("input", { value: q, onChange: e => setQ(e.target.value), placeholder: "Spieler, Verein, Stichwort \u2026", style: { width: "100%", boxSizing: "border-box", padding: "10px 13px", borderRadius: 10, border: "1.5px solid " + HAIR, fontFamily: FONT_BODY, fontSize: 13.5, outline: "none" } }),
+    React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: "#8a8a86", textTransform: "uppercase", letterSpacing: .6, margin: "13px 0 7px" } }, "Vorschl\u00e4ge \u00b7 Vereine"),
+    React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: 6 } },
+      vereine.map(v => chip(v, club === v, () => setClub(club === v ? "" : v), "v-" + v)),
+      (club || q) && chip("\u2715 Zur\u00fccksetzen", false, () => { setClub(""); setQ(""); }, "reset")));
+}
+function ScoutMenu({ view, setView }) {
+  const aktiv = view === "talente" || view === "listen";
+  const col = "#0e7490";
+  const gehe = (e, ziel) => { setView(ziel); const d = e.currentTarget.closest("details"); if (d) d.removeAttribute("open"); };
+  const eintrag = (label, ziel) => React.createElement("button", { key: ziel, onClick: e => gehe(e, ziel), style: { display: "block", width: "100%", textAlign: "left", border: "none", background: view === ziel ? "#e6f6f9" : "none", padding: "10px 13px", borderRadius: 9, fontFamily: FONT_BODY, fontSize: 13, fontWeight: 700, color: "#20323a", cursor: "pointer", whiteSpace: "nowrap" } }, label);
+  return React.createElement("details", { style: { position: "relative" } },
+    React.createElement("summary", { style: { listStyle: "none", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, cursor: "pointer", border: "1.5px solid " + (aktiv ? col : HAIR), padding: "8px 15px", borderRadius: 999, display: "inline-flex", alignItems: "center", gap: 7, background: aktiv ? col : "#fff", color: aktiv ? "#fff" : "#3a3a38", boxShadow: aktiv ? "0 2px 8px rgba(0,0,0,.14)" : "0 1px 2px rgba(0,0,0,.04)", userSelect: "none" } }, "Scouting \u25be"),
+    React.createElement("div", { style: { position: "absolute", top: 42, left: 0, zIndex: 40, background: "#fff", border: "1px solid " + HAIR, borderRadius: 12, padding: 5, boxShadow: "0 14px 36px rgba(20,20,18,.16)", minWidth: 190 } },
+      eintrag("\uD83C\uDFC6 Talent-Rankings", "talente"),
+      eintrag("\uD83D\uDCCB Scoutinglisten", "listen")));
+}
+
 const NEWS = [{
   id: "n1",
   sport: "fussball",
@@ -1757,7 +1779,7 @@ const NEWS = [{
   id: "n3",
   sport: "fussball",
   league: "Premier League",
-  type: "verfuegbar",
+  type: "geruecht",
   headline: "Routinier auf dem Markt — ablösefrei zu haben",
   summary: "Vertrag läuft aus, eine Verlängerung gilt als unwahrscheinlich. Mehrere Klubs aus Italien und Saudi-Arabien beobachten die Lage.",
   player: {
@@ -4806,39 +4828,26 @@ function TransferApp({
     const q = plQ.trim();
     const landLigen = plLand ? (LAND_LIGEN.find(x => x.de === plLand) || {}).ligen || [] : [];
     const hatFilter = !!(plLg || plLand || plTeam || plPos);
-    if (q.length < 2 && !hatFilter) {
-      setPlItems(null);
-      setPlTeams([]);
-      return;
-    }
+    if (!plLeagues.length) setPlLeagues(LAND_LIGEN.flatMap(x => x.ligen || []));
+    if (!q && !hatFilter) { setPlItems(null); setPlTeams([]); return; }
     let alive = true;
     setPlLoading(true);
     const timer = setTimeout(() => {
-      let url = SPIELER_URL + "?q=" + encodeURIComponent(q);
-      if (plLg) url += "&lg=" + encodeURIComponent(plLg);else if (landLigen.length) url += "&lgs=" + encodeURIComponent(landLigen.join(","));
-      if (plTeam) url += "&team=" + encodeURIComponent(plTeam);
-      if (plPos) url += "&pos=" + encodeURIComponent(plPos);
-      fetch(url, {
-        credentials: "omit",
-        cache: "no-store"
-      }).then(r => r.json()).then(raw => {
+      let url = "/db/players?select=player_id,name,team,league,position,age,nationality,photo,apps,minutes,rating,goals,assists&limit=200&order=rating.desc.nullslast,minutes.desc";
+      if (q) url += "&name=ilike." + encodeURIComponent("*" + q + "*");
+      if (plLg) url += "&league=eq." + encodeURIComponent(plLg);
+      else if (landLigen.length) url += "&league=in.(" + landLigen.map(l => encodeURIComponent('"' + l + '"')).join(",") + ")";
+      if (plTeam) url += "&team=eq." + encodeURIComponent(plTeam);
+      if (plPos) url += "&position=eq." + encodeURIComponent(plPos);
+      fetch(url, { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(rows => {
         if (!alive) return;
-        const d = normResp(raw);
-        setPlItems(d && Array.isArray(d.items) ? d.items : []);
-        if (d && Array.isArray(d.leagues)) setPlLeagues(d.leagues);
-        setPlTeams(d && Array.isArray(d.teams) ? d.teams : []);
+        const arr = Array.isArray(rows) ? rows : [];
+        setPlItems(arr.map(p => ({ pid: p.player_id, name: p.name, team: p.team, league: p.league, pos: p.position, age: p.age, nat: p.nationality, photo: p.photo, apps: p.apps, min: p.minutes, rating: p.rating, goals: p.goals, assists: p.assists })));
+        setPlTeams(Array.from(new Set(arr.map(p => p.team).filter(Boolean))).slice(0, 40));
         setPlLoading(false);
-      }).catch(() => {
-        if (alive) {
-          setPlItems([]);
-          setPlLoading(false);
-        }
-      });
-    }, 350);
-    return () => {
-      alive = false;
-      clearTimeout(timer);
-    };
+      }).catch(() => { if (alive) { setPlItems([]); setPlLoading(false); } });
+    }, 140);
+    return () => { alive = false; clearTimeout(timer); };
   }, [view, plQ, plLg, plLand, plTeam, plPos]);
   const [marktErg, setMarktErg] = useState(null);
   const [marktLoading, setMarktLoading] = useState(false);
@@ -5687,7 +5696,7 @@ function TransferApp({
       alignSelf: "center",
       flexWrap: "wrap"
     }
-  }, [["feed", t("tab_feed")], ["talente", t("tal_tab")], ["gesucht", t("tab_seek")], ["ranking", t("rank_tab")], ["listen", t("li_tab")], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["watch", t("watch_tab")]].map(([k, label]) => {
+  }, [["feed", t("tab_feed")], ["gesucht", t("tab_seek")], ["ranking", t("rank_tab")], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["watch", t("watch_tab")]].map(([k, label]) => {
     const active = view === k;
     const col = k === "talente" ? "#0e7490" : k === "gesucht" ? TYPE.verein_sucht.color : k === "ranking" ? "#b9860b" : k === "watch" ? "#6b4fd8" : k === "players" ? "#1a6dc0" : k === "chancen" ? "#c2410c" : k === "listen" ? "#be123c" : "#149a59";
     return /*#__PURE__*/React.createElement("button", {
@@ -5709,7 +5718,7 @@ function TransferApp({
         boxShadow: active ? "0 2px 8px rgba(0,0,0,.14)" : "0 1px 2px rgba(0,0,0,.04)"
       }
     }, label);
-  })))), /*#__PURE__*/React.createElement("main", {
+  }), /*#__PURE__*/React.createElement(ScoutMenu, { view: view, setView: setView })))), /*#__PURE__*/React.createElement("main", {
     className: `tw-main ${view === "gesucht" ? "gesucht" : "feed"}`,
     style: {
       flex: "1 0 auto",
@@ -7627,132 +7636,7 @@ function TransferApp({
     onWatch: it => setAddSheet(it),
     key: item.id,
     item: item
-  })))), /*#__PURE__*/React.createElement("aside", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "#fff",
-      border: `1px solid ${HAIR}`,
-      borderRadius: 14,
-      overflow: "hidden",
-      position: "sticky",
-      top: 64
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "13px 16px",
-      borderBottom: `1px solid ${HAIR}`,
-      display: "flex",
-      alignItems: "center",
-      gap: 8,
-      background: TYPE.verein_sucht.soft
-    }
-  }, /*#__PURE__*/React.createElement(Target, {
-    size: 16,
-    strokeWidth: 2.3,
-    color: TYPE.verein_sucht.color
-  }), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontFamily: FONT_DISPLAY,
-      fontWeight: 600,
-      fontSize: 17,
-      color: TYPE.verein_sucht.color,
-      letterSpacing: .3
-    }
-  }, "Verein sucht Spieler")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      maxHeight: 520,
-      overflowY: "auto"
-    }
-  }, needs.slice(0, 12).map((n, i, arr) => /*#__PURE__*/React.createElement("button", {
-    key: n.id,
-    onClick: () => {
-      setView("gesucht");
-      setPosFilter("");
-      setSport(n.sport === "basketball" || n.sport === "nfl" ? n.sport : "fussball");
-    },
-    style: {
-      width: "100%",
-      textAlign: "left",
-      cursor: "pointer",
-      background: "#fff",
-      border: "none",
-      borderBottom: i < arr.length - 1 ? `1px solid ${HAIR}` : "none",
-      padding: "11px 16px",
-      display: "flex",
-      alignItems: "center",
-      gap: 11
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      color: SPORT[n.sport].color,
-      background: SPORT[n.sport].soft,
-      borderRadius: 8,
-      width: 34,
-      height: 34,
-      flexShrink: 0
-    }
-  }, /*#__PURE__*/React.createElement(Target, {
-    size: 16,
-    strokeWidth: 2.2
-  })), /*#__PURE__*/React.createElement("span", {
-    style: {
-      flex: 1,
-      minWidth: 0
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      display: "block",
-      fontFamily: FONT_BODY,
-      fontWeight: 700,
-      fontSize: 13,
-      color: INK,
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      whiteSpace: "nowrap"
-    }
-  }, seekingClub(n)), /*#__PURE__*/React.createElement("span", {
-    style: {
-      display: "block",
-      fontFamily: FONT_BODY,
-      fontSize: 11.5,
-      color: MUTED,
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      whiteSpace: "nowrap"
-    }
-  }, n.league || SPORT[n.sport].label)), /*#__PURE__*/React.createElement(ArrowRight, {
-    size: 14,
-    strokeWidth: 2,
-    color: MUTED
-  }))), needs.length > 12 && /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      setView("gesucht");
-      setPosFilter("");
-      setSport("fussball");
-    },
-    style: {
-      width: "100%",
-      textAlign: "center",
-      cursor: "pointer",
-      background: "#fff",
-      border: "none",
-      padding: "11px 16px",
-      fontFamily: FONT_BODY,
-      fontSize: 12,
-      fontWeight: 600,
-      color: TYPE.verein_sucht.color
-    }
-  }, "Alle ", needs.length, " Bedarfe ansehen →"))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 14,
-      fontSize: 11,
-      color: MUTED,
-      lineHeight: 1.5,
-      fontFamily: FONT_BODY
-    }
-  }, "Prototyp mit Beispieldaten. Im Echtbetrieb liefern die n8n-Workflows diese Einträge automatisch, getaggt nach Sportart, Liga, Verein und Typ.")))), /*#__PURE__*/React.createElement("footer", {
+  })))), /*#__PURE__*/React.createElement("aside", null, React.createElement(FeedSuche, { q: query, setQ: setQuery, club: club, setClub: setClub, alle: news })))), /*#__PURE__*/React.createElement("footer", {
     style: {
       borderTop: `1px solid ${HAIR}`,
       background: "#fff",
