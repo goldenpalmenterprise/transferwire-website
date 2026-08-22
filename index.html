@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <title>TransferWire — Transfermeldungen & Vereinsbedarfe</title>
-<!-- tw-build: 2026-08-22-e app-umbau -->
+<!-- tw-build: 2026-08-22-f vollnamen -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -4834,7 +4834,7 @@ function TransferApp({
     setPlLoading(true);
     const timer = setTimeout(() => {
       let url = "/db/players?select=player_id,name,team,league,position,age,nationality,photo,apps,minutes,rating,goals,assists&limit=200&order=rating.desc.nullslast,minutes.desc";
-      if (q) url += "&name=ilike." + encodeURIComponent("*" + q + "*");
+      if (q) { for (const w of q.split(/\s+/).filter(Boolean).slice(0, 4)) { url += "&name=ilike." + encodeURIComponent("*" + w + "*"); } }
       if (plLg) url += "&league=eq." + encodeURIComponent(plLg);
       else if (landLigen.length) url += "&league=in.(" + landLigen.map(l => encodeURIComponent('"' + l + '"')).join(",") + ")";
       if (plTeam) url += "&team=eq." + encodeURIComponent(plTeam);
