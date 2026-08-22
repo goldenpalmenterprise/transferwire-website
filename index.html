@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <title>TransferWire — Transfermeldungen & Vereinsbedarfe</title>
-<!-- tw-build: 2026-08-21-c feed-trennung -->
+<!-- tw-build: 2026-08-21-d talent-scouting -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -1667,6 +1667,42 @@ const normSport = s => {
   return SPORT[k] ? k : "fussball";
 };
 const normItem = it => it && typeof it === "object" ? { ...it, sport: normSport(it.sport), type: TYPE[it.type] ? it.type : "geruecht" } : it;
+
+function TalentScouting() {
+  const [kat, setKat] = React.useState("top");
+  const [land, setLand] = React.useState("alle");
+  const [rows, setRows] = React.useState([]);
+  const [laden, setLaden] = React.useState(true);
+  React.useEffect(() => {
+    let aktiv = true;
+    setLaden(true);
+    let url;
+    if (kat === "tore") url = "/db/players_youth?select=name,age,team,league,goals,assists,minutes&minutes=gt.0&order=goals.desc,assists.desc&limit=50";
+    else if (kat === "assists") url = "/db/players_youth?select=name,age,team,league,goals,assists,minutes&minutes=gt.0&order=assists.desc,goals.desc&limit=50";
+    else {
+      url = "/db/talent_profiles?select=name,age,club,league,country,position,scout_score,unentdeckt,goals,assists&order=scout_score.desc&limit=50";
+      if (kat === "unentdeckt") url += "&unentdeckt=is.true";
+      if (land !== "alle") url += "&country=eq." + land;
+    }
+    fetch(url).then(r => r.json()).then(d => { if (aktiv) { setRows(Array.isArray(d) ? d : []); setLaden(false); } }).catch(() => { if (aktiv) { setRows([]); setLaden(false); } });
+    return () => { aktiv = false; };
+  }, [kat, land]);
+  const chip = (k, label) => React.createElement("button", { key: k, onClick: () => setKat(k), style: { padding: "7px 14px", borderRadius: 999, border: "1.5px solid " + (kat === k ? "#0e7490" : "#d8d8d4"), background: kat === k ? "#0e7490" : "#fff", color: kat === k ? "#fff" : "#3b3b38", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, cursor: "pointer" } }, label);
+  const lchip = (k, label) => React.createElement("button", { key: k, onClick: () => setLand(k), style: { padding: "5px 11px", borderRadius: 999, border: "1px solid " + (land === k ? "#0e7490" : "#e2e2de"), background: land === k ? "#e6f6f9" : "#fff", color: "#0e7490", fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 700, cursor: "pointer" } }, label);
+  return React.createElement("div", { style: { gridColumn: "1 / -1", background: "#fff", border: "1.5px solid #e4e4e0", borderRadius: 16, padding: 18 } },
+    React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 18, fontWeight: 800, marginBottom: 10 } }, "\uD83D\uDD2D Talent-Scouting \u2014 Rankings"),
+    React.createElement("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 } }, chip("top", "\uD83C\uDFC6 Top 50 Europa"), chip("unentdeckt", "\uD83D\uDC8E Unentdeckt"), chip("tore", "\u26BD Torj\u00e4ger"), chip("assists", "\uD83C\uDFAF Vorlagen")),
+    (kat === "top" || kat === "unentdeckt") && React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 } }, lchip("alle", "Alle"), lchip("DE", "DE"), lchip("EN", "EN"), lchip("FR", "FR"), lchip("ES", "ES"), lchip("INT", "INT")),
+    laden ? React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "#8a8a86", padding: "14px 4px" } }, "Lade Rankings \u2026") :
+    rows.length === 0 ? React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "#8a8a86", padding: "14px 4px" } }, "Noch keine Eintr\u00e4ge in dieser Kategorie \u2014 die Scout-Agenten f\u00fcllen die Liste t\u00e4glich weiter auf.") :
+    React.createElement("div", null, rows.map((r, i) => React.createElement("div", { key: i, style: { display: "flex", alignItems: "center", gap: 12, padding: "9px 6px", borderTop: i ? "1px solid #f0f0ec" : "none", fontFamily: FONT_BODY, fontSize: 13.5 } },
+      React.createElement("div", { style: { width: 34, fontWeight: 800, color: i < 3 ? "#b9860b" : "#8a8a86" } }, "#" + (i + 1)),
+      React.createElement("div", { style: { flex: 1, minWidth: 0 } },
+        React.createElement("div", { style: { fontWeight: 700 } }, r.name, r.age ? React.createElement("span", { style: { fontWeight: 500, color: "#8a8a86" } }, " \u00b7 " + r.age) : null),
+        React.createElement("div", { style: { fontSize: 12, color: "#8a8a86", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, (r.club || r.team || "") + (r.league ? " \u00b7 " + r.league : ""))),
+      React.createElement("div", { style: { fontWeight: 800, color: "#0e7490", whiteSpace: "nowrap" } }, kat === "tore" ? ((r.goals || 0) + " Tore") : kat === "assists" ? ((r.assists || 0) + " Vorl.") : ("Score " + (r.scout_score != null ? Number(r.scout_score).toFixed(1) : "-")))))));
+}
+
 const NEWS = [{
   id: "n1",
   sport: "fussball",
@@ -7450,7 +7486,7 @@ function TransferApp({
     }
   }, t("watch_nohits")))), (view === "feed" || view === "watch" || view === "talente") && /*#__PURE__*/React.createElement(React.Fragment, null, view === "talente" && /*#__PURE__*/React.createElement("div", {
     style: { background: "#e6f6f9", border: "1.5px solid #0e7490", borderRadius: 14, padding: "12px 18px", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 600, color: "#0e7490", gridColumn: "1 / -1" }
-  }, "\uD83C\uDFAF ", t("tal_banner")), /*#__PURE__*/React.createElement("div", null, cascade && /*#__PURE__*/React.createElement("div", {
+  }, "\uD83C\uDFAF ", t("tal_banner")), view === "talente" && /*#__PURE__*/React.createElement(TalentScouting, null), /*#__PURE__*/React.createElement("div", null, cascade && /*#__PURE__*/React.createElement("div", {
     style: {
       background: "#fff",
       border: `1px solid ${HAIR}`,
