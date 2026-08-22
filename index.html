@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <title>TransferWire — Transfermeldungen & Vereinsbedarfe</title>
-<!-- tw-build: 2026-08-22-f vollnamen -->
+<!-- tw-build: 2026-08-22-g tm-werte -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -4833,7 +4833,7 @@ function TransferApp({
     let alive = true;
     setPlLoading(true);
     const timer = setTimeout(() => {
-      let url = "/db/players?select=player_id,name,team,league,position,age,nationality,photo,apps,minutes,rating,goals,assists&limit=200&order=rating.desc.nullslast,minutes.desc";
+      let url = "/db/players?select=player_id,name,team,league,position,age,nationality,photo,apps,minutes,rating,goals,assists,tm_value_text,tm_contract_until&limit=200&order=rating.desc.nullslast,minutes.desc";
       if (q) { for (const w of q.split(/\s+/).filter(Boolean).slice(0, 4)) { url += "&name=ilike." + encodeURIComponent("*" + w + "*"); } }
       if (plLg) url += "&league=eq." + encodeURIComponent(plLg);
       else if (landLigen.length) url += "&league=in.(" + landLigen.map(l => encodeURIComponent('"' + l + '"')).join(",") + ")";
@@ -4842,7 +4842,7 @@ function TransferApp({
       fetch(url, { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(rows => {
         if (!alive) return;
         const arr = Array.isArray(rows) ? rows : [];
-        setPlItems(arr.map(p => ({ pid: p.player_id, name: p.name, team: p.team, league: p.league, pos: p.position, age: p.age, nat: p.nationality, photo: p.photo, apps: p.apps, min: p.minutes, rating: p.rating, goals: p.goals, assists: p.assists })));
+        setPlItems(arr.map(p => ({ pid: p.player_id, name: p.name, team: p.team, league: p.league, pos: p.position, age: p.age, nat: p.nationality, photo: p.photo, apps: p.apps, min: p.minutes, rating: p.rating, goals: p.goals, assists: p.assists, mw: p.tm_value_text, vertrag: p.tm_contract_until })));
         setPlTeams(Array.from(new Set(arr.map(p => p.team).filter(Boolean))).slice(0, 40));
         setPlLoading(false);
       }).catch(() => { if (alive) { setPlItems([]); setPlLoading(false); } });
@@ -7393,7 +7393,7 @@ function TransferApp({
         color: "#4a4a48",
         marginTop: 4
       }
-    }, x.apps, " Sp. · ", x.min, "′", x.rating ? ` · Note ${x.rating}` : "", " · ", x.goals, "T/", x.assists, "A")), /*#__PURE__*/React.createElement("div", {
+    }, x.apps, " Sp. · ", x.min, "′", x.rating ? ` · Note ${x.rating}` : "", " · ", x.goals, "T/", x.assists, "A", x.mw ? ` · MW ${x.mw}` : "", x.vertrag ? ` · Vertrag bis ${String(x.vertrag).slice(0, 4)}` : "")), /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
         gap: 8
