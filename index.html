@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <title>TransferWire — Transfermeldungen & Vereinsbedarfe</title>
-<!-- tw-build: 2026-08-22-a impressum-mail -->
+<!-- tw-build: 2026-08-22-b chancen-retry -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -4843,7 +4843,7 @@ function TransferApp({
   const [marktErg, setMarktErg] = useState(null);
   const [marktLoading, setMarktLoading] = useState(false);
   useEffect(() => {
-    if (view !== "chancen" || marktErg || marktLoading) return;
+    if (view !== "chancen" || (marktErg && marktErg.ok) || marktLoading) return;
     setMarktLoading(true);
     fetch(MARKT_URL, {
       credentials: "omit",
