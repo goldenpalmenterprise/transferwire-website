@@ -23,7 +23,7 @@
   button:hover { filter: brightness(.97); }
   :focus-visible { outline: 2px solid #149a59; outline-offset: 2px; border-radius: 6px; }
 </style>
-<!-- tw-build: 2026-08-23-f talente-suche-oben -->
+<!-- tw-build: 2026-08-23-g kopf-kompakt -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -1733,7 +1733,7 @@ function FeedSuche({ q, setQ, club, setClub, alle }) {
       (club || q) && chip("\u2715 Zur\u00fccksetzen", false, () => { setClub(""); setQ(""); }, "reset")));
 }
 function ScoutMenu({ view, setView }) {
-  const aktiv = view === "talente" || view === "listen";
+  const aktiv = view === "talente" || view === "listen" || view === "ranking";
   const [offen, setOffen] = useState(false);
   const [pos, setPos] = useState({ top: 120, left: 12 });
   const schalte = e => {
@@ -1750,7 +1750,8 @@ function ScoutMenu({ view, setView }) {
       React.createElement("div", { onClick: () => setOffen(false), style: { position: "fixed", inset: 0, zIndex: 59 } }),
       React.createElement("div", { style: { position: "fixed", top: pos.top, left: pos.left, zIndex: 60, background: "#fff", border: "1px solid " + HAIR, borderRadius: 12, padding: 5, minWidth: 196, boxShadow: "0 14px 40px rgba(15,21,32,.18)" } },
         eintrag("\uD83C\uDFC6 Talent-Rankings", "talente"),
-        eintrag("\uD83D\uDCCB Scoutinglisten", "listen"))));
+        eintrag("\uD83D\uDCCB Scoutinglisten", "listen"),
+        eintrag("\uD83D\uDCC8 " + t("rank_tab"), "ranking"))));
 }
 
 function SpielerDrawer({ x, news, schliessen }) {
@@ -5508,11 +5509,7 @@ function TransferApp({
     style: {
       color: "#149a59"
     }
-  }, "WIRE"))), /*#__PURE__*/React.createElement("span", {
-    style: {
-      flex: 1
-    }
-  }), /*#__PURE__*/React.createElement("div", {
+  }, "WIRE"))), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 150, maxWidth: 560, margin: "0 12px", background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.14)", borderRadius: 10, padding: "7px 12px" } }, /*#__PURE__*/React.createElement(Search, { size: 15, strokeWidth: 2, color: "rgba(255,255,255,.6)" }), /*#__PURE__*/React.createElement("input", { value: query, onChange: e => { setQuery(e.target.value); if (["gesucht", "ranking", "players", "chancen", "geruechte", "listen"].indexOf(view) >= 0) setView("feed"); }, placeholder: t("search_ph"), style: { border: "none", outline: "none", background: "transparent", fontSize: 13.5, color: "#fff", width: "100%", fontFamily: FONT_BODY } }), query && /*#__PURE__*/React.createElement("button", { onClick: () => setQuery(""), style: { border: "none", background: "none", cursor: "pointer", color: "rgba(255,255,255,.6)", display: "flex", padding: 0 } }, /*#__PURE__*/React.createElement(X, { size: 14 }))), /*#__PURE__*/React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 6, fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, letterSpacing: .6, color: "rgba(255,255,255,.75)", marginRight: 4 } }, /*#__PURE__*/React.createElement("span", { style: { width: 7, height: 7, borderRadius: 99, background: "#22c55e", boxShadow: "0 0 0 3px rgba(34,197,94,.22)" } }), "LIVE"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
@@ -5714,82 +5711,6 @@ function TransferApp({
   }, t("logout"))))))), /*#__PURE__*/React.createElement("div", {
     style: {
       background: "#fff",
-      borderBottom: `1px solid ${HAIR}`
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "tw-datebar",
-    style: {
-      maxWidth: 1760,
-      margin: "0 auto",
-      padding: "11px 20px",
-      display: "flex",
-      alignItems: "center",
-      gap: 14,
-      flexWrap: "wrap"
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontFamily: FONT_DISPLAY,
-      fontWeight: 600,
-      fontSize: 18,
-      letterSpacing: .4
-    }
-  }, t("today"), " · ", new Date().toLocaleDateString(LANG === "en" ? "en-GB" : "de-DE", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric"
-  })), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 12,
-      color: MUTED
-    }
-  }, news.length, " Meldungen · ", fixCount, " fixe Deals · ", rumorCount, " Gerüchte"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      flex: 1
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 7,
-      background: PAGE,
-      border: `1px solid ${HAIR}`,
-      borderRadius: 9,
-      padding: "6px 11px",
-      minWidth: 230
-    }
-  }, /*#__PURE__*/React.createElement(Search, {
-    size: 15,
-    strokeWidth: 2,
-    color: MUTED
-  }), /*#__PURE__*/React.createElement("input", {
-    value: query,
-    onChange: e => setQuery(e.target.value),
-    placeholder: t("search_ph"),
-    style: {
-      border: "none",
-      outline: "none",
-      background: "transparent",
-      fontSize: 13,
-      color: INK,
-      width: "100%",
-      fontFamily: FONT_BODY
-    }
-  }), query && /*#__PURE__*/React.createElement("button", {
-    onClick: () => setQuery(""),
-    style: {
-      border: "none",
-      background: "none",
-      cursor: "pointer",
-      color: MUTED,
-      display: "flex"
-    }
-  }, /*#__PURE__*/React.createElement(X, {
-    size: 14
-  }))))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "#fff",
       borderBottom: `1px solid ${HAIR}`,
       position: "sticky",
       top: 0,
@@ -5806,33 +5727,7 @@ function TransferApp({
       flexWrap: "wrap",
       rowGap: 0
     }
-  }, sportTabs.map(([k, label]) => {
-    const active = sport === k;
-    const col = k === "alle" ? INK : SPORT[k].color;
-    return /*#__PURE__*/React.createElement("button", {
-      key: k,
-      className: "tw-tab",
-      onClick: () => {
-        setSport(k);
-        setCountry("");
-        setLeague("");
-        setClub("");
-        setPosFilter("");
-      },
-      style: {
-        fontFamily: FONT_DISPLAY,
-        fontWeight: 600,
-        fontSize: 16,
-        letterSpacing: .4,
-        padding: "13px 16px 11px",
-        border: "none",
-        background: "transparent",
-        cursor: "pointer",
-        color: active ? col : MUTED,
-        borderBottom: active ? `3px solid ${col}` : "3px solid transparent"
-      }
-    }, label);
-  }), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
       overflowX: "auto",
       WebkitOverflowScrolling: "touch",
@@ -5843,7 +5738,7 @@ function TransferApp({
       flexWrap: "wrap"
     },
     className: "tw-tabs"
-  }, [["feed", t("tab_feed")], ["geruechte", "Transfers & Gerüchte"], ["gesucht", t("tab_seek")], ["ranking", t("rank_tab")], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["watch", t("watch_tab")]].map(([k, label]) => {
+  }, [["feed", t("tab_feed")], ["geruechte", "Transfers"], ["gesucht", t("tab_seek")], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["watch", t("watch_tab")]].map(([k, label]) => {
     const active = view === k;
     const col = k === "talente" ? "#0e7490" : k === "geruechte" ? "#b3541e" : k === "gesucht" ? TYPE.verein_sucht.color : k === "ranking" ? "#b9860b" : k === "watch" ? "#6b4fd8" : k === "players" ? "#1a6dc0" : k === "chancen" ? "#c2410c" : k === "listen" ? "#be123c" : "#149a59";
     return /*#__PURE__*/React.createElement("button", {
@@ -7645,7 +7540,7 @@ function TransferApp({
     }
   }, t("watch_nohits")))), (view === "feed" || view === "watch" || view === "talente") && /*#__PURE__*/React.createElement(React.Fragment, null, view === "talente" && /*#__PURE__*/React.createElement("div", { style: { marginBottom: 12 } }, /*#__PURE__*/React.createElement(FeedSuche, { q: query, setQ: setQuery, club: club, setClub: setClub, alle: news })), view === "talente" && /*#__PURE__*/React.createElement("div", {
     style: { background: "#e6f6f9", border: "1.5px solid #0e7490", borderRadius: 14, padding: "12px 18px", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 600, color: "#0e7490", gridColumn: "1 / -1" }
-  }, "\uD83C\uDFAF ", t("tal_banner")), view === "talente" && /*#__PURE__*/React.createElement(TalentScouting, null), /*#__PURE__*/React.createElement("div", null, cascade && /*#__PURE__*/React.createElement("div", {
+  }, "\uD83C\uDFAF ", t("tal_banner")), view === "talente" && /*#__PURE__*/React.createElement(TalentScouting, null), view === "feed" && /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 10 } }, sportTabs.map(([k, label]) => { const a2 = sport === k; const c2 = k === "alle" ? "#0f1520" : SPORT[k].color; return /*#__PURE__*/React.createElement("button", { key: "sp" + k, onClick: () => { setSport(k); setCountry(""); setLeague(""); setClub(""); setPosFilter(""); }, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 11px", borderRadius: 999, border: "1px solid " + (a2 ? c2 : HAIR), background: a2 ? c2 : "#fff", color: a2 ? "#fff" : "#5b6472" } }, label); }), /*#__PURE__*/React.createElement("span", { style: { width: 1, height: 22, background: HAIR, margin: "0 2px" } }), [["alle", "Alle", news.length], ["fix", TYPE.fix.label, fixCount], ["geruecht", TYPE.geruecht.label, rumorCount]].map(([k, lab, n]) => { const a3 = type === k; return /*#__PURE__*/React.createElement("button", { key: "kpi" + k, onClick: () => setType(k), style: { display: "inline-flex", alignItems: "baseline", gap: 7, cursor: "pointer", padding: "7px 13px", borderRadius: 12, border: "1px solid " + (a3 ? "#0f1520" : HAIR), background: a3 ? "#0f1520" : "#fff", boxShadow: "0 1px 2px rgba(15,21,32,.05)" } }, /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: .8, textTransform: "uppercase", color: a3 ? "rgba(255,255,255,.75)" : "#8a92a3" } }, lab), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 18, fontWeight: 700, color: a3 ? "#fff" : "#0f1520" } }, Number(n).toLocaleString("de-DE"))); })), /*#__PURE__*/React.createElement("div", null, cascade && /*#__PURE__*/React.createElement("div", {
     style: {
       background: "#fff",
       border: `1px solid ${HAIR}`,
