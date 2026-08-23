@@ -4,7 +4,26 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <title>TransferWire — Transfermeldungen & Vereinsbedarfe</title>
-<!-- tw-build: 2026-08-23-b transfers-geruechte -->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style id="tw-design">
+  html, body { background: #f3f5f8; }
+  .tw-card { transition: box-shadow .18s ease, transform .18s ease; box-shadow: 0 1px 2px rgba(15,21,32,.05); }
+  .tw-card:hover { box-shadow: 0 12px 28px rgba(15,21,32,.11); transform: translateY(-1px); }
+  .tw-skel { position: relative; overflow: hidden; background: #eaeef4; border-radius: 14px; }
+  .tw-skel::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,.8), transparent); animation: twshimmer 1.15s infinite; }
+  @keyframes twshimmer { 100% { transform: translateX(100%); } }
+  .tw-tabs { scrollbar-width: none; }
+  .tw-tabs::-webkit-scrollbar { display: none; }
+  @media (max-width: 780px) {
+    .tw-tabs { flex-wrap: nowrap !important; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+    .tw-main { padding-left: 12px !important; padding-right: 12px !important; }
+  }
+  button { transition: filter .14s ease; }
+  button:hover { filter: brightness(.97); }
+  :focus-visible { outline: 2px solid #149a59; outline-offset: 2px; border-radius: 6px; }
+</style>
+<!-- tw-build: 2026-08-23-c redesign -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -1517,7 +1536,7 @@ const fmtDate = t => new Date(t).toLocaleDateString(LANG === "en" ? "en-GB" : "d
 
 const INK = "#17171a";
 const MUTED = "#74746f";
-const HAIR = "#e6e5e0";
+const HAIR = "#e3e7ee";
 const PAGE = "#f4f3ef";
 const CARD = "#ffffff";
 const SPORT = {
@@ -1723,6 +1742,59 @@ function ScoutMenu({ view, setView }) {
     React.createElement("div", { style: { position: "absolute", top: 42, left: 0, zIndex: 40, background: "#fff", border: "1px solid " + HAIR, borderRadius: 12, padding: 5, boxShadow: "0 14px 36px rgba(20,20,18,.16)", minWidth: 190 } },
       eintrag("\uD83C\uDFC6 Talent-Rankings", "talente"),
       eintrag("\uD83D\uDCCB Scoutinglisten", "listen")));
+}
+
+function SpielerDrawer({ x, news, schliessen }) {
+  const h = React.createElement;
+  const nachname = String(x.name || "").trim().split(/\s+/).pop().toLowerCase();
+  const treffer = (news || []).filter(n => {
+    const sp = String((n.player && n.player.name) || n.player || "");
+    return nachname.length > 2 && ((n.headline || "") + " " + sp).toLowerCase().indexOf(nachname) >= 0;
+  }).slice(0, 5);
+  const stat = (label, wert) => h("div", { style: { flex: "1 1 0", textAlign: "center", background: "#f5f7fa", borderRadius: 12, padding: "10px 4px" } },
+    h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 21, fontWeight: 700, color: "#0f1520" } }, wert == null || wert === "" ? "\u2013" : wert),
+    h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: "#8a92a3", textTransform: "uppercase" } }, label));
+  const jahr = x.vertrag ? String(x.vertrag).slice(0, 4) : "";
+  return h("div", { style: { position: "fixed", inset: 0, zIndex: 90 } },
+    h("div", { onClick: schliessen, style: { position: "absolute", inset: 0, background: "rgba(15,21,32,.45)", backdropFilter: "blur(2px)" } }),
+    h("div", { style: { position: "absolute", top: 0, right: 0, bottom: 0, width: "min(430px, 94vw)", background: "#fff", boxShadow: "-24px 0 60px rgba(15,21,32,.25)", padding: "20px 22px 28px", overflowY: "auto", borderRadius: "18px 0 0 18px" } },
+      h("button", { onClick: schliessen, style: { position: "absolute", top: 14, right: 14, width: 34, height: 34, borderRadius: 99, border: "1px solid " + HAIR, background: "#fff", cursor: "pointer", fontSize: 16, fontWeight: 800, color: "#3a4150" } }, "\u2715"),
+      h("div", { style: { display: "flex", alignItems: "center", gap: 14, marginBottom: 14, marginTop: 2 } },
+        x.photo ? h("img", { src: x.photo, alt: "", style: { width: 76, height: 76, borderRadius: 20, objectFit: "cover", border: "1px solid " + HAIR, background: "#f5f7fa" }, onError: e => { e.currentTarget.style.display = "none"; } }) :
+          h("div", { style: { width: 76, height: 76, borderRadius: 20, background: "#0f1520", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontSize: 26, fontWeight: 700 } }, String(x.name || "?").split(/\s+/).map(w => w[0]).slice(0, 2).join("")),
+        h("div", null,
+          h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 27, fontWeight: 700, color: "#0f1520", lineHeight: 1.05 } }, x.name),
+          h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "#5b6472", marginTop: 4, fontWeight: 600 } }, [x.team, x.lg, x.pos, x.age ? x.age + " J." : "", x.nat].filter(Boolean).join(" \u00b7 ")))),
+      h("div", { style: { display: "flex", gap: 10, marginBottom: 12 } },
+        h("div", { style: { flex: 1, background: "#eaf7ef", border: "1px solid #cfe9da", borderRadius: 14, padding: "12px 14px" } },
+          h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1, color: "#0d8a4f", textTransform: "uppercase" } }, "Marktwert"),
+          h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 24, fontWeight: 700, color: "#0b6b3e" } }, x.mw || "\u2013")),
+        h("div", { style: { flex: 1, background: "#f5f7fa", border: "1px solid " + HAIR, borderRadius: 14, padding: "12px 14px" } },
+          h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1, color: "#8a92a3", textTransform: "uppercase" } }, "Vertrag bis"),
+          h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 24, fontWeight: 700, color: "#0f1520" } }, jahr || "\u2013"))),
+      h("div", { style: { display: "flex", gap: 8, marginBottom: 18 } }, stat("Spiele", x.apps), stat("Minuten", x.min), stat("Note", x.rating), stat("Tore", x.goals), stat("Assists", x.assists)),
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 900, letterSpacing: 1.2, color: "#8a92a3", textTransform: "uppercase", marginBottom: 8 } }, "Letzte Meldungen"),
+      treffer.length ? treffer.map(n => h("div", { key: n.id, style: { display: "flex", gap: 9, alignItems: "flex-start", padding: "9px 0", borderTop: "1px solid " + HAIR } },
+        h("span", { style: { marginTop: 5, width: 8, height: 8, borderRadius: 99, background: (TYPE[n.type] || TYPE.geruecht).color, flex: "0 0 auto" } }),
+        h("div", null,
+          h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 700, color: "#232b38", lineHeight: 1.35 } }, n.headline),
+          h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: "#8a92a3", marginTop: 2 } }, (TYPE[n.type] || TYPE.geruecht).label + (n.league ? " \u00b7 " + n.league : ""))))) :
+        h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "#8a92a3", padding: "10px 0", borderTop: "1px solid " + HAIR } }, "Noch keine Meldungen zu diesem Spieler im Radar.")));
+}
+
+function LandingStats() {
+  const h = React.createElement;
+  const [spieler, setSpieler] = useState("");
+  useEffect(() => {
+    fetch("/db/players?select=player_id&limit=1", { headers: { Prefer: "count=estimated" }, cache: "no-store" })
+      .then(r => { const cr = r.headers.get("content-range") || ""; const m = cr.match(/\/(\d+)/); if (m) setSpieler(Number(m[1]).toLocaleString("de-DE")); })
+      .catch(() => {});
+  }, []);
+  const S = (zahl, label) => h("div", { style: { minWidth: 120 } },
+    h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 36, fontWeight: 700, color: "#fff", lineHeight: 1 } }, zahl),
+    h("div", { style: { fontFamily: mono, fontSize: 10.5, letterSpacing: 2, color: "#9a9a96", textTransform: "uppercase", marginTop: 5 } }, label));
+  return h("div", { style: { display: "flex", gap: 34, flexWrap: "wrap", margin: "26px 0 4px", paddingTop: 20, borderTop: "1px solid rgba(255,255,255,.10)" } },
+    S(spieler || "15.000+", "Spieler live"), S("20", "Ligen komplett"), S("548", "Quellen im Radar"), S("24/7", "KI-\u00dcberwachung"));
 }
 
 function GerVue({ alle, onWatch }) {
@@ -2247,11 +2319,12 @@ function NewsCard({
   const type = TYPE[item.type] || TYPE.geruecht;
   const isNeed = item.type === "verein_sucht";
   return /*#__PURE__*/React.createElement("article", {
+    className: "tw-card",
     style: {
       background: CARD,
       border: `1px solid ${HAIR}`,
-      borderRadius: 14,
-      padding: "16px 18px",
+      borderRadius: 16,
+      padding: "16px 18px 14px",
       borderLeft: `3px solid ${sport.color}`
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -2265,7 +2338,7 @@ function NewsCard({
   }, /*#__PURE__*/React.createElement(Badge, {
     meta: type,
     dot: true
-  }), /*#__PURE__*/React.createElement("button", {
+  }), /*#__PURE__*/React.createElement("span", { style: { flex: 1 } }), /*#__PURE__*/React.createElement("button", {
     onClick: e => {
       e.stopPropagation();
       const txt = item.headline + (item.url ? "\n" + item.url : "");
@@ -2550,7 +2623,7 @@ function NewsCard({
       borderRadius: 6,
       padding: "2px 7px"
     }
-  }, s.name, " ", /*#__PURE__*/React.createElement(ExternalLink, {
+  }, /*#__PURE__*/React.createElement("img", { src: "https://www.google.com/s2/favicons?sz=32&domain=" + encodeURIComponent(String(s.url || "").replace(/^https?:\/\//, "").split("/")[0] || "transferwire.de"), alt: "", width: 13, height: 13, style: { borderRadius: 3, opacity: .85 }, onError: e => { e.currentTarget.style.display = "none"; } }), s.name, " ", /*#__PURE__*/React.createElement(ExternalLink, {
     size: 11,
     strokeWidth: 2
   }))))));
@@ -3549,7 +3622,7 @@ function LandingPage({
     style: {
       color: LGREEN
     }
-  }, t("l_h1b"))), /*#__PURE__*/React.createElement("p", {
+  }, t("l_h1b"))), /*#__PURE__*/React.createElement(LandingStats, null), /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 16,
@@ -4810,6 +4883,8 @@ function TransferApp({
   const [league, setLeague] = useState("");
   const [club, setClub] = useState("");
   const [view, setView] = useState("feed");
+  const [plSel, setPlSel] = useState(null);
+  useEffect(() => { const t0 = setTimeout(() => { try { localStorage.setItem("tw_seen", String(Date.now())); } catch (e) {} }, 6000); return () => clearTimeout(t0); }, []);
   const [posFilter, setPosFilter] = useState("");
   const [watch, setWatch] = useState(loadWatch());
   const [addSheet, setAddSheet] = useState(null);
@@ -5757,7 +5832,8 @@ function TransferApp({
       gap: 6,
       alignSelf: "center",
       flexWrap: "wrap"
-    }
+    },
+    className: "tw-tabs"
   }, [["feed", t("tab_feed")], ["geruechte", "Transfers & Gerüchte"], ["gesucht", t("tab_seek")], ["ranking", t("rank_tab")], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["watch", t("watch_tab")]].map(([k, label]) => {
     const active = view === k;
     const col = k === "talente" ? "#0e7490" : k === "geruechte" ? "#b3541e" : k === "gesucht" ? TYPE.verein_sucht.color : k === "ranking" ? "#b9860b" : k === "watch" ? "#6b4fd8" : k === "players" ? "#1a6dc0" : k === "chancen" ? "#c2410c" : k === "listen" ? "#be123c" : "#149a59";
@@ -5769,18 +5845,18 @@ function TransferApp({
         fontSize: 13.5,
         fontWeight: 800,
         cursor: "pointer",
-        border: `1.5px solid ${active ? col : HAIR}`,
+        border: `1px solid ${active ? "#0f1520" : HAIR}`,
         padding: "8px 15px",
         borderRadius: 999,
         display: "inline-flex",
         alignItems: "center",
         gap: 7,
-        background: active ? col : "#fff",
-        color: active ? "#fff" : "#3a3a38",
-        boxShadow: active ? "0 2px 8px rgba(0,0,0,.14)" : "0 1px 2px rgba(0,0,0,.04)"
+        background: active ? "#0f1520" : "#fff",
+        color: active ? "#fff" : "#3a4150",
+        boxShadow: active ? "0 6px 16px rgba(15,21,32,.22)" : "0 1px 2px rgba(15,21,32,.05)"
       }
-    }, label);
-  }), /*#__PURE__*/React.createElement(ScoutMenu, { view: view, setView: setView })))), /*#__PURE__*/React.createElement("main", {
+    }, /*#__PURE__*/React.createElement("span", { style: { width: 7, height: 7, borderRadius: 99, background: col, boxShadow: active ? "0 0 0 3px rgba(255,255,255,.22)" : "none" } }), label);
+  }), /*#__PURE__*/React.createElement("span", { style: { marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: "#3a4150", background: "#fff", border: "1px solid " + HAIR, borderRadius: 999, padding: "7px 13px" } }, /*#__PURE__*/React.createElement("span", { style: { width: 7, height: 7, borderRadius: 99, background: "#149a59", boxShadow: "0 0 0 3px rgba(20,154,89,.16)" } }), "Live \u00b7 " + new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })), /*#__PURE__*/React.createElement(ScoutMenu, { view: view, setView: setView })))), /*#__PURE__*/React.createElement("main", {
     className: `tw-main ${view === "gesucht" ? "gesucht" : "feed"}`,
     style: {
       flex: "1 0 auto",
@@ -7377,7 +7453,7 @@ function TransferApp({
       color: MUTED,
       padding: "18px 4px"
     }
-  }, "…") : plItems.length === 0 ? /*#__PURE__*/React.createElement("div", {
+  }, [0, 1, 2].map(i => /*#__PURE__*/React.createElement("div", { key: i, className: "tw-skel", style: { height: 84, marginBottom: 10 } }))) : plItems.length === 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
       background: "#fff",
       border: `1px solid ${HAIR}`,
@@ -7397,7 +7473,10 @@ function TransferApp({
     const on = (watch.items || []).some(w => w.t === "spieler" && w.w === x.name);
     return /*#__PURE__*/React.createElement("div", {
       key: x.pid,
+      className: "tw-card",
+      onClick: () => setPlSel(x),
       style: {
+        cursor: "pointer",
         background: "#fff",
         border: `1px solid ${HAIR}`,
         borderRadius: 12,
@@ -7694,11 +7773,7 @@ function TransferApp({
       color: MUTED,
       fontSize: 14
     }
-  }, "Keine Meldungen für diese Auswahl. Filter zurücksetzen und erneut versuchen.") : (view === "watch" ? watchList : filtered).map(item => /*#__PURE__*/React.createElement(NewsCard, {
-    onWatch: it => setAddSheet(it),
-    key: item.id,
-    item: item
-  })))), /*#__PURE__*/React.createElement("aside", null, React.createElement(FeedSuche, { q: query, setQ: setQuery, club: club, setClub: setClub, alle: news })))), /*#__PURE__*/React.createElement("footer", {
+  }, "Keine Meldungen für diese Auswahl. Filter zurücksetzen und erneut versuchen.") : (() => { const liste = (view === "watch" ? watchList : filtered); let seen = 0; try { seen = Number(localStorage.getItem("tw_seen") || 0); } catch (e) {} const heute = new Date(); heute.setHours(0, 0, 0, 0); const gesternTs = heute.getTime() - 86400000; const gruppe = it => { const d = new Date(it.published || it.publishedAt || 0); if (isNaN(d.getTime())) return ""; const ts = d.getTime(); if (ts >= heute.getTime()) return "Heute"; if (ts >= gesternTs) return "Gestern"; return "Fr\u00fcher"; }; const aus = []; let letzte = null; let neuMarke = false; liste.forEach(it => { const g = gruppe(it); if (g && g !== letzte) { aus.push(/*#__PURE__*/React.createElement("div", { key: "g" + g, style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 900, letterSpacing: 1.6, color: "#8a92a3", margin: "8px 2px 0", textTransform: "uppercase" } }, g)); letzte = g; } const ts = new Date(it.published || it.publishedAt || 0).getTime(); if (!neuMarke && seen && !isNaN(ts) && ts > 0 && ts <= seen) { aus.push(/*#__PURE__*/React.createElement("div", { key: "seenline", style: { display: "flex", alignItems: "center", gap: 10, margin: "2px 0" } }, /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, color: "#149a59" } }, "NEU SEIT DEINEM LETZTEN BESUCH \u2191"), /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }))); neuMarke = true; } aus.push(/*#__PURE__*/React.createElement(NewsCard, { onWatch: it2 => setAddSheet(it2), key: it.id, item: it })); }); return aus; })())), /*#__PURE__*/React.createElement("aside", null, React.createElement(FeedSuche, { q: query, setQ: setQuery, club: club, setClub: setClub, alle: news }))), plSel && /*#__PURE__*/React.createElement(SpielerDrawer, { x: plSel, news: news, schliessen: () => setPlSel(null) })), /*#__PURE__*/React.createElement("footer", {
     style: {
       borderTop: `1px solid ${HAIR}`,
       background: "#fff",
