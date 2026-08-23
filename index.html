@@ -23,7 +23,7 @@
   button:hover { filter: brightness(.97); }
   :focus-visible { outline: 2px solid #149a59; outline-offset: 2px; border-radius: 6px; }
 </style>
-<!-- tw-build: 2026-08-23-h premium-w1 -->
+<!-- tw-build: 2026-08-23-i premium-w2 -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -1708,12 +1708,12 @@ function TalentScouting() {
     (kat === "top" || kat === "unentdeckt") && React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 } }, lchip("alle", "Alle"), lchip("DE", "DE"), lchip("EN", "EN"), lchip("FR", "FR"), lchip("ES", "ES"), lchip("INT", "INT")),
     laden ? React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "#8a8a86", padding: "14px 4px" } }, "Lade Rankings \u2026") :
     rows.length === 0 ? React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "#8a8a86", padding: "14px 4px" } }, "Noch keine Eintr\u00e4ge in dieser Kategorie \u2014 die Scout-Agenten f\u00fcllen die Liste t\u00e4glich weiter auf.") :
-    React.createElement("div", null, rows.map((r, i) => React.createElement("div", { key: i, style: { display: "flex", alignItems: "center", gap: 12, padding: "9px 6px", borderTop: i ? "1px solid #f0f0ec" : "none", fontFamily: FONT_BODY, fontSize: 13.5 } },
-      React.createElement("div", { style: { width: 34, fontWeight: 800, color: i < 3 ? "#b9860b" : "#8a8a86" } }, "#" + (i + 1)),
+    React.createElement(React.Fragment, null, rows.length >= 3 && React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 10, marginBottom: 12 } }, rows.slice(0, 3).map((r, i) => React.createElement("div", { key: "top" + i, className: "tw-card", style: { background: "#f5fafb", border: "1px solid #cfe4e8", borderRadius: 14, padding: "12px 14px", display: "flex", gap: 12, alignItems: "center" } }, React.createElement("div", { style: { width: 46, height: 46, borderRadius: 14, background: "#087F8C", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontSize: 18, fontWeight: 700, flex: "0 0 auto" } }, "#" + (i + 1)), React.createElement("div", { style: { minWidth: 0, flex: 1 } }, React.createElement("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 18, fontWeight: 700, color: "#15181C", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, r.name), React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "#667085", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, [(r.club || r.team || ""), r.age ? r.age + " J." : "", r.position || ""].filter(Boolean).join(" \u00b7 ")), React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 900, color: "#087F8C", marginTop: 3 } }, kat === "tore" ? ((r.goals || 0) + " Tore") : kat === "assists" ? ((r.assists || 0) + " Vorl.") : ("TW-Score " + (r.scout_score != null ? Math.round(Number(r.scout_score) * 10) : "-"))))))), React.createElement("div", null, rows.slice(3).map((r, i) => React.createElement("div", { key: i, style: { display: "flex", alignItems: "center", gap: 12, padding: "9px 6px", borderTop: i ? "1px solid #f0f0ec" : "none", fontFamily: FONT_BODY, fontSize: 13.5 } },
+      React.createElement("div", { style: { width: 34, fontWeight: 800, color: "#8a8a86" } }, "#" + (i + 4)),
       React.createElement("div", { style: { flex: 1, minWidth: 0 } },
         React.createElement("div", { style: { fontWeight: 700 } }, r.name, r.age ? React.createElement("span", { style: { fontWeight: 500, color: "#8a8a86" } }, " \u00b7 " + r.age) : null),
         React.createElement("div", { style: { fontSize: 12, color: "#8a8a86", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, (r.club || r.team || "") + (r.league ? " \u00b7 " + r.league : ""))),
-      React.createElement("div", { style: { fontWeight: 800, color: "#0e7490", whiteSpace: "nowrap" } }, kat === "tore" ? ((r.goals || 0) + " Tore") : kat === "assists" ? ((r.assists || 0) + " Vorl.") : ("TW-Score " + (r.scout_score != null ? Math.round(Number(r.scout_score) * 10) : "-")))))));
+      React.createElement("div", { style: { fontWeight: 800, color: "#0e7490", whiteSpace: "nowrap" } }, kat === "tore" ? ((r.goals || 0) + " Tore") : kat === "assists" ? ((r.assists || 0) + " Vorl.") : ("TW-Score " + (r.scout_score != null ? Math.round(Number(r.scout_score) * 10) : "-"))))))));
 }
 
 
@@ -1751,6 +1751,28 @@ function ScoutMenu({ view, setView }) {
         eintrag("\uD83C\uDFC6 Talent-Rankings", "talente"),
         eintrag("\uD83D\uDCCB Scoutinglisten", "listen"),
         eintrag("\uD83D\uDCC8 " + t("rank_tab"), "ranking"))));
+}
+
+function VergleichUI({ spieler, entf, leeren, offen, setOffen }) {
+  const h = React.createElement;
+  const zeilen = [["Alter", x => x.age ? x.age + " J." : "\u2013"], ["Verein", x => x.team || "\u2013"], ["Position", x => x.pos || "\u2013"], ["Marktwert", x => x.mw || "\u2013"], ["Vertrag bis", x => x.vertrag ? String(x.vertrag).slice(0, 4) : "\u2013"], ["Spiele", x => x.apps ?? "\u2013"], ["Minuten", x => x.min ?? "\u2013"], ["Note", x => x.rating || "\u2013"], ["Tore", x => x.goals ?? 0], ["Assists", x => x.assists ?? 0]];
+  return h(React.Fragment, null,
+    h("div", { style: { position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 80, background: "#0f1520", color: "#fff", padding: "10px 18px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", boxShadow: "0 -10px 30px rgba(15,21,32,.3)" } },
+      h("span", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1, color: "rgba(255,255,255,.65)", textTransform: "uppercase" } }, "Vergleich"),
+      spieler.map(x => h("span", { key: x.pid, style: { display: "inline-flex", alignItems: "center", gap: 7, background: "rgba(255,255,255,.1)", border: "1px solid rgba(255,255,255,.18)", borderRadius: 999, padding: "6px 11px", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700 } }, x.name, h("button", { onClick: () => entf(x.pid), style: { border: "none", background: "none", color: "rgba(255,255,255,.7)", cursor: "pointer", fontSize: 12, padding: 0 } }, "\u2715"))),
+      h("span", { style: { flex: 1 } }),
+      spieler.length >= 2 && h("button", { onClick: () => setOffen(true), style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 900, cursor: "pointer", padding: "9px 18px", borderRadius: 10, border: "none", background: "#149a59", color: "#fff" } }, "Vergleichen"),
+      h("button", { onClick: leeren, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, cursor: "pointer", padding: "8px 12px", borderRadius: 10, border: "1px solid rgba(255,255,255,.25)", background: "transparent", color: "rgba(255,255,255,.8)" } }, "Leeren")),
+    offen && h("div", { style: { position: "fixed", inset: 0, zIndex: 95 } },
+      h("div", { onClick: () => setOffen(false), style: { position: "absolute", inset: 0, background: "rgba(15,21,32,.5)", backdropFilter: "blur(2px)" } }),
+      h("div", { style: { position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: "min(760px, 94vw)", maxHeight: "84vh", overflowY: "auto", background: "#fff", borderRadius: 18, boxShadow: "0 30px 80px rgba(15,21,32,.35)", padding: "22px 24px" } },
+        h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 } },
+          h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 24, fontWeight: 700, color: "#15181C" } }, "Spieler-Vergleich"),
+          h("button", { onClick: () => setOffen(false), style: { width: 32, height: 32, borderRadius: 99, border: "1px solid " + HAIR, background: "#fff", cursor: "pointer", fontWeight: 800 } }, "\u2715")),
+        h("div", { style: { display: "grid", gridTemplateColumns: "110px repeat(" + spieler.length + ", 1fr)", fontFamily: FONT_BODY, fontSize: 13 } },
+          h("div", null),
+          spieler.map(x => h("div", { key: "k" + x.pid, style: { padding: "8px 10px", fontFamily: FONT_DISPLAY, fontSize: 17, fontWeight: 700, color: "#0f1520", borderBottom: "2px solid #0f1520" } }, x.name)),
+          zeilen.map(([lab, fn], ri) => [h("div", { key: "l" + ri, style: { padding: "8px 10px", color: "#8a92a3", fontWeight: 800, fontSize: 11, textTransform: "uppercase", letterSpacing: .6, borderBottom: "1px solid " + HAIR } }, lab), ...spieler.map(x => h("div", { key: lab + x.pid, style: { padding: "8px 10px", fontWeight: 700, color: "#232b38", borderBottom: "1px solid " + HAIR } }, fn(x)))])))));
 }
 
 function ScoutSub({ view, setView }) {
@@ -1826,6 +1848,7 @@ function GerVue({ alle, onWatch }) {
   const [kiAntwort, setKiAntwort] = useState("");
   const [kiIds, setKiIds] = useState(null);
   const [kiVor, setKiVor] = useState([]);
+  const [gAnsicht, setGAnsicht] = useState("karten");
   const ligenAlle = LAND_LIGEN.flatMap(x => x.ligen || []);
   const ligen = gLand ? ((LAND_LIGEN.find(x => x.de === gLand) || {}).ligen || []) : ligenAlle;
   const frage = f => {
@@ -1873,8 +1896,8 @@ function GerVue({ alle, onWatch }) {
       sel(gLiga, setGLiga, ligen, "Alle Ligen"),
       h("input", { value: gVerein, onChange: e => setGVerein(e.target.value), placeholder: "Verein filtern \u2026", style: { fontFamily: FONT_BODY, fontSize: 13, padding: "9px 12px", borderRadius: 10, border: "1.5px solid " + HAIR, outline: "none", width: 170 } }),
       typChip("", "Alle"), typChip("fix", TYPE.fix.label), typChip("geruecht", TYPE.geruecht.label), typChip("verein_sucht", TYPE.verein_sucht.label)),
-    h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#8a8880", marginBottom: 10 } }, liste.length + " Meldungen" + (kiIds ? " \u00b7 KI-Auswahl aktiv" : "")),
-    liste.length ? liste.map(item => h(NewsCard, { key: item.id, item: item, onWatch: onWatch })) : h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, color: "#8a8880", padding: "30px 0", textAlign: "center" } }, "Keine Meldungen f\u00fcr diese Auswahl - Filter lockern oder die KI oben fragen."));
+    h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 10, flexWrap: "wrap" } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#8a8880" } }, liste.length + " Meldungen" + (kiIds ? " \u00b7 KI-Auswahl aktiv" : "")), h("div", { style: { display: "flex", gap: 6 } }, [["karten", "Karten"], ["kompakt", "Kompakt"]].map(([k, lab]) => h("button", { key: k, onClick: () => setGAnsicht(k), style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 12px", borderRadius: 8, border: "1px solid " + (gAnsicht === k ? "#0f1520" : HAIR), background: gAnsicht === k ? "#0f1520" : "#fff", color: gAnsicht === k ? "#fff" : "#5b6472" } }, lab)))),
+    liste.length ? (gAnsicht === "kompakt" ? h("div", { style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 14, overflow: "hidden" } }, liste.map((it, i) => { const ty = TYPE[it.type] || TYPE.geruecht; const d = new Date(it.published || it.publishedAt || 0); const z = isNaN(d.getTime()) ? "" : d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) + " " + d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }); return h("div", { key: it.id, onClick: () => { if (it.url) window.open(it.url, "_blank"); }, style: { display: "grid", gridTemplateColumns: "86px 96px minmax(0,1.6fr) minmax(0,1fr) 90px", gap: 10, alignItems: "center", padding: "9px 14px", borderTop: i ? "1px solid " + HAIR : "none", cursor: it.url ? "pointer" : "default", fontFamily: FONT_BODY, fontSize: 12.5 } }, h("span", { style: { color: "#8a92a3", fontSize: 11.5 } }, z), h("span", { style: { display: "inline-flex", alignItems: "center", gap: 5, fontWeight: 800, color: ty.color, fontSize: 11 } }, h("span", { style: { width: 7, height: 7, borderRadius: 99, background: ty.color } }), ty.label), h("span", { style: { fontWeight: 700, color: "#15181C", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, it.headline), h("span", { style: { color: "#5b6472", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, [String((it.player && it.player.name) || it.player || ""), (it.fromClub || it.from) ? (it.fromClub || it.from) + " \u2192 " + (it.toClub || it.to || it.seek || "?") : (it.toClub || it.to || it.seek || "")].filter(Boolean).join(" \u00b7 ")), h("span", { style: { textAlign: "right", fontWeight: 800, color: "#0f1520" } }, it.fee || "")); })) : liste.map(item => h(NewsCard, { key: item.id, item: item, onWatch: onWatch }))) : h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, color: "#8a8880", padding: "30px 0", textAlign: "center" } }, "Keine Meldungen f\u00fcr diese Auswahl - Filter lockern oder die KI oben fragen."));
 }
 
 const NEWS = [{
@@ -4899,6 +4922,10 @@ function TransferApp({
   const [view, setView] = useState("feed");
   const [plSel, setPlSel] = useState(null);
   const [plGesamt, setPlGesamt] = useState("");
+  const [plModus, setPlModus] = useState("karten");
+  const [plSort, setPlSort] = useState({ k: "", d: -1 });
+  const [plVergleich, setPlVergleich] = useState([]);
+  const [plVglOffen, setPlVglOffen] = useState(false);
   useEffect(() => { fetch("/db/players?select=player_id&limit=1", { headers: { Prefer: "count=estimated" }, cache: "no-store" }).then(r => { const m = (r.headers.get("content-range") || "").match(/\/(\d+)/); if (m) setPlGesamt(Number(m[1]).toLocaleString("de-DE")); }).catch(() => {}); }, []);
   useEffect(() => { const tast = e => { const tag = (e.target && e.target.tagName) || ""; const inFeld = tag === "INPUT" || tag === "TEXTAREA" || (e.target && e.target.isContentEditable); if (e.key === "Escape") setPlSel(null); if ((!inFeld && e.key === "/") || ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K"))) { const el = document.getElementById("tw-gsuche"); if (el) { e.preventDefault(); el.focus(); } } }; window.addEventListener("keydown", tast); return () => window.removeEventListener("keydown", tast); }, []);
   useEffect(() => { const t0 = setTimeout(() => { try { localStorage.setItem("tw_seen", String(Date.now())); } catch (e) {} }, 6000); return () => clearTimeout(t0); }, []);
@@ -6131,8 +6158,10 @@ function TransferApp({
       style: {
         background: "linear-gradient(180deg, #14522f 0%, #0e3d22 100%)",
         borderRadius: 14,
-        padding: "16px 12px 18px",
-        marginBottom: 14
+        padding: "18px 14px 20px",
+        marginBottom: 14,
+        position: "relative",
+        overflow: "hidden"
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
@@ -6156,11 +6185,14 @@ function TransferApp({
         color: "rgba(255,255,255,.7)",
         marginBottom: 14
       }
-    }, t("totw_sub")), [["Sturm"], ["Mittelfeld"], ["Abwehr"], ["Torwart"]].map(([pos]) => /*#__PURE__*/React.createElement("div", {
+    }, t("totw_sub")), /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 100 150", preserveAspectRatio: "none", style: { position: "absolute", inset: 0, width: "100%", height: "100%", opacity: .15, pointerEvents: "none" } }, /*#__PURE__*/React.createElement("rect", { x: 3, y: 3, width: 94, height: 144, rx: 3, fill: "none", stroke: "#fff", strokeWidth: .7 }), /*#__PURE__*/React.createElement("line", { x1: 3, y1: 75, x2: 97, y2: 75, stroke: "#fff", strokeWidth: .7 }), /*#__PURE__*/React.createElement("circle", { cx: 50, cy: 75, r: 12, fill: "none", stroke: "#fff", strokeWidth: .7 }), /*#__PURE__*/React.createElement("circle", { cx: 50, cy: 75, r: 1.4, fill: "#fff" }), /*#__PURE__*/React.createElement("rect", { x: 24, y: 3, width: 52, height: 15, fill: "none", stroke: "#fff", strokeWidth: .7 }), /*#__PURE__*/React.createElement("rect", { x: 36, y: 3, width: 28, height: 6.5, fill: "none", stroke: "#fff", strokeWidth: .7 }), /*#__PURE__*/React.createElement("rect", { x: 24, y: 132, width: 52, height: 15, fill: "none", stroke: "#fff", strokeWidth: .7 }), /*#__PURE__*/React.createElement("rect", { x: 36, y: 140.5, width: 28, height: 6.5, fill: "none", stroke: "#fff", strokeWidth: .7 })), [["Sturm"], ["Mittelfeld"], ["Abwehr"], ["Torwart"]].map(([pos]) => /*#__PURE__*/React.createElement("div", {
       key: pos,
       style: {
         display: "flex",
-        justifyContent: "center",
+        justifyContent: "space-evenly",
+        width: "100%",
+        position: "relative",
+        zIndex: 1,
         gap: 10,
         flexWrap: "wrap",
         marginBottom: 13
@@ -6524,9 +6556,9 @@ function TransferApp({
     }
   }, t("li_sub"))), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      flexDirection: "column",
-      gap: 8,
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))",
+      gap: 14,
       marginBottom: 16
     }
   }, LIST_PRESETS.map(pr => /*#__PURE__*/React.createElement("div", {
@@ -6554,7 +6586,7 @@ function TransferApp({
       color: MUTED,
       marginTop: 3
     }
-  }, LANG === "en" ? pr.sen : pr.sde)))), myLists.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, LANG === "en" ? pr.sen : pr.sde), /*#__PURE__*/React.createElement("div", { style: { marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center", fontFamily: FONT_BODY, fontSize: 11, color: "#8a92a3" } }, /*#__PURE__*/React.createElement("span", null, "automatisch aktualisiert \u00b7 t\u00e4glich 04:00"), /*#__PURE__*/React.createElement("span", { style: { fontWeight: 900, color: "#087F8C" } }, "Liste \u00f6ffnen \u2192"))))), myLists.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 11.5,
@@ -7374,7 +7406,7 @@ function TransferApp({
       fontSize: 13,
       color: "#4a4a48"
     }
-  }, t("pl_none")) : /*#__PURE__*/React.createElement("div", {
+  }, t("pl_none")) : /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", { style: { display: "flex", gap: 6, marginBottom: 10 } }, [["karten", "Karten"], ["tabelle", "Tabelle"]].map(([k, lab]) => /*#__PURE__*/React.createElement("button", { key: k, onClick: () => setPlModus(k), style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 12px", borderRadius: 8, border: "1px solid " + (plModus === k ? "#0f1520" : HAIR), background: plModus === k ? "#0f1520" : "#fff", color: plModus === k ? "#fff" : "#5b6472" } }, lab))), plModus === "tabelle" ? (() => { const mwVal = x => { const m = String(x.mw || "").match(/([\d.,]+)\s*(Mio|Tsd)/); if (!m) return -1; return parseFloat(m[1].replace(/\./g, "").replace(",", ".")) * (m[2] === "Mio" ? 1e6 : 1e3); }; const wert = (x, k) => k === "mw" ? mwVal(x) : k === "name" ? String(x.name || "").toLowerCase() : Number(x[k] || 0); const zeilen = plSort.k ? [...plItems].sort((a, b) => { const A = wert(a, plSort.k), B = wert(b, plSort.k); return (A < B ? -1 : A > B ? 1 : 0) * plSort.d; }) : plItems; const koepfe = [["name", "Spieler", "left"], ["age", "Alter", "right"], ["", "Verein", "left"], ["", "Pos", "left"], ["mw", "MW", "right"], ["", "Vertrag", "right"], ["apps", "Sp", "right"], ["min", "Min", "right"], ["rating", "Note", "right"], ["goals", "T", "right"], ["assists", "A", "right"], ["", "", "center"]]; const sortKlick = k => { if (!k) return; setPlSort(s => s.k === k ? { k, d: -s.d } : { k, d: k === "name" ? 1 : -1 }); }; const imVgl = x => plVergleich.some(v => v.pid === x.pid); const vglToggle = x => setPlVergleich(v => imVgl(x) ? v.filter(y => y.pid !== x.pid) : (v.length >= 3 ? v : [...v, x])); return /*#__PURE__*/React.createElement("div", { style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 14, overflow: "auto" } }, /*#__PURE__*/React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontFamily: FONT_BODY, fontSize: 12.5, minWidth: 860 } }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, koepfe.map(([k, lab, al], i) => /*#__PURE__*/React.createElement("th", { key: i, onClick: () => sortKlick(k), style: { position: "sticky", top: 0, background: "#f8fafb", borderBottom: "1px solid " + HAIR, padding: "9px 10px", textAlign: al, fontSize: 10.5, fontWeight: 900, letterSpacing: .7, textTransform: "uppercase", color: plSort.k === k && k ? "#0f1520" : "#8a92a3", cursor: k ? "pointer" : "default", whiteSpace: "nowrap", zIndex: 2 } }, lab, plSort.k === k && k ? (plSort.d > 0 ? " \u2191" : " \u2193") : "")))), /*#__PURE__*/React.createElement("tbody", null, zeilen.map(x => /*#__PURE__*/React.createElement("tr", { key: x.pid, onClick: () => setPlSel(x), style: { cursor: "pointer", borderBottom: "1px solid " + HAIR } }, /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", fontWeight: 800, color: "#15181C", whiteSpace: "nowrap" } }, x.name), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", color: "#5b6472" } }, x.age || "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", color: "#5b6472", whiteSpace: "nowrap", maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis" } }, x.team), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", color: "#5b6472", whiteSpace: "nowrap" } }, x.pos || "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", fontWeight: 800, color: "#0b6b3e", whiteSpace: "nowrap" } }, x.mw || "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", color: "#5b6472" } }, x.vertrag ? String(x.vertrag).slice(0, 4) : "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", color: "#5b6472" } }, x.apps ?? "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", color: "#5b6472" } }, x.min ?? "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", fontWeight: 800, color: "#15181C" } }, x.rating || "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", color: "#5b6472" } }, x.goals ?? 0), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", color: "#5b6472" } }, x.assists ?? 0), /*#__PURE__*/React.createElement("td", { onClick: e => { e.stopPropagation(); vglToggle(x); }, style: { padding: "9px 10px", textAlign: "center" } }, /*#__PURE__*/React.createElement("span", { style: { display: "inline-block", width: 17, height: 17, borderRadius: 5, border: "1.5px solid " + (imVgl(x) ? "#149a59" : HAIR), background: imVgl(x) ? "#149a59" : "#fff", color: "#fff", fontSize: 11, lineHeight: "17px", fontWeight: 900 } }, imVgl(x) ? "\u2713" : ""))))))); })() : /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
@@ -7479,7 +7511,7 @@ function TransferApp({
         color: on ? "#149a59" : "#4a4a48"
       }
     }, on ? "✓" : t("watch_add"))));
-  }))), view === "watch" && /*#__PURE__*/React.createElement("div", {
+  })))), view === "watch" && /*#__PURE__*/React.createElement("div", {
     style: {
       background: "#fff",
       border: `1px solid ${HAIR}`,
@@ -7684,7 +7716,7 @@ function TransferApp({
       color: MUTED,
       fontSize: 14
     }
-  }, "Keine Meldungen für diese Auswahl. Filter zurücksetzen und erneut versuchen.") : (() => { const liste = (view === "watch" ? watchList : filtered); let seen = 0; try { seen = Number(localStorage.getItem("tw_seen") || 0); } catch (e) {} const heute = new Date(); heute.setHours(0, 0, 0, 0); const gesternTs = heute.getTime() - 86400000; const gruppe = it => { const d = new Date(it.published || it.publishedAt || 0); if (isNaN(d.getTime())) return ""; const ts = d.getTime(); if (ts >= heute.getTime()) return "Heute"; if (ts >= gesternTs) return "Gestern"; return "Fr\u00fcher"; }; const aus = []; let letzte = null; let neuMarke = false; liste.forEach(it => { const g = gruppe(it); if (g && g !== letzte) { aus.push(/*#__PURE__*/React.createElement("div", { key: "g" + g, style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 900, letterSpacing: 1.6, color: "#8a92a3", margin: "8px 2px 0", textTransform: "uppercase" } }, g)); letzte = g; } const ts = new Date(it.published || it.publishedAt || 0).getTime(); if (!neuMarke && seen && !isNaN(ts) && ts > 0 && ts <= seen) { aus.push(/*#__PURE__*/React.createElement("div", { key: "seenline", style: { display: "flex", alignItems: "center", gap: 10, margin: "2px 0" } }, /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, color: "#149a59" } }, "NEU SEIT DEINEM LETZTEN BESUCH \u2191"), /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }))); neuMarke = true; } aus.push(/*#__PURE__*/React.createElement(NewsCard, { onWatch: it2 => setAddSheet(it2), key: it.id, item: it })); }); return aus; })())), /*#__PURE__*/React.createElement("aside", null, view !== "talente" && React.createElement(FeedSuche, { q: query, setQ: setQuery, club: club, setClub: setClub, alle: news }))), plSel && /*#__PURE__*/React.createElement(SpielerDrawer, { x: plSel, news: news, schliessen: () => setPlSel(null) })), /*#__PURE__*/React.createElement("footer", {
+  }, "Keine Meldungen für diese Auswahl. Filter zurücksetzen und erneut versuchen.") : (() => { const liste = (view === "watch" ? watchList : filtered); let seen = 0; try { seen = Number(localStorage.getItem("tw_seen") || 0); } catch (e) {} const heute = new Date(); heute.setHours(0, 0, 0, 0); const gesternTs = heute.getTime() - 86400000; const gruppe = it => { const d = new Date(it.published || it.publishedAt || 0); if (isNaN(d.getTime())) return ""; const ts = d.getTime(); if (ts >= heute.getTime()) return "Heute"; if (ts >= gesternTs) return "Gestern"; return "Fr\u00fcher"; }; const aus = []; let letzte = null; let neuMarke = false; liste.forEach(it => { const g = gruppe(it); if (g && g !== letzte) { aus.push(/*#__PURE__*/React.createElement("div", { key: "g" + g, style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 900, letterSpacing: 1.6, color: "#8a92a3", margin: "8px 2px 0", textTransform: "uppercase" } }, g)); letzte = g; } const ts = new Date(it.published || it.publishedAt || 0).getTime(); if (!neuMarke && seen && !isNaN(ts) && ts > 0 && ts <= seen) { aus.push(/*#__PURE__*/React.createElement("div", { key: "seenline", style: { display: "flex", alignItems: "center", gap: 10, margin: "2px 0" } }, /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, color: "#149a59" } }, "NEU SEIT DEINEM LETZTEN BESUCH \u2191"), /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }))); neuMarke = true; } aus.push(/*#__PURE__*/React.createElement(NewsCard, { onWatch: it2 => setAddSheet(it2), key: it.id, item: it })); }); return aus; })())), /*#__PURE__*/React.createElement("aside", null, view !== "talente" && React.createElement(FeedSuche, { q: query, setQ: setQuery, club: club, setClub: setClub, alle: news }))), plSel && /*#__PURE__*/React.createElement(SpielerDrawer, { x: plSel, news: news, schliessen: () => setPlSel(null) }), plVergleich.length > 0 && /*#__PURE__*/React.createElement(VergleichUI, { spieler: plVergleich, entf: pid => setPlVergleich(v => v.filter(y => y.pid !== pid)), leeren: () => { setPlVergleich([]); setPlVglOffen(false); }, offen: plVglOffen, setOffen: setPlVglOffen })), /*#__PURE__*/React.createElement("footer", {
     style: {
       borderTop: `1px solid ${HAIR}`,
       background: "#fff",
