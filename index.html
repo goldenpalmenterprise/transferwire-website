@@ -23,7 +23,7 @@
   button:hover { filter: brightness(.97); }
   :focus-visible { outline: 2px solid #149a59; outline-offset: 2px; border-radius: 6px; }
 </style>
-<!-- tw-build: 2026-08-23-d unbestaetigt -->
+<!-- tw-build: 2026-08-23-e scouting-fix -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -982,7 +982,7 @@ const I18N = {
     match_save: "Profil speichern",
     match_close: "Schließen",
     match_tap: "Profil antippen zum Filtern",
-    watch_tab: "Expiring deals",
+    watch_tab: "Merkliste",
     watch_add: "Beobachten",
     watch_sheet_title: "Auf die Merkliste setzen",
     watch_p: "Spieler",
@@ -1734,14 +1734,23 @@ function FeedSuche({ q, setQ, club, setClub, alle }) {
 }
 function ScoutMenu({ view, setView }) {
   const aktiv = view === "talente" || view === "listen";
-  const col = "#0e7490";
-  const gehe = (e, ziel) => { setView(ziel); const d = e.currentTarget.closest("details"); if (d) d.removeAttribute("open"); };
-  const eintrag = (label, ziel) => React.createElement("button", { key: ziel, onClick: e => gehe(e, ziel), style: { display: "block", width: "100%", textAlign: "left", border: "none", background: view === ziel ? "#e6f6f9" : "none", padding: "10px 13px", borderRadius: 9, fontFamily: FONT_BODY, fontSize: 13, fontWeight: 700, color: "#20323a", cursor: "pointer", whiteSpace: "nowrap" } }, label);
-  return React.createElement("details", { style: { position: "relative" } },
-    React.createElement("summary", { style: { listStyle: "none", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, cursor: "pointer", border: "1.5px solid " + (aktiv ? col : HAIR), padding: "8px 15px", borderRadius: 999, display: "inline-flex", alignItems: "center", gap: 7, background: aktiv ? col : "#fff", color: aktiv ? "#fff" : "#3a3a38", boxShadow: aktiv ? "0 2px 8px rgba(0,0,0,.14)" : "0 1px 2px rgba(0,0,0,.04)", userSelect: "none" } }, "Scouting \u25be"),
-    React.createElement("div", { style: { position: "absolute", top: 42, left: 0, zIndex: 40, background: "#fff", border: "1px solid " + HAIR, borderRadius: 12, padding: 5, boxShadow: "0 14px 36px rgba(20,20,18,.16)", minWidth: 190 } },
-      eintrag("\uD83C\uDFC6 Talent-Rankings", "talente"),
-      eintrag("\uD83D\uDCCB Scoutinglisten", "listen")));
+  const [offen, setOffen] = useState(false);
+  const [pos, setPos] = useState({ top: 120, left: 12 });
+  const schalte = e => {
+    const r = e.currentTarget.getBoundingClientRect();
+    setPos({ top: r.bottom + 8, left: Math.max(8, Math.min(r.left, (window.innerWidth || 360) - 208)) });
+    setOffen(o => !o);
+  };
+  const gehe = ziel => { setView(ziel); setOffen(false); };
+  const eintrag = (label, ziel) => React.createElement("button", { key: ziel, onClick: () => gehe(ziel), style: { display: "block", width: "100%", textAlign: "left", border: "none", background: view === ziel ? "#f0f3f8" : "transparent", borderRadius: 9, padding: "10px 13px", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, color: "#20242c", cursor: "pointer" } }, label);
+  return React.createElement(React.Fragment, null,
+    React.createElement("button", { onClick: schalte, style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, cursor: "pointer", border: "1px solid " + (aktiv ? "#0f1520" : HAIR), padding: "8px 15px", borderRadius: 999, display: "inline-flex", alignItems: "center", gap: 7, background: aktiv ? "#0f1520" : "#fff", color: aktiv ? "#fff" : "#3a4150", boxShadow: aktiv ? "0 6px 16px rgba(15,21,32,.22)" : "0 1px 2px rgba(15,21,32,.05)" } },
+      React.createElement("span", { style: { width: 7, height: 7, borderRadius: 99, background: "#0e7490", boxShadow: aktiv ? "0 0 0 3px rgba(255,255,255,.22)" : "none" } }), "Scouting", React.createElement("span", { style: { fontSize: 10, opacity: .8 } }, "\u25BE")),
+    offen && React.createElement(React.Fragment, null,
+      React.createElement("div", { onClick: () => setOffen(false), style: { position: "fixed", inset: 0, zIndex: 59 } }),
+      React.createElement("div", { style: { position: "fixed", top: pos.top, left: pos.left, zIndex: 60, background: "#fff", border: "1px solid " + HAIR, borderRadius: 12, padding: 5, minWidth: 196, boxShadow: "0 14px 40px rgba(15,21,32,.18)" } },
+        eintrag("\uD83C\uDFC6 Talent-Rankings", "talente"),
+        eintrag("\uD83D\uDCCB Scoutinglisten", "listen"))));
 }
 
 function SpielerDrawer({ x, news, schliessen }) {
@@ -5856,7 +5865,7 @@ function TransferApp({
         boxShadow: active ? "0 6px 16px rgba(15,21,32,.22)" : "0 1px 2px rgba(15,21,32,.05)"
       }
     }, /*#__PURE__*/React.createElement("span", { style: { width: 7, height: 7, borderRadius: 99, background: col, boxShadow: active ? "0 0 0 3px rgba(255,255,255,.22)" : "none" } }), label);
-  }), /*#__PURE__*/React.createElement("span", { style: { marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: "#3a4150", background: "#fff", border: "1px solid " + HAIR, borderRadius: 999, padding: "7px 13px" } }, /*#__PURE__*/React.createElement("span", { style: { width: 7, height: 7, borderRadius: 99, background: "#149a59", boxShadow: "0 0 0 3px rgba(20,154,89,.16)" } }), "Live \u00b7 " + new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })), /*#__PURE__*/React.createElement(ScoutMenu, { view: view, setView: setView })))), /*#__PURE__*/React.createElement("main", {
+  }), /*#__PURE__*/React.createElement(ScoutMenu, { view: view, setView: setView })))), /*#__PURE__*/React.createElement("main", {
     className: `tw-main ${view === "gesucht" ? "gesucht" : "feed"}`,
     style: {
       flex: "1 0 auto",
