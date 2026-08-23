@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <title>TransferWire — Transfermeldungen & Vereinsbedarfe</title>
-<!-- tw-build: 2026-08-23-a diakritik -->
+<!-- tw-build: 2026-08-23-b transfers-geruechte -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -1723,6 +1723,68 @@ function ScoutMenu({ view, setView }) {
     React.createElement("div", { style: { position: "absolute", top: 42, left: 0, zIndex: 40, background: "#fff", border: "1px solid " + HAIR, borderRadius: 12, padding: 5, boxShadow: "0 14px 36px rgba(20,20,18,.16)", minWidth: 190 } },
       eintrag("\uD83C\uDFC6 Talent-Rankings", "talente"),
       eintrag("\uD83D\uDCCB Scoutinglisten", "listen")));
+}
+
+function GerVue({ alle, onWatch }) {
+  const h = React.createElement;
+  const [gLand, setGLand] = useState("");
+  const [gLiga, setGLiga] = useState("");
+  const [gVerein, setGVerein] = useState("");
+  const [gTyp, setGTyp] = useState("");
+  const [kiFrage, setKiFrage] = useState("");
+  const [kiLade, setKiLade] = useState(false);
+  const [kiAntwort, setKiAntwort] = useState("");
+  const [kiIds, setKiIds] = useState(null);
+  const [kiVor, setKiVor] = useState([]);
+  const ligenAlle = LAND_LIGEN.flatMap(x => x.ligen || []);
+  const ligen = gLand ? ((LAND_LIGEN.find(x => x.de === gLand) || {}).ligen || []) : ligenAlle;
+  const frage = f => {
+    const txt = (f || kiFrage).trim();
+    if (!txt || kiLade) return;
+    setKiLade(true); setKiAntwort(""); setKiIds(null); setKiVor([]);
+    postJson("/api/tw-geruechte", { frage: txt, liga: gLiga, land: gLand, verein: gVerein, typ: gTyp })
+      .then(r => r.json())
+      .then(d => { setKiAntwort(d.antwort || "Keine Antwort erhalten."); setKiIds(Array.isArray(d.ids) && d.ids.length ? d.ids.map(Number) : null); setKiVor(Array.isArray(d.vorschlaege) ? d.vorschlaege : []); })
+      .catch(() => setKiAntwort("Die KI-Recherche ist gerade nicht erreichbar - bitte gleich erneut versuchen."))
+      .finally(() => setKiLade(false));
+  };
+  const feldVon = it => String(it.fromClub || it.from || "");
+  const feldZu = it => String(it.toClub || it.to || it.seek || "");
+  const feldSp = it => String((it.player && it.player.name) || it.player || "");
+  const basisTypen = ["fix", "geruecht", "verein_sucht"];
+  let liste = (alle || []).filter(it => {
+    const typ = it.type || "";
+    if (gTyp ? typ !== gTyp : basisTypen.indexOf(typ) < 0) return false;
+    const liga = it.league || "";
+    if (gLiga && liga !== gLiga) return false;
+    if (!gLiga && gLand && ligen.indexOf(liga) < 0) return false;
+    if (gVerein) { const v = gVerein.toLowerCase(); if ((feldVon(it) + " " + feldZu(it) + " " + feldSp(it)).toLowerCase().indexOf(v) < 0) return false; }
+    return true;
+  });
+  if (kiIds) { const m = {}; liste.forEach(it => { m[Number(it.id)] = it; }); liste = kiIds.map(i => m[i]).filter(Boolean); }
+  liste = liste.slice(0, 120);
+  const sel = (wert, setzer, optionen, platzhalter) => h("select", { value: wert, onChange: e => setzer(e.target.value), style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 700, padding: "9px 12px", borderRadius: 10, border: "1.5px solid " + HAIR, background: "#fff", color: "#3a3a38", cursor: "pointer" } },
+    h("option", { value: "" }, platzhalter), optionen.map(o => h("option", { key: o, value: o }, o)));
+  const typChip = (k, label) => { const akt = gTyp === k; const col = k && TYPE[k] ? TYPE[k].color : "#b3541e"; return h("button", { key: k || "alle", onClick: () => setGTyp(akt ? "" : k), style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, cursor: "pointer", padding: "7px 13px", borderRadius: 999, border: "1.5px solid " + (akt ? col : HAIR), background: akt ? col : "#fff", color: akt ? "#fff" : "#3a3a38" } }, label); };
+  return h("div", { style: { maxWidth: 980, margin: "0 auto", padding: "10px 4px 40px" } },
+    h("div", { style: { fontFamily: FONT_BODY, fontSize: 24, fontWeight: 900, color: "#232322", marginBottom: 2 } }, "Transfers & Ger\u00fcchte"),
+    h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: "#6d6b66", marginBottom: 14 } }, "Alle aktuellen Transfer-Meldungen aus TransferWire - filterbar und per KI durchsuchbar."),
+    h("div", { style: { border: "1.5px solid #e3d3b8", background: "#fbf6ec", borderRadius: 16, padding: "14px 16px", marginBottom: 14 } },
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 900, color: "#8a6a1f", marginBottom: 8, letterSpacing: .3 } }, "\u26A1 KI-RECHERCHE"),
+      h("div", { style: { display: "flex", gap: 8, flexWrap: "wrap" } },
+        h("input", { value: kiFrage, onChange: e => setKiFrage(e.target.value), onKeyDown: e => { if (e.key === "Enter") frage(); }, placeholder: "Frag die KI: z. B. Welche St\u00fcrmer-Ger\u00fcchte gibt es in der S\u00fcper Lig?", style: { flex: "1 1 320px", fontFamily: FONT_BODY, fontSize: 14, padding: "11px 14px", borderRadius: 12, border: "1.5px solid " + HAIR, outline: "none" } }),
+        h("button", { onClick: () => frage(), disabled: kiLade, style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 900, cursor: kiLade ? "wait" : "pointer", padding: "11px 20px", borderRadius: 12, border: "none", background: kiLade ? "#c8b88f" : "#b3541e", color: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,.15)" } }, kiLade ? "denkt \u2026" : "KI fragen")),
+      kiAntwort ? h("div", { style: { marginTop: 12, fontFamily: FONT_BODY, fontSize: 14.5, lineHeight: 1.55, color: "#33322f", background: "#fff", border: "1px solid " + HAIR, borderRadius: 12, padding: "12px 14px" } }, kiAntwort) : null,
+      (kiIds || kiVor.length) ? h("div", { style: { marginTop: 10, display: "flex", gap: 7, flexWrap: "wrap", alignItems: "center" } },
+        kiIds ? h("button", { onClick: () => setKiIds(null), style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, cursor: "pointer", padding: "6px 12px", borderRadius: 999, border: "none", background: "#0d8a4f", color: "#fff" } }, "KI-Treffer (" + liste.length + ") \u2715 alle zeigen") : null,
+        kiVor.map(v => h("button", { key: v, onClick: () => { setKiFrage(v); frage(v); }, style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, cursor: "pointer", padding: "6px 12px", borderRadius: 999, border: "1.5px solid " + HAIR, background: "#fff", color: "#6d6b66" } }, "\u21B3 " + v))) : null),
+    h("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 12 } },
+      sel(gLand, v => { setGLand(v); setGLiga(""); }, LAND_LIGEN.map(x => x.de), "Alle L\u00e4nder"),
+      sel(gLiga, setGLiga, ligen, "Alle Ligen"),
+      h("input", { value: gVerein, onChange: e => setGVerein(e.target.value), placeholder: "Verein filtern \u2026", style: { fontFamily: FONT_BODY, fontSize: 13, padding: "9px 12px", borderRadius: 10, border: "1.5px solid " + HAIR, outline: "none", width: 170 } }),
+      typChip("", "Alle"), typChip("fix", TYPE.fix.label), typChip("geruecht", TYPE.geruecht.label), typChip("verein_sucht", TYPE.verein_sucht.label)),
+    h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#8a8880", marginBottom: 10 } }, liste.length + " Meldungen" + (kiIds ? " \u00b7 KI-Auswahl aktiv" : "")),
+    liste.length ? liste.map(item => h(NewsCard, { key: item.id, item: item, onWatch: onWatch })) : h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, color: "#8a8880", padding: "30px 0", textAlign: "center" } }, "Keine Meldungen f\u00fcr diese Auswahl - Filter lockern oder die KI oben fragen."));
 }
 
 const NEWS = [{
@@ -5696,9 +5758,9 @@ function TransferApp({
       alignSelf: "center",
       flexWrap: "wrap"
     }
-  }, [["feed", t("tab_feed")], ["gesucht", t("tab_seek")], ["ranking", t("rank_tab")], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["watch", t("watch_tab")]].map(([k, label]) => {
+  }, [["feed", t("tab_feed")], ["geruechte", "Transfers & Gerüchte"], ["gesucht", t("tab_seek")], ["ranking", t("rank_tab")], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["watch", t("watch_tab")]].map(([k, label]) => {
     const active = view === k;
-    const col = k === "talente" ? "#0e7490" : k === "gesucht" ? TYPE.verein_sucht.color : k === "ranking" ? "#b9860b" : k === "watch" ? "#6b4fd8" : k === "players" ? "#1a6dc0" : k === "chancen" ? "#c2410c" : k === "listen" ? "#be123c" : "#149a59";
+    const col = k === "talente" ? "#0e7490" : k === "geruechte" ? "#b3541e" : k === "gesucht" ? TYPE.verein_sucht.color : k === "ranking" ? "#b9860b" : k === "watch" ? "#6b4fd8" : k === "players" ? "#1a6dc0" : k === "chancen" ? "#c2410c" : k === "listen" ? "#be123c" : "#149a59";
     return /*#__PURE__*/React.createElement("button", {
       key: k,
       onClick: () => setView(k),
@@ -5725,7 +5787,7 @@ function TransferApp({
       width: "100%",
       boxSizing: "border-box"
     }
-  }, view === "gesucht" && /*#__PURE__*/React.createElement("div", {
+  }, view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news, onWatch: it => setAddSheet(it) }), view === "gesucht" && /*#__PURE__*/React.createElement("div", {
     style: {
       background: "#fff",
       border: `1px solid ${HAIR}`,
