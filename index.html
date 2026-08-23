@@ -23,7 +23,7 @@
   button:hover { filter: brightness(.97); }
   :focus-visible { outline: 2px solid #149a59; outline-offset: 2px; border-radius: 6px; }
 </style>
-<!-- tw-build: 2026-08-23-c redesign -->
+<!-- tw-build: 2026-08-23-d unbestaetigt -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -2338,7 +2338,7 @@ function NewsCard({
   }, /*#__PURE__*/React.createElement(Badge, {
     meta: type,
     dot: true
-  }), /*#__PURE__*/React.createElement("span", { style: { flex: 1 } }), /*#__PURE__*/React.createElement("button", {
+  }), item.type === "geruecht" && Number(item.reliability || 0) < 5 && /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10, fontWeight: 900, letterSpacing: 1, color: "#8a5a00", border: "1px solid #ecd9a8", background: "#fdf3da", borderRadius: 6, padding: "3px 8px", textTransform: "uppercase" } }, "\u26A0 Unbest\u00e4tigt"), /*#__PURE__*/React.createElement("span", { style: { flex: 1 } }), /*#__PURE__*/React.createElement("button", {
     onClick: e => {
       e.stopPropagation();
       const txt = item.headline + (item.url ? "\n" + item.url : "");
