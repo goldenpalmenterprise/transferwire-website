@@ -31,7 +31,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-24-n sprachen4 -->
+<!-- tw-build: 2026-08-24-m neue-meldungen -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -751,34 +751,6 @@ const postJson = (url, payload) => fetch(url, {
 let LANG = "de";
 let __twToggleLang = null;
 const I18N = {
-  fr: {
-    today: "Aujourd'hui", settings: "Param\u00e8tres", connecting: "Connexion \u2026", demo: "Donn\u00e9es de d\u00e9mo",
-    tab_feed: "Fil d'actualit\u00e9", tal_tab: "Talents", watch_tab: "Favoris", players_tab: "Joueurs",
-    ch_tab: "Fins de contrat", rank_tab: "Classement", tab_seek: "Clubs en recherche", logout: "D\u00e9connexion",
-    watch_add: "Suivre", li_title: "Listes de scouting", li_sub: "Classements automatiques et listes de travail",
-    li_new: "Cr\u00e9er ma liste", pl_title: "Base de donn\u00e9es joueurs",
-    match_title: "Besoins des clubs & matching joueurs", match_add: "+ Nouveau profil joueur",
-    match_sub: "Cr\u00e9e un profil joueur et trouve les clubs qui recherchent exactement ce poste.",
-    rank_title: "Performance des joueurs", rank_sub: "Score TW de 0 \u00e0 100 \u2014 recalcul\u00e9 chaque nuit \u00e0 partir de toutes les statistiques de match.",
-    rank_empty: "Aucun r\u00e9sultat", totw_title: "\u00c9quipe de la semaine", totw_sub: "Le meilleur onze du week-end",
-    chat_title: "TW Scout", chat_hi: "Demande au TW Scout",
-    chat_sug1: "Quelles rumeurs de transfert aujourd'hui ?", chat_sug2: "Quels clubs cherchent un attaquant ?", chat_sug3: "Montre-moi les jeunes talents en forme",
-    st_title: "Param\u00e8tres", s_title: "Abonnement TransferWire", x_btn: "S'abonner \u2014 49 \u20ac/mois", l_abo_btn: "Tarifs & abonnements"
-  },
-  es: {
-    today: "Hoy", settings: "Ajustes", connecting: "Conectando \u2026", demo: "Datos de demostraci\u00f3n",
-    tab_feed: "Noticias", tal_tab: "Talentos", watch_tab: "Favoritos", players_tab: "Jugadores",
-    ch_tab: "Fines de contrato", rank_tab: "Clasificaci\u00f3n", tab_seek: "Clubes buscando", logout: "Cerrar sesi\u00f3n",
-    watch_add: "Seguir", li_title: "Listas de scouting", li_sub: "Rankings autom\u00e1ticos y listas de trabajo",
-    li_new: "Crear mi lista", pl_title: "Base de datos de jugadores",
-    match_title: "Necesidades de clubes & matching de jugadores", match_add: "+ Nuevo perfil de jugador",
-    match_sub: "Crea un perfil de jugador y encuentra clubes que buscan exactamente esa posici\u00f3n.",
-    rank_title: "Rendimiento de jugadores", rank_sub: "Puntuaci\u00f3n TW de 0 a 100 \u2014 recalculada cada noche con todas las estad\u00edsticas.",
-    rank_empty: "Sin resultados", totw_title: "Equipo de la semana", totw_sub: "El mejor once del fin de semana",
-    chat_title: "TW Scout", chat_hi: "Pregunta al TW Scout",
-    chat_sug1: "\u00bfQu\u00e9 rumores de fichajes hay hoy?", chat_sug2: "\u00bfQu\u00e9 clubes buscan delantero?", chat_sug3: "Mu\u00e9strame j\u00f3venes talentos en forma",
-    st_title: "Ajustes", s_title: "Suscripci\u00f3n TransferWire", x_btn: "Suscribirse \u2014 49 \u20ac/mes", l_abo_btn: "Precios y planes"
-  },
   de: {
     today: "Heute",
     settings: "Einstellungen",
@@ -1403,7 +1375,7 @@ const I18N = {
   }
 };
 function t(k) {
-  const a = (I18N[LANG] || {})[k]; if (a !== undefined) return a; if ((LANG === "fr" || LANG === "es") && (I18N.en || {})[k] !== undefined) return I18N.en[k]; return I18N.de[k] !== undefined ? I18N.de[k] : k;
+  return (I18N[LANG] || {})[k] !== undefined ? I18N[LANG][k] : I18N.de[k] !== undefined ? I18N.de[k] : k;
 }
 function typeLabel(k) {
   const d = TYPE[k];
@@ -1505,11 +1477,197 @@ function normResp(x) {
   if (Array.isArray(x) && x.length && x[0] && typeof x[0] === "object") return x[0];
   return x;
 }
-function LangSwitch({ dark }) {
-  const opt = ["de", "en", "fr", "es"];
-  return React.createElement("div", { style: { display: "inline-flex", border: "1px solid " + (dark ? "rgba(255,255,255,.28)" : HAIR), borderRadius: 9, overflow: "hidden" } },
-    opt.map(o => React.createElement("button", { key: o, onClick: () => __twToggleLang && __twToggleLang(o), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .4, padding: "5px 9px", border: "none", background: LANG === o ? (dark ? "rgba(255,255,255,.92)" : "#0f1520") : "transparent", color: LANG === o ? (dark ? "#111" : "#fff") : (dark ? "rgba(255,255,255,.72)" : "#5b6472") } }, o.toUpperCase())));
+function LangSwitch({
+  dark
+}) {
+  const de = LANG === "de";
+  const base = {
+    cursor: "pointer",
+    fontFamily: FONT_BODY,
+    fontSize: 11.5,
+    fontWeight: 700,
+    padding: "5px 10px",
+    border: "none"
+  };
+  const on = dark ? {
+    background: "rgba(255,255,255,.92)",
+    color: "#111"
+  } : {
+    background: INK,
+    color: "#fff"
+  };
+  const off = dark ? {
+    background: "transparent",
+    color: "#d3d3cf"
+  } : {
+    background: "transparent",
+    color: MUTED
+  };
+  return /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "inline-flex",
+      borderRadius: 8,
+      overflow: "hidden",
+      border: dark ? "1px solid rgba(255,255,255,.28)" : `1px solid ${HAIR}`
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      if (!de && __twToggleLang) __twToggleLang();
+    },
+    style: {
+      ...base,
+      ...(de ? on : off)
+    }
+  }, "DE"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      if (de && __twToggleLang) __twToggleLang();
+    },
+    style: {
+      ...base,
+      ...(!de ? on : off)
+    }
+  }, "EN"));
 }
+const fmtDate = t => new Date(t).toLocaleDateString(LANG === "en" ? "en-GB" : "de-DE", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric"
+});
+
+/* ──────────────────────────────────────────────────────────────────────────
+   TRANSFERWIRE — Prototyp eines täglichen Transfer-Newsfeeds
+   Fußball · Basketball · NFL
+   Alle Einträge sind BEISPIELDATEN nach dem vereinbarten Schema.
+   Im Echtbetrieb füllen n8n-Workflows genau diese Felder und schreiben sie
+   in die Datenbank; diese Oberfläche liest sie aus und sortiert nach Tags.
+   ────────────────────────────────────────────────────────────────────────── */
+
+const INK = "#17171a";
+const MUTED = "#74746f";
+const HAIR = "#e3e7ee";
+const PAGE = "#f4f3ef";
+const CARD = "#ffffff";
+const SPORT = {
+  fussball: {
+    label: "Fußball",
+    en: "Football",
+    color: "#149a59",
+    soft: "#e4f4eb"
+  }
+};
+const TYPE = {
+  fix: {
+    label: "Fixer Deal",
+    en: "Done deal",
+    color: "#0d8a4f",
+    soft: "#e2f3ea"
+  },
+  geruecht: {
+    label: "Gerücht",
+    en: "Rumour",
+    color: "#b07a05",
+    soft: "#faf0d8"
+  },
+  verein_sucht: {
+    label: "Verein sucht",
+    en: "Club seeks",
+    color: "#6d4bc7",
+    soft: "#ece6fa"
+  },
+  leihe: {
+    label: "Leihe",
+    en: "Loan",
+    color: "#0f8e8e",
+    soft: "#def0f0"
+  },
+  vertrag: {
+    label: "Vertrag verlängert",
+    en: "Contract extended",
+    color: "#5a6473",
+    soft: "#eceef1"
+  },
+  leihe: { label: "Leihe", en: "Loan", color: "#1a6dc0", soft: "#e3eefb" },
+  vertrag_verlaengert: { label: "Verl\u00e4ngert", en: "Extended", color: "#0d8a4f", soft: "#e2f3ea" },
+  vertragslos: { label: "Vertragslos", en: "Free agent", color: "#6b7280", soft: "#eef0f3" },
+  vertrag: { label: "Vertrag", en: "Contract", color: "#0d8a4f", soft: "#e2f3ea" },
+  trade: { label: "Trade", en: "Trade", color: "#6b4fd8", soft: "#ece7fb" }
+};
+const RELIABILITY = ["", "Spekulation", "Gerücht", "Konkret", "Sehr wahrscheinlich", "Bestätigt"];
+const POS_LABEL = {
+  TW: "Torwart",
+  IV: "Innenverteidiger",
+  LV: "Linksverteidiger",
+  RV: "Rechtsverteidiger",
+  DM: "Defensives Mittelfeld",
+  ZM: "Zentrales Mittelfeld",
+  OM: "Offensives Mittelfeld",
+  LA: "Linksaußen",
+  RA: "Rechtsaußen",
+  ST: "Stürmer"
+};
+
+/* ── Standard-Positionen je Sportart + Zuordnung freier Bedarfstexte ─────── */
+const POSITION_SETS = {
+  fussball: [{
+    key: "TW",
+    label: "Torwart",
+    kw: ["torwart", "torhüter", "torhueter", "keeper", "goalkeeper"],
+    codes: ["tw"]
+  }, {
+    key: "IV",
+    label: "Innenverteidiger",
+    kw: ["innenverteidiger", "innenverteidigung", "abwehrzentrum"],
+    codes: ["iv"]
+  }, {
+    key: "LV",
+    label: "Linksverteidiger",
+    kw: ["linksverteidiger", "linker außenverteidiger", "linker aussenverteidiger"],
+    codes: ["lv"]
+  }, {
+    key: "RV",
+    label: "Rechtsverteidiger",
+    kw: ["rechtsverteidiger", "rechter außenverteidiger", "rechter aussenverteidiger"],
+    codes: ["rv"]
+  }, {
+    key: "AV",
+    label: "Außenverteidiger",
+    kw: ["außenverteidiger", "aussenverteidiger", "außenbahn", "aussenbahn", "wingback", "wing-back"],
+    codes: ["av"]
+  }, {
+    key: "DM",
+    label: "Sechser",
+    kw: ["sechser", "defensives mittelfeld", "abräumer", "abraeumer", "sechser/achter"],
+    codes: ["dm"]
+  }, {
+    key: "ZM",
+    label: "Achter",
+    kw: ["achter", "zentrales mittelfeld", "zentraler mittelfeld", "box-to-box", "zentraler mittelfeldspieler", "achter/zehner"],
+    codes: ["zm"]
+  }, {
+    key: "OM",
+    label: "Zehner",
+    kw: ["zehner", "offensives mittelfeld", "spielmacher", "kreativer mittelfeld", "kreativer mittelfeldspieler"],
+    codes: ["om"]
+  }, {
+    key: "FL",
+    label: "Flügel",
+    kw: ["flügel", "fluegel", "linksaußen", "linksaussen", "rechtsaußen", "rechtsaussen", "außenstürmer", "aussenstuermer", "winger", "flügelspieler", "fluegelspieler"],
+    codes: ["la", "ra"]
+  }, {
+    key: "ST",
+    label: "Stürmer",
+    kw: ["stürmer", "stuermer", "torjäger", "torjaeger", "angreifer", "zielspieler", "goalgetter", "neuner", "mittelstürmer", "mittelstuermer"],
+    codes: ["st"]
+  }, {
+    key: "TR",
+    label: "Trainer",
+    kw: ["trainer", "cheftrainer", "coach"],
+    codes: []
+  }]
+};
+const posSetFor = sport => POSITION_SETS[sport] || POSITION_SETS.fussball;
+
+// Prüft, ob der (freie) Bedarfstext eines Vereins eine bestimmte Position enthält
 function needMatchesPos(need, pos) {
   const t = (need.positionNeeded || "").toLowerCase();
   if (!t) return false;
@@ -9588,15 +9746,15 @@ class TwBoundary extends React.Component {
 function TransferWire() {
   const [lang, setLangState] = useState(() => {
     try {
-      const v = store.getItem("tw_lang"); return ["de", "en", "fr", "es"].indexOf(v) >= 0 ? v : "de";
+      return store.getItem("tw_lang") === "en" ? "en" : "de";
     } catch (e) {
       return "de";
     }
   });
   LANG = lang;
   useEffect(() => {
-    __twToggleLang = ziel => {
-      const n = ["de", "en", "fr", "es"].indexOf(ziel) >= 0 ? ziel : "de";
+    __twToggleLang = () => {
+      const n = LANG === "de" ? "en" : "de";
       try {
         store.setItem("tw_lang", n);
       } catch (e) {}
