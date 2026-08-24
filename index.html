@@ -48,7 +48,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-24-ze card-style-fix -->
+<!-- tw-build: 2026-08-24-zf community-badge-pagination -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -1537,6 +1537,9 @@ const HAIR = "#e3e7ee";
 const PAGE = "#f4f3ef";
 const CARD = "#ffffff";
 const CARD_BOX = { background: CARD, border: "1px solid " + HAIR, borderRadius: 14 };
+const istCommunity = it => !!it && (String(it.id || "").indexOf("cmty-") === 0 || (Array.isArray(it.sources) && it.sources.some(s => /community/i.test(String((s && (s.q || s.name)) || "")))));
+const cmtyBadgeStyle = pad => ({ fontFamily: FONT_BODY, fontSize: 10, fontWeight: 900, letterSpacing: 1, color: "#6d28d9", border: "1px solid #d9ccf7", background: "#f1ecfd", borderRadius: 6, padding: pad || "3px 8px", textTransform: "uppercase", whiteSpace: "nowrap" });
+const CMTY_BADGE_TEXT = "\uD83D\uDC65 Community \u00b7 ungepr\u00fcft";
 const SPORT = {
   fussball: {
     label: "Fußball",
@@ -1782,7 +1785,7 @@ function MeldungsPanel({ m, schliessen, onWatch }) {
       h("button", { onClick: schliessen, style: { position: "absolute", top: 14, right: 14, width: 34, height: 34, borderRadius: 99, border: "1px solid " + HAIR, background: "#fff", cursor: "pointer", fontSize: 16, fontWeight: 800, color: "#3a4150" } }, "\u2715"),
       h("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 12, flexWrap: "wrap", paddingRight: 40 } },
         h("span", { style: { display: "inline-flex", alignItems: "center", gap: 6, fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, color: ty.color, background: ty.soft, borderRadius: 7, padding: "5px 10px", textTransform: "uppercase", letterSpacing: .6 } }, h("span", { style: { width: 7, height: 7, borderRadius: 99, background: ty.color } }), ty.label),
-        m.type === "geruecht" && rel < 5 && h("span", { style: { fontFamily: FONT_BODY, fontSize: 10, fontWeight: 900, letterSpacing: 1, color: "#8a5a00", border: "1px solid #ecd9a8", background: "#fdf3da", borderRadius: 6, padding: "4px 8px", textTransform: "uppercase" } }, "\u26A0 Unbest\u00e4tigt"),
+        m.type === "geruecht" && rel < 5 && h("span", { style: { fontFamily: FONT_BODY, fontSize: 10, fontWeight: 900, letterSpacing: 1, color: "#8a5a00", border: "1px solid #ecd9a8", background: "#fdf3da", borderRadius: 6, padding: "4px 8px", textTransform: "uppercase" } }, "\u26A0 Unbest\u00e4tigt"), istCommunity(m) && h("span", { style: cmtyBadgeStyle("4px 8px") }, CMTY_BADGE_TEXT),
         m.league && h("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 700, color: "#667085" } }, m.league)),
       h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 25, fontWeight: 700, color: "#15181C", lineHeight: 1.15, marginBottom: 12 } }, m.headline),
       h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, lineHeight: 1.65, color: "#33322f", marginBottom: 16 } }, m.summary || "\u2013"),
@@ -2429,7 +2432,7 @@ function NewsCard({
   }, /*#__PURE__*/React.createElement(Badge, {
     meta: type,
     dot: true
-  }), item.type === "geruecht" && Number(item.reliability || 0) < 5 && /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10, fontWeight: 900, letterSpacing: 1, color: "#8a5a00", border: "1px solid #ecd9a8", background: "#fdf3da", borderRadius: 6, padding: "3px 8px", textTransform: "uppercase" } }, "\u26A0 Unbest\u00e4tigt"), /*#__PURE__*/React.createElement("span", { style: { flex: 1 } }), /*#__PURE__*/React.createElement("button", {
+  }), item.type === "geruecht" && Number(item.reliability || 0) < 5 && /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10, fontWeight: 900, letterSpacing: 1, color: "#8a5a00", border: "1px solid #ecd9a8", background: "#fdf3da", borderRadius: 6, padding: "3px 8px", textTransform: "uppercase" } }, "\u26A0 Unbest\u00e4tigt"), istCommunity(item) && /*#__PURE__*/React.createElement("span", { style: cmtyBadgeStyle("3px 8px") }, CMTY_BADGE_TEXT), /*#__PURE__*/React.createElement("span", { style: { flex: 1 } }), /*#__PURE__*/React.createElement("button", {
     onClick: e => {
       e.stopPropagation();
       const txt = item.headline + (item.url ? "\n" + item.url : "");
@@ -2752,7 +2755,7 @@ function NeedCard({
   }, /*#__PURE__*/React.createElement(Badge, {
     meta: v,
     dot: true
-  }), /*#__PURE__*/React.createElement("span", {
+  }), istCommunity(item) && /*#__PURE__*/React.createElement("span", { style: cmtyBadgeStyle("3px 8px") }, CMTY_BADGE_TEXT), /*#__PURE__*/React.createElement("span", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 11.5,
@@ -4970,6 +4973,8 @@ function TransferApp({
   const [league, setLeague] = useState("");
   const [club, setClub] = useState("");
   const [view, setView] = useState("feed");
+  const FEED_SEITE = 60;
+  const [feedLimit, setFeedLimit] = useState(FEED_SEITE);
   const [plSel, setPlSel] = useState(null);
   const [plGesamt, setPlGesamt] = useState("");
   const [plModus, setPlModus] = useState("karten");
@@ -5529,6 +5534,7 @@ function TransferApp({
       return true;
     });
   }, [sport, type, query, club, news, view]);
+  useEffect(() => { setFeedLimit(FEED_SEITE); }, [sport, type, query, club, view, country, league, posFilter]);
   const needs = news.filter(n => n.type === "verein_sucht");
   const fixCount = news.filter(n => n.type === "fix").length;
   const rumorCount = news.filter(n => n.type === "geruecht").length;
@@ -5852,7 +5858,7 @@ function TransferApp({
     },
     className: "tw-tabs"
   }, [["feed", t("tab_feed")], ["geruechte", "Transfers"], ["gesucht", "Vereinsbedarf"], ["ranking", "Performance"], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]].map(([k, label]) => {
-    const active = view === k;
+    const active = view === k || (k === "community" && (view === "networking" || view === "moderation"));
     const col = k === "talente" ? "#0e7490" : k === "geruechte" ? "#b3541e" : k === "gesucht" ? TYPE.verein_sucht.color : k === "ranking" ? "#b9860b" : k === "watch" ? "#6b4fd8" : k === "players" ? "#1a6dc0" : k === "chancen" ? "#c2410c" : k === "listen" ? "#087F8C" : "#149a59";
     return /*#__PURE__*/React.createElement("button", {
       key: k,
@@ -7845,7 +7851,7 @@ function TransferApp({
       color: MUTED,
       fontSize: 14
     }
-  }, "Keine Meldungen für diese Auswahl. Filter zurücksetzen und erneut versuchen.") : (() => { const liste = (view === "watch" ? watchList : filtered); let seen = 0; try { seen = Number(localStorage.getItem("tw_seen") || 0); } catch (e) {} const heute = new Date(); heute.setHours(0, 0, 0, 0); const gesternTs = heute.getTime() - 86400000; const gruppe = it => { const d = new Date(it.published || it.publishedAt || 0); if (isNaN(d.getTime())) return ""; const ts = d.getTime(); if (ts >= heute.getTime()) return "Heute"; if (ts >= gesternTs) return "Gestern"; return "Fr\u00fcher"; }; const aus = []; let letzte = null; let neuMarke = false; liste.forEach(it => { const g = gruppe(it); if (g && g !== letzte) { aus.push(/*#__PURE__*/React.createElement("div", { key: "g" + g, style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 900, letterSpacing: 1.6, color: "#8a92a3", margin: "8px 2px 0", textTransform: "uppercase" } }, g)); letzte = g; } const ts = new Date(it.published || it.publishedAt || 0).getTime(); if (!neuMarke && seen && !isNaN(ts) && ts > 0 && ts <= seen) { aus.push(/*#__PURE__*/React.createElement("div", { key: "seenline", style: { display: "flex", alignItems: "center", gap: 10, margin: "2px 0" } }, /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, color: "#149a59" } }, "NEU SEIT DEINEM LETZTEN BESUCH \u2191"), /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }))); neuMarke = true; } aus.push(/*#__PURE__*/React.createElement(NewsCard, { onWatch: it2 => setAddSheet(it2), onOpen: it2 => setMSel(it2), key: it.id, item: it })); }); return aus; })())), /*#__PURE__*/React.createElement("aside", null, view !== "talente" && view !== "community" && view !== "networking" && React.createElement(FeedSuche, { q: query, setQ: setQuery, club: club, setClub: setClub, alle: news, watch: watchList, geheZu: setView, fs: { sport: sport, type: type, country: country, league: league }, setFs: { setSport: setSport, setType: setType, setCountry: setCountry, setLeague: setLeague } }))), plSel && /*#__PURE__*/React.createElement(SpielerDrawer, { x: plSel, news: news, schliessen: () => setPlSel(null) }), mSel && /*#__PURE__*/React.createElement(MeldungsPanel, { m: mSel, schliessen: () => setMSel(null), onWatch: it => { setAddSheet(it); setMSel(null); } }), plVergleich.length > 0 && /*#__PURE__*/React.createElement(VergleichUI, { spieler: plVergleich, entf: pid => setPlVergleich(v => v.filter(y => y.pid !== pid)), leeren: () => { setPlVergleich([]); setPlVglOffen(false); }, offen: plVglOffen, setOffen: setPlVglOffen })), /*#__PURE__*/React.createElement("footer", {
+  }, "Keine Meldungen für diese Auswahl. Filter zurücksetzen und erneut versuchen.") : (() => { const listeAlle = (view === "watch" ? watchList : filtered); const liste = listeAlle.slice(0, feedLimit); let seen = 0; try { seen = Number(localStorage.getItem("tw_seen") || 0); } catch (e) {} const heute = new Date(); heute.setHours(0, 0, 0, 0); const gesternTs = heute.getTime() - 86400000; const gruppe = it => { const d = new Date(it.published || it.publishedAt || 0); if (isNaN(d.getTime())) return ""; const ts = d.getTime(); if (ts >= heute.getTime()) return "Heute"; if (ts >= gesternTs) return "Gestern"; return "Fr\u00fcher"; }; const aus = []; let letzte = null; let neuMarke = false; liste.forEach(it => { const g = gruppe(it); if (g && g !== letzte) { aus.push(/*#__PURE__*/React.createElement("div", { key: "g" + g, style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 900, letterSpacing: 1.6, color: "#8a92a3", margin: "8px 2px 0", textTransform: "uppercase" } }, g)); letzte = g; } const ts = new Date(it.published || it.publishedAt || 0).getTime(); if (!neuMarke && seen && !isNaN(ts) && ts > 0 && ts <= seen) { aus.push(/*#__PURE__*/React.createElement("div", { key: "seenline", style: { display: "flex", alignItems: "center", gap: 10, margin: "2px 0" } }, /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, color: "#149a59" } }, "NEU SEIT DEINEM LETZTEN BESUCH \u2191"), /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }))); neuMarke = true; } aus.push(/*#__PURE__*/React.createElement(NewsCard, { onWatch: it2 => setAddSheet(it2), onOpen: it2 => setMSel(it2), key: it.id, item: it })); }); if (listeAlle.length > liste.length) aus.push(/*#__PURE__*/React.createElement("div", { key: "mehr", style: { display: "flex", justifyContent: "center", padding: "8px 0 4px" } }, /*#__PURE__*/React.createElement("button", { onClick: () => setFeedLimit(l => l + FEED_SEITE), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 22px", borderRadius: 999, border: "1px solid #0f1520", background: "#fff", color: "#0f1520", boxShadow: "0 1px 2px rgba(15,21,32,.05)" } }, "Mehr laden (" + liste.length + " von " + listeAlle.length + ")"))); return aus; })())), /*#__PURE__*/React.createElement("aside", null, view !== "talente" && view !== "community" && view !== "networking" && React.createElement(FeedSuche, { q: query, setQ: setQuery, club: club, setClub: setClub, alle: news, watch: watchList, geheZu: setView, fs: { sport: sport, type: type, country: country, league: league }, setFs: { setSport: setSport, setType: setType, setCountry: setCountry, setLeague: setLeague } }))), plSel && /*#__PURE__*/React.createElement(SpielerDrawer, { x: plSel, news: news, schliessen: () => setPlSel(null) }), mSel && /*#__PURE__*/React.createElement(MeldungsPanel, { m: mSel, schliessen: () => setMSel(null), onWatch: it => { setAddSheet(it); setMSel(null); } }), plVergleich.length > 0 && /*#__PURE__*/React.createElement(VergleichUI, { spieler: plVergleich, entf: pid => setPlVergleich(v => v.filter(y => y.pid !== pid)), leeren: () => { setPlVergleich([]); setPlVglOffen(false); }, offen: plVglOffen, setOffen: setPlVglOffen })), /*#__PURE__*/React.createElement("footer", {
     style: {
       borderTop: `1px solid ${HAIR}`,
       background: "#fff",
