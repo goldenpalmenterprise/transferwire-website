@@ -48,7 +48,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-24-zl antworten-einheitlich -->
+<!-- tw-build: 2026-08-24-zm kontakt-aufnehmen -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -1797,7 +1797,7 @@ function CmtyChip({ status }) {
   return React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .4, padding: "3px 10px", borderRadius: 999, background: s[1], color: s[2], whiteSpace: "nowrap" } }, s[0]);
 }
 function AntwortButton({ onClick, eigener }) {
-  return React.createElement("button", { onClick: eigener ? undefined : onClick, disabled: !!eigener, title: eigener ? "Dein eigener Beitrag \u2014 Antworten anderer Mitglieder erreichen dich per E-Mail" : "Dem Autor per E-Mail antworten (deine Adresse wird als Antwortadresse \u00fcbermittelt)", style: { cursor: eigener ? "default" : "pointer", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, padding: "5px 12px", borderRadius: 999, border: "1px solid " + (eigener ? HAIR : "#0f1520"), background: eigener ? "#f4f6f9" : "#0f1520", color: eigener ? "#9aa3b0" : "#fff", whiteSpace: "nowrap" } }, "\u21A9 Antworten");
+  return React.createElement("button", { onClick: eigener ? undefined : onClick, disabled: !!eigener, title: eigener ? "Dein eigener Beitrag \u2014 Kontaktanfragen anderer Mitglieder erreichen dich per E-Mail" : "Kontakt zum Autor aufnehmen (per E-Mail \u00fcber TransferWire, deine Adresse wird als Antwortadresse \u00fcbermittelt)", style: { cursor: eigener ? "default" : "pointer", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, padding: "5px 12px", borderRadius: 999, border: "1px solid " + (eigener ? HAIR : "#0f1520"), background: eigener ? "#f4f6f9" : "#0f1520", color: eigener ? "#9aa3b0" : "#fff", whiteSpace: "nowrap" } }, "\u2709 Kontakt aufnehmen");
 }
 function MeldeButton({ onClick, gemeldet }) {
   return React.createElement("button", { onClick: onClick, disabled: !!gemeldet, title: gemeldet ? "Du hast diesen Beitrag gemeldet" : "Beitrag melden", style: { cursor: gemeldet ? "default" : "pointer", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, padding: "5px 10px", borderRadius: 999, border: "1px solid " + HAIR, background: "#fff", color: gemeldet ? "#9aa3b0" : "#5b6472", whiteSpace: "nowrap" } }, gemeldet ? "\u2691 Gemeldet" : "\u2691 Melden");
@@ -5492,11 +5492,11 @@ function TransferApp({
     }).catch(() => setCAdminMsg("Verbindung fehlgeschlagen."));
   };
   const antwortSenden = postId => {
-    const nachricht = window.prompt("Deine Antwort an den Autor \u2014 geht per E-Mail \u00fcber TransferWire, deine Adresse wird als Antwortadresse \u00fcbermittelt:", "");
+    const nachricht = window.prompt("Deine Nachricht an den Autor \u2014 geht per E-Mail \u00fcber TransferWire, deine Adresse wird als Antwortadresse \u00fcbermittelt:", "");
     if (nachricht === null) return;
     if (nachricht.trim().length < 3) { window.alert("Bitte eine kurze Nachricht eingeben."); return; }
     fetch("/api/tw-community-contact", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.assign(cAuthBody(), { post_id: postId, nachricht: nachricht.trim() })) }).then(r => r.json()).then(d => {
-      window.alert(d && d.ok ? "\u2713 Antwort zugestellt \u2014 der Autor kann dir direkt per E-Mail antworten." : d && d.grund === "eigener" ? "Das ist dein eigener Beitrag." : d && d.grund === "premium" ? "Nur im Premium-Abo m\u00f6glich." : "Antwort fehlgeschlagen.");
+      window.alert(d && d.ok ? "\u2713 Kontaktanfrage zugestellt \u2014 der Autor kann dir direkt per E-Mail antworten." : d && d.grund === "eigener" ? "Das ist dein eigener Beitrag." : d && d.grund === "premium" ? "Nur im Premium-Abo m\u00f6glich." : "Kontaktanfrage fehlgeschlagen.");
     }).catch(() => window.alert("Verbindung fehlgeschlagen."));
   };
   const meldePost = (id, kind) => {
