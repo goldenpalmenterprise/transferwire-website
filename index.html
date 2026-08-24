@@ -31,7 +31,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-24-o sprachen4-fix -->
+<!-- tw-build: 2026-08-24-p fundament-zurueck -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -1510,7 +1510,85 @@ function LangSwitch({ dark }) {
   return React.createElement("div", { style: { display: "inline-flex", border: "1px solid " + (dark ? "rgba(255,255,255,.28)" : HAIR), borderRadius: 9, overflow: "hidden" } },
     opt.map(o => React.createElement("button", { key: o, onClick: () => __twToggleLang && __twToggleLang(o), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .4, padding: "5px 9px", border: "none", background: LANG === o ? (dark ? "rgba(255,255,255,.92)" : "#0f1520") : "transparent", color: LANG === o ? (dark ? "#111" : "#fff") : (dark ? "rgba(255,255,255,.72)" : "#5b6472") } }, o.toUpperCase())));
 }
+const fmtDate = t => new Date(t).toLocaleDateString(LANG === "en" ? "en-GB" : "de-DE", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric"
+});
 
+/* ──────────────────────────────────────────────────────────────────────────
+   TRANSFERWIRE — Prototyp eines täglichen Transfer-Newsfeeds
+   Fußball · Basketball · NFL
+   Alle Einträge sind BEISPIELDATEN nach dem vereinbarten Schema.
+   Im Echtbetrieb füllen n8n-Workflows genau diese Felder und schreiben sie
+   in die Datenbank; diese Oberfläche liest sie aus und sortiert nach Tags.
+   ────────────────────────────────────────────────────────────────────────── */
+
+const INK = "#17171a";
+const MUTED = "#74746f";
+const HAIR = "#e3e7ee";
+const PAGE = "#f4f3ef";
+const CARD = "#ffffff";
+const SPORT = {
+  fussball: {
+    label: "Fußball",
+    en: "Football",
+    color: "#149a59",
+    soft: "#e4f4eb"
+  }
+};
+const TYPE = {
+  fix: {
+    label: "Fixer Deal",
+    en: "Done deal",
+    color: "#0d8a4f",
+    soft: "#e2f3ea"
+  },
+  geruecht: {
+    label: "Gerücht",
+    en: "Rumour",
+    color: "#b07a05",
+    soft: "#faf0d8"
+  },
+  verein_sucht: {
+    label: "Verein sucht",
+    en: "Club seeks",
+    color: "#6d4bc7",
+    soft: "#ece6fa"
+  },
+  leihe: {
+    label: "Leihe",
+    en: "Loan",
+    color: "#0f8e8e",
+    soft: "#def0f0"
+  },
+  vertrag: {
+    label: "Vertrag verlängert",
+    en: "Contract extended",
+    color: "#5a6473",
+    soft: "#eceef1"
+  },
+  leihe: { label: "Leihe", en: "Loan", color: "#1a6dc0", soft: "#e3eefb" },
+  vertrag_verlaengert: { label: "Verl\u00e4ngert", en: "Extended", color: "#0d8a4f", soft: "#e2f3ea" },
+  vertragslos: { label: "Vertragslos", en: "Free agent", color: "#6b7280", soft: "#eef0f3" },
+  vertrag: { label: "Vertrag", en: "Contract", color: "#0d8a4f", soft: "#e2f3ea" },
+  trade: { label: "Trade", en: "Trade", color: "#6b4fd8", soft: "#ece7fb" }
+};
+const RELIABILITY = ["", "Spekulation", "Gerücht", "Konkret", "Sehr wahrscheinlich", "Bestätigt"];
+const POS_LABEL = {
+  TW: "Torwart",
+  IV: "Innenverteidiger",
+  LV: "Linksverteidiger",
+  RV: "Rechtsverteidiger",
+  DM: "Defensives Mittelfeld",
+  ZM: "Zentrales Mittelfeld",
+  OM: "Offensives Mittelfeld",
+  LA: "Linksaußen",
+  RA: "Rechtsaußen",
+  ST: "Stürmer"
+};
+
+/* ── Standard-Positionen je Sportart + Zuordnung freier Bedarfstexte ─────── */
 const POSITION_SETS = {
   fussball: [{
     key: "TW",
