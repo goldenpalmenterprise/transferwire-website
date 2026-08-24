@@ -48,7 +48,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-24-zf community-badge-pagination -->
+<!-- tw-build: 2026-08-24-zg community-moderation -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -1767,12 +1767,31 @@ function ScoutMenu({ view, setView }) {
         eintrag("\uD83D\uDCCB Scoutinglisten", "listen"),
         eintrag("\uD83D\uDCC8 " + t("rank_tab"), "ranking"))));
 }
-function CommunitySub({ view, setView }) {
+const ADMIN_EMAILS = ["laurenzrath@gmx.de"];
+const CMTY_STATUS = {
+  neu: ["Wartet auf Pr\u00fcfung", "#eef1f5", "#5b6472"],
+  prueft: ["Wird gepr\u00fcft \u2026", "#eef1f5", "#5b6472"],
+  veroeffentlicht: ["\u2713 Im Feed (ungepr\u00fcft)", "#e7f6ee", "#149a59"],
+  notiert: ["Notiert", "#eef1f5", "#5b6472"],
+  freigegeben: ["\u2713 Online", "#e7f6ee", "#149a59"],
+  abgelehnt: ["Abgelehnt", "#fdecea", "#b04a3a"],
+  gemeldet: ["Gemeldet \u2013 in Pr\u00fcfung", "#fdf3da", "#8a5a00"],
+  zurueckgezogen: ["Zur\u00fcckgezogen", "#fdecea", "#b04a3a"]
+};
+function CmtyChip({ status }) {
+  const s = CMTY_STATUS[status] || CMTY_STATUS.neu;
+  return React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .4, padding: "3px 10px", borderRadius: 999, background: s[1], color: s[2], whiteSpace: "nowrap" } }, s[0]);
+}
+function MeldeButton({ onClick, gemeldet }) {
+  return React.createElement("button", { onClick: onClick, disabled: !!gemeldet, title: gemeldet ? "Du hast diesen Beitrag gemeldet" : "Beitrag melden", style: { cursor: gemeldet ? "default" : "pointer", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, padding: "5px 10px", borderRadius: 999, border: "1px solid " + HAIR, background: "#fff", color: gemeldet ? "#9aa3b0" : "#5b6472", whiteSpace: "nowrap" } }, gemeldet ? "\u2691 Gemeldet" : "\u2691 Melden");
+}
+const ADMIN_BTN = col => ({ cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, padding: "7px 14px", borderRadius: 999, border: "1px solid " + col, background: "#fff", color: col });
+function CommunitySub({ view, setView, admin }) {
   const pill = (label, key) => {
     const an = view === key;
     return React.createElement("button", { key: key, onClick: () => setView(key), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, padding: "8px 16px", borderRadius: 999, border: "1px solid " + (an ? "#b45309" : HAIR), background: an ? "#b45309" : "#fff", color: an ? "#fff" : "#3a4150", boxShadow: an ? "0 6px 16px rgba(180,83,9,.28)" : "0 1px 2px rgba(15,21,32,.05)" } }, label);
   };
-  return React.createElement("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 4 } }, pill("\uD83D\uDCAC Transfer-Infos", "community"), pill("\uD83E\uDD1D Networking \u00b7 PRO", "networking"));
+  return React.createElement("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 4 } }, pill("\uD83D\uDCAC Transfer-Infos", "community"), pill("\uD83E\uDD1D Networking \u00b7 PRO", "networking"), admin && pill("\uD83D\uDEE1 Moderation", "moderation"));
 }
 
 function MeldungsPanel({ m, schliessen, onWatch }) {
@@ -5430,6 +5449,37 @@ function TransferApp({
   const [cBusy, setCBusy] = useState(false);
   const [cMsg, setCMsg] = useState("");
   const [cNetMsg, setCNetMsg] = useState("");
+  const [cAdminPosts, setCAdminPosts] = useState([]);
+  const [cAdminFilter, setCAdminFilter] = useState("alle");
+  const [cAdminMsg, setCAdminMsg] = useState("");
+  const istAdmin = !!(account && account.email && ADMIN_EMAILS.indexOf(String(account.email).toLowerCase().trim()) >= 0);
+  const cAuthQ = () => "email=" + encodeURIComponent(account && account.email || "") + "&code=" + encodeURIComponent(account && account.code || "");
+  const cAuthBody = () => ({ email: account && account.email || "", code: account && account.code || "" });
+  const ladeAdmin = () => {
+    fetch("/api/tw-community-admin?" + cAuthQ(), { cache: "no-store" }).then(r => r.json()).then(d => {
+      if (d && d.ok && Array.isArray(d.items)) setCAdminPosts(d.items); else setCAdminMsg("Keine Berechtigung.");
+    }).catch(() => setCAdminMsg("Verbindung fehlgeschlagen."));
+  };
+  const adminAktion = (id, aktion) => {
+    const frage = aktion === "zurueckziehen" ? "Beitrag zur\u00fcckziehen? Er verschwindet aus Liste und Feed." : aktion === "neu_pruefen" ? "Beitrag erneut durch den KI-Pr\u00fcfer laufen lassen?" : "Beitrag freigeben?";
+    if (!window.confirm(frage)) return;
+    const note = aktion === "zurueckziehen" ? (window.prompt("Interne Notiz (optional):", "") || "") : "";
+    setCAdminMsg("");
+    fetch("/api/tw-community-admin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.assign(cAuthBody(), { post_id: id, aktion: aktion, note: note })) }).then(r => r.json()).then(d => {
+      setCAdminMsg(d && d.ok ? "\u2713 Erledigt \u2014 Status: " + (d.status || "") : "Aktion fehlgeschlagen" + (d && d.grund ? " (" + d.grund + ")" : "."));
+      ladeAdmin();
+      if (d && d.ok) { try { ladeFeed(); } catch (e) {} }
+      if (d && d.ok && aktion === "neu_pruefen") setTimeout(ladeAdmin, 12000);
+    }).catch(() => setCAdminMsg("Verbindung fehlgeschlagen."));
+  };
+  const meldePost = (id, kind) => {
+    const grund = window.prompt("Warum m\u00f6chtest du diesen Beitrag melden? (optional)", "");
+    if (grund === null) return;
+    fetch("/api/tw-community-report", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.assign(cAuthBody(), { post_id: id, grund: grund })) }).then(r => r.json()).then(d => {
+      window.alert(d && d.ok ? "Danke \u2014 der Beitrag wurde gemeldet und wird gepr\u00fcft." : d && d.grund === "doppelt" ? "Du hast diesen Beitrag bereits gemeldet." : "Melden fehlgeschlagen.");
+      ladeCommunity(kind);
+    }).catch(() => window.alert("Verbindung fehlgeschlagen."));
+  };
   const ladeCommunity = kind => {
     fetch("/api/tw-community?kind=" + kind + "&email=" + encodeURIComponent(account && account.email || "") + "&code=" + encodeURIComponent(account && account.code || ""), { cache: "no-store" }).then(r => r.json()).then(d => {
       if (d && d.ok && Array.isArray(d.items)) {
@@ -5440,6 +5490,7 @@ function TransferApp({
   useEffect(() => {
     if (view === "community") ladeCommunity("info");
     if (view === "networking" && account && account.plan === "premium") ladeCommunity("networking");
+    if (view === "moderation" && istAdmin) ladeAdmin();
   }, [view]);
   const sendeCommunity = kind => {
     const text = (kind === "networking" ? cNetText : cText).trim();
@@ -5450,8 +5501,10 @@ function TransferApp({
       setCBusy(false);
       if (d && d.ok) {
         if (kind === "networking") setCNetText(""); else setCText("");
-        setMsg("\u2713 Ver\u00f6ffentlicht \u2014 danke f\u00fcr deinen Beitrag!");
+        setMsg("\u2713 Gesendet \u2014 der KI-Pr\u00fcfer sichtet deinen Beitrag in wenigen Sekunden, du bekommst das Ergebnis per E-Mail.");
         ladeCommunity(kind);
+        setTimeout(() => ladeCommunity(kind), 9000);
+        setTimeout(() => ladeCommunity(kind), 25000);
       } else setMsg(d && d.grund === "limit" ? "Tageslimit erreicht (max. 10 Beitr\u00e4ge/24h)." : "Konnte nicht gesendet werden.");
     }).catch(() => { setCBusy(false); setMsg("Verbindung fehlgeschlagen."); });
   };
@@ -5522,7 +5575,7 @@ function TransferApp({
     const q = query.trim().toLowerCase();
     return news.filter(n => {
       if (view === "talente" && n.talent !== true) return false;
-      if (view === "community" || view === "networking") return false;
+      if (view === "community" || view === "networking" || view === "moderation") return false;
       if (view === "feed" && String(n.id || "").startsWith("tal-")) return false;
       if (sport !== "alle" && n.sport !== sport) return false;
       if (type !== "alle" && n.type !== type) return false;
@@ -7666,8 +7719,8 @@ function TransferApp({
       fontSize: 12.5,
       color: MUTED
     }
-  }, t("watch_nohits")))), (view === "feed" || view === "watch" || view === "talente" || view === "community" || view === "networking") && /*#__PURE__*/React.createElement(React.Fragment, null, view === "community" && /*#__PURE__*/React.createElement("div", { style: { gridColumn: "1 / -1", display: "grid", gap: 14 } },
-    /*#__PURE__*/React.createElement(CommunitySub, { view: view, setView: setView }),
+  }, t("watch_nohits")))), (view === "feed" || view === "watch" || view === "talente" || view === "community" || view === "networking" || view === "moderation") && /*#__PURE__*/React.createElement(React.Fragment, null, view === "community" && /*#__PURE__*/React.createElement("div", { style: { gridColumn: "1 / -1", display: "grid", gap: 14 } },
+    /*#__PURE__*/React.createElement(CommunitySub, { view: view, setView: setView, admin: istAdmin }),
     /*#__PURE__*/React.createElement("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 24, margin: "2px 0 0", textTransform: "uppercase", letterSpacing: .4, color: INK } }, "\uD83D\uDCAC Community \u2014 Transfer-Infos"),
     /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, margin: "0 0 2px", maxWidth: 720 } }, "Teile, was du aus deinem Netzwerk h\u00f6rst \u2014 Wechsel, Ger\u00fcchte, Vereinsbedarfe, Spielerinfos. Unser KI-Pr\u00fcfer sichtet jeden Hinweis, ordnet ihn ein und stellt Relevantes gekennzeichnet in den Feed und nach \u201eVerein sucht\u201c."),
     /*#__PURE__*/React.createElement("div", { style: { border: "1px solid #f2d9a4", background: "#fdf6e3", borderRadius: 11, padding: "10px 14px", fontFamily: FONT_BODY, fontSize: 12.5, color: "#8a5a00", fontWeight: 600 } }, "\u24D8 Community-Hinweise sind ungepr\u00fcft. Ver\u00f6ffentlichte Eintr\u00e4ge erscheinen als Ger\u00fccht mit Kennzeichnung \u201eTW Community (ungepr\u00fcft)\u201c und niedrigster Zuverl\u00e4ssigkeit."),
@@ -7683,11 +7736,38 @@ function TransferApp({
         /*#__PURE__*/React.createElement("div", null,
           /*#__PURE__*/React.createElement("b", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: INK } }, p.author_name || "Mitglied"),
           /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, (p.author_rolle || "Mitglied") + " \u00b7 " + fmtDate(p.created_at))),
-        /*#__PURE__*/React.createElement("span", { style: { marginLeft: "auto", fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .4, padding: "3px 10px", borderRadius: 999, background: p.status === "veroeffentlicht" ? "#e7f6ee" : p.status === "abgelehnt" ? "#fdecea" : "#eef1f5", color: p.status === "veroeffentlicht" ? "#149a59" : p.status === "abgelehnt" ? "#b04a3a" : "#5b6472" } }, p.status === "veroeffentlicht" ? "\u2713 Im Feed (ungepr\u00fcft)" : p.status === "abgelehnt" ? "Abgelehnt" : p.status === "notiert" ? "Notiert" : "Wartet auf Pr\u00fcfung")),
+        /*#__PURE__*/React.createElement("div", { style: { marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 } }, /*#__PURE__*/React.createElement(CmtyChip, { status: p.status }), !p.own && /*#__PURE__*/React.createElement(MeldeButton, { gemeldet: p.gemeldet_von_mir, onClick: () => meldePost(p.id, "info") }))),
       /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "#2a3140", whiteSpace: "pre-wrap" } }, p.body))),
     cInfoPosts.length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Noch keine Beitr\u00e4ge \u2014 sei der Erste!")),
+  view === "moderation" && /*#__PURE__*/React.createElement("div", { style: { gridColumn: "1 / -1", display: "grid", gap: 14 } },
+    /*#__PURE__*/React.createElement(CommunitySub, { view: view, setView: setView, admin: istAdmin }),
+    /*#__PURE__*/React.createElement("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 24, margin: "2px 0 0", textTransform: "uppercase", letterSpacing: .4, color: INK } }, "\uD83D\uDEE1 Moderation"),
+    !istAdmin ? /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED } }, "Nur f\u00fcr Administratoren.") : /*#__PURE__*/React.createElement(React.Fragment, null,
+      /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, margin: "0 0 2px", maxWidth: 720 } }, "Alle Community-Beitr\u00e4ge mit KI-Einordnung, Meldungen und Aktionen. Gemeldete Beitr\u00e4ge stehen oben. Ab 3 Meldungen wird ein Beitrag automatisch verborgen, bis du entscheidest."),
+      /*#__PURE__*/React.createElement("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" } },
+        [["alle", "Alle"], ["gemeldet", "Gemeldet"], ["info", "Transfer-Infos"], ["networking", "Networking"], ["abgelehnt", "Abgelehnt"], ["offen", "Offen"]].map(([k, label]) => /*#__PURE__*/React.createElement("button", { key: k, onClick: () => setCAdminFilter(k), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, padding: "8px 16px", borderRadius: 999, border: "1px solid " + (cAdminFilter === k ? "#0f1520" : HAIR), background: cAdminFilter === k ? "#0f1520" : "#fff", color: cAdminFilter === k ? "#fff" : "#3a4150" } }, label)),
+        /*#__PURE__*/React.createElement("button", { onClick: ladeAdmin, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, padding: "8px 14px", borderRadius: 999, border: "1px solid " + HAIR, background: "#fff", color: "#3a4150" } }, "\u21BB Aktualisieren"),
+        /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, color: cAdminMsg.indexOf("\u2713") === 0 ? "#149a59" : "#b04a3a" } }, cAdminMsg)),
+      cAdminPosts.filter(p => cAdminFilter === "alle" || (cAdminFilter === "gemeldet" ? (p.status === "gemeldet" || Number(p.meldungen) > 0) : cAdminFilter === "abgelehnt" ? p.status === "abgelehnt" : cAdminFilter === "offen" ? (p.status === "neu" || p.status === "prueft") : p.kind === cAdminFilter)).map(p => /*#__PURE__*/React.createElement("div", { key: p.id, className: "tw-card", style: Object.assign({}, CARD_BOX, { padding: 15, borderColor: p.status === "gemeldet" ? "#ecd9a8" : HAIR }) },
+        /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 9, marginBottom: 8, flexWrap: "wrap" } },
+          /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: .6, textTransform: "uppercase", padding: "3px 9px", borderRadius: 6, background: p.kind === "networking" ? "#0f1520" : "#149a59", color: "#fff" } }, p.kind === "networking" ? "Networking" : "Transfer-Info"),
+          /*#__PURE__*/React.createElement("b", { style: { fontFamily: FONT_BODY, fontSize: 13, color: INK } }, "#" + p.id + " \u00b7 " + (p.author_name || "Mitglied")),
+          /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, (p.author_email || "") + " \u00b7 " + fmtDate(p.created_at)),
+          /*#__PURE__*/React.createElement("div", { style: { marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" } }, /*#__PURE__*/React.createElement(CmtyChip, { status: p.status }), Number(p.meldungen) > 0 && /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, padding: "3px 9px", borderRadius: 999, background: "#fdf3da", color: "#8a5a00" } }, "\u2691 " + p.meldungen))),
+        /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "#2a3140", whiteSpace: "pre-wrap", marginBottom: 8 } }, p.body),
+        /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, lineHeight: 1.6, borderTop: "1px solid " + HAIR, paddingTop: 8 } },
+          p.agent_headline && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, "KI: "), p.agent_headline, p.agent_type ? " (" + p.agent_type + ")" : ""),
+          p.agent_note && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, "Begr\u00fcndung: "), p.agent_note),
+          p.melder && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, "Gemeldet von: "), p.melder),
+          p.admin_note && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, "Notiz: "), p.admin_note),
+          p.published_news_id && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, "Feed: "), p.published_news_id)),
+        /*#__PURE__*/React.createElement("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 } },
+          p.status !== "zurueckgezogen" && /*#__PURE__*/React.createElement("button", { onClick: () => adminAktion(p.id, "zurueckziehen"), style: ADMIN_BTN("#b04a3a") }, "Zur\u00fcckziehen"),
+          (p.status === "abgelehnt" || p.status === "gemeldet" || p.status === "zurueckgezogen" || p.status === "neu" || p.status === "prueft") && /*#__PURE__*/React.createElement("button", { onClick: () => adminAktion(p.id, "freigeben"), style: ADMIN_BTN("#149a59") }, p.kind === "networking" ? "Freigeben" : (p.hat_feed ? "Freigeben (in Feed)" : "Freigeben (als Notiz)")),
+          /*#__PURE__*/React.createElement("button", { onClick: () => adminAktion(p.id, "neu_pruefen"), style: ADMIN_BTN("#0f1520") }, "Neu pr\u00fcfen")))),
+      cAdminPosts.length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Keine Beitr\u00e4ge geladen."))),
   view === "networking" && /*#__PURE__*/React.createElement("div", { style: { gridColumn: "1 / -1", display: "grid", gap: 14 } },
-    /*#__PURE__*/React.createElement(CommunitySub, { view: view, setView: setView }),
+    /*#__PURE__*/React.createElement(CommunitySub, { view: view, setView: setView, admin: istAdmin }),
     /*#__PURE__*/React.createElement("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 24, margin: "2px 0 0", textTransform: "uppercase", letterSpacing: .4, color: INK } }, "\uD83E\uDD1D Networking"),
     /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, margin: "0 0 2px", maxWidth: 720 } }, "Kontakte finden, Deals anschieben: Suche Zug\u00e4nge zu Vereinen, biete Spieler an oder hol dir Hilfe aus dem Netzwerk \u2014 exklusiv f\u00fcr Premium-Mitglieder."),
     account && account.plan === "premium" ? /*#__PURE__*/React.createElement(React.Fragment, null,
@@ -7704,7 +7784,7 @@ function TransferApp({
           /*#__PURE__*/React.createElement("div", null,
             /*#__PURE__*/React.createElement("b", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: INK } }, p.author_name || "Mitglied"),
             /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, (p.author_rolle || "Mitglied") + " \u00b7 " + fmtDate(p.created_at))),
-          /*#__PURE__*/React.createElement("button", { onClick: () => kontaktAnfrage(p.id), style: { marginLeft: "auto", cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, padding: "7px 14px", borderRadius: 999, border: "1px solid #0f1520", background: "#fff", color: "#0f1520" } }, "Kontakt aufnehmen")),
+          /*#__PURE__*/React.createElement("div", { style: { marginLeft: "auto", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" } }, p.own ? /*#__PURE__*/React.createElement(CmtyChip, { status: p.status }) : /*#__PURE__*/React.createElement(MeldeButton, { gemeldet: p.gemeldet_von_mir, onClick: () => meldePost(p.id, "networking") }), !p.own && /*#__PURE__*/React.createElement("button", { onClick: () => kontaktAnfrage(p.id), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, padding: "7px 14px", borderRadius: 999, border: "1px solid #0f1520", background: "#fff", color: "#0f1520" } }, "Kontakt aufnehmen"))),
         /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "#2a3140", whiteSpace: "pre-wrap" } }, p.body))),
       cNetPosts.length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Noch keine Gesuche \u2014 starte das Netzwerk!")) :
     /*#__PURE__*/React.createElement("div", { className: "tw-card", style: Object.assign({}, CARD_BOX, { padding: "34px 24px", textAlign: "center", maxWidth: 560 }) },
@@ -7805,7 +7885,7 @@ function TransferApp({
     style: {
       color: INK
     }
-  }, club), " — ", filtered.length, " ", filtered.length === 1 ? "Meldung" : "Meldungen", ".")), view !== "talente" && view !== "community" && view !== "networking" && /*#__PURE__*/React.createElement("div", {
+  }, club), " — ", filtered.length, " ", filtered.length === 1 ? "Meldung" : "Meldungen", ".")), view !== "talente" && view !== "community" && view !== "networking" && view !== "moderation" && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 7,
@@ -7851,7 +7931,7 @@ function TransferApp({
       color: MUTED,
       fontSize: 14
     }
-  }, "Keine Meldungen für diese Auswahl. Filter zurücksetzen und erneut versuchen.") : (() => { const listeAlle = (view === "watch" ? watchList : filtered); const liste = listeAlle.slice(0, feedLimit); let seen = 0; try { seen = Number(localStorage.getItem("tw_seen") || 0); } catch (e) {} const heute = new Date(); heute.setHours(0, 0, 0, 0); const gesternTs = heute.getTime() - 86400000; const gruppe = it => { const d = new Date(it.published || it.publishedAt || 0); if (isNaN(d.getTime())) return ""; const ts = d.getTime(); if (ts >= heute.getTime()) return "Heute"; if (ts >= gesternTs) return "Gestern"; return "Fr\u00fcher"; }; const aus = []; let letzte = null; let neuMarke = false; liste.forEach(it => { const g = gruppe(it); if (g && g !== letzte) { aus.push(/*#__PURE__*/React.createElement("div", { key: "g" + g, style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 900, letterSpacing: 1.6, color: "#8a92a3", margin: "8px 2px 0", textTransform: "uppercase" } }, g)); letzte = g; } const ts = new Date(it.published || it.publishedAt || 0).getTime(); if (!neuMarke && seen && !isNaN(ts) && ts > 0 && ts <= seen) { aus.push(/*#__PURE__*/React.createElement("div", { key: "seenline", style: { display: "flex", alignItems: "center", gap: 10, margin: "2px 0" } }, /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, color: "#149a59" } }, "NEU SEIT DEINEM LETZTEN BESUCH \u2191"), /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }))); neuMarke = true; } aus.push(/*#__PURE__*/React.createElement(NewsCard, { onWatch: it2 => setAddSheet(it2), onOpen: it2 => setMSel(it2), key: it.id, item: it })); }); if (listeAlle.length > liste.length) aus.push(/*#__PURE__*/React.createElement("div", { key: "mehr", style: { display: "flex", justifyContent: "center", padding: "8px 0 4px" } }, /*#__PURE__*/React.createElement("button", { onClick: () => setFeedLimit(l => l + FEED_SEITE), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 22px", borderRadius: 999, border: "1px solid #0f1520", background: "#fff", color: "#0f1520", boxShadow: "0 1px 2px rgba(15,21,32,.05)" } }, "Mehr laden (" + liste.length + " von " + listeAlle.length + ")"))); return aus; })())), /*#__PURE__*/React.createElement("aside", null, view !== "talente" && view !== "community" && view !== "networking" && React.createElement(FeedSuche, { q: query, setQ: setQuery, club: club, setClub: setClub, alle: news, watch: watchList, geheZu: setView, fs: { sport: sport, type: type, country: country, league: league }, setFs: { setSport: setSport, setType: setType, setCountry: setCountry, setLeague: setLeague } }))), plSel && /*#__PURE__*/React.createElement(SpielerDrawer, { x: plSel, news: news, schliessen: () => setPlSel(null) }), mSel && /*#__PURE__*/React.createElement(MeldungsPanel, { m: mSel, schliessen: () => setMSel(null), onWatch: it => { setAddSheet(it); setMSel(null); } }), plVergleich.length > 0 && /*#__PURE__*/React.createElement(VergleichUI, { spieler: plVergleich, entf: pid => setPlVergleich(v => v.filter(y => y.pid !== pid)), leeren: () => { setPlVergleich([]); setPlVglOffen(false); }, offen: plVglOffen, setOffen: setPlVglOffen })), /*#__PURE__*/React.createElement("footer", {
+  }, "Keine Meldungen für diese Auswahl. Filter zurücksetzen und erneut versuchen.") : (() => { const listeAlle = (view === "watch" ? watchList : filtered); const liste = listeAlle.slice(0, feedLimit); let seen = 0; try { seen = Number(localStorage.getItem("tw_seen") || 0); } catch (e) {} const heute = new Date(); heute.setHours(0, 0, 0, 0); const gesternTs = heute.getTime() - 86400000; const gruppe = it => { const d = new Date(it.published || it.publishedAt || 0); if (isNaN(d.getTime())) return ""; const ts = d.getTime(); if (ts >= heute.getTime()) return "Heute"; if (ts >= gesternTs) return "Gestern"; return "Fr\u00fcher"; }; const aus = []; let letzte = null; let neuMarke = false; liste.forEach(it => { const g = gruppe(it); if (g && g !== letzte) { aus.push(/*#__PURE__*/React.createElement("div", { key: "g" + g, style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 900, letterSpacing: 1.6, color: "#8a92a3", margin: "8px 2px 0", textTransform: "uppercase" } }, g)); letzte = g; } const ts = new Date(it.published || it.publishedAt || 0).getTime(); if (!neuMarke && seen && !isNaN(ts) && ts > 0 && ts <= seen) { aus.push(/*#__PURE__*/React.createElement("div", { key: "seenline", style: { display: "flex", alignItems: "center", gap: 10, margin: "2px 0" } }, /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, color: "#149a59" } }, "NEU SEIT DEINEM LETZTEN BESUCH \u2191"), /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }))); neuMarke = true; } aus.push(/*#__PURE__*/React.createElement(NewsCard, { onWatch: it2 => setAddSheet(it2), onOpen: it2 => setMSel(it2), key: it.id, item: it })); }); if (listeAlle.length > liste.length) aus.push(/*#__PURE__*/React.createElement("div", { key: "mehr", style: { display: "flex", justifyContent: "center", padding: "8px 0 4px" } }, /*#__PURE__*/React.createElement("button", { onClick: () => setFeedLimit(l => l + FEED_SEITE), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 22px", borderRadius: 999, border: "1px solid #0f1520", background: "#fff", color: "#0f1520", boxShadow: "0 1px 2px rgba(15,21,32,.05)" } }, "Mehr laden (" + liste.length + " von " + listeAlle.length + ")"))); return aus; })())), /*#__PURE__*/React.createElement("aside", null, view !== "talente" && view !== "community" && view !== "networking" && view !== "moderation" && React.createElement(FeedSuche, { q: query, setQ: setQuery, club: club, setClub: setClub, alle: news, watch: watchList, geheZu: setView, fs: { sport: sport, type: type, country: country, league: league }, setFs: { setSport: setSport, setType: setType, setCountry: setCountry, setLeague: setLeague } }))), plSel && /*#__PURE__*/React.createElement(SpielerDrawer, { x: plSel, news: news, schliessen: () => setPlSel(null) }), mSel && /*#__PURE__*/React.createElement(MeldungsPanel, { m: mSel, schliessen: () => setMSel(null), onWatch: it => { setAddSheet(it); setMSel(null); } }), plVergleich.length > 0 && /*#__PURE__*/React.createElement(VergleichUI, { spieler: plVergleich, entf: pid => setPlVergleich(v => v.filter(y => y.pid !== pid)), leeren: () => { setPlVergleich([]); setPlVglOffen(false); }, offen: plVglOffen, setOffen: setPlVglOffen })), /*#__PURE__*/React.createElement("footer", {
     style: {
       borderTop: `1px solid ${HAIR}`,
       background: "#fff",
