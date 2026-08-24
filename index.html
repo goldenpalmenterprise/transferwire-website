@@ -48,7 +48,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-24-zm kontakt-aufnehmen -->
+<!-- tw-build: 2026-08-24-zn en-layer -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -776,10 +776,274 @@ const postJson = (url, payload) => fetch(url, {
   credentials: "omit"
 }).then(r => r.json());
 let LANG = "de";
+/* ── TransferWire EN-Übersetzungsschicht (DE→EN zur Laufzeit) ─────────────────── */
+const EN_MAP = {
+"Vereinsbedarf": "Club needs",
+"Dunkles Design": "Dark mode",
+"Helles Design": "Light mode",
+"Spieler, Verein, Liga oder Wettbewerb suchen": "Search players, clubs, leagues or competitions",
+"Alle": "All",
+"Fixer Deal": "Done deal",
+"Ger\u00fccht": "Rumour",
+"Leihe": "Loan",
+"Vertragslos": "Free agent",
+"Vertrag verl\u00e4ngert": "Contract extended",
+"Verein sucht": "Club need",
+"Alle Meldungen": "All reports",
+"\u26a0 Unbest\u00e4tigt": "\u26a0 Unconfirmed",
+"Konkret": "Concrete",
+"Best\u00e4tigt": "Confirmed",
+"Sehr wahrscheinlich": "Very likely",
+"Spekulation": "Speculation",
+"Offiziell": "Official",
+"Meistdiskutierte Vereine": "Most discussed clubs",
+"Gespeicherte Filter": "Saved filters",
+"+ Aktuellen Filter speichern": "+ Save current filter",
+"Name f\u00fcr diesen Filter:": "Name for this filter:",
+"\u2715 Zur\u00fccksetzen": "\u2715 Reset",
+"Suche l\u00f6schen": "Clear search",
+"Quelle \u00f6ffnen": "Open source",
+"NEU SEIT DEINEM LETZTEN BESUCH \u2191": "NEW SINCE YOUR LAST VISIT \u2191",
+"Heute": "Today",
+"Gestern": "Yesterday",
+"Fr\u00fcher": "Earlier",
+"Transfers & Ger\u00fcchte": "Transfers & rumours",
+"Alle aktuellen Transfer-Meldungen aus TransferWire - filterbar und per KI durchsuchbar.": "All current transfer reports from TransferWire - filterable and searchable with AI.",
+"\u2726 TRANSFERWIRE FRAGEN": "\u2726 ASK TRANSFERWIRE",
+"KI fragen": "Ask AI",
+"Karten": "Cards",
+"Kompakt": "Compact",
+"Frag die KI: z. B. Welche St\u00fcrmer-Ger\u00fcchte gibt es in der S\u00fcper Lig?": "Ask the AI: e.g. Which striker rumours are there in the S\u00fcper Lig?",
+"Verein filtern \u2026": "Filter club \u2026",
+"Alle L\u00e4nder": "All countries",
+"Alle Ligen": "All leagues",
+"Keine Meldungen f\u00fcr diese Auswahl - Filter lockern oder die KI oben fragen.": "No reports for this selection - loosen the filters or ask the AI above.",
+"Die KI-Recherche ist gerade nicht erreichbar - bitte gleich erneut versuchen.": "The AI research is currently unavailable - please try again in a moment.",
+"Spielerprofil anlegen": "Create player profile",
+"+ Neues Spielerprofil": "+ New player profile",
+"Position & Kriterien w\u00e4hlen": "Choose position & criteria",
+"Passende Vereine erhalten": "Get matching clubs",
+"Verein sucht \u2014 Position w\u00e4hlen": "Club need \u2014 choose a position",
+"Zuerst die Position w\u00e4hlen. Danach werden alle Vereine vorgeschlagen, die genau dort einen Spieler suchen.": "Choose the position first. Then all clubs looking for a player in exactly that spot are suggested.",
+"Vereine": "Clubs",
+"Torwart": "Goalkeeper",
+"Innenverteidiger": "Centre-back",
+"Linksverteidiger": "Left-back",
+"Rechtsverteidiger": "Right-back",
+"Au\u00dfenverteidiger": "Full-back",
+"Sechser": "Defensive midfielder",
+"Achter": "Central midfielder",
+"Zehner": "Attacking midfielder",
+"Fl\u00fcgel": "Winger",
+"St\u00fcrmer": "Striker",
+"Trainer": "Coach",
+"Mittelst\u00fcrmer": "Centre-forward",
+"Fl\u00fcgelspieler": "Winger",
+"Au\u00dfenst\u00fcrmer": "Wide forward",
+"Alle Positionen": "All positions",
+"Vereine, die einen": "Clubs looking for a",
+"VEREINSBEDARF": "CLUB NEED",
+"VEREINSBEDARF & SPIELER-MATCHING": "CLUB NEEDS & PLAYER MATCHING",
+"Zweikampf": "Duels",
+"Tempo/Dribbling": "Pace/Dribbling",
+"Konzentration": "Concentration",
+"Stellungsspiel": "Positioning",
+"Passspiel": "Passing",
+"Chancenkreation": "Chance creation",
+"Disziplin": "Discipline",
+"Spieler des Spieltags": "Player of the matchday",
+"St\u00e4rkste Einzelleistung": "Strongest individual performance",
+"So entsteht der Score: positionsgewichtete Bewertung aller Spielstatistiken (Tore, Vorlagen, Zweik\u00e4mpfe, P\u00e4sse, Paraden) auf einer Skala von 0\u2013100 \u2014 jede Nacht neu berechnet.": "How the score works: a position-weighted rating of all match statistics (goals, assists, duels, passes, saves) on a 0\u2013100 scale \u2014 recalculated every night.",
+"Mittelfeld": "Midfield",
+"P\u00e4sse": "Passes",
+"Zweik\u00e4mpfe": "Duels",
+"Sturm": "Attack",
+"Abwehr": "Defence",
+"Paraden": "Saves",
+"Entdecke": "Discover",
+"Spieler aus 20 Ligen": "players from 20 leagues",
+"Marktwerte, Vertragsenden und Live-Statistiken \u2014 die Suche startet ab dem ersten Buchstaben.": "Market values, contract expiries and live statistics \u2014 the search starts from the first letter.",
+"Marktwerte": "Market values",
+"Transfermarkt-Abgleich \u00b7 t\u00e4glich": "Transfermarkt sync \u00b7 daily",
+"Vertragsenden": "Contract expiries",
+"alle 20 Ligen abgedeckt": "all 20 leagues covered",
+"Blitzsuche": "Instant search",
+"Antwort in ~0,15 Sekunden": "Answer in ~0.15 seconds",
+"Tabelle": "Table",
+"Sp. \u00b7": "Apps \u00b7",
+"Marktwert": "Market value",
+"Vertrag bis": "Contract until",
+"Spiele": "Matches",
+"Minuten": "Minutes",
+"Note": "Rating",
+"Tore": "Goals",
+"Vorlagen": "Assists",
+"Letzte Meldungen": "Latest reports",
+"Noch keine Meldungen zu diesem Spieler im Radar.": "No reports on this player in the radar yet.",
+"Spieler-Vergleich": "Player comparison",
+"Talent-Rankings": "Talent rankings",
+"Scouting-Listen": "Scouting lists",
+"\ud83d\udd2d Talent-Scouting \u2014 Rankings": "\ud83d\udd2d Talent scouting \u2014 rankings",
+"\ud83c\udfc6 Talent-Rankings": "\ud83c\udfc6 Talent rankings",
+"\ud83c\udfc6 Top 50 Europa": "\ud83c\udfc6 Top 50 Europe",
+"\ud83d\udc8e Unentdeckt": "\ud83d\udc8e Undiscovered",
+"\u26bd Torj\u00e4ger": "\u26bd Top scorers",
+"\ud83c\udfaf Vorlagen": "\ud83c\udfaf Assists",
+"Noch keine Eintr\u00e4ge in dieser Kategorie \u2014 die Scout-Agenten f\u00fcllen die Liste t\u00e4glich weiter auf.": "No entries in this category yet \u2014 the scout agents keep filling the list daily.",
+"automatisch aktualisiert \u00b7 t\u00e4glich 04:00": "updated automatically \u00b7 daily 04:00",
+"Liste \u00f6ffnen \u2192": "Open list \u2192",
+"\ud83d\udcac Transfer-Infos": "\ud83d\udcac Transfer intel",
+"Transfer-Infos": "Transfer intel",
+"\ud83e\udd1d Networking \u00b7 PRO": "\ud83e\udd1d Networking \u00b7 PRO",
+"\ud83d\udcac Community \u2014 Transfer-Infos": "\ud83d\udcac Community \u2014 Transfer intel",
+"Teile, was du aus deinem Netzwerk h\u00f6rst \u2014 Wechsel, Ger\u00fcchte, Vereinsbedarfe, Spielerinfos. Unser KI-Pr\u00fcfer sichtet jeden Hinweis, ordnet ihn ein und stellt Relevantes gekennzeichnet in den Feed.": "Share what you hear from your network \u2014 transfers, rumours, club needs, player intel. Our AI reviewer checks every tip, classifies it and puts relevant items into the feed, clearly labelled.",
+"\u24d8 Community-Hinweise sind ungepr\u00fcft. Ver\u00f6ffentlichte Eintr\u00e4ge erscheinen als Ger\u00fccht mit Kennzeichnung \u201eTW Community (ungepr\u00fcft)\u201c und niedrigster Zuverl\u00e4ssigkeit.": "\u24d8 Community tips are unverified. Published entries appear as rumours labelled \u201cTW Community (unverified)\u201d with the lowest reliability.",
+"Neuer Hinweis": "New tip",
+"Hinweis senden": "Send tip",
+"Noch keine Beitr\u00e4ge \u2014 sei der Erste!": "No posts yet \u2014 be the first!",
+"Keine Meldungen f\u00fcr diese Auswahl. Filter zur\u00fccksetzen und erneut versuchen.": "No entries for this selection. Reset the filter and try again.",
+"Hinweise durchsuchen: Spieler, Verein, Position, Stichwort \u2026": "Search tips: player, club, position, keyword \u2026",
+"z. B. \u201eAus dem Umfeld von \u2026 h\u00f6re ich, dass \u2026\u201c \u2014 je konkreter (Verein, Position, Zeitraum), desto n\u00fctzlicher.": "e.g. \u201cFrom the circle around \u2026 I hear that \u2026\u201d \u2014 the more specific (club, position, timeframe), the more useful.",
+"\ud83e\udd1d Networking": "\ud83e\udd1d Networking",
+"Kontakte finden, Deals anschieben: Suche Zug\u00e4nge zu Vereinen, biete Spieler an oder hol dir Hilfe aus dem Netzwerk \u2014 exklusiv f\u00fcr Premium-Mitglieder.": "Find contacts, push deals: look for access to clubs, offer players or get help from the network \u2014 exclusively for Premium members.",
+"Nur im Premium-Abo": "Premium plan only",
+"Networking verbindet dich direkt mit Vermittlern, Scouts und Vereinsmitarbeitern \u2014 Fragen und Angebote posten, Kontakte kn\u00fcpfen, Deals anschieben.": "Networking connects you directly with agents, scouts and club staff \u2014 post questions and offers, make contacts, push deals.",
+"Premium freischalten \u2014 99 \u20ac/Monat": "Unlock Premium \u2014 \u20ac99/month",
+"Frage / Angebot": "Question / offer",
+"Anfrage ver\u00f6ffentlichen": "Publish request",
+"Anfragen durchsuchen: Position, Verein, Land, Stichwort \u2026": "Search requests: position, club, country, keyword \u2026",
+"Noch keine Anfragen \u2014 starte das Netzwerk!": "No requests yet \u2014 start the network!",
+"Keine Treffer f\u00fcr \u201e": "No results for \u201c",
+"\u2709 Kontakt aufnehmen": "\u2709 Get in touch",
+"\u2691 Melden": "\u2691 Report",
+"\u2691 Gemeldet": "\u2691 Reported",
+"Beitrag melden": "Report post",
+"Du hast diesen Beitrag gemeldet": "You have reported this post",
+"Wartet auf Pr\u00fcfung": "Awaiting review",
+"Wird gepr\u00fcft \u2026": "Being reviewed \u2026",
+"\u2713 Im Feed (ungepr\u00fcft)": "\u2713 In the feed (unverified)",
+"Notiert": "Noted",
+"\u2713 Online": "\u2713 Online",
+"Abgelehnt": "Rejected",
+"Gemeldet \u2013 in Pr\u00fcfung": "Reported \u2013 under review",
+"Zur\u00fcckgezogen": "Withdrawn",
+"\ud83d\udee1 Moderation": "\ud83d\udee1 Moderation",
+"Nur f\u00fcr Administratoren.": "Administrators only.",
+"Alle Community-Beitr\u00e4ge mit KI-Einordnung, Meldungen und Aktionen. Gemeldete Beitr\u00e4ge stehen oben. Ab 3 Meldungen wird ein Beitrag automatisch verborgen, bis du entscheidest.": "All community posts with AI classification, reports and actions. Reported posts come first. From 3 reports a post is hidden automatically until you decide.",
+"Gemeldet": "Reported",
+"Offen": "Open",
+"\u21bb Aktualisieren": "\u21bb Refresh",
+"Keine Beitr\u00e4ge geladen.": "No posts loaded.",
+"Zur\u00fcckziehen": "Withdraw",
+"Freigeben": "Approve",
+"Freigeben (in Feed)": "Approve (into feed)",
+"Freigeben (als Notiz)": "Approve (as note)",
+"Neu pr\u00fcfen": "Re-review",
+"Transfer-Info": "Transfer intel",
+"Spieler": "Player",
+"Von": "From",
+"Zu": "To",
+"Abl\u00f6se": "Fee",
+"Verl\u00e4sslichkeit": "Reliability",
+"Quellen": "Sources",
+"\u2661 Merken": "\u2661 Save",
+"Beobachten": "Watch",
+"Spieler live": "players live",
+"Ligen komplett": "leagues complete",
+"Quellen im Radar": "sources on the radar",
+"KI-\u00dcberwachung": "AI monitoring",
+"Innenverteidiger wechselt fix nach M\u00fcnchen": "Centre-back completes move to Munich",
+"Medizincheck bestanden, Vertrag bis 2030 unterschrieben. Abl\u00f6se inklusive Boni im Bereich der gemeldeten Summe.": "Medical passed, contract signed until 2030. Fee including bonuses in the range of the reported sum.",
+"Inter sucht Linksverteidiger f\u00fcr die neue Saison": "Inter looking for a left-back for the new season",
+"Nach dem Abgang auf der linken Abwehrseite priorisiert die sportliche Leitung einen offensivstarken Linksverteidiger unter 27.": "After the departure on the left side of defence, the sporting management prioritises an attack-minded left-back under 27.",
+"Madrid sondiert Mittelfeld-Verst\u00e4rkung": "Madrid exploring midfield reinforcement",
+"Real soll laut Berichten Interesse an einem zentralen Box-to-Box-Spieler hinterlegt haben. Konkrete Gespr\u00e4che stehen noch aus.": "Real are reported to have registered interest in a central box-to-box player. Concrete talks are still pending.",
+"Budget ~30 Mio \u20ac": "Budget ~\u20ac30m",
+"Live \u00b7 gerade eben": "Live \u00b7 just now",
+"Ligen": "leagues",
+"Sportart": "Sport",
+"Alle Sportarten": "All sports",
+"Fu\u00dfball": "Football",
+"Basketball": "Basketball",
+"Land": "Country",
+"Liga": "League",
+"Verein": "Club",
+"Position": "Position",
+"Alter": "Age",
+"Nationalit\u00e4t": "Nationality",
+"Eins\u00e4tze": "Appearances",
+"Gelbe Karten": "Yellow cards",
+"Rote Karten": "Red cards",
+"Form": "Form",
+"Verletzt": "Injured",
+"Fit": "Fit",
+"Sprache": "Language",
+"Einstellungen": "Settings",
+"Abmelden": "Log out",
+"Impressum": "Imprint",
+"Datenschutz": "Privacy",
+"AGB": "Terms",
+"Hier Vertr\u00e4ge k\u00fcndigen": "Cancel contracts here"
+};
+const EN_COUNTRIES = { "Deutschland": "Germany", "\u00d6sterreich": "Austria", "Schweiz": "Switzerland", "Spanien": "Spain", "Italien": "Italy", "Frankreich": "France", "Belgien": "Belgium", "Niederlande": "Netherlands", "T\u00fcrkei": "Turkey", "D\u00e4nemark": "Denmark", "Griechenland": "Greece", "Polen": "Poland", "Tschechien": "Czechia", "Kroatien": "Croatia", "Serbien": "Serbia", "Schottland": "Scotland", "Schweden": "Sweden", "Norwegen": "Norway", "Russland": "Russia", "Ungarn": "Hungary", "Slowakei": "Slovakia", "Rum\u00e4nien": "Romania", "Brasilien": "Brazil", "Argentinien": "Argentina", "Vereinigte Staaten": "United States", "Saudi-Arabien": "Saudi Arabia", "Japan": "Japan", "S\u00fcdkorea": "South Korea", "Australien": "Australia", "Mexiko": "Mexico", "Kolumbien": "Colombia" };
+Object.assign(EN_MAP, EN_COUNTRIES);
+const EN_WORDS = [
+  ["Rechter Au\u00dfenverteidiger", "right-back"], ["Linker Au\u00dfenverteidiger", "left-back"], ["rechter Au\u00dfenverteidiger", "right-back"], ["linker Au\u00dfenverteidiger", "left-back"],
+  ["rechter Verteidiger", "right-back"], ["linker Verteidiger", "left-back"], ["linker Offensivau\u00dfen", "left winger"], ["rechter Offensivau\u00dfen", "right winger"], ["Offensivau\u00dfen", "winger"],
+  ["Leihe f\u00fcr eine Saison", "one-season loan"], ["Leihe von", "on loan from"], ["nicht ver\u00f6ffentlicht", "undisclosed"], ["auslaufende Vertr\u00e4ge", "expiring contracts"], ["offizielle Bekanntgabe", "official announcement"],
+  ["laut Medienberichten", "according to media reports"], ["laut Medien", "according to media"], ["Profikader m\u00f6glich", "first-team squad possible"], ["Millionen Euro", "million euros"], ["plus Boni", "plus bonuses"], ["bei Aufstieg", "on promotion"],
+  ["Mittelst\u00fcrmer", "centre-forward"], ["Au\u00dfenst\u00fcrmer", "wide forward"], ["Fl\u00fcgelspieler", "winger"], ["St\u00fcrmer", "striker"], ["Torh\u00fcter", "goalkeeper"], ["Torwart", "goalkeeper"],
+  ["Innenverteidiger", "centre-back"], ["Linksverteidiger", "left-back"], ["Rechtsverteidiger", "right-back"], ["Au\u00dfenverteidiger", "full-back"], ["Mittelfeldspieler", "midfielder"], ["Mittelfeld", "midfield"],
+  ["Sechser", "defensive midfielder"], ["Achter", "central midfielder"], ["Zehner", "attacking midfielder"], ["Spielmacher", "playmaker"], ["Fl\u00fcgel", "winger"], ["Verteidiger", "defender"], ["Sportdirektor", "sporting director"], ["Trainer", "coach"], ["Sturm/Fl\u00fcgel", "Forward/Winger"], ["Sturm", "Forward"], ["Abwehr", "Defence"],
+  ["ausl\u00e4ndischer", "foreign"], ["Kaufpflicht", "obligation to buy"], ["Kaufoption", "option to buy"], ["abl\u00f6sefrei", "free transfer"], ["Abl\u00f6se", "fee"], ["Vereinsmeldung", "club statement"], ["Medienberichten", "media reports"],
+  ["Jahrgang", "born"], ["Nachwuchs", "youth"], ["Jugend", "youth"], ["angeblich", "reportedly"], ["gemeldet", "reported"], ["Bericht", "report"], ["Leihe", "loan"], ["laut", "according to"], ["rund", "around"], ["\u00fcber", "over"], ["bis zu", "up to"], ["m\u00f6glich", "possible"],
+  ["Spanien", "Spain"], ["Slowakei", "Slovakia"], ["\u00d6sterreich", "Austria"], ["Schweiz", "Switzerland"], ["Deutschland", "Germany"], ["Frankreich", "France"], ["Italien", "Italy"], ["Belgien", "Belgium"], ["Niederlande", "Netherlands"], ["T\u00fcrkei", "Turkey"], ["D\u00e4nemark", "Denmark"]
+].map(([a, b]) => [new RegExp("(?<![A-Za-z\u00c4\u00d6\u00dc\u00e4\u00f6\u00fc\u00df])" + a.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?![A-Za-z\u00c4\u00d6\u00dc\u00e4\u00f6\u00fc\u00df])", "g"), b]);
+const EN_MARK = /[\u00e4\u00f6\u00fc\u00df\u00c4\u00d6\u00dc]|(?<![A-Za-z])(bis|laut|plus|Leihe|Boni|gemeldet|Bericht|Jahrgang|Nachwuchs|Jugend|Kaufpflicht|Kaufoption|Spanien|Trainer|Sturm|Abwehr|Mittelfeld|Verteidiger|rund|Sechser|Achter|Zehner|Torwart|Spielmacher|Sportdirektor|Belgien|Italien|Frankreich|Deutschland|Niederlande)(?![A-Za-z])/;
+const EN_RULES = [
+  [/^vor (\d+) Min$/, (m) => m[1] + " min ago"], [/^vor (\d+) Std$/, (m) => m[1] + " h ago"], [/^vor (\d+) Tg$/, (m) => m[1] + " d ago"], [/^vor (\d+) Tagen?$/, (m) => m[1] + " d ago"],
+  [/^Live \u00b7 vor (\d+) Min$/, (m) => "Live \u00b7 " + m[1] + " min ago"], [/^Live \u00b7 vor (\d+) Std$/, (m) => "Live \u00b7 " + m[1] + " h ago"], [/^Live \u00b7 gerade eben$/, () => "Live \u00b7 just now"],
+  [/^Mehr laden \((\d+) von (\d+)\)$/, (m) => "Load more (" + m[1] + " of " + m[2] + ")"], [/^(\d+) Meldungen$/, (m) => m[1] + " reports"], [/^(\d+) Meldung$/, (m) => m[1] + " report"],
+  [/^(\d+) Eintr\u00e4ge$/, (m) => m[1] + " entries"], [/^(\d+) Eintrag$/, (m) => m[1] + " entry"], [/^(\d+) Treffer$/, (m) => m[1] + " results"], [/^(\d+) von (\d+) Treffern?$/, (m) => m[1] + " of " + m[2] + " results"],
+  [/^(\d+) Vereine?$/, (m) => m[1] + (m[1] === "1" ? " club" : " clubs")], [/^(\d+) Spieler$/, (m) => m[1] + " players"], [/^(\d+) Anfragen?$/, (m) => m[1] + (m[1] === "1" ? " request" : " requests")], [/^(\d+) Hinweise?$/, (m) => m[1] + (m[1] === "1" ? " tip" : " tips")],
+  [/^(.*)\u00b7 (\d+) J\. \u00b7(.*)$/, (m) => twEnShort(m[1]) + "\u00b7 " + m[2] + " y/o \u00b7" + twEnShort(m[3])], [/^(\d+) J\.$/, (m) => m[1] + " y/o"], [/^Talente \(Jahrgang (\d+)/, (m) => "Talents (born " + m[1]],
+  [/^Vereine, die einen (.*) suchen$/, (m) => "Clubs looking for a " + m[1]], [/^(\d+) bis (\d+)(.*)$/, (m) => m[1] + " to " + m[2] + twEnShort(m[3])]
+];
+function twEnShort(s) {
+  if (s.length > 90 || !EN_MARK.test(s)) return s;
+  let r = s;
+  for (const [re, en] of EN_WORDS) r = r.replace(re, en);
+  return r.replace(/(\d) bis (\d)/g, "$1 to $2");
+}
+function twEn(s) {
+  if (LANG !== "en" || typeof s !== "string" || s.length < 2) return s;
+  const m0 = s.match(/^(\s*)(.*?)(\s*)$/);
+  const core = m0[2];
+  if (!core) return s;
+  const hit = EN_MAP[core];
+  if (hit !== undefined) return m0[1] + hit + m0[3];
+  for (const [re, fn] of EN_RULES) { const m = core.match(re); if (m) return m0[1] + fn(m) + m0[3]; }
+  return m0[1] + twEnShort(core) + m0[3];
+}
+(function () {
+  const ce = React.createElement;
+  React.createElement = function (type, props) {
+    let args = Array.prototype.slice.call(arguments, 2);
+    if (LANG === "en") {
+      for (let i = 0; i < args.length; i++) if (typeof args[i] === "string") args[i] = twEn(args[i]);
+      if (props && typeof props === "object") {
+        const p2 = {};
+        let ge = false;
+        for (const k of ["placeholder", "title", "aria-label"]) if (typeof props[k] === "string") { p2[k] = twEn(props[k]); ge = true; }
+        if (ge) props = Object.assign({}, props, p2);
+      }
+    }
+    return ce.apply(React, [type, props].concat(args));
+  };
+})();
+
 let __twToggleLang = null;
 const I18N = {
-  fr: { today: "Aujourd'hui", settings: "Param\u00e8tres", connecting: "Connexion \u2026", demo: "Donn\u00e9es de d\u00e9mo", tab_feed: "Fil d'actualit\u00e9", tal_tab: "Talents", watch_tab: "Favoris", players_tab: "Joueurs", ch_tab: "Fins de contrat", rank_tab: "Classement", tab_seek: "Clubs en recherche", logout: "D\u00e9connexion", watch_add: "Suivre", li_title: "Listes de scouting", li_sub: "Classements automatiques et listes de travail", li_new: "Cr\u00e9er ma liste", pl_title: "Base de donn\u00e9es joueurs", match_title: "Besoins des clubs & matching joueurs", match_add: "+ Nouveau profil joueur", match_sub: "Cr\u00e9e un profil joueur et trouve les clubs qui recherchent exactement ce poste.", rank_title: "Performance des joueurs", rank_sub: "Score TW de 0 \u00e0 100 \u2014 recalcul\u00e9 chaque nuit.", rank_empty: "Aucun r\u00e9sultat", totw_title: "\u00c9quipe de la semaine", totw_sub: "Le meilleur onze du week-end", chat_title: "TW Scout", chat_hi: "Demande au TW Scout", chat_sug1: "Quelles rumeurs de transfert aujourd'hui ?", chat_sug2: "Quels clubs cherchent un attaquant ?", chat_sug3: "Montre-moi les jeunes talents en forme", st_title: "Param\u00e8tres", s_title: "Abonnement TransferWire", x_btn: "S'abonner \u2014 49 \u20ac/mois", l_abo_btn: "Tarifs & abonnements" },
-  es: { today: "Hoy", settings: "Ajustes", connecting: "Conectando \u2026", demo: "Datos de demostraci\u00f3n", tab_feed: "Noticias", tal_tab: "Talentos", watch_tab: "Favoritos", players_tab: "Jugadores", ch_tab: "Fines de contrato", rank_tab: "Clasificaci\u00f3n", tab_seek: "Clubes buscando", logout: "Cerrar sesi\u00f3n", watch_add: "Seguir", li_title: "Listas de scouting", li_sub: "Rankings autom\u00e1ticos y listas de trabajo", li_new: "Crear mi lista", pl_title: "Base de datos de jugadores", match_title: "Necesidades de clubes & matching de jugadores", match_add: "+ Nuevo perfil de jugador", match_sub: "Crea un perfil de jugador y encuentra clubes que buscan exactamente esa posici\u00f3n.", rank_title: "Rendimiento de jugadores", rank_sub: "Puntuaci\u00f3n TW de 0 a 100 \u2014 recalculada cada noche.", rank_empty: "Sin resultados", totw_title: "Equipo de la semana", totw_sub: "El mejor once del fin de semana", chat_title: "TW Scout", chat_hi: "Pregunta al TW Scout", chat_sug1: "\u00bfQu\u00e9 rumores de fichajes hay hoy?", chat_sug2: "\u00bfQu\u00e9 clubes buscan delantero?", chat_sug3: "Mu\u00e9strame j\u00f3venes talentos en forma", st_title: "Ajustes", s_title: "Suscripci\u00f3n TransferWire", x_btn: "Suscribirse \u2014 49 \u20ac/mes", l_abo_btn: "Precios y planes" },
   de: {
     today: "Heute",
     settings: "Einstellungen",
@@ -1404,7 +1668,7 @@ const I18N = {
   }
 };
 function t(k) {
-  const a = (I18N[LANG] || {})[k]; if (a !== undefined) return a; if ((LANG === "fr" || LANG === "es") && (I18N.en || {})[k] !== undefined) return I18N.en[k]; return I18N.de[k] !== undefined ? I18N.de[k] : k;
+  const a = (I18N[LANG] || {})[k]; if (a !== undefined) return a; return I18N.de[k] !== undefined ? I18N.de[k] : k;
 }
 function typeLabel(k) {
   const d = TYPE[k];
@@ -1507,7 +1771,7 @@ function normResp(x) {
   return x;
 }
 function LangSwitch({ dark }) {
-  const opt = ["de", "en", "fr", "es"];
+  const opt = ["de", "en"];
   const [dk, setDk] = React.useState(() => { try { return localStorage.getItem("tw_dark") === "1"; } catch (e) { return false; } });
   React.useEffect(() => {
     try { document.documentElement.classList.toggle("tw-dark", dk); localStorage.setItem("tw_dark", dk ? "1" : "0"); } catch (e) {}
@@ -1824,7 +2088,7 @@ function MeldungsPanel({ m, schliessen, onWatch }) {
         m.type === "geruecht" && rel < 5 && h("span", { style: { fontFamily: FONT_BODY, fontSize: 10, fontWeight: 900, letterSpacing: 1, color: "#8a5a00", border: "1px solid #ecd9a8", background: "#fdf3da", borderRadius: 6, padding: "4px 8px", textTransform: "uppercase" } }, "\u26A0 Unbest\u00e4tigt"), istCommunity(m) && h("span", { style: cmtyBadgeStyle("4px 8px") }, CMTY_BADGE_TEXT),
         m.league && h("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 700, color: "#667085" } }, m.league)),
       h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 25, fontWeight: 700, color: "#15181C", lineHeight: 1.15, marginBottom: 12 } }, m.headline),
-      h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, lineHeight: 1.65, color: "#33322f", marginBottom: 16 } }, m.summary || "\u2013"),
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, lineHeight: 1.65, color: "#33322f", marginBottom: 16 } }, dS(m) || "\u2013"),
       h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 } },
         [["Spieler", String((m.player && m.player.name) || m.player || "") || "\u2013"], ["Position", (m.player && m.player.position) || m.position || "\u2013"], ["Von", m.fromClub || m.from || "\u2013"], ["Zu", m.toClub || m.to || m.seek || "\u2013"], ["Abl\u00f6se", m.fee || "\u2013"], ["Verl\u00e4sslichkeit", rel ? (RELIABILITY[rel] || rel) : "\u2013"]].map(([lab, wert]) => h("div", { key: lab, style: { background: "#f8fafb", border: "1px solid " + HAIR, borderRadius: 10, padding: "9px 12px" } },
           h("div", { style: { fontFamily: FONT_BODY, fontSize: 9.5, fontWeight: 900, letterSpacing: .8, color: "#8a92a3", textTransform: "uppercase" } }, lab),
@@ -1903,7 +2167,7 @@ function SpielerDrawer({ x, news, schliessen }) {
       treffer.length ? treffer.map(n => h("div", { key: n.id, style: { display: "flex", gap: 9, alignItems: "flex-start", padding: "9px 0", borderTop: "1px solid " + HAIR } },
         h("span", { style: { marginTop: 5, width: 8, height: 8, borderRadius: 99, background: (TYPE[n.type] || TYPE.geruecht).color, flex: "0 0 auto" } }),
         h("div", null,
-          h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 700, color: "#232b38", lineHeight: 1.35 } }, n.headline),
+          h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 700, color: "#232b38", lineHeight: 1.35 } }, dH(n)),
           h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: "#8a92a3", marginTop: 2 } }, (TYPE[n.type] || TYPE.geruecht).label + (n.league ? " \u00b7 " + n.league : ""))))) :
         h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "#8a92a3", padding: "10px 0", borderTop: "1px solid " + HAIR } }, "Noch keine Meldungen zu diesem Spieler im Radar.")));
 }
@@ -1983,7 +2247,7 @@ function GerVue({ alle, onWatch, onOpen }) {
       h("input", { value: gVerein, onChange: e => setGVerein(e.target.value), placeholder: "Verein filtern \u2026", style: { fontFamily: FONT_BODY, fontSize: 13, padding: "9px 12px", borderRadius: 10, border: "1.5px solid " + HAIR, outline: "none", width: 170 } }),
       typChip("", "Alle"), typChip("fix", TYPE.fix.label), typChip("geruecht", TYPE.geruecht.label), typChip("verein_sucht", TYPE.verein_sucht.label)),
     h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 10, flexWrap: "wrap" } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#8a8880" } }, liste.length + " Meldungen" + (kiIds ? " \u00b7 KI-Auswahl aktiv" : "")), h("div", { style: { display: "flex", gap: 6 } }, [["karten", "Karten"], ["kompakt", "Kompakt"]].map(([k, lab]) => h("button", { key: k, onClick: () => setGAnsicht(k), style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 12px", borderRadius: 8, border: "1px solid " + (gAnsicht === k ? "#0f1520" : HAIR), background: gAnsicht === k ? "#0f1520" : "#fff", color: gAnsicht === k ? "#fff" : "#5b6472" } }, lab)))),
-    liste.length ? (gAnsicht === "kompakt" ? h("div", { style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 14, overflow: "hidden" } }, liste.map((it, i) => { const ty = TYPE[it.type] || TYPE.geruecht; const d = new Date(it.published || it.publishedAt || 0); const z = isNaN(d.getTime()) ? "" : d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) + " " + d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }); return h("div", { key: it.id, onClick: () => { if (it.url) window.open(it.url, "_blank"); }, style: { display: "grid", gridTemplateColumns: "86px 96px minmax(0,1.6fr) minmax(0,1fr) 90px", gap: 10, alignItems: "center", padding: "9px 14px", borderTop: i ? "1px solid " + HAIR : "none", cursor: it.url ? "pointer" : "default", fontFamily: FONT_BODY, fontSize: 12.5 } }, h("span", { style: { color: "#8a92a3", fontSize: 11.5 } }, z), h("span", { style: { display: "inline-flex", alignItems: "center", gap: 5, fontWeight: 800, color: ty.color, fontSize: 11 } }, h("span", { style: { width: 7, height: 7, borderRadius: 99, background: ty.color } }), ty.label), h("span", { style: { fontWeight: 700, color: "#15181C", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, it.headline), h("span", { style: { color: "#5b6472", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, [String((it.player && it.player.name) || it.player || ""), (it.fromClub || it.from) ? (it.fromClub || it.from) + " \u2192 " + (it.toClub || it.to || it.seek || "?") : (it.toClub || it.to || it.seek || "")].filter(Boolean).join(" \u00b7 ")), h("span", { style: { textAlign: "right", fontWeight: 800, color: "#0f1520" } }, it.fee || "")); })) : liste.map(item => h(NewsCard, { key: item.id, item: item, onWatch: onWatch, onOpen: onOpen }))) : h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, color: "#8a8880", padding: "30px 0", textAlign: "center" } }, "Keine Meldungen f\u00fcr diese Auswahl - Filter lockern oder die KI oben fragen."));
+    liste.length ? (gAnsicht === "kompakt" ? h("div", { style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 14, overflow: "hidden" } }, liste.map((it, i) => { const ty = TYPE[it.type] || TYPE.geruecht; const d = new Date(it.published || it.publishedAt || 0); const z = isNaN(d.getTime()) ? "" : d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) + " " + d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }); return h("div", { key: it.id, onClick: () => { if (it.url) window.open(it.url, "_blank"); }, style: { display: "grid", gridTemplateColumns: "86px 96px minmax(0,1.6fr) minmax(0,1fr) 90px", gap: 10, alignItems: "center", padding: "9px 14px", borderTop: i ? "1px solid " + HAIR : "none", cursor: it.url ? "pointer" : "default", fontFamily: FONT_BODY, fontSize: 12.5 } }, h("span", { style: { color: "#8a92a3", fontSize: 11.5 } }, z), h("span", { style: { display: "inline-flex", alignItems: "center", gap: 5, fontWeight: 800, color: ty.color, fontSize: 11 } }, h("span", { style: { width: 7, height: 7, borderRadius: 99, background: ty.color } }), ty.label), h("span", { style: { fontWeight: 700, color: "#15181C", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, dH(it)), h("span", { style: { color: "#5b6472", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, [String((it.player && it.player.name) || it.player || ""), (it.fromClub || it.from) ? (it.fromClub || it.from) + " \u2192 " + (it.toClub || it.to || it.seek || "?") : (it.toClub || it.to || it.seek || "")].filter(Boolean).join(" \u00b7 ")), h("span", { style: { textAlign: "right", fontWeight: 800, color: "#0f1520" } }, it.fee || "")); })) : liste.map(item => h(NewsCard, { key: item.id, item: item, onWatch: onWatch, onOpen: onOpen }))) : h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, color: "#8a8880", padding: "30px 0", textAlign: "center" } }, "Keine Meldungen f\u00fcr diese Auswahl - Filter lockern oder die KI oben fragen."));
 }
 
 const NEWS = [{
@@ -2863,7 +3127,7 @@ function NeedCard({
       borderRadius: 999,
       padding: "3px 10px"
     }
-  }, c))), item.summary && /*#__PURE__*/React.createElement("p", {
+  }, c))), dS(item) && /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12.5,
@@ -2871,7 +3135,7 @@ function NeedCard({
       lineHeight: 1.5,
       margin: "0 0 11px"
     }
-  }, item.summary), item.seekStrengths && /*#__PURE__*/React.createElement("div", {
+  }, dS(item)), item.seekStrengths && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexWrap: "wrap",
@@ -7361,7 +7625,7 @@ function TransferApp({
       fontSize: 13.5,
       color: INK
     }
-  }, f.headline), /*#__PURE__*/React.createElement("div", {
+  }, dH(f)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12,
@@ -7369,7 +7633,7 @@ function TransferApp({
       marginTop: 3,
       lineHeight: 1.5
     }
-  }, f.summary), /*#__PURE__*/React.createElement("div", {
+  }, dS(f)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 10.5,
@@ -9942,7 +10206,7 @@ class TwBoundary extends React.Component {
 function TransferWire() {
   const [lang, setLangState] = useState(() => {
     try {
-      const v = store.getItem("tw_lang"); return ["de", "en", "fr", "es"].indexOf(v) >= 0 ? v : "de";
+      const v = store.getItem("tw_lang"); return ["de", "en"].indexOf(v) >= 0 ? v : (v === "fr" || v === "es" ? "en" : "de");
     } catch (e) {
       return "de";
     }
@@ -9950,7 +10214,7 @@ function TransferWire() {
   LANG = lang;
   useEffect(() => {
     __twToggleLang = ziel => {
-      const n = ["de", "en", "fr", "es"].indexOf(ziel) >= 0 ? ziel : "de";
+      const n = ["de", "en"].indexOf(ziel) >= 0 ? ziel : "de";
       try {
         store.setItem("tw_lang", n);
       } catch (e) {}
