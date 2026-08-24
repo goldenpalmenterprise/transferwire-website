@@ -37,7 +37,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-24-w darkmode -->
+<!-- tw-build: 2026-08-24-x mobil-grid-fix -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -5499,6 +5499,7 @@ function TransferApp({
         .tw-need-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(288px,1fr)); gap:12px; }
         @media (max-width: 880px) {
           .tw-main.feed { grid-template-columns: 1fr; }
+          .tw-main.feed > aside { grid-column: 1; grid-row: auto; }
         }
         @media (max-width: 600px) {
           .tw-main { padding:14px 13px 40px; gap:16px; }
