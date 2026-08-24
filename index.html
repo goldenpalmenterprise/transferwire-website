@@ -31,7 +31,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-24-q sprachen4-sauber -->
+<!-- tw-build: 2026-08-24-r landing-mono-fix -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -1838,7 +1838,7 @@ function LandingStats() {
   }, []);
   const S = (zahl, label) => h("div", { style: { minWidth: 120 } },
     h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 36, fontWeight: 700, color: "#fff", lineHeight: 1 } }, zahl),
-    h("div", { style: { fontFamily: mono, fontSize: 10.5, letterSpacing: 2, color: "#9a9a96", textTransform: "uppercase", marginTop: 5 } }, label));
+    h("div", { style: { fontFamily: "'Courier New', ui-monospace, monospace", fontSize: 10.5, letterSpacing: 2, color: "#9a9a96", textTransform: "uppercase", marginTop: 5 } }, label));
   return h("div", { style: { display: "flex", gap: 34, flexWrap: "wrap", margin: "26px 0 4px", paddingTop: 20, borderTop: "1px solid rgba(255,255,255,.10)" } },
     S(spieler || "15.000+", "Spieler live"), S("20", "Ligen komplett"), S("548", "Quellen im Radar"), S("24/7", "KI-\u00dcberwachung"));
 }
