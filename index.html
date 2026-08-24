@@ -48,7 +48,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-24-zk antworten-infos -->
+<!-- tw-build: 2026-08-24-zl antworten-einheitlich -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -1795,6 +1795,9 @@ const CMTY_STATUS = {
 function CmtyChip({ status }) {
   const s = CMTY_STATUS[status] || CMTY_STATUS.neu;
   return React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .4, padding: "3px 10px", borderRadius: 999, background: s[1], color: s[2], whiteSpace: "nowrap" } }, s[0]);
+}
+function AntwortButton({ onClick, eigener }) {
+  return React.createElement("button", { onClick: eigener ? undefined : onClick, disabled: !!eigener, title: eigener ? "Dein eigener Beitrag \u2014 Antworten anderer Mitglieder erreichen dich per E-Mail" : "Dem Autor per E-Mail antworten (deine Adresse wird als Antwortadresse \u00fcbermittelt)", style: { cursor: eigener ? "default" : "pointer", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, padding: "5px 12px", borderRadius: 999, border: "1px solid " + (eigener ? HAIR : "#0f1520"), background: eigener ? "#f4f6f9" : "#0f1520", color: eigener ? "#9aa3b0" : "#fff", whiteSpace: "nowrap" } }, "\u21A9 Antworten");
 }
 function MeldeButton({ onClick, gemeldet }) {
   return React.createElement("button", { onClick: onClick, disabled: !!gemeldet, title: gemeldet ? "Du hast diesen Beitrag gemeldet" : "Beitrag melden", style: { cursor: gemeldet ? "default" : "pointer", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, padding: "5px 10px", borderRadius: 999, border: "1px solid " + HAIR, background: "#fff", color: gemeldet ? "#9aa3b0" : "#5b6472", whiteSpace: "nowrap" } }, gemeldet ? "\u2691 Gemeldet" : "\u2691 Melden");
@@ -7760,7 +7763,7 @@ function TransferApp({
         /*#__PURE__*/React.createElement("div", null,
           /*#__PURE__*/React.createElement("b", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: INK } }, p.author_name || "Mitglied"),
           /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, (p.author_rolle || "Mitglied") + " \u00b7 " + fmtDate(p.created_at))),
-        /*#__PURE__*/React.createElement("div", { style: { marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 } }, /*#__PURE__*/React.createElement(CmtyChip, { status: p.status }), !p.own && /*#__PURE__*/React.createElement("button", { onClick: () => antwortSenden(p.id), title: "Dem Autor per E-Mail antworten", style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, padding: "5px 12px", borderRadius: 999, border: "1px solid #0f1520", background: "#0f1520", color: "#fff", whiteSpace: "nowrap" } }, "\u21A9 Antworten"), !p.own && /*#__PURE__*/React.createElement(MeldeButton, { gemeldet: p.gemeldet_von_mir, onClick: () => meldePost(p.id, "info") }))),
+        /*#__PURE__*/React.createElement("div", { style: { marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 } }, /*#__PURE__*/React.createElement(CmtyChip, { status: p.status }), /*#__PURE__*/React.createElement(AntwortButton, { eigener: !!p.own, onClick: () => antwortSenden(p.id) }), !p.own && /*#__PURE__*/React.createElement(MeldeButton, { gemeldet: p.gemeldet_von_mir, onClick: () => meldePost(p.id, "info") }))),
       /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "#2a3140", whiteSpace: "pre-wrap" } }, p.body))),
     cInfoPosts.length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Noch keine Beitr\u00e4ge \u2014 sei der Erste!"), cInfoPosts.length > 0 && cmtyFilter(cInfoPosts, cInfoSuche).length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Keine Treffer f\u00fcr \u201e" + cInfoSuche + "\u201c.")),
   view === "moderation" && /*#__PURE__*/React.createElement("div", { style: { gridColumn: "1 / -1", display: "grid", gap: 14 } },
@@ -7808,7 +7811,7 @@ function TransferApp({
           /*#__PURE__*/React.createElement("div", null,
             /*#__PURE__*/React.createElement("b", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: INK } }, p.author_name || "Mitglied"),
             /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, (p.author_rolle || "Mitglied") + " \u00b7 " + fmtDate(p.created_at))),
-          /*#__PURE__*/React.createElement("div", { style: { marginLeft: "auto", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" } }, p.own ? /*#__PURE__*/React.createElement(CmtyChip, { status: p.status }) : /*#__PURE__*/React.createElement(MeldeButton, { gemeldet: p.gemeldet_von_mir, onClick: () => meldePost(p.id, "networking") }), !p.own && /*#__PURE__*/React.createElement("button", { onClick: () => kontaktAnfrage(p.id), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, padding: "7px 14px", borderRadius: 999, border: "1px solid #0f1520", background: "#fff", color: "#0f1520" } }, "Kontakt aufnehmen"))),
+          /*#__PURE__*/React.createElement("div", { style: { marginLeft: "auto", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" } }, p.own ? /*#__PURE__*/React.createElement(CmtyChip, { status: p.status }) : /*#__PURE__*/React.createElement(MeldeButton, { gemeldet: p.gemeldet_von_mir, onClick: () => meldePost(p.id, "networking") }), /*#__PURE__*/React.createElement(AntwortButton, { eigener: !!p.own, onClick: () => antwortSenden(p.id) }))),
         /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "#2a3140", whiteSpace: "pre-wrap" } }, p.body))),
       cNetPosts.length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Noch keine Anfragen \u2014 starte das Netzwerk!"), cNetPosts.length > 0 && cmtyFilter(cNetPosts, cNetSuche).length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Keine Treffer f\u00fcr \u201e" + cNetSuche + "\u201c.")) :
     /*#__PURE__*/React.createElement("div", { className: "tw-card", style: Object.assign({}, CARD_BOX, { padding: "34px 24px", textAlign: "center", maxWidth: 560 }) },
