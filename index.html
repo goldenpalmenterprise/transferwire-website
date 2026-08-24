@@ -34,7 +34,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-24-u chips-guard -->
+<!-- tw-build: 2026-08-24-v app-langswitch -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -5584,7 +5584,7 @@ function TransferApp({
       background: dataState === "live" ? "#34d27b" : "#e0a63b",
       boxShadow: `0 0 0 3px ${dataState === "live" ? "rgba(52,210,123,.2)" : "rgba(224,166,59,.2)"}`
     }
-  }), dataState === "loading" ? t("connecting") : dataState === "live" ? `Live${updatedAt ? " · " + relTime(updatedAt) : ""}` : t("demo")), /*#__PURE__*/React.createElement("div", {
+  }), dataState === "loading" ? t("connecting") : dataState === "live" ? `Live${updatedAt ? " · " + relTime(updatedAt) : ""}` : t("demo")), /*#__PURE__*/React.createElement(LangSwitch, { dark: true }), /*#__PURE__*/React.createElement("div", {
     style: {
       position: "relative"
     }
