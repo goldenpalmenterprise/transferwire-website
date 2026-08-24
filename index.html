@@ -27,8 +27,11 @@
   .tw-fab::before { content: "TW"; color: #fff; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: .5px; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
   .tw-fab::after { content: ""; position: absolute; top: 5px; right: 5px; width: 9px; height: 9px; border-radius: 99px; background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.25); }
   .tw-pos-grid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important; gap: 12 !important; }
+  .tw-main select, .tw-main input:not([type="checkbox"]):not([type="radio"]) { min-height: 42px; border-radius: 9px; box-sizing: border-box; }
+  .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
+  .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-24-k premium-w4 -->
+<!-- tw-build: 2026-08-24-l premium-w5 -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -6023,7 +6026,7 @@ function TransferApp({
         color: on ? v.color : MUTED,
         fontWeight: on ? 600 : 400
       }
-    }, count, " ", count === 1 ? "Verein" : "Vereine")), on && /*#__PURE__*/React.createElement(ArrowRight, {
+    }, /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 21, fontWeight: 700, color: v.color, marginRight: 4, verticalAlign: "middle" } }, count), " ", count === 1 ? "Verein" : "Vereine")), on && /*#__PURE__*/React.createElement(ArrowRight, {
       size: 15,
       strokeWidth: 2.2,
       color: MUTED
@@ -6408,16 +6411,17 @@ function TransferApp({
         }
       }, "#", i + 1), /*#__PURE__*/React.createElement("div", { style: { width: 38, height: 38, borderRadius: 12, background: "#0f1520", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontSize: 15, fontWeight: 700, flexShrink: 0 } }, String(x.name || "?").split(/\s+/).map(w => w[0]).slice(0, 2).join("")), /*#__PURE__*/React.createElement("div", {
         style: {
-          minWidth: 52,
+          minWidth: 58,
           textAlign: "center",
           background: scoreColor(x.score),
           color: "#fff",
-          borderRadius: 9,
-          padding: "7px 0",
+          borderRadius: 13,
+          padding: "10px 0",
           fontFamily: FONT_DISPLAY,
           fontWeight: 700,
-          fontSize: 19,
-          lineHeight: 1
+          fontSize: 23,
+          lineHeight: 1,
+          boxShadow: "0 4px 12px rgba(15,21,32,.14)"
         }
       }, x.score), /*#__PURE__*/React.createElement("div", {
         style: {
