@@ -48,7 +48,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-24-zi networking-wording-search -->
+<!-- tw-build: 2026-08-24-zj umlaut-suche -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -1767,7 +1767,7 @@ function ScoutMenu({ view, setView }) {
         eintrag("\uD83D\uDCCB Scoutinglisten", "listen"),
         eintrag("\uD83D\uDCC8 " + t("rank_tab"), "ranking"))));
 }
-const cmtyNorm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+const cmtyNorm = s => String(s || "").toLowerCase().replace(/\u00df/g, "ss").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ae/g, "a").replace(/oe/g, "o").replace(/ue/g, "u");
 const cmtyFilter = (posts, q) => {
   const w = cmtyNorm(q).split(/\s+/).filter(Boolean);
   if (!w.length) return posts;
