@@ -48,7 +48,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-24-zd community-wrapper -->
+<!-- tw-build: 2026-08-24-ze card-style-fix -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -1536,6 +1536,7 @@ const MUTED = "#74746f";
 const HAIR = "#e3e7ee";
 const PAGE = "#f4f3ef";
 const CARD = "#ffffff";
+const CARD_BOX = { background: CARD, border: "1px solid " + HAIR, borderRadius: 14 };
 const SPORT = {
   fussball: {
     label: "Fußball",
@@ -7664,13 +7665,13 @@ function TransferApp({
     /*#__PURE__*/React.createElement("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 24, margin: "2px 0 0", textTransform: "uppercase", letterSpacing: .4, color: INK } }, "\uD83D\uDCAC Community \u2014 Transfer-Infos"),
     /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, margin: "0 0 2px", maxWidth: 720 } }, "Teile, was du aus deinem Netzwerk h\u00f6rst \u2014 Wechsel, Ger\u00fcchte, Vereinsbedarfe, Spielerinfos. Unser KI-Pr\u00fcfer sichtet jeden Hinweis, ordnet ihn ein und stellt Relevantes gekennzeichnet in den Feed und nach \u201eVerein sucht\u201c."),
     /*#__PURE__*/React.createElement("div", { style: { border: "1px solid #f2d9a4", background: "#fdf6e3", borderRadius: 11, padding: "10px 14px", fontFamily: FONT_BODY, fontSize: 12.5, color: "#8a5a00", fontWeight: 600 } }, "\u24D8 Community-Hinweise sind ungepr\u00fcft. Ver\u00f6ffentlichte Eintr\u00e4ge erscheinen als Ger\u00fccht mit Kennzeichnung \u201eTW Community (ungepr\u00fcft)\u201c und niedrigster Zuverl\u00e4ssigkeit."),
-    /*#__PURE__*/React.createElement("div", { className: "tw-card", style: Object.assign({}, CARD, { padding: 16 }) },
+    /*#__PURE__*/React.createElement("div", { className: "tw-card", style: Object.assign({}, CARD_BOX, { padding: 16 }) },
       /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, letterSpacing: .6, textTransform: "uppercase", color: MUTED, marginBottom: 8 } }, "Neuer Hinweis"),
       /*#__PURE__*/React.createElement("textarea", { value: cText, onChange: e => setCText(e.target.value), maxLength: 1200, placeholder: "z. B. \u201eAus dem Umfeld von \u2026 h\u00f6re ich, dass \u2026\u201c \u2014 je konkreter (Verein, Position, Zeitraum), desto n\u00fctzlicher.", style: { width: "100%", minHeight: 96, resize: "vertical", border: "1px solid " + HAIR, borderRadius: 9, padding: "10px 12px", fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.55, color: INK, boxSizing: "border-box" } }),
       /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, marginTop: 10, flexWrap: "wrap" } },
         /*#__PURE__*/React.createElement("button", { onClick: () => sendeCommunity("info"), disabled: cBusy, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 18px", borderRadius: 9, border: "none", background: cBusy ? "#9aa3b0" : "#149a59", color: "#fff", boxShadow: "0 6px 16px rgba(20,154,89,.25)" } }, cBusy ? "Wird gesendet \u2026" : "Hinweis senden"),
         /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: cMsg.indexOf("\u2713") === 0 ? "#149a59" : "#b04a3a", fontWeight: 700 } }, cMsg))),
-    cInfoPosts.map(p => /*#__PURE__*/React.createElement("div", { key: p.id, className: "tw-card", style: Object.assign({}, CARD, { padding: 15 }) },
+    cInfoPosts.map(p => /*#__PURE__*/React.createElement("div", { key: p.id, className: "tw-card", style: Object.assign({}, CARD_BOX, { padding: 15 }) },
       /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 9, marginBottom: 8 } },
         /*#__PURE__*/React.createElement("span", { style: { width: 30, height: 30, borderRadius: 99, background: "#149a59", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 900 } }, (p.author_name || "?")[0].toUpperCase()),
         /*#__PURE__*/React.createElement("div", null,
@@ -7685,13 +7686,13 @@ function TransferApp({
     /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, margin: "0 0 2px", maxWidth: 720 } }, "Kontakte finden, Deals anschieben: Suche Zug\u00e4nge zu Vereinen, biete Spieler an oder hol dir Hilfe aus dem Netzwerk \u2014 exklusiv f\u00fcr Premium-Mitglieder."),
     account && account.plan === "premium" ? /*#__PURE__*/React.createElement(React.Fragment, null,
       /*#__PURE__*/React.createElement("div", { style: { border: "1px solid #cfe3f5", background: "#eef6fd", borderRadius: 11, padding: "10px 14px", fontFamily: FONT_BODY, fontSize: 12.5, color: "#1e5d8f", fontWeight: 600 } }, "\u24D8 Gesuche sehen nur Premium-Mitglieder. Kontakt l\u00e4uft \u00fcber TW-Vermittlung \u2014 deine E-Mail wird erst sichtbar, wenn du selbst antwortest."),
-      /*#__PURE__*/React.createElement("div", { className: "tw-card", style: Object.assign({}, CARD, { padding: 16 }) },
+      /*#__PURE__*/React.createElement("div", { className: "tw-card", style: Object.assign({}, CARD_BOX, { padding: 16 }) },
         /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, letterSpacing: .6, textTransform: "uppercase", color: MUTED, marginBottom: 8 } }, "Neues Gesuch / Angebot"),
         /*#__PURE__*/React.createElement("textarea", { value: cNetText, onChange: e => setCNetText(e.target.value), maxLength: 1200, placeholder: "z. B. \u201eSuche direkten Kontakt in die sportliche Leitung von \u2026 f\u00fcr einen St\u00fcrmer (U21, abl\u00f6sefrei). Wer kann vermitteln?\u201c", style: { width: "100%", minHeight: 96, resize: "vertical", border: "1px solid " + HAIR, borderRadius: 9, padding: "10px 12px", fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.55, color: INK, boxSizing: "border-box" } }),
         /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, marginTop: 10, flexWrap: "wrap" } },
           /*#__PURE__*/React.createElement("button", { onClick: () => sendeCommunity("networking"), disabled: cBusy, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 18px", borderRadius: 9, border: "none", background: cBusy ? "#9aa3b0" : "#0f1520", color: "#fff", boxShadow: "0 6px 16px rgba(15,21,32,.25)" } }, cBusy ? "Wird gesendet \u2026" : "Gesuch ver\u00f6ffentlichen"),
           /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: cNetMsg.indexOf("\u2713") === 0 ? "#149a59" : "#b04a3a", fontWeight: 700 } }, cNetMsg))),
-      cNetPosts.map(p => /*#__PURE__*/React.createElement("div", { key: p.id, className: "tw-card", style: Object.assign({}, CARD, { padding: 15 }) },
+      cNetPosts.map(p => /*#__PURE__*/React.createElement("div", { key: p.id, className: "tw-card", style: Object.assign({}, CARD_BOX, { padding: 15 }) },
         /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 9, marginBottom: 8 } },
           /*#__PURE__*/React.createElement("span", { style: { width: 30, height: 30, borderRadius: 99, background: "#0f1520", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 900 } }, (p.author_name || "?")[0].toUpperCase()),
           /*#__PURE__*/React.createElement("div", null,
@@ -7700,7 +7701,7 @@ function TransferApp({
           /*#__PURE__*/React.createElement("button", { onClick: () => kontaktAnfrage(p.id), style: { marginLeft: "auto", cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, padding: "7px 14px", borderRadius: 999, border: "1px solid #0f1520", background: "#fff", color: "#0f1520" } }, "Kontakt aufnehmen")),
         /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "#2a3140", whiteSpace: "pre-wrap" } }, p.body))),
       cNetPosts.length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Noch keine Gesuche \u2014 starte das Netzwerk!")) :
-    /*#__PURE__*/React.createElement("div", { className: "tw-card", style: Object.assign({}, CARD, { padding: "34px 24px", textAlign: "center", maxWidth: 560 }) },
+    /*#__PURE__*/React.createElement("div", { className: "tw-card", style: Object.assign({}, CARD_BOX, { padding: "34px 24px", textAlign: "center", maxWidth: 560 }) },
       /*#__PURE__*/React.createElement("div", { style: { width: 52, height: 52, borderRadius: 99, background: "#0f1520", color: "#e3b34e", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 12 } }, "\uD83D\uDD12"),
       /*#__PURE__*/React.createElement("h3", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 19, margin: "0 0 6px", textTransform: "uppercase", color: INK } }, "Nur im Premium-Abo"),
       /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, lineHeight: 1.6, margin: "0 0 16px" } }, "Networking verbindet dich direkt mit Vermittlern, Scouts und Vereinsmitarbeitern \u2014 Gesuche posten, Kontakte kn\u00fcpfen, Deals anschieben."),
