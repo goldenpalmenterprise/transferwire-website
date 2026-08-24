@@ -28,12 +28,13 @@
   .tw-fab::after { content: ""; position: absolute; top: 5px; right: 5px; width: 9px; height: 9px; border-radius: 99px; background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.25); }
   .tw-pos-grid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important; gap: 12 !important; }
   .tw-main.feed > * { grid-column: 1; min-width: 0; }
-  .tw-main.feed > aside { grid-column: 2; grid-row: 1 / span 30; align-self: start; }
+  .tw-main.feed > aside { grid-column: 2; grid-row: 1 / span 3; align-self: start; }
+  .tw-main.feed > aside:empty { display: none; }
   .tw-main select, .tw-main input:not([type="checkbox"]):not([type="radio"]) { min-height: 42px; border-radius: 9px; box-sizing: border-box; }
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-24-s feed-grid-fix -->
+<!-- tw-build: 2026-08-24-t talente-luecke-fix -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
