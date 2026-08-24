@@ -31,7 +31,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-24-l premium-w5 -->
+<!-- tw-build: 2026-08-24-m neue-meldungen -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -5420,14 +5420,13 @@ function TransferApp({
   const watchList = useMemo(() => news.filter(it => watchMatchesItem(watch, it)), [news, watch]);
   const [dataState, setDataState] = useState("demo"); // 'demo' | 'live' | 'loading'
   const [updatedAt, setUpdatedAt] = useState(null);
-  useEffect(() => {
-    let alive = true;
+  const [neueZahl, setNeueZahl] = useState(0);
+  const ladeFeed = () => {
     setDataState("loading");
     fetch(API_URL + "?email=" + encodeURIComponent(account && account.email || "") + "&code=" + encodeURIComponent(account && account.code || ""), {
       credentials: "omit",
       cache: "no-store"
     }).then(r => r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status))).then(data => {
-      if (!alive) return;
       let payload = data;
       if (typeof payload === "string") {
         try {
@@ -5448,16 +5447,29 @@ function TransferApp({
         setNews(items.map(normItem));
         setDataState("live");
         setUpdatedAt(payload && payload.updated || new Date().toISOString());
+        setNeueZahl(0);
       } else {
-        setDataState("demo"); // Webhook aktiv, aber Tabelle noch leer -> Beispiele zeigen
+        setDataState("demo");
       }
     }).catch(() => {
-      if (alive) setDataState("demo"); // Webhook nicht erreichbar/aktiv -> Beispiele
+      setDataState(s => s === "live" ? "live" : "demo");
     });
-    return () => {
-      alive = false;
+  };
+  useEffect(() => { ladeFeed(); }, []);
+  useEffect(() => {
+    const puls = () => {
+      try {
+        const max = news.reduce((a, n) => { const t = new Date(n.published || n.publishedAt || 0).getTime(); return t > a ? t : a; }, 0);
+        if (!max) return;
+        fetch("/db/signals?select=id&published=gt." + encodeURIComponent(new Date(max).toISOString()) + "&limit=1", { headers: { Prefer: "count=exact" }, cache: "no-store" }).then(r => {
+          const m = (r.headers.get("content-range") || "").match(/\/(\d+)/);
+          if (m) setNeueZahl(Number(m[1]) || 0);
+        }).catch(() => {});
+      } catch (e) {}
     };
-  }, []);
+    const iv = setInterval(puls, 150000);
+    return () => clearInterval(iv);
+  }, [news]);
   const relTime = iso => {
     if (!iso) return null;
     const diff = Math.max(0, (Date.now() - new Date(iso).getTime()) / 60000);
@@ -7613,7 +7625,7 @@ function TransferApp({
     }
   }, t("watch_nohits")))), (view === "feed" || view === "watch" || view === "talente") && /*#__PURE__*/React.createElement(React.Fragment, null, view === "talente" && /*#__PURE__*/React.createElement(ScoutSub, { view: view, setView: setView }), view === "talente" && /*#__PURE__*/React.createElement("div", {
     style: { background: "#e6f6f9", border: "1.5px solid #0e7490", borderRadius: 14, padding: "12px 18px", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 600, color: "#0e7490", gridColumn: "1 / -1" }
-  }, "\u24D8  ", t("tal_banner")), view === "talente" && /*#__PURE__*/React.createElement(TalentScouting, null), view === "feed" && /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 10 } }, sportTabs.map(([k, label]) => { const a2 = sport === k; const c2 = k === "alle" ? "#0f1520" : SPORT[k].color; return /*#__PURE__*/React.createElement("button", { key: "sp" + k, onClick: () => { setSport(k); setCountry(""); setLeague(""); setClub(""); setPosFilter(""); }, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 11px", borderRadius: 999, border: "1px solid " + (a2 ? c2 : HAIR), background: a2 ? c2 : "#fff", color: a2 ? "#fff" : "#5b6472" } }, label); }), /*#__PURE__*/React.createElement("span", { style: { width: 1, height: 22, background: HAIR, margin: "0 2px" } }), [["alle", "Alle", news.length], ["fix", TYPE.fix.label, fixCount], ["geruecht", TYPE.geruecht.label, rumorCount]].map(([k, lab, n]) => { const a3 = type === k; return /*#__PURE__*/React.createElement("button", { key: "kpi" + k, onClick: () => setType(k), style: { display: "inline-flex", alignItems: "baseline", gap: 7, cursor: "pointer", padding: "7px 13px", borderRadius: 12, border: "1px solid " + (a3 ? "#0f1520" : HAIR), background: a3 ? "#0f1520" : "#fff", boxShadow: "0 1px 2px rgba(15,21,32,.05)" } }, /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: .8, textTransform: "uppercase", color: a3 ? "rgba(255,255,255,.75)" : "#8a92a3" } }, lab), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 18, fontWeight: 700, color: a3 ? "#fff" : "#0f1520" } }, Number(n).toLocaleString("de-DE"))); })), /*#__PURE__*/React.createElement("div", null, cascade && /*#__PURE__*/React.createElement("div", {
+  }, "\u24D8  ", t("tal_banner")), view === "talente" && /*#__PURE__*/React.createElement(TalentScouting, null), view === "feed" && neueZahl > 0 && /*#__PURE__*/React.createElement("button", { onClick: () => { ladeFeed(); window.scrollTo({ top: 0, behavior: "smooth" }); }, style: { display: "block", margin: "0 auto 12px", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 900, cursor: "pointer", padding: "9px 18px", borderRadius: 999, border: "none", background: "#149a59", color: "#fff", boxShadow: "0 8px 20px rgba(20,154,89,.35)" } }, "\u2191 " + neueZahl + " neue " + (neueZahl === 1 ? "Meldung" : "Meldungen")), view === "feed" && /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 10 } }, sportTabs.map(([k, label]) => { const a2 = sport === k; const c2 = k === "alle" ? "#0f1520" : SPORT[k].color; return /*#__PURE__*/React.createElement("button", { key: "sp" + k, onClick: () => { setSport(k); setCountry(""); setLeague(""); setClub(""); setPosFilter(""); }, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 11px", borderRadius: 999, border: "1px solid " + (a2 ? c2 : HAIR), background: a2 ? c2 : "#fff", color: a2 ? "#fff" : "#5b6472" } }, label); }), /*#__PURE__*/React.createElement("span", { style: { width: 1, height: 22, background: HAIR, margin: "0 2px" } }), [["alle", "Alle", news.length], ["fix", TYPE.fix.label, fixCount], ["geruecht", TYPE.geruecht.label, rumorCount]].map(([k, lab, n]) => { const a3 = type === k; return /*#__PURE__*/React.createElement("button", { key: "kpi" + k, onClick: () => setType(k), style: { display: "inline-flex", alignItems: "baseline", gap: 7, cursor: "pointer", padding: "7px 13px", borderRadius: 12, border: "1px solid " + (a3 ? "#0f1520" : HAIR), background: a3 ? "#0f1520" : "#fff", boxShadow: "0 1px 2px rgba(15,21,32,.05)" } }, /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: .8, textTransform: "uppercase", color: a3 ? "rgba(255,255,255,.75)" : "#8a92a3" } }, lab), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 18, fontWeight: 700, color: a3 ? "#fff" : "#0f1520" } }, Number(n).toLocaleString("de-DE"))); })), /*#__PURE__*/React.createElement("div", null, cascade && /*#__PURE__*/React.createElement("div", {
     style: {
       background: "#fff",
       border: `1px solid ${HAIR}`,
