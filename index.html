@@ -48,7 +48,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-24-zq en-keys -->
+<!-- tw-build: 2026-08-24-zr community-translate -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -985,7 +985,7 @@ const EN_MAP = {
 "AGB": "Terms",
 "Hier Vertr\u00e4ge k\u00fcndigen": "Cancel contracts here"
 };
-Object.assign(EN_MAP, { "Die Seite hatte einen technischen Fehler. Einmal neu laden hilft meistens.": "The page ran into a technical error. Reloading usually fixes it.", "Seite neu laden": "Reload page", "Ups \u2014 kleiner Aussetzer": "Oops \u2014 a small hiccup", "Etwas ist schiefgelaufen": "Something went wrong", "Neu laden": "Reload" });
+Object.assign(EN_MAP, { "Die Seite hatte einen technischen Fehler. Einmal neu laden hilft meistens.": "The page ran into a technical error. Reloading usually fixes it.", "Seite neu laden": "Reload page", "\uD83C\uDF10 Auf Englisch": "\uD83C\uDF10 Translate to English", "Original anzeigen": "Show original", "\u2026 \u00dcbersetze": "\u2026 Translating", "Beitrag ins Englische \u00fcbersetzen (jede Sprache)": "Translate this post into English (any language)", "\u00dcbersetzung fehlgeschlagen.": "Translation failed.", "Ups \u2014 kleiner Aussetzer": "Oops \u2014 a small hiccup", "Etwas ist schiefgelaufen": "Something went wrong", "Neu laden": "Reload" });
 const EN_COUNTRIES = { "Deutschland": "Germany", "\u00d6sterreich": "Austria", "Schweiz": "Switzerland", "Spanien": "Spain", "Italien": "Italy", "Frankreich": "France", "Belgien": "Belgium", "Niederlande": "Netherlands", "T\u00fcrkei": "Turkey", "D\u00e4nemark": "Denmark", "Griechenland": "Greece", "Polen": "Poland", "Tschechien": "Czechia", "Kroatien": "Croatia", "Serbien": "Serbia", "Schottland": "Scotland", "Schweden": "Sweden", "Norwegen": "Norway", "Russland": "Russia", "Ungarn": "Hungary", "Slowakei": "Slovakia", "Rum\u00e4nien": "Romania", "Brasilien": "Brazil", "Argentinien": "Argentina", "Vereinigte Staaten": "United States", "Saudi-Arabien": "Saudi Arabia", "Japan": "Japan", "S\u00fcdkorea": "South Korea", "Australien": "Australia", "Mexiko": "Mexico", "Kolumbien": "Colombia" };
 Object.assign(EN_MAP, EN_COUNTRIES);
 const EN_WORDS = [
@@ -2065,6 +2065,11 @@ function CmtyChip({ status }) {
 function AntwortButton({ onClick, eigener }) {
   return React.createElement("button", { onClick: eigener ? undefined : onClick, disabled: !!eigener, title: eigener ? "Dein eigener Beitrag \u2014 Kontaktanfragen anderer Mitglieder erreichen dich per E-Mail" : "Kontakt zum Autor aufnehmen (per E-Mail \u00fcber TransferWire, deine Adresse wird als Antwortadresse \u00fcbermittelt)", style: { cursor: eigener ? "default" : "pointer", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, padding: "5px 12px", borderRadius: 999, border: "1px solid " + (eigener ? HAIR : "#0f1520"), background: eigener ? "#f4f6f9" : "#0f1520", color: eigener ? "#9aa3b0" : "#fff", whiteSpace: "nowrap" } }, "\u2709 Kontakt aufnehmen");
 }
+function UebersetzenButton({ zustand, onClick }) {
+  const label = zustand === "laedt" ? "\u2026 \u00dcbersetze" : zustand === "en" ? "Original anzeigen" : "\uD83C\uDF10 Auf Englisch";
+  return React.createElement("button", { onClick: onClick, disabled: zustand === "laedt", title: "Beitrag ins Englische \u00fcbersetzen (jede Sprache)", style: { cursor: zustand === "laedt" ? "default" : "pointer", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, padding: "5px 10px", borderRadius: 999, border: "1px solid " + HAIR, background: zustand === "en" ? "#eef1f5" : "#fff", color: "#3a4150", whiteSpace: "nowrap" } }, label);
+}
+const cmtyBodyText = (p, ue, zeige) => (zeige[p.id] && ue[p.id] && ue[p.id].text) ? ue[p.id].text : p.body;
 function MeldeButton({ onClick, gemeldet }) {
   return React.createElement("button", { onClick: onClick, disabled: !!gemeldet, title: gemeldet ? "Du hast diesen Beitrag gemeldet" : "Beitrag melden", style: { cursor: gemeldet ? "default" : "pointer", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, padding: "5px 10px", borderRadius: 999, border: "1px solid " + HAIR, background: "#fff", color: gemeldet ? "#9aa3b0" : "#5b6472", whiteSpace: "nowrap" } }, gemeldet ? "\u2691 Gemeldet" : "\u2691 Melden");
 }
@@ -5737,6 +5742,19 @@ function TransferApp({
   const [cAdminPosts, setCAdminPosts] = useState([]);
   const [cAdminFilter, setCAdminFilter] = useState("alle");
   const [cAdminMsg, setCAdminMsg] = useState("");
+  const [cUe, setCUe] = useState({});
+  const [cUeZeige, setCUeZeige] = useState({});
+  const [cUeLaedt, setCUeLaedt] = useState({});
+  const uebersetzePost = id => {
+    if (cUe[id] && cUe[id].text) { setCUeZeige(z => Object.assign({}, z, { [id]: !z[id] })); return; }
+    if (cUeLaedt[id]) return;
+    setCUeLaedt(l => Object.assign({}, l, { [id]: true }));
+    fetch("/api/tw-community-translate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.assign(cAuthBody(), { post_id: id })) }).then(r => r.json()).then(d => {
+      setCUeLaedt(l => Object.assign({}, l, { [id]: false }));
+      if (d && d.ok && d.text_en) { setCUe(u => Object.assign({}, u, { [id]: { text: d.text_en, lang: d.lang || "" } })); setCUeZeige(z => Object.assign({}, z, { [id]: true })); }
+      else window.alert("\u00dcbersetzung fehlgeschlagen.");
+    }).catch(() => { setCUeLaedt(l => Object.assign({}, l, { [id]: false })); window.alert("Verbindung fehlgeschlagen."); });
+  };
   const istAdmin = !!(account && account.email && ADMIN_EMAILS.indexOf(String(account.email).toLowerCase().trim()) >= 0);
   const cAuthQ = () => "email=" + encodeURIComponent(account && account.email || "") + "&code=" + encodeURIComponent(account && account.code || "");
   const cAuthBody = () => ({ email: account && account.email || "", code: account && account.code || "" });
@@ -8029,8 +8047,8 @@ function TransferApp({
         /*#__PURE__*/React.createElement("div", null,
           /*#__PURE__*/React.createElement("b", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: INK } }, p.author_name || "Mitglied"),
           /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, (p.author_rolle || "Mitglied") + " \u00b7 " + fmtDate(p.created_at))),
-        /*#__PURE__*/React.createElement("div", { style: { marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 } }, /*#__PURE__*/React.createElement(CmtyChip, { status: p.status }), /*#__PURE__*/React.createElement(AntwortButton, { eigener: !!p.own, onClick: () => antwortSenden(p.id) }), !p.own && /*#__PURE__*/React.createElement(MeldeButton, { gemeldet: p.gemeldet_von_mir, onClick: () => meldePost(p.id, "info") }))),
-      /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "#2a3140", whiteSpace: "pre-wrap" } }, p.body))),
+        /*#__PURE__*/React.createElement("div", { style: { marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 } }, /*#__PURE__*/React.createElement(CmtyChip, { status: p.status }), /*#__PURE__*/React.createElement(UebersetzenButton, { zustand: cUeLaedt[p.id] ? "laedt" : (cUeZeige[p.id] && cUe[p.id] ? "en" : "de"), onClick: () => uebersetzePost(p.id) }), /*#__PURE__*/React.createElement(AntwortButton, { eigener: !!p.own, onClick: () => antwortSenden(p.id) }), !p.own && /*#__PURE__*/React.createElement(MeldeButton, { gemeldet: p.gemeldet_von_mir, onClick: () => meldePost(p.id, "info") }))),
+      /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "#2a3140", whiteSpace: "pre-wrap" } }, cmtyBodyText(p, cUe, cUeZeige), cUeZeige[p.id] && cUe[p.id] && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED, marginTop: 6 } }, "\uD83C\uDF10 \u00dcbersetzt" + (cUe[p.id].lang ? " aus " + cUe[p.id].lang.toUpperCase() : ""))))),
     cInfoPosts.length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Noch keine Beitr\u00e4ge \u2014 sei der Erste!"), cInfoPosts.length > 0 && cmtyFilter(cInfoPosts, cInfoSuche).length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Keine Treffer f\u00fcr \u201e" + cInfoSuche + "\u201c.")),
   view === "moderation" && /*#__PURE__*/React.createElement("div", { style: { gridColumn: "1 / -1", display: "grid", gap: 14 } },
     /*#__PURE__*/React.createElement(CommunitySub, { view: view, setView: setView, admin: istAdmin }),
@@ -8077,8 +8095,8 @@ function TransferApp({
           /*#__PURE__*/React.createElement("div", null,
             /*#__PURE__*/React.createElement("b", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: INK } }, p.author_name || "Mitglied"),
             /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, (p.author_rolle || "Mitglied") + " \u00b7 " + fmtDate(p.created_at))),
-          /*#__PURE__*/React.createElement("div", { style: { marginLeft: "auto", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" } }, p.own ? /*#__PURE__*/React.createElement(CmtyChip, { status: p.status }) : /*#__PURE__*/React.createElement(MeldeButton, { gemeldet: p.gemeldet_von_mir, onClick: () => meldePost(p.id, "networking") }), /*#__PURE__*/React.createElement(AntwortButton, { eigener: !!p.own, onClick: () => antwortSenden(p.id) }))),
-        /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "#2a3140", whiteSpace: "pre-wrap" } }, p.body))),
+          /*#__PURE__*/React.createElement("div", { style: { marginLeft: "auto", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" } }, /*#__PURE__*/React.createElement(UebersetzenButton, { zustand: cUeLaedt[p.id] ? "laedt" : (cUeZeige[p.id] && cUe[p.id] ? "en" : "de"), onClick: () => uebersetzePost(p.id) }), p.own ? /*#__PURE__*/React.createElement(CmtyChip, { status: p.status }) : /*#__PURE__*/React.createElement(MeldeButton, { gemeldet: p.gemeldet_von_mir, onClick: () => meldePost(p.id, "networking") }), /*#__PURE__*/React.createElement(AntwortButton, { eigener: !!p.own, onClick: () => antwortSenden(p.id) }))),
+        /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "#2a3140", whiteSpace: "pre-wrap" } }, cmtyBodyText(p, cUe, cUeZeige), cUeZeige[p.id] && cUe[p.id] && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED, marginTop: 6 } }, "\uD83C\uDF10 \u00dcbersetzt" + (cUe[p.id].lang ? " aus " + cUe[p.id].lang.toUpperCase() : ""))))),
       cNetPosts.length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Noch keine Anfragen \u2014 starte das Netzwerk!"), cNetPosts.length > 0 && cmtyFilter(cNetPosts, cNetSuche).length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Keine Treffer f\u00fcr \u201e" + cNetSuche + "\u201c.")) :
     /*#__PURE__*/React.createElement("div", { className: "tw-card", style: Object.assign({}, CARD_BOX, { padding: "34px 24px", textAlign: "center", maxWidth: 560 }) },
       /*#__PURE__*/React.createElement("div", { style: { width: 52, height: 52, borderRadius: 99, background: "#0f1520", color: "#e3b34e", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 12 } }, "\uD83D\uDD12"),
