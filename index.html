@@ -30,11 +30,14 @@
   .tw-main.feed > * { grid-column: 1; min-width: 0; }
   .tw-main.feed > aside { grid-column: 2; grid-row: 1 / span 3; align-self: start; }
   .tw-main.feed > aside:empty { display: none; }
+  html.tw-dark { background: #0d1117; }
+  html.tw-dark::before { content: ""; position: fixed; inset: 0; z-index: 2147483647; pointer-events: none; backdrop-filter: invert(1) hue-rotate(180deg); -webkit-backdrop-filter: invert(1) hue-rotate(180deg); }
+  html.tw-dark img, html.tw-dark video, html.tw-dark iframe { filter: invert(1) hue-rotate(180deg); }
   .tw-main select, .tw-main input:not([type="checkbox"]):not([type="radio"]) { min-height: 42px; border-radius: 9px; box-sizing: border-box; }
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-24-v app-langswitch -->
+<!-- tw-build: 2026-08-24-w darkmode -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -1484,8 +1487,14 @@ function normResp(x) {
 }
 function LangSwitch({ dark }) {
   const opt = ["de", "en", "fr", "es"];
-  return React.createElement("div", { style: { display: "inline-flex", border: "1px solid " + (dark ? "rgba(255,255,255,.28)" : HAIR), borderRadius: 9, overflow: "hidden" } },
-    opt.map(o => React.createElement("button", { key: o, onClick: () => __twToggleLang && __twToggleLang(o), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .4, padding: "5px 9px", border: "none", background: LANG === o ? (dark ? "rgba(255,255,255,.92)" : "#0f1520") : "transparent", color: LANG === o ? (dark ? "#111" : "#fff") : (dark ? "rgba(255,255,255,.72)" : "#5b6472") } }, o.toUpperCase())));
+  const [dk, setDk] = React.useState(() => { try { return localStorage.getItem("tw_dark") === "1"; } catch (e) { return false; } });
+  React.useEffect(() => {
+    try { document.documentElement.classList.toggle("tw-dark", dk); localStorage.setItem("tw_dark", dk ? "1" : "0"); } catch (e) {}
+  }, [dk]);
+  return React.createElement("div", { style: { display: "inline-flex", alignItems: "center", gap: 8 } },
+    React.createElement("div", { style: { display: "inline-flex", border: "1px solid " + (dark ? "rgba(255,255,255,.28)" : HAIR), borderRadius: 9, overflow: "hidden" } },
+      opt.map(o => React.createElement("button", { key: o, onClick: () => __twToggleLang && __twToggleLang(o), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .4, padding: "5px 9px", border: "none", background: LANG === o ? (dark ? "rgba(255,255,255,.92)" : "#0f1520") : "transparent", color: LANG === o ? (dark ? "#111" : "#fff") : (dark ? "rgba(255,255,255,.72)" : "#5b6472") } }, o.toUpperCase()))),
+    React.createElement("button", { onClick: () => setDk(d => !d), "aria-label": "Design hell/dunkel", title: dk ? "Helles Design" : "Dunkles Design", style: { cursor: "pointer", width: 30, height: 30, borderRadius: 9, border: "1px solid " + (dark ? "rgba(255,255,255,.28)" : HAIR), background: "transparent", color: dark ? "rgba(255,255,255,.85)" : "#0f1520", fontSize: 14, lineHeight: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", padding: 0 } }, dk ? "\u2600" : "\u263E"));
 }
 const fmtDate = t => new Date(t).toLocaleDateString(LANG === "en" ? "en-GB" : "de-DE", {
   day: "2-digit",
