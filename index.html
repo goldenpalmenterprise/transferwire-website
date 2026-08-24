@@ -48,7 +48,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-24-zn en-layer -->
+<!-- tw-build: 2026-08-24-zo en-layer-hostonly -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -985,6 +985,7 @@ const EN_MAP = {
 "AGB": "Terms",
 "Hier Vertr\u00e4ge k\u00fcndigen": "Cancel contracts here"
 };
+Object.assign(EN_MAP, { "Die Seite hatte einen technischen Fehler. Einmal neu laden hilft meistens.": "The page ran into a technical error. Reloading usually fixes it.", "Seite neu laden": "Reload page", "Etwas ist schiefgelaufen": "Something went wrong", "Neu laden": "Reload" });
 const EN_COUNTRIES = { "Deutschland": "Germany", "\u00d6sterreich": "Austria", "Schweiz": "Switzerland", "Spanien": "Spain", "Italien": "Italy", "Frankreich": "France", "Belgien": "Belgium", "Niederlande": "Netherlands", "T\u00fcrkei": "Turkey", "D\u00e4nemark": "Denmark", "Griechenland": "Greece", "Polen": "Poland", "Tschechien": "Czechia", "Kroatien": "Croatia", "Serbien": "Serbia", "Schottland": "Scotland", "Schweden": "Sweden", "Norwegen": "Norway", "Russland": "Russia", "Ungarn": "Hungary", "Slowakei": "Slovakia", "Rum\u00e4nien": "Romania", "Brasilien": "Brazil", "Argentinien": "Argentina", "Vereinigte Staaten": "United States", "Saudi-Arabien": "Saudi Arabia", "Japan": "Japan", "S\u00fcdkorea": "South Korea", "Australien": "Australia", "Mexiko": "Mexico", "Kolumbien": "Colombia" };
 Object.assign(EN_MAP, EN_COUNTRIES);
 const EN_WORDS = [
@@ -1029,7 +1030,7 @@ function twEn(s) {
   const ce = React.createElement;
   React.createElement = function (type, props) {
     let args = Array.prototype.slice.call(arguments, 2);
-    if (LANG === "en") {
+    if (LANG === "en" && typeof type === "string") {
       for (let i = 0; i < args.length; i++) if (typeof args[i] === "string") args[i] = twEn(args[i]);
       if (props && typeof props === "object") {
         const p2 = {};
