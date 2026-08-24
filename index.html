@@ -48,7 +48,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-24-zc community -->
+<!-- tw-build: 2026-08-24-zd community-wrapper -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -7659,7 +7659,7 @@ function TransferApp({
       fontSize: 12.5,
       color: MUTED
     }
-  }, t("watch_nohits")))), (view === "feed" || view === "watch" || view === "talente") && /*#__PURE__*/React.createElement(React.Fragment, null, view === "community" && /*#__PURE__*/React.createElement("div", { style: { gridColumn: "1 / -1", display: "grid", gap: 14 } },
+  }, t("watch_nohits")))), (view === "feed" || view === "watch" || view === "talente" || view === "community" || view === "networking") && /*#__PURE__*/React.createElement(React.Fragment, null, view === "community" && /*#__PURE__*/React.createElement("div", { style: { gridColumn: "1 / -1", display: "grid", gap: 14 } },
     /*#__PURE__*/React.createElement(CommunitySub, { view: view, setView: setView }),
     /*#__PURE__*/React.createElement("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 24, margin: "2px 0 0", textTransform: "uppercase", letterSpacing: .4, color: INK } }, "\uD83D\uDCAC Community \u2014 Transfer-Infos"),
     /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, margin: "0 0 2px", maxWidth: 720 } }, "Teile, was du aus deinem Netzwerk h\u00f6rst \u2014 Wechsel, Ger\u00fcchte, Vereinsbedarfe, Spielerinfos. Unser KI-Pr\u00fcfer sichtet jeden Hinweis, ordnet ihn ein und stellt Relevantes gekennzeichnet in den Feed und nach \u201eVerein sucht\u201c."),
