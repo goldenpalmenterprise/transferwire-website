@@ -5461,7 +5461,7 @@ function TransferApp({
       try {
         const max = news.reduce((a, n) => { const t = new Date(n.published || n.publishedAt || 0).getTime(); return t > a ? t : a; }, 0);
         if (!max) return;
-        fetch("/db/signals?select=id&published=gt." + encodeURIComponent(new Date(max).toISOString()) + "&limit=1", { headers: { Prefer: "count=exact" }, cache: "no-store" }).then(r => {
+        fetch("/db/signals?select=id&published_at=gt." + encodeURIComponent(new Date(max).toISOString()) + "&limit=1", { headers: { Prefer: "count=exact" }, cache: "no-store" }).then(r => {
           const m = (r.headers.get("content-range") || "").match(/\/(\d+)/);
           if (m) setNeueZahl(Number(m[1]) || 0);
         }).catch(() => {});
