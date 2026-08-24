@@ -26,8 +26,9 @@
   .tw-fab > * { display: none !important; }
   .tw-fab::before { content: "TW"; color: #fff; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: .5px; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
   .tw-fab::after { content: ""; position: absolute; top: 5px; right: 5px; width: 9px; height: 9px; border-radius: 99px; background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.25); }
+  .tw-pos-grid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important; gap: 12 !important; }
 </style>
-<!-- tw-build: 2026-08-23-j premium-w3 -->
+<!-- tw-build: 2026-08-24-k premium-w4 -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -1726,7 +1727,12 @@ function TalentScouting() {
 }
 
 
-function FeedSuche({ q, setQ, club, setClub, alle, watch, geheZu }) {
+function FeedSuche({ q, setQ, club, setClub, alle, watch, geheZu, fs, setFs }) {
+  const [gesp, setGesp] = useState(() => { try { return JSON.parse(localStorage.getItem("tw_savedfilters") || "[]"); } catch (e) { return []; } });
+  const merkeGesp = neu => { setGesp(neu); try { localStorage.setItem("tw_savedfilters", JSON.stringify(neu)); } catch (e) {} };
+  const speichere = () => { const n = (window.prompt("Name f\u00fcr diesen Filter:") || "").trim(); if (!n) return; const e2 = { n, sport: fs && fs.sport, type: fs && fs.type, country: fs && fs.country, league: fs && fs.league, club: club, q: q }; merkeGesp([...gesp.filter(x => x.n !== n), e2].slice(-6)); };
+  const wende = e2 => { if (setFs) { setFs.setSport(e2.sport || "alle"); setFs.setType(e2.type || "alle"); setFs.setCountry(e2.country || ""); setFs.setLeague(e2.league || ""); } setClub(e2.club || ""); setQ(e2.q || ""); };
+  const loesche = i2 => merkeGesp(gesp.filter((x, j2) => j2 !== i2));
   const vereine = React.useMemo(() => {
     const z = {};
     for (const n of (alle || [])) { for (const c of [n.to_club, n.from_club]) { if (c && c.length > 2) z[c] = (z[c] || 0) + 1; } }
@@ -1737,7 +1743,12 @@ function FeedSuche({ q, setQ, club, setClub, alle, watch, geheZu }) {
     React.createElement("div", { style: { fontFamily: FONT_BODY, fontWeight: 800, fontSize: 14.5, marginBottom: 10 } }, "Meistdiskutierte Vereine"),
     React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: 6 } },
       vereine.map(v => chip(v, club === v, () => setClub(club === v ? "" : v), "v-" + v)),
-      (club || q) && chip("\u2715 Zur\u00fccksetzen", false, () => { setClub(""); setQ(""); }, "reset")), (watch || []).length ? React.createElement("div", { style: { marginTop: 14, paddingTop: 12, borderTop: "1px solid " + HAIR } }, React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.2, color: "#8a92a3", textTransform: "uppercase", marginBottom: 8 } }, "Meine Merkliste"), (watch || []).slice(0, 3).map((w, i) => React.createElement("div", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, color: "#232b38", padding: "4px 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, "\u2665 " + String(w && (w.wert || w.name) || w || ""))), React.createElement("button", { onClick: () => geheZu && geheZu("watch"), style: { marginTop: 6, fontFamily: FONT_BODY, fontSize: 12, fontWeight: 900, color: "#149a59", background: "none", border: "none", cursor: "pointer", padding: 0 } }, "Alle " + (watch || []).length + " anzeigen \u2192")) : null);
+      (club || q) && chip("\u2715 Zur\u00fccksetzen", false, () => { setClub(""); setQ(""); }, "reset")), (watch || []).length ? React.createElement("div", { style: { marginTop: 14, paddingTop: 12, borderTop: "1px solid " + HAIR } }, React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.2, color: "#8a92a3", textTransform: "uppercase", marginBottom: 8 } }, "Meine Merkliste"), (watch || []).slice(0, 3).map((w, i) => React.createElement("div", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, color: "#232b38", padding: "4px 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, "\u2665 " + String(w && (w.wert || w.name) || w || ""))), React.createElement("button", { onClick: () => geheZu && geheZu("watch"), style: { marginTop: 6, fontFamily: FONT_BODY, fontSize: 12, fontWeight: 900, color: "#149a59", background: "none", border: "none", cursor: "pointer", padding: 0 } }, "Alle " + (watch || []).length + " anzeigen \u2192")) : null, React.createElement("div", { style: { marginTop: 14, paddingTop: 12, borderTop: "1px solid " + HAIR } },
+      React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.2, color: "#8a92a3", textTransform: "uppercase", marginBottom: 8 } }, "Gespeicherte Filter"),
+      gesp.map((e2, i2) => React.createElement("div", { key: i2, style: { display: "flex", alignItems: "center", gap: 6, padding: "3px 0" } },
+        React.createElement("button", { onClick: () => wende(e2), style: { flex: 1, textAlign: "left", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, color: "#232b38", background: "none", border: "none", cursor: "pointer", padding: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, "\u25CE " + e2.n),
+        React.createElement("button", { onClick: () => loesche(i2), style: { border: "none", background: "none", cursor: "pointer", color: "#8a92a3", fontSize: 11, padding: 0 } }, "\u2715"))),
+      React.createElement("button", { onClick: speichere, style: { marginTop: 6, fontFamily: FONT_BODY, fontSize: 12, fontWeight: 900, color: "#0f1520", background: "#f0f3f8", border: "1px solid " + HAIR, borderRadius: 8, cursor: "pointer", padding: "7px 11px" } }, "+ Aktuellen Filter speichern")));
 }
 function ScoutMenu({ view, setView }) {
   const aktiv = view === "talente" || view === "listen" || view === "ranking";
@@ -4700,10 +4711,10 @@ function SettingsOverlay({
     size: 15
   }))), /*#__PURE__*/React.createElement("div", {
     style: {
-      background: "transparent",
-      border: "none",
-      borderRadius: 0,
-      padding: "0 0 4px",
+      background: "#fff",
+      border: `1px solid ${HAIR}`,
+      borderRadius: 12,
+      padding: "14px 16px",
       marginBottom: 14
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -5617,31 +5628,7 @@ function TransferApp({
       borderRadius: 9,
       padding: "11px 12px"
     }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      display: "block",
-      width: 18,
-      height: 2,
-      background: "#e8e8e4",
-      borderRadius: 2
-    }
-  }), /*#__PURE__*/React.createElement("span", {
-    style: {
-      display: "block",
-      width: 18,
-      height: 2,
-      background: "#e8e8e4",
-      borderRadius: 2
-    }
-  }), /*#__PURE__*/React.createElement("span", {
-    style: {
-      display: "block",
-      width: 18,
-      height: 2,
-      background: "#e8e8e4",
-      borderRadius: 2
-    }
-  })), menuOpen && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", { style: { width: 26, height: 26, borderRadius: 99, background: "#149a59", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 900, letterSpacing: .3 } }, account && account.email ? account.email[0].toUpperCase() : "\u2261")), menuOpen && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     onClick: () => setMenuOpen(false),
     style: {
       position: "fixed",
@@ -5981,6 +5968,7 @@ function TransferApp({
     const count = needsBySport.filter(n => needMatchesPos(n, p)).length;
     const v = TYPE.verein_sucht;
     const on = count > 0;
+    if (!on) return null;
     return /*#__PURE__*/React.createElement("button", {
       key: p.key,
       className: "tw-tile",
@@ -5996,7 +5984,7 @@ function TransferApp({
         display: "flex",
         alignItems: "center",
         gap: 11,
-        opacity: on ? 1 : .5
+        minHeight: 94
       }
     }, /*#__PURE__*/React.createElement("span", {
       style: {
@@ -6127,7 +6115,95 @@ function TransferApp({
       lineHeight: 1.55,
       margin: "6px 0 0"
     }
-  }, t("rank_sub"))), /*#__PURE__*/React.createElement("div", { style: { display: "grid", gridTemplateColumns: "minmax(0, 1fr) 340px", gap: 24, alignItems: "start" } }, (() => {
+  }, t("rank_sub"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: 8,
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    value: perfQ,
+    onChange: e => setPerfQ(e.target.value),
+    placeholder: t("rank_search_ph"),
+    style: {
+      flex: "1 1 200px",
+      fontFamily: FONT_BODY,
+      fontSize: 16,
+      padding: "10px 12px",
+      border: `1px solid ${HAIR}`,
+      borderRadius: 9,
+      boxSizing: "border-box",
+      background: "#fff"
+    }
+  }), /*#__PURE__*/React.createElement("select", {
+    value: perfLg,
+    onChange: e => setPerfLg(e.target.value),
+    style: {
+      fontFamily: FONT_BODY,
+      fontSize: 13,
+      padding: "10px 10px",
+      border: `1px solid ${HAIR}`,
+      borderRadius: 9,
+      background: "#fff",
+      maxWidth: 170
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, t("rank_all_lg")), [...new Set((perf || []).map(x => x.league).filter(Boolean))].sort().map(l => /*#__PURE__*/React.createElement("option", {
+    key: l,
+    value: l
+  }, l))), /*#__PURE__*/React.createElement("select", {
+    value: perfPos,
+    onChange: e => setPerfPos(e.target.value),
+    style: {
+      fontFamily: FONT_BODY,
+      fontSize: 13,
+      padding: "10px 10px",
+      border: `1px solid ${HAIR}`,
+      borderRadius: 9,
+      background: "#fff"
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, t("rank_all_pos")), ["Torwart", "Abwehr", "Mittelfeld", "Sturm"].map(p => /*#__PURE__*/React.createElement("option", {
+    key: p,
+    value: p
+  }, p))), /*#__PURE__*/React.createElement("select", {
+    value: perfSt,
+    onChange: e => setPerfSt(e.target.value),
+    style: {
+      fontFamily: FONT_BODY,
+      fontSize: 13,
+      padding: "10px 10px",
+      border: `1px solid ${HAIR}`,
+      borderRadius: 9,
+      background: "#fff",
+      maxWidth: 165
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, t("rank_all_st")), PERF_TAGS.map(p => /*#__PURE__*/React.createElement("option", {
+    key: p,
+    value: p
+  }, p))), /*#__PURE__*/React.createElement("select", {
+    value: perfSw,
+    onChange: e => setPerfSw(e.target.value),
+    style: {
+      fontFamily: FONT_BODY,
+      fontSize: 13,
+      padding: "10px 10px",
+      border: `1px solid ${HAIR}`,
+      borderRadius: 9,
+      background: "#fff",
+      maxWidth: 165
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, t("rank_all_sw")), PERF_TAGS.map(p => /*#__PURE__*/React.createElement("option", {
+    key: p,
+    value: p
+  }, p)))), /*#__PURE__*/React.createElement("div", { style: { display: "grid", gridTemplateColumns: "minmax(0, 1fr) 340px", gap: 24, alignItems: "start" } }, (() => {
     if (!perf || perf.length < 11) return null;
     const best = {};
     for (const x of perf) {
@@ -6263,95 +6339,7 @@ function TransferApp({
     }, t("totw_sub12")), /*#__PURE__*/React.createElement(Chip, {
       x: joker
     })));
-  })(), (() => { const topP = (perf || []).slice().sort((a, b) => (b.score || 0) - (a.score || 0))[0]; if (!topP) return null; return /*#__PURE__*/React.createElement("div", { className: "tw-card", style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 16, padding: "16px 18px" } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.2, color: "#8a92a3", textTransform: "uppercase", marginBottom: 10 } }, "Spieler des Spieltags"), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 13, marginBottom: 12 } }, /*#__PURE__*/React.createElement("div", { style: { width: 56, height: 56, borderRadius: 16, background: "#0f1520", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontSize: 21, fontWeight: 700, flex: "0 0 auto" } }, String(topP.name || "?").split(/\s+/).map(w => w[0]).slice(0, 2).join("")), /*#__PURE__*/React.createElement("div", { style: { minWidth: 0 } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 21, fontWeight: 700, color: "#15181C", lineHeight: 1.05 } }, topP.name), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "#667085", marginTop: 3 } }, [topP.team, topP.pos].filter(Boolean).join(" \u00b7 ")))), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, background: "#eaf7ef", border: "1px solid #cfe9da", borderRadius: 14, padding: "12px 14px", marginBottom: 12 } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 34, fontWeight: 700, color: "#0b6b3e", lineHeight: 1 } }, Math.round(topP.score || 0)), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: "#0d8a4f", lineHeight: 1.35 } }, "TW-SCORE", /*#__PURE__*/React.createElement("br", null), "St\u00e4rkste Einzelleistung")), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "#667085", lineHeight: 1.6 } }, "So entsteht der Score: positionsgewichtete Bewertung aller Spielstatistiken (Tore, Vorlagen, Zweik\u00e4mpfe, P\u00e4sse, Paraden) auf einer Skala von 0\u2013100 \u2014 jede Nacht neu berechnet.")); })()), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      flexWrap: "wrap",
-      gap: 8,
-      marginBottom: 14
-    }
-  }, /*#__PURE__*/React.createElement("input", {
-    value: perfQ,
-    onChange: e => setPerfQ(e.target.value),
-    placeholder: t("rank_search_ph"),
-    style: {
-      flex: "1 1 200px",
-      fontFamily: FONT_BODY,
-      fontSize: 16,
-      padding: "10px 12px",
-      border: `1px solid ${HAIR}`,
-      borderRadius: 9,
-      boxSizing: "border-box",
-      background: "#fff"
-    }
-  }), /*#__PURE__*/React.createElement("select", {
-    value: perfLg,
-    onChange: e => setPerfLg(e.target.value),
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 13,
-      padding: "10px 10px",
-      border: `1px solid ${HAIR}`,
-      borderRadius: 9,
-      background: "#fff",
-      maxWidth: 170
-    }
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, t("rank_all_lg")), [...new Set((perf || []).map(x => x.league).filter(Boolean))].sort().map(l => /*#__PURE__*/React.createElement("option", {
-    key: l,
-    value: l
-  }, l))), /*#__PURE__*/React.createElement("select", {
-    value: perfPos,
-    onChange: e => setPerfPos(e.target.value),
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 13,
-      padding: "10px 10px",
-      border: `1px solid ${HAIR}`,
-      borderRadius: 9,
-      background: "#fff"
-    }
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, t("rank_all_pos")), ["Torwart", "Abwehr", "Mittelfeld", "Sturm"].map(p => /*#__PURE__*/React.createElement("option", {
-    key: p,
-    value: p
-  }, p))), /*#__PURE__*/React.createElement("select", {
-    value: perfSt,
-    onChange: e => setPerfSt(e.target.value),
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 13,
-      padding: "10px 10px",
-      border: `1px solid ${HAIR}`,
-      borderRadius: 9,
-      background: "#fff",
-      maxWidth: 165
-    }
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, t("rank_all_st")), PERF_TAGS.map(p => /*#__PURE__*/React.createElement("option", {
-    key: p,
-    value: p
-  }, p))), /*#__PURE__*/React.createElement("select", {
-    value: perfSw,
-    onChange: e => setPerfSw(e.target.value),
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 13,
-      padding: "10px 10px",
-      border: `1px solid ${HAIR}`,
-      borderRadius: 9,
-      background: "#fff",
-      maxWidth: 165
-    }
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, t("rank_all_sw")), PERF_TAGS.map(p => /*#__PURE__*/React.createElement("option", {
-    key: p,
-    value: p
-  }, p)))), perfLoading || perf === null ? /*#__PURE__*/React.createElement("div", {
+  })(), (() => { const topP = (perf || []).slice().sort((a, b) => (b.score || 0) - (a.score || 0))[0]; if (!topP) return null; return /*#__PURE__*/React.createElement("div", { className: "tw-card", style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 16, padding: "16px 18px" } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.2, color: "#8a92a3", textTransform: "uppercase", marginBottom: 10 } }, "Spieler des Spieltags"), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 13, marginBottom: 12 } }, /*#__PURE__*/React.createElement("div", { style: { width: 56, height: 56, borderRadius: 16, background: "#0f1520", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontSize: 21, fontWeight: 700, flex: "0 0 auto" } }, String(topP.name || "?").split(/\s+/).map(w => w[0]).slice(0, 2).join("")), /*#__PURE__*/React.createElement("div", { style: { minWidth: 0 } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 21, fontWeight: 700, color: "#15181C", lineHeight: 1.05 } }, topP.name), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "#667085", marginTop: 3 } }, [topP.team, topP.pos].filter(Boolean).join(" \u00b7 ")))), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, background: "#eaf7ef", border: "1px solid #cfe9da", borderRadius: 14, padding: "12px 14px", marginBottom: 12 } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 34, fontWeight: 700, color: "#0b6b3e", lineHeight: 1 } }, Math.round(topP.score || 0)), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: "#0d8a4f", lineHeight: 1.35 } }, "TW-SCORE", /*#__PURE__*/React.createElement("br", null), "St\u00e4rkste Einzelleistung")), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "#667085", lineHeight: 1.6 } }, "So entsteht der Score: positionsgewichtete Bewertung aller Spielstatistiken (Tore, Vorlagen, Zweik\u00e4mpfe, P\u00e4sse, Paraden) auf einer Skala von 0\u2013100 \u2014 jede Nacht neu berechnet.")); })()), perfLoading || perf === null ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 13,
@@ -6397,10 +6385,11 @@ function TransferApp({
       const offen = perfOpen === x.k;
       return /*#__PURE__*/React.createElement("div", {
         key: x.k,
+        className: "tw-card",
         style: {
           background: "#fff",
           border: `1px solid ${HAIR}`,
-          borderRadius: 12,
+          borderRadius: 14,
           padding: "12px 14px"
         }
       }, /*#__PURE__*/React.createElement("div", {
@@ -6413,11 +6402,11 @@ function TransferApp({
         style: {
           fontFamily: FONT_DISPLAY,
           fontWeight: 700,
-          fontSize: 15,
-          color: MUTED,
-          minWidth: 30
+          fontSize: 17,
+          color: i < 3 ? "#b9860b" : MUTED,
+          minWidth: 34
         }
-      }, "#", i + 1), /*#__PURE__*/React.createElement("div", {
+      }, "#", i + 1), /*#__PURE__*/React.createElement("div", { style: { width: 38, height: 38, borderRadius: 12, background: "#0f1520", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontSize: 15, fontWeight: 700, flexShrink: 0 } }, String(x.name || "?").split(/\s+/).map(w => w[0]).slice(0, 2).join("")), /*#__PURE__*/React.createElement("div", {
         style: {
           minWidth: 52,
           textAlign: "center",
@@ -7757,7 +7746,7 @@ function TransferApp({
       color: MUTED,
       fontSize: 14
     }
-  }, "Keine Meldungen für diese Auswahl. Filter zurücksetzen und erneut versuchen.") : (() => { const liste = (view === "watch" ? watchList : filtered); let seen = 0; try { seen = Number(localStorage.getItem("tw_seen") || 0); } catch (e) {} const heute = new Date(); heute.setHours(0, 0, 0, 0); const gesternTs = heute.getTime() - 86400000; const gruppe = it => { const d = new Date(it.published || it.publishedAt || 0); if (isNaN(d.getTime())) return ""; const ts = d.getTime(); if (ts >= heute.getTime()) return "Heute"; if (ts >= gesternTs) return "Gestern"; return "Fr\u00fcher"; }; const aus = []; let letzte = null; let neuMarke = false; liste.forEach(it => { const g = gruppe(it); if (g && g !== letzte) { aus.push(/*#__PURE__*/React.createElement("div", { key: "g" + g, style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 900, letterSpacing: 1.6, color: "#8a92a3", margin: "8px 2px 0", textTransform: "uppercase" } }, g)); letzte = g; } const ts = new Date(it.published || it.publishedAt || 0).getTime(); if (!neuMarke && seen && !isNaN(ts) && ts > 0 && ts <= seen) { aus.push(/*#__PURE__*/React.createElement("div", { key: "seenline", style: { display: "flex", alignItems: "center", gap: 10, margin: "2px 0" } }, /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, color: "#149a59" } }, "NEU SEIT DEINEM LETZTEN BESUCH \u2191"), /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }))); neuMarke = true; } aus.push(/*#__PURE__*/React.createElement(NewsCard, { onWatch: it2 => setAddSheet(it2), onOpen: it2 => setMSel(it2), key: it.id, item: it })); }); return aus; })())), /*#__PURE__*/React.createElement("aside", null, view !== "talente" && React.createElement(FeedSuche, { q: query, setQ: setQuery, club: club, setClub: setClub, alle: news, watch: watchList, geheZu: setView }))), plSel && /*#__PURE__*/React.createElement(SpielerDrawer, { x: plSel, news: news, schliessen: () => setPlSel(null) }), mSel && /*#__PURE__*/React.createElement(MeldungsPanel, { m: mSel, schliessen: () => setMSel(null), onWatch: it => { setAddSheet(it); setMSel(null); } }), plVergleich.length > 0 && /*#__PURE__*/React.createElement(VergleichUI, { spieler: plVergleich, entf: pid => setPlVergleich(v => v.filter(y => y.pid !== pid)), leeren: () => { setPlVergleich([]); setPlVglOffen(false); }, offen: plVglOffen, setOffen: setPlVglOffen })), /*#__PURE__*/React.createElement("footer", {
+  }, "Keine Meldungen für diese Auswahl. Filter zurücksetzen und erneut versuchen.") : (() => { const liste = (view === "watch" ? watchList : filtered); let seen = 0; try { seen = Number(localStorage.getItem("tw_seen") || 0); } catch (e) {} const heute = new Date(); heute.setHours(0, 0, 0, 0); const gesternTs = heute.getTime() - 86400000; const gruppe = it => { const d = new Date(it.published || it.publishedAt || 0); if (isNaN(d.getTime())) return ""; const ts = d.getTime(); if (ts >= heute.getTime()) return "Heute"; if (ts >= gesternTs) return "Gestern"; return "Fr\u00fcher"; }; const aus = []; let letzte = null; let neuMarke = false; liste.forEach(it => { const g = gruppe(it); if (g && g !== letzte) { aus.push(/*#__PURE__*/React.createElement("div", { key: "g" + g, style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 900, letterSpacing: 1.6, color: "#8a92a3", margin: "8px 2px 0", textTransform: "uppercase" } }, g)); letzte = g; } const ts = new Date(it.published || it.publishedAt || 0).getTime(); if (!neuMarke && seen && !isNaN(ts) && ts > 0 && ts <= seen) { aus.push(/*#__PURE__*/React.createElement("div", { key: "seenline", style: { display: "flex", alignItems: "center", gap: 10, margin: "2px 0" } }, /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, color: "#149a59" } }, "NEU SEIT DEINEM LETZTEN BESUCH \u2191"), /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }))); neuMarke = true; } aus.push(/*#__PURE__*/React.createElement(NewsCard, { onWatch: it2 => setAddSheet(it2), onOpen: it2 => setMSel(it2), key: it.id, item: it })); }); return aus; })())), /*#__PURE__*/React.createElement("aside", null, view !== "talente" && React.createElement(FeedSuche, { q: query, setQ: setQuery, club: club, setClub: setClub, alle: news, watch: watchList, geheZu: setView, fs: { sport: sport, type: type, country: country, league: league }, setFs: { setSport: setSport, setType: setType, setCountry: setCountry, setLeague: setLeague } }))), plSel && /*#__PURE__*/React.createElement(SpielerDrawer, { x: plSel, news: news, schliessen: () => setPlSel(null) }), mSel && /*#__PURE__*/React.createElement(MeldungsPanel, { m: mSel, schliessen: () => setMSel(null), onWatch: it => { setAddSheet(it); setMSel(null); } }), plVergleich.length > 0 && /*#__PURE__*/React.createElement(VergleichUI, { spieler: plVergleich, entf: pid => setPlVergleich(v => v.filter(y => y.pid !== pid)), leeren: () => { setPlVergleich([]); setPlVglOffen(false); }, offen: plVglOffen, setOffen: setPlVglOffen })), /*#__PURE__*/React.createElement("footer", {
     style: {
       borderTop: `1px solid ${HAIR}`,
       background: "#fff",
@@ -8395,7 +8384,7 @@ function TransferApp({
       flexDirection: "column",
       gap: 7
     }
-  }, [t("chat_sug1"), t("chat_sug2"), t("chat_sug3")].map((s, i) => /*#__PURE__*/React.createElement("button", {
+  }, (view === "geruechte" ? ["Welche St\u00fcrmer-Ger\u00fcchte gibt es in der S\u00fcper Lig?", "Zeig mir die st\u00e4rksten Ger\u00fcchte der letzten 24 Stunden", "Welche Vereine sind aktuell am aktivsten?"] : view === "gesucht" ? ["Welche Clubs passen zu meinem Spielerprofil?", "Welche Vereine suchen aktuell einen St\u00fcrmer?", "Wo werden Innenverteidiger gesucht?"] : view === "ranking" ? ["Wie wird der TW-Score berechnet?", "Wer ist der Spieler des Spieltags und warum?", "Zeig mir die Formkurve der Top-Elf"] : view === "players" ? ["Finde U23-Sechser mit auslaufendem Vertrag", "Welche Spieler haben 2027 Vertragsende?", "Zeig mir die wertvollsten U21-Spieler"] : view === "talente" || view === "listen" ? ["Erstelle eine Liste mit U21-Innenverteidigern", "Welche Talente sind noch unentdeckt?", "Wer sind die Top-Torj\u00e4ger unter 19?"] : view === "chancen" ? ["Welche Spieler sind ab Sommer abl\u00f6sefrei?", "Zeig mir vertragslose St\u00fcrmer", "Wessen Vertrag endet 2026?"] : [t("chat_sug1"), t("chat_sug2"), t("chat_sug3")]).map((s, i) => /*#__PURE__*/React.createElement("button", {
     key: i,
     onClick: () => sendChat(s),
     style: {
