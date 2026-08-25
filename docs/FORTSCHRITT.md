@@ -354,3 +354,13 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
 ### OFFEN
 - Kompaktansicht-Spalten stehen (Zeit/Typ/Verein-Spieler/Bewegung/Liga/Status/Quelle) – noch nicht live gegengeprüft.
 - 1.4 einheitliche Filterleiste für die ÜBRIGEN Seiten (nach Launch), Vereinslogos-Sync, Match-/Opportunity-Score (Freigabe), Boss-To-dos (PAT!).
+
+## 25.08. 23:42–23:52 – NEWSFEED: Seitenleisten-Kasten weg, normale Filterzeile (Commit 7d6e203, Marker ah)
+- Boss-Screenshot (1845 px breit): der weiße Kasten „Meistdiskutierte Vereine / Gespeicherte Filter“ lag ÜBER den Feed-Karten (Karten 617 px breit,
+  Kasten 1232–1570). Headless (rt38) war das Layout korrekt (1020/340) – Ursache beim Boss nicht reproduzierbar (Tab war seit ~22 Std offen, „aktualisiert vor 22 Std“).
+- Entscheidung: Feed hat KEINE Seitenleiste mehr (aside leer → :has-Regel → volle Breite 1384 px, zwei Karten à 686 px). FeedSuche bekommt
+  Prop inline: Filterzeile (.tw-feedfilter) direkt unter den Typ-Chips: Label „Meistdiskutierte Vereine“, 5 Vereins-Chips (Logo, Name, Zähler),
+  aktiver Chip dunkel #0f1520, „✕ Zurücksetzen“, rechts gespeicherte Filter als Chips (◎ Name, ✕ löschen) + „+ Aktuellen Filter speichern“.
+  Andere Seiten behalten den Seitenleisten-Kasten (Bedingung view !== "feed").
+- Abnahme rt39 (1845 px): keine Überlappung, Filterzeile 49 px, Chip-Klick → 35 Karten (Manchester United), Zurücksetzen → 60; mobil 366 px passt. 0 Fehler.
+- OFFEN: Boss-Brief „Vereinsbedarf & Spieler-Matching“ (Datenlage geprüft: 584 Bedarfe, 383 mit seekStrengths, KEIN Alter; siehe Analyse im Chat) – noch nicht gebaut.
