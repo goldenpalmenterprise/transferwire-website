@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-25-ae terminal-finish -->
+<!-- tw-build: 2026-08-25-af zeitfilter-fix -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -2279,6 +2279,16 @@ function LandingStats() {
 }
 
 const twDomain = u => { try { return String(u || "").replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0]; } catch (e) { return ""; } };
+const relToTime = txt => {
+  const s = String(txt || "").toLowerCase().trim();
+  if (!s) return 0;
+  if (/gerade eben|just now|soeben/.test(s)) return Date.now();
+  const m = s.match(/(\d+)\s*(min|std|h\b|hour|tg|tag|d\b|day)/);
+  if (!m) return 0;
+  const n = Number(m[1]); const u = m[2];
+  const ms = /min/.test(u) ? 60000 : /std|^h|hour/.test(u) ? 3600000 : 86400000;
+  return Date.now() - n * ms;
+};
 const twRelTime = iso => {
   if (!iso) return "";
   const diff = Math.max(0, (Date.now() - new Date(iso).getTime()) / 60000);
@@ -2370,7 +2380,7 @@ function GerVue({ alle, onWatch, onOpen, updatedAt, watch, onSide, apply }) {
   const [gAnsicht, setGAnsicht] = useState("karten");
   const [weitere, setWeitere] = useState(false);
   const [sheet, setSheet] = useState(false);
-  const neuesteZeit = useMemo(() => (alle || []).reduce((a, n) => { const t = new Date(n.published || n.publishedAt || 0).getTime(); return t > a ? t : a; }, 0), [alle]);
+  const neuesteZeit = useMemo(() => (alle || []).reduce((a, n) => { const t = (n.published ? new Date(n.published).getTime() : 0) || relToTime(n.publishedAt); return t > a ? t : a; }, 0), [alle]);
   const aktualisiert = twRelTime(updatedAt || (neuesteZeit ? new Date(neuesteZeit).toISOString() : null));
   const [limit, setLimit] = useState(60);
   const [kiFrage, setKiFrage] = useState("");
@@ -2398,7 +2408,7 @@ function GerVue({ alle, onWatch, onOpen, updatedAt, watch, onSide, apply }) {
   const feldVon = it => String(it.fromClub || it.from || "");
   const feldZu = it => String(it.toClub || it.to || it.seek || "");
   const feldSp = it => String((it.player && it.player.name) || it.player || "");
-  const zeitVon = it => { const t = new Date(it.published || it.publishedAt || 0).getTime(); return isNaN(t) ? 0 : t; };
+  const zeitVon = it => { const t = it.published ? new Date(it.published).getTime() : NaN; return isNaN(t) || !t ? relToTime(it.publishedAt) : t; };
   const beobClubs = useMemo(() => { const s = new Set(); (watch || []).forEach(w => gerClubs(w).forEach(c => s.add(c))); return s; }, [watch]);
   const basis = useMemo(() => (alle || []).filter(it => {
     const typ = it.type || "";
