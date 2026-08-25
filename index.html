@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-25-zv pagehead-empty -->
+<!-- tw-build: 2026-08-25-zw score-names -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -676,8 +676,8 @@ const LIST_PRESETS = [{
   id: "abwehr",
   de: "Top 25 U23-Abwehrspieler Europa",
   en: "Top 25 U23 defenders Europe",
-  sde: "Verteidiger nach TW-Score",
-  sen: "Defenders by TW score",
+  sde: "Verteidiger nach TW Performance Score",
+  sen: "Defenders by TW Performance Score",
   p: {
     max_age: 23,
     region: "europa",
@@ -787,6 +787,7 @@ const postJson = (url, payload) => fetch(url, {
 let LANG = "de";
 /* ── TransferWire EN-Übersetzungsschicht (DE→EN zur Laufzeit) ─────────────────── */
 const EN_MAP = {
+"Wie wird der TW Performance Score berechnet?": "How is the TW Performance Score calculated?",
 "Vereinsbedarf": "Club needs",
 "Dunkles Design": "Dark mode",
 "Helles Design": "Light mode",
@@ -862,7 +863,7 @@ const EN_MAP = {
 "Disziplin": "Discipline",
 "Spieler des Spieltags": "Player of the matchday",
 "St\u00e4rkste Einzelleistung": "Strongest individual performance",
-"So entsteht der Score: positionsgewichtete Bewertung aller Spielstatistiken (Tore, Vorlagen, Zweik\u00e4mpfe, P\u00e4sse, Paraden) auf einer Skala von 0\u2013100 \u2014 jede Nacht neu berechnet.": "How the score works: a position-weighted rating of all match statistics (goals, assists, duels, passes, saves) on a 0\u2013100 scale \u2014 recalculated every night.",
+"So entsteht der TW Performance Score: positionsgewichtete Bewertung aller Spielstatistiken (Tore, Vorlagen, Zweik\u00e4mpfe, P\u00e4sse, Paraden) auf einer Skala von 0\u2013100 \u2014 jede Nacht neu berechnet.": "How the TW Performance Score works: a position-weighted rating of all match statistics (goals, assists, duels, passes, saves) on a 0\u2013100 scale \u2014 recalculated every night.",
 "Mittelfeld": "Midfield",
 "P\u00e4sse": "Passes",
 "Zweik\u00e4mpfe": "Duels",
@@ -1103,7 +1104,7 @@ const I18N = {
     tour3_t: "Ranking, Datenbank & Briefing",
     tour3_d: "Nach jedem Spieltag bewertet unser Scout-System alle Einsätze (Tab „Ranking“), die Spieler-Datenbank liefert Formkurven — und über das Menü oben rechts aktivierst du Alerts und das Morgen-Briefing.",
     totw_title: "Team der Woche",
-    totw_sub: "Die Top-Elf nach TW-Score der letzten Tage",
+    totw_sub: "Die Top-Elf nach TW Performance Score der letzten Tage",
     totw_sub12: "12. Mann — stärkster Einwechsler",
     l_abo_card: "TransferWire Abo",
     l_month: "/ Monat",
@@ -1183,7 +1184,7 @@ const I18N = {
     li_f_region: "Region",
     li_f_league: "Liga (optional)",
     li_f_pos: "Position",
-    li_f_score: "Min. Score",
+    li_f_score: "Min. Performance Score",
     li_f_maxmin: "Max. Minuten (f\u00fcr Unentdeckte)",
     li_f_sort: "Sortierung",
     li_f_save: "Liste speichern",
@@ -1193,7 +1194,7 @@ const I18N = {
     li_r_europa: "Europa",
     li_r_de: "Deutschland",
     li_r_zweite: "Zweite Ligen",
-    li_s_score: "TW-Score",
+    li_s_score: "TW Performance Score",
     li_s_goals: "Tore",
     li_s_assists: "Assists",
     li_s_minutes: "Minuten",
@@ -1259,13 +1260,13 @@ const I18N = {
     pl_results: "Treffer",
     pl_in_db: "Spieler in der Datenbank",
     pl_season_line: "Saisonwerte",
-    pl_form: "Formkurve — TW-Score je Spieltag",
+    pl_form: "Formkurve — TW Performance Score je Spieltag",
     pl_noform: "Noch keine Spieltags-Bewertungen — sie erscheinen automatisch nach den nächsten Einsätzen.",
     pl_injury: "Aktuell verletzt / angeschlagen",
     pl_needs: "Passende Vereins-Gesuche",
     rank_tab: "Ranking",
     rank_title: "Spieler-Performance",
-    rank_sub: "Jede Nacht bewertet unser Scout-System alle Einsätze des Spieltags: positionsgewichteter TW-Score (0–100) aus den offiziellen Spielstatistiken — bei den Top-Performern mit Stärken, Schwächen und Entwicklungshinweis vom KI-Scout.",
+    rank_sub: "Jede Nacht bewertet unser Scout-System alle Einsätze des Spieltags: positionsgewichteter TW Performance Score (0–100) aus den offiziellen Spielstatistiken — bei den Top-Performern mit Stärken, Schwächen und Entwicklungshinweis vom KI-Scout.",
     rank_search_ph: "Spieler oder Verein suchen …",
     rank_all_lg: "Alle Ligen",
     rank_all_pos: "Alle Positionen",
@@ -1414,7 +1415,7 @@ const I18N = {
     tour3_t: "Ranking, database & briefing",
     tour3_d: "After every matchday our scout system rates all appearances (“Ranking” tab), the player database delivers form curves — and the menu top right activates alerts and the morning briefing.",
     totw_title: "Team of the week",
-    totw_sub: "The top XI by TW score of the last days",
+    totw_sub: "The top XI by TW Performance Score of the last days",
     totw_sub12: "12th man — best substitute",
     l_abo_card: "TransferWire subscription",
     l_month: "/ month",
@@ -1494,7 +1495,7 @@ const I18N = {
     li_f_region: "Region",
     li_f_league: "League (optional)",
     li_f_pos: "Position",
-    li_f_score: "Min. score",
+    li_f_score: "Min. Performance Score",
     li_f_maxmin: "Max. minutes (for hidden gems)",
     li_f_sort: "Sort by",
     li_f_save: "Save list",
@@ -1504,7 +1505,7 @@ const I18N = {
     li_r_europa: "Europe",
     li_r_de: "Germany",
     li_r_zweite: "Second divisions",
-    li_s_score: "TW score",
+    li_s_score: "TW Performance Score",
     li_s_goals: "Goals",
     li_s_assists: "Assists",
     li_s_minutes: "Minutes",
@@ -1570,13 +1571,13 @@ const I18N = {
     pl_results: "results",
     pl_in_db: "players in the database",
     pl_season_line: "Season stats",
-    pl_form: "Form curve — TW score per matchday",
+    pl_form: "Form curve — TW Performance Score per matchday",
     pl_noform: "No matchday ratings yet — they appear automatically after the next appearances.",
     pl_injury: "Currently injured / doubtful",
     pl_needs: "Matching club openings",
     rank_tab: "Ranking",
     rank_title: "Player performance",
-    rank_sub: "Every night our scouting system rates every appearance of the matchday: a position-weighted TW score (0–100) from official match statistics — top performers get strengths, weaknesses and a development note from the AI scout.",
+    rank_sub: "Every night our scouting system rates every appearance of the matchday: a position-weighted TW Performance Score (0–100) from official match statistics — top performers get strengths, weaknesses and a development note from the AI scout.",
     rank_search_ph: "Search player or club …",
     rank_all_lg: "All leagues",
     rank_all_pos: "All positions",
@@ -1984,17 +1985,17 @@ function TalentScouting() {
   const chip = (k, label) => React.createElement("button", { key: k, onClick: () => setKat(k), style: { padding: "7px 14px", borderRadius: 999, border: "1.5px solid " + (kat === k ? "#0e7490" : "#d8d8d4"), background: kat === k ? "#0e7490" : "#fff", color: kat === k ? "#fff" : "#3b3b38", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, cursor: "pointer" } }, label);
   const lchip = (k, label) => React.createElement("button", { key: k, onClick: () => setLand(k), style: { padding: "5px 11px", borderRadius: 999, border: "1px solid " + (land === k ? "#0e7490" : "#e2e2de"), background: land === k ? "#e6f6f9" : "#fff", color: "#0e7490", fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 700, cursor: "pointer" } }, label);
   return React.createElement("div", { style: { gridColumn: "1 / -1", background: "#fff", border: "1.5px solid #e4e4e0", borderRadius: 16, padding: 18 } },
-    React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 18, fontWeight: 800, marginBottom: 10 } }, "\uD83D\uDD2D Talent-Scouting \u2014 Rankings"),
+    React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 10 } }, React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 18, fontWeight: 800 } }, "\uD83D\uDD2D Talent-Scouting \u2014 Rankings"), React.createElement(ScoreLegend, { kind: "talent" })),
     React.createElement("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 } }, chip("top", "\uD83C\uDFC6 Top 50 Europa"), chip("unentdeckt", "\uD83D\uDC8E Unentdeckt"), chip("tore", "\u26BD Torj\u00e4ger"), chip("assists", "\uD83C\uDFAF Vorlagen")),
     (kat === "top" || kat === "unentdeckt") && React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 } }, lchip("alle", "Alle"), lchip("DE", "DE"), lchip("EN", "EN"), lchip("FR", "FR"), lchip("ES", "ES"), lchip("INT", "INT")),
     laden ? React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "#8a8a86", padding: "14px 4px" } }, "Lade Rankings \u2026") :
     rows.length === 0 ? React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "#8a8a86", padding: "14px 4px" } }, "Noch keine Eintr\u00e4ge in dieser Kategorie \u2014 die Scout-Agenten f\u00fcllen die Liste t\u00e4glich weiter auf.") :
-    React.createElement(React.Fragment, null, rows.length >= 3 && React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 10, marginBottom: 12 } }, rows.slice(0, 3).map((r, i) => React.createElement("div", { key: "top" + i, className: "tw-card", style: { background: "#f5fafb", border: "1px solid #cfe4e8", borderRadius: 14, padding: "12px 14px", display: "flex", gap: 12, alignItems: "center" } }, React.createElement("div", { style: { width: 46, height: 46, borderRadius: 14, background: "#087F8C", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontSize: 18, fontWeight: 700, flex: "0 0 auto" } }, "#" + (i + 1)), React.createElement("div", { style: { minWidth: 0, flex: 1 } }, React.createElement("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 18, fontWeight: 700, color: "#15181C", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, r.name), React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "#667085", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, [(r.club || r.team || ""), r.age ? r.age + " J." : "", r.position || ""].filter(Boolean).join(" \u00b7 ")), React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 900, color: "#087F8C", marginTop: 3 } }, kat === "tore" ? ((r.goals || 0) + " Tore") : kat === "assists" ? ((r.assists || 0) + " Vorl.") : ("TW-Score " + (r.scout_score != null ? Math.round(Number(r.scout_score) * 10) : "-"))))))), React.createElement("div", null, rows.slice(3).map((r, i) => React.createElement("div", { key: i, style: { display: "flex", alignItems: "center", gap: 12, padding: "9px 6px", borderTop: i ? "1px solid #f0f0ec" : "none", fontFamily: FONT_BODY, fontSize: 13.5 } },
+    React.createElement(React.Fragment, null, rows.length >= 3 && React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 10, marginBottom: 12 } }, rows.slice(0, 3).map((r, i) => React.createElement("div", { key: "top" + i, className: "tw-card", style: { background: "#f5fafb", border: "1px solid #cfe4e8", borderRadius: 14, padding: "12px 14px", display: "flex", gap: 12, alignItems: "center" } }, React.createElement("div", { style: { width: 46, height: 46, borderRadius: 14, background: "#087F8C", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontSize: 18, fontWeight: 700, flex: "0 0 auto" } }, "#" + (i + 1)), React.createElement("div", { style: { minWidth: 0, flex: 1 } }, React.createElement("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 18, fontWeight: 700, color: "#15181C", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, r.name), React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "#667085", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, [(r.club || r.team || ""), r.age ? r.age + " J." : "", r.position || ""].filter(Boolean).join(" \u00b7 ")), React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 900, color: "#087F8C", marginTop: 3 } }, kat === "tore" ? ((r.goals || 0) + " Tore") : kat === "assists" ? ((r.assists || 0) + " Vorl.") : ("TW Talent Score " + (r.scout_score != null ? Math.round(Number(r.scout_score) * 10) : "-"))))))), React.createElement("div", null, rows.slice(3).map((r, i) => React.createElement("div", { key: i, style: { display: "flex", alignItems: "center", gap: 12, padding: "9px 6px", borderTop: i ? "1px solid #f0f0ec" : "none", fontFamily: FONT_BODY, fontSize: 13.5 } },
       React.createElement("div", { style: { width: 34, fontWeight: 800, color: "#8a8a86" } }, "#" + (i + 4)),
       React.createElement("div", { style: { flex: 1, minWidth: 0 } },
         React.createElement("div", { style: { fontWeight: 700 } }, r.name, r.age ? React.createElement("span", { style: { fontWeight: 500, color: "#8a8a86" } }, " \u00b7 " + r.age) : null),
         React.createElement("div", { style: { fontSize: 12, color: "#8a8a86", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, (r.club || r.team || "") + (r.league ? " \u00b7 " + r.league : ""))),
-      React.createElement("div", { style: { fontWeight: 800, color: "#0e7490", whiteSpace: "nowrap" } }, kat === "tore" ? ((r.goals || 0) + " Tore") : kat === "assists" ? ((r.assists || 0) + " Vorl.") : ("TW-Score " + (r.scout_score != null ? Math.round(Number(r.scout_score) * 10) : "-"))))))));
+      React.createElement("div", { style: { fontWeight: 800, color: "#0e7490", whiteSpace: "nowrap" } }, kat === "tore" ? ((r.goals || 0) + " Tore") : kat === "assists" ? ((r.assists || 0) + " Vorl.") : ("TW Talent Score " + (r.scout_score != null ? Math.round(Number(r.scout_score) * 10) : "-"))))))));
 }
 
 
@@ -2090,6 +2091,67 @@ function ClubLogo({ name, size }) {
   const url = name && CLUB_LOGOS[name];
   if (url) return React.createElement("img", { src: url, alt: "", width: sz, height: sz, loading: "lazy", style: { width: sz, height: sz, objectFit: "contain", borderRadius: 4, flexShrink: 0 } });
   return React.createElement("span", { "aria-hidden": true, style: { width: sz, height: sz, borderRadius: "50%", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_BODY, fontSize: Math.max(8, Math.round(sz * 0.42)), fontWeight: 900, color: "#fff", background: "hsl(" + clubHue(name) + " 38% 46%)", letterSpacing: .3 } }, clubMono(name));
+}
+const SCORES = {
+  performance: {
+    name: "TW Performance Score", scale: "0\u2013100",
+    de: "Positionsgewichtete Bewertung eines einzelnen Einsatzes aus den offiziellen Spielstatistiken (Tore, Vorlagen, Zweik\u00e4mpfe, P\u00e4sse, Paraden) auf einer Skala von 0 bis 100: 85+ herausragend \u00b7 70\u201384 stark \u00b7 55\u201369 solide \u00b7 unter 55 schwacher Tag. Wird jede Nacht nach dem Spieltag neu berechnet.",
+    en: "Position-weighted rating of a single appearance based on official match statistics (goals, assists, duels, passes, saves) on a 0\u2013100 scale: 85+ outstanding \u00b7 70\u201384 strong \u00b7 55\u201369 solid \u00b7 below 55 a weak day. Recalculated every night after the matchday."
+  },
+  talent: {
+    name: "TW Talent Score", scale: "0\u2013100",
+    de: "Einsch\u00e4tzung des KI-Scouts f\u00fcr Nachwuchsspieler (U17\u2013U21) aus Leistungsdaten \u2014 Tore, Vorlagen und Rating im Verh\u00e4ltnis zu Alter und Einsatzminuten \u2014 sowie der Medienlage. Skala 0\u2013100, w\u00f6chentlich aktualisiert. \u201eUnentdeckt\u201c = starke Zahlen bei geringer Medienpr\u00e4senz.",
+    en: "AI scout assessment of youth players (U17\u2013U21) based on performance data \u2014 goals, assists and rating relative to age and minutes played \u2014 plus media coverage. 0\u2013100 scale, updated weekly. \u201cUndiscovered\u201d = strong numbers with little media presence."
+  },
+  match: {
+    name: "TW Match Score", scale: "0\u2013100",
+    de: "Wie gut ein Spielerprofil zu einem Vereins-Gesuch passt: Position, Altersfenster und \u00fcbereinstimmende St\u00e4rken. Skala 0\u2013100.",
+    en: "How well a player profile fits a club request: position, age window and matching strengths. 0\u2013100 scale."
+  },
+  opportunity: {
+    name: "TW Opportunity Score", scale: "0\u2013100",
+    de: "Marktchance rund um einen Spieler: Restlaufzeit des Vertrags, Vertragslos-Status und Verkaufsdruck des Vereins. Skala 0\u2013100.",
+    en: "Market opportunity around a player: remaining contract term, free-agent status and the club\u2019s selling pressure. 0\u2013100 scale."
+  }
+};
+function ScoreInfo({ kind, size }) {
+  const [pos, setPos] = React.useState(null);
+  const btn = React.useRef(null);
+  const d = SCORES[kind] || SCORES.performance;
+  const sz = size || 15;
+  const en = LANG === "en";
+  React.useEffect(() => {
+    if (!pos) return;
+    const close = e => { if (btn.current && e && e.target && btn.current.contains(e.target)) return; setPos(null); };
+    const key = e => { if (e.key === "Escape") setPos(null); };
+    document.addEventListener("mousedown", close); document.addEventListener("keydown", key); window.addEventListener("scroll", close, true); window.addEventListener("resize", close);
+    return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", key); window.removeEventListener("scroll", close, true); window.removeEventListener("resize", close); };
+  }, [pos]);
+  const toggle = e => {
+    e.preventDefault(); e.stopPropagation();
+    if (pos) { setPos(null); return; }
+    const r = e.currentTarget.getBoundingClientRect();
+    const w = Math.min(300, window.innerWidth - 16);
+    const left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
+    const below = r.bottom + 8 + 130 < window.innerHeight;
+    setPos({ left, w, top: below ? r.bottom + 8 : null, bottom: below ? null : window.innerHeight - r.top + 8 });
+  };
+  return React.createElement("span", { className: "tw-scoreinfo", style: { position: "relative", display: "inline-flex", alignItems: "center", marginLeft: 4, verticalAlign: "middle" } },
+    React.createElement("button", { ref: btn, type: "button", onClick: toggle, "aria-expanded": !!pos, "aria-label": en ? "How does the " + d.name + " work?" : "Wie entsteht der " + d.name + "?", title: en ? "How does the " + d.name + " work?" : "Wie entsteht der " + d.name + "?", style: { cursor: "pointer", background: "none", padding: 0, margin: 0, width: sz, height: sz, borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "currentColor", opacity: pos ? 1 : .8, border: "1.5px solid currentColor", fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: "italic", fontSize: Math.round(sz * .68), fontWeight: 700, lineHeight: 1, letterSpacing: 0, textTransform: "none", flexShrink: 0 } }, "i"),
+    pos ? React.createElement("div", { role: "dialog", onMouseDown: e => e.stopPropagation(), onClick: e => e.stopPropagation(), style: { position: "fixed", zIndex: 120, top: pos.top == null ? "auto" : pos.top, bottom: pos.bottom == null ? "auto" : pos.bottom, left: pos.left, width: pos.w, background: "#fff", color: INK, border: "1px solid " + HAIR, borderRadius: 12, padding: "12px 14px", boxShadow: "0 12px 32px rgba(15,23,42,.14)", fontFamily: FONT_BODY, textAlign: "left", textTransform: "none", letterSpacing: 0, whiteSpace: "normal", cursor: "default", opacity: 1 } },
+      React.createElement("div", { style: { fontSize: 13, fontWeight: 800, color: INK, marginBottom: 4, lineHeight: 1.3 } }, d.name, React.createElement("span", { style: { color: MUTED, fontWeight: 600 } }, " \u00b7 " + (en ? "scale " : "Skala ") + d.scale)),
+      React.createElement("div", { style: { fontSize: 12.5, fontWeight: 500, lineHeight: 1.55, color: "#3f4650" } }, en ? d.en : d.de)) : null);
+}
+function ScoreName({ kind, size }) {
+  const d = SCORES[kind] || SCORES.performance;
+  return React.createElement("span", { className: "tw-scorename", style: { display: "inline-flex", alignItems: "center", whiteSpace: "nowrap" } }, d.name, React.createElement(ScoreInfo, { kind: kind, size: size }));
+}
+function ScoreLegend({ kind, style }) {
+  const d = SCORES[kind] || SCORES.performance;
+  return React.createElement("div", { className: "tw-scorelegend", style: Object.assign({ display: "flex", alignItems: "center", gap: 6, fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 700, color: MUTED, letterSpacing: .2, whiteSpace: "nowrap" }, style || {}) },
+    React.createElement("span", { "aria-hidden": true, style: { width: 9, height: 9, borderRadius: 3, background: scoreColor(90), display: "inline-block", flexShrink: 0 } }),
+    React.createElement(ScoreName, { kind: kind, size: 14 }),
+    React.createElement("span", { style: { fontWeight: 500 } }, "\u00b7 " + (LANG === "en" ? "scale " : "Skala ") + d.scale));
 }
 function EmptyState({ icon, title, text, action, onAction, action2, onAction2 }) {
   return React.createElement("div", { className: "tw-card", style: { textAlign: "center", padding: "36px 24px", borderStyle: "dashed" } },
@@ -6820,7 +6882,7 @@ function TransferApp({
     }, t("totw_sub12")), /*#__PURE__*/React.createElement(Chip, {
       x: joker
     })));
-  })(), (() => { const topP = (perf || []).slice().sort((a, b) => (b.score || 0) - (a.score || 0))[0]; if (!topP) return null; return /*#__PURE__*/React.createElement("div", { className: "tw-card", style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 16, padding: "16px 18px" } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.2, color: "#8a92a3", textTransform: "uppercase", marginBottom: 10 } }, "Spieler des Spieltags"), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 13, marginBottom: 12 } }, /*#__PURE__*/React.createElement("div", { style: { width: 56, height: 56, borderRadius: 16, background: "#0f1520", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontSize: 21, fontWeight: 700, flex: "0 0 auto" } }, String(topP.name || "?").split(/\s+/).map(w => w[0]).slice(0, 2).join("")), /*#__PURE__*/React.createElement("div", { style: { minWidth: 0 } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 21, fontWeight: 700, color: "#15181C", lineHeight: 1.05 } }, topP.name), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "#667085", marginTop: 3 } }, [topP.team, topP.pos].filter(Boolean).join(" \u00b7 ")))), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, background: "#eaf7ef", border: "1px solid #cfe9da", borderRadius: 14, padding: "12px 14px", marginBottom: 12 } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 34, fontWeight: 700, color: "#0b6b3e", lineHeight: 1 } }, Math.round(topP.score || 0)), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: "#0d8a4f", lineHeight: 1.35 } }, "TW-SCORE", /*#__PURE__*/React.createElement("br", null), "St\u00e4rkste Einzelleistung")), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "#667085", lineHeight: 1.6 } }, "So entsteht der Score: positionsgewichtete Bewertung aller Spielstatistiken (Tore, Vorlagen, Zweik\u00e4mpfe, P\u00e4sse, Paraden) auf einer Skala von 0\u2013100 \u2014 jede Nacht neu berechnet.")); })()), perfLoading || perf === null ? /*#__PURE__*/React.createElement("div", {
+  })(), (() => { const topP = (perf || []).slice().sort((a, b) => (b.score || 0) - (a.score || 0))[0]; if (!topP) return null; return /*#__PURE__*/React.createElement("div", { className: "tw-card", style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 16, padding: "16px 18px" } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.2, color: "#8a92a3", textTransform: "uppercase", marginBottom: 10 } }, "Spieler des Spieltags"), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 13, marginBottom: 12 } }, /*#__PURE__*/React.createElement("div", { style: { width: 56, height: 56, borderRadius: 16, background: "#0f1520", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontSize: 21, fontWeight: 700, flex: "0 0 auto" } }, String(topP.name || "?").split(/\s+/).map(w => w[0]).slice(0, 2).join("")), /*#__PURE__*/React.createElement("div", { style: { minWidth: 0 } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 21, fontWeight: 700, color: "#15181C", lineHeight: 1.05 } }, topP.name), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "#667085", marginTop: 3 } }, [topP.team, topP.pos].filter(Boolean).join(" \u00b7 ")))), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, background: "#eaf7ef", border: "1px solid #cfe9da", borderRadius: 14, padding: "12px 14px", marginBottom: 12 } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 34, fontWeight: 700, color: "#0b6b3e", lineHeight: 1 } }, Math.round(topP.score || 0)), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: "#0d8a4f", lineHeight: 1.35 } }, "TW PERFORMANCE SCORE", /*#__PURE__*/React.createElement(ScoreInfo, { kind: "performance", size: 13 }), /*#__PURE__*/React.createElement("br", null), "St\u00e4rkste Einzelleistung")), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "#667085", lineHeight: 1.6 } }, "So entsteht der TW Performance Score: positionsgewichtete Bewertung aller Spielstatistiken (Tore, Vorlagen, Zweik\u00e4mpfe, P\u00e4sse, Paraden) auf einer Skala von 0\u2013100 \u2014 jede Nacht neu berechnet.")); })()), perfLoading || perf === null ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 13,
@@ -6847,7 +6909,7 @@ function TransferApp({
         flexDirection: "column",
         gap: 10
       }
-    }, gefiltert.map((x, i) => {
+    }, /*#__PURE__*/React.createElement(ScoreLegend, { kind: "performance", style: { padding: "2px 2px 0" } }), gefiltert.map((x, i) => {
       let st = {};
       try {
         st = JSON.parse(x.stats || "{}");
@@ -7429,13 +7491,21 @@ function TransferApp({
     }
   }, t("li_back")), /*#__PURE__*/React.createElement("div", {
     style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 12,
+      flexWrap: "wrap",
+      marginBottom: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
       fontFamily: FONT_DISPLAY,
       fontWeight: 700,
       fontSize: 18,
-      textTransform: "uppercase",
-      marginBottom: 10
+      textTransform: "uppercase"
     }
-  }, listActive.titel), listLoading || listItems === null ? /*#__PURE__*/React.createElement("div", {
+  }, listActive.titel), /*#__PURE__*/React.createElement(ScoreLegend, { kind: "performance" })), listLoading || listItems === null ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 13,
@@ -8541,7 +8611,7 @@ function TransferApp({
       letterSpacing: 1,
       margin: "2px 0 6px"
     }
-  }, t("vd_kader")), /*#__PURE__*/React.createElement("div", {
+  }, t("vd_kader"), " \u00b7 ", /*#__PURE__*/React.createElement(ScoreName, { kind: "performance", size: 13 })), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
@@ -8873,7 +8943,7 @@ function TransferApp({
       flexDirection: "column",
       gap: 7
     }
-  }, (view === "geruechte" ? ["Welche St\u00fcrmer-Ger\u00fcchte gibt es in der S\u00fcper Lig?", "Zeig mir die st\u00e4rksten Ger\u00fcchte der letzten 24 Stunden", "Welche Vereine sind aktuell am aktivsten?"] : view === "gesucht" ? ["Welche Clubs passen zu meinem Spielerprofil?", "Welche Vereine suchen aktuell einen St\u00fcrmer?", "Wo werden Innenverteidiger gesucht?"] : view === "ranking" ? ["Wie wird der TW-Score berechnet?", "Wer ist der Spieler des Spieltags und warum?", "Zeig mir die Formkurve der Top-Elf"] : view === "players" ? ["Finde U23-Sechser mit auslaufendem Vertrag", "Welche Spieler haben 2027 Vertragsende?", "Zeig mir die wertvollsten U21-Spieler"] : view === "talente" || view === "listen" ? ["Erstelle eine Liste mit U21-Innenverteidigern", "Welche Talente sind noch unentdeckt?", "Wer sind die Top-Torj\u00e4ger unter 19?"] : view === "chancen" ? ["Welche Spieler sind ab Sommer abl\u00f6sefrei?", "Zeig mir vertragslose St\u00fcrmer", "Wessen Vertrag endet 2026?"] : [t("chat_sug1"), t("chat_sug2"), t("chat_sug3")]).map((s, i) => /*#__PURE__*/React.createElement("button", {
+  }, (view === "geruechte" ? ["Welche St\u00fcrmer-Ger\u00fcchte gibt es in der S\u00fcper Lig?", "Zeig mir die st\u00e4rksten Ger\u00fcchte der letzten 24 Stunden", "Welche Vereine sind aktuell am aktivsten?"] : view === "gesucht" ? ["Welche Clubs passen zu meinem Spielerprofil?", "Welche Vereine suchen aktuell einen St\u00fcrmer?", "Wo werden Innenverteidiger gesucht?"] : view === "ranking" ? ["Wie wird der TW Performance Score berechnet?", "Wer ist der Spieler des Spieltags und warum?", "Zeig mir die Formkurve der Top-Elf"] : view === "players" ? ["Finde U23-Sechser mit auslaufendem Vertrag", "Welche Spieler haben 2027 Vertragsende?", "Zeig mir die wertvollsten U21-Spieler"] : view === "talente" || view === "listen" ? ["Erstelle eine Liste mit U21-Innenverteidigern", "Welche Talente sind noch unentdeckt?", "Wer sind die Top-Torj\u00e4ger unter 19?"] : view === "chancen" ? ["Welche Spieler sind ab Sommer abl\u00f6sefrei?", "Zeig mir vertragslose St\u00fcrmer", "Wessen Vertrag endet 2026?"] : [t("chat_sug1"), t("chat_sug2"), t("chat_sug3")]).map((s, i) => /*#__PURE__*/React.createElement("button", {
     key: i,
     onClick: () => sendChat(s),
     style: {
@@ -9312,7 +9382,7 @@ function TransferApp({
         letterSpacing: 1,
         marginBottom: 6
       }
-    }, t("pl_form")), !plDetail.form || plDetail.form.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    }, t("pl_form"), /*#__PURE__*/React.createElement(ScoreInfo, { kind: "performance", size: 13 })), !plDetail.form || plDetail.form.length === 0 ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontFamily: FONT_BODY,
         fontSize: 12.5,
