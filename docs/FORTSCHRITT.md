@@ -304,3 +304,19 @@ Off-Site-Backup (Storage Box); optional Cloudflare (Rate-Limit gegen Code-Brute-
   auf 390 px (82–382 px), im Spieler-Detail-Overlay; Klick daneben/Esc schließen; EN (rt27): "scale 0–100" + englischer Text; 0 Fehler.
 - OFFEN: 1.6 Statussystem, 1.4 Filterleiste (nach Launch), Vereinslogos-Sync, Match-/Opportunity-Score-Berechnung (Freigabe), Boss-To-dos
   (PAT rotieren! OpenAI-Limit, n8n-2FA, SSH-Key, Repo privat).
+
+## 25.08. 01:40–01:58 – DESIGN-SYSTEM 1.6 STATUSSYSTEM, Commit c607931 / Marker zz
+- Meldungsarten (TYPE) bereinigt: je Art genau eine Definition (vorher leihe/vertrag doppelt, spätere Definition gewann). Farbcode eindeutig:
+  Fixer Deal grün #0d8a4f · Gerücht amber #b07a05 · Verein sucht violett #6d4bc7 · Leihe blau #1a6dc0 · Verlängert/Vertrag türkis #0f8e8e (vorher
+  gleiches Grün wie Fixer Deal) · Vertragslos grau #6b7280 · Trade #6b4fd8. Linke Kartenkante + Badge nutzen type.color.
+- Belastbarkeitsstufen (RELIABILITY 1–5) neu benannt, damit sie nicht mit der Meldungsart kollidieren: Spekulation · Unbestätigt (vorher "Gerücht")
+  · Belastbar (vorher "Konkret") · Sehr wahrscheinlich · Bestätigt; RELIABILITY_EN: Speculation · Unconfirmed · Solid · Very likely · Confirmed.
+- Neuer Baustein Reliability({value,size}) = Signal-Balken + Wort in relColor + Tooltip "Belastbarkeit N von 5 — Skala: …" (className tw-rel).
+  Eingesetzt in NewsCard-Fuß, NeedCard, Meldungspanel-Kopf. Signal aria-label "Belastbarkeit". Keine direkte Signal-Verwendung mehr außerhalb.
+- Meldungspanel: eigene Uppercase-Pille → Badge (wie Karten), daneben Reliability; "⚠ Unbestätigt"-Chip entfernt (war redundant); Feld
+  "Verlässlichkeit" → "Belastbarkeit" (DE/EN). GerVue-Kompaktliste zeigt weiter Punkt+Art (Farbcode), keine Belastbarkeit (bewusst kompakt).
+- EN_MAP: Unbestätigt→Unconfirmed, Belastbar→Solid, Belastbarkeit→Reliability. Daten/Werte unverändert (nur Wörter/Darstellung).
+- Tests rt32–rt36: Feed 60 Karten / 60 Reliability (Belastbar 25, Sehr wahrscheinlich 14, Unbestätigt 13, Bestätigt 8), Badges nur Meldungsarten,
+  kein ⚠; EN Solid/Very likely/Unconfirmed/Confirmed; Transfers 120/120; Vereinsbedarf 46 NeedCards/46; Panel: Badge "Gerücht" + "Belastbar"
+  + Liga, tw-rel 1, kein ⚠. 0 Fehler. Lektion Test: innerText liefert text-transform (BELASTBARKEIT) → Prüfungen case-insensitiv schreiben.
+- OFFEN: 1.4 Filterleiste (nach Launch), Vereinslogos-Sync, Match-/Opportunity-Score (Freigabe), Listen-Preset U23-Abwehr 0 Treffer, Boss-To-dos.

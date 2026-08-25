@@ -11,4 +11,4 @@
    - Kostenziel ≤ 6 €/Tag (Kosten-Wächter mailt täglich 23:50). Web-Suche-Workflows sind die Kostentreiber.
    - Englisch: Wörterbuch `docs/en_map.json` → als JSON-Block `const EN_MAP` in index.html; neue deutsche UI-Texte dort eintragen.
 4. Tests: `docs/tests/` (Playwright-Skripte laufen im Container `tm-fetcher` auf dem Server, Aufruf über die Admin-Shell).
-5. Offene Punkte stehen am Ende von `docs/FORTSCHRITT.md` (Design-System 1.4/1.6, Vereinslogos-Sync, Boss-To-dos; 1.5 Score-Namen ist live).
+5. Offene Punkte stehen am Ende von `docs/FORTSCHRITT.md` (Design-System 1.4 Filterleiste, Vereinslogos-Sync, Boss-To-dos; 1.5 Score-Namen und 1.6 Statussystem sind live).
