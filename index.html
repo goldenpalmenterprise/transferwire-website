@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-25-zy score-portal -->
+<!-- tw-build: 2026-08-25-zz status-system -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -787,6 +787,9 @@ const postJson = (url, payload) => fetch(url, {
 let LANG = "de";
 /* ── TransferWire EN-Übersetzungsschicht (DE→EN zur Laufzeit) ─────────────────── */
 const EN_MAP = {
+"Unbest\u00e4tigt": "Unconfirmed",
+"Belastbar": "Solid",
+"Belastbarkeit": "Reliability",
 "Wie wird der TW Performance Score berechnet?": "How is the TW Performance Score calculated?",
 "Vereinsbedarf": "Club needs",
 "Dunkles Design": "Dark mode",
@@ -1825,43 +1828,17 @@ const SPORT = {
   }
 };
 const TYPE = {
-  fix: {
-    label: "Fixer Deal",
-    en: "Done deal",
-    color: "#0d8a4f",
-    soft: "#e2f3ea"
-  },
-  geruecht: {
-    label: "Gerücht",
-    en: "Rumour",
-    color: "#b07a05",
-    soft: "#faf0d8"
-  },
-  verein_sucht: {
-    label: "Verein sucht",
-    en: "Club seeks",
-    color: "#6d4bc7",
-    soft: "#ece6fa"
-  },
-  leihe: {
-    label: "Leihe",
-    en: "Loan",
-    color: "#0f8e8e",
-    soft: "#def0f0"
-  },
-  vertrag: {
-    label: "Vertrag verlängert",
-    en: "Contract extended",
-    color: "#5a6473",
-    soft: "#eceef1"
-  },
+  fix: { label: "Fixer Deal", en: "Done deal", color: "#0d8a4f", soft: "#e2f3ea" },
+  geruecht: { label: "Ger\u00fccht", en: "Rumour", color: "#b07a05", soft: "#faf0d8" },
+  verein_sucht: { label: "Verein sucht", en: "Club seeks", color: "#6d4bc7", soft: "#ece6fa" },
   leihe: { label: "Leihe", en: "Loan", color: "#1a6dc0", soft: "#e3eefb" },
-  vertrag_verlaengert: { label: "Verl\u00e4ngert", en: "Extended", color: "#0d8a4f", soft: "#e2f3ea" },
+  vertrag_verlaengert: { label: "Verl\u00e4ngert", en: "Extended", color: "#0f8e8e", soft: "#def0f0" },
+  vertrag: { label: "Vertrag", en: "Contract", color: "#0f8e8e", soft: "#def0f0" },
   vertragslos: { label: "Vertragslos", en: "Free agent", color: "#6b7280", soft: "#eef0f3" },
-  vertrag: { label: "Vertrag", en: "Contract", color: "#0d8a4f", soft: "#e2f3ea" },
   trade: { label: "Trade", en: "Trade", color: "#6b4fd8", soft: "#ece7fb" }
 };
-const RELIABILITY = ["", "Spekulation", "Gerücht", "Konkret", "Sehr wahrscheinlich", "Bestätigt"];
+const RELIABILITY = ["", "Spekulation", "Unbest\u00e4tigt", "Belastbar", "Sehr wahrscheinlich", "Best\u00e4tigt"];
+const RELIABILITY_EN = ["", "Speculation", "Unconfirmed", "Solid", "Very likely", "Confirmed"];
 const POS_LABEL = {
   TW: "Torwart",
   IV: "Innenverteidiger",
@@ -2198,13 +2175,13 @@ function MeldungsPanel({ m, schliessen, onWatch }) {
     h("div", { style: { position: "absolute", top: 0, right: 0, bottom: 0, width: "min(480px, 94vw)", background: "#fff", boxShadow: "-24px 0 60px rgba(15,21,32,.25)", padding: "20px 22px 30px", overflowY: "auto", borderRadius: "18px 0 0 18px" } },
       h("button", { onClick: schliessen, style: { position: "absolute", top: 14, right: 14, width: 34, height: 34, borderRadius: 99, border: "1px solid " + HAIR, background: "#fff", cursor: "pointer", fontSize: 16, fontWeight: 800, color: "#3a4150" } }, "\u2715"),
       h("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 12, flexWrap: "wrap", paddingRight: 40 } },
-        h("span", { style: { display: "inline-flex", alignItems: "center", gap: 6, fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, color: ty.color, background: ty.soft, borderRadius: 7, padding: "5px 10px", textTransform: "uppercase", letterSpacing: .6 } }, h("span", { style: { width: 7, height: 7, borderRadius: 99, background: ty.color } }), ty.label),
-        m.type === "geruecht" && rel < 5 && h("span", { style: { fontFamily: FONT_BODY, fontSize: 10, fontWeight: 900, letterSpacing: 1, color: "#8a5a00", border: "1px solid #ecd9a8", background: "#fdf3da", borderRadius: 6, padding: "4px 8px", textTransform: "uppercase" } }, "\u26A0 Unbest\u00e4tigt"), istCommunity(m) && h("span", { style: cmtyBadgeStyle("4px 8px") }, CMTY_BADGE_TEXT),
+        h(Badge, { meta: ty, dot: true }), rel ? h(Reliability, { value: rel }) : null,
+        istCommunity(m) && h("span", { style: cmtyBadgeStyle("4px 8px") }, CMTY_BADGE_TEXT),
         m.league && h("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 700, color: "#667085" } }, m.league)),
       h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 25, fontWeight: 700, color: "#15181C", lineHeight: 1.15, marginBottom: 12 } }, m.headline),
       h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, lineHeight: 1.65, color: "#33322f", marginBottom: 16 } }, dS(m) || "\u2013"),
       h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 } },
-        [["Spieler", String((m.player && m.player.name) || m.player || "") || "\u2013"], ["Position", (m.player && m.player.position) || m.position || "\u2013"], ["Von", m.fromClub || m.from || "\u2013"], ["Zu", m.toClub || m.to || m.seek || "\u2013"], ["Abl\u00f6se", m.fee || "\u2013"], ["Verl\u00e4sslichkeit", rel ? (RELIABILITY[rel] || rel) : "\u2013"]].map(([lab, wert]) => h("div", { key: lab, style: { background: "#f8fafb", border: "1px solid " + HAIR, borderRadius: 10, padding: "9px 12px" } },
+        [["Spieler", String((m.player && m.player.name) || m.player || "") || "\u2013"], ["Position", (m.player && m.player.position) || m.position || "\u2013"], ["Von", m.fromClub || m.from || "\u2013"], ["Zu", m.toClub || m.to || m.seek || "\u2013"], ["Abl\u00f6se", m.fee || "\u2013"], ["Belastbarkeit", rel ? ((LANG === "en" ? RELIABILITY_EN[rel] : RELIABILITY[rel]) || rel) : "\u2013"]].map(([lab, wert]) => h("div", { key: lab, style: { background: "#f8fafb", border: "1px solid " + HAIR, borderRadius: 10, padding: "9px 12px" } },
           h("div", { style: { fontFamily: FONT_BODY, fontSize: 9.5, fontWeight: 900, letterSpacing: .8, color: "#8a92a3", textTransform: "uppercase" } }, lab),
           h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, color: "#232b38", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, wert)))),
       (m.sources || []).length ? h("div", null,
@@ -2777,7 +2754,7 @@ function Signal({
       gap: 2,
       height: 14
     },
-    "aria-label": `Verlässlichkeit ${value} von 5`
+    "aria-label": `Belastbarkeit ${value} von 5`
   }, [1, 2, 3, 4, 5].map(i => /*#__PURE__*/React.createElement("span", {
     key: i,
     style: {
@@ -2787,6 +2764,16 @@ function Signal({
       background: i <= value ? c : "#dad9d4"
     }
   })));
+}
+function Reliability({ value, size }) {
+  const v = Math.max(0, Math.min(5, Number(value) || 0));
+  const en = LANG === "en";
+  const word = en ? (RELIABILITY_EN[v] || "") : (RELIABILITY[v] || "");
+  const skala = (en ? RELIABILITY_EN : RELIABILITY).slice(1).join(" \u00b7 ");
+  const tip = (en ? "Reliability " : "Belastbarkeit ") + v + (en ? " of 5" : " von 5") + " \u2014 " + (en ? "scale: " : "Skala: ") + skala;
+  return React.createElement("span", { className: "tw-rel", title: tip, "aria-label": tip, style: { display: "inline-flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" } },
+    React.createElement(Signal, { value: v }),
+    word ? React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: size || 11.5, fontWeight: 700, color: relColor(v) } }, word) : null);
 }
 function Badge({
   meta,
@@ -3101,22 +3088,7 @@ function NewsCard({
       marginTop: "auto",
       paddingTop: 2
     }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 7
-    }
-  }, /*#__PURE__*/React.createElement(Signal, {
-    value: item.reliability
-  }), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 11.5,
-      fontWeight: 600,
-      color: relColor(item.reliability)
-    }
-  }, RELIABILITY[item.reliability])), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement(Reliability, { value: item.reliability }), /*#__PURE__*/React.createElement("span", {
     style: {
       width: 1,
       height: 14,
@@ -3335,22 +3307,7 @@ function NeedCard({
       padding: "3px 10px",
       borderRadius: 999
     }
-  }, item.fee), /*#__PURE__*/React.createElement("span", {
-    style: {
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 6
-    }
-  }, /*#__PURE__*/React.createElement(Signal, {
-    value: item.reliability
-  }), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 11,
-      fontWeight: 600,
-      color: relColor(item.reliability)
-    }
-  }, RELIABILITY[item.reliability])), (item.sources || []).slice(0, 2).map((s, i) => /*#__PURE__*/React.createElement("a", {
+  }, item.fee), /*#__PURE__*/React.createElement(Reliability, { value: item.reliability, size: 11 }), (item.sources || []).slice(0, 2).map((s, i) => /*#__PURE__*/React.createElement("a", {
     key: i,
     href: s.url,
     onClick: e => { e.preventDefault(); e.stopPropagation(); if (s.url) window.open(s.url, "_blank"); },
