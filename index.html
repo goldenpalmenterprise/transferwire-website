@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-25-af zeitfilter-fix -->
+<!-- tw-build: 2026-08-25-ag equal-columns -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -6114,7 +6114,7 @@ function TransferApp({
 .tw-main.feed:not(:has(> aside:not(:empty))) > * { grid-column: 1 / -1; }
         .tw-feedlist { align-items: stretch; } .tw-glist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: stretch; } .tw-gfilter-mobile { display: none; } @media (max-width: 860px) { .tw-glist { grid-template-columns: minmax(0, 1fr); } } @media (max-width: 700px) { .tw-gfilter-row { display: none !important; } .tw-gfilter-mobile { display: flex !important; } .tw-gchips { flex-wrap: nowrap !important; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; scrollbar-width: none; } .tw-gchips::-webkit-scrollbar { display: none; } .tw-gchips > button { flex-shrink: 0; } } .tw-clamp2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; } .tw-clamp3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; } .tw-gtable { overflow-x:auto; } .tw-grow { display:grid; grid-template-columns: 76px 104px minmax(0,1.1fr) minmax(0,1.5fr) 118px 110px 118px; gap:10px; align-items:center; min-width:820px; padding:7px 12px; border-top:1px solid #E1E5E2; font-family: inherit; font-size:12.5px; cursor:pointer; } .tw-grow > span, .tw-grow > a { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; } .tw-grow:hover { background:#f8fafb; } .tw-ghead { border-top:none; background:#f8fafb; cursor:default; font-size:10.5px; font-weight:800; letter-spacing:.6px; text-transform:uppercase; color:#667085; } .tw-ghead:hover { background:#f8fafb; } .tw-hover-only { opacity: 0; transition: opacity .15s; } .tw-card:hover .tw-hover-only, .tw-card:focus-within .tw-hover-only { opacity: 1; } .tw-route-club { display: inline-flex; align-items: center; gap: 6px; min-width: 0; } .tw-route-club span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         @media (min-width: 1280px) {
-          .tw-feedlist { grid-template-columns: 1fr 1fr !important; gap:14px; }
+          .tw-feedlist { grid-template-columns: minmax(0,1fr) minmax(0,1fr) !important; gap:14px; }
         }
         .tw-main.gesucht { grid-template-columns: 1fr; }
         .tw-pos-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(158px,1fr)); gap:10px; }
