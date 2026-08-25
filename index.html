@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-25-zx score-popover -->
+<!-- tw-build: 2026-08-25-zy score-portal -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -2123,7 +2123,7 @@ function ScoreInfo({ kind, size }) {
   const en = LANG === "en";
   React.useEffect(() => {
     if (!pos) return;
-    const close = e => { if (btn.current && e && e.target && btn.current.contains(e.target)) return; setPos(null); };
+    const close = e => { if (e && e.target && ((btn.current && btn.current.contains(e.target)) || (box.current && box.current.contains(e.target)))) return; setPos(null); };
     const key = e => { if (e.key === "Escape") setPos(null); };
     document.addEventListener("mousedown", close); document.addEventListener("keydown", key); window.addEventListener("scroll", close, true); window.addEventListener("resize", close);
     return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", key); window.removeEventListener("scroll", close, true); window.removeEventListener("resize", close); };
@@ -2148,9 +2148,9 @@ function ScoreInfo({ kind, size }) {
   };
   return React.createElement("span", { className: "tw-scoreinfo", style: { position: "relative", display: "inline-flex", alignItems: "center", marginLeft: 4, verticalAlign: "middle" } },
     React.createElement("button", { ref: btn, type: "button", onClick: toggle, "aria-expanded": !!pos, "aria-label": en ? "How does the " + d.name + " work?" : "Wie entsteht der " + d.name + "?", title: en ? "How does the " + d.name + " work?" : "Wie entsteht der " + d.name + "?", style: { cursor: "pointer", background: "none", padding: 0, margin: 0, width: sz, height: sz, borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "currentColor", opacity: pos ? 1 : .8, border: "1.5px solid currentColor", fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: "italic", fontSize: Math.round(sz * .68), fontWeight: 700, lineHeight: 1, letterSpacing: 0, textTransform: "none", flexShrink: 0 } }, "i"),
-    pos ? React.createElement("div", { ref: box, role: "dialog", onMouseDown: e => e.stopPropagation(), onClick: e => e.stopPropagation(), style: { position: "fixed", zIndex: 120, top: pos.top, left: pos.left, width: pos.w, background: "#fff", color: INK, border: "1px solid " + HAIR, borderRadius: 12, padding: "12px 14px", boxShadow: "0 12px 32px rgba(15,23,42,.14)", fontFamily: FONT_BODY, textAlign: "left", textTransform: "none", letterSpacing: 0, whiteSpace: "normal", cursor: "default", opacity: 1, visibility: pos.fixed ? "visible" : "hidden" } },
+    pos ? ReactDOM.createPortal(React.createElement("div", { ref: box, role: "dialog", onMouseDown: e => e.stopPropagation(), onClick: e => e.stopPropagation(), style: { position: "fixed", zIndex: 1500, top: pos.top, left: pos.left, width: pos.w, background: "#fff", color: INK, border: "1px solid " + HAIR, borderRadius: 12, padding: "12px 14px", boxShadow: "0 12px 32px rgba(15,23,42,.14)", fontFamily: FONT_BODY, textAlign: "left", textTransform: "none", letterSpacing: 0, whiteSpace: "normal", cursor: "default", opacity: 1, visibility: pos.fixed ? "visible" : "hidden" } },
       React.createElement("div", { style: { fontSize: 13, fontWeight: 800, color: INK, marginBottom: 4, lineHeight: 1.3 } }, d.name, React.createElement("span", { style: { color: MUTED, fontWeight: 600 } }, " \u00b7 " + (en ? "scale " : "Skala ") + d.scale)),
-      React.createElement("div", { style: { fontSize: 12.5, fontWeight: 500, lineHeight: 1.55, color: "#3f4650" } }, en ? d.en : d.de)) : null);
+      React.createElement("div", { style: { fontSize: 12.5, fontWeight: 500, lineHeight: 1.55, color: "#3f4650" } }, en ? d.en : d.de)), document.body) : null);
 }
 function ScoreName({ kind, size }) {
   const d = SCORES[kind] || SCORES.performance;
