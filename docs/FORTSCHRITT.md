@@ -320,3 +320,37 @@ Off-Site-Backup (Storage Box); optional Cloudflare (Rate-Limit gegen Code-Brute-
   kein ⚠; EN Solid/Very likely/Unconfirmed/Confirmed; Transfers 120/120; Vereinsbedarf 46 NeedCards/46; Panel: Badge "Gerücht" + "Belastbar"
   + Liga, tw-rel 1, kein ⚠. 0 Fehler. Lektion Test: innerText liefert text-transform (BELASTBARKEIT) → Prüfungen case-insensitiv schreiben.
 - OFFEN: 1.4 Filterleiste (nach Launch), Vereinslogos-Sync, Match-/Opportunity-Score (Freigabe), Listen-Preset U23-Abwehr 0 Treffer, Boss-To-dos.
+
+## 25.08. 02:31–03:05 – TRANSFERS & GERÜCHTE: Feinbrief des Bosses (Commits c2e4217, 31270b3, 2e4c967, Marker ae/af/ag)
+ACHTUNG VORGESCHICHTE: Eine Parallel-Session hatte 02:17–02:29 (a511f3b, 2f48ce8, 3b466f2, Marker ab–ad) Abschnitt 2 des Boss-Dokuments bereits
+weitgehend gebaut (Beschreibung+Datenstand, Scout-Block, zweizeilige Filter mit Zählern, Weitere Filter, Sortierung, Karten/Kompakt-Tabelle,
+Signalstärke/SignalLine, gespeicherte Suchen, GerAside mit Marktüberblick). Boss hat danach entschieden: diese Session übernimmt. Vor jedem Push git pull!
+### Ergänzt (ae)
+- Texte: Beschreibung „…Bedarfssignale – laufend aktualisiert und mit dem TW Scout durchsuchbar.“; Scout-Kopf „TW SCOUT · TRANSFERRECHERCHE“
+  (uppercase, 11 px); Platzhalter „Frage z. B.: …“; Vorschläge jetzt Neue Bundesliga-Deals / Vertragslose U23-Spieler / Vereine mit aktuellem Stürmerbedarf.
+- Filter: Verein-Feld „Verein oder Spieler suchen ...“ (220 px), Position → „Alle Positionen“, Zeitraum-Platzhalter „Alle Zeiträume“,
+  GER_LEER.zeit = "7d" (Standard Letzte 7 Tage; zählt nicht als aktiver Filter). Sortierung „Neueste zuerst“.
+- Zeile unter den Filtern: links „N Meldungen · aktualisiert vor X“ (twRelTime auf updatedAt/neueste Meldung), rechts Sortierung + Karten/Kompakt;
+  alte separate Zählzeile entfernt. Aktiver Chip „Alle“ = #0f1520 (dunkel, kein Orange) – war schon so.
+- Kartenraster: .tw-glist zwei Spalten, ab 860 px eine. RouteLine-Komponente in NewsCard: Pfeil NUR wenn Von- UND Zielverein bekannt; sonst
+  „ZIELVEREIN [Verein]“ bzw. „AKTUELLER VEREIN [Verein]“ / „VERTRAGSLOS · ZULETZT“; Kasten entfällt ganz, wenn weder Spieler noch Verein noch Ablöse.
+- Mobil (≤700 px): Filterzeile ausgeblendet, stattdessen Button „Filter (N)“ → Bottom Sheet (fixed unten, 86vh, Land/Liga/Suche/Position/Zeitraum +
+  kompletter „Weitere Filter“-Block + Zurücksetzen/„N Meldungen anzeigen“); Typ-Chips horizontal scrollbar (nowrap, Scrollbar versteckt).
+### Fehler gefunden und behoben (af) – WICHTIG
+- Die API /api/transfernews liefert KEIN published (ISO), nur publishedAt als relativen Text („vor 2 Std“). zeitVon() gab damit 0 zurück →
+  mit dem neuen Standard „Letzte 7 Tage“ filterte die Seite ALLES weg (rt37: 0 Meldungen). Fix: relToTime() parst „vor N Min/Std/Tg“ und
+  „N min/h/d ago“; zeitVon(), neuesteZeit und der Heute-Zähler der Seitenleiste nutzen es. Danach 383 Meldungen (64 fix / 118 Gerüchte / 166 Bedarf).
+- (ag) .tw-feedlist-Regel für ≥1280 px auf minmax(0,1fr) umgestellt – vorher konnten lange Inhalte eine Spalte breiter ziehen.
+### Abnahme rt37 (Marker af/ag)
+Desktop: Beschreibung/Scout-Kopf/Platzhalter/Vorschläge korrekt, Scout-Block 102 px hoch (Vorgabe ≤104), Filter wie oben, Chips „Alle 383 …“,
+aktiv dunkel rgb(15,21,32), Zeile „383 Meldungen · aktualisiert gerade eben“, Sortierung „Neueste zuerst“, Karten je Reihe 2 (522/484 px, gleiche Höhe
+307/307, 275/275), kein Pfeil ohne Ziel, 13× „ZIELVEREIN“-Zeile. Mobil 390 px: Filterzeile aus, Filter-Button an, Chips scrollbar, Karten 366 px einspaltig,
+Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), schließt korrekt. EN: club-need signals, TW SCOUT · TRANSFER RESEARCH,
+„383 reports · updated just now“, kein deutscher Rest. 0 Fehler.
+### KI-Sprachregel (n8n, nicht Website)
+- Analyst ifOFnqTVjThmiFEJ, System-Prompt Punkt 7 NEU: Formulierung muss zum type passen – nur type=fix darf vollendet formulieren (wechselt zu,
+  verpflichtet, offiziell); geruecht IMMER vorbehaltlich (steht vor einem Wechsel zu, Gespräche mit, Interesse an); verein_sucht nie als Bewegung.
+  Version 00a11cf0 publiziert (03:0x). Wirkt erst auf NEUE Meldungen ab dem nächsten Lauf (:20), Altbestand bleibt wie er ist.
+### OFFEN
+- Kompaktansicht-Spalten stehen (Zeit/Typ/Verein-Spieler/Bewegung/Liga/Status/Quelle) – noch nicht live gegengeprüft.
+- 1.4 einheitliche Filterleiste für die ÜBRIGEN Seiten (nach Launch), Vereinslogos-Sync, Match-/Opportunity-Score (Freigabe), Boss-To-dos (PAT!).
