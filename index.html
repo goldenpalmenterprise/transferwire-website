@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-24-zt design-system -->
+<!-- tw-build: 2026-08-25-zu design-fullwidth -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -5971,6 +5971,8 @@ function TransferApp({
         .tw-wrap { max-width:1760px; margin:0 auto; }
         .tw-main { max-width:1440px; margin:0 auto; padding:24px 28px 56px; display:grid; gap:24px; }
         .tw-main.feed { grid-template-columns: minmax(0,3fr) minmax(300px,1fr); column-gap:24px; }
+.tw-main.feed:not(:has(> aside:not(:empty))) { grid-template-columns: minmax(0,1fr); }
+.tw-main.feed:not(:has(> aside:not(:empty))) > * { grid-column: 1 / -1; }
         .tw-feedlist { align-items: stretch; } .tw-hover-only { opacity: 0; transition: opacity .15s; } .tw-card:hover .tw-hover-only, .tw-card:focus-within .tw-hover-only { opacity: 1; } .tw-route-club { display: inline-flex; align-items: center; gap: 6px; min-width: 0; } .tw-route-club span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         @media (min-width: 1280px) {
           .tw-feedlist { grid-template-columns: 1fr 1fr !important; gap:14px; }
