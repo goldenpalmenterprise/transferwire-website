@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-25-zu design-fullwidth -->
+<!-- tw-build: 2026-08-25-zv pagehead-empty -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -994,7 +994,7 @@ const EN_MAP = {
 "AGB": "Terms",
 "Hier Vertr\u00e4ge k\u00fcndigen": "Cancel contracts here"
 };
-Object.assign(EN_MAP, { "Die Seite hatte einen technischen Fehler. Einmal neu laden hilft meistens.": "The page ran into a technical error. Reloading usually fixes it.", "Seite neu laden": "Reload page", "Noch keine Daten": "No data yet", "Nach diesem Verein filtern": "Filter by this club", "Filter aufheben": "Clear filter", "Noch keine gespeicherten Filter \u2014 z. B. \u201ePremier League Ger\u00fcchte\u201c oder \u201eSt\u00fcrmer \u00b7 Vertrag bis 2027\u201c.": "No saved filters yet \u2014 e.g. \u201cPremier League rumours\u201d or \u201cStrikers \u00b7 contract until 2027\u201d.", "Vertragslos": "Free agent", "\uD83C\uDF10 Auf Englisch": "\uD83C\uDF10 Translate to English", "Original anzeigen": "Show original", "\u2026 \u00dcbersetze": "\u2026 Translating", "Beitrag ins Englische \u00fcbersetzen (jede Sprache)": "Translate this post into English (any language)", "\u00dcbersetzung fehlgeschlagen.": "Translation failed.", "Ups \u2014 kleiner Aussetzer": "Oops \u2014 a small hiccup", "Etwas ist schiefgelaufen": "Something went wrong", "Neu laden": "Reload" });
+Object.assign(EN_MAP, { "Die Seite hatte einen technischen Fehler. Einmal neu laden hilft meistens.": "The page ran into a technical error. Reloading usually fixes it.", "Seite neu laden": "Reload page", "Deine Merkliste ist noch leer": "Your watchlist is still empty", "Keine Spieler gefunden": "No players found", "Noch keine Spieltagsdaten": "No matchday data yet", "Keine Treffer in den Scouting-Listen": "No results in the scouting lists", "Noch keine Eintr\u00e4ge": "No entries yet", "Noch keine Beitr\u00e4ge": "No posts yet", "Sei der Erste \u2014 teile einen Transfer-Hinweis aus deinem Netzwerk. Der KI-Pr\u00fcfer sichtet ihn in Sekunden.": "Be the first \u2014 share a transfer tip from your network. The AI reviewer checks it within seconds.", "Noch keine Anfragen": "No requests yet", "Starte das Netzwerk \u2014 stelle eine Frage oder ver\u00f6ffentliche ein Angebot.": "Start the network \u2014 ask a question or publish an offer.", "Keine Beitr\u00e4ge geladen": "No posts loaded", "Es liegen keine Community-Beitr\u00e4ge f\u00fcr diesen Filter vor.": "There are no community posts for this filter.", "Noch keine Daten": "No data yet", "Nach diesem Verein filtern": "Filter by this club", "Filter aufheben": "Clear filter", "Noch keine gespeicherten Filter \u2014 z. B. \u201ePremier League Ger\u00fcchte\u201c oder \u201eSt\u00fcrmer \u00b7 Vertrag bis 2027\u201c.": "No saved filters yet \u2014 e.g. \u201cPremier League rumours\u201d or \u201cStrikers \u00b7 contract until 2027\u201d.", "Vertragslos": "Free agent", "\uD83C\uDF10 Auf Englisch": "\uD83C\uDF10 Translate to English", "Original anzeigen": "Show original", "\u2026 \u00dcbersetze": "\u2026 Translating", "Beitrag ins Englische \u00fcbersetzen (jede Sprache)": "Translate this post into English (any language)", "\u00dcbersetzung fehlgeschlagen.": "Translation failed.", "Ups \u2014 kleiner Aussetzer": "Oops \u2014 a small hiccup", "Etwas ist schiefgelaufen": "Something went wrong", "Neu laden": "Reload" });
 const EN_COUNTRIES = { "Deutschland": "Germany", "\u00d6sterreich": "Austria", "Schweiz": "Switzerland", "Spanien": "Spain", "Italien": "Italy", "Frankreich": "France", "Belgien": "Belgium", "Niederlande": "Netherlands", "T\u00fcrkei": "Turkey", "D\u00e4nemark": "Denmark", "Griechenland": "Greece", "Polen": "Poland", "Tschechien": "Czechia", "Kroatien": "Croatia", "Serbien": "Serbia", "Schottland": "Scotland", "Schweden": "Sweden", "Norwegen": "Norway", "Russland": "Russia", "Ungarn": "Hungary", "Slowakei": "Slovakia", "Rum\u00e4nien": "Romania", "Brasilien": "Brazil", "Argentinien": "Argentina", "Vereinigte Staaten": "United States", "Saudi-Arabien": "Saudi Arabia", "Japan": "Japan", "S\u00fcdkorea": "South Korea", "Australien": "Australia", "Mexiko": "Mexico", "Kolumbien": "Colombia" };
 Object.assign(EN_MAP, EN_COUNTRIES);
 const EN_WORDS = [
@@ -2090,6 +2090,15 @@ function ClubLogo({ name, size }) {
   const url = name && CLUB_LOGOS[name];
   if (url) return React.createElement("img", { src: url, alt: "", width: sz, height: sz, loading: "lazy", style: { width: sz, height: sz, objectFit: "contain", borderRadius: 4, flexShrink: 0 } });
   return React.createElement("span", { "aria-hidden": true, style: { width: sz, height: sz, borderRadius: "50%", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_BODY, fontSize: Math.max(8, Math.round(sz * 0.42)), fontWeight: 900, color: "#fff", background: "hsl(" + clubHue(name) + " 38% 46%)", letterSpacing: .3 } }, clubMono(name));
+}
+function EmptyState({ icon, title, text, action, onAction, action2, onAction2 }) {
+  return React.createElement("div", { className: "tw-card", style: { textAlign: "center", padding: "36px 24px", borderStyle: "dashed" } },
+    React.createElement("div", { style: { fontSize: 30, lineHeight: 1, marginBottom: 12, opacity: .85 } }, icon || "\u2609"),
+    React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 16, fontWeight: 800, color: INK, marginBottom: 6 } }, title),
+    text ? React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.55, color: MUTED, maxWidth: 520, margin: "0 auto" } }, text) : null,
+    (action || action2) ? React.createElement("div", { style: { display: "flex", gap: 8, justifyContent: "center", marginTop: 16, flexWrap: "wrap" } },
+      action ? React.createElement("button", { onClick: onAction, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 16px", borderRadius: 10, border: "1px solid #0f1520", background: "#0f1520", color: "#fff" } }, action) : null,
+      action2 ? React.createElement("button", { onClick: onAction2, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 16px", borderRadius: 10, border: "1px solid " + HAIR, background: "#fff", color: INK } }, action2) : null) : null);
 }
 function UebersetzenButton({ zustand, onClick }) {
   const label = zustand === "laedt" ? "\u2026 \u00dcbersetze" : zustand === "en" ? "Original anzeigen" : "\uD83C\uDF10 Auf Englisch";
@@ -6575,15 +6584,17 @@ function TransferApp({
       fontFamily: FONT_DISPLAY,
       fontWeight: 700,
       fontSize: 30,
-      color: "#15181C"
+      lineHeight: "38px",
+      color: INK,
+      marginBottom: 6
     }
   }, t("rank_title")), /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: FONT_BODY,
-      fontSize: 12.5,
-      color: "#4a4a48",
-      lineHeight: 1.55,
-      margin: "6px 0 0"
+      fontSize: 14.5,
+      color: MUTED,
+      lineHeight: 1.5,
+      margin: "0 0 22px"
     }
   }, t("rank_sub"))), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -6816,18 +6827,7 @@ function TransferApp({
       color: MUTED,
       padding: "20px 4px"
     }
-  }, t("rank_loading")) : perf.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "#fff",
-      border: `1px solid ${HAIR}`,
-      borderRadius: 12,
-      padding: "18px 16px",
-      fontFamily: FONT_BODY,
-      fontSize: 13,
-      color: "#4a4a48",
-      lineHeight: 1.6
-    }
-  }, t("rank_empty")) : (() => {
+  }, t("rank_loading")) : perf.length === 0 ? /*#__PURE__*/React.createElement(EmptyState, { icon: "\u{1F4CA}", title: "Noch keine Spieltagsdaten", text: t("rank_empty") }) : (() => {
     const q = perfQ.toLowerCase().trim();
     const gefiltert = perf.filter(x => (!q || (x.name + " " + x.team).toLowerCase().indexOf(q) >= 0) && (!perfLg || x.league === perfLg) && (!perfPos || x.pos === perfPos) && (!perfSt || (x.stt || "").indexOf(perfSt) >= 0) && (!perfSw || (x.swt || "").indexOf(perfSw) >= 0));
     if (!gefiltert.length) return /*#__PURE__*/React.createElement("div", {
@@ -7045,15 +7045,17 @@ function TransferApp({
       fontFamily: FONT_DISPLAY,
       fontWeight: 700,
       fontSize: 30,
-      color: "#15181C"
+      lineHeight: "38px",
+      color: INK,
+      marginBottom: 6
     }
   }, t("li_title")), /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: FONT_BODY,
-      fontSize: 12.5,
-      color: "#4a4a48",
-      lineHeight: 1.55,
-      margin: "6px 0 0"
+      fontSize: 14.5,
+      color: MUTED,
+      lineHeight: 1.5,
+      margin: "0 0 22px"
     }
   }, t("li_sub"))), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -7440,17 +7442,7 @@ function TransferApp({
       color: MUTED,
       padding: "14px 4px"
     }
-  }, "…") : listItems.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "#fff",
-      border: `1px solid ${HAIR}`,
-      borderRadius: 12,
-      padding: "16px",
-      fontFamily: FONT_BODY,
-      fontSize: 12.5,
-      color: "#4a4a48"
-    }
-  }, t("li_none")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, "…") : listItems.length === 0 ? /*#__PURE__*/React.createElement(EmptyState, { icon: "\u{1F4CB}", title: "Keine Treffer in den Scouting-Listen", text: t("li_none") }) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
@@ -7552,15 +7544,17 @@ function TransferApp({
       fontFamily: FONT_DISPLAY,
       fontWeight: 700,
       fontSize: 30,
-      color: "#15181C"
+      lineHeight: "38px",
+      color: INK,
+      marginBottom: 6
     }
   }, t("ch_title")), /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: FONT_BODY,
-      fontSize: 12.5,
-      color: "#4a4a48",
-      lineHeight: 1.55,
-      margin: "6px 0 0"
+      fontSize: 14.5,
+      color: MUTED,
+      lineHeight: 1.5,
+      margin: "0 0 22px"
     }
   }, t("ch_sub"))), marktLoading || !marktErg ? /*#__PURE__*/React.createElement("div", {
     style: {
@@ -7579,19 +7573,7 @@ function TransferApp({
       letterSpacing: 1,
       margin: "4px 0 8px"
     }
-  }, t("ch_ausl")), !marktErg.auslaufend || marktErg.auslaufend.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "#fff",
-      border: `1px solid ${HAIR}`,
-      borderRadius: 12,
-      padding: "14px 16px",
-      marginBottom: 16,
-      fontFamily: FONT_BODY,
-      fontSize: 12.5,
-      color: "#4a4a48",
-      lineHeight: 1.55
-    }
-  }, t("ch_ausl_none")) : /*#__PURE__*/React.createElement("div", {
+  }, t("ch_ausl")), !marktErg.auslaufend || marktErg.auslaufend.length === 0 ? /*#__PURE__*/React.createElement(EmptyState, { icon: "\u{1F4C4}", title: "Noch keine Eintr\u00e4ge", text: t("ch_ausl_none") }) : /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
@@ -7659,18 +7641,7 @@ function TransferApp({
       letterSpacing: 1,
       margin: "4px 0 8px"
     }
-  }, t("ch_frei")), !marktErg.frei || marktErg.frei.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "#fff",
-      border: `1px solid ${HAIR}`,
-      borderRadius: 12,
-      padding: "14px 16px",
-      marginBottom: 16,
-      fontFamily: FONT_BODY,
-      fontSize: 12.5,
-      color: "#4a4a48"
-    }
-  }, t("ch_frei_none")) : /*#__PURE__*/React.createElement("div", {
+  }, t("ch_frei")), !marktErg.frei || marktErg.frei.length === 0 ? /*#__PURE__*/React.createElement(EmptyState, { icon: "\u{1F4C4}", title: "Noch keine Eintr\u00e4ge", text: t("ch_frei_none") }) : /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
@@ -7718,18 +7689,7 @@ function TransferApp({
       letterSpacing: 1,
       margin: "4px 0 8px"
     }
-  }, t("ch_druck")), !marktErg.druck || marktErg.druck.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "#fff",
-      border: `1px solid ${HAIR}`,
-      borderRadius: 12,
-      padding: "14px 16px",
-      marginBottom: 8,
-      fontFamily: FONT_BODY,
-      fontSize: 12.5,
-      color: "#4a4a48"
-    }
-  }, t("ch_druck_none")) : /*#__PURE__*/React.createElement("div", {
+  }, t("ch_druck")), !marktErg.druck || marktErg.druck.length === 0 ? /*#__PURE__*/React.createElement(EmptyState, { icon: "\u{1F4C4}", title: "Noch keine Eintr\u00e4ge", text: t("ch_druck_none") }) : /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
@@ -7775,15 +7735,17 @@ function TransferApp({
       fontFamily: FONT_DISPLAY,
       fontWeight: 700,
       fontSize: 30,
-      color: "#15181C"
+      lineHeight: "38px",
+      color: INK,
+      marginBottom: 6
     }
   }, t("pl_title")), /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: FONT_BODY,
-      fontSize: 12.5,
-      color: "#4a4a48",
-      lineHeight: 1.55,
-      margin: "6px 0 0"
+      fontSize: 14.5,
+      color: MUTED,
+      lineHeight: 1.5,
+      margin: "0 0 22px"
     }
   }, t("pl_sub"))), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -7897,17 +7859,7 @@ function TransferApp({
       color: MUTED,
       padding: "18px 4px"
     }
-  }, [0, 1, 2].map(i => /*#__PURE__*/React.createElement("div", { key: i, className: "tw-skel", style: { height: 84, marginBottom: 10 } }))) : plItems.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "#fff",
-      border: `1px solid ${HAIR}`,
-      borderRadius: 12,
-      padding: "18px 16px",
-      fontFamily: FONT_BODY,
-      fontSize: 13,
-      color: "#4a4a48"
-    }
-  }, t("pl_none")) : /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", { style: { display: "flex", gap: 6, marginBottom: 10 } }, [["karten", "Karten"], ["tabelle", "Tabelle"]].map(([k, lab]) => /*#__PURE__*/React.createElement("button", { key: k, onClick: () => setPlModus(k), style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 12px", borderRadius: 8, border: "1px solid " + (plModus === k ? "#0f1520" : HAIR), background: plModus === k ? "#0f1520" : "#fff", color: plModus === k ? "#fff" : "#5b6472" } }, lab))), plModus === "tabelle" ? (() => { const mwVal = x => { const m = String(x.mw || "").match(/([\d.,]+)\s*(Mio|Tsd)/); if (!m) return -1; return parseFloat(m[1].replace(/\./g, "").replace(",", ".")) * (m[2] === "Mio" ? 1e6 : 1e3); }; const wert = (x, k) => k === "mw" ? mwVal(x) : k === "name" ? String(x.name || "").toLowerCase() : Number(x[k] || 0); const zeilen = plSort.k ? [...plItems].sort((a, b) => { const A = wert(a, plSort.k), B = wert(b, plSort.k); return (A < B ? -1 : A > B ? 1 : 0) * plSort.d; }) : plItems; const koepfe = [["name", "Spieler", "left"], ["age", "Alter", "right"], ["", "Verein", "left"], ["", "Pos", "left"], ["mw", "MW", "right"], ["", "Vertrag", "right"], ["apps", "Sp", "right"], ["min", "Min", "right"], ["rating", "Note", "right"], ["goals", "T", "right"], ["assists", "A", "right"], ["", "", "center"]]; const sortKlick = k => { if (!k) return; setPlSort(s => s.k === k ? { k, d: -s.d } : { k, d: k === "name" ? 1 : -1 }); }; const imVgl = x => plVergleich.some(v => v.pid === x.pid); const vglToggle = x => setPlVergleich(v => imVgl(x) ? v.filter(y => y.pid !== x.pid) : (v.length >= 3 ? v : [...v, x])); return /*#__PURE__*/React.createElement("div", { style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 14, overflow: "auto" } }, /*#__PURE__*/React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontFamily: FONT_BODY, fontSize: 12.5, minWidth: 860 } }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, koepfe.map(([k, lab, al], i) => /*#__PURE__*/React.createElement("th", { key: i, onClick: () => sortKlick(k), style: { position: "sticky", top: 0, background: "#f8fafb", borderBottom: "1px solid " + HAIR, padding: "9px 10px", textAlign: al, fontSize: 10.5, fontWeight: 900, letterSpacing: .7, textTransform: "uppercase", color: plSort.k === k && k ? "#0f1520" : "#8a92a3", cursor: k ? "pointer" : "default", whiteSpace: "nowrap", zIndex: 2 } }, lab, plSort.k === k && k ? (plSort.d > 0 ? " \u2191" : " \u2193") : "")))), /*#__PURE__*/React.createElement("tbody", null, zeilen.map(x => /*#__PURE__*/React.createElement("tr", { key: x.pid, onClick: () => setPlSel(x), style: { cursor: "pointer", borderBottom: "1px solid " + HAIR } }, /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", fontWeight: 800, color: "#15181C", whiteSpace: "nowrap" } }, x.name), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", color: "#5b6472" } }, x.age || "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", color: "#5b6472", whiteSpace: "nowrap", maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis" } }, x.team), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", color: "#5b6472", whiteSpace: "nowrap" } }, x.pos || "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", fontWeight: 800, color: "#0b6b3e", whiteSpace: "nowrap" } }, x.mw || "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", color: "#5b6472" } }, x.vertrag ? String(x.vertrag).slice(0, 4) : "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", color: "#5b6472" } }, x.apps ?? "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", color: "#5b6472" } }, x.min ?? "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", fontWeight: 800, color: "#15181C" } }, x.rating || "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", color: "#5b6472" } }, x.goals ?? 0), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", color: "#5b6472" } }, x.assists ?? 0), /*#__PURE__*/React.createElement("td", { onClick: e => { e.stopPropagation(); vglToggle(x); }, style: { padding: "9px 10px", textAlign: "center" } }, /*#__PURE__*/React.createElement("span", { style: { display: "inline-block", width: 17, height: 17, borderRadius: 5, border: "1.5px solid " + (imVgl(x) ? "#149a59" : HAIR), background: imVgl(x) ? "#149a59" : "#fff", color: "#fff", fontSize: 11, lineHeight: "17px", fontWeight: 900 } }, imVgl(x) ? "\u2713" : ""))))))); })() : /*#__PURE__*/React.createElement("div", {
+  }, [0, 1, 2].map(i => /*#__PURE__*/React.createElement("div", { key: i, className: "tw-skel", style: { height: 84, marginBottom: 10 } }))) : plItems.length === 0 ? /*#__PURE__*/React.createElement(EmptyState, { icon: "\u{1F50D}", title: "Keine Spieler gefunden", text: t("pl_none") }) : /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", { style: { display: "flex", gap: 6, marginBottom: 10 } }, [["karten", "Karten"], ["tabelle", "Tabelle"]].map(([k, lab]) => /*#__PURE__*/React.createElement("button", { key: k, onClick: () => setPlModus(k), style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 12px", borderRadius: 8, border: "1px solid " + (plModus === k ? "#0f1520" : HAIR), background: plModus === k ? "#0f1520" : "#fff", color: plModus === k ? "#fff" : "#5b6472" } }, lab))), plModus === "tabelle" ? (() => { const mwVal = x => { const m = String(x.mw || "").match(/([\d.,]+)\s*(Mio|Tsd)/); if (!m) return -1; return parseFloat(m[1].replace(/\./g, "").replace(",", ".")) * (m[2] === "Mio" ? 1e6 : 1e3); }; const wert = (x, k) => k === "mw" ? mwVal(x) : k === "name" ? String(x.name || "").toLowerCase() : Number(x[k] || 0); const zeilen = plSort.k ? [...plItems].sort((a, b) => { const A = wert(a, plSort.k), B = wert(b, plSort.k); return (A < B ? -1 : A > B ? 1 : 0) * plSort.d; }) : plItems; const koepfe = [["name", "Spieler", "left"], ["age", "Alter", "right"], ["", "Verein", "left"], ["", "Pos", "left"], ["mw", "MW", "right"], ["", "Vertrag", "right"], ["apps", "Sp", "right"], ["min", "Min", "right"], ["rating", "Note", "right"], ["goals", "T", "right"], ["assists", "A", "right"], ["", "", "center"]]; const sortKlick = k => { if (!k) return; setPlSort(s => s.k === k ? { k, d: -s.d } : { k, d: k === "name" ? 1 : -1 }); }; const imVgl = x => plVergleich.some(v => v.pid === x.pid); const vglToggle = x => setPlVergleich(v => imVgl(x) ? v.filter(y => y.pid !== x.pid) : (v.length >= 3 ? v : [...v, x])); return /*#__PURE__*/React.createElement("div", { style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 14, overflow: "auto" } }, /*#__PURE__*/React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontFamily: FONT_BODY, fontSize: 12.5, minWidth: 860 } }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, koepfe.map(([k, lab, al], i) => /*#__PURE__*/React.createElement("th", { key: i, onClick: () => sortKlick(k), style: { position: "sticky", top: 0, background: "#f8fafb", borderBottom: "1px solid " + HAIR, padding: "9px 10px", textAlign: al, fontSize: 10.5, fontWeight: 900, letterSpacing: .7, textTransform: "uppercase", color: plSort.k === k && k ? "#0f1520" : "#8a92a3", cursor: k ? "pointer" : "default", whiteSpace: "nowrap", zIndex: 2 } }, lab, plSort.k === k && k ? (plSort.d > 0 ? " \u2191" : " \u2193") : "")))), /*#__PURE__*/React.createElement("tbody", null, zeilen.map(x => /*#__PURE__*/React.createElement("tr", { key: x.pid, onClick: () => setPlSel(x), style: { cursor: "pointer", borderBottom: "1px solid " + HAIR } }, /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", fontWeight: 800, color: "#15181C", whiteSpace: "nowrap" } }, x.name), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", color: "#5b6472" } }, x.age || "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", color: "#5b6472", whiteSpace: "nowrap", maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis" } }, x.team), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", color: "#5b6472", whiteSpace: "nowrap" } }, x.pos || "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", fontWeight: 800, color: "#0b6b3e", whiteSpace: "nowrap" } }, x.mw || "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", color: "#5b6472" } }, x.vertrag ? String(x.vertrag).slice(0, 4) : "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", color: "#5b6472" } }, x.apps ?? "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", color: "#5b6472" } }, x.min ?? "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", fontWeight: 800, color: "#15181C" } }, x.rating || "\u2013"), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", color: "#5b6472" } }, x.goals ?? 0), /*#__PURE__*/React.createElement("td", { style: { padding: "9px 10px", textAlign: "right", color: "#5b6472" } }, x.assists ?? 0), /*#__PURE__*/React.createElement("td", { onClick: e => { e.stopPropagation(); vglToggle(x); }, style: { padding: "9px 10px", textAlign: "center" } }, /*#__PURE__*/React.createElement("span", { style: { display: "inline-block", width: 17, height: 17, borderRadius: 5, border: "1.5px solid " + (imVgl(x) ? "#149a59" : HAIR), background: imVgl(x) ? "#149a59" : "#fff", color: "#fff", fontSize: 11, lineHeight: "17px", fontWeight: 900 } }, imVgl(x) ? "\u2713" : ""))))))); })() : /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
@@ -8030,14 +7982,7 @@ function TransferApp({
       letterSpacing: 1,
       marginBottom: 8
     }
-  }, t("watch_mgmt")), (watch.items || []).length === 0 ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 13,
-      color: "#4a4a48",
-      lineHeight: 1.55
-    }
-  }, t("watch_empty")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, t("watch_mgmt")), (watch.items || []).length === 0 ? /*#__PURE__*/React.createElement(EmptyState, { icon: "\u2606", title: "Deine Merkliste ist noch leer", text: t("watch_empty") }) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexWrap: "wrap",
@@ -8097,7 +8042,7 @@ function TransferApp({
           /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, (p.author_rolle || "Mitglied") + " \u00b7 " + fmtDate(p.created_at))),
         /*#__PURE__*/React.createElement("div", { style: { marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 } }, /*#__PURE__*/React.createElement(CmtyChip, { status: p.status }), /*#__PURE__*/React.createElement(UebersetzenButton, { zustand: cUeLaedt[p.id] ? "laedt" : (cUeZeige[p.id] && cUe[p.id] ? "en" : "de"), onClick: () => uebersetzePost(p.id) }), /*#__PURE__*/React.createElement(AntwortButton, { eigener: !!p.own, onClick: () => antwortSenden(p.id) }), !p.own && /*#__PURE__*/React.createElement(MeldeButton, { gemeldet: p.gemeldet_von_mir, onClick: () => meldePost(p.id, "info") }))),
       /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "#2a3140", whiteSpace: "pre-wrap" } }, cmtyBodyText(p, cUe, cUeZeige), cUeZeige[p.id] && cUe[p.id] && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED, marginTop: 6 } }, "\uD83C\uDF10 \u00dcbersetzt" + (cUe[p.id].lang ? " aus " + cUe[p.id].lang.toUpperCase() : ""))))),
-    cInfoPosts.length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Noch keine Beitr\u00e4ge \u2014 sei der Erste!"), cInfoPosts.length > 0 && cmtyFilter(cInfoPosts, cInfoSuche).length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Keine Treffer f\u00fcr \u201e" + cInfoSuche + "\u201c.")),
+    cInfoPosts.length === 0 && /*#__PURE__*/React.createElement(EmptyState, { icon: "\u{1F4AC}", title: "Noch keine Beitr\u00e4ge", text: "Sei der Erste \u2014 teile einen Transfer-Hinweis aus deinem Netzwerk. Der KI-Pr\u00fcfer sichtet ihn in Sekunden." }), cInfoPosts.length > 0 && cmtyFilter(cInfoPosts, cInfoSuche).length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Keine Treffer f\u00fcr \u201e" + cInfoSuche + "\u201c.")),
   view === "moderation" && /*#__PURE__*/React.createElement("div", { style: { gridColumn: "1 / -1", display: "grid", gap: 14 } },
     /*#__PURE__*/React.createElement(CommunitySub, { view: view, setView: setView, admin: istAdmin }),
     /*#__PURE__*/React.createElement("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 24, margin: "2px 0 0", textTransform: "uppercase", letterSpacing: .4, color: INK } }, "\uD83D\uDEE1 Moderation"),
@@ -8124,7 +8069,7 @@ function TransferApp({
           p.status !== "zurueckgezogen" && /*#__PURE__*/React.createElement("button", { onClick: () => adminAktion(p.id, "zurueckziehen"), style: ADMIN_BTN("#b04a3a") }, "Zur\u00fcckziehen"),
           (p.status === "abgelehnt" || p.status === "gemeldet" || p.status === "zurueckgezogen" || p.status === "neu" || p.status === "prueft") && /*#__PURE__*/React.createElement("button", { onClick: () => adminAktion(p.id, "freigeben"), style: ADMIN_BTN("#149a59") }, p.kind === "networking" ? "Freigeben" : (p.hat_feed ? "Freigeben (in Feed)" : "Freigeben (als Notiz)")),
           /*#__PURE__*/React.createElement("button", { onClick: () => adminAktion(p.id, "neu_pruefen"), style: ADMIN_BTN("#0f1520") }, "Neu pr\u00fcfen")))),
-      cAdminPosts.length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Keine Beitr\u00e4ge geladen."))),
+      cAdminPosts.length === 0 && /*#__PURE__*/React.createElement(EmptyState, { icon: "\u{1F6E1}", title: "Keine Beitr\u00e4ge geladen", text: "Es liegen keine Community-Beitr\u00e4ge f\u00fcr diesen Filter vor." }))),
   view === "networking" && /*#__PURE__*/React.createElement("div", { style: { gridColumn: "1 / -1", display: "grid", gap: 14 } },
     /*#__PURE__*/React.createElement(CommunitySub, { view: view, setView: setView, admin: istAdmin }),
     /*#__PURE__*/React.createElement("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 24, margin: "2px 0 0", textTransform: "uppercase", letterSpacing: .4, color: INK } }, "\uD83E\uDD1D Networking"),
@@ -8145,7 +8090,7 @@ function TransferApp({
             /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, (p.author_rolle || "Mitglied") + " \u00b7 " + fmtDate(p.created_at))),
           /*#__PURE__*/React.createElement("div", { style: { marginLeft: "auto", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" } }, /*#__PURE__*/React.createElement(UebersetzenButton, { zustand: cUeLaedt[p.id] ? "laedt" : (cUeZeige[p.id] && cUe[p.id] ? "en" : "de"), onClick: () => uebersetzePost(p.id) }), p.own ? /*#__PURE__*/React.createElement(CmtyChip, { status: p.status }) : /*#__PURE__*/React.createElement(MeldeButton, { gemeldet: p.gemeldet_von_mir, onClick: () => meldePost(p.id, "networking") }), /*#__PURE__*/React.createElement(AntwortButton, { eigener: !!p.own, onClick: () => antwortSenden(p.id) }))),
         /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "#2a3140", whiteSpace: "pre-wrap" } }, cmtyBodyText(p, cUe, cUeZeige), cUeZeige[p.id] && cUe[p.id] && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED, marginTop: 6 } }, "\uD83C\uDF10 \u00dcbersetzt" + (cUe[p.id].lang ? " aus " + cUe[p.id].lang.toUpperCase() : ""))))),
-      cNetPosts.length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Noch keine Anfragen \u2014 starte das Netzwerk!"), cNetPosts.length > 0 && cmtyFilter(cNetPosts, cNetSuche).length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Keine Treffer f\u00fcr \u201e" + cNetSuche + "\u201c.")) :
+      cNetPosts.length === 0 && /*#__PURE__*/React.createElement(EmptyState, { icon: "\u{1F91D}", title: "Noch keine Anfragen", text: "Starte das Netzwerk \u2014 stelle eine Frage oder ver\u00f6ffentliche ein Angebot." }), cNetPosts.length > 0 && cmtyFilter(cNetPosts, cNetSuche).length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Keine Treffer f\u00fcr \u201e" + cNetSuche + "\u201c.")) :
     /*#__PURE__*/React.createElement("div", { className: "tw-card", style: Object.assign({}, CARD_BOX, { padding: "34px 24px", textAlign: "center", maxWidth: 560 }) },
       /*#__PURE__*/React.createElement("div", { style: { width: 52, height: 52, borderRadius: 99, background: "#0f1520", color: "#e3b34e", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 12 } }, "\uD83D\uDD12"),
       /*#__PURE__*/React.createElement("h3", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 19, margin: "0 0 6px", textTransform: "uppercase", color: INK } }, "Nur im Premium-Abo"),
