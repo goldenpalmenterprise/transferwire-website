@@ -281,3 +281,26 @@ Off-Site-Backup (Storage Box); optional Cloudflare (Rate-Limit gegen Code-Brute-
   Networking, Moderation. Feed-Filter-Leerzustand ("Keine Meldungen für diese Auswahl") NICHT umgestellt (anderes Markup). Bestehende Texte
   bleiben als Erklärung erhalten; neue Überschriften + EN-Wörterbuch ergänzt. Technik: Wrapper per Rückwärtssuche vom Textanker ersetzt
   (Muster waren mehrzeilig/Template-Literale). rt25: Community + Merkliste zeigen Icon/Überschrift/Erklärung zentriert, 0 Fehler.
+
+## 25.08. 00:56–01:37 – DESIGN-SYSTEM 1.5 SCORE-NAMEN, Commits d9116b8 / 80515aa / d83d6fc, Marker zw/zx/zy (neuer Chat)
+- Einstieg: /home/claude/stufe3_fortschritt.md fehlte (frische Umgebung) → Stand aus docs/FORTSCHRITT.md im Repo. Boss-PAT (16.08.-Chat) wieder in
+  /home/claude/.git-credentials (600). Lokale Kopien: /home/claude/tests, /home/claude/i18n/en_map.json.
+- Baustein (vor EmptyState): SCORES {performance, talent, match, opportunity} mit name/scale/de/en; ScoreInfo({kind,size}) = Info-Symbol "i"
+  (currentColor, 15 px) → Klick-Popover (ReactDOM.createPortal an document.body, position fixed, z 1500, misst Höhe per useLayoutEffect und klappt
+  nach oben, Breite min(300, vw-16), schließt bei Esc/Klick daneben/Scroll/Resize); ScoreName({kind}) = Name + Symbol; ScoreLegend({kind,style}) =
+  Farbkästchen + Name + Symbol + "· Skala 0–100" (EN "scale"). Texte DE/EN direkt über LANG (nicht über EN_MAP).
+- Umbenennung TW-Score → TW Performance Score: rank_sub, totw_sub, li_s_score, li_f_score ("Min. Performance Score"), pl_form, Listen-Preset
+  sde/sen "abwehr", Chat-Vorschlag "Wie wird der TW Performance Score berechnet?", Panel Spieler des Spieltags ("TW PERFORMANCE SCORE" + Symbol,
+  "So entsteht der TW Performance Score: …" + EN_MAP-Key/Value angepasst). Legenden: über der Performance-Liste, in der Kopfzeile jeder
+  Scouting-Liste (Titel links, Legende rechts), Vereins-Dossier "Kader (nach Einsatzminuten) · TW Performance Score ⓘ", Spieler-Detail Formkurve ⓘ.
+- Talent-Rankings: "TW-Score N" → "TW Talent Score N" (Kacheln + Zeilen), Kopfzeile flex mit ScoreLegend talent rechts.
+- Match/Opportunity: NUR Definitionen im Baustein, nirgends gerendert – es gibt keine Zahl dafür (Match = profilOverlap-Zählung im Gesucht-View,
+  Opportunity = nichts). Berechnung wäre neuer Inhalt → Boss-Entscheidung.
+- Lektionen: (1) position:fixed innerhalb einer .tw-card wird durch das Hover-transform der Karte verschoben → Popover als Portal an body.
+  (2) add_init_script setzt tw_lang bei JEDEM Reload → EN im Test nur per __twToggleLang('en') ohne Reload prüfen. (3) Spieler-Detail öffnet über
+  Button "Profil" (openPlayer → plDetail-Overlay); Tabellenzeile (setPlSel) ist ein anderer Drawer. (4) Listen-Preset "Top 25 U23-Abwehrspieler
+  Europa" liefert aktuell 0 Treffer (API count 0, Saisonstart) – EmptyState + Legende korrekt; Filter ggf. lockern (Boss).
+- Tests (docs/tests): rt26–rt31. Ergebnis rt28/rt31 (Marker zy): Popover sichtbar bei Hover-Karte (1292–1592 px), am unteren Rand (Flip),
+  auf 390 px (82–382 px), im Spieler-Detail-Overlay; Klick daneben/Esc schließen; EN (rt27): "scale 0–100" + englischer Text; 0 Fehler.
+- OFFEN: 1.6 Statussystem, 1.4 Filterleiste (nach Launch), Vereinslogos-Sync, Match-/Opportunity-Score-Berechnung (Freigabe), Boss-To-dos
+  (PAT rotieren! OpenAI-Limit, n8n-2FA, SSH-Key, Repo privat).
