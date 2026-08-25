@@ -1,0 +1,283 @@
+# TransferWire – Stufe 3 Fortschritt (Fortsetzung 24.08.2026, Session ab ~13:30 UTC)
+
+Vorgeschichte: siehe Übergabe-Briefing 24.08. ~06:00 (Mobil, Sprachwähler/Dark-Mode, OG, Posteingang, Community ~95%).
+Arbeitsweise: Repo geklont nach /home/claude/site, Push via Boss-PAT (fine-grained, nur transferwire-website, Contents R/W;
+hinterlegt in /home/claude/.git-credentials, chmod 600, stammt aus Chat "Serverumzug Stufe 3" vom 16.08.).
+Tests laufen auf dem Server im Container tm-fetcher über Admin-Shell-WF umhYeTVuKBNB2Z3u.
+Übergabe von Testskripten: Base64 → `echo <b64> | docker exec -i tm-fetcher sh -c 'base64 -d > /tmp/x.py && python3 /tmp/x.py'`
+(umgeht die Heredoc-/Escape-Falle komplett; lokale Kopien in /home/claude/tests/).
+
+## 24.08. 13:30 – rt10d ausgeführt (Exec 7778)
+- Ergebnis rot: Community-View leer (h2 "", textarea false, Luettich false), Networking-Pille nicht gefunden, 0 pageerrors.
+- Nebenbefund: sed-Marker-Patch in rt10d gescheitert (`unknown option to 's'` – Pipe-Delimiter vs. `||` im Regex) → rt10d = rt10c.
+- Live-Marker per curl: 2026-08-24-zd → KEIN Cache-Problem, Bug echt.
+
+## 24.08. 13:34 – Diagnose rt10e (Exec 7785) → Ursache gefunden
+- Nach Klick auf Tab "Community": `.tw-main` = null, `.tw-tabs` leer → App unmounted, TwBoundary-Fallback.
+- Konsole: `TypeError: Failed to set an indexed property [0] on 'CSSStyleDeclaration'`.
+- Ursache im Code: Community/Networking-Karten nutzten `style: Object.assign({}, CARD, {...})`,
+  aber `CARD` ist in index.html der Farbstring "#ffffff" (Z. 1538), kein Style-Objekt.
+  Object.assign kopiert die Zeichen als Keys 0..6 → React setzt style[0] → Crash → Boundary → "leere" View.
+  Der Fehler ist KEIN pageerror (React fängt ihn), darum zeigten rt10c/d 0 Fehler.
+
+## 24.08. 13:38 – Fix gepusht: Commit d598695, Marker 2026-08-24-ze card-style-fix
+- `const CARD_BOX = { background: CARD, border: "1px solid " + HAIR, borderRadius: 14 };` (Z. 1539)
+- 5 Stellen `Object.assign({}, CARD, {` → `Object.assign({}, CARD_BOX, {` (Community-Formular, Info-Posts, Networking-Formular, Networking-Posts, Premium-Gate).
+- node --check auf allen Inline-Script-Blöcken grün.
+- Abnahme: rt10f (Tab-Klick über `.tw-tabs button`, Marker, Community-Checks, Networking-Gate, Konsolenfehler, 4xx-URLs).
+
+## Lektionen
+- `get_by_text("Community", exact=True)` in rt10c traf zwar den Tab, aber die View-Prüfung sah nur `.tw-main` – bei einem
+  Boundary-Fallback sieht das wie "leer" aus. Künftig in Tests immer auch `main: !!document.querySelector('.tw-main')`
+  und Konsolen-Errors (nicht nur pageerror) mitloggen.
+- Style-Konstanten in index.html: HAIR/CARD/PAGE/INK sind FARBSTRINGS. Karten-Style = CARD_BOX.
+
+## 24.08. 13:40 – Abnahme rt10f (Exec 7795) GRÜN
+Marker ze live · Community-View vollständig (h2, Textarea, "Hinweis senden", Amber-Banner, Pillen) · Post 1 "Standard Luettich" sichtbar
+mit Chip "Im Feed" · Networking-View: h2, Gold-Button, kein Formular (Gate greift) · FeedSuche/Feedkarten in Community ausgeblendet ·
+0 Konsolen-/Page-Errors · 4xx nur gstatic faviconV2 (Google-Favicon-Dienst für Quellenlogos, extern, harmlos).
+Zwei Scheinbefunde geklärt:
+- "Nur im Premium-Abo" nicht gefunden → Element hat textTransform uppercase, innerText = "NUR IM PREMIUM-ABO". Test künftig case-insensitiv.
+- "KV Kortrijk" nicht sichtbar → Post 2 ist kind=networking (Premium-Liste), Test-Konto sieht dort korrekt das Gate. Kein Bug.
+
+## Datenstand Community (DB + API, Exec 7806)
+- Post 1: kind info, status veroeffentlicht, agent_type verein_sucht, published_news_id cmty-1.
+- Post 2: kind networking, status neu (Premium-Testkonto), erscheint in API kind=networking nur mit Premium-Code.
+- Analyst-WF Z0xO8t9jEp0ffJdW: Exec 7493 um 06:05 UTC REAL mit gpt-5.5 gelaufen (762 Tokens, 163 Reasoning), publish → Feed
+  cmty-1 "Standard Lüttich sucht: linker Verteidiger", reliability 1, source "TW Community (ungeprueft)", Post markiert.
+  Seit 07:05 stündlich ~40 ms success (nichts zu tun). → OpenAI-Credits sind offenbar geladen; Livedemo damit erledigt.
+
+## 24.08. 13:48 – Feed-Verifikation cmty-1 (Exec 7813) GRÜN
+n8n-DB Transfernews: news_id cmty-1, type verein_sucht, reliability 1, source_name "TW Community (ungeprueft)", league Belgische Pro League.
+Feed-DOM (rt10g): 1.687 Karten geladen, cmty-1 an Position 124, Kartentext: "Verein sucht | Belgische Pro League | vor 8 Std |
+Standard Lüttich sucht: linker Verteidiger | Laut Community-Hinweis … | VEREINSBEDARF | Standard Lüttich | linker Verteidiger |
+kleines Budget, Leihe bevorzugt | Spekulation". Quelle "TW Community" ist auf der Karte NICHT sichtbar (nur "Spekulation" + Konjunktiv-
+Summary) → Badge-Idee hat echten Mehrwert. Anker für Badge: "Unbest\u00e4tigt" (escaped!) in index.html Z. 1785 und 2432.
+Nebenbefund: FeedSuche-Aside enthält kein input/select (asideInputs = []) → Testselektor ".tw-main aside input" ist falsch; Suche sitzt im Header.
+
+## STATUS COMMUNITY: 100 % live und abgenommen (Frontend ze, API 5QyzGceCwIANV4nq aktiv, Analyst Z0xO8t9jEp0ffJdW aktiv, Agent-Livelauf 06:05 UTC bestätigt).
+Testskripte (lokal /home/claude/tests, auf Server /tmp): rt10e Diagnose, rt10f Abnahme Community/Networking, rt10g Feed-Scan.
+
+## OFFEN / IDEEN (Reihenfolge = Empfehlung)
+1. Lila COMMUNITY-Badge in NewsCard (Anker gefunden) – ~30 Min.
+2. Feed-Paginierung "Mehr laden" 60er – Feed rendert aktuell 1.687 Karten auf einmal – ~1 h, wichtig für Mobil/Launch.
+3. Melde-Button an Community-Posts (Status gemeldet + Mail info@) – ~45 Min.
+4. Admin-Moderationsansicht (Liste + freigeben/ablehnen, Boss-only) – ~1,5 h.
+5. Upvotes/Reputation – nach Launch (eigene Tabelle votes, GRANT tw_app!).
+6. rt-Tests: Checks case-insensitiv, Konsolenfehler mitloggen, main-Existenz prüfen.
+PENDING BOSS (aus Briefing): n8n-Cloud kündigen bis ~29.08. · Stripe Testkauf 49 € + alten 60 €-Link deaktivieren · Hetzner-2FA ·
+GitHub-PAT rotieren (steht im Klartext im Chat vom 16.08.) · OpenAI-Credits: laut Agent-Lauf 06:05 vorhanden → Backlog-Sprint 971 Signale startklar.
+
+## 24.08. 14:05–14:45 – COMMUNITY 1.1 (Paket vom Boss freigegeben, Auto-Freigabe durch Agent beibehalten)
+### Frontend (3 Pushes)
+- 9af450a / Marker zf: Lila Badge "👥 Community · ungeprüft" in NewsCard, NeedCard, MeldungsPanel (istCommunity: id cmty-* oder Quelle /community/i).
+  Feed-Paginierung: FEED_SEITE=60, "Mehr laden (x von y)"-Pille, Reset bei Filter-/View-Wechsel. Community-Tab aktiv bei networking/moderation.
+- 08da669 / Marker zg: ADMIN_EMAILS=['laurenzrath@gmx.de'] (Frontend nur Anzeige, Server prüft), CmtyChip (neu/prueft/veroeffentlicht/notiert/
+  freigegeben/abgelehnt/gemeldet/zurueckgezogen), MeldeButton (nur Fremdbeiträge, disabled wenn gemeldet_von_mir), Networking: eigene Gesuche
+  zeigen Chip statt Kontakt-Button. View "moderation" (dritte Pille 🛡 nur für Admins): Filter Alle/Gemeldet/Info/Networking/Abgelehnt/Offen,
+  Karten mit KI-Label/Begründung/Melder/Notiz/Feed-ID, Aktionen Zurückziehen (confirm + Notiz-Prompt) / Freigeben / Neu prüfen.
+  Sende-Erfolgsmeldung angepasst + Reload nach 9 s und 25 s (Sofortprüfung). Guards für moderation in Wrapper/Filterleiste/Aside/newsfilter.
+- 2ed76bb / Marker zh: Positions-Keywords LV/RV/IV um Varianten ("linker/rechter verteidiger", EN) erweitert.
+### DB (Migration 14:09): community_posts + updated_at, meldungen, admin_note, agent_headline, feed_json; Tabelle community_reports
+  (UNIQUE post_id+reporter_email, CASCADE) + GRANTs tw_app + Sequence; Index (status, created_at).
+### Analyst v2 (Z0xO8t9jEp0ffJdW, publiziert): Trigger "Sofort-Start" (executeWorkflowTrigger passthrough) + Cron :05; Claim-Query
+  neu→prueft (prueft älter 20 Min wird erneut geclaimt); Prompt mit KIND info/networking, approve/reject für Networking, position_needed als
+  Standardname (Torwart…Trainer); Meldungen formen schreibt agent_headline + feed_json, baut Autor-Mails; Posts markieren erweitert;
+  Mails aufteilen → Autor-Mail (SMTP info@, onError continue). Livetests: Post 2 approve (Mail an nicht existentes Testpostfach 550 → ok),
+  Post 3 (VfB RV) publish in 12 s, Mail an laurenzrath@gmx.de queued.
+### API v2 (5QyzGceCwIANV4nq, publiziert): Liste = Fremdbeiträge nur veroeffentlicht/notiert/freigegeben, eigene immer; Felder own,
+  gemeldet_von_mir, meldungen, agent_headline. POST → Anlage antworten → Nur bei Erfolg → Sofort pruefen (executeWorkflow, wait=false).
+### Moderations-API (NEU B9z8s4orPk55Fzf9, publiziert, Credentials explizit gesetzt):
+  POST /api/tw-community-report {email,code,post_id,grund} → community_reports (1×/Nutzer), meldungen+1, ab 3 → status gemeldet + Feed-Zeile
+  gelöscht, Mail an info@ (→ Boss). Antworten ok / doppelt / auth.
+  GET /api/tw-community-admin?email&code → alle Posts (gemeldet zuerst) inkl. agent_note, melder, hat_feed. Nur ADMINS-Whitelist (im Code-Node).
+  POST /api/tw-community-admin {aktion: zurueckziehen|freigeben|neu_pruefen, note} → Status + Feed-Delete/Re-Insert aus feed_json;
+  neu_pruefen startet Analyst sofort. Volltest 14:33 grün (Exec 7860), Testmeldung zurückgesetzt.
+### Abnahme rt11 (Exec 7872) GRÜN: Marker zg, Feed 60→120 von 1697, Badge cmty-3, Community-Pillen inkl. Moderation, Chips, Melden nur fremd,
+  Moderation 3 Karten + Aktionen, Premium: Networking-Chip ✓ Online, kein Kontakt-Button am eigenen Gesuch, 0 Fehler.
+  Offen: rt11b Vereinsbedarf-Kacheln (RV cmty-3, LV cmty-1) nach Keyword-Fix.
+- rt11b (Exec 7914) GRÜN: Vereinsbedarf-Kachel Rechtsverteidiger zeigt cmty-3 (VfB) mit Badge, Kachel Linksverteidiger zeigt cmty-1
+  (Standard Lüttich, "linker Verteidiger" via neuem Keyword) mit Badge. NeedCard rendert KEINE Headline (Verein + Position + Summary) →
+  Tests auf Vereinsnamen matchen. Kachelzähler zählen Vereine, nicht Bedarfe.
+- 14:52 cmty-3 (Claude-Testhinweis über VfB) per Admin-Aktion zurueckziehen aus Feed entfernt; feed_json bleibt → "Freigeben (in Feed)" stellt wieder her.
+
+## STATUS 24.08. 14:55: COMMUNITY 1.1 LIVE UND ABGENOMMEN
+Frontend Marker zh (Commits 9af450a, 08da669, 2ed76bb) · Analyst v2 Z0xO8t9jEp0ffJdW · API v2 5QyzGceCwIANV4nq · Moderation B9z8s4orPk55Fzf9.
+Testskripte lokal /home/claude/tests (rt10e/f/g, rt11, rt11b, mod_test.sh), auf Server /tmp/*.py.
+Admin-Whitelist: ADMIN_EMAILS (Frontend, nur Anzeige) + ADMINS in Code-Nodes "Auth (Admin-Liste)"/"Auth (Admin-Aktion)" (Server, maßgeblich).
+Zum Erweitern beide Stellen pflegen.
+
+## IDEEN COMMUNITY 1.2 (nach Launch)
+- Spielerprofil-Verknüpfung: Agent matcht player_name gegen players (15.006) → Hinweis am Profil (SpielerDrawer).
+- Dubletten-/Bestätigungs-Check: gleiche Meldung aus Sportmonks/RSS vorhanden → Einstufung anheben ("Community + Presse").
+- Deal-Matching im Networking: Angebot (Stürmer) ↔ Gesuch (Verein sucht Stürmer) automatisch verknüpfen, Premium-Mehrwert.
+- Upvotes/Reputation (Tabelle votes, GRANT tw_app).
+- Autor-Mail zusätzlich auf EN, wenn Beitrag englisch geschrieben.
+
+## 24.08. 14:55–15:20 – BACKLOG + KOSTENKALIBRIERUNG + MODELL-MIX (WICHTIG)
+- Backlog 971 Signale: bereits abgearbeitet (nur 23 offene, alle aus der laufenden Stunde; 7.505 in 7 Tagen verarbeitet). Kein Sprint nötig.
+- FALLE ENTDECKT: Der nächtliche Qualitäts-Mix (~02:12, SQL auf workflow_entity.nodes + n8n-Restart) war NIE aktiv. n8n führt die
+  publizierte Version aus workflow_history (activeVersionId) aus. Beweis: Analyst-Lauf 14:20 antwortete mit gpt-5-mini-2025-08-07.
+  → NIE Modelle per SQL setzen. Immer update_workflow (echte Node-Änderung nötig, sonst keine Versionsrotation!) + publish_workflow.
+  Trick bei "Entwurf hat schon den Zielwert": setNodePosition um 1px erzwingt eine neue Version.
+- PREISE (verifiziert OpenAI-Doku 24.08.): gpt-5.5 = 5 $/M in, 30 $/M out (cached 0,50); gpt-5-mini 0,25/2; gpt-5.6-terra 2/12; luna 0,20/1,20.
+  Nacht-Schätzung "Analyst 5.5 ≈ 1,80 €/Tag" war falsch: gemessen 17,3k in / 8,0k out je Lauf (davon ~4,9k Reasoning) → 0,33 $/Lauf
+  → 7,8 $/Tag (24 Läufe), ≈ 31 $/Tag an Launch-Tagen (Cron :20 + :05/:35/:50 am 30./31.8. und 1./2.9.).
+- Messung 24h (Regex über execution_data, prompt_tokens + promptTokens): Analyst 224k/104k (13 Läufe), Kaderstärken 67k/27k (1 Lauf, 7 Calls),
+  Voll-Leser 28k/16k (1 Lauf, 30 Calls), Verletzungs-Scout 25k/13,5k, Markt-Scout 8k/3,4k, Kaderlücken 1,2k/2,4k (2), Community 1,8k/0,8k.
+  Modellnamen sind in execution_data nicht per Regex greifbar (flatted-Referenzen) → aus workflow_history lesen.
+- UMGESETZT + PUBLIZIERT 15:15–15:17: mini für Kaderstärken v2 (3 Modell-Nodes), Verletzungs-Scout v2 (3), Performance-Analyst, Voll-Leser
+  (Redaktion), Markt-Scout (2 Code-Nodes), Kontakt-Scout (Code-Node) → spart ≈ 1,9 $/Tag. Bedarfs-Radar auf gpt-5.5 (1×/Tag, Kosten morgen messen).
+  Signal-Analyst: gpt-5-mini BEHALTEN + EN-Fix aus dem Entwurf live (Upsert bewahrt headline_en/summary_en bei unveränderter Headline/Summary).
+  Gerüchte-Suche bleibt mini (nutzerseitig, Traffic unbekannt). Kaderlücken bleibt 2×/Tag (0,08 $/Tag, Drosselung nicht nötig).
+- Kosten jetzt: ≈ 1,2 $/Tag gemessen + Nacht-Agenten (Radar 5.5 offen) → deutlich unter 6 €/Tag.
+- OFFEN (Boss-Entscheidung): Analyst-Qualität. Optionen: gpt-5.6-terra ≈ 3,1 $/Tag (Launch 12,5 $); 5.5 mit reasoning_effort low ≈ 4,6 $
+  (Launch 18 $); mini + Prompt/Reasoning-Tuning ≈ 0,5 $. Empfehlung: A/B derselben Signal-Charge mini vs. terra, Launch-Extra-Läufe auf 2/Std.
+- Entwurfs-Tabelle (workflow_entity.nodes) für Gerüchte-Suche enthält noch gpt-5.5 aus dem SQL → bei künftigen Updates dieses Workflows
+  Modell bewusst auf mini setzen (sonst rutscht 5.5 in die nächste Version).
+
+## 24.08. 15:20–15:55 – ANALYST-ENTSCHEIDUNG: gpt-5.6-terra
+- 15:20-Lauf mit mini + EN-Fix grün (Exec 7952: 52 Signale → 15 Meldungen, Upsert ok).
+- A/B-Workflow lpq85TUpim7ZcrV6 "TW Test: Analyst A/B mini vs terra (manuell)" (Exec 7972, dieselben 52 Signale):
+  mini 13 Cluster / 16 Signale, 6.735 out (4.224 Reasoning), 0,016 $ · terra 16 Cluster / 19 Signale, 2.460 out (359 Reasoning), 0,045 $,
+  Quellen in Summaries, konservativere Reliability (3,06 vs 3,38), 2 Talente statt 1, Status-Einstufung korrekter (Tunde geruecht statt fix).
+- UMGESETZT 15:5x: Analyst ifOFnqTVjThmiFEJ auf gpt-5.6-terra (Version 9cb78146), Launch-Extra-Crons von "5,35,50" auf "50" (2 Läufe/Std. am
+  30./31.8., 1./2.9.). Erwartung ≈ 1,70 $/Tag normal, ≈ 3,40 $/Tag Launch. Rückweg: vorherige Version (e78dfb6b, mini) publizieren.
+- Hinweis terra: cache_write_tokens erscheint (Prompt-Caching, Writes 1,25×, 30-Min-Cache) – im Stundenlauf kaum Wirkung, an Launch-Tagen (30-Min-Takt) günstiger.
+- Kontrolle: 16:20-Lauf muss model "gpt-5.6-terra" zeigen und success sein.
+
+## 24.08. 17:05 – Kontrollen
+- Analyst 16:20 (Exec 7997) mit gpt-5.6-terra GRÜN: 54 Signale → 26 Meldungen (mini: 15 aus 52), 8.556 in / 3.639 out ≈ 0,06 $.
+- Parallel-Session hat 16:58/17:00 Networking-Wording ("Frage / Angebot", "Anfrage veröffentlichen", "Anfragen") + Stichwort-Suche
+  (Networking + Transfer-Infos, alle Wörter, diakritik-/umlaut-insensitiv) gepusht (Commits 776fbec, 3540008, Marker zj).
+  rt12 live GRÜN (Exec 8039): Kortrijk 1 Treffer, "Stürmer"/"stuermer" je 1, zwei Wörter 1, Unsinn 0 + "Keine Treffer", kein "Gesuch" mehr, 0 Fehler.
+- Antworten in Networking = "Kontakt aufnehmen" → Vermittlungsmail über info@ mit replyTo des Anfragenden; keine In-App-Kommentare (bewusst).
+- 17:2x: Parallel-Session Commit b1b95d5 (Marker zk) "Antworten"-Button an fremden Transfer-Info-Karten + API-Version 17:18 (Kontakt für Info-Posts
+  ohne Premium-Pflicht). rt13 live GRÜN (Exec 8073, Premium-Test): Karte zeigt "↩ Antworten | ⚑ Melden", Prompt-Text, Alert "✓ Antwort zugestellt";
+  Testantwort ging real an laurenzrath@gmx.de. 0 Fehler.
+- HINWEIS: Es läuft eine Parallel-Session auf demselben Repo/n8n → vor jedem Push git pull, vor Workflow-Änderungen aktive Version prüfen.
+- 18:35 (dieses Fenster, ab jetzt einziges aktives): Commit d5bf443 / Marker zl: AntwortButton-Komponente, einheitlich "↩ Antworten" in Transfer-Infos
+  UND Networking (statt "Kontakt aufnehmen"); eigene Beiträge zeigen den Button ausgegraut mit Tooltip ("Antworten anderer erreichen dich per E-Mail").
+  Networking nutzt jetzt antwortSenden (Nachricht Pflicht ≥3 Zeichen). rt14 GRÜN (Exec 8146): Infos 1 aktiv (fremd), Networking 2 ausgegraut (eigene), 0 Fehler.
+- 18:40: Boss-Wunsch: Button heißt wieder "✉ Kontakt aufnehmen" (Infos + Networking, eigene Beiträge ausgegraut), Prompt "Deine Nachricht an den Autor",
+  Bestätigung "Kontaktanfrage zugestellt". Commit 3703ce1 / Marker zm.
+  Alle Test-Community-Beiträge (1–4) + Reports + Feed-Einträge cmty-* gelöscht, Sequenzen auf 1 zurückgesetzt → Community ist leer und launchbereit.
+  rt15 GRÜN (Exec 8159): Feed ohne Community-Karten, Infos/Networking zeigen Leerzustand, 0 Fehler. Formular-Platzhalter (Beispieltexte im Eingabefeld) bewusst behalten.
+
+## 24.08. 18:55–19:45 – VOLLSTÄNDIGE ENGLISCHE VERSION + FR/ES ENTFERNT
+Ausgangslage: t()/I18N deckte ~310 Schlüssel ab, aber Hunderte Texte standen direkt im Code; Feed-/Bedarfs-Details zeigten in EN deutsche Felder.
+Vorgehen: Playwright-Scanner /tmp/scan_en*.py (lokal /home/claude/tests) sammelt in EN alle sichtbaren Texte aller Ansichten (Feed, Transfers,
+Bedarf-Kacheln+Liste, Performance, Players+Drawer, Openings, Watchlist, Scouting+Listen, Community/Networking/Moderation, Detail-Panel, Landing)
+und schneidet sie mit den Code-Literalen → "UI-Text" vs. "Datentext".
+### Umsetzung (Commits de67fa9 → 4220a2b, Marker zn…zq)
+- EN-Übersetzungsschicht direkt nach `let LANG = "de";`: EN_MAP (221 Einträge, JSON), EN_COUNTRIES, EN_WORDS (Positions-/Ablöse-/Status-Fragmente,
+  Unicode-Lookarounds), EN_RULES (vor N Min/Std/Tg, Live · …, Mehr laden (x von y), N Meldungen/Einträge/Treffer/Vereine/Anfragen/Hinweise,
+  "· N J. ·" → y/o, "Vereine, die einen X suchen", "N bis M …"), twEnShort (nur ≤90 Zeichen mit deutschem Marker), twEn(), Patch von
+  React.createElement: übersetzt String-Kinder + placeholder/title/aria-label NUR bei DOM-Elementen (typeof type === "string") und nur bei LANG==="en".
+  Lektionen: (1) Kinder eigener Komponenten NICHT übersetzen (Crash), (2) Regex mit [\s\S] für mehrzeilige Texte + null-Guard,
+  (3) Schlüssel immer aus dem echten Code-Literal nehmen (Scan-Ausgabe war gekürzt → Community-Beschreibung matchte nicht).
+- Wörterbuch pflegen: /home/claude/i18n/en_map.json (Quelle), Einbau als JSON-Block `const EN_MAP = {...}` in index.html (json.loads-validiert).
+- EN-Felder: MeldungsPanel dS(m), Spieler-Drawer dH(n), NeedCard dS(item), GerVue-Kompaktliste dH(it), Landing-Vorschau dH/dS(f).
+- FR/ES: I18N.fr/es gelöscht (~20 KB), Umschalter ["de","en"], tw_lang fr/es → en, t()-Fallback entfernt.
+- Übersetzer ZFTqK4CLBSTgxEeQ: Cron von stündlich :40 auf "25,55 * * * *" (folgt Analyst :20 / Launch :50), publiziert 19:32.
+  DB-Abdeckung headline_en: 1.797/1.799 (Rest = laufende Stunde).
+### Tests
+- rt16 (Exec 8229): EN lädt, Tabs englisch, Umschalter DE/EN, 0 Fehler. rt18 (Exec 8274): Live-Toggle DE→EN→DE ohne Reload, DE unverändert.
+- scan_en4 (Exec 8261): UI-Restliste nur Vereinsnamen/Demo-Name/bereits englische Sätze; Datentexte deutsch = frische Meldungen vor dem Übersetzer-Lauf.
+### Grenzen
+- Lange deutsche KI-Fließtexte OHNE EN-Feld in anderen Tabellen (ältere Bedarfsbegründungen im Kaderlücken-Detail, Performance-Notizen,
+  Scout-Chat-Antworten, Community-Beiträge = Nutzertext) werden nicht übersetzt. Weg: Übersetzer-WF auf diese Tabellen ausweiten (Boss-Entscheidung).
+- 19:55 erster Übersetzer-Lauf im neuen Takt (Exec 8283, success): 0 von 1.814 Meldungen ohne EN → Feed in EN vollständig englisch.
+
+## 24.08. 20:00–20:20 – COMMUNITY: ÜBERSETZEN-BUTTON (jede Sprache → Englisch)
+- DB: community_posts + body_en, body_lang (Cache).
+- NEU Workflow C9Ez5ibrTSolSkOv "TW Community – Übersetzer API (Webhook)": POST /api/tw-community-translate {email, code, post_id} → Auth (jedes
+  aktive Konto) → Post laden → Cache? → sonst gpt-5-mini (reasoning_effort low, JSON {lang, text_en}; alles übersetzen außer Eigennamen)
+  → speichern → {ok, text_en, lang}. Erstaufruf ≈ 3,4 s, Cache 0,2 s. Credentials explizit gesetzt, publiziert.
+  Lektion: ohne reasoning_effort low brauchte gpt-5-mini 17 s / 1.344 Denk-Tokens für zwei Zeilen; Prompt "Positionen exakt behalten" ließ
+  "lateral izquierdo"/"enero" unübersetzt → Prompt: nur Eigennamen behalten.
+- Frontend Commit 2d9d45f / Marker zr: UebersetzenButton ("🌐 Auf Englisch" ↔ "Original anzeigen", "… Übersetze"), an Info- und Networking-
+  Karten; Textkörper wechselt, Hinweis "🌐 Übersetzt aus ES"; Zustände cUe/cUeZeige/cUeLaedt; EN-Wörterbuch ergänzt. Moderationsansicht zeigt Original.
+- rt19b (Exec 8324) GRÜN: spanische Anfrage → KI freigegeben → Klick → englischer Text + "Übersetzt aus ES" → "Original anzeigen" → Spanisch
+  → erneuter Klick sofort (Cache). Testbeitrag gelöscht, Sequenz zurückgesetzt. 0 Fehler.
+
+## 24.08. 20:25–20:35 – RESTBEREICHE DE/EN + !!! OPENAI-GUTHABEN LEER !!!
+- Bedarfsbegründungen = summary der verein_sucht-Zeilen (inj-*/rss-*), summary_en vorhanden → seit NeedCard-dS-Fix englisch. Scan EN Club needs: nur 1 Quellenname deutsch.
+- Performance-Ansicht: 1.033 sichtbare Texte, 0 deutsch. Chat-Workflow sgfKNfoJTTGGwEuX parst lang und setzt "Antworte auf Englisch/Deutsch" → bereits zweisprachig.
+- KRITISCH: OpenAI API antwortet seit ~20:15 UTC mit 429 credit_balance_exhausted ("You have no credits remaining"). Analyst 20:20 error,
+  Chat-Test 20:31 error. Betroffen: Signal-Analyst, EN-Übersetzer, Community-Prüfer (Posts bleiben in prueft → Cron-Retry), Übersetzen-Button,
+  Scout-Chat, alle Nacht-Agenten. Boss muss Guthaben laden (+ Auto-Recharge). Danach holen Analyst (:20, LIMIT 150) und Übersetzer (:25/:55) automatisch auf.
+
+## 24.08. 21:05–21:35 – KOSTENPROBLEM GEFUNDEN + BEHOBEN (Boss: 50 € an einem Tag, Ziel ≤ 6 €/Tag)
+Ursache: Erste Messung zählte nur prompt_tokens/promptTokens; Responses-API (Web-Suche) meldet input_tokens/output_tokens → unsichtbar.
+n8n speichert Execution-Daten "flatted": Strings (Modellnamen, "web_search_call") stehen dedupliziert in einer Stringtabelle → per Regex
+NICHT zählbar; Zahlen (Tokens) sind inline → zählbar. Modell daher aus workflow_history der aktiven Version ableiten.
+### Verbraucher (24 h, alle Formate)
+- Bedarfs-Scout Deutschland 4BjusAxYNt1uvLue: 1 Lauf, 466 Aufrufe (!), 11,47 Mio in / 1,55 Mio out, 10 h Laufzeit → ≈ 10,6 $/Tag mit mini
+  (+ Web-Suche 0,01 $/Aufruf); 7 Tage: 25,2 Mio in. Code: "Variante 1: täglich ALLE Länder" = 466 Vereine aus 14 Ländern, ohne search_context_size/max_tokens.
+  Auf gpt-5.5 wäre EIN Lauf > 100 $ (erklärt die 50 €).
+- Vertrags-Scout 3MzOmjVwt8GaLvAs (So 5:00): 20 Liga-Recherchen gpt-5.5 + Web-Suche, 1,39 Mio in → ≈ 9 $/Lauf.
+- Radar qoJpIltSvfTGt3Iw: 656k in / 84k out je Lauf → mit gpt-5.5 (heute Nachmittag gesetzt!) 5,80 $/Nacht; zurück auf mini = 0,33 $.
+### Umgesetzt (alle publiziert, aktive Version geprüft)
+- Bedarfs-Scout: Rotation (DE i%3==tag%3, INTL idx%7==tag%7 → ~77/Tag), tools web_search search_context_size 'low', reasoning effort low,
+  max_output_tokens 900; Launch-Extra-Crons 18:30 entfernt. Erwartung ≈ 1 $/Tag. Mechanik: Entwurf per SQL (jsonb_set + Dollar-Quoting
+  /tmp/bedarf_fix.py) → setNodePosition → publish (Version wird aus Entwurf gebaut).
+- Vertrags-Scout: mini, search_context_size medium, reasoning low, max_output_tokens 2500 → ≈ 0,4 $/Woche.
+- Radar: gpt-5-mini (Version 1dcd732c) – VOR 22:00 publiziert. (Boss-Nachtvorgabe "Radar auf 5.5" verworfen: Kostenziel geht vor.)
+- NEU Workflow NZzqmm9gWrQWu4N1 "TW Kosten-Wächter (täglich 23:50)": Postgres (n8n-DB) Regex-Aggregation 24 h aller Token-Formate + Modell/Web-Suche
+  je aktivem Workflow → Code (Preisliste USD/M: 5.5=5/30, terra=2/12, mini=0,25/2, 4o-mini=0,15/0,6, 4o=2,5/10; Web-Suche 0,01 $/Aufruf; EUR ×0,92)
+  → Mail an laurenzrath@gmx.de, Betreff mit ⚠ ab 6 €. Testlauf 21:30: 12,66 € (24 h) – Mail zugestellt. Preis je Workflow = aktuell aktives Modell (Näherung).
+- Erwartung ab morgen: Analyst ≈ 1,6 $, Bedarfs-Scout ≈ 1 $, Nacht-Agenten ≈ 0,5 $, Rest Cent → ≈ 3 $/Tag ≈ 2,8 €.
+### Boss-To-do (harte Sperre): OpenAI Settings → Limits → monatliches Budget-Limit (z. B. 180 $) + Warnschwelle 90 $ + Auto-Recharge klein halten.
+
+## 24.08. 22:05–22:20 – SICHERHEITSAUDIT + HÄRTUNG (Boss-Auftrag)
+Befund Server (Hetzner, Ubuntu 24.04, Kernel 6.8): nur 22/80/443 offen; Postgres/PostgREST/n8n nur im Docker-Netz; unattended-upgrades an;
+n8n 2.33.7, Diagnostics aus, Executions 7 Tage; Postgres listen * aber nicht veröffentlicht; keine Firewall (ufw/iptables leer).
+KRITISCH gefunden: sshd PermitRootLogin yes + PasswordAuthentication yes, KEIN authorized_key, 9.964 fehlgeschlagene Passwortversuche (Brute-Force
+laufend), kein fail2ban; KEIN Backup. Admin-Shell = n8n SSH-Node mit Passwort (Cred eRJ5pak2iZbRe8R6) aus dem Docker-Netz (172.18.0.3).
+Umgesetzt (Skript /home/claude/tests/harden.sh):
+- fail2ban (jail.local: sshd aggressive, maxretry 4, findtime 10m, bantime 2h, ignoreip 127/8 + 172.16/12) → sofort 2 Bans.
+- sshd: /etc/ssh/sshd_config.d/00-tw-hardening.conf (PasswordAuthentication no, MaxAuthTries 3, LoginGraceTime 20) + Match-Block am Ende von
+  sshd_config (Address 172.16.0.0/12,127.0.0.0/8 → PasswordAuthentication yes) — nur weil 0 externe Passwort-Logins im Log. sshd -t ok, Restart ok,
+  Admin-Shell danach verifiziert. FOLGE: Boss kann von außen NUR noch per SSH-Schlüssel (oder Hetzner-Konsole) → Key hinterlegen!
+- Backup: /opt/transferwire/backup.sh (pg_dumpall beider DBs gzip + .env/compose, 14 Tage), Cron 03:30 root; erster Dump 1,3 GB ok.
+- Netlify _headers (Commit 4ba7152): HSTS preload, X-Frame-Options DENY, nosniff, Referrer-Policy, Permissions-Policy, COOP — live geprüft.
+Geprüft/ok: keine Schlüssel im Frontend oder Git-Historie; kein dangerouslySetInnerHTML/eval in der App; keine externen Skripte; Postgres-Queries der
+Webhooks parametrisiert (einzige Interpolation: Analyst "Verarbeitet markieren" mit DB-IDs, kein Nutzereingang); Stripe-Webhook durch URL-Secret
+(?key=twsec_…) geschützt (keine HMAC-Prüfung – Verbesserung möglich); Admin-Endpunkte Whitelist.
+OFFEN (Boss): n8n-2FA aktivieren; OpenAI Budget-Limit; GitHub-Repo auf privat + PAT rotieren; Hetzner Cloud Firewall (22 nur eigene IP);
+Off-Site-Backup (Storage Box); optional Cloudflare (Rate-Limit gegen Code-Brute-Force auf /api/tw-code); SSH-Key für eigenen Zugang.
+
+## 24.08. 23:00–23:15 – FEED-FINISH (Boss-Wünsche), Commit 89466e0 / Marker zs
+- Header: eine Live-Anzeige "● LIVE · aktualisiert vor X Min" (LIVE-Pill entfernt; EN-Regeln "updated N min ago"). Lektion: Regex auf einer
+  langen Zeile hatte zuerst den ⌘K-Span erwischt → exakten Pill-String ersetzt.
+- Seitenleiste: Zählung nutzte to_club/from_club (snake_case), Items sind camelCase → Liste war leer. Jetzt Top-5 nummeriert mit "N Updates",
+  klickbar (Vereinsfilter), Logo/Monogramm; Leerzustand für gespeicherte Filter mit Beispielen.
+- NewsCard: "⚠ Unbestätigt"-Chip entfernt; Karten flex-column + .tw-feedlist align-items stretch + Footer marginTop auto → gleiche Höhe je Reihe
+  (geprüft: 227/227, 256/256); Share = Icon (nur bei Hover, .tw-hover-only), Watch = Bookmark-Icon mit Tooltip statt Pill.
+- Transferzeile: Spieler-Meta ohne leere Felder (kein "· J ·" mehr), Vertragslos statt leerem Von-Verein, ClubLogo an beiden Vereinen, Ablöse in
+  fester rechter Spalte (minWidth 92, nowrap).
+- ClubLogo: lädt /api/tw-logos (Map Name→URL, existiert noch NICHT) sonst farbiges Monogramm. Logo-Quelle fehlt: keine Team-IDs/Logos in DB
+  (fixtures/players nur Namen). Folgeaufgabe: API-Football /teams je Liga → Tabelle clubs(name, api_id, logo) + Alias-Matching → Webhook /tw-logos.
+- rt21 GRÜN (Exec 8488): 0 Fehler.
+
+## 25.08. 00:25–00:35 – DESIGN-SYSTEM RUNDE 1 (Boss-Dokument 1.1–1.3), Commits 8caece9 + c8ec2ca, Marker zt/zu
+- Tokens (JS-Konstanten → wirken in allen Inline-Styles): INK #14181D, MUTED #667085, HAIR #E1E5E2, PAGE #F5F6F2; body #F5F6F2.
+- Breite: .tw-main + Header + Tabs max 1440, padding 24/28, gap 24. Raster mit Seitenleiste 3fr/1fr (≈9/3), Spalte 24. Ohne (leere) aside
+  volle Breite via :has() – gemessen: Feed/Merkliste 1020 px Inhalt + aside, Spieler/Performance/Vertragsenden 1384 px (voll).
+- Karten: .tw-card radius 14, border #E1E5E2, padding 20/22, kein Schatten; Hover border #CFD7D1 + 0 8px 24px rgba(15,23,42,.06) + -1px.
+  .tw-tile analog. Eingaben 44 px / radius 10 / border #E1E5E2. Titel: h2 direkt im View 30/38, Beschreibung 14.5 #667085 (Community geprüft).
+  Spieler-Datenbank-Titel ist ein div mit 30px (bereits konform).
+- NOCH OFFEN aus dem Dokument: 1.2 Titelzeile mit Hauptaktion rechts + "Umfang · Datenstand" je Seite (Markup je View), 1.4 einheitliche
+  Filterleiste + Ergebniszähler/Sortierung/Ansicht, 1.5 Score-Namen (Performance/Talent/Match/Opportunity + Info-Symbol), 1.6 Statussystem
+  (Farben/Belastbarkeit statt 3 Badges), 1.7 Leere Zustände mit Icon/Überschrift/Aktion.
+
+## 25.08. 00:40–00:47 – DESIGN-SYSTEM 1.2 + 1.7, Commit 05c9373 / Marker zv
+- 1.2: Kopfzeilen Spieler-Datenbank, Performance, Vertragsenden, Scouting-Listen: Titel 30/38 INK + marginBottom 6, Beschreibung 14.5/1.5 MUTED,
+  Abstand 22 (gemessen Spieler: 30px/38px, 14.5px rgb(102,112,133)). Hauptaktion rechts + "Umfang · Datenstand" NICHT ergänzt (wäre neuer Inhalt /
+  je View eigene Variablen) → offen, mit Boss klären.
+- 1.7: Komponente EmptyState({icon,title,text,action,onAction,action2,onAction2}) = .tw-card zentriert (Rahmen solid, da .tw-card !important).
+  Eingesetzt (10×): Merkliste, Spieler (pl_none), Performance (rank_empty), Scouting-Listen (li_none), Vertragsenden (3 Tabs), Community,
+  Networking, Moderation. Feed-Filter-Leerzustand ("Keine Meldungen für diese Auswahl") NICHT umgestellt (anderes Markup). Bestehende Texte
+  bleiben als Erklärung erhalten; neue Überschriften + EN-Wörterbuch ergänzt. Technik: Wrapper per Rückwärtssuche vom Textanker ersetzt
+  (Muster waren mehrzeilig/Template-Literale). rt25: Community + Merkliste zeigen Icon/Überschrift/Erklärung zentriert, 0 Fehler.
