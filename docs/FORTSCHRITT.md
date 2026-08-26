@@ -403,3 +403,25 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
   „Sang-Yoon Kang · Achter · 24 Jahre · 22 neue · 35 gesamt“; „35 Vereine passen zu Sang-Yoon Kang“ mit Profil-Gründen; Bearbeiten vorbefüllt, nach
   Speichern weiter 1 Profil; mobil 2 Kacheln/Reihe (177 px), Matches einspaltig (366 px). 0 Fehler.
 - OFFEN: „Vertrag bis“ auf der Profilkarte braucht ein Sheet-Feld (Boss-Freigabe); Gehaltsrahmen/Marktwert ohne Vereinsdaten nicht als Grund darstellbar.
+
+## 26.08. 01:40–02:20 – SPIELER-PERFORMANCE (Boss-Brief), Commits fbac6ed / c7f24a5 / 1617ccc, Marker an/ao/ap
+- Boss-Vorgabe: Such- und Filterleiste (1 Suchfeld, 4 Selects: Alle Ligen / Alle Positionen / Stärke filtern / Schwäche filtern) unverändert – NICHT ANFASSEN.
+  Offene Punkte pausiert (Boss 26.08.), nur bei echter Dringlichkeit ansprechen.
+- Datenlage /api/tw-performance: Zeilen der letzten 5 Tage, Top 250 nach tw_score; Felder pid, name, team, league, pos (Torwart/Abwehr/Mittelfeld/Sturm),
+  date, gegner, min, sub, score, api, st/sw (Texte), stt/swt (Tags), dev, stats (JSON-String: t,a,s,st,p,pq,kp,zk "5/11",tk,ic,dr,f,g,r,sv,gc). KEIN Foto,
+  KEIN Alter, KEIN Vorspieltag. pq = angekommene Pässe (Zahl) – alte Anzeige „(15%)“ war falsch; jetzt Passquote = pq/p (68 %). Analyst läuft 2:30.
+- Neue Komponenten (vor NeedCard): perfStats/perfPassquote/perfPosCode/perfKeyValues/perfKurz/perfDatenstand/perfElf, PitchLines (SVG quer 150×100 bzw.
+  hochkant 100×150: Außenlinien, Mittellinie, Mittelkreis, Straf-/Torräume, Elfmeterpunkte, Bögen, Eckbögen), PerfMarker (44 px Kreis mit Score, Name,
+  Kürzel TW/AW/MF/ST, Hover-Karte .tw-pm-tip mit Verein/Tore/Assists bzw. Paraden/Gegentore/Minuten/Score; Klick → openPlayer), PerfPitch (Team der Woche
+  als Formation über die Fläche, Joker-Zeile), SpieltagKarte (Monogramm, Name, Verein+Logo, Position·Liga, TW PERFORMANCE SCORE groß, Delta zum letzten
+  Spiel per SPIELER_URL?pid (form), Matchwerte-Chips, „Analyse öffnen“, „Beobachten“), PerfTabelle (Spalten # / Spieler / Spiel / Position / Min. /
+  Schlüsselwerte / Trend / TW Score ⓘ; Zeile klappt Stärken/Schwächen/Entwicklung + Analyse auf; mobil kompakte Karten), PerfVue (Layout .tw-perf-main
+  3fr/1fr, ≤900 px einspaltig, Spielfeld hochkant ≤700 px; „Wie wird der Score berechnet? ⓘ“ = ScoreInfo mit label; Mindestspielzeit 30 Min – Suche hebt
+  sie auf). Alter TotW-/Panel-/Listen-Block im TransferApp ersetzt; Kopf: rank_sub neu (DE/EN) + Datenstand-Zeile.
+- Trend-Spalte zeigt „–“ (Tooltip): pro Zeile gibt es keinen Vorspieltag in der API. Würde eine API-Erweiterung brauchen (Vorwert je pid).
+- (ao) „Wie wird der Score berechnet?“ als Label IN der ScoreInfo-Schaltfläche (Prop label). (ap) ScoreInfo: Scroll-Schonfrist 600 ms nach dem Öffnen –
+  Playwright-/Trackpad-Nachlaufscrollen schloss das Popover sofort (Ursache des „KEIN POPOVER“ in rt46–48).
+- Abnahme rt46/rt48/rt50: Kopf/Beschreibung/Datenstand ok; Filterleiste identisch (auch mobil); Spalten 74/25; Spielfeld 3:2 mit 5 Rechtecken, 4 Kreisen,
+  3 Bögen, 1 Linie; 11 Marker (44 px), Hover-Karte sichtbar; Karte mit Titel, Monogramm, Werten „3 Tore · 1 Assist · 83 Minuten · 68 % Passquote ·
+  5/11 Zweikämpfe“, Delta „▲ +20 zum letzten Spiel (77)“, Buttons; Tabelle 8 Spalten, 244 Zeilen, Details + „Analyse öffnen“ (Formkurve lädt);
+  mobil Spielfeld hochkant (2:3) über Karte, Liste als Karten; EN vollständig; Erklärung öffnet per echtem Klick, Scrollen schließt. 0 Fehler.
