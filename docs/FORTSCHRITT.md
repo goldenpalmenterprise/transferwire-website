@@ -488,3 +488,26 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
   Tabs „Spieler 2 · Vereine 1 · Meldungen 40“, Zeile Cole Palmer „Chelsea · Sturm | 89 API | keine | 30.06.2033 | heute“ mit allen sechs Aktionen,
   Notiz + Alert aus + Entfernen funktionieren; Vereinszeile „Manchester United | 13 neue Meldungen | heute“; mobil Tabs scrollbar, Aside unter dem
   Inhalt, Empfehlungen einspaltig. 0 Fehler. (av: Namensvariante „Luís Asué“ ↔ DB „Luís Nlavo Asué“ wird jetzt über Vor-/Nachname gefunden.)
+
+## 26.08. 03:30–03:45 – TALENT-RANKINGS (Boss-Brief), Commits d307282 / +ax, Marker aw/ax
+- Boss-Vorgabe: Kategorien (🏆 Top 50 Europa / 💎 Unentdeckt / ⚽ Torjäger / 🎯 Vorlagen), Länder-Chips (Alle/DE/EN/FR/ES/INT), ScoutSub-Tabs
+  unverändert – Chips, Reihenfolge, Abfragen (URLs) und Lade-/Leer-Texte 1:1 übernommen.
+- Datenlage /db/talent_profiles: talent_key („name-slug|2007“ oder „name-slug|a18“ – beide Formate für denselben Spieler möglich → Dedupe über den
+  Slug vor „|“), scout_score 0–10 grob (9, 8.5, 8, 7.6 …), strengths (Kommaliste), minutes, rating, mentions_7d, goals, assists, begruendung,
+  updated_at; KEIN player_id/Foto/Vertrag/Vorwoche. Anreicherung per Name aus players_youth (player_id, photo, minutes, rating) und players
+  (Vertrag, Foto). Torjäger/Vorlagen aus players_youth (order=goals.desc liefert NULL zuerst → Anzeige sortiert clientseitig).
+- Transparenter TW Talent Score (talFaktoren, eine Nachkommastelle): Potenzial (scout_score×10, 30 %), Leistung (Rating 6→40 … 8→95, sonst
+  Potenzial, 25 %), Entwicklung (45 + Torbeteiligung/90 bis 30 + Medienmomentum bis 25, 15 %), Einsatzzeit (Minuten 0→20, 450→55, 900→75,
+  1500→90, 15 %), Altersfaktor (16→95 … 21→58, 10 %), Gegnerstärke (Top-5 90 / Erstligen 75 / Zweitligen 62 / Jugend-Reserve 45 / sonst 55, 5 %).
+  SCORES.talent-Text nennt die Formel. Vorwochen-Delta: Client-Snapshot tw_talent_snap (wöchentlich rollend; bis dahin „erste Bewertung in
+  diesem Ranking“) – ein serverseitiger Wochen-Snapshot wäre der saubere Ausbau.
+- UI: Kopf (h2 „Talent-Rankings“, Beschreibung, „Aktualisiert … um … Uhr“ aus max(updated_at)), Hinweisbalken kurz + ScoreInfo-Label „Methodik
+  ansehen“ (öffnet Talent-Score-Erklärung); Top-3-Karten (Rang, Foto/Monogramm, Name, Alter · Position, Verein · Liga, Score-Pill klickbar,
+  Vorwochen-Text, stärkste Eigenschaft = erste Stärke, „Analyse öffnen“ → openPlayer bei pid, sonst Panel; #1 mit Outline/Schatten/Verlauf);
+  Tabelle (Rang/Spieler/Alter/Position/Verein-Liga/Minuten/Vertrag/Trend/TW Talent Score, sticky Kopf, Zeile → Profil/Panel); Panel (Portal
+  rechts): sechs Faktoren mit Balken/Wert/Gewicht, Stärken, Begründung, Aktionen Beobachten/Analyse öffnen/Vergleichen/Scouting-Liste/Exportieren
+  (CSV je Spieler); Vergleich/Analyse nur mit pid (Hinweis). Mobil: Top-3 untereinander, Liste als Karten.
+- Abnahme rt56: Titel/Beschreibung/„Aktualisiert am 24.08. um 19:42 Uhr“, Banner kurz + Methodik-Link (öffnet Popover), Chips 4 + 6 unverändert,
+  Top-3 mit allen Elementen („81,1“, „erste Bewertung …“, „Stärkste Eigenschaft: Konstanz“), Tabelle 9 Spalten, 44 Zeilen, alle Scores mit
+  Nachkommastelle, 35 verschiedene Werte, 0 doppelte Namen, Panel mit 6 Faktoren/Gewichten und 5 Aktionen, Export „talent-florian-hellstern.csv“,
+  Torjäger-Ansicht mit Spalte „Tore“, mobil einspaltig/Karten. 0 Fehler.
