@@ -453,3 +453,20 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
   INSERT per UPDATE zurück (Backup: tw_players_sync.sql.bak-2026-08-26). Test: Spiegel-Lauf mit 376 Marktwerten vorher/nachher identisch.
 - Transfermarkt-Import manuell nachgeholt (Rotation tm_state.liga_index gesetzt): LaLiga 379, Bundesliga 408, Premier League 469, Serie A, Ligue 1.
   Rotation läuft ab jetzt nächtlich weiter (eine Liga pro Nacht, 20 Ligen). Hinweis: Das SQL-Skript enthält das DB-Passwort im Klartext (dblink).
+
+## 26.08. 03:05–03:20 – VERTRAGSRADAR „Auslaufende Verträge & verfügbare Spieler“ (Boss-Brief), Commit 09573cf, Marker as
+- Boss-Vorgabe: vorhandene Filter/Kategorien/Sortierungen unverändert – die Seite hat drei Kategorien (Auslaufende Verträge binnen 12 Monaten /
+  Vertragslos gemeldet / Klubs unter Verkaufsdruck), keine Filter- oder Sortier-Elemente. Kategorien und ihre Inhalte für frei/druck unverändert.
+- Datenlage /api/tw-markt (dauert ~10 s!): auslaufend (33: pid,name,team,league,pos,age,bis „YYYY-MM-DD“ oder „vertragslos“, note mit Datum,
+  minutes,rating – KEIN Marktwert), frei (18 News: headline,summary,player,league,datum), druck (0). Marktwert/Vertrag aus /db/players (tm_*).
+- Neue Komponenten (vor NeedCard): vtDatum (YYYY-MM-DD, YYYY-MM, YYYY, DD.MM.YYYY), vtFmt, vtTage, vtStatus (frei → „Vertragslos seit DD.MM.YYYY“ +
+  Badge „Sofort verfügbar“ orange; <30 Tage → „Endet in N Tagen“ orange; sonst „Vertrag bis DD.MM.YYYY“ neutral; nie „Vertrag bis vertragslos“),
+  vtScore (Opportunity 0–99: Verfügbarkeit 40/32/24/14, Alter 15/9, Minuten 15/9/4, Rating 15/10/5, Marktwert 8/4, Quelle 7/3), vtRadarZeile,
+  VertragKpis (sofort = Radar-Vertragslose; Verträge 6 Monate + Marktwert>1 Mio innerhalb 12 Monaten per PostgREST-Count; neu = frei-Meldungen der
+  letzten 7 Tage + Radar-Vertragslose mit Datum der letzten 7 Tage), VertragTabelle (Radar + DB-Verträge 12 Monate, Dedupe per pid, Reihenfolge
+  vertragslos → früheste Enddaten → Score; Spalten Spieler/Alter/Position/Verein-Liga/Status/Vertragsende/Marktwert/Quelle/TW Opportunity Score ⓘ;
+  sticky Kopf, Zeile → openPlayer; mobil ≤760 px Vertragskarten). SCORES.opportunity-Text nennt jetzt die Faktoren mit Punkten.
+- Abnahme rt53: Titel/Beschreibung; Kennzahlen „3 sofort verfügbar · 29 Verträge enden in 6 Monaten · 285 Spieler mit Marktwert über 1 Mio. € ·
+  12 neue Einträge diese Woche“; Tabelle 9 Spalten, 232 Zeilen, sticky; Status-Varianten korrekt (Vertragslos seit + Badge, Vertragslos + Badge,
+  Vertrag bis), kein „Vertrag bis vertragslos“, kein Orange bei normalen Enden, 195 Marktwerte, Quellen Markt-Scout/Transfermarkt, Scores 83/72/66,
+  Erklärung öffnet mit Faktoren, Zeile öffnet Profil, mobil 232 Karten + 4 Kennzahlen. 0 Fehler.
