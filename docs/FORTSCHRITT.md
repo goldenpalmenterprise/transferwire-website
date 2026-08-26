@@ -511,3 +511,21 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
   Top-3 mit allen Elementen („81,1“, „erste Bewertung …“, „Stärkste Eigenschaft: Konstanz“), Tabelle 9 Spalten, 44 Zeilen, alle Scores mit
   Nachkommastelle, 35 verschiedene Werte, 0 doppelte Namen, Panel mit 6 Faktoren/Gewichten und 5 Aktionen, Export „talent-florian-hellstern.csv“,
   Torjäger-Ansicht mit Spalte „Tore“, mobil einspaltig/Karten. 0 Fehler.
+
+## 26.08. 03:45–03:57 – SCOUTING-LISTEN (Boss-Brief), Commit cd232fa, Marker ay
+- Boss-Vorgabe: Filter-/Sortierfunktionen unverändert – das Listenformular (Name, Max. Alter, Region, Liga, Position, Min. Performance Score,
+  Max. Minuten, Sortierung, Speichern/Abbrechen) und die geöffnete Listenansicht (← Alle Listen, Titel, ScoreLegend, Einträge) sind 1:1 geblieben.
+  Nur die Übersicht wurde ersetzt.
+- Neue Komponente ListenVue (vor NeedCard) + liFilterChips/liExportCsv: Kopf (h2, Beschreibung, grüner Hauptbutton „+ Neue Scouting-Liste“ →
+  setListFormOpen), Tabs Empfohlen (LIST_PRESETS) / Meine Listen (myLists) / Geteilte Listen (shared-Flag bzw. tw_listmeta), Kartenraster 3
+  Spalten (mobil 1): Titel, Beschreibung, drei Spielerbilder (aus den Listentreffern, DbFoto), „N Spieler · automatisch aktualisiert“ (N = Treffer
+  der Liste per LISTEN_URL, gecacht), „Zuletzt aktualisiert: heute, HH:MM Uhr“ (imported_at der Spielertabelle), Filter-Chips aus den Parametern,
+  Status Kuratiert/Privat/Geteilt, Alert aktiv/inaktiv (tw_listmeta), „Liste öffnen →“ (ladeListe). Drei-Punkte-Menü: Öffnen, Duplizieren (Kopie in
+  Meine Listen), Teilen (Link #liste=<base64 JSON> in die Zwischenablage, Liste als geteilt markiert; Import beim Laden per Hash → Meine Listen mit
+  shared=true, von=„Link“), Exportieren (CSV der Treffer), Alert aktivieren/deaktivieren, Löschen (nur eigene, rot, mit Rückfrage).
+  Leerzustände: „Noch keine eigenen Scouting-Listen“ + Text + „Neue Liste erstellen“; analog für Geteilte. Keine roten Linien/Buttons mehr
+  (Türkis #0e7490 / Grün #149a59 / Grau).
+- Abnahme rt57/rt58: Kopf/Beschreibung, grüner Button rechts, Tabs „Empfohlen 10 · Meine Listen 0 · Geteilte Listen 0“, 0 rote Elemente, 10 Karten
+  in 3 Spalten mit allen Elementen, Menü (5 Punkte bei kuratierten), Duplizieren → „Meine Listen 1“, Alert + Teilen → „Geteilte Listen 1“,
+  Export „scouting-top-50-u21-talente-europa-kopie.csv“, Löschen → Leerzustand mit allen Texten, Formular unverändert (Labels/Optionen), Liste öffnen
+  → Listenansicht mit 50 Einträgen, mobil einspaltig (366 px) mit scrollbaren Tabs. 0 Fehler.
