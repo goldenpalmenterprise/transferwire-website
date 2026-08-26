@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-26-al matching-fein -->
+<!-- tw-build: 2026-08-26-am staerken-text -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -3287,7 +3287,7 @@ function matchGruende(need, profil) {
     const mine = bedarfStaerken(profil.s), gesucht = bedarfStaerken(need.seekStrengths);
     const treffer = mine.filter(x => gesucht.some(y => y === x || y.indexOf(x) >= 0 || x.indexOf(y) >= 0));
     if (treffer.length) g.push({ ok: true, t: (en ? "strengths match: " : "St\u00e4rken passen: ") + treffer.join(", ") });
-    else if (gesucht.length) g.push({ ok: false, t: (en ? "sought strengths not in profile: " : "gesuchte St\u00e4rken nicht im Profil: ") + gesucht.slice(0, 3).join(", ") });
+    else if (gesucht.length) { const roh = String(need.seekStrengths || "").split(",").map(x => x.trim()).filter(Boolean); const satz = roh.some(x => x.length > 30); const txt = satz ? String(need.seekStrengths).trim().slice(0, 72) + (String(need.seekStrengths).trim().length > 72 ? "\u2026" : "") : roh.slice(0, 3).join(", "); g.push({ ok: false, t: (satz ? (en ? "sought profile: " : "gesuchtes Profil: ") : (en ? "sought strengths not in profile: " : "gesuchte St\u00e4rken nicht im Profil: ")) + txt }); }
     const a1 = Number(profil.a1) || 0, a2 = Number(profil.a2) || 0;
     if (BEDARF_JUNG_RE.test(text) && ((a2 && a2 <= 24) || (a1 && a1 <= 21))) g.push({ ok: true, t: en ? "age fits: club looks for a young player" : "Alter passt: Verein sucht einen jungen Spieler" });
     else if (BEDARF_ERFAHREN_RE.test(text) && ((a1 && a1 >= 27) || (a2 && a2 >= 30))) g.push({ ok: true, t: en ? "age fits: club looks for experience" : "Alter passt: Verein sucht Erfahrung" });
