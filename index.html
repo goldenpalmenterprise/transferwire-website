@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-26-ak matching -->
+<!-- tw-build: 2026-08-26-al matching-fein -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -3337,7 +3337,7 @@ function BedarfVue({ needs, profiles, matchProfil, setMatchProfil, posSet, activ
     h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "#4a4a48", lineHeight: 1.5 } }, en ? "New matching clubs are detected automatically and can be reported via e-mail alert." : "Neue passende Vereine werden automatisch erkannt und k\u00f6nnen per E-Mail-Alert gemeldet werden."));
   const profilKarte = p => {
     const tr = profilTreffer(p); const neu = tr.filter(bedarfNeu).length; const on = matchProfil && matchProfil.raw === p.raw;
-    const alter = p.a1 && p.a2 ? p.a1 + "\u2013" + p.a2 + (en ? " yrs" : " Jahre") : p.a1 ? (en ? "from " : "ab ") + p.a1 + (en ? " yrs" : " Jahren") : p.a2 ? (en ? "up to " : "bis ") + p.a2 + (en ? " yrs" : " Jahre") : "";
+    const alter = p.a1 && p.a2 ? (p.a1 === p.a2 ? p.a1 : p.a1 + "\u2013" + p.a2) + (en ? " yrs" : " Jahre") : p.a1 ? (en ? "from " : "ab ") + p.a1 + (en ? " yrs" : " Jahren") : p.a2 ? (en ? "up to " : "bis ") + p.a2 + (en ? " yrs" : " Jahre") : "";
     const meta = [p.l || p.p, alter, p.s ? (en ? "strengths: " : "St\u00e4rken: ") + p.s : ""].filter(Boolean).join(" \u00b7 ");
     return h("div", { key: p.raw, className: "tw-card", style: { background: "#fff", border: "1.5px solid " + (on ? "#149a59" : HAIR), borderRadius: 14, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 6, minWidth: 0 } },
       h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 } },
@@ -3345,16 +3345,16 @@ function BedarfVue({ needs, profiles, matchProfil, setMatchProfil, posSet, activ
         h("button", { onClick: () => removeProfil(p.raw), title: en ? "Delete profile" : "Profil l\u00f6schen", style: { cursor: "pointer", background: "none", border: "none", color: MUTED, fontSize: 15, padding: 0, lineHeight: 1 } }, "\u00d7")),
       h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, lineHeight: 1.45 } }, meta),
       h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, color: neu ? "#149a59" : INK, marginTop: 2 } }, neu + " " + (en ? "new club match" + (neu === 1 ? "" : "es") : "neue Vereinsmatches"), h("span", { style: { fontWeight: 500, color: MUTED } }, " \u00b7 " + tr.length + " " + (en ? "in total" : "gesamt"))),
-      h("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", marginTop: 6 } }, btn(on ? (en ? "\u2713 Matches shown" : "\u2713 Matches werden angezeigt") : (en ? "Show matches" : "Matches ansehen"), () => { setMatchProfil(on ? null : p); setPosFilter(""); }, !on, "m"), btn(en ? "Edit profile" : "Profil bearbeiten", () => onEditProfile(p), false, "e")));
+      h("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", marginTop: 6 } }, btn(en ? "Show matches" : "Matches ansehen", () => { setMatchProfil(p); setPosFilter(""); }, true, "m"), btn(en ? "Edit profile" : "Profil bearbeiten", () => onEditProfile(p), false, "e")));
   };
   const profileBlock = h("div", { style: { marginBottom: 18 } },
-    h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1, textTransform: "uppercase", color: MUTED, marginBottom: 8 } }, en ? "My player profiles" : "Meine Spielerprofile"),
+    h("div", { style: { fontFamily: FONT_BODY, fontSize: 16, fontWeight: 800, color: INK, marginBottom: 10 } }, en ? "My player profiles" : "Meine Spielerprofile"),
     h("div", { className: "tw-profil-grid", style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 } }, profiles.map(profilKarte)));
   const kachel = p => {
     const tr = alle.filter(n => passtPos(n, p)); const count = tr.length; if (!count) return null; const neu = tr.filter(bedarfNeu).length;
     return h("button", { key: p.key, className: "tw-tile", onClick: () => setPosFilter(p.key), style: { textAlign: "left", cursor: "pointer", background: "#fff", border: "1px solid " + HAIR, borderRadius: 14, padding: "13px 14px", display: "flex", flexDirection: "column", gap: 8, minWidth: 0 } },
       h("div", { style: { display: "flex", alignItems: "center", gap: 10, minWidth: 0 } }, h(PitchIcon, { pos: p.key, color: v.color }), h("span", { style: { fontFamily: FONT_BODY, fontWeight: 800, fontSize: 14, color: INK, lineHeight: 1.15, minWidth: 0 } }, posLabel(p))),
-      h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: INK } }, h("b", { style: { fontFamily: FONT_DISPLAY, fontSize: 20, fontWeight: 700, color: v.color, marginRight: 5, verticalAlign: "middle" } }, count), (en ? "matching club" + (count === 1 ? "" : "s") : "passende Vereine")),
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: INK } }, h("b", { style: { fontFamily: FONT_DISPLAY, fontSize: 20, fontWeight: 700, color: v.color, marginRight: 5, verticalAlign: "middle" } }, count), " " + (en ? "matching club" + (count === 1 ? "" : "s") : "passende Vereine")),
       h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: neu ? "#149a59" : MUTED } }, neu ? "+" + neu + " " + (en ? "new hit" + (neu === 1 ? "" : "s") : "neue Treffer") : (en ? "no new hits this week" : "keine neuen Treffer")));
   };
   const posGrid = h("div", null,
