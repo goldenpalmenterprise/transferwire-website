@@ -587,3 +587,22 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
 - Abnahme rt62/rt64/rt65 (390×800, mobile Emulation): Burger links (13 px), Menü mit 9 Einträgen + 9 Symbolen, Navigation funktioniert;
   alle 9 Seiten: scrollWidth 390 = kein Überlauf, keine Elemente außerhalb (außer in bewusst wischbaren Zeilen), keine Karte breiter als
   das Fenster, Titel 24 px, Beschreibungen 13.5 px (Transfers-Beschreibung 14.5 – Kopf dort anders gebaut, harmlos). 0 Fehler.
+
+## 26.08. 05:00–05:25 – KADER-ABGLEICH: veraltete Vereine (Boss: Han-Beom Lee stand noch bei Midtjylland, spielt seit Aug. für Club Brugge)
+- Befund: Der nächtliche Spieler-Sync (zzZkTERPpYvofNhr, 3:30, 7 Ligen/Nacht) nimmt den Verein aus `statistics[0].team` der Abfrage
+  players?team=X – bei Wechseln liefert die alte Liga-Nacht wieder den alten Verein (Flattern zwischen Nächten). Die TW-Performance-Tabelle
+  wusste es richtig (Fixture 07.08. Club Brugge KV), die players-Tabelle/Datentabelle nicht.
+- Neu: Workflow „TW Kader-Abgleich (täglich 5:00)“ (7cz9uum6cWPGK8Sm, aktiv, Error-Workflow gesetzt; SDK-Code in docs/n8n-kader-abgleich.sdk.js):
+  Ligen (20) → teams?league → players/squads?team (≈372 Aufrufe, 350 ms Abstand) → Kader-Karte (pid → Verein/Liga, 11.146 Spieler) →
+  Spiele laden (Postgres n8n-DB: letzte Fixture je Spieler aus TW-Performance-Tabelle, 30 Tage) → Spieler laden (players) → Vergleich
+  (Evidenz: letztes Spiel ≤30 Tage schlägt Kader; sonst API-Kader; Namensvergleich normalisiert) → Batch → UPDATE players (team, league,
+  team_source, team_updated_at) + Datentabelle „TW Spieler“ (Update je Spieler, damit der 4:30-Spiegel nichts zurückdreht) → kader_audit
+  (status 'kader-abgleich') → Morgenreport per Mail an laurenzrath@gmx.de (Anzahl + Liste).
+- Spalten players.team_source/team_updated_at angelegt; Spiegel-SQL sichert sie wie die TM-Spalten (tm_keep).
+- Nachtkette jetzt: 2:30 Performance-Analyst → 2:40 TM-Import → 3:30 Kader-Sync (Rotation) → 4:30 Spiegel → 5:00 Kader-Abgleich (korrigiert).
+- Erstlauf: 1.022 Korrekturen (995 Kader, 27 Spiel) – u. a. Lee → Club Brugge KV / Jupiler Pro League; Profil-API zeigt Club Brugge.
+  Zweitlauf: 48 (Spiel-Evidenz, überwiegend Namensvarianten wie „Vitória SC“ ↔ „Guimaraes“ aus den Fixtures – gleicher Verein, andere
+  API-Schreibweise; ab dem dritten Lauf stabil). Bekannte Grenze: API-Kader können bei kleinen Ligen einige Tage nachlaufen; Spiel-Evidenz
+  greift dann, sobald der Spieler eingesetzt wird.
+- Ideen (offen): bestätigte Transfermeldungen („fix“ mit Spieler + Zielverein) als dritte Evidenz innerhalb von Stunden; Hinweis
+  „Verein geprüft am …“ im Profil; Warnung an den Boss, wenn Kader und Spiele >7 Tage widersprechen; Vereins-Aliasliste für die API-Namen.
