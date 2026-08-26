@@ -561,3 +561,14 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
 - Abnahme rt60: Kasten mit drei Selects (14 Länder; Liga/Verein bis zur Auswahl deaktiviert) zwischen Zähler-Zeile und Chips; Auswahl USA →
   Major League Soccer → Inter Miami CF filtert („Gefiltert nach Inter Miami CF — 0 Meldungen“), Zurücksetzen stellt 60 Karten wieder her,
   Merkliste ohne Kasten, mobil passt (Selects 164/164/336 px). 0 Fehler.
+
+## 26.08. 04:25–04:35 – VERTRAGSRADAR: Filterleiste (Boss-Wunsch per Screenshot), Commit 76ecf13, Marker bb
+- Neue Filterleiste in VertragTabelle (oberhalb der Tabelle, unterhalb der Kategorie-Überschrift): Suchfeld „Spieler oder Verein suchen …“,
+  Status (Alle / Sofort verfügbar / Endet in 30 Tagen / Endet in 6 Monaten / Vertrag bis 12 Monate), Position (Torwart/Abwehr/Mittelfeld/Sturm),
+  Liga (aus den Zeilen), Alter (U21/U23/U25/U30), Marktwert (mit Marktwert / über 1 Mio / über 5 Mio), Quelle (aus den Zeilen); darunter
+  Trefferzahl „N Verträge“, „✕ Filter zurücksetzen (n)“ (rot, nur bei aktiven Filtern) und Sortierung (Dringlichkeit/Vertragsende/Marktwert/
+  TW Opportunity Score/Alter/Name). Leer-Treffer: „Keine Verträge für diese Filter.“ + Zurücksetzen. Aktive Felder mit dunklem Rand + fett.
+  Nebenbei: Positionen der Datenbank-Zeilen (Goalkeeper/Defender/Midfielder/Attacker) auf Torwart/Abwehr/Mittelfeld/Sturm vereinheitlicht (vtPos).
+- Abnahme rt61: 7 Selects + Suchfeld, „232 Verträge“; Status „Sofort verfügbar“ → 3 Zeilen, alle vertragslos, „Filter zurücksetzen (1)“; Position
+  Mittelfeld → 71 Zeilen; Marktwert vorhanden → 195 Zeilen; Suche ohne Treffer → Leerhinweis; Zurücksetzen → 232; Sortierung Marktwert →
+  95,00 / 72,50 / 57,37 Mio. €; mobil alles im Bild, Karten. 0 Fehler.
