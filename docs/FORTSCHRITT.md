@@ -572,3 +572,18 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
 - Abnahme rt61: 7 Selects + Suchfeld, „232 Verträge“; Status „Sofort verfügbar“ → 3 Zeilen, alle vertragslos, „Filter zurücksetzen (1)“; Position
   Mittelfeld → 71 Zeilen; Marktwert vorhanden → 195 Zeilen; Suche ohne Treffer → Leerhinweis; Zurücksetzen → 232; Sortierung Marktwert →
   95,00 / 72,50 / 57,37 Mio. €; mobil alles im Bild, Karten. 0 Fehler.
+
+## 26.08. 04:40–05:00 – HANDY-LAYOUT (Boss-Auftrag), Commits 785f253 / fd54a58 / 4e47271, Marker bc/bd/be
+- Prinzip: nur Darstellung, nur ≤760 px (Media Query im App-Style-Block) – Desktop unverändert (rt64: Burger versteckt, 9 Tabs sichtbar,
+  Kopf 60 px, LIVE-Text sichtbar, Feed zweispaltig).
+- MobilNav (vor NeedCard): Burger-Knopf (.tw-burger, 40×40, drei Striche) als erstes Kind der .tw-headwrap; Portal-Panel links (min(320px,86vw))
+  mit Logo, ✕, allen Seiten als Buttons (Symbol NAV_ICONS + Label + Farbpunkt NAV_FARBE, aktive Seite dunkel, 48 px hoch); Auswahl schließt und
+  scrollt nach oben; Esc/Overlay schließen; Body-Scroll gesperrt. Klassen ergänzt: .tw-logo, .tw-gsuche-box, .tw-kbd, .tw-tabbar.
+- Mobil-CSS: .tw-burger sichtbar, .tw-tabbar (Pillenreihe) aus, Kopf 56 px/Abstand 8/Padding 10, .tw-livetime aus, Logo 24 px/17 px, Suchbox
+  ohne Rand-Margin, ⌘K aus; html/body overflow-x hidden; .tw-main Padding 12/12/96, Gap 14, einspaltig, aside in Spalte 1; alle Kopfzeilen
+  (h2 inkl. der spezifischen Design-System-Regel und div-Titel [style*="font-size: 30px"]) 24 px/30 px, Beschreibungen 13.5 px; .tw-feedfilter
+  wischbar; .tw-feedlist minmax(0,1fr) (Scouting-Karten liefen auf 771 px, weil 1fr Mindestbreite = Inhalt); Karten/Bilder/SVG max 100 %;
+  Kennzahlen zweispaltig; .tw-perf-main einspaltig.
+- Abnahme rt62/rt64/rt65 (390×800, mobile Emulation): Burger links (13 px), Menü mit 9 Einträgen + 9 Symbolen, Navigation funktioniert;
+  alle 9 Seiten: scrollWidth 390 = kein Überlauf, keine Elemente außerhalb (außer in bewusst wischbaren Zeilen), keine Karte breiter als
+  das Fenster, Titel 24 px, Beschreibungen 13.5 px (Transfers-Beschreibung 14.5 – Kopf dort anders gebaut, harmlos). 0 Fehler.
