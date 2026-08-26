@@ -606,3 +606,34 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
   greift dann, sobald der Spieler eingesetzt wird.
 - Ideen (offen): bestätigte Transfermeldungen („fix“ mit Spieler + Zielverein) als dritte Evidenz innerhalb von Stunden; Hinweis
   „Verein geprüft am …“ im Profil; Warnung an den Boss, wenn Kader und Spiele >7 Tage widersprechen; Vereins-Aliasliste für die API-Namen.
+
+## 26.08. 05:55–06:20 – QUELLEN-AUSBAU + SYSTEMKONTROLLE + KOSTEN (Boss-Auftrag)
+### Quellen (Datentabelle „Transfernews Quellen“ IQk1uY59LjYaOsyi, RSS-Zweig 18462puK0GA3Azyu liest typ='rss')
+- Bestand vorher 558 Quellen (davon ~126 RSS; Rest web/offiziell/spezialportal für Voll-Leser/Scouts). 69 + 62 Kandidaten per Server-curl
+  geprüft (echtes RSS/Atom mit Items); 54 neue RSS-Quellen eingefügt (INSERT mit NOT-EXISTS auf quelle_url, hinweis „Quellen-Ausbau 26.08.2026“):
+  DE Unterhaus: Google-News-Suchen je Regionalliga West/Nord/Nordost/Südwest/Bayern (Transfer/Wechsel/Zugang/Abgang/Probetraining/vereinslos),
+  3. Liga (Probetraining/vereinslos/Testspieler/Kaderplanung), 2. Bundesliga (Kaderplanung/Leihe/vertragslos/Vertragsverlängerung), kicker
+  Regionalliga, Liga Drei, Sportschau, Bundesliga.com, t-online; Insider (GN-Namenssuchen): Kerry Hau, Patrick Berger, Max Bielefeld, Tobias
+  Altschäffl, Christian Falk, Georg Holzner, Ekrem Konur, Mike Verweij, Rik Elfrink, Pedro Sepúlveda, Sébastien Denis, Hugo Guillemet;
+  Europa: Mundo Deportivo, SPORT.es, AS (Portada/Primera), Marca (Segunda, Fichajes), RMC Sport, Le Parisien, Ouest-France, Maisfutebol, Zerozero,
+  HLN, Voetbalkrant, Walfoot, VI, NOS, AD, Blick, Sky Sport Austria, Kurier, derStandard, Sabah, Hürriyet, Football League World, Football Insider,
+  TEAMtalk, 90min, Mirror, Telegraph, Independent. Jetzt 612 Quellen, 180 RSS.
+- Ohne RSS (404/403/Bot-Schutz, nur als Web-Quelle möglich): Transfermarkt-News, Sport1, Sky DE, Reviersport, FuPa, Sportbuzzer, Ligainsider,
+  FussballTransfers, Foot Mercato, Calciomercato, Corriere/Tuttosport, A Bola, O Jogo, Sporza, Voetbalzone, Tipsbladet, bold.dk, Laola1, Krone,
+  Fanatik, TRT, Sporx, Relevo, Fichajes.com – dafür decken die Google-News-Suchen dieselben Häuser ab.
+- Vorfilter des RSS-Zweigs erweitert (publiziert): Unterhaus-Signalwörter probetraining, testspieler, trainingsgast, gastspieler, vereinslos,
+  vertragslos, kaderplanung, vertragsauflösung, aufgelöst, freigestellt, ausgeliehen, rückkehr, free agent, released, trial, svincolato, libre,
+  agente libre; MAX_GESAMT 220→300, MAX_JE_QUELLE 6→5 (Round-Robin über alle Quellen bleibt). Kosten je Lauf gpt-4o ≈ 2–3 Cent.
+### Systemkontrolle – KRITISCH
+- OpenAI antwortet seit 25.08. 05:20 (lokal) mit „Your organization has reached its configured enforced spend limit“. Betroffen (alle Fehler seit
+  dem): EN-Übersetzer (alle 30 Min), TW Analyst Signale→Meldungen (stündlich), Performance-Analyst (2:30, 25.+26.08. fehlgeschlagen – letzte
+  Analyse 23.08.), Kaderstärken-Analyst, Verletzungs-Scout, Quellen-Voll-Leser (25.08.), Talent-Scouts, RSS-Zweig (Agent-Knoten fällt still aus,
+  Lauf „success“ mit 0 Meldungen). Nicht betroffen: Kader-Sync/Spiegel/Abgleich, TM-Import, API-Football-Syncs, Website-APIs, Mails.
+- Nur der Boss kann das lösen: platform.openai.com → Settings → Organization → Limits → Enforced limit erhöhen/entfernen (Empfehlung 200 $ mit
+  Warnschwelle 100 $). Danach holen die Stundenläufe automatisch auf; Performance-Analyst/Voll-Leser ggf. manuell nachstarten.
+- NEU: „TW Wächter: OpenAI-Limit (alle 6 h)“ (gh8Y00Av9djWPm3o, aktiv): zählt Fehler mit „spend limit“ in execution_data (n8n-DB) der letzten
+  6 h; bei >0 Alarm-Mail an laurenzrath@gmx.de mit Ursache, betroffenen Workflows und Anleitung. Testlauf: 21 Fehler seit 02:20 → Mail zugestellt.
+### Kosten
+- Kosten-Wächter 25.08. 23:50: 0,18 € (24 h) – nur weil OpenAI blockiert; normaler Betrieb (24.08. nach Kalibrierung) ≈ 3 $/Tag ≈ 2,8 €, damit
+  unter dem Ziel 5–6 €/Tag. Auffällig: „TW Analyst: Signale → Meldungen“ läuft auf gpt-5.6-terra (0,17 $ für 5 Läufe) – im Rahmen, aber teuerstes
+  Modell im Stundentakt; bei Bedarf auf mini umstellen (≈ 0,02 $/Tag).
