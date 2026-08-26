@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-26-am staerken-text -->
+<!-- tw-build: 2026-08-26-an performance -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -1269,7 +1269,7 @@ const I18N = {
     pl_needs: "Passende Vereins-Gesuche",
     rank_tab: "Ranking",
     rank_title: "Spieler-Performance",
-    rank_sub: "Jede Nacht bewertet unser Scout-System alle Einsätze des Spieltags: positionsgewichteter TW Performance Score (0–100) aus den offiziellen Spielstatistiken — bei den Top-Performern mit Stärken, Schwächen und Entwicklungshinweis vom KI-Scout.",
+    rank_sub: "Positionsgewichtete Spieltagsanalyse aus offiziellen Leistungsdaten. Der TW Performance Score wird jede Nacht neu berechnet.",
     rank_search_ph: "Spieler oder Verein suchen …",
     rank_all_lg: "Alle Ligen",
     rank_all_pos: "Alle Positionen",
@@ -1580,7 +1580,7 @@ const I18N = {
     pl_needs: "Matching club openings",
     rank_tab: "Ranking",
     rank_title: "Player performance",
-    rank_sub: "Every night our scouting system rates every appearance of the matchday: a position-weighted TW Performance Score (0–100) from official match statistics — top performers get strengths, weaknesses and a development note from the AI scout.",
+    rank_sub: "Position-weighted matchday analysis from official performance data. The TW Performance Score is recalculated every night.",
     rank_search_ph: "Search player or club …",
     rank_all_lg: "All leagues",
     rank_all_pos: "All positions",
@@ -3369,6 +3369,191 @@ function BedarfVue({ needs, profiles, matchProfil, setMatchProfil, posSet, activ
     liste.length === 0 ? h(EmptyState, { icon: "\u{1F50E}", title: en ? "No matching clubs" : "Keine passenden Vereine", text: en ? "No club currently reports this need." : "Kein Verein meldet aktuell diesen Bedarf." })
       : h("div", { className: "tw-need-grid" }, liste.map(x => h(NeedCard, { key: x.n.id, item: x.n, highlight: activePos, onContacts: openContacts, match: { score: x.s, gruende: matchGruende(x.n, matchProfil) }, onOpen: onOpen, onWatchClub: onWatchClub, watched: beobachtet(seekingClub(x.n)) }))));
   return h("div", { className: "tw-bedarf" }, kopf, profiles.length ? profileBlock : intro, alle.length === 0 ? h(EmptyState, { icon: "\u{1F4ED}", title: en ? "No open club needs" : "Aktuell kein offener Bedarf", text: en ? "Club needs appear here as soon as they are reported." : "Sobald Vereine Bedarf melden, erscheint er hier." }) : (activePos || matchProfil) ? ergebnis : posGrid);
+}
+function perfStats(x) { try { const s = typeof x.stats === "string" ? JSON.parse(x.stats || "{}") : (x.stats || {}); return s && typeof s === "object" ? s : {}; } catch (e) { return {}; } }
+function perfPassquote(st) { const p = Number(st.p) || 0, pq = Number(st.pq) || 0; if (!p) return null; return pq > p ? Math.round(pq) : Math.round(pq / p * 100); }
+function perfPosCode(pos) { return { Torwart: "TW", Abwehr: "AW", Mittelfeld: "MF", Sturm: "ST" }[pos] || String(pos || "").slice(0, 2).toUpperCase(); }
+function perfKeyValues(x) {
+  const en = LANG === "en"; const st = perfStats(x); const pq = perfPassquote(st); const gk = x.pos === "Torwart";
+  const t = Number(st.t) || 0, a = Number(st.a) || 0, sv = Number(st.sv) || 0, gc = Number(st.gc) || 0;
+  const out = [];
+  if (gk) { out.push(sv + (en ? (sv === 1 ? " save" : " saves") : (sv === 1 ? " Parade" : " Paraden"))); out.push(gc + (en ? (gc === 1 ? " goal conceded" : " goals conceded") : (gc === 1 ? " Gegentor" : " Gegentore"))); }
+  else { out.push(t + (en ? (t === 1 ? " goal" : " goals") : (t === 1 ? " Tor" : " Tore"))); out.push(a + (en ? (a === 1 ? " assist" : " assists") : (a === 1 ? " Assist" : " Assists"))); }
+  out.push((Number(x.min) || 0) + (en ? " minutes" : " Minuten"));
+  if (pq !== null) out.push(pq + (en ? " % pass accuracy" : " % Passquote"));
+  if (st.zk && st.zk !== "0/0") out.push(st.zk + (en ? " duels" : " Zweik\u00e4mpfe"));
+  return out;
+}
+function perfKurz(x) {
+  const en = LANG === "en"; const st = perfStats(x); const pq = perfPassquote(st); const gk = x.pos === "Torwart";
+  const teile = gk ? [(Number(st.sv) || 0) + (en ? " SV" : " Par."), (Number(st.gc) || 0) + (en ? " GC" : " GT")] : [(Number(st.t) || 0) + (en ? " G" : " T"), (Number(st.a) || 0) + " A"];
+  if (pq !== null) teile.push(pq + (en ? " % pass" : " % P\u00e4sse"));
+  if (st.zk && st.zk !== "0/0") teile.push(st.zk + (en ? " duels" : " ZK"));
+  return teile.join(" \u00b7 ");
+}
+function perfDatenstand(perf) {
+  const en = LANG === "en"; const j = new Date();
+  const nach = j.getHours() > 2 || (j.getHours() === 2 && j.getMinutes() >= 30);
+  const tag = nach ? (en ? "today" : "heute") : (en ? "yesterday" : "gestern");
+  const daten = (perf || []).map(x => String(x.date || "")).filter(Boolean).sort();
+  const letzter = daten.length ? daten[daten.length - 1] : "";
+  const sp = letzter ? letzter.slice(8, 10) + "." + letzter.slice(5, 7) + "." : "";
+  return (en ? "Data as of " : "Datenstand: ") + tag + ", 02:30" + (en ? "" : " Uhr") + (sp ? " \u00b7 " + (en ? "matchday " : "Spieltag ") + sp : "") + " \u00b7 " + (en ? "minimum playing time 30 minutes by default" : "Mindestspielzeit standardm\u00e4\u00dfig 30 Minuten");
+}
+function perfElf(basis) {
+  const best = {};
+  for (const x of basis) { if (!best[x.pid] || x.score > best[x.pid].score) best[x.pid] = x; }
+  const pool = Object.values(best).sort((a, b) => b.score - a.score);
+  if (pool.length < 11) return null;
+  const need = [["Torwart", 1], ["Abwehr", 4], ["Mittelfeld", 3], ["Sturm", 3]];
+  const gew = new Set(); const reihen = {};
+  for (const [pos, n] of need) { reihen[pos] = pool.filter(x => x.pos === pos && !gew.has(x.pid)).slice(0, n); reihen[pos].forEach(x => gew.add(x.pid)); }
+  const rest = pool.filter(x => !gew.has(x.pid));
+  for (const [pos, n] of need) { while (reihen[pos].length < n && rest.length) { const x = rest.shift(); reihen[pos].push(x); gew.add(x.pid); } }
+  if (need.reduce((a, [p]) => a + reihen[p].length, 0) < 11) return null;
+  const subBest = {};
+  for (const x of basis) { if (x.sub === true && (!subBest[x.pid] || x.score > subBest[x.pid].score)) subBest[x.pid] = x; }
+  const joker = Object.values(subBest).sort((a, b) => b.score - a.score).find(x => !gew.has(x.pid)) || null;
+  return { reihen: reihen, joker: joker };
+}
+function PitchLines({ portrait }) {
+  const h = React.createElement; const L = { stroke: "rgba(255,255,255,.75)", strokeWidth: .7, fill: "none" };
+  if (portrait) return h("svg", { viewBox: "0 0 100 150", preserveAspectRatio: "none", style: { position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" } },
+    h("rect", Object.assign({ x: 2, y: 2, width: 96, height: 146 }, L)), h("line", Object.assign({ x1: 2, y1: 75, x2: 98, y2: 75 }, L)), h("circle", Object.assign({ cx: 50, cy: 75, r: 13.1 }, L)), h("circle", { cx: 50, cy: 75, r: 1, fill: "rgba(255,255,255,.8)" }),
+    h("rect", Object.assign({ x: 20.35, y: 2, width: 59.3, height: 23.6 }, L)), h("rect", Object.assign({ x: 36.5, y: 2, width: 27, height: 7.9 }, L)), h("circle", { cx: 50, cy: 17.7, r: 1, fill: "rgba(255,255,255,.8)" }), h("path", Object.assign({ d: "M 39.59 25.6 A 13.07 13.07 0 0 0 60.41 25.6" }, L)),
+    h("rect", Object.assign({ x: 20.35, y: 124.4, width: 59.3, height: 23.6 }, L)), h("rect", Object.assign({ x: 36.5, y: 140.1, width: 27, height: 7.9 }, L)), h("circle", { cx: 50, cy: 132.3, r: 1, fill: "rgba(255,255,255,.8)" }), h("path", Object.assign({ d: "M 39.59 124.4 A 13.07 13.07 0 0 1 60.41 124.4" }, L)),
+    h("path", Object.assign({ d: "M 2 4 A 2 2 0 0 0 4 2 M 96 2 A 2 2 0 0 0 98 4 M 98 146 A 2 2 0 0 0 96 148 M 4 148 A 2 2 0 0 0 2 146" }, L)));
+  return h("svg", { viewBox: "0 0 150 100", preserveAspectRatio: "none", style: { position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" } },
+    h("rect", Object.assign({ x: 2, y: 2, width: 146, height: 96 }, L)), h("line", Object.assign({ x1: 75, y1: 2, x2: 75, y2: 98 }, L)), h("circle", Object.assign({ cx: 75, cy: 50, r: 13.1 }, L)), h("circle", { cx: 75, cy: 50, r: 1, fill: "rgba(255,255,255,.8)" }),
+    h("rect", Object.assign({ x: 2, y: 20.35, width: 23.6, height: 59.3 }, L)), h("rect", Object.assign({ x: 2, y: 36.5, width: 7.9, height: 27 }, L)), h("circle", { cx: 17.7, cy: 50, r: 1, fill: "rgba(255,255,255,.8)" }), h("path", Object.assign({ d: "M 25.6 39.59 A 13.07 13.07 0 0 1 25.6 60.41" }, L)),
+    h("rect", Object.assign({ x: 124.4, y: 20.35, width: 23.6, height: 59.3 }, L)), h("rect", Object.assign({ x: 140.1, y: 36.5, width: 7.9, height: 27 }, L)), h("circle", { cx: 132.3, cy: 50, r: 1, fill: "rgba(255,255,255,.8)" }), h("path", Object.assign({ d: "M 124.4 60.41 A 13.07 13.07 0 0 1 124.4 39.59" }, L)),
+    h("path", Object.assign({ d: "M 2 4 A 2 2 0 0 0 4 2 M 146 2 A 2 2 0 0 0 148 4 M 148 96 A 2 2 0 0 0 146 98 M 4 98 A 2 2 0 0 0 2 96" }, L)));
+}
+function PerfMarker({ x, left, top, portrait, onOpen }) {
+  const h = React.createElement; const en = LANG === "en"; const st = perfStats(x); const gk = x.pos === "Torwart";
+  const groesse = portrait ? 34 : 44;
+  const zeile = gk ? (Number(st.sv) || 0) + (en ? " saves" : " Paraden") + " \u00b7 " + (Number(st.gc) || 0) + (en ? " conceded" : " Gegentore") : (Number(st.t) || 0) + (en ? " goals" : " Tore") + " \u00b7 " + (Number(st.a) || 0) + (en ? " assists" : " Assists");
+  return h("div", { className: "tw-pm", onClick: () => onOpen && onOpen(x), title: x.name, style: { position: "absolute", left: left + "%", top: top + "%", transform: "translate(-50%, -50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, cursor: "pointer", width: portrait ? 78 : 110 } },
+    h("span", { style: { width: groesse, height: groesse, borderRadius: 99, background: scoreColor(x.score), color: "#fff", border: "2.5px solid #fff", boxShadow: "0 4px 12px rgba(0,0,0,.35)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: portrait ? 14 : 17, lineHeight: 1 } }, Math.round(x.score || 0)),
+    h("span", { style: { fontFamily: FONT_BODY, fontSize: portrait ? 10.5 : 12.5, fontWeight: 800, color: "#fff", textShadow: "0 1px 3px rgba(0,0,0,.6)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%", textAlign: "center" } }, x.name),
+    h("span", { style: { fontFamily: FONT_BODY, fontSize: 9.5, fontWeight: 900, letterSpacing: 1, color: "rgba(255,255,255,.85)", textShadow: "0 1px 2px rgba(0,0,0,.5)" } }, perfPosCode(x.pos)),
+    h("div", { className: "tw-pm-tip", style: { position: "absolute", bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)", width: 210, background: "#0f1520", color: "#fff", borderRadius: 12, padding: "10px 12px", boxShadow: "0 12px 30px rgba(0,0,0,.35)", textAlign: "left", zIndex: 5 } },
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, x.name),
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "rgba(255,255,255,.75)", marginBottom: 6, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, x.team),
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, lineHeight: 1.45 } }, zeile, h("br"), (Number(x.min) || 0) + (en ? " minutes" : " Minuten")),
+      h("div", { style: { marginTop: 6, fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, letterSpacing: .5, textTransform: "uppercase", color: scoreColor(x.score) } }, "TW Performance Score " + Math.round(x.score || 0))));
+}
+function PerfPitch({ elf, portrait, onOpen }) {
+  const h = React.createElement; const en = LANG === "en";
+  const order = [["Torwart", 1], ["Abwehr", 4], ["Mittelfeld", 3], ["Sturm", 3]];
+  const linie = portrait ? [90, 68, 44, 20] : [9, 31, 55, 79];
+  const marker = [];
+  if (elf) order.forEach(([pos], li) => { const r = elf.reihen[pos] || []; r.forEach((x, i) => { const s = (i + 1) / (r.length + 1) * 100; const pad = portrait ? 8 : 6; const slot = pad + s * (100 - 2 * pad) / 100; marker.push(h(PerfMarker, { key: x.k || x.pid, x: x, left: portrait ? slot : linie[li], top: portrait ? linie[li] : slot, portrait: portrait, onOpen: onOpen })); }); });
+  return h("div", { className: "tw-card", style: { background: "#0f1520", borderRadius: 16, padding: 14, color: "#fff", overflow: "visible" } },
+    h("div", { style: { display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 10 } },
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, textTransform: "uppercase", color: "rgba(255,255,255,.85)" } }, t("totw_title")),
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "rgba(255,255,255,.6)" } }, t("totw_sub"))),
+    h("div", { className: "tw-pitch" + (portrait ? " portrait" : ""), style: { position: "relative", borderRadius: 12, overflow: "visible", aspectRatio: portrait ? "2 / 3" : "3 / 2", background: portrait ? "repeating-linear-gradient(0deg, #1f7a45 0 12.5%, #23834b 12.5% 25%)" : "repeating-linear-gradient(90deg, #1f7a45 0 12.5%, #23834b 12.5% 25%)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,.08)" } },
+      h(PitchLines, { portrait: portrait }),
+      elf ? marker : h("div", { style: { position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_BODY, fontSize: 13, color: "rgba(255,255,255,.8)", textAlign: "center", padding: 20 } }, en ? "Team of the matchday appears once eleven rated players are available." : "Die Elf des Spieltags erscheint, sobald elf bewertete Spieler vorliegen.")),
+    elf && elf.joker ? h("div", { style: { marginTop: 10, display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 12, color: "rgba(255,255,255,.8)", flexWrap: "wrap" } },
+      h("span", { style: { fontSize: 10, fontWeight: 900, letterSpacing: 1.4, textTransform: "uppercase", color: "rgba(255,255,255,.6)" } }, t("totw_sub12")),
+      h("button", { onClick: () => onOpen && onOpen(elf.joker), style: { cursor: "pointer", background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.18)", color: "#fff", borderRadius: 999, padding: "4px 10px 4px 5px", display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700 } },
+        h("span", { style: { width: 22, height: 22, borderRadius: 99, background: scoreColor(elf.joker.score), display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontSize: 11, fontWeight: 700 } }, Math.round(elf.joker.score || 0)), elf.joker.name, h("span", { style: { color: "rgba(255,255,255,.6)", fontWeight: 500 } }, elf.joker.team))) : null);
+}
+function SpieltagKarte({ x, onOpen, watched, onWatchToggle }) {
+  const h = React.createElement; const en = LANG === "en";
+  const [prev, setPrev] = useState(undefined);
+  useEffect(() => {
+    if (!x || !x.pid) { setPrev(undefined); return; }
+    let aktiv = true; setPrev(undefined);
+    fetch(SPIELER_URL + "?pid=" + x.pid, { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(raw => {
+      if (!aktiv) return; const d = normResp(raw); const form = d && Array.isArray(d.form) ? d.form.slice() : [];
+      const sortiert = form.filter(f => f && f.score != null).sort((a, b) => String(b.date || b.datum || "").localeCompare(String(a.date || a.datum || "")));
+      const aeltere = sortiert.filter(f => String(f.date || f.datum || "") < String(x.date || ""));
+      const p = aeltere.length ? aeltere[0] : (sortiert.length > 1 ? sortiert[1] : null);
+      setPrev(p ? Number(p.score) : null);
+    }).catch(() => { if (aktiv) setPrev(null); });
+    return () => { aktiv = false; };
+  }, [x && x.pid, x && x.date]);
+  if (!x) return null;
+  const mono = String(x.name || "?").split(/\s+/).map(w => w[0]).slice(0, 2).join("").toUpperCase();
+  const delta = prev == null ? null : Math.round((x.score || 0) - prev);
+  const werte = perfKeyValues(x);
+  return h("div", { className: "tw-card", style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 16, padding: "16px 18px", display: "flex", flexDirection: "column", gap: 12, minWidth: 0 } },
+    h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, textTransform: "uppercase", color: "#8a92a3" } }, en ? "Player of the matchday" : "Spieler des Spieltags"),
+    h("div", { style: { display: "flex", alignItems: "center", gap: 13, minWidth: 0 } },
+      h("div", { style: { width: 64, height: 64, borderRadius: 18, background: "linear-gradient(135deg, #0f1520, #26304a)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontSize: 24, fontWeight: 700, flex: "0 0 auto", boxShadow: "0 8px 18px rgba(15,21,32,.25)" } }, mono),
+      h("div", { style: { minWidth: 0 } },
+        h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 22, fontWeight: 700, color: INK, lineHeight: 1.05, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, x.name),
+        h("div", { style: { display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, minWidth: 0 } }, h(ClubLogo, { name: x.team, size: 16 }), h("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, x.team)),
+        h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, marginTop: 2 } }, [x.pos, x.league].filter(Boolean).join(" \u00b7 ")))),
+    h("div", { style: { background: "#eaf7ef", border: "1px solid #cfe9da", borderRadius: 14, padding: "12px 14px" } },
+      h("div", { style: { display: "flex", alignItems: "center", gap: 10 } },
+        h("span", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1, color: "#0d8a4f", textTransform: "uppercase", display: "inline-flex", alignItems: "center" } }, "TW Performance Score", h(ScoreInfo, { kind: "performance", size: 13 })),
+        h("span", { style: { marginLeft: "auto", fontFamily: FONT_DISPLAY, fontSize: 40, fontWeight: 700, color: "#0b6b3e", lineHeight: 1 } }, Math.round(x.score || 0))),
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, marginTop: 6, color: delta == null ? MUTED : delta > 0 ? "#0d8a4f" : delta < 0 ? "#b04a3a" : MUTED } }, prev === undefined ? (en ? "Comparing with last match \u2026" : "Vergleich mit dem letzten Spiel \u2026") : delta == null ? (en ? "First rated match" : "Erstes erfasstes Spiel") : (delta > 0 ? "\u25B2 +" + delta : delta < 0 ? "\u25BC " + delta : "\u25B6 \u00b10") + (en ? " vs. last match" : " zum letzten Spiel") + " (" + Math.round(prev) + ")")),
+    h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6 } }, werte.map((w, i) => h("span", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, color: INK, background: "#f5f6f2", border: "1px solid " + HAIR, borderRadius: 999, padding: "5px 10px" } }, w))),
+    h("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", marginTop: "auto" } },
+      h("button", { onClick: () => onOpen && onOpen(x), style: { flex: 1, cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 14px", borderRadius: 10, border: "none", background: "#0f1520", color: "#fff", whiteSpace: "nowrap" } }, en ? "Open analysis" : "Analyse \u00f6ffnen"),
+      h("button", { onClick: () => onWatchToggle && onWatchToggle(x.name), title: watched ? (en ? "Remove from watchlist" : "Von der Merkliste entfernen") : (en ? "Add to watchlist" : "Auf die Merkliste"), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 14px", borderRadius: 10, border: "1px solid " + (watched ? "#bfe3cf" : HAIR), background: watched ? "#eef7f1" : "#fff", color: watched ? "#149a59" : INK, display: "inline-flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" } }, h(IconBookmark, { size: 14, filled: watched }), watched ? (en ? "Watching" : "Beobachtet") : (en ? "Watch" : "Beobachten"))));
+}
+function PerfTabelle({ rows, portrait, watch, onWatchToggle, onOpen, offen, setOffen }) {
+  const h = React.createElement; const en = LANG === "en";
+  const istWatched = name => (watch || []).some(w => w.t === "spieler" && w.w === name);
+  const datum = d => d ? String(d).slice(8, 10) + "." + String(d).slice(5, 7) + "." : "";
+  const details = x => h("div", { style: { gridColumn: "1 / -1", borderTop: "1px solid " + HAIR, padding: "10px 12px 12px", background: "#fafbfa" } },
+    x.st ? h("div", { style: { marginBottom: 8 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: "#149a59", textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 } }, t("rank_st")), String(x.st).split(/;|\n/).map((z, i) => h("div", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#2a3140", lineHeight: 1.5 } }, "\u2022 " + z.trim()))) : null,
+    x.sw ? h("div", { style: { marginBottom: 8 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: "#b04a3a", textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 } }, t("rank_sw")), String(x.sw).split(/;|\n/).map((z, i) => h("div", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#2a3140", lineHeight: 1.5 } }, "\u2022 " + z.trim()))) : null,
+    x.dev ? h("div", { style: { marginBottom: 8 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: MUTED, textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 } }, t("rank_dev")), h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#2a3140", lineHeight: 1.5, fontStyle: "italic" } }, x.dev)) : null,
+    h("div", { style: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", fontFamily: FONT_BODY, fontSize: 12, color: MUTED } }, perfKeyValues(x).join(" \u00b7 "), x.api ? h("span", null, "\u00b7 " + t("rank_api") + " " + x.api) : null, h("button", { onClick: e => { e.stopPropagation(); onOpen && onOpen(x); }, style: { marginLeft: "auto", cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, padding: "6px 12px", borderRadius: 8, border: "1px solid " + HAIR, background: "#fff", color: INK } }, en ? "Open analysis \u2192" : "Analyse \u00f6ffnen \u2192")));
+  const watchBtn = x => h("button", { onClick: e => { e.stopPropagation(); onWatchToggle && onWatchToggle(x.name); }, title: istWatched(x.name) ? (en ? "Remove from watchlist" : "Von der Merkliste entfernen") : (en ? "Add to watchlist" : "Auf die Merkliste"), style: { cursor: "pointer", background: "none", border: "none", padding: 2, color: istWatched(x.name) ? "#149a59" : "#9aa0a6", display: "inline-flex", flexShrink: 0 } }, h(IconBookmark, { size: 14, filled: istWatched(x.name) }));
+  const pill = x => h("span", { style: { display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 44, height: 30, borderRadius: 9, background: scoreColor(x.score), color: "#fff", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 17 } }, Math.round(x.score || 0));
+  const trend = h("span", { title: en ? "Trend from the second rated matchday" : "Trend ab dem zweiten erfassten Spieltag", style: { color: "#9aa0a6", fontWeight: 700 } }, "\u2013");
+  if (portrait) return h("div", { style: { display: "flex", flexDirection: "column", gap: 8 } }, rows.map((x, i) => { const on = offen === x.k; return h("div", { key: x.k, className: "tw-card", onClick: () => setOffen(on ? null : x.k), style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 12, cursor: "pointer", overflow: "hidden" } },
+    h("div", { style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 12px" } },
+      h("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 14, fontWeight: 700, color: MUTED, width: 28, flexShrink: 0 } }, "#" + (i + 1)),
+      h("div", { style: { flex: 1, minWidth: 0 } },
+        h("div", { style: { display: "flex", alignItems: "center", gap: 6, minWidth: 0 } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, x.name), watchBtn(x)),
+        h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, [x.team + (x.gegner ? " \u2013 " + x.gegner : ""), x.pos, (x.min || 0) + "\u2032"].join(" \u00b7 ")),
+        h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "#3f4650", marginTop: 2 } }, perfKurz(x))),
+      pill(x)), on ? details(x) : null); }));
+  const kopf = [["#", 52], [en ? "Player" : "Spieler", null], [en ? "Match" : "Spiel", null], ["Position", 96], [en ? "Min" : "Min.", 62], [en ? "Key values" : "Schl\u00fcsselwerte", null], ["Trend", 58], ["TW Score", 78]];
+  return h("div", { className: "tw-ptable", style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 14, overflow: "hidden" } },
+    h("div", { className: "tw-prow tw-phead" }, kopf.map(([k], i) => h("span", { key: i, style: { display: "inline-flex", alignItems: "center", gap: 4 } }, k, k === "TW Score" ? h(ScoreInfo, { kind: "performance", size: 13 }) : null))),
+    rows.map((x, i) => { const on = offen === x.k; return h(React.Fragment, { key: x.k },
+      h("div", { className: "tw-prow" + (on ? " on" : ""), onClick: () => setOffen(on ? null : x.k) },
+        h("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 15, fontWeight: 700, color: i < 3 ? INK : MUTED } }, "#" + (i + 1)),
+        h("span", { style: { display: "inline-flex", alignItems: "center", gap: 6, minWidth: 0 } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, x.name), x.sub ? h("span", { style: { fontFamily: FONT_BODY, fontSize: 9.5, fontWeight: 900, letterSpacing: .6, textTransform: "uppercase", color: "#8a5a00", background: "#fdf3da", borderRadius: 5, padding: "2px 5px", flexShrink: 0 } }, t("rank_sub_badge")) : null, watchBtn(x)),
+        h("span", { style: { display: "inline-flex", alignItems: "center", gap: 6, minWidth: 0, fontFamily: FONT_BODY, fontSize: 12.5, color: "#3f4650" } }, h(ClubLogo, { name: x.team, size: 16 }), h("span", { style: { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, x.team + (x.gegner ? " \u2013 " + x.gegner : "")), x.date ? h("span", { style: { color: "#9aa0a6", flexShrink: 0 } }, datum(x.date)) : null),
+        h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#3f4650" } }, x.pos),
+        h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#3f4650" } }, (x.min || 0) + "\u2032"),
+        h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#3f4650", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, perfKurz(x)),
+        trend,
+        pill(x)),
+      on ? h("div", { className: "tw-prow-details" }, details(x)) : null); }));
+}
+function PerfVue({ perf, perfLoading, q, lg, pos, st, sw, watch, onWatchToggle, onOpen, offen, setOffen }) {
+  const h = React.createElement; const en = LANG === "en";
+  const [portrait, setPortrait] = useState(() => typeof window !== "undefined" && window.innerWidth <= 700);
+  useEffect(() => { const f = () => setPortrait(window.innerWidth <= 700); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);
+  const q2 = String(q || "").toLowerCase().trim();
+  const basis = (perf || []).filter(x => q2 ? true : (Number(x.min) || 0) >= 30);
+  const gefiltert = basis.filter(x => (!q2 || (x.name + " " + x.team).toLowerCase().indexOf(q2) >= 0) && (!lg || x.league === lg) && (!pos || x.pos === pos) && (!st || (x.stt || "").indexOf(st) >= 0) && (!sw || (x.swt || "").indexOf(sw) >= 0));
+  const elf = useMemo(() => perfElf(basis), [perf]);
+  const topP = basis.slice().sort((a, b) => (b.score || 0) - (a.score || 0))[0] || null;
+  const istWatched = name => (watch || []).some(w => w.t === "spieler" && w.w === name);
+  const erkl = h("span", { style: { display: "inline-flex", alignItems: "center", gap: 2, fontFamily: FONT_BODY, fontSize: 13, fontWeight: 700, color: INK } },
+    h("span", { onClick: e => { const b = e.currentTarget.parentNode.querySelector(".tw-scoreinfo button"); if (b) b.click(); }, style: { cursor: "pointer", textDecoration: "underline", textDecorationColor: "rgba(20,154,89,.5)", textUnderlineOffset: 3 } }, en ? "How is the score calculated?" : "Wie wird der Score berechnet?"),
+    h(ScoreInfo, { kind: "performance", size: 15 }));
+  return h("div", null,
+    perf && perf.length ? h("div", { className: "tw-perf-main" }, h(PerfPitch, { elf: elf, portrait: portrait, onOpen: onOpen }), topP ? h(SpieltagKarte, { x: topP, onOpen: onOpen, watched: istWatched(topP.name), onWatchToggle: onWatchToggle }) : null) : null,
+    h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", margin: "16px 0 10px" } }, erkl,
+      perf && perf.length ? h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED } }, gefiltert.length + " " + (en ? "appearances" : "Eins\u00e4tze") + (q2 ? "" : " \u00b7 " + (en ? "at least 30 minutes" : "ab 30 Minuten"))) : null),
+    perfLoading || perf === null ? h("div", { style: { padding: "34px 20px", textAlign: "center", fontFamily: FONT_BODY, color: MUTED } }, t("rank_loading"))
+      : perf.length === 0 ? h(EmptyState, { icon: "\u{1F4CA}", title: en ? "No matchday data yet" : "Noch keine Spieltagsdaten", text: t("rank_empty") })
+      : gefiltert.length === 0 ? h("div", { style: { background: "#fff", border: "1px dashed " + HAIR, borderRadius: 14, padding: "40px 20px", textAlign: "center", color: MUTED, fontFamily: FONT_BODY, fontSize: 14 } }, t("rank_nores"))
+      : h(PerfTabelle, { rows: gefiltert, portrait: portrait, watch: watch, onWatchToggle: onWatchToggle, onOpen: onOpen, offen: offen, setOffen: setOffen }));
 }
 function NeedCard({
   item,
@@ -6277,7 +6462,7 @@ function TransferApp({
         .tw-main.feed { grid-template-columns: minmax(0,3fr) minmax(300px,1fr); column-gap:24px; }
 .tw-main.feed:not(:has(> aside:not(:empty))) { grid-template-columns: minmax(0,1fr); }
 .tw-main.feed:not(:has(> aside:not(:empty))) > * { grid-column: 1 / -1; }
-        .tw-feedlist { align-items: stretch; } .tw-glist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: stretch; } .tw-gfilter-mobile { display: none; } @media (max-width: 860px) { .tw-glist { grid-template-columns: minmax(0, 1fr); } } @media (max-width: 700px) { .tw-gfilter-row { display: none !important; } .tw-gfilter-mobile { display: flex !important; } .tw-gchips { flex-wrap: nowrap !important; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; scrollbar-width: none; } .tw-gchips::-webkit-scrollbar { display: none; } .tw-gchips > button { flex-shrink: 0; } } .tw-clamp2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; } .tw-clamp3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; } .tw-gtable { overflow-x:auto; } .tw-grow { display:grid; grid-template-columns: 76px 104px minmax(0,1.1fr) minmax(0,1.5fr) 118px 110px 118px; gap:10px; align-items:center; min-width:820px; padding:7px 12px; border-top:1px solid #E1E5E2; font-family: inherit; font-size:12.5px; cursor:pointer; } .tw-grow > span, .tw-grow > a { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; } .tw-grow:hover { background:#f8fafb; } .tw-ghead { border-top:none; background:#f8fafb; cursor:default; font-size:10.5px; font-weight:800; letter-spacing:.6px; text-transform:uppercase; color:#667085; } .tw-ghead:hover { background:#f8fafb; } .tw-hover-only { opacity: 0; transition: opacity .15s; } .tw-card:hover .tw-hover-only, .tw-card:focus-within .tw-hover-only { opacity: 1; } .tw-route-club { display: inline-flex; align-items: center; gap: 6px; min-width: 0; } .tw-route-club span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tw-feedlist { align-items: stretch; } .tw-perf-main { display: grid; grid-template-columns: minmax(0, 3fr) minmax(280px, 1fr); gap: 18px; align-items: stretch; } .tw-pm .tw-pm-tip { opacity: 0; visibility: hidden; transition: opacity .12s; } .tw-pm:hover { z-index: 6; } .tw-pm:hover .tw-pm-tip { opacity: 1; visibility: visible; } .tw-prow { display: grid; grid-template-columns: 52px minmax(0, 1.5fr) minmax(0, 1.4fr) 96px 62px minmax(0, 1.6fr) 58px 78px; gap: 10px; align-items: center; padding: 9px 14px; border-top: 1px solid #E1E5E2; cursor: pointer; min-width: 0; } .tw-prow > span { min-width: 0; } .tw-prow:hover, .tw-prow.on { background: #f8fafb; } .tw-phead { border-top: none; background: #f8fafb; cursor: default; font-family: inherit; font-size: 10.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: #667085; } .tw-phead:hover { background: #f8fafb; } @media (max-width: 900px) { .tw-perf-main { grid-template-columns: minmax(0, 1fr); } } .tw-glist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: stretch; } .tw-gfilter-mobile { display: none; } @media (max-width: 860px) { .tw-glist { grid-template-columns: minmax(0, 1fr); } } @media (max-width: 700px) { .tw-gfilter-row { display: none !important; } .tw-gfilter-mobile { display: flex !important; } .tw-gchips { flex-wrap: nowrap !important; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; scrollbar-width: none; } .tw-gchips::-webkit-scrollbar { display: none; } .tw-gchips > button { flex-shrink: 0; } } .tw-clamp2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; } .tw-clamp3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; } .tw-gtable { overflow-x:auto; } .tw-grow { display:grid; grid-template-columns: 76px 104px minmax(0,1.1fr) minmax(0,1.5fr) 118px 110px 118px; gap:10px; align-items:center; min-width:820px; padding:7px 12px; border-top:1px solid #E1E5E2; font-family: inherit; font-size:12.5px; cursor:pointer; } .tw-grow > span, .tw-grow > a { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; } .tw-grow:hover { background:#f8fafb; } .tw-ghead { border-top:none; background:#f8fafb; cursor:default; font-size:10.5px; font-weight:800; letter-spacing:.6px; text-transform:uppercase; color:#667085; } .tw-ghead:hover { background:#f8fafb; } .tw-hover-only { opacity: 0; transition: opacity .15s; } .tw-card:hover .tw-hover-only, .tw-card:focus-within .tw-hover-only { opacity: 1; } .tw-route-club { display: inline-flex; align-items: center; gap: 6px; min-width: 0; } .tw-route-club span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         @media (min-width: 1280px) {
           .tw-feedlist { grid-template-columns: minmax(0,1fr) minmax(0,1fr) !important; gap:14px; }
         }
@@ -6625,9 +6810,9 @@ function TransferApp({
       fontSize: 14.5,
       color: MUTED,
       lineHeight: 1.5,
-      margin: "0 0 22px"
+      margin: "0 0 6px"
     }
-  }, t("rank_sub"))), /*#__PURE__*/React.createElement("div", {
+  }, t("rank_sub")), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, margin: "0 0 22px" } }, perfDatenstand(perf))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexWrap: "wrap",
@@ -6715,355 +6900,7 @@ function TransferApp({
   }, t("rank_all_sw")), PERF_TAGS.map(p => /*#__PURE__*/React.createElement("option", {
     key: p,
     value: p
-  }, p)))), /*#__PURE__*/React.createElement("div", { style: { display: "grid", gridTemplateColumns: "minmax(0, 1fr) 340px", gap: 24, alignItems: "start" } }, (() => {
-    if (!perf || perf.length < 11) return null;
-    const best = {};
-    for (const x of perf) {
-      if (!best[x.pid] || x.score > best[x.pid].score) best[x.pid] = x;
-    }
-    const pool = Object.values(best).sort((a, b) => b.score - a.score);
-    if (pool.length < 11) return null;
-    const need = [["Torwart", 1], ["Abwehr", 4], ["Mittelfeld", 3], ["Sturm", 3]];
-    const gew = new Set();
-    const reihen = {};
-    for (const [pos, n] of need) {
-      reihen[pos] = pool.filter(x => x.pos === pos && !gew.has(x.pid)).slice(0, n);
-      reihen[pos].forEach(x => gew.add(x.pid));
-    }
-    const rest = pool.filter(x => !gew.has(x.pid));
-    for (const [pos, n] of need) {
-      while (reihen[pos].length < n && rest.length) {
-        const x = rest.shift();
-        reihen[pos].push(x);
-        gew.add(x.pid);
-      }
-    }
-    const elf = need.reduce((a, [p]) => a + reihen[p].length, 0);
-    if (elf < 11) return null;
-    const subBest = {};
-    for (const x of perf) {
-      if (x.sub === true && (!subBest[x.pid] || x.score > subBest[x.pid].score)) subBest[x.pid] = x;
-    }
-    const joker = Object.values(subBest).sort((a, b) => b.score - a.score).find(x => !gew.has(x.pid)) || null;
-    const Chip = ({
-      x
-    }) => /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 3,
-        minWidth: 74,
-        maxWidth: 96
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        background: scoreColor(x.score),
-        color: "#fff",
-        borderRadius: 8,
-        padding: "4px 9px",
-        fontFamily: FONT_DISPLAY,
-        fontWeight: 700,
-        fontSize: 14
-      }
-    }, x.score), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontFamily: FONT_BODY,
-        fontSize: 11,
-        fontWeight: 800,
-        color: "#fff",
-        textAlign: "center",
-        lineHeight: 1.2
-      }
-    }, x.name), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontFamily: FONT_BODY,
-        fontSize: 9.5,
-        color: "rgba(255,255,255,.75)",
-        textAlign: "center"
-      }
-    }, x.team));
-    return /*#__PURE__*/React.createElement("div", {
-      style: {
-        background: "linear-gradient(180deg, #14522f 0%, #0e3d22 100%)",
-        borderRadius: 14,
-        padding: "18px 14px 20px",
-        marginBottom: 14,
-        position: "relative",
-        overflow: "hidden"
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        textAlign: "center",
-        marginBottom: 4
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontFamily: FONT_DISPLAY,
-        fontWeight: 700,
-        fontSize: 17,
-        color: "#fff",
-        textTransform: "uppercase",
-        letterSpacing: 1
-      }
-    }, t("totw_title"))), /*#__PURE__*/React.createElement("div", {
-      style: {
-        textAlign: "center",
-        fontFamily: FONT_BODY,
-        fontSize: 11,
-        color: "rgba(255,255,255,.7)",
-        marginBottom: 14
-      }
-    }, t("totw_sub")), /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 100 150", preserveAspectRatio: "none", style: { position: "absolute", inset: 0, width: "100%", height: "100%", opacity: .15, pointerEvents: "none" } }, /*#__PURE__*/React.createElement("rect", { x: 3, y: 3, width: 94, height: 144, rx: 3, fill: "none", stroke: "#fff", strokeWidth: .7 }), /*#__PURE__*/React.createElement("line", { x1: 3, y1: 75, x2: 97, y2: 75, stroke: "#fff", strokeWidth: .7 }), /*#__PURE__*/React.createElement("circle", { cx: 50, cy: 75, r: 12, fill: "none", stroke: "#fff", strokeWidth: .7 }), /*#__PURE__*/React.createElement("circle", { cx: 50, cy: 75, r: 1.4, fill: "#fff" }), /*#__PURE__*/React.createElement("rect", { x: 24, y: 3, width: 52, height: 15, fill: "none", stroke: "#fff", strokeWidth: .7 }), /*#__PURE__*/React.createElement("rect", { x: 36, y: 3, width: 28, height: 6.5, fill: "none", stroke: "#fff", strokeWidth: .7 }), /*#__PURE__*/React.createElement("rect", { x: 24, y: 132, width: 52, height: 15, fill: "none", stroke: "#fff", strokeWidth: .7 }), /*#__PURE__*/React.createElement("rect", { x: 36, y: 140.5, width: 28, height: 6.5, fill: "none", stroke: "#fff", strokeWidth: .7 })), [["Sturm"], ["Mittelfeld"], ["Abwehr"], ["Torwart"]].map(([pos]) => /*#__PURE__*/React.createElement("div", {
-      key: pos,
-      style: {
-        display: "flex",
-        justifyContent: "space-evenly",
-        width: "100%",
-        position: "relative",
-        zIndex: 1,
-        gap: 10,
-        flexWrap: "wrap",
-        marginBottom: 13
-      }
-    }, reihen[pos].map(x => /*#__PURE__*/React.createElement(Chip, {
-      key: x.pid,
-      x: x
-    })))), joker && /*#__PURE__*/React.createElement("div", {
-      style: {
-        borderTop: "1px solid rgba(255,255,255,.22)",
-        marginTop: 2,
-        paddingTop: 12,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 6
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontFamily: FONT_BODY,
-        fontSize: 10,
-        fontWeight: 800,
-        color: "rgba(255,255,255,.75)",
-        textTransform: "uppercase",
-        letterSpacing: 1.5
-      }
-    }, t("totw_sub12")), /*#__PURE__*/React.createElement(Chip, {
-      x: joker
-    })));
-  })(), (() => { const topP = (perf || []).slice().sort((a, b) => (b.score || 0) - (a.score || 0))[0]; if (!topP) return null; return /*#__PURE__*/React.createElement("div", { className: "tw-card", style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 16, padding: "16px 18px" } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.2, color: "#8a92a3", textTransform: "uppercase", marginBottom: 10 } }, "Spieler des Spieltags"), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 13, marginBottom: 12 } }, /*#__PURE__*/React.createElement("div", { style: { width: 56, height: 56, borderRadius: 16, background: "#0f1520", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontSize: 21, fontWeight: 700, flex: "0 0 auto" } }, String(topP.name || "?").split(/\s+/).map(w => w[0]).slice(0, 2).join("")), /*#__PURE__*/React.createElement("div", { style: { minWidth: 0 } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 21, fontWeight: 700, color: "#15181C", lineHeight: 1.05 } }, topP.name), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "#667085", marginTop: 3 } }, [topP.team, topP.pos].filter(Boolean).join(" \u00b7 ")))), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, background: "#eaf7ef", border: "1px solid #cfe9da", borderRadius: 14, padding: "12px 14px", marginBottom: 12 } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 34, fontWeight: 700, color: "#0b6b3e", lineHeight: 1 } }, Math.round(topP.score || 0)), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: "#0d8a4f", lineHeight: 1.35 } }, "TW PERFORMANCE SCORE", /*#__PURE__*/React.createElement(ScoreInfo, { kind: "performance", size: 13 }), /*#__PURE__*/React.createElement("br", null), "St\u00e4rkste Einzelleistung")), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "#667085", lineHeight: 1.6 } }, "So entsteht der TW Performance Score: positionsgewichtete Bewertung aller Spielstatistiken (Tore, Vorlagen, Zweik\u00e4mpfe, P\u00e4sse, Paraden) auf einer Skala von 0\u2013100 \u2014 jede Nacht neu berechnet.")); })()), perfLoading || perf === null ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 13,
-      color: MUTED,
-      padding: "20px 4px"
-    }
-  }, t("rank_loading")) : perf.length === 0 ? /*#__PURE__*/React.createElement(EmptyState, { icon: "\u{1F4CA}", title: "Noch keine Spieltagsdaten", text: t("rank_empty") }) : (() => {
-    const q = perfQ.toLowerCase().trim();
-    const gefiltert = perf.filter(x => (!q || (x.name + " " + x.team).toLowerCase().indexOf(q) >= 0) && (!perfLg || x.league === perfLg) && (!perfPos || x.pos === perfPos) && (!perfSt || (x.stt || "").indexOf(perfSt) >= 0) && (!perfSw || (x.swt || "").indexOf(perfSw) >= 0));
-    if (!gefiltert.length) return /*#__PURE__*/React.createElement("div", {
-      style: {
-        background: "#fff",
-        border: `1px solid ${HAIR}`,
-        borderRadius: 12,
-        padding: "18px 16px",
-        fontFamily: FONT_BODY,
-        fontSize: 13,
-        color: "#4a4a48"
-      }
-    }, t("rank_nores"));
-    return /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        gap: 10
-      }
-    }, /*#__PURE__*/React.createElement(ScoreLegend, { kind: "performance", style: { padding: "2px 2px 0" } }), gefiltert.map((x, i) => {
-      let st = {};
-      try {
-        st = JSON.parse(x.stats || "{}");
-      } catch (e) {}
-      const offen = perfOpen === x.k;
-      return /*#__PURE__*/React.createElement("div", {
-        key: x.k,
-        className: "tw-card",
-        style: {
-          background: "#fff",
-          border: `1px solid ${HAIR}`,
-          borderRadius: 14,
-          padding: "12px 14px"
-        }
-      }, /*#__PURE__*/React.createElement("div", {
-        style: {
-          display: "flex",
-          alignItems: "center",
-          gap: 12
-        }
-      }, /*#__PURE__*/React.createElement("div", {
-        style: {
-          fontFamily: FONT_DISPLAY,
-          fontWeight: 700,
-          fontSize: 17,
-          color: i < 3 ? "#b9860b" : MUTED,
-          minWidth: 34
-        }
-      }, "#", i + 1), /*#__PURE__*/React.createElement("div", { style: { width: 38, height: 38, borderRadius: 12, background: "#0f1520", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontSize: 15, fontWeight: 700, flexShrink: 0 } }, String(x.name || "?").split(/\s+/).map(w => w[0]).slice(0, 2).join("")), /*#__PURE__*/React.createElement("div", {
-        style: {
-          minWidth: 58,
-          textAlign: "center",
-          background: scoreColor(x.score),
-          color: "#fff",
-          borderRadius: 13,
-          padding: "10px 0",
-          fontFamily: FONT_DISPLAY,
-          fontWeight: 700,
-          fontSize: 23,
-          lineHeight: 1,
-          boxShadow: "0 4px 12px rgba(15,21,32,.14)"
-        }
-      }, x.score), /*#__PURE__*/React.createElement("div", {
-        style: {
-          flex: 1,
-          minWidth: 0
-        }
-      }, /*#__PURE__*/React.createElement("div", {
-        style: {
-          fontFamily: FONT_BODY,
-          fontWeight: 800,
-          fontSize: 14.5,
-          color: INK
-        }
-      }, x.name, x.sub && /*#__PURE__*/React.createElement("span", {
-        style: {
-          marginLeft: 7,
-          fontSize: 10.5,
-          fontWeight: 700,
-          color: "#8a6d1a",
-          background: "#f6ecc9",
-          borderRadius: 6,
-          padding: "2px 6px"
-        }
-      }, t("rank_sub_badge"))), /*#__PURE__*/React.createElement("div", {
-        style: {
-          fontFamily: FONT_BODY,
-          fontSize: 12,
-          color: MUTED,
-          marginTop: 2
-        }
-      }, x.team, x.gegner ? ` – ${x.gegner}` : "", " · ", x.league, " · ", x.pos, " · ", x.min, "′")), /*#__PURE__*/React.createElement("button", {
-        onClick: () => {
-          const on = (watch.items || []).some(w => w.t === "spieler" && w.w === x.name);
-          if (on) removeWatch("spieler", x.name);else addWatch("spieler", x.name);
-        },
-        style: {
-          cursor: "pointer",
-          background: (watch.items || []).some(w => w.t === "spieler" && w.w === x.name) ? "#eef7f1" : "#f1f1ec",
-          border: (watch.items || []).some(w => w.t === "spieler" && w.w === x.name) ? "1px solid #bfe3cf" : "none",
-          borderRadius: 8,
-          padding: "7px 11px",
-          fontFamily: FONT_BODY,
-          fontSize: 11.5,
-          fontWeight: 700,
-          color: (watch.items || []).some(w => w.t === "spieler" && w.w === x.name) ? "#149a59" : "#4a4a48",
-          whiteSpace: "nowrap"
-        }
-      }, (watch.items || []).some(w => w.t === "spieler" && w.w === x.name) ? "✓" : t("watch_add")), /*#__PURE__*/React.createElement("button", {
-        onClick: () => setPerfOpen(offen ? null : x.k),
-        style: {
-          cursor: "pointer",
-          background: "#f1f1ec",
-          border: "none",
-          borderRadius: 8,
-          padding: "7px 11px",
-          fontFamily: FONT_BODY,
-          fontSize: 11.5,
-          fontWeight: 700,
-          color: "#4a4a48",
-          whiteSpace: "nowrap"
-        }
-      }, offen ? t("rank_less") : t("rank_more"))), /*#__PURE__*/React.createElement("div", {
-        style: {
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 10,
-          marginTop: 9,
-          fontFamily: FONT_BODY,
-          fontSize: 11.5,
-          color: "#4a4a48"
-        }
-      }, /*#__PURE__*/React.createElement("span", null, st.t || 0, "T / ", st.a || 0, "A"), /*#__PURE__*/React.createElement("span", null, "Pässe ", st.p || 0, " (", st.pq || 0, "%)"), /*#__PURE__*/React.createElement("span", null, "Zweikämpfe ", st.zk || "0/0"), x.pos === "Torwart" ? /*#__PURE__*/React.createElement("span", null, "Paraden ", st.sv || 0) : /*#__PURE__*/React.createElement("span", null, "Tacklings ", st.tk || 0), x.api > 0 && /*#__PURE__*/React.createElement("span", {
-        style: {
-          color: MUTED
-        }
-      }, t("rank_api"), " ", x.api)), offen && /*#__PURE__*/React.createElement("div", {
-        style: {
-          marginTop: 11,
-          borderTop: `1px solid ${HAIR}`,
-          paddingTop: 11
-        }
-      }, x.st ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-        style: {
-          fontFamily: FONT_BODY,
-          fontSize: 11,
-          fontWeight: 700,
-          color: "#149a59",
-          textTransform: "uppercase",
-          letterSpacing: 1,
-          marginBottom: 4
-        }
-      }, t("rank_st")), x.st.split(/;|\n/).map((z, zi) => /*#__PURE__*/React.createElement("div", {
-        key: zi,
-        style: {
-          fontFamily: FONT_BODY,
-          fontSize: 12.5,
-          color: INK,
-          lineHeight: 1.5
-        }
-      }, "✓ ", z.trim())), x.sw && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-        style: {
-          fontFamily: FONT_BODY,
-          fontSize: 11,
-          fontWeight: 700,
-          color: "#b04a3a",
-          textTransform: "uppercase",
-          letterSpacing: 1,
-          margin: "9px 0 4px"
-        }
-      }, t("rank_sw")), x.sw.split(/;|\n/).map((z, zi) => /*#__PURE__*/React.createElement("div", {
-        key: zi,
-        style: {
-          fontFamily: FONT_BODY,
-          fontSize: 12.5,
-          color: INK,
-          lineHeight: 1.5
-        }
-      }, "– ", z.trim()))), x.dev && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-        style: {
-          fontFamily: FONT_BODY,
-          fontSize: 11,
-          fontWeight: 700,
-          color: MUTED,
-          textTransform: "uppercase",
-          letterSpacing: 1,
-          margin: "9px 0 4px"
-        }
-      }, t("rank_dev")), /*#__PURE__*/React.createElement("div", {
-        style: {
-          fontFamily: FONT_BODY,
-          fontSize: 12.5,
-          color: "#4a4a48",
-          fontStyle: "italic",
-          lineHeight: 1.5
-        }
-      }, x.dev))) : /*#__PURE__*/React.createElement("div", {
-        style: {
-          fontFamily: FONT_BODY,
-          fontSize: 12,
-          color: MUTED
-        }
-      }, "Dribblings ", st.dr || "0/0", " · Interceptions ", st.ic || 0, " · Fouls ", st.f || 0, " · Karten G", st.g || 0, "/R", st.r || 0)));
-    }));
-  })()), view === "listen" && /*#__PURE__*/React.createElement(ScoutSub, { view: view, setView: setView }), view === "listen" && (!listActive ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, p)))), /*#__PURE__*/React.createElement(PerfVue, { perf: perf, perfLoading: perfLoading, q: perfQ, lg: perfLg, pos: perfPos, st: perfSt, sw: perfSw, watch: watch.items, onWatchToggle: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); }, onOpen: x => openPlayer(x.pid, x.name, x.team), offen: perfOpen, setOffen: setPerfOpen })), view === "listen" && /*#__PURE__*/React.createElement(ScoutSub, { view: view, setView: setView }), view === "listen" && (!listActive ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       background: "transparent",
       border: "none",
