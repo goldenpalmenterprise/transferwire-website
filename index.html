@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-26-az community -->
+<!-- tw-build: 2026-08-26-ba feed-vereinsfilter -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -7072,10 +7072,11 @@ function TransferApp({
   const needs = news.filter(n => n.type === "verein_sucht");
   const fixCount = news.filter(n => n.type === "fix").length;
   const rumorCount = news.filter(n => n.type === "geruecht").length;
-  const cascade = sport === "fussball" || sport === "basketball";
-  const countryOpts = cascade ? Object.keys(HIERARCHY[sport]) : [];
-  const leagueOpts = country && HIERARCHY[sport]?.[country] ? Object.keys(HIERARCHY[sport][country]) : [];
-  const clubOpts = country && league && HIERARCHY[sport]?.[country]?.[league] ? HIERARCHY[sport][country][league] : [];
+  const hierSport = sport === "alle" ? "fussball" : sport;
+  const cascade = !!HIERARCHY[hierSport];
+  const countryOpts = cascade ? Object.keys(HIERARCHY[hierSport]) : [];
+  const leagueOpts = country && HIERARCHY[hierSport]?.[country] ? Object.keys(HIERARCHY[hierSport][country]) : [];
+  const clubOpts = country && league && HIERARCHY[hierSport]?.[country]?.[league] ? HIERARCHY[hierSport][country][league] : [];
   const needsBySport = needs.filter(n => sport === "alle" || n.sport === sport);
   const posSet = posSetFor(sport === "alle" ? "fussball" : sport);
   const activePos = posSet.find(p => p.key === posFilter) || null;
@@ -8241,7 +8242,7 @@ function TransferApp({
       /*#__PURE__*/React.createElement("button", { onClick: () => window.open(STRIPE_LINK_PREMIUM, "_blank"), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 900, padding: "12px 22px", borderRadius: 10, border: "none", background: "linear-gradient(90deg,#efc25e,#d9963a)", color: "#1c1508", boxShadow: "0 8px 22px rgba(217,150,58,.35)" } }, "Premium freischalten \u2014 99 \u20ac/Monat"))),
   view === "talente" && /*#__PURE__*/React.createElement(ScoutSub, { view: view, setView: setView }), view === "talente" && /*#__PURE__*/React.createElement("div", {
     style: { background: "#e6f6f9", border: "1.5px solid #0e7490", borderRadius: 14, padding: "12px 18px", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 600, color: "#0e7490", gridColumn: "1 / -1" }
-  }, "\u24D8  ", t("tal_banner"), " ", React.createElement(ScoreInfo, { kind: "talent", size: 12, label: LANG === "en" ? "View methodology" : "Methodik ansehen" })), view === "talente" && /*#__PURE__*/React.createElement(TalentScouting, { onWatch: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); }, watched: name => (watch.items || []).some(w => w.t === "spieler" && w.w === name), onOpen: openPlayer, onVergleich: p => setPlVergleich(v => v.some(y => y.pid === p.pid) ? v.filter(y => y.pid !== p.pid) : (v.length >= 3 ? v : [...v, p])), vergleich: plVergleich }), view === "feed" && neueZahl > 0 && /*#__PURE__*/React.createElement("button", { onClick: () => { ladeFeed(); window.scrollTo({ top: 0, behavior: "smooth" }); }, style: { display: "block", margin: "0 auto 12px", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 900, cursor: "pointer", padding: "9px 18px", borderRadius: 999, border: "none", background: "#149a59", color: "#fff", boxShadow: "0 8px 20px rgba(20,154,89,.35)" } }, "\u2191 " + neueZahl + " neue " + (neueZahl === 1 ? "Meldung" : "Meldungen")), view === "feed" && /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 10 } }, sportTabs.map(([k, label]) => { const a2 = sport === k; const c2 = k === "alle" ? "#0f1520" : SPORT[k].color; return /*#__PURE__*/React.createElement("button", { key: "sp" + k, onClick: () => { setSport(k); setCountry(""); setLeague(""); setClub(""); setPosFilter(""); }, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 11px", borderRadius: 999, border: "1px solid " + (a2 ? c2 : HAIR), background: a2 ? c2 : "#fff", color: a2 ? "#fff" : "#5b6472" } }, label); }), /*#__PURE__*/React.createElement("span", { style: { width: 1, height: 22, background: HAIR, margin: "0 2px" } }), [["alle", "Alle", news.length], ["fix", TYPE.fix.label, fixCount], ["geruecht", TYPE.geruecht.label, rumorCount]].map(([k, lab, n]) => { const a3 = type === k; return /*#__PURE__*/React.createElement("button", { key: "kpi" + k, onClick: () => setType(k), style: { display: "inline-flex", alignItems: "baseline", gap: 7, cursor: "pointer", padding: "7px 13px", borderRadius: 12, border: "1px solid " + (a3 ? "#0f1520" : HAIR), background: a3 ? "#0f1520" : "#fff", boxShadow: "0 1px 2px rgba(15,21,32,.05)" } }, /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: .8, textTransform: "uppercase", color: a3 ? "rgba(255,255,255,.75)" : "#8a92a3" } }, lab), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 18, fontWeight: 700, color: a3 ? "#fff" : "#0f1520" } }, Number(n).toLocaleString("de-DE"))); })), /*#__PURE__*/React.createElement("div", null, cascade && /*#__PURE__*/React.createElement("div", {
+  }, "\u24D8  ", t("tal_banner"), " ", React.createElement(ScoreInfo, { kind: "talent", size: 12, label: LANG === "en" ? "View methodology" : "Methodik ansehen" })), view === "talente" && /*#__PURE__*/React.createElement(TalentScouting, { onWatch: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); }, watched: name => (watch.items || []).some(w => w.t === "spieler" && w.w === name), onOpen: openPlayer, onVergleich: p => setPlVergleich(v => v.some(y => y.pid === p.pid) ? v.filter(y => y.pid !== p.pid) : (v.length >= 3 ? v : [...v, p])), vergleich: plVergleich }), view === "feed" && neueZahl > 0 && /*#__PURE__*/React.createElement("button", { onClick: () => { ladeFeed(); window.scrollTo({ top: 0, behavior: "smooth" }); }, style: { display: "block", margin: "0 auto 12px", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 900, cursor: "pointer", padding: "9px 18px", borderRadius: 999, border: "none", background: "#149a59", color: "#fff", boxShadow: "0 8px 20px rgba(20,154,89,.35)" } }, "\u2191 " + neueZahl + " neue " + (neueZahl === 1 ? "Meldung" : "Meldungen")), view === "feed" && /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 10 } }, sportTabs.map(([k, label]) => { const a2 = sport === k; const c2 = k === "alle" ? "#0f1520" : SPORT[k].color; return /*#__PURE__*/React.createElement("button", { key: "sp" + k, onClick: () => { setSport(k); setCountry(""); setLeague(""); setClub(""); setPosFilter(""); }, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 11px", borderRadius: 999, border: "1px solid " + (a2 ? c2 : HAIR), background: a2 ? c2 : "#fff", color: a2 ? "#fff" : "#5b6472" } }, label); }), /*#__PURE__*/React.createElement("span", { style: { width: 1, height: 22, background: HAIR, margin: "0 2px" } }), [["alle", "Alle", news.length], ["fix", TYPE.fix.label, fixCount], ["geruecht", TYPE.geruecht.label, rumorCount]].map(([k, lab, n]) => { const a3 = type === k; return /*#__PURE__*/React.createElement("button", { key: "kpi" + k, onClick: () => setType(k), style: { display: "inline-flex", alignItems: "baseline", gap: 7, cursor: "pointer", padding: "7px 13px", borderRadius: 12, border: "1px solid " + (a3 ? "#0f1520" : HAIR), background: a3 ? "#0f1520" : "#fff", boxShadow: "0 1px 2px rgba(15,21,32,.05)" } }, /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: .8, textTransform: "uppercase", color: a3 ? "rgba(255,255,255,.75)" : "#8a92a3" } }, lab), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 18, fontWeight: 700, color: a3 ? "#fff" : "#0f1520" } }, Number(n).toLocaleString("de-DE"))); })), /*#__PURE__*/React.createElement("div", null, view === "feed" && cascade && /*#__PURE__*/React.createElement("div", {
     style: {
       background: "#fff",
       border: `1px solid ${HAIR}`,
@@ -8259,7 +8260,7 @@ function TransferApp({
   }, /*#__PURE__*/React.createElement(MapPin, {
     size: 15,
     strokeWidth: 2.3,
-    color: SPORT[sport].color
+    color: SPORT[hierSport].color
   }), /*#__PURE__*/React.createElement("span", {
     style: {
       fontFamily: FONT_DISPLAY,
@@ -8298,7 +8299,7 @@ function TransferApp({
     label: "1 · Land wählen",
     value: country,
     options: countryOpts,
-    accent: SPORT[sport].color,
+    accent: SPORT[hierSport].color,
     onChange: v => {
       setCountry(v);
       setLeague("");
@@ -8309,7 +8310,7 @@ function TransferApp({
     value: league,
     options: leagueOpts,
     disabled: !country,
-    accent: SPORT[sport].color,
+    accent: SPORT[hierSport].color,
     onChange: v => {
       setLeague(v);
       setClub("");
@@ -8319,7 +8320,7 @@ function TransferApp({
     value: club,
     options: clubOpts,
     disabled: !league,
-    accent: SPORT[sport].color,
+    accent: SPORT[hierSport].color,
     onChange: v => setClub(v)
   })), club && /*#__PURE__*/React.createElement("div", {
     style: {
