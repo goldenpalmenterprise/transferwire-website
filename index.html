@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-26-ai terminal-wording -->
+<!-- tw-build: 2026-08-26-aj datum-parse -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -2296,6 +2296,8 @@ const relToTime = txt => {
   const s = String(txt || "").toLowerCase().trim();
   if (!s) return 0;
   if (/gerade eben|just now|soeben/.test(s)) return Date.now();
+  const dm = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})?$/);
+  if (dm) { const j = new Date(); let y = dm[3] ? Number(dm[3]) : j.getFullYear(); let d = new Date(y, Number(dm[2]) - 1, Number(dm[1]), 12, 0, 0); if (d.getTime() > j.getTime() + 86400000) d = new Date(y - 1, Number(dm[2]) - 1, Number(dm[1]), 12, 0, 0); return d.getTime(); }
   const m = s.match(/(\d+)\s*(min|std|h\b|hour|tg|tag|d\b|day)/);
   if (!m) return 0;
   const n = Number(m[1]); const u = m[2];
