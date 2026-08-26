@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-26-ao score-label -->
+<!-- tw-build: 2026-08-26-ap scroll-grace -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -2113,10 +2113,12 @@ function ScoreInfo({ kind, size, label }) {
   const en = LANG === "en";
   React.useEffect(() => {
     if (!pos) return;
+    const t0 = Date.now();
     const close = e => { if (e && e.target && ((btn.current && btn.current.contains(e.target)) || (box.current && box.current.contains(e.target)))) return; setPos(null); };
+    const scrollClose = () => { if (Date.now() - t0 < 600) return; setPos(null); };
     const key = e => { if (e.key === "Escape") setPos(null); };
-    document.addEventListener("mousedown", close); document.addEventListener("keydown", key); window.addEventListener("scroll", close, true); window.addEventListener("resize", close);
-    return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", key); window.removeEventListener("scroll", close, true); window.removeEventListener("resize", close); };
+    document.addEventListener("mousedown", close); document.addEventListener("keydown", key); window.addEventListener("scroll", scrollClose, true); window.addEventListener("resize", close);
+    return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", key); window.removeEventListener("scroll", scrollClose, true); window.removeEventListener("resize", close); };
   }, [pos]);
   React.useLayoutEffect(() => {
     if (!pos || pos.fixed || !box.current) return;
