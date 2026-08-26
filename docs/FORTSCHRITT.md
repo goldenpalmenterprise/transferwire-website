@@ -529,3 +529,24 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
   in 3 Spalten mit allen Elementen, Menü (5 Punkte bei kuratierten), Duplizieren → „Meine Listen 1“, Alert + Teilen → „Geteilte Listen 1“,
   Export „scouting-top-50-u21-talente-europa-kopie.csv“, Löschen → Leerzustand mit allen Texten, Formular unverändert (Labels/Optionen), Liste öffnen
   → Listenansicht mit 50 Einträgen, mobil einspaltig (366 px) mit scrollbaren Tabs. 0 Fehler.
+
+## 26.08. 03:58–04:10 – COMMUNITY – TRANSFERHINWEISE (Boss-Brief), Commit 28f2d6c, Marker az
+- Boss-Vorgabe: Such-/Filterbereich unverändert – das CmtySuche-Feld („Hinweise durchsuchen: Spieler, Verein, Position, Stichwort …“ mit
+  Treffer-Zähler) ist 1:1 an seiner Stelle geblieben. Networking-Unterbereich inhaltlich unverändert (nur Tab-Label „Networking Pro“).
+- Datenlage community_posts: id, kind, author_name/rolle, body, created_at, status (neu/prueft/veroeffentlicht/notiert/freigegeben/abgelehnt/
+  gemeldet/zurueckgezogen), meldungen, agent_headline, feed_json, body_en/lang. Aktuell 0 Beiträge. Neue Einreichungen bekommen einen
+  strukturierten Kopf im Body: „Art · Verein · Spieler/Position · Zeitraum · Liga“ + Leerzeile + Beschreibung + „Quelle/Kontext: …“;
+  sendeCommunity(kind, textOverride, anonym) sendet zusätzlich anonym:true (Backend ignoriert es ggf.; die Karte zeigt ohnehin keinen Autor).
+- Neue Komponenten (vor NeedCard): cmParse (Kopfzeile/feed_json → Verein/Position/Zeitraum, Headline = agent_headline oder erster Satz),
+  cmStatus (Ungeprüft / Mehrfach gemeldet (≥1 ähnliche: gleicher Verein + Position) / TW geprüft (freigegeben) / Offiziell bestätigt
+  (bestaetigt) / Abgelehnt/Zurückgezogen grau), CommunityPanel (Portal rechts 560 px, mobil Vollbild: Art (6), Verein, Spieler oder Position,
+  Zeitraum (5), Liga oder Region, Beschreibung mit Boss-Platzhalter, Quelle oder Kontext, Radio mit Profil/anonym, Bestätigungscheckbox,
+  „Hinweis zur Prüfung einreichen“ erst gültig ab 10 Zeichen + Checkbox; Esc schließt; schließt nach „✓“), CommunityVue (Warnhinweis kurz +
+  „Mehr zur Verifizierung“ mit Status-Erklärung; eingeklappter Composer „Teile einen Transferhinweis aus deinem Netzwerk …“ + „Hinweis erstellen“;
+  Karten „COMMUNITY-HINWEIS · <Status>“, Zeit, Überschrift, 3-Zeilen-Clamp, Verein·Position·Zeitraum, ähnliche Meldungen, Prüfstatus-Pill,
+  Speichern (tw_saved_hints) / Ergänzen (Panel mit Vorlage aus der Karte) / Melden (meldePost) + Übersetzen; ein Leerzustand „Noch keine
+  Community-Hinweise“ + Text + „Hinweis teilen“; rechte Spalte ≥1100 px: Aktueller Prüfstatus (Zähler je Status), Häufig genannte Vereine,
+  Community-Regeln). Kopf h2 „Community – Transferhinweise“ + Beschreibung.
+- Abnahme rt59: Titel/Beschreibung, Unterbereiche „Transferhinweise · Networking Pro“, Banner-Text exakt + Verifizierungs-Erklärung, Suchfeld
+  identisch, Composer statt Formular (kein Textarea sichtbar), Leerzustand mit allen Texten, rechte Spalte (2 Spalten), Panel mit allen Feldern,
+  Platzhalter exakt, Button erst nach Text+Checkbox aktiv, Esc schließt; mobil Panel 390 px Vollbild, Feed einspaltig. 0 Fehler.
