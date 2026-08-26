@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-26-ar ligen-zahl -->
+<!-- tw-build: 2026-08-26-as vertragsradar -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -1219,8 +1219,8 @@ const I18N = {
     chat_auth: "Bitte einmal neu einloggen, dann steht der KI-Scout bereit.",
     chat_err: "Da ist etwas schiefgelaufen \u2014 bitte gleich noch einmal versuchen.",
     ch_tab: "Vertragsenden",
-    ch_title: "Auslaufende Verträge & vertragslose Spieler",
-    ch_sub: "Auslaufende Verträge, vertragslose Spieler und Klubs unter Verkaufsdruck — täglich per KI-Recherche und News-Analyse aktualisiert.",
+    ch_title: "Auslaufende Vertr\u00e4ge & verf\u00fcgbare Spieler",
+    ch_sub: "Spieler mit auslaufenden Vertr\u00e4gen, best\u00e4tigte Free Agents und Vereine unter Verkaufsdruck \u2013 t\u00e4glich aktualisiert.",
     ch_ausl: "Auslaufende Verträge (binnen 12 Monaten)",
     ch_ausl_none: "Noch keine recherchierten Vertragsenden — der Markt-Scout füllt diese Liste Tag für Tag automatisch.",
     ch_frei: "Vertragslos gemeldet",
@@ -1530,8 +1530,8 @@ const I18N = {
     chat_auth: "Please log in again, then the AI scout is ready.",
     chat_err: "Something went wrong \u2014 please try again in a moment.",
     ch_tab: "Openings",
-    ch_title: "Market openings",
-    ch_sub: "Expiring contracts, free agents and clubs under pressure to sell — updated daily via AI research and news analysis.",
+    ch_title: "Expiring contracts & available players",
+    ch_sub: "Players with expiring contracts, confirmed free agents and clubs under selling pressure \u2013 updated daily.",
     ch_ausl: "Expiring contracts (within 12 months)",
     ch_ausl_none: "No researched contract ends yet — the market scout fills this list automatically day by day.",
     ch_frei: "Reported as free agents",
@@ -2100,8 +2100,8 @@ const SCORES = {
   },
   opportunity: {
     name: "TW Opportunity Score", scale: "0\u2013100",
-    de: "Marktchance rund um einen Spieler: Restlaufzeit des Vertrags, Vertragslos-Status und Verkaufsdruck des Vereins. Skala 0\u2013100.",
-    en: "Market opportunity around a player: remaining contract term, free-agent status and the club\u2019s selling pressure. 0\u2013100 scale."
+    de: "Marktchance rund um einen Spieler, Skala 0\u2013100. Faktoren: Verf\u00fcgbarkeit (vertragslos 40 \u00b7 Vertragsende unter 30 Tagen 32 \u00b7 unter 6 Monaten 24 \u00b7 unter 12 Monaten 14), Alter (22\u201329 Jahre 15 \u00b7 20\u201332 Jahre 9), Einsatzminuten der Saison (ab 1.500 15 \u00b7 ab 700 9 \u00b7 ab 200 4), Liga-Rating (ab 7,2 15 \u00b7 ab 6,8 10 \u00b7 ab 6,4 5), Marktwert (ab 1 Mio. \u20ac 8 \u00b7 ab 250 Tsd. \u20ac 4) und Quelle (Transfermarkt/offiziell 7 \u00b7 Bericht 3).",
+    en: "Market opportunity around a player, 0\u2013100 scale. Factors: availability (free agent 40 \u00b7 contract ends within 30 days 32 \u00b7 within 6 months 24 \u00b7 within 12 months 14), age (22\u201329 15 \u00b7 20\u201332 9), season minutes (1,500+ 15 \u00b7 700+ 9 \u00b7 200+ 4), league rating (7.2+ 15 \u00b7 6.8+ 10 \u00b7 6.4+ 5), market value (\u20ac1m+ 8 \u00b7 \u20ac250k+ 4) and source (Transfermarkt/official 7 \u00b7 report 3)."
   }
 };
 function ScoreInfo({ kind, size, label }) {
@@ -3691,6 +3691,104 @@ function DbVue({ q, hatFilter, items, loading, stats, watch, onWatchToggle, onOp
       : rows.length === 0 ? h(EmptyState, { icon: "\u{1F50D}", title: nurScout ? (en ? "Scouting list is empty" : "Scouting-Liste ist leer") : (en ? "No players found" : "Keine Spieler gefunden"), text: nurScout ? (en ? "Add players from the table." : "F\u00fcge Spieler aus der Tabelle hinzu.") : t("pl_none") })
       : mobil ? karten : tabelle,
     quick ? h(SpielerQuick, { x: quick, onClose: () => setQuick(null), onOpen: onOpen, watched: istWatched(quick.name), onWatchToggle: onWatchToggle }) : null);
+}
+function vtDatum(v) {
+  const s = String(v || "").trim(); if (!s) return null;
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/); if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12);
+  m = s.match(/^(\d{4})-(\d{2})$/); if (m) return new Date(Number(m[1]), Number(m[2]), 0, 12);
+  m = s.match(/^(\d{4})$/); if (m) return new Date(Number(m[1]), 5, 30, 12);
+  m = s.match(/(\d{2})\.(\d{2})\.(\d{4})/); if (m) return new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]), 12);
+  return null;
+}
+const vtFmt = d => d ? String(d.getDate()).padStart(2, "0") + "." + String(d.getMonth() + 1).padStart(2, "0") + "." + d.getFullYear() : "";
+const vtTage = d => d ? Math.ceil((d.getTime() - Date.now()) / 86400000) : null;
+function vtStatus(r) {
+  const en = LANG === "en";
+  if (r.frei) return { text: r.seit ? (en ? "Free agent since " : "Vertragslos seit ") + vtFmt(r.seit) : (en ? "Free agent" : "Vertragslos"), badge: en ? "Available now" : "Sofort verf\u00fcgbar", dringend: true };
+  const t = vtTage(r.ende);
+  if (t === null) return { text: en ? "Contract end unknown" : "Vertragsende unbekannt", badge: "", dringend: false };
+  if (t < 0) return { text: (en ? "Contract ran out " : "Vertrag ausgelaufen ") + vtFmt(r.ende), badge: "", dringend: false };
+  if (t < 30) return { text: t === 0 ? (en ? "Ends today" : "Endet heute") : (en ? "Ends in " + t + (t === 1 ? " day" : " days") : "Endet in " + t + (t === 1 ? " Tag" : " Tagen")), badge: "", dringend: true };
+  return { text: (en ? "Contract until " : "Vertrag bis ") + vtFmt(r.ende), badge: "", dringend: false };
+}
+function vtScore(r) {
+  const t = r.frei ? -1 : vtTage(r.ende);
+  let s = r.frei ? 40 : t === null ? 8 : t < 30 ? 32 : t <= 180 ? 24 : t <= 365 ? 14 : 6;
+  const a = Number(r.age) || 0; s += a >= 22 && a <= 29 ? 15 : (a >= 20 && a <= 32) ? 9 : a ? 3 : 0;
+  const mi = Number(r.minutes) || 0; s += mi >= 1500 ? 15 : mi >= 700 ? 9 : mi >= 200 ? 4 : 0;
+  const ra = Number(r.rating) || 0; s += ra >= 7.2 ? 15 : ra >= 6.8 ? 10 : ra >= 6.4 ? 5 : 0;
+  const mw = Number(r.mwEur) || 0; s += mw >= 1000000 ? 8 : mw >= 250000 ? 4 : 0;
+  s += r.quelle === "Transfermarkt" || /offiziell|official/i.test(r.note || "") ? 7 : 3;
+  return Math.min(99, Math.round(s));
+}
+function vtRadarZeile(a) {
+  const frei = String(a.bis || "").toLowerCase().indexOf("vertragslos") >= 0 || /^vertragslos/i.test(String(a.note || ""));
+  const m = String(a.note || "").match(/(\d{2}\.\d{2}\.\d{4})/);
+  return { pid: a.pid, name: a.name, team: a.team, league: a.league, pos: a.pos, age: a.age, minutes: a.minutes, rating: a.rating, frei: frei, seit: frei && m ? vtDatum(m[1]) : null, ende: frei ? null : vtDatum(a.bis), mw: "", mwEur: 0, quelle: /transfermarkt/i.test(String(a.note || "")) ? "Transfermarkt" : (LANG === "en" ? "Market scout" : "Markt-Scout"), note: a.note || "", photo: "", nat: "" };
+}
+function VertragKpis({ radar, frei }) {
+  const h = React.createElement; const en = LANG === "en";
+  const [z, setZ] = useState(null);
+  useEffect(() => {
+    let aktiv = true; const iso = d => d.toISOString().slice(0, 10); const j = new Date();
+    const p180 = new Date(Date.now() + 180 * 86400000), p365 = new Date(Date.now() + 365 * 86400000);
+    const fenster = (bis) => "or=(and(tm_contract_until.gte." + iso(j) + ",tm_contract_until.lte." + iso(bis) + "),and(contract_until.gte." + iso(j) + ",contract_until.lte." + iso(bis) + "))";
+    const zaehl = url => fetch(url, { credentials: "omit", cache: "no-store", headers: { Prefer: "count=exact", Range: "0-0" } }).then(r => { const m2 = /\/(\d+)/.exec(r.headers.get("content-range") || ""); return m2 ? Number(m2[1]) : 0; }).catch(() => 0);
+    Promise.all([zaehl("/db/players?select=player_id&" + fenster(p180) + "&limit=1"), zaehl("/db/players?select=player_id&tm_value_eur=gt.1000000&" + fenster(p365) + "&limit=1")]).then(([e6, mw]) => { if (aktiv) setZ({ e6: e6, mw: mw }); });
+    return () => { aktiv = false; };
+  }, []);
+  const sofort = (radar || []).filter(a => vtRadarZeile(a).frei).length;
+  const woche = Date.now() - 7 * 86400000;
+  const neu = (frei || []).filter(f => { const d = vtDatum(f.datum); return d && d.getTime() >= woche; }).length + (radar || []).filter(a => { const r = vtRadarZeile(a); return r.seit && r.seit.getTime() >= woche; }).length;
+  const kpi = (w, lab, warn) => h("div", { style: { display: "flex", alignItems: "baseline", gap: 7, background: "#fff", border: "1px solid " + (warn ? "#f1d6a6" : HAIR), borderRadius: 12, padding: "10px 14px", minWidth: 0 } }, h("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 22, fontWeight: 700, color: warn ? "#b07a05" : INK, lineHeight: 1 } }, w), h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, fontWeight: 600 } }, lab));
+  return h("div", { className: "tw-vt-kpis", style: { display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 18 } },
+    kpi(sofort, en ? "available now" : "sofort verf\u00fcgbar", sofort > 0),
+    kpi(z ? dbFmtZahl(z.e6) : "\u2026", en ? "contracts end within 6 months" : "Vertr\u00e4ge enden in 6 Monaten", false),
+    kpi(z ? dbFmtZahl(z.mw) : "\u2026", en ? "players with a market value above \u20ac1m" : "Spieler mit Marktwert \u00fcber 1 Mio. \u20ac", false),
+    kpi(neu, en ? "new entries this week" : "neue Eintr\u00e4ge diese Woche", false));
+}
+function VertragTabelle({ radar, onOpen }) {
+  const h = React.createElement; const en = LANG === "en";
+  const [db, setDb] = useState(null);
+  const [anreich, setAnreich] = useState({});
+  const [mobil, setMobil] = useState(() => typeof window !== "undefined" && window.innerWidth <= 760);
+  useEffect(() => { const f = () => setMobil(window.innerWidth <= 760); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);
+  useEffect(() => {
+    let aktiv = true; const iso = d => d.toISOString().slice(0, 10); const j = new Date(); const p365 = new Date(Date.now() + 365 * 86400000);
+    const sel = "select=player_id,name,team,league,position,age,nationality,photo,minutes,rating,tm_value_text,tm_value_eur,tm_contract_until,contract_until";
+    fetch("/db/players?" + sel + "&or=(and(tm_contract_until.gte." + iso(j) + ",tm_contract_until.lte." + iso(p365) + "),and(contract_until.gte." + iso(j) + ",contract_until.lte." + iso(p365) + "))&order=tm_contract_until.asc.nullslast,contract_until.asc.nullslast&limit=200", { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(rows => { if (aktiv) setDb(Array.isArray(rows) ? rows : []); }).catch(() => { if (aktiv) setDb([]); });
+    const pids = (radar || []).map(a => a.pid).filter(Boolean);
+    if (pids.length) fetch("/db/players?select=player_id,tm_value_text,tm_value_eur,photo,nationality,tm_contract_until,contract_until&player_id=in.(" + pids.join(",") + ")&limit=200", { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(rows => { if (!aktiv || !Array.isArray(rows)) return; const m = {}; rows.forEach(p => { m[p.player_id] = p; }); setAnreich(m); }).catch(() => {});
+    return () => { aktiv = false; };
+  }, [radar]);
+  const rows = useMemo(() => {
+    const out = []; const seen = {};
+    (radar || []).forEach(a => { const r = vtRadarZeile(a); const p = anreich[r.pid]; if (p) { r.mw = p.tm_value_text || ""; r.mwEur = p.tm_value_eur || 0; r.photo = p.photo || ""; r.nat = p.nationality || ""; if (!r.frei && !r.ende) r.ende = vtDatum(p.tm_contract_until || p.contract_until); } if (r.pid) seen[r.pid] = 1; out.push(r); });
+    (db || []).forEach(p => { if (seen[p.player_id]) return; seen[p.player_id] = 1; const tm = !!p.tm_contract_until; out.push({ pid: p.player_id, name: p.name, team: p.team, league: p.league, pos: p.position, age: p.age, nat: p.nationality, photo: p.photo, minutes: p.minutes, rating: p.rating, frei: false, seit: null, ende: vtDatum(p.tm_contract_until || p.contract_until), mw: p.tm_value_text || "", mwEur: p.tm_value_eur || 0, quelle: tm ? "Transfermarkt" : "API-Football", note: "" }); });
+    const rang = r => r.frei ? -1e9 : (r.ende ? r.ende.getTime() : 9e15);
+    return out.filter(r => r.frei || !r.ende || vtTage(r.ende) >= 0).sort((a, b) => rang(a) - rang(b) || vtScore(b) - vtScore(a));
+  }, [radar, db, anreich]);
+  const status = r => { const st = vtStatus(r); return h("span", { style: { display: "inline-flex", flexDirection: "column", gap: 3, alignItems: "flex-start" } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: st.dringend ? 800 : 600, color: st.dringend ? "#b07a05" : "#3f4650", whiteSpace: "nowrap" } }, st.text), st.badge ? h("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: .6, textTransform: "uppercase", color: "#b07a05", background: "#fdf3da", borderRadius: 999, padding: "2px 8px" } }, st.badge) : null); };
+  const score = r => { const sc = vtScore(r); return h("span", { style: { display: "inline-flex", alignItems: "center", gap: 5, whiteSpace: "nowrap" } }, h("span", { style: { display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 40, height: 26, borderRadius: 8, background: scoreColor(sc), color: "#fff", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 15 } }, sc), h("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, color: MUTED } }, "/100")); };
+  const th = (lab, al) => h("th", { key: lab, style: { position: "sticky", top: 0, zIndex: 2, background: "#f8fafb", borderBottom: "1px solid " + HAIR, padding: "10px 10px", textAlign: al || "left", fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: .7, textTransform: "uppercase", color: "#667085", whiteSpace: "nowrap" } }, lab, lab.indexOf("Opportunity") >= 0 ? h(ScoreInfo, { kind: "opportunity", size: 12 }) : null);
+  const td = (kinder, al) => h("td", { style: { padding: "9px 10px", textAlign: al || "left", fontFamily: FONT_BODY, fontSize: 12.5, color: "#3f4650", whiteSpace: "nowrap", verticalAlign: "middle", borderBottom: "1px solid " + HAIR } }, kinder);
+  if (db === null && !(radar || []).length) return h("div", { style: { padding: "10px 4px" } }, [0, 1, 2].map(i => h("div", { key: i, className: "tw-skel", style: { height: 46, marginBottom: 8 } })));
+  if (!rows.length) return h(EmptyState, { icon: "\u{1F4C4}", title: en ? "No entries yet" : "Noch keine Eintr\u00e4ge", text: t("ch_ausl_none") });
+  if (mobil) return h("div", { style: { display: "flex", flexDirection: "column", gap: 8 } }, rows.map(r => h("div", { key: r.pid || r.name, className: "tw-card", onClick: () => r.pid && onOpen(r.pid, r.name, r.team), style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 12, padding: "10px 12px", cursor: r.pid ? "pointer" : "default" } },
+    h("div", { style: { display: "flex", alignItems: "center", gap: 10 } }, h(DbFoto, { x: r, size: 36 }), h("div", { style: { flex: 1, minWidth: 0 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, r.name), h("div", { style: { display: "flex", alignItems: "center", gap: 5, fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, h(ClubLogo, { name: r.team, size: 14 }), [r.team, r.pos, r.age ? r.age + (en ? " yrs" : " J.") : ""].filter(Boolean).join(" \u00b7 "))), score(r)),
+    h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 8, flexWrap: "wrap" } }, status(r), h("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "#3f4650" } }, [r.mw ? r.mw : (en ? "no market value" : "kein Marktwert"), r.ende && !r.frei ? vtFmt(r.ende) : ""].filter(Boolean).join(" \u00b7 "))))));
+  return h("div", { className: "tw-vttable", style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 14, overflow: "auto", maxHeight: "72vh" } },
+    h("table", { style: { width: "100%", borderCollapse: "separate", borderSpacing: 0, minWidth: 980 } },
+      h("thead", null, h("tr", null, th(en ? "Player" : "Spieler"), th(en ? "Age" : "Alter", "right"), th("Position"), th(en ? "Club/League" : "Verein/Liga"), th("Status"), th(en ? "Contract end" : "Vertragsende", "right"), th(en ? "Market value" : "Marktwert", "right"), th(en ? "Source" : "Quelle"), th("TW Opportunity Score", "right"))),
+      h("tbody", null, rows.map(r => h("tr", { key: r.pid || r.name, className: "tw-vtrow", onClick: () => r.pid && onOpen(r.pid, r.name, r.team), style: { cursor: r.pid ? "pointer" : "default" } },
+        td(h("span", { style: { display: "inline-flex", alignItems: "center", gap: 9 } }, h(DbFoto, { x: r, size: 32 }), h("span", { style: { display: "inline-flex", flexDirection: "column" } }, h("span", { style: { fontWeight: 800, color: INK, fontSize: 13.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 220 } }, r.name), r.nat ? h("span", { style: { fontSize: 11, color: MUTED } }, r.nat) : null))),
+        td(r.age || "\u2013", "right"), td(r.pos || "\u2013"),
+        td(h("span", { style: { display: "inline-flex", alignItems: "center", gap: 7 } }, h(ClubLogo, { name: r.team, size: 18 }), h("span", { style: { display: "inline-flex", flexDirection: "column" } }, h("span", { style: { fontWeight: 700, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 190 } }, r.team), h("span", { style: { fontSize: 11, color: MUTED } }, r.league || "")))),
+        td(status(r)),
+        td(r.frei ? h("span", { style: { color: MUTED } }, "\u2013") : (r.ende ? vtFmt(r.ende) : "\u2013"), "right"),
+        td(r.mw ? h("span", { style: { fontWeight: 800, color: "#0b6b3e" } }, r.mw) : "\u2013", "right"),
+        td(h("span", { title: r.note || "", style: { color: MUTED } }, r.quelle)),
+        td(score(r), "right"))))));
 }
 function NeedCard({
   item,
@@ -6613,7 +6711,7 @@ function TransferApp({
         .tw-main.feed { grid-template-columns: minmax(0,3fr) minmax(300px,1fr); column-gap:24px; }
 .tw-main.feed:not(:has(> aside:not(:empty))) { grid-template-columns: minmax(0,1fr); }
 .tw-main.feed:not(:has(> aside:not(:empty))) > * { grid-column: 1 / -1; }
-        .tw-feedlist { align-items: stretch; } .tw-dbrow .tw-dbact { opacity: 0; transition: opacity .12s; } .tw-dbrow:hover .tw-dbact, .tw-dbrow.on .tw-dbact { opacity: 1; } .tw-dbrow:hover td { background: #f8fafb; } .tw-dbrow.on td { background: #f2faf5; } @media (max-width: 760px) { .tw-dbact { opacity: 1 !important; } } .tw-perf-main { display: grid; grid-template-columns: minmax(0, 3fr) minmax(280px, 1fr); gap: 18px; align-items: stretch; } .tw-pm .tw-pm-tip { opacity: 0; visibility: hidden; transition: opacity .12s; } .tw-pm:hover { z-index: 6; } .tw-pm:hover .tw-pm-tip { opacity: 1; visibility: visible; } .tw-prow { display: grid; grid-template-columns: 52px minmax(0, 1.5fr) minmax(0, 1.4fr) 96px 62px minmax(0, 1.6fr) 58px 78px; gap: 10px; align-items: center; padding: 9px 14px; border-top: 1px solid #E1E5E2; cursor: pointer; min-width: 0; } .tw-prow > span { min-width: 0; } .tw-prow:hover, .tw-prow.on { background: #f8fafb; } .tw-phead { border-top: none; background: #f8fafb; cursor: default; font-family: inherit; font-size: 10.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: #667085; } .tw-phead:hover { background: #f8fafb; } @media (max-width: 900px) { .tw-perf-main { grid-template-columns: minmax(0, 1fr); } } .tw-glist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: stretch; } .tw-gfilter-mobile { display: none; } @media (max-width: 860px) { .tw-glist { grid-template-columns: minmax(0, 1fr); } } @media (max-width: 700px) { .tw-gfilter-row { display: none !important; } .tw-gfilter-mobile { display: flex !important; } .tw-gchips { flex-wrap: nowrap !important; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; scrollbar-width: none; } .tw-gchips::-webkit-scrollbar { display: none; } .tw-gchips > button { flex-shrink: 0; } } .tw-clamp2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; } .tw-clamp3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; } .tw-gtable { overflow-x:auto; } .tw-grow { display:grid; grid-template-columns: 76px 104px minmax(0,1.1fr) minmax(0,1.5fr) 118px 110px 118px; gap:10px; align-items:center; min-width:820px; padding:7px 12px; border-top:1px solid #E1E5E2; font-family: inherit; font-size:12.5px; cursor:pointer; } .tw-grow > span, .tw-grow > a { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; } .tw-grow:hover { background:#f8fafb; } .tw-ghead { border-top:none; background:#f8fafb; cursor:default; font-size:10.5px; font-weight:800; letter-spacing:.6px; text-transform:uppercase; color:#667085; } .tw-ghead:hover { background:#f8fafb; } .tw-hover-only { opacity: 0; transition: opacity .15s; } .tw-card:hover .tw-hover-only, .tw-card:focus-within .tw-hover-only { opacity: 1; } .tw-route-club { display: inline-flex; align-items: center; gap: 6px; min-width: 0; } .tw-route-club span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tw-feedlist { align-items: stretch; } .tw-vtrow:hover td { background: #f8fafb; } .tw-dbrow .tw-dbact { opacity: 0; transition: opacity .12s; } .tw-dbrow:hover .tw-dbact, .tw-dbrow.on .tw-dbact { opacity: 1; } .tw-dbrow:hover td { background: #f8fafb; } .tw-dbrow.on td { background: #f2faf5; } @media (max-width: 760px) { .tw-dbact { opacity: 1 !important; } } .tw-perf-main { display: grid; grid-template-columns: minmax(0, 3fr) minmax(280px, 1fr); gap: 18px; align-items: stretch; } .tw-pm .tw-pm-tip { opacity: 0; visibility: hidden; transition: opacity .12s; } .tw-pm:hover { z-index: 6; } .tw-pm:hover .tw-pm-tip { opacity: 1; visibility: visible; } .tw-prow { display: grid; grid-template-columns: 52px minmax(0, 1.5fr) minmax(0, 1.4fr) 96px 62px minmax(0, 1.6fr) 58px 78px; gap: 10px; align-items: center; padding: 9px 14px; border-top: 1px solid #E1E5E2; cursor: pointer; min-width: 0; } .tw-prow > span { min-width: 0; } .tw-prow:hover, .tw-prow.on { background: #f8fafb; } .tw-phead { border-top: none; background: #f8fafb; cursor: default; font-family: inherit; font-size: 10.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: #667085; } .tw-phead:hover { background: #f8fafb; } @media (max-width: 900px) { .tw-perf-main { grid-template-columns: minmax(0, 1fr); } } .tw-glist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: stretch; } .tw-gfilter-mobile { display: none; } @media (max-width: 860px) { .tw-glist { grid-template-columns: minmax(0, 1fr); } } @media (max-width: 700px) { .tw-gfilter-row { display: none !important; } .tw-gfilter-mobile { display: flex !important; } .tw-gchips { flex-wrap: nowrap !important; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; scrollbar-width: none; } .tw-gchips::-webkit-scrollbar { display: none; } .tw-gchips > button { flex-shrink: 0; } } .tw-clamp2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; } .tw-clamp3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; } .tw-gtable { overflow-x:auto; } .tw-grow { display:grid; grid-template-columns: 76px 104px minmax(0,1.1fr) minmax(0,1.5fr) 118px 110px 118px; gap:10px; align-items:center; min-width:820px; padding:7px 12px; border-top:1px solid #E1E5E2; font-family: inherit; font-size:12.5px; cursor:pointer; } .tw-grow > span, .tw-grow > a { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; } .tw-grow:hover { background:#f8fafb; } .tw-ghead { border-top:none; background:#f8fafb; cursor:default; font-size:10.5px; font-weight:800; letter-spacing:.6px; text-transform:uppercase; color:#667085; } .tw-ghead:hover { background:#f8fafb; } .tw-hover-only { opacity: 0; transition: opacity .15s; } .tw-card:hover .tw-hover-only, .tw-card:focus-within .tw-hover-only { opacity: 1; } .tw-route-club { display: inline-flex; align-items: center; gap: 6px; min-width: 0; } .tw-route-club span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         @media (min-width: 1280px) {
           .tw-feedlist { grid-template-columns: minmax(0,1fr) minmax(0,1fr) !important; gap:14px; }
         }
@@ -7583,7 +7681,7 @@ function TransferApp({
       lineHeight: 1.5,
       margin: "0 0 22px"
     }
-  }, t("ch_sub"))), marktLoading || !marktErg ? /*#__PURE__*/React.createElement("div", {
+  }, t("ch_sub"))), marktErg && marktErg.ok ? /*#__PURE__*/React.createElement(VertragKpis, { radar: marktErg.auslaufend || [], frei: marktErg.frei || [] }) : null, marktLoading || !marktErg ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 13,
@@ -7600,65 +7698,7 @@ function TransferApp({
       letterSpacing: 1,
       margin: "4px 0 8px"
     }
-  }, t("ch_ausl")), !marktErg.auslaufend || marktErg.auslaufend.length === 0 ? /*#__PURE__*/React.createElement(EmptyState, { icon: "\u{1F4C4}", title: "Noch keine Eintr\u00e4ge", text: t("ch_ausl_none") }) : /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      flexDirection: "column",
-      gap: 8,
-      marginBottom: 16
-    }
-  }, marktErg.auslaufend.map(a => /*#__PURE__*/React.createElement("div", {
-    key: a.pid,
-    onClick: () => openPlayer(a.pid, a.name, a.team),
-    style: {
-      cursor: "pointer",
-      background: "#fff",
-      border: `1px solid ${HAIR}`,
-      borderLeft: "3px solid #c2410c",
-      borderRadius: 12,
-      padding: "11px 14px"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      gap: 10,
-      flexWrap: "wrap"
-    }
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontWeight: 800,
-      fontSize: 14,
-      color: INK
-    }
-  }, a.name), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 12,
-      color: MUTED
-    }
-  }, " · ", a.team, " · ", a.pos, a.age ? ` · ${a.age} J.` : "")), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 11.5,
-      fontWeight: 800,
-      color: "#c2410c",
-      background: "#fdf0e8",
-      border: "1px solid #f3d5c2",
-      borderRadius: 7,
-      padding: "3px 9px",
-      whiteSpace: "nowrap"
-    }
-  }, t("ch_bis"), " ", a.bis)), a.note && /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 11.5,
-      color: MUTED,
-      marginTop: 4
-    }
-  }, a.note)))), /*#__PURE__*/React.createElement("div", {
+  }, t("ch_ausl")), /*#__PURE__*/React.createElement(VertragTabelle, { radar: marktErg.auslaufend || [], onOpen: openPlayer }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 11.5,
