@@ -470,3 +470,21 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
   12 neue Einträge diese Woche“; Tabelle 9 Spalten, 232 Zeilen, sticky; Status-Varianten korrekt (Vertragslos seit + Badge, Vertragslos + Badge,
   Vertrag bis), kein „Vertrag bis vertragslos“, kein Orange bei normalen Enden, 195 Marktwerte, Quellen Markt-Scout/Transfermarkt, Scores 83/72/66,
   Erklärung öffnet mit Faktoren, Zeile öffnet Profil, mobil 232 Karten + 4 Kennzahlen. 0 Fehler.
+
+## 26.08. 03:20–03:35 – MERKLISTE & ALERTS (Boss-Brief), Commits c7b37d4 / 41e75db / +av, Marker at/au/av
+- Boss-Vorgabe: vorhandene Filter unverändert – auf der Merkliste sind das die Meldungs-Chips (Alle Meldungen / Leihe / Vertragslos) des gemeinsamen
+  Feed-Bausteins; unangetastet. Die Meldungsliste (watchList) läuft weiter unter dem neuen Cockpit.
+- Neue Komponenten (vor NeedCard): mkLese/mkSchreib, mkMerkeZuletzt (openPlayer schreibt tw_recent, max 8), mkGespeicherteSuchen (tw_savedfilters /
+  tw_gsearches / tw_dbsearches), MerkSpielerZeile (Datenbank-Lookup über search_name: normalisiert → Vor-+Nachname → Name; Kurzansicht-Daten
+  Verein·Position, TW Performance Score + Veränderung aus SPIELER_URL-Form (sonst Rating×10 „API“), neue Meldungen (7 Tage) aus watchList,
+  Vertragsende, letzte Aktualisierung; Aktionen Profil öffnen / Notiz (tw_notes) / Alert ein-aus (item.alert=false = stumm, per updateWatch) /
+  Scouting-Liste / Vergleichen / Entfernen; mobil Karte), MerkVue (Titel, Beschreibung, Tabs Spieler/Vereine/Meldungen/Spielerprofile/Gespeicherte
+  Suchen mit Zählern; Leerzustand kompakt mit „Spieler entdecken“ → players, „Suchprofil erstellen“ → gesucht + Profil-Sheet; „Empfohlen für dich“
+  3 Karten → ranking/chancen/gesucht; Vereins-Tab mit Meldungszähler; Profil-Tab „Matches ansehen“; Suchen-Tab „Anwenden“ (feed: Filter setzen,
+  transfers: setGerApply, db: setPl*)), MerkAside (ersetzt FeedSuche auf der Merkliste: „Deine Alerts“ mit Status aktiv/keine, Text, Button →
+  setWatchDlg; „Zuletzt angesehen“ aus tw_recent).
+- Abnahme rt54/rt55: leer: Titel, Beschreibung, 5 Tabs mit 0, Leerzustand-Texte, beide Buttons, drei Empfehlungen, Aside „Deine Alerts“ / „Keine
+  aktiven Alerts“ / Text / „Alert erstellen“ (öffnet E-Mail-Dialog) / „Zuletzt angesehen“, kein „Meistdiskutierte“; Chips unverändert. Befüllt:
+  Tabs „Spieler 2 · Vereine 1 · Meldungen 40“, Zeile Cole Palmer „Chelsea · Sturm | 89 API | keine | 30.06.2033 | heute“ mit allen sechs Aktionen,
+  Notiz + Alert aus + Entfernen funktionieren; Vereinszeile „Manchester United | 13 neue Meldungen | heute“; mobil Tabs scrollbar, Aside unter dem
+  Inhalt, Empfehlungen einspaltig. 0 Fehler. (av: Namensvariante „Luís Asué“ ↔ DB „Luís Nlavo Asué“ wird jetzt über Vor-/Nachname gefunden.)
