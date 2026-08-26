@@ -425,3 +425,31 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
   3 Bögen, 1 Linie; 11 Marker (44 px), Hover-Karte sichtbar; Karte mit Titel, Monogramm, Werten „3 Tore · 1 Assist · 83 Minuten · 68 % Passquote ·
   5/11 Zweikämpfe“, Delta „▲ +20 zum letzten Spiel (77)“, Buttons; Tabelle 8 Spalten, 244 Zeilen, Details + „Analyse öffnen“ (Formkurve lädt);
   mobil Spielfeld hochkant (2:3) über Karte, Liste als Karten; EN vollständig; Erklärung öffnet per echtem Klick, Scrollen schließt. 0 Fehler.
+
+## 26.08. 02:25–03:05 – SPIELER-DATENBANK (Boss-Brief) + DATENFEHLER Transfermarkt-Spalten, Commits 3867ecc / df0a391, Marker aq/ar
+- Boss-Vorgabe: Such- und Filterleiste (Suchfeld + Alle Länder / Alle Ligen / Erst Liga wählen / Alle Positionen) unverändert – NICHT ANFASSEN.
+- Datenlage /db/players (PostgREST, max 200 Zeilen je Antwort, KEINE Aggregate): 15.315 Spieler; Spalten u. a. age, apps, minutes, rating, goals,
+  assists, pass_acc, duels_pct, contract_until, contract_note, fitness_note, photo, tm_id, tm_value_eur, tm_value_text, tm_contract_until,
+  tm_updated_at, imported_at. Zähler per GET + Header „Prefer: count=exact“ + „Range: 0-0“ (content-range „0-0/N“).
+  /api/tw-listen?sort=score&limit=200&min_minutes=270 liefert pid/name/team/league/pos/age/photo/score/src(tw|api)/sp/goals/assists/min.
+- Neue Komponenten (vor NeedCard): DB_COLS, dbFmtZahl/dbDatum/dbMwEur/dbBald/dbNormDb/dbRelevanz, DbFoto (Foto oder Monogramm), DbSpark (Formkurve),
+  SpielerQuick (Kurzansicht rechts als Portal: Name, Alter·Position·Nation, Verein+Logo, TW PERFORMANCE SCORE + Quelle, Marktwert, Vertragsende,
+  Minuten, Fitness, Formkurve aus SPIELER_URL?pid (form), Stärken aus f.st der letzten Spiele, „Volles Profil öffnen“, „Beobachten“; Esc schließt),
+  DbVue (Kennzahlen Spieler/Ligen/Verträge 12 Monate; „Empfohlene Spieler“ = tw-listen Top 200 + Anreicherung aus /db/players per player_id=in.(…);
+  Relevanz = Score + 10 bei TW-Analyse + Minuten/90 (max 10) + 4 Marktwert + 2 Vertrag + 1 Foto; Toolbar Ergebnisse/Sortierung-Select/Spalten anpassen
+  (localStorage tw_dbcols)/Suche speichern (tw_dbsearches, Chips)/Exportieren (CSV, Semikolon, BOM)/Scouting-Liste (tw_scoutlist, Filter);
+  Tabelle .tw-dbtable maxHeight 72vh, sticky th, sortierbare Spalten, Vergleichs-Häkchen (plVergleich, max 3), Hover-Aktionen .tw-dbact
+  (öffnen/beobachten/vergleichen/Scouting-Liste); Suchmodus nutzt dieselbe Tabelle (Score = rating×10 „API“, TW-Score wenn in Empfehlungen);
+  Form-Spalte = letzter Spieltag aus PERF_URL vs. Score (▲/▼/▶), sonst „–“; mobil ≤760 px Karten). Kopf-Beschreibung dynamisch aus dbStats
+  (TransferApp: gesamt, v12, stand=imported_at, ligen=dbLigenZahl() – Alias-Namen Jupiler Pro League/Premiership/Superligaen zählen nicht → 20).
+- Abnahme rt51: Kopf „15.315 Spieler aus 20 Ligen · … · aktualisiert heute um 02:30 Uhr“, Filterleiste identisch, Kennzahlen, Marketingblock weg,
+  „Empfohlene Spieler“ + Unterzeile, „15.315 Ergebnisse“, Toolbar, 9 Spalten, sticky, 60 Zeilen, Sortierung Alter ok, Hover-Aktionen sichtbar,
+  Vergleich markiert, Scouting-Liste 1, Kurzansicht 420 px mit allen Feldern, Spalten abwählbar, Export „transferwire-spieler.csv“, Suche „Palmer“
+  → 5 Ergebnisse, mobil Karten (60), Filter unverändert. 0 Fehler.
+### DATENFEHLER (behoben, Boss informiert)
+- Der „TW DB: Spieler-Spiegel (täglich 4:30)“ (/opt/transferwire/tw_players_sync.sql, per SSH-Workflow 4IpxlFUalqigwT64) macht TRUNCATE players +
+  INSERT aus der n8n-Datentabelle – OHNE die Transfermarkt-Spalten. Folge: Marktwerte/TM-Verträge des 2:40-Imports wurden täglich um 4:30 gelöscht
+  (26.08. 02:29 UTC: 94 Verträge; 02:43 UTC: 0). FIX: Skript sichert vor dem TRUNCATE die tm_*-Spalten in TEMP tm_keep und spielt sie nach dem
+  INSERT per UPDATE zurück (Backup: tw_players_sync.sql.bak-2026-08-26). Test: Spiegel-Lauf mit 376 Marktwerten vorher/nachher identisch.
+- Transfermarkt-Import manuell nachgeholt (Rotation tm_state.liga_index gesetzt): LaLiga 379, Bundesliga 408, Premier League 469, Serie A, Ligue 1.
+  Rotation läuft ab jetzt nächtlich weiter (eine Liga pro Nacht, 20 Ligen). Hinweis: Das SQL-Skript enthält das DB-Passwort im Klartext (dblink).
