@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-26-ah feed-inline-filter -->
+<!-- tw-build: 2026-08-26-ai terminal-wording -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -2329,11 +2329,11 @@ function SignalLine({ item }) {
       "\u2713 " + (en ? "Confirmed" : "Best\u00e4tigt") + " \u00b7 " + (off ? (en ? "official club statement" : "offizielle Vereinsmeldung") : (en ? "confirmed report" : "best\u00e4tigte Meldung")));
   }
   const sc = signalScore(item);
-  const trust = r >= 4 ? (en ? "high source trust" : "hohes Quellenvertrauen") : r === 3 ? (en ? "medium source trust" : "mittleres Quellenvertrauen") : (en ? "low source trust" : "geringes Quellenvertrauen");
+  const trust = (en ? "source trust: " : "Quellenvertrauen: ") + (r >= 4 ? (en ? "high" : "hoch") : r === 3 ? (en ? "medium" : "mittel") : (en ? "low" : "gering"));
   const tip = (en ? "Signal " + sc + "/100 from reliability " + r + " of 5 and number of sources \u2014 scale: " : "Signal " + sc + "/100 aus Belastbarkeit " + r + " von 5 und Quellenzahl \u2014 Skala: ") + skala;
   return React.createElement("div", { className: "tw-rel", title: tip, style: { display: "flex", alignItems: "center", gap: 7, minWidth: 0 } },
     React.createElement(Signal, { value: r }),
-    React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: relColor(r), whiteSpace: "nowrap" } }, "Signal " + sc + "/100"),
+    React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: relColor(r), whiteSpace: "nowrap" } }, (en ? "Signal strength " : "Signalst\u00e4rke ") + sc + "/100"),
     React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, " \u00b7 " + trust));
 }
 function SourceLine({ sources }) {
@@ -2548,14 +2548,14 @@ function GerVue({ alle, onWatch, onOpen, updatedAt, watch, onSide, apply }) {
         liste.length ? (gAnsicht === "kompakt"
       ? h("div", { className: "tw-gtable", style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 14, overflow: "hidden" } },
           h("div", { className: "tw-grow tw-ghead" }, [en ? "Time" : "Zeit", en ? "Type" : "Typ", en ? "Club/Player" : "Verein/Spieler", en ? "Move" : "Bewegung", en ? "League" : "Liga", "Status", en ? "Source" : "Quelle"].map(x => h("span", { key: x }, x))),
-          liste.map(it => { const ty = TYPE[it.type] || TYPE.geruecht; const r = Number(it.reliability) || 0; const srcs = (it.sources || []).filter(s => s && s.url); const isNeed = it.type === "verein_sucht"; const bewegung = isNeed ? ((en ? "seeks " : "sucht ") + (splitPositions(it.positionNeeded).slice(0, 2).join(", ") || "\u2014")) : ((feldVon(it) || (en ? "Free agent" : "Vertragslos")) + " \u2192 " + (feldZu(it) || "?")); const wer = isNeed ? (seekingClubSafe(it) || it.seek || "\u2014") : (feldSp(it) || feldZu(it) || "\u2014");
+          liste.map(it => { const ty = TYPE[it.type] || TYPE.geruecht; const r = Number(it.reliability) || 0; const srcs = (it.sources || []).filter(s => s && s.url); const isNeed = it.type === "verein_sucht"; const von = feldVon(it), zu = feldZu(it), frei = it.type === "vertragslos"; const bewegung = isNeed ? ((en ? "seeks " : "sucht ") + splitPositions(it.positionNeeded).slice(0, 2).join(", ")).trim() : (von && zu ? von + " \u2192 " + zu : frei && zu ? (en ? "Free agent" : "Vertragslos") + " \u2192 " + zu : zu ? (en ? "Target: " : "Ziel: ") + zu : von ? (frei ? (en ? "free agent, last " : "vertragslos, zuletzt ") : (en ? "from " : "von ")) + von : ""); const wer = isNeed ? (seekingClubSafe(it) || it.seek || "") : (feldSp(it) || feldZu(it) || "");
             return h("div", { key: it.id, className: "tw-grow", onClick: () => { if (typeof onOpen === "function") onOpen(it); else if (it.url) window.open(it.url, "_blank"); }, title: it.headline },
               h("span", { style: { color: "#8a92a3" } }, zeitAnzeige(it)),
               h("span", { style: { display: "inline-flex", alignItems: "center", gap: 5, fontWeight: 800, color: ty.color, fontSize: 11 } }, h("span", { style: { width: 7, height: 7, borderRadius: 99, background: ty.color, flexShrink: 0 } }), en ? (ty.en || ty.label) : ty.label),
               h("span", { style: { fontWeight: 700, color: INK } }, wer),
               h("span", { style: { color: "#5b6472" } }, bewegung),
-              h("span", { style: { color: "#5b6472" } }, it.league || "\u2014"),
-              h("span", { style: { fontWeight: 700, color: relColor(r) } }, r >= 5 ? "\u2713 " + (en ? "Confirmed" : "Best\u00e4tigt") : "Signal " + signalScore(it)),
+              h("span", { style: { color: "#5b6472" } }, it.league || ""),
+              h("span", { style: { fontWeight: 700, color: relColor(r) } }, r >= 5 ? "\u2713 " + (en ? "Confirmed" : "Best\u00e4tigt") : (en ? "Signal " : "Signalst\u00e4rke ") + signalScore(it) + "/100"),
               srcs.length ? h("a", { href: srcs[0].url, onClick: e => { e.preventDefault(); e.stopPropagation(); window.open(srcs[0].url, "_blank"); }, style: { color: INK, fontWeight: 600, textDecoration: "none" } }, twDomain(srcs[0].url)) : h("span", { style: { color: "#8a92a3" } }, "TW")); }))
       : h("div", { className: "tw-feedlist tw-glist" }, liste.map(item => h(NewsCard, { key: item.id, item: item, onWatch: onWatch, onOpen: onOpen }))))
       : h(EmptyState, { icon: "\u{1F4ED}", title: en ? "No reports for this selection" : "Keine Meldungen f\u00fcr diese Auswahl", text: en ? "Loosen a filter or ask TW Scout above." : "Filter lockern oder TW Scout oben fragen.", action: aktivFilter || f.typ ? (en ? "Reset filters" : "Filter zur\u00fccksetzen") : null, onAction: () => { setF(Object.assign({}, GER_LEER)); setKiIds(null); } }),
