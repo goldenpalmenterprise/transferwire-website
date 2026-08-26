@@ -35,7 +35,7 @@
   .tw-fab > * { display: none !important; }
   .tw-fab::before { content: "TW"; color: #fff; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: .5px; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
   .tw-fab::after { content: ""; position: absolute; top: 5px; right: 5px; width: 9px; height: 9px; border-radius: 99px; background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.25); }
-  .tw-pos-grid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important; gap: 12 !important; }
+  .tw-pos-grid { display: grid !important; grid-template-columns: repeat(5, minmax(0, 1fr)) !important; gap: 12px !important; } @media (max-width: 1000px) { .tw-pos-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } } @media (max-width: 700px) { .tw-pos-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } .tw-need-grid { grid-template-columns: 1fr !important; } .tw-bedarf-steps { flex-wrap: wrap; gap: 8px !important; } .tw-bedarf-link { display: none; } .tw-bedarf-intro { max-height: none !important; } }
   .tw-main.feed > * { grid-column: 1; min-width: 0; }
   .tw-main.feed > aside { grid-column: 2; grid-row: 1 / span 3; align-self: start; }
   .tw-main.feed > aside:empty { display: none; }
@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-26-aj datum-parse -->
+<!-- tw-build: 2026-08-26-ak matching -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -2095,8 +2095,8 @@ const SCORES = {
   },
   match: {
     name: "TW Match Score", scale: "0\u2013100",
-    de: "Wie gut ein Spielerprofil zu einem Vereins-Gesuch passt: Position, Altersfenster und \u00fcbereinstimmende St\u00e4rken. Skala 0\u2013100.",
-    en: "How well a player profile fits a club request: position, age window and matching strengths. 0\u2013100 scale."
+    de: "Wie gut ein Vereins-Gesuch zu Position und Profil passt: Position (Pflicht), Belastbarkeit der Meldung, Kaderplatz-Signale (Abgang, Verletzung, Ersatzsuche), Aktualit\u00e4t und Quellenzahl; mit Spielerprofil zus\u00e4tzlich St\u00e4rken- und Alters-Passung. Skala 0\u2013100.",
+    en: "How well a club need fits position and profile: position (required), reliability of the report, squad-place signals (departure, injury, replacement search), recency and number of sources; with a player profile also strengths and age fit. 0\u2013100 scale."
   },
   opportunity: {
     name: "TW Opportunity Score", scale: "0\u2013100",
@@ -3237,10 +3237,147 @@ function NewsCard({
       typeof onOpen === "function" ? /*#__PURE__*/React.createElement("button", { onClick: e => { e.stopPropagation(); onOpen(item); }, style: { cursor: "pointer", background: "none", border: "none", padding: 0, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "#0f1520", whiteSpace: "nowrap" } }, "Details \u2192") : (item.url ? /*#__PURE__*/React.createElement("a", { href: item.url, target: "_blank", rel: "noopener", onClick: e => e.stopPropagation(), style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "#0f1520", textDecoration: "none", whiteSpace: "nowrap" } }, (LANG === "en" ? "Source" : "Quelle") + " \u2192") : null))));
 }
 
+const BEDARF_KADER_RE = /abgang|abg\u00e4nge|abgaenge|verl\u00e4sst|verlaesst|verlassen|verletz|ausfall|ausf\u00e4llt|ersatz|nachfolger|l\u00fccke|luecke|verkauft|abgegeben|wechselt zu|kreuzband|leihe endet|zur\u00fcckgekehrt/i;
+const BEDARF_JUNG_RE = /\bU-?(1[6-9]|2[0-3])\b|\bjung|talent|perspektiv|nachwuchs|young|prospect/i;
+const BEDARF_ERFAHREN_RE = /erfahren|routin|f\u00fchrungsspieler|fuehrungsspieler|leader|experienced|veteran/i;
+function bedarfLand(league) {
+  const lg = String(league || "").trim();
+  if (!lg) return null;
+  for (const l of LAND_LIGEN) { const i = (l.ligen || []).indexOf(lg); if (i >= 0) return { de: l.de, en: l.en || l.de, stufe: i + 1 }; }
+  return null;
+}
+function bedarfStaerken(s) { return String(s || "").split(",").map(x => x.trim().toLowerCase()).filter(Boolean); }
+function bedarfNeu(it) { const t = zeitVonItem(it); return t > 0 && Date.now() - t <= 7 * 86400000; }
+function zeitVonItem(it) { const t = it && it.published ? new Date(it.published).getTime() : NaN; return isNaN(t) || !t ? relToTime(it && it.publishedAt) : t; }
+function matchScore(need, profil) {
+  const rel = Math.max(0, Math.min(5, Number(need.reliability) || 0));
+  const text = String(need.positionNeeded || "") + " " + String(need.summary || "") + " " + String(need.headline || "");
+  let s = 40 + rel * 6;
+  if (BEDARF_KADER_RE.test(text)) s += 10;
+  const t = zeitVonItem(need); const tage = t ? (Date.now() - t) / 86400000 : 99;
+  if (tage <= 3) s += 6; else if (tage <= 7) s += 3;
+  if ((need.sources || []).filter(x => x && x.url).length >= 2) s += 4;
+  if (profil) {
+    const mine = bedarfStaerken(profil.s), gesucht = bedarfStaerken(need.seekStrengths);
+    const treffer = mine.filter(x => gesucht.some(g => g === x || g.indexOf(x) >= 0 || x.indexOf(g) >= 0)).length;
+    s += Math.min(12, treffer * 4);
+    const a1 = Number(profil.a1) || 0, a2 = Number(profil.a2) || 0;
+    if (BEDARF_JUNG_RE.test(text) && ((a2 && a2 <= 24) || (a1 && a1 <= 21))) s += 6;
+    if (BEDARF_ERFAHREN_RE.test(text) && ((a1 && a1 >= 27) || (a2 && a2 >= 30))) s += 6;
+  }
+  return Math.min(99, Math.round(s));
+}
+function matchGruende(need, profil) {
+  const en = LANG === "en";
+  const rel = Math.max(0, Math.min(5, Number(need.reliability) || 0));
+  const text = String(need.positionNeeded || "") + " " + String(need.summary || "") + " " + String(need.headline || "");
+  const srcs = (need.sources || []).filter(x => x && (x.name || x.q || x.url));
+  const quelle = srcs.length ? (srcs[0].name || srcs[0].q || twDomain(srcs[0].url)) : (en ? "TW radar" : "TW-Radar");
+  const wort = (en ? RELIABILITY_EN : RELIABILITY)[rel] || "";
+  const g = [];
+  g.push(rel >= 3 ? { ok: true, t: (en ? "public club need \u00b7 " : "\u00f6ffentlicher Bedarf \u00b7 ") + quelle + (srcs.length > 1 ? " +" + (srcs.length - 1) : "") + (wort ? " \u00b7 " + wort : "") } : { ok: false, t: (en ? "need from a single thin source \u00b7 " : "Bedarf aus d\u00fcnner Quelle \u00b7 ") + quelle });
+  const pos = splitPositions(need.positionNeeded).slice(0, 2).join(", ");
+  if (pos) g.push({ ok: true, t: profil ? (en ? "position fits: " : "Position passt: ") + pos : pos + (en ? " explicitly sought" : " explizit gesucht") });
+  const km = String(need.summary || "").match(/(Abgang|Abg\u00e4nge|Abgaenge|Verletzung|Ausfall|Ersatz f\u00fcr|Nachfolger f\u00fcr|Kreuzband)[^.,;]{0,45}/);
+  if (BEDARF_KADER_RE.test(text)) g.push({ ok: true, t: (en ? "squad place probably open" : "Kaderplatz wahrscheinlich frei") + (km ? " \u00b7 " + km[0].trim() : "") });
+  const land = bedarfLand(need.league);
+  if (land) g.push({ ok: true, t: (en ? "market " : "Markt ") + (en ? land.en : land.de) + " \u00b7 " + need.league + " (" + land.stufe + (en ? (land.stufe === 1 ? "st" : "nd") + " tier" : ". Liga") + ")" });
+  else if (need.league) g.push({ ok: true, t: (en ? "league: " : "Liga: ") + need.league });
+  if (profil) {
+    const mine = bedarfStaerken(profil.s), gesucht = bedarfStaerken(need.seekStrengths);
+    const treffer = mine.filter(x => gesucht.some(y => y === x || y.indexOf(x) >= 0 || x.indexOf(y) >= 0));
+    if (treffer.length) g.push({ ok: true, t: (en ? "strengths match: " : "St\u00e4rken passen: ") + treffer.join(", ") });
+    else if (gesucht.length) g.push({ ok: false, t: (en ? "sought strengths not in profile: " : "gesuchte St\u00e4rken nicht im Profil: ") + gesucht.slice(0, 3).join(", ") });
+    const a1 = Number(profil.a1) || 0, a2 = Number(profil.a2) || 0;
+    if (BEDARF_JUNG_RE.test(text) && ((a2 && a2 <= 24) || (a1 && a1 <= 21))) g.push({ ok: true, t: en ? "age fits: club looks for a young player" : "Alter passt: Verein sucht einen jungen Spieler" });
+    else if (BEDARF_ERFAHREN_RE.test(text) && ((a1 && a1 >= 27) || (a2 && a2 >= 30))) g.push({ ok: true, t: en ? "age fits: club looks for experience" : "Alter passt: Verein sucht Erfahrung" });
+  }
+  if (need.publishedAt) g.push({ ok: bedarfNeu(need), t: (en ? "reported " : "gemeldet ") + (LANG === "en" ? (twRelTime(need.published) || need.publishedAt) : need.publishedAt) });
+  return g;
+}
+const POS_PITCH = { TW: [[5, 14]], IV: [[11, 14]], LV: [[12, 5]], RV: [[12, 23]], AV: [[12, 5], [12, 23]], DM: [[17, 14]], ZM: [[22, 14]], OM: [[27, 14]], FL: [[29, 5], [29, 23]], ST: [[34, 14]] };
+function PitchIcon({ pos, color }) {
+  const dots = POS_PITCH[pos];
+  const c = color || "#6d4bc7";
+  if (!dots) return React.createElement("span", { style: { width: 44, height: 30, borderRadius: 8, background: "#ece6fa", color: c, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 13, flexShrink: 0 } }, pos);
+  return React.createElement("svg", { width: 44, height: 30, viewBox: "0 0 40 28", "aria-hidden": true, style: { flexShrink: 0, display: "block" } },
+    React.createElement("rect", { x: 1, y: 1, width: 38, height: 26, rx: 2, fill: "#eef7f1", stroke: "#9ccbb0", strokeWidth: 1 }),
+    React.createElement("line", { x1: 20, y1: 1, x2: 20, y2: 27, stroke: "#9ccbb0", strokeWidth: 1 }),
+    React.createElement("circle", { cx: 20, cy: 14, r: 3.5, fill: "none", stroke: "#9ccbb0", strokeWidth: 1 }),
+    React.createElement("rect", { x: 1, y: 8, width: 5, height: 12, fill: "none", stroke: "#9ccbb0", strokeWidth: 1 }),
+    React.createElement("rect", { x: 34, y: 8, width: 5, height: 12, fill: "none", stroke: "#9ccbb0", strokeWidth: 1 }),
+    dots.map((d, i) => React.createElement("circle", { key: i, cx: d[0], cy: d[1], r: 3.2, fill: c, stroke: "#fff", strokeWidth: 1.2 })));
+}
+function BedarfVue({ needs, profiles, matchProfil, setMatchProfil, posSet, activePos, setPosFilter, onNewProfile, onEditProfile, removeProfil, openContacts, onOpen, onWatchClub, watch }) {
+  const h = React.createElement;
+  const en = LANG === "en";
+  const v = TYPE.verein_sucht;
+  const alle = needs || [];
+  const passtPos = (n, p) => needMatchesPos(n, p);
+  const profilTreffer = p => alle.filter(n => profilPasst(p, n));
+  const beobachtet = name => (watch || []).some(w => w && w.t === "verein" && String(w.w || "").toLowerCase() === String(name || "").toLowerCase());
+  const posLabel = p => p ? (en ? (POS_LABEL && POS_LABEL[p.key] && POS_LABEL[p.key].en) || p.label : p.label) : "";
+  const bedarfTitel = (n, label) => en ? n + " club" + (n === 1 ? "" : "s") + " with current " + label.toLowerCase() + " need" : n + " Verein" + (n === 1 ? "" : "e") + " mit aktuellem " + (label.indexOf(" ") >= 0 ? "Bedarf: " + label : label + "bedarf");
+  const liste = matchProfil ? profilTreffer(matchProfil).map(n => ({ n: n, s: matchScore(n, matchProfil) })).sort((a, b) => b.s - a.s || zeitVonItem(b.n) - zeitVonItem(a.n)) : activePos ? alle.filter(n => passtPos(n, activePos)).map(n => ({ n: n, s: matchScore(n, null) })).sort((a, b) => b.s - a.s || zeitVonItem(b.n) - zeitVonItem(a.n)) : [];
+  const neuZahl = liste.filter(x => bedarfNeu(x.n)).length;
+  const btn = (label, onClick, primary, key) => h("button", { key: key, onClick: onClick, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, padding: "8px 13px", borderRadius: 9, border: primary ? "none" : "1px solid " + HAIR, background: primary ? "#149a59" : "#fff", color: primary ? "#fff" : INK, whiteSpace: "nowrap" } }, label);
+  const kopf = h("div", { style: { display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 16 } },
+    h("div", { style: { minWidth: 0, flex: 1 } },
+      h("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 30, lineHeight: "38px", margin: "0 0 6px", color: INK } }, en ? "Club needs & player matching" : "Vereinsbedarf & Spieler-Matching"),
+      h("p", { style: { fontFamily: FONT_BODY, fontSize: 14.5, lineHeight: 1.5, color: MUTED, margin: 0, maxWidth: 720 } }, en ? "Create a player profile and find clubs whose current need fits position, age, contract status and target market." : "Erstelle ein Spielerprofil und finde Vereine, deren aktueller Bedarf zu Position, Alter, Vertragsstatus und Zielmarkt passt.")),
+    h("button", { onClick: onNewProfile, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 900, padding: "11px 18px", borderRadius: 10, border: "none", background: "#149a59", color: "#fff", whiteSpace: "nowrap", boxShadow: "0 6px 16px rgba(20,154,89,.3)", flexShrink: 0 } }, t("match_add")));
+  const schritte = [[1, en ? "Create player profile" : "Spielerprofil anlegen"], [2, en ? "Set criteria" : "Kriterien festlegen"], [3, en ? "Compare clubs" : "Vereine vergleichen"]];
+  const intro = h("div", { className: "tw-card tw-bedarf-intro", style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 14, padding: "16px 18px", marginBottom: 18, maxHeight: 180, overflow: "hidden" } },
+    h("div", { className: "tw-bedarf-steps", style: { display: "flex", alignItems: "center", gap: 0, marginBottom: 12 } },
+      schritte.map(([nr, tx], i) => h(React.Fragment, { key: nr },
+        h("div", { style: { display: "inline-flex", alignItems: "center", gap: 9, background: "#f8fafb", border: "1px solid " + HAIR, borderRadius: 10, padding: "8px 13px", whiteSpace: "nowrap" } },
+          h("span", { style: { width: 24, height: 24, borderRadius: 99, background: "#149a59", color: "#fff", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 13, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } }, nr),
+          h("span", { style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 700, color: INK } }, tx)),
+        i < schritte.length - 1 ? h("span", { className: "tw-bedarf-link", "aria-hidden": true, style: { flex: "0 1 46px", height: 2, background: "linear-gradient(90deg, #149a59, #9ccbb0)", margin: "0 2px", minWidth: 14 } }) : null))),
+    h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "#4a4a48", lineHeight: 1.5 } }, en ? "New matching clubs are detected automatically and can be reported via e-mail alert." : "Neue passende Vereine werden automatisch erkannt und k\u00f6nnen per E-Mail-Alert gemeldet werden."));
+  const profilKarte = p => {
+    const tr = profilTreffer(p); const neu = tr.filter(bedarfNeu).length; const on = matchProfil && matchProfil.raw === p.raw;
+    const alter = p.a1 && p.a2 ? p.a1 + "\u2013" + p.a2 + (en ? " yrs" : " Jahre") : p.a1 ? (en ? "from " : "ab ") + p.a1 + (en ? " yrs" : " Jahren") : p.a2 ? (en ? "up to " : "bis ") + p.a2 + (en ? " yrs" : " Jahre") : "";
+    const meta = [p.l || p.p, alter, p.s ? (en ? "strengths: " : "St\u00e4rken: ") + p.s : ""].filter(Boolean).join(" \u00b7 ");
+    return h("div", { key: p.raw, className: "tw-card", style: { background: "#fff", border: "1.5px solid " + (on ? "#149a59" : HAIR), borderRadius: 14, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 6, minWidth: 0 } },
+      h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 } },
+        h("div", { style: { fontFamily: FONT_BODY, fontSize: 16, fontWeight: 800, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, p.n || p.l || p.p),
+        h("button", { onClick: () => removeProfil(p.raw), title: en ? "Delete profile" : "Profil l\u00f6schen", style: { cursor: "pointer", background: "none", border: "none", color: MUTED, fontSize: 15, padding: 0, lineHeight: 1 } }, "\u00d7")),
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, lineHeight: 1.45 } }, meta),
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, color: neu ? "#149a59" : INK, marginTop: 2 } }, neu + " " + (en ? "new club match" + (neu === 1 ? "" : "es") : "neue Vereinsmatches"), h("span", { style: { fontWeight: 500, color: MUTED } }, " \u00b7 " + tr.length + " " + (en ? "in total" : "gesamt"))),
+      h("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", marginTop: 6 } }, btn(on ? (en ? "\u2713 Matches shown" : "\u2713 Matches werden angezeigt") : (en ? "Show matches" : "Matches ansehen"), () => { setMatchProfil(on ? null : p); setPosFilter(""); }, !on, "m"), btn(en ? "Edit profile" : "Profil bearbeiten", () => onEditProfile(p), false, "e")));
+  };
+  const profileBlock = h("div", { style: { marginBottom: 18 } },
+    h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1, textTransform: "uppercase", color: MUTED, marginBottom: 8 } }, en ? "My player profiles" : "Meine Spielerprofile"),
+    h("div", { className: "tw-profil-grid", style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 } }, profiles.map(profilKarte)));
+  const kachel = p => {
+    const tr = alle.filter(n => passtPos(n, p)); const count = tr.length; if (!count) return null; const neu = tr.filter(bedarfNeu).length;
+    return h("button", { key: p.key, className: "tw-tile", onClick: () => setPosFilter(p.key), style: { textAlign: "left", cursor: "pointer", background: "#fff", border: "1px solid " + HAIR, borderRadius: 14, padding: "13px 14px", display: "flex", flexDirection: "column", gap: 8, minWidth: 0 } },
+      h("div", { style: { display: "flex", alignItems: "center", gap: 10, minWidth: 0 } }, h(PitchIcon, { pos: p.key, color: v.color }), h("span", { style: { fontFamily: FONT_BODY, fontWeight: 800, fontSize: 14, color: INK, lineHeight: 1.15, minWidth: 0 } }, posLabel(p))),
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: INK } }, h("b", { style: { fontFamily: FONT_DISPLAY, fontSize: 20, fontWeight: 700, color: v.color, marginRight: 5, verticalAlign: "middle" } }, count), (en ? "matching club" + (count === 1 ? "" : "s") : "passende Vereine")),
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: neu ? "#149a59" : MUTED } }, neu ? "+" + neu + " " + (en ? "new hit" + (neu === 1 ? "" : "s") : "neue Treffer") : (en ? "no new hits this week" : "keine neuen Treffer")));
+  };
+  const posGrid = h("div", null,
+    h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1, textTransform: "uppercase", color: MUTED, marginBottom: 8 } }, en ? "Choose a position" : "Position w\u00e4hlen"),
+    h("div", { className: "tw-pos-grid" }, posSet.map(kachel)));
+  const titel = matchProfil ? (en ? liste.length + " club" + (liste.length === 1 ? "" : "s") + " match " + (matchProfil.n || matchProfil.l) : liste.length + " Verein" + (liste.length === 1 ? "" : "e") + " passen zu " + (matchProfil.n || matchProfil.l)) : bedarfTitel(liste.length, posLabel(activePos));
+  const ergebnis = h("div", null,
+    h("div", { style: { display: "flex", alignItems: "center", gap: 12, marginBottom: 14, flexWrap: "wrap" } },
+      h("button", { onClick: () => { setPosFilter(""); setMatchProfil(null); }, style: { display: "inline-flex", alignItems: "center", gap: 5, cursor: "pointer", border: "1px solid " + HAIR, background: "#fff", borderRadius: 9, padding: "7px 12px", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 600, color: INK } }, h(ArrowLeft, { size: 14 }), " ", matchProfil ? (en ? "All profiles" : "Alle Profile") : (en ? "All positions" : "Alle Positionen")),
+      h("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 19, color: INK, letterSpacing: .2 } }, titel),
+      neuZahl ? h("span", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: "#149a59", background: "#e2f3ea", borderRadius: 999, padding: "3px 9px" } }, "+" + neuZahl + " " + (en ? "new" : "neu")) : null),
+    liste.length === 0 ? h(EmptyState, { icon: "\u{1F50E}", title: en ? "No matching clubs" : "Keine passenden Vereine", text: en ? "No club currently reports this need." : "Kein Verein meldet aktuell diesen Bedarf." })
+      : h("div", { className: "tw-need-grid" }, liste.map(x => h(NeedCard, { key: x.n.id, item: x.n, highlight: activePos, onContacts: openContacts, match: { score: x.s, gruende: matchGruende(x.n, matchProfil) }, onOpen: onOpen, onWatchClub: onWatchClub, watched: beobachtet(seekingClub(x.n)) }))));
+  return h("div", { className: "tw-bedarf" }, kopf, profiles.length ? profileBlock : intro, alle.length === 0 ? h(EmptyState, { icon: "\u{1F4ED}", title: en ? "No open club needs" : "Aktuell kein offener Bedarf", text: en ? "Club needs appear here as soon as they are reported." : "Sobald Vereine Bedarf melden, erscheint er hier." }) : (activePos || matchProfil) ? ergebnis : posGrid);
+}
 function NeedCard({
   item,
   highlight,
-  onContacts
+  onContacts,
+  match,
+  onOpen,
+  onWatchClub,
+  watched
 }) {
   const sport = SPORT[item.sport] || SPORT.fussball;
   const v = TYPE.verein_sucht;
@@ -3403,7 +3540,15 @@ function NeedCard({
       color: "#4a4a48",
       margin: "0 0 12px"
     }
-  }, dS(item)), /*#__PURE__*/React.createElement("div", {
+  }, dS(item)), match ? /*#__PURE__*/React.createElement("div", { className: "tw-match", style: { marginTop: 10, paddingTop: 10, borderTop: "1px dashed " + HAIR } },
+    /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 8 } },
+      /*#__PURE__*/React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 6, fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, letterSpacing: .6, textTransform: "uppercase", color: INK } }, /*#__PURE__*/React.createElement(ScoreName, { kind: "match", size: 13 })),
+      /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 26, fontWeight: 700, lineHeight: 1, color: scoreColor(match.score) } }, match.score, /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, color: MUTED, marginLeft: 2 } }, "/100"))),
+    /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: INK, marginBottom: 5 } }, LANG === "en" ? "Why this match?" : "Warum dieses Match?"),
+    /*#__PURE__*/React.createElement("ul", { style: { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 3 } }, (match.gruende || []).slice(0, 6).map((g, i) => /*#__PURE__*/React.createElement("li", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12.5, lineHeight: 1.4, color: g.ok ? INK : MUTED, display: "flex", gap: 6 } }, /*#__PURE__*/React.createElement("span", { style: { color: g.ok ? "#149a59" : MUTED, fontWeight: 800, flexShrink: 0 } }, g.ok ? "\u2713" : "\u25CB"), /*#__PURE__*/React.createElement("span", null, g.t)))),
+    /*#__PURE__*/React.createElement("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 } },
+      /*#__PURE__*/React.createElement("button", { onClick: e => { e.stopPropagation(); if (typeof onOpen === "function") onOpen(item); }, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, padding: "8px 13px", borderRadius: 9, border: "none", background: "#0f1520", color: "#fff" } }, LANG === "en" ? "Analyse match" : "Match analysieren"),
+      /*#__PURE__*/React.createElement("button", { onClick: e => { e.stopPropagation(); if (typeof onWatchClub === "function") onWatchClub(club); }, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, padding: "8px 13px", borderRadius: 9, border: "1px solid " + (watched ? "#149a59" : HAIR), background: watched ? "#e2f3ea" : "#fff", color: watched ? "#0d8a4f" : INK } }, watched ? (LANG === "en" ? "\u2713 Watching club" : "\u2713 Verein beobachtet") : (LANG === "en" ? "Watch club" : "Verein beobachten")))) : null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
@@ -5500,6 +5645,7 @@ function TransferApp({
   const [pfA1, setPfA1] = useState("");
   const [pfA2, setPfA2] = useState("");
   const [pfSt, setPfSt] = useState([]);
+  const [pfEdit, setPfEdit] = useState(null);
   const profiles = useMemo(() => (watch.items || []).filter(x => x.t === "profil").map(x => {
     try {
       const p = JSON.parse(x.w);
@@ -5528,7 +5674,11 @@ function TransferApp({
     setPfSt([]);
     p.raw = w;
     setMatchProfil(p);
-    addWatch("profil", w);
+    if (pfEdit) {
+      const next = Object.assign({}, watch, { items: (watch.items || []).filter(x => !(x.t === "profil" && x.w === pfEdit)).concat([{ t: "profil", w: w }]) });
+      updateWatch(next);
+      setPfEdit(null);
+    } else addWatch("profil", w);
   };
   const [perf, setPerf] = useState(null);
   const [perfLoading, setPerfLoading] = useState(false);
@@ -6132,7 +6282,7 @@ function TransferApp({
           .tw-feedlist { grid-template-columns: minmax(0,1fr) minmax(0,1fr) !important; gap:14px; }
         }
         .tw-main.gesucht { grid-template-columns: 1fr; }
-        .tw-pos-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(158px,1fr)); gap:10px; }
+        .tw-pos-grid { display:grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap:10px; }
         .tw-need-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(288px,1fr)); gap:12px; }
         @media (max-width: 880px) {
           .tw-main.feed { grid-template-columns: 1fr; }
@@ -6452,271 +6602,7 @@ function TransferApp({
       width: "100%",
       boxSizing: "border-box"
     }
-  }, view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news, onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "geruechte" && /*#__PURE__*/React.createElement("aside", null, /*#__PURE__*/React.createElement(GerAside, { s: gerSide, onApply: setGerApply })), view === "gesucht" && /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "#fff",
-      border: `1px solid ${HAIR}`,
-      borderRadius: 12,
-      padding: "12px 14px",
-      marginBottom: 14
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      gap: 10,
-      flexWrap: "wrap"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 12,
-      fontWeight: 700,
-      color: MUTED,
-      textTransform: "uppercase",
-      letterSpacing: 1
-    }
-  }, t("match_title")), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setProfilSheet(true),
-    style: {
-      cursor: "pointer",
-      background: "#149a59",
-      border: "none",
-      borderRadius: 10,
-      padding: "10px 18px",
-      fontFamily: FONT_BODY,
-      fontSize: 13,
-      fontWeight: 900,
-      color: "#fff",
-      boxShadow: "0 6px 16px rgba(20,154,89,.3)"
-    }
-  }, t("match_add"))), profiles.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 8,
-      fontFamily: FONT_BODY,
-      fontSize: 13,
-      color: "#4a4a48",
-      lineHeight: 1.55
-    }
-  }, t("match_sub"), /*#__PURE__*/React.createElement("div", { style: { display: "flex", gap: 10, flexWrap: "wrap", marginTop: 14 } }, [["1", "Spielerprofil anlegen"], ["2", "Position & Kriterien w\u00e4hlen"], ["3", "Passende Vereine erhalten"]].map(([nr, tx]) => /*#__PURE__*/React.createElement("div", { key: nr, style: { display: "flex", alignItems: "center", gap: 9, background: "#f8fafb", border: "1px solid " + HAIR, borderRadius: 10, padding: "9px 13px" } }, /*#__PURE__*/React.createElement("span", { style: { width: 22, height: 22, borderRadius: 99, background: "#149a59", color: "#fff", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 900, display: "flex", alignItems: "center", justifyContent: "center" } }, nr), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, color: "#3a4150" } }, tx))))) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      flexWrap: "wrap",
-      gap: 8,
-      marginTop: 10
-    }
-  }, profiles.map(p => {
-    const on = matchProfil && matchProfil.raw === p.raw;
-    return /*#__PURE__*/React.createElement("span", {
-      key: p.raw,
-      style: {
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        background: on ? "#eef7f1" : "#f1f1ec",
-        border: `1px solid ${on ? "#bfe3cf" : "transparent"}`,
-        borderRadius: 8,
-        padding: "6px 10px",
-        fontFamily: FONT_BODY,
-        fontSize: 12.5,
-        color: INK
-      }
-    }, /*#__PURE__*/React.createElement("button", {
-      onClick: () => setMatchProfil(on ? null : p),
-      style: {
-        cursor: "pointer",
-        background: "none",
-        border: "none",
-        padding: 0,
-        fontFamily: FONT_BODY,
-        fontSize: 12.5,
-        fontWeight: on ? 800 : 600,
-        color: on ? "#149a59" : INK
-      }
-    }, p.n || p.l, " · ", p.p, p.a1 || p.a2 ? ` · ${p.a1 || "?"}–${p.a2 || "?"}` : ""), /*#__PURE__*/React.createElement("button", {
-      onClick: () => removeProfil(p.raw),
-      style: {
-        cursor: "pointer",
-        background: "none",
-        border: "none",
-        padding: 0,
-        color: MUTED,
-        fontSize: 15,
-        lineHeight: 1
-      }
-    }, "×"));
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 8,
-      fontFamily: FONT_BODY,
-      fontSize: 11.5,
-      color: MUTED
-    }
-  }, matchProfil ? `${needsFiltered.length} ${t("match_hits")}${matchProfil.s ? ` · ${needsFiltered.filter(n => profilOverlap(matchProfil, n) > 0).length} ${t("match_hits_st")}` : ""}` : t("match_tap")))), view === "gesucht" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 16
-    }
-  }, /*#__PURE__*/React.createElement("h2", {
-    style: {
-      fontFamily: FONT_DISPLAY,
-      fontWeight: 600,
-      fontSize: 23,
-      letterSpacing: .3,
-      margin: "0 0 3px",
-      color: INK
-    }
-  }, "Verein sucht — Position wählen"), /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 13,
-      color: MUTED,
-      margin: 0
-    }
-  }, "Zuerst die Position wählen. Danach werden alle Vereine vorgeschlagen, die genau dort einen Spieler suchen.")), needsBySport.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "#fff",
-      border: `1px dashed ${HAIR}`,
-      borderRadius: 14,
-      padding: "40px 20px",
-      textAlign: "center",
-      color: MUTED,
-      fontSize: 14
-    }
-  }, "Aktuell kein offener Bedarf in dieser Sportart.") : !activePos && !matchProfil ?
-  /*#__PURE__*/
-  /* Schritt 1: Standard-Position wählen */
-  React.createElement("div", {
-    className: "tw-pos-grid"
-  }, posSet.map(p => {
-    const count = needsBySport.filter(n => needMatchesPos(n, p)).length;
-    const v = TYPE.verein_sucht;
-    const on = count > 0;
-    if (!on) return null;
-    return /*#__PURE__*/React.createElement("button", {
-      key: p.key,
-      className: "tw-tile",
-      onClick: () => on && setPosFilter(p.key),
-      disabled: !on,
-      style: {
-        textAlign: "left",
-        cursor: on ? "pointer" : "default",
-        background: "#fff",
-        border: `1px solid ${HAIR}`,
-        borderRadius: 14,
-        padding: "13px 14px",
-        display: "flex",
-        alignItems: "center",
-        gap: 11,
-        minHeight: 94
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontFamily: FONT_DISPLAY,
-        fontWeight: 700,
-        fontSize: 17,
-        color: v.color,
-        background: v.soft,
-        borderRadius: 10,
-        minWidth: 46,
-        height: 44,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexShrink: 0
-      }
-    }, p.key), /*#__PURE__*/React.createElement("span", {
-      style: {
-        flex: 1,
-        minWidth: 0
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        display: "block",
-        fontFamily: FONT_BODY,
-        fontWeight: 700,
-        fontSize: 13.5,
-        color: INK,
-        lineHeight: 1.15
-      }
-    }, p.label), /*#__PURE__*/React.createElement("span", {
-      style: {
-        display: "block",
-        fontFamily: FONT_BODY,
-        fontSize: 11.5,
-        color: on ? v.color : MUTED,
-        fontWeight: on ? 600 : 400
-      }
-    }, /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 21, fontWeight: 700, color: v.color, marginRight: 4, verticalAlign: "middle" } }, count), " ", count === 1 ? "Verein" : "Vereine")), on && /*#__PURE__*/React.createElement(ArrowRight, {
-      size: 15,
-      strokeWidth: 2.2,
-      color: MUTED
-    }));
-  })) :
-  /*#__PURE__*/
-  /* Schritt 2: Vereine, die genau diese Position suchen */
-  React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 12,
-      marginBottom: 14,
-      flexWrap: "wrap"
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => setPosFilter(""),
-    style: {
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 5,
-      cursor: "pointer",
-      border: `1px solid ${HAIR}`,
-      background: "#fff",
-      borderRadius: 9,
-      padding: "7px 12px",
-      fontFamily: FONT_BODY,
-      fontSize: 12.5,
-      fontWeight: 600,
-      color: INK
-    }
-  }, /*#__PURE__*/React.createElement(ArrowLeft, {
-    size: 14
-  }), " Alle Positionen"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontFamily: FONT_DISPLAY,
-      fontWeight: 600,
-      fontSize: 19,
-      color: INK,
-      letterSpacing: .2
-    }
-  }, "Vereine, die einen ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: TYPE.verein_sucht.color
-    }
-  }, activePos ? activePos.label : matchProfil ? matchProfil.l : ""), " suchen"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 12.5,
-      color: MUTED
-    }
-  }, needsFiltered.length, " ", needsFiltered.length === 1 ? "Verein" : "Vereine")), needsFiltered.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "#fff",
-      border: `1px dashed ${HAIR}`,
-      borderRadius: 14,
-      padding: "40px 20px",
-      textAlign: "center",
-      color: MUTED,
-      fontSize: 14
-    }
-  }, "Aktuell kein offener Bedarf auf dieser Position.") : /*#__PURE__*/React.createElement("div", {
-    className: "tw-need-grid"
-  }, needsFiltered.map(item => /*#__PURE__*/React.createElement(NeedCard, {
-    key: item.id,
-    item: item,
-    highlight: activePos,
-    onContacts: openContacts
-  }))))), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news, onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "geruechte" && /*#__PURE__*/React.createElement("aside", null, /*#__PURE__*/React.createElement(GerAside, { s: gerSide, onApply: setGerApply })), view === "gesucht" && /*#__PURE__*/React.createElement(BedarfVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       background: "transparent",
       border: "none",
