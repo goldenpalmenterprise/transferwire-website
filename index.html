@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-26-au merk-suche -->
+<!-- tw-build: 2026-08-26-av merk-namen -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -3811,7 +3811,9 @@ function MerkSpielerZeile({ item, news, onOpen, onRemove, onAlert, onVergleich, 
     const norm = String(item.w).toLowerCase().replace(/\u00df/g, "ss").replace(/\u0131/g, "i").replace(/\u00e6/g, "ae").replace(/\u0153/g, "oe").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[%*]/g, "").trim();
     const sel = "select=player_id,name,team,league,position,age,photo,rating,minutes,tm_value_text,tm_contract_until,contract_until,imported_at";
     const hole = url => fetch(url, { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(rows => Array.isArray(rows) ? rows : []);
-    hole("/db/players?" + sel + "&search_name=ilike." + encodeURIComponent("*" + norm + "*") + "&order=minutes.desc.nullslast&limit=1").then(rows => rows.length ? rows : hole("/db/players?" + sel + "&name=ilike." + encodeURIComponent("*" + String(item.w).replace(/[%*]/g, "") + "*") + "&order=minutes.desc.nullslast&limit=1")).then(rows => {
+    const worte = norm.split(/\s+/).filter(w => w.length >= 2);
+    const stufe2 = worte.length >= 2 ? "/db/players?" + sel + "&and=(search_name.ilike." + encodeURIComponent("*" + worte[0] + "*") + ",search_name.ilike." + encodeURIComponent("*" + worte[worte.length - 1] + "*") + ")&order=minutes.desc.nullslast&limit=1" : null;
+    hole("/db/players?" + sel + "&search_name=ilike." + encodeURIComponent("*" + norm + "*") + "&order=minutes.desc.nullslast&limit=1").then(rows => rows.length || !stufe2 ? rows : hole(stufe2)).then(rows => rows.length ? rows : hole("/db/players?" + sel + "&name=ilike." + encodeURIComponent("*" + String(item.w).replace(/[%*]/g, "") + "*") + "&order=minutes.desc.nullslast&limit=1")).then(rows => {
       if (!aktiv) return; const p = Array.isArray(rows) && rows[0] ? rows[0] : null;
       if (!p) { setD({ ok: false }); return; }
       const basis = { ok: true, pid: p.player_id, team: p.team, league: p.league, pos: p.position, age: p.age, photo: p.photo, rating: p.rating, minutes: p.minutes, mw: p.tm_value_text || "", ende: p.tm_contract_until || p.contract_until || "", stand: p.imported_at || "", score: p.rating ? Math.round(Number(p.rating) * 10) : null, src: "api", delta: null, letztes: "" };
