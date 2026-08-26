@@ -364,3 +364,17 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
   Andere Seiten behalten den Seitenleisten-Kasten (Bedingung view !== "feed").
 - Abnahme rt39 (1845 px): keine Überlappung, Filterzeile 49 px, Chip-Klick → 35 Karten (Manchester United), Zurücksetzen → 60; mobil 366 px passt. 0 Fehler.
 - OFFEN: Boss-Brief „Vereinsbedarf & Spieler-Matching“ (Datenlage geprüft: 584 Bedarfe, 383 mit seekStrengths, KEIN Alter; siehe Analyse im Chat) – noch nicht gebaut.
+
+## 26.08. 00:50–01:00 – TRANSFERS: Boss-Brief erneut (Filterbereich jetzt EINGEFROREN), Commits fd6b7b9 / 6c8d02d, Marker ai/aj
+- Boss-Vorgabe neu: Filterbereich (Zeile 1, Typ-Chips, Weitere Filter, mobiles Sheet) bleibt vollständig unverändert – Beschriftungen, Reihenfolge,
+  Optionen, Verhalten, aktive Zustände, Abstände, mobil. NICHT MEHR ANFASSEN.
+- (ai) Karten-Signalzeile exakt im Boss-Wortlaut: „Signalstärke NN/100 · Quellenvertrauen: hoch/mittel/gering“ (EN „Signal strength … · source trust: …“).
+  Kompaktliste: Bewegung nur bei Von+Ziel („A → B“), sonst „Vertragslos → B“ (nur type vertragslos), „Ziel: B“ oder „von A“; keine „—“/„?“-Platzhalter
+  mehr (Verein/Liga leer statt Strich); Status „Signalstärke NN/100“ bzw. „✓ Bestätigt“.
+- (aj) FUND: publishedAt der API ist nur für <24 h relativ („vor 3 Std“), älter kommt als Datum „25.08.“ / „04.08.“. relToTime parst jetzt DD.MM.
+  und DD.MM.JJJJ (Mittag; Zukunft → Vorjahr). Vorher zeigte der 7-Tage-Standard nur 30 Meldungen, jetzt 1015 (219 fix / 271 Gerüchte / 411 Bedarf).
+- Abnahme rt40/rt41: Titel/Beschreibung/Scout-Kopf/Vorschläge ok; Zeile „N Meldungen · aktualisiert …“, „Neueste zuerst“, Karten/Kompakt; Kicker uppercase,
+  Beobachten + Zeit rechts, Beschreibung 3-Zeilen-Clamp, 30/30 „Details →“, keine Pfeile ohne Ziel, keine Platzhalter, zwei gleich breite Spalten;
+  Kompakt: 7 Spalten, Zeilenhöhe 31 px, keine Platzhalter; mobil: Kompakt-Button sichtbar, Tabelle horizontal scrollbar (366 px), Karten einspaltig,
+  Filterbereich unverändert (Filter-Button „flex“). 0 Fehler.
+- OFFEN: Altbestand der Gerüchte-Überschriften (Sprachregel greift nur für neue Meldungen) – einmalige Nachformulierung nur mit Boss-OK.
