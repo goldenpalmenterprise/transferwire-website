@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-26-aq datenbank -->
+<!-- tw-build: 2026-08-26-ar ligen-zahl -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -3556,6 +3556,8 @@ function PerfVue({ perf, perfLoading, q, lg, pos, st, sw, watch, onWatchToggle, 
       : gefiltert.length === 0 ? h("div", { style: { background: "#fff", border: "1px dashed " + HAIR, borderRadius: 14, padding: "40px 20px", textAlign: "center", color: MUTED, fontFamily: FONT_BODY, fontSize: 14 } }, t("rank_nores"))
       : h(PerfTabelle, { rows: gefiltert, portrait: portrait, watch: watch, onWatchToggle: onWatchToggle, onOpen: onOpen, offen: offen, setOffen: setOffen }));
 }
+const DB_LIGA_ALIAS = { "Jupiler Pro League": 1, "Premiership": 1, "Superligaen": 1 };
+const dbLigenZahl = () => LAND_LIGEN.reduce((a, l) => a + (l.ligen || []).filter(x => !DB_LIGA_ALIAS[x]).length, 0);
 const DB_COLS = [["age", "Alter", "Age"], ["pos", "Position", "Position"], ["team", "Verein/Liga", "Club/League"], ["vertrag", "Vertrag", "Contract"], ["mw", "Marktwert", "Market value"], ["min", "Minuten", "Minutes"], ["score", "TW Performance Score", "TW Performance Score"], ["form", "Form", "Form"]];
 const dbFmtZahl = n => Number(n || 0).toLocaleString("de-DE");
 const dbDatum = d => { const s = String(d || ""); return /^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(8, 10) + "." + s.slice(5, 7) + "." + s.slice(0, 4) : (s || ""); };
@@ -3674,7 +3676,7 @@ function DbVue({ q, hatFilter, items, loading, stats, watch, onWatchToggle, onOp
     h("div", { style: { display: "flex", alignItems: "center", gap: 10 } }, h(DbFoto, { x: x, size: 36 }), h("div", { style: { flex: 1, minWidth: 0 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, x.name), h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, [x.age ? x.age + (en ? " yrs" : " J.") : "", x.pos, x.team].filter(Boolean).join(" \u00b7 "))), scorePill(x)),
     h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 8, fontFamily: FONT_BODY, fontSize: 11.5, color: "#3f4650", flexWrap: "wrap" } }, h("span", null, [x.vertrag ? (en ? "Contract " : "Vertrag ") + dbDatum(x.vertrag) : "", x.mw || "", x.min != null ? dbFmtZahl(x.min) + " Min." : ""].filter(Boolean).join(" \u00b7 ")), h("span", { style: { display: "inline-flex", alignItems: "center", gap: 6 } }, formZelle(x), aktionen(x))))));
   return h("div", { className: "tw-db" },
-    h("div", { style: { display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 } }, kpi(stats && stats.gesamt ? dbFmtZahl(stats.gesamt) : "\u2026", en ? "players" : "Spieler"), kpi(stats && stats.ligen ? stats.ligen : LAND_LIGEN.reduce((a, l) => a + (l.ligen || []).length, 0), en ? "leagues" : "Ligen"), kpi(stats && stats.v12 != null ? dbFmtZahl(stats.v12) : "\u2026", en ? "contracts ending within 12 months" : "Vertr\u00e4ge innerhalb von 12 Monaten")),
+    h("div", { style: { display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 } }, kpi(stats && stats.gesamt ? dbFmtZahl(stats.gesamt) : "\u2026", en ? "players" : "Spieler"), kpi(stats && stats.ligen ? stats.ligen : dbLigenZahl(), en ? "leagues" : "Ligen"), kpi(stats && stats.v12 != null ? dbFmtZahl(stats.v12) : "\u2026", en ? "contracts ending within 12 months" : "Vertr\u00e4ge innerhalb von 12 Monaten")),
     h("div", { style: { display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 10 } },
       h("div", null, h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 22, fontWeight: 700, color: INK, lineHeight: 1.1 } }, kopfTitel), h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, marginTop: 3 } }, kopfSub)),
       h("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" } },
@@ -5957,7 +5959,7 @@ function TransferApp({
       zaehl("/db/players?select=player_id&limit=1"),
       zaehl("/db/players?select=player_id&or=(and(tm_contract_until.gte." + iso(heute) + ",tm_contract_until.lte." + iso(inJahr) + "),and(contract_until.gte." + iso(heute) + ",contract_until.lte." + iso(inJahr) + "))&limit=1"),
       fetch("/db/players?select=imported_at&order=imported_at.desc.nullslast&limit=1", { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(rows => Array.isArray(rows) && rows[0] ? rows[0].imported_at : null).catch(() => null)
-    ]).then(([gesamt, v12, stand]) => { if (aktiv) setDbStats({ gesamt: gesamt, v12: v12, stand: stand, ligen: LAND_LIGEN.reduce((a, l) => a + (l.ligen || []).length, 0) }); });
+    ]).then(([gesamt, v12, stand]) => { if (aktiv) setDbStats({ gesamt: gesamt, v12: v12, stand: stand, ligen: dbLigenZahl() }); });
     return () => { aktiv = false; };
   }, [view]);
   const [plVergleich, setPlVergleich] = useState([]);
