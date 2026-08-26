@@ -550,3 +550,14 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
 - Abnahme rt59: Titel/Beschreibung, Unterbereiche „Transferhinweise · Networking Pro“, Banner-Text exakt + Verifizierungs-Erklärung, Suchfeld
   identisch, Composer statt Formular (kein Textarea sichtbar), Leerzustand mit allen Texten, rechte Spalte (2 Spalten), Panel mit allen Feldern,
   Platzhalter exakt, Button erst nach Text+Checkbox aktiv, Esc schließt; mobil Panel 390 px Vollbild, Feed einspaltig. 0 Fehler.
+
+## 26.08. 04:15–04:25 – NEWSFEED: alter Vereinsfilter wieder da (Boss-Screenshot), Commit 3a0cba7, Marker ba
+- Boss: „den alten Filter auf der Seite bitte wieder rein machen“ (Screenshot Newsfeed mit Prompt „Name für diesen Filter“). Befund: Der Kasten
+  „Verein gezielt suchen“ (1 · Land wählen → 2 · Liga wählen → 3 · Verein wählen, SelectField-Kaskade aus HIERARCHY) hing an
+  `cascade = sport === "fussball" || "basketball"`; sport ist seit dem Basis-Import fest „alle“ und sportTabs = [] → der Kasten war nie sichtbar.
+- Fix: hierSport = sport === "alle" ? "fussball" : sport; cascade = !!HIERARCHY[hierSport]; countryOpts/leagueOpts/clubOpts und die Farben
+  (SPORT[hierSport].color statt SPORT[sport] – sonst Absturz bei „alle“) darauf umgestellt; Kasten nur bei view === "feed" (nicht Merkliste).
+  Filterlogik unverändert (Verein-Auswahl filtert den Feed; Land/Liga nur zur Auswahl). „Aktuellen Filter speichern“ sichert Land/Liga/Verein mit.
+- Abnahme rt60: Kasten mit drei Selects (14 Länder; Liga/Verein bis zur Auswahl deaktiviert) zwischen Zähler-Zeile und Chips; Auswahl USA →
+  Major League Soccer → Inter Miami CF filtert („Gefiltert nach Inter Miami CF — 0 Meldungen“), Zurücksetzen stellt 60 Karten wieder her,
+  Merkliste ohne Kasten, mobil passt (Selects 164/164/336 px). 0 Fehler.
