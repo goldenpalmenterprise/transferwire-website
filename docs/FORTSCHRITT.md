@@ -378,3 +378,28 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
   Kompakt: 7 Spalten, Zeilenhöhe 31 px, keine Platzhalter; mobil: Kompakt-Button sichtbar, Tabelle horizontal scrollbar (366 px), Karten einspaltig,
   Filterbereich unverändert (Filter-Button „flex“). 0 Fehler.
 - OFFEN: Altbestand der Gerüchte-Überschriften (Sprachregel greift nur für neue Meldungen) – einmalige Nachformulierung nur mit Boss-OK.
+
+## 26.08. 01:05–01:45 – VEREINSBEDARF & SPIELER-MATCHING (Boss-Brief), Commits 5323ce5 / d696ec5 / +am, Marker ak/al/am
+- Boss-Vorgabe: Kriterien- und Filterelemente (Profil-Sheet: Spielername, Position, Alter von/bis, Stärken; Beschriftung/Reihenfolge/Optionen/
+  Verhalten) bleiben unverändert – NICHT ANFASSEN. Header/Navigation unverändert.
+- Neue Komponente BedarfVue (vor NeedCard) ersetzt die beiden gesucht-Blöcke im TransferApp (Props: needs=needsBySport, profiles, matchProfil,
+  setMatchProfil, posSet, activePos, setPosFilter, onNewProfile, onEditProfile, removeProfil, openContacts, onOpen=setMSel, onWatchClub=addWatch("verein"),
+  watch=watch.items). Aufbau: Kopf (h2 + Beschreibung + grüner „+ Neues Spielerprofil“ rechts) → Intro (3 verbundene Schritte + Alert-Satz, 114 px)
+  ODER „Meine Spielerprofile“ (Karten: Name, Positionslabel · Alter · Stärken, „N neue Vereinsmatches · M gesamt“, Matches ansehen / Profil bearbeiten / ×)
+  → Positionsraster (.tw-pos-grid 5 je Reihe, ≤1000 px 3, ≤700 px 2; Kachel = PitchIcon (Mini-Spielfeld mit Punkt je Position) + Name + „N passende
+  Vereine“ + „+M neue Treffer“ (7 Tage)) ODER Ergebnis („N Vereine mit aktuellem Xbedarf“ / „N Vereine passen zu Name“, Zurück-Button, „+N neu“).
+- NeedCard erweitert (Props match{score, gruende}, onOpen, onWatchClub, watched): Block „TW Match Score ⓘ … NN/100“ (scoreColor), „Warum dieses
+  Match?“ mit ✓/○-Gründen, Buttons „Match analysieren“ (→ MeldungsPanel) und „Verein beobachten“ (→ Merkliste Typ verein, Zustand „✓ Verein beobachtet“).
+- matchScore(need, profil): 40 Position + rel×6 + 10 Kaderplatz-Signal (Regex Abgang/Verletzung/Ersatz…) + Aktualität (≤3 Tg 6, ≤7 Tg 3) + ≥2 Quellen 4;
+  mit Profil: Stärken-Treffer ×4 (max 12), Alter passt (jung/erfahren im Text) +6; Deckel 99. matchGruende(): öffentlicher Bedarf · Quelle · Belastbarkeit,
+  Position explizit gesucht / passt, Kaderplatz frei · Snippet, Markt Land · Liga (Stufe aus LAND_LIGEN), Stärken passen / gesuchtes Profil (○), Alter passt,
+  gemeldet <Zeit>. Immer ≥3 Gründe. SCORES.match-Erklärung entsprechend aktualisiert.
+- Profil bearbeiten: pfEdit-State; onEditProfile befüllt pfName/pfPos/pfA1/pfA2/pfSt und öffnet den unveränderten Sheet; addProfil ersetzt bei pfEdit
+  das alte Profil in einem updateWatch (kein Duplikat). „+ Neues Spielerprofil“ setzt pfEdit zurück.
+- (al) Feinschliff: Leerzeichen „46 passende Vereine“, „24 Jahre“ bei gleichem Von/Bis, Button dauerhaft „Matches ansehen“, „Meine Spielerprofile“ 16 px.
+  (am) Satz-Stärken aus dem Bedarfs-Radar als „gesuchtes Profil: …“ (Original, 72 Zeichen) statt kleingeschriebener Liste.
+- Abnahme rt45 (Marker al): Kopf/Button/Intro 114 px/Schritte/Alert ok; 10 Kacheln 5+5 mit SVG; „46 Vereine mit aktuellem Torwartbedarf“, 46 Karten,
+  Score 74/100, 5 Gründe, alle Karten ≥3; Analyse-Panel öffnet; Beobachten setzt Merkliste; Sheet-Labels unverändert (3 Inputs, 1 Select); Profil
+  „Sang-Yoon Kang · Achter · 24 Jahre · 22 neue · 35 gesamt“; „35 Vereine passen zu Sang-Yoon Kang“ mit Profil-Gründen; Bearbeiten vorbefüllt, nach
+  Speichern weiter 1 Profil; mobil 2 Kacheln/Reihe (177 px), Matches einspaltig (366 px). 0 Fehler.
+- OFFEN: „Vertrag bis“ auf der Profilkarte braucht ein Sheet-Feld (Boss-Freigabe); Gehaltsrahmen/Marktwert ohne Vereinsdaten nicht als Grund darstellbar.
