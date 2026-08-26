@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-26-ba feed-vereinsfilter -->
+<!-- tw-build: 2026-08-26-bb vertrag-filter -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -3823,10 +3823,11 @@ function vtScore(r) {
   s += r.quelle === "Transfermarkt" || /offiziell|official/i.test(r.note || "") ? 7 : 3;
   return Math.min(99, Math.round(s));
 }
+const vtPos = p => ({ Goalkeeper: "Torwart", Defender: "Abwehr", Midfielder: "Mittelfeld", Attacker: "Sturm", Forward: "Sturm" })[String(p || "").trim()] || String(p || "").trim();
 function vtRadarZeile(a) {
   const frei = String(a.bis || "").toLowerCase().indexOf("vertragslos") >= 0 || /^vertragslos/i.test(String(a.note || ""));
   const m = String(a.note || "").match(/(\d{2}\.\d{2}\.\d{4})/);
-  return { pid: a.pid, name: a.name, team: a.team, league: a.league, pos: a.pos, age: a.age, minutes: a.minutes, rating: a.rating, frei: frei, seit: frei && m ? vtDatum(m[1]) : null, ende: frei ? null : vtDatum(a.bis), mw: "", mwEur: 0, quelle: /transfermarkt/i.test(String(a.note || "")) ? "Transfermarkt" : (LANG === "en" ? "Market scout" : "Markt-Scout"), note: a.note || "", photo: "", nat: "" };
+  return { pid: a.pid, name: a.name, team: a.team, league: a.league, pos: vtPos(a.pos), age: a.age, minutes: a.minutes, rating: a.rating, frei: frei, seit: frei && m ? vtDatum(m[1]) : null, ende: frei ? null : vtDatum(a.bis), mw: "", mwEur: 0, quelle: /transfermarkt/i.test(String(a.note || "")) ? "Transfermarkt" : (LANG === "en" ? "Market scout" : "Markt-Scout"), note: a.note || "", photo: "", nat: "" };
 }
 function VertragKpis({ radar, frei }) {
   const h = React.createElement; const en = LANG === "en";
@@ -3854,6 +3855,8 @@ function VertragTabelle({ radar, onOpen }) {
   const [db, setDb] = useState(null);
   const [anreich, setAnreich] = useState({});
   const [mobil, setMobil] = useState(() => typeof window !== "undefined" && window.innerWidth <= 760);
+  const VT_LEER = { q: "", status: "alle", pos: "", liga: "", alter: "", mw: "", quelle: "", sort: "dringlichkeit" };
+  const [fl, setFl] = useState(VT_LEER);
   useEffect(() => { const f = () => setMobil(window.innerWidth <= 760); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);
   useEffect(() => {
     let aktiv = true; const iso = d => d.toISOString().slice(0, 10); const j = new Date(); const p365 = new Date(Date.now() + 365 * 86400000);
@@ -3866,23 +3869,68 @@ function VertragTabelle({ radar, onOpen }) {
   const rows = useMemo(() => {
     const out = []; const seen = {};
     (radar || []).forEach(a => { const r = vtRadarZeile(a); const p = anreich[r.pid]; if (p) { r.mw = p.tm_value_text || ""; r.mwEur = p.tm_value_eur || 0; r.photo = p.photo || ""; r.nat = p.nationality || ""; if (!r.frei && !r.ende) r.ende = vtDatum(p.tm_contract_until || p.contract_until); } if (r.pid) seen[r.pid] = 1; out.push(r); });
-    (db || []).forEach(p => { if (seen[p.player_id]) return; seen[p.player_id] = 1; const tm = !!p.tm_contract_until; out.push({ pid: p.player_id, name: p.name, team: p.team, league: p.league, pos: p.position, age: p.age, nat: p.nationality, photo: p.photo, minutes: p.minutes, rating: p.rating, frei: false, seit: null, ende: vtDatum(p.tm_contract_until || p.contract_until), mw: p.tm_value_text || "", mwEur: p.tm_value_eur || 0, quelle: tm ? "Transfermarkt" : "API-Football", note: "" }); });
+    (db || []).forEach(p => { if (seen[p.player_id]) return; seen[p.player_id] = 1; const tm = !!p.tm_contract_until; out.push({ pid: p.player_id, name: p.name, team: p.team, league: p.league, pos: vtPos(p.position), age: p.age, nat: p.nationality, photo: p.photo, minutes: p.minutes, rating: p.rating, frei: false, seit: null, ende: vtDatum(p.tm_contract_until || p.contract_until), mw: p.tm_value_text || "", mwEur: p.tm_value_eur || 0, quelle: tm ? "Transfermarkt" : "API-Football", note: "" }); });
     const rang = r => r.frei ? -1e9 : (r.ende ? r.ende.getTime() : 9e15);
     return out.filter(r => r.frei || !r.ende || vtTage(r.ende) >= 0).sort((a, b) => rang(a) - rang(b) || vtScore(b) - vtScore(a));
   }, [radar, db, anreich]);
+  const ligen = useMemo(() => Array.from(new Set(rows.map(r => r.league).filter(Boolean))).sort(), [rows]);
+  const quellen = useMemo(() => Array.from(new Set(rows.map(r => r.quelle).filter(Boolean))).sort(), [rows]);
+  const gefiltert = useMemo(() => {
+    const q = fl.q.trim().toLowerCase();
+    const liste = rows.filter(r => {
+      if (q && (String(r.name || "") + " " + String(r.team || "")).toLowerCase().indexOf(q) < 0) return false;
+      const tg = r.frei ? -1 : vtTage(r.ende);
+      if (fl.status === "frei" && !r.frei) return false;
+      if (fl.status === "30" && (r.frei || tg === null || tg >= 30)) return false;
+      if (fl.status === "180" && (r.frei || tg === null || tg > 180)) return false;
+      if (fl.status === "365" && r.frei) return false;
+      if (fl.pos && r.pos !== fl.pos) return false;
+      if (fl.liga && r.league !== fl.liga) return false;
+      if (fl.alter && (!r.age || Number(r.age) > Number(fl.alter))) return false;
+      const eur = Number(r.mwEur) || 0;
+      if (fl.mw === "vorhanden" && !eur) return false;
+      if (fl.mw === "1m" && eur < 1000000) return false;
+      if (fl.mw === "5m" && eur < 5000000) return false;
+      if (fl.quelle && r.quelle !== fl.quelle) return false;
+      return true;
+    });
+    const k = fl.sort;
+    if (k === "ende") liste.sort((a, b) => (a.frei ? -1 : a.ende ? a.ende.getTime() : 9e15) - (b.frei ? -1 : b.ende ? b.ende.getTime() : 9e15));
+    else if (k === "mw") liste.sort((a, b) => (Number(b.mwEur) || 0) - (Number(a.mwEur) || 0));
+    else if (k === "score") liste.sort((a, b) => vtScore(b) - vtScore(a));
+    else if (k === "alter") liste.sort((a, b) => (Number(a.age) || 99) - (Number(b.age) || 99));
+    else if (k === "name") liste.sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "de"));
+    return liste;
+  }, [rows, fl]);
+  const aktivFilter = Object.keys(VT_LEER).filter(k => k !== "sort" && fl[k] !== VT_LEER[k]).length;
+  const sel = (k, opts, label) => h("select", { value: fl[k], onChange: e => setFl(Object.assign({}, fl, { [k]: e.target.value })), "aria-label": label, style: { fontFamily: FONT_BODY, fontSize: 13, color: fl[k] !== VT_LEER[k] ? INK : "#3f4650", fontWeight: fl[k] !== VT_LEER[k] ? 800 : 600, border: "1px solid " + (fl[k] !== VT_LEER[k] ? "#0f1520" : HAIR), borderRadius: 10, padding: "0 10px", height: 40, background: "#fff", minWidth: 0, flex: "1 1 150px", maxWidth: 230 } }, opts.map(([v, l]) => h("option", { key: v, value: v }, l)));
+  const filterleiste = h("div", { className: "tw-vtfilter", style: { display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 } },
+    h("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" } },
+      h("input", { value: fl.q, onChange: e => setFl(Object.assign({}, fl, { q: e.target.value })), placeholder: en ? "Search player or club \u2026" : "Spieler oder Verein suchen \u2026", style: { fontFamily: FONT_BODY, fontSize: 13, color: INK, border: "1px solid " + (fl.q ? "#0f1520" : HAIR), borderRadius: 10, padding: "0 12px", height: 40, background: "#fff", flex: "1 1 220px", minWidth: 0, maxWidth: 320 } }),
+      sel("status", [["alle", en ? "All statuses" : "Alle Status"], ["frei", en ? "Available now" : "Sofort verf\u00fcgbar"], ["30", en ? "Ends within 30 days" : "Endet in 30 Tagen"], ["180", en ? "Ends within 6 months" : "Endet in 6 Monaten"], ["365", en ? "Contract until (12 months)" : "Vertrag bis (12 Monate)"]], "Status"),
+      sel("pos", [["", en ? "All positions" : "Alle Positionen"], ["Torwart", "Torwart"], ["Abwehr", "Abwehr"], ["Mittelfeld", "Mittelfeld"], ["Sturm", "Sturm"]], "Position"),
+      sel("liga", [["", en ? "All leagues" : "Alle Ligen"]].concat(ligen.map(l => [l, l])), "Liga"),
+      sel("alter", [["", en ? "All ages" : "Alle Altersklassen"], ["21", "U21"], ["23", "U23"], ["25", "U25"], ["30", "U30"]], "Alter"),
+      sel("mw", [["", en ? "All market values" : "Alle Marktwerte"], ["vorhanden", en ? "With market value" : "Mit Marktwert"], ["1m", en ? "Above \u20ac1m" : "\u00fcber 1 Mio. \u20ac"], ["5m", en ? "Above \u20ac5m" : "\u00fcber 5 Mio. \u20ac"]], "Marktwert"),
+      sel("quelle", [["", en ? "All sources" : "Alle Quellen"]].concat(quellen.map(q2 => [q2, q2])), "Quelle")),
+    h("div", { style: { display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED } },
+      h("span", { style: { fontWeight: 800, color: INK } }, dbFmtZahl(gefiltert.length) + " " + (en ? (gefiltert.length === 1 ? "contract" : "contracts") : (gefiltert.length === 1 ? "Vertrag" : "Vertr\u00e4ge"))),
+      aktivFilter ? h("button", { onClick: () => setFl(VT_LEER), style: { cursor: "pointer", border: "none", background: "none", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "#b04a3a", padding: 0 } }, "\u2715 " + (en ? "Reset filters" : "Filter zur\u00fccksetzen") + " (" + aktivFilter + ")") : null,
+      h("label", { style: { marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" } }, en ? "Sort:" : "Sortierung:", h("select", { value: fl.sort, onChange: e => setFl(Object.assign({}, fl, { sort: e.target.value })), style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: INK, border: "1px solid " + HAIR, borderRadius: 9, padding: "6px 8px", background: "#fff" } }, [["dringlichkeit", en ? "Urgency" : "Dringlichkeit"], ["ende", en ? "Contract end" : "Vertragsende"], ["mw", en ? "Market value" : "Marktwert"], ["score", "TW Opportunity Score"], ["alter", en ? "Age" : "Alter"], ["name", "Name"]].map(([v, l]) => h("option", { key: v, value: v }, l))))));
   const status = r => { const st = vtStatus(r); return h("span", { style: { display: "inline-flex", flexDirection: "column", gap: 3, alignItems: "flex-start" } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: st.dringend ? 800 : 600, color: st.dringend ? "#b07a05" : "#3f4650", whiteSpace: "nowrap" } }, st.text), st.badge ? h("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: .6, textTransform: "uppercase", color: "#b07a05", background: "#fdf3da", borderRadius: 999, padding: "2px 8px" } }, st.badge) : null); };
   const score = r => { const sc = vtScore(r); return h("span", { style: { display: "inline-flex", alignItems: "center", gap: 5, whiteSpace: "nowrap" } }, h("span", { style: { display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 40, height: 26, borderRadius: 8, background: scoreColor(sc), color: "#fff", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 15 } }, sc), h("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, color: MUTED } }, "/100")); };
   const th = (lab, al) => h("th", { key: lab, style: { position: "sticky", top: 0, zIndex: 2, background: "#f8fafb", borderBottom: "1px solid " + HAIR, padding: "10px 10px", textAlign: al || "left", fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: .7, textTransform: "uppercase", color: "#667085", whiteSpace: "nowrap" } }, lab, lab.indexOf("Opportunity") >= 0 ? h(ScoreInfo, { kind: "opportunity", size: 12 }) : null);
   const td = (kinder, al) => h("td", { style: { padding: "9px 10px", textAlign: al || "left", fontFamily: FONT_BODY, fontSize: 12.5, color: "#3f4650", whiteSpace: "nowrap", verticalAlign: "middle", borderBottom: "1px solid " + HAIR } }, kinder);
   if (db === null && !(radar || []).length) return h("div", { style: { padding: "10px 4px" } }, [0, 1, 2].map(i => h("div", { key: i, className: "tw-skel", style: { height: 46, marginBottom: 8 } })));
   if (!rows.length) return h(EmptyState, { icon: "\u{1F4C4}", title: en ? "No entries yet" : "Noch keine Eintr\u00e4ge", text: t("ch_ausl_none") });
-  if (mobil) return h("div", { style: { display: "flex", flexDirection: "column", gap: 8 } }, rows.map(r => h("div", { key: r.pid || r.name, className: "tw-card", onClick: () => r.pid && onOpen(r.pid, r.name, r.team), style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 12, padding: "10px 12px", cursor: r.pid ? "pointer" : "default" } },
+  const keineTreffer = h("div", { style: { background: "#fff", border: "1px dashed " + HAIR, borderRadius: 14, padding: "36px 20px", textAlign: "center", fontFamily: FONT_BODY, fontSize: 13.5, color: MUTED } }, en ? "No contracts match these filters." : "Keine Vertr\u00e4ge f\u00fcr diese Filter.", " ", h("button", { onClick: () => setFl(VT_LEER), style: { cursor: "pointer", border: "none", background: "none", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, color: "#0e7490", padding: 0 } }, en ? "Reset filters" : "Filter zur\u00fccksetzen"));
+  if (mobil) return h("div", null, filterleiste, !gefiltert.length ? keineTreffer : h("div", { style: { display: "flex", flexDirection: "column", gap: 8 } }, gefiltert.map(r => h("div", { key: r.pid || r.name, className: "tw-card", onClick: () => r.pid && onOpen(r.pid, r.name, r.team), style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 12, padding: "10px 12px", cursor: r.pid ? "pointer" : "default" } },
     h("div", { style: { display: "flex", alignItems: "center", gap: 10 } }, h(DbFoto, { x: r, size: 36 }), h("div", { style: { flex: 1, minWidth: 0 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, r.name), h("div", { style: { display: "flex", alignItems: "center", gap: 5, fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, h(ClubLogo, { name: r.team, size: 14 }), [r.team, r.pos, r.age ? r.age + (en ? " yrs" : " J.") : ""].filter(Boolean).join(" \u00b7 "))), score(r)),
-    h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 8, flexWrap: "wrap" } }, status(r), h("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "#3f4650" } }, [r.mw ? r.mw : (en ? "no market value" : "kein Marktwert"), r.ende && !r.frei ? vtFmt(r.ende) : ""].filter(Boolean).join(" \u00b7 "))))));
-  return h("div", { className: "tw-vttable", style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 14, overflow: "auto", maxHeight: "72vh" } },
+    h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 8, flexWrap: "wrap" } }, status(r), h("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "#3f4650" } }, [r.mw ? r.mw : (en ? "no market value" : "kein Marktwert"), r.ende && !r.frei ? vtFmt(r.ende) : ""].filter(Boolean).join(" \u00b7 ")))))));
+  return h("div", null, filterleiste, !gefiltert.length ? keineTreffer : h("div", { className: "tw-vttable", style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 14, overflow: "auto", maxHeight: "72vh" } },
     h("table", { style: { width: "100%", borderCollapse: "separate", borderSpacing: 0, minWidth: 980 } },
       h("thead", null, h("tr", null, th(en ? "Player" : "Spieler"), th(en ? "Age" : "Alter", "right"), th("Position"), th(en ? "Club/League" : "Verein/Liga"), th("Status"), th(en ? "Contract end" : "Vertragsende", "right"), th(en ? "Market value" : "Marktwert", "right"), th(en ? "Source" : "Quelle"), th("TW Opportunity Score", "right"))),
-      h("tbody", null, rows.map(r => h("tr", { key: r.pid || r.name, className: "tw-vtrow", onClick: () => r.pid && onOpen(r.pid, r.name, r.team), style: { cursor: r.pid ? "pointer" : "default" } },
+      h("tbody", null, gefiltert.map(r => h("tr", { key: r.pid || r.name, className: "tw-vtrow", onClick: () => r.pid && onOpen(r.pid, r.name, r.team), style: { cursor: r.pid ? "pointer" : "default" } },
         td(h("span", { style: { display: "inline-flex", alignItems: "center", gap: 9 } }, h(DbFoto, { x: r, size: 32 }), h("span", { style: { display: "inline-flex", flexDirection: "column" } }, h("span", { style: { fontWeight: 800, color: INK, fontSize: 13.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 220 } }, r.name), r.nat ? h("span", { style: { fontSize: 11, color: MUTED } }, r.nat) : null))),
         td(r.age || "\u2013", "right"), td(r.pos || "\u2013"),
         td(h("span", { style: { display: "inline-flex", alignItems: "center", gap: 7 } }, h(ClubLogo, { name: r.team, size: 18 }), h("span", { style: { display: "inline-flex", flexDirection: "column" } }, h("span", { style: { fontWeight: 700, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 190 } }, r.team), h("span", { style: { fontSize: 11, color: MUTED } }, r.league || "")))),
@@ -3890,7 +3938,7 @@ function VertragTabelle({ radar, onOpen }) {
         td(r.frei ? h("span", { style: { color: MUTED } }, "\u2013") : (r.ende ? vtFmt(r.ende) : "\u2013"), "right"),
         td(r.mw ? h("span", { style: { fontWeight: 800, color: "#0b6b3e" } }, r.mw) : "\u2013", "right"),
         td(h("span", { title: r.note || "", style: { color: MUTED } }, r.quelle)),
-        td(score(r), "right"))))));
+        td(score(r), "right")))))));
 }
 const MK_NOTES_KEY = "tw_notes", MK_RECENT_KEY = "tw_recent";
 const mkLese = (k, fb) => { try { const v = JSON.parse(localStorage.getItem(k) || "null"); return v === null ? fb : v; } catch (e) { return fb; } };
