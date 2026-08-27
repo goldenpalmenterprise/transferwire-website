@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-26-be mobil-titel -->
+<!-- tw-build: 2026-08-27-bg probetraining-radar -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -4240,6 +4240,29 @@ function MobilNav({ view, setView, items }) {
         h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderBottom: "1px solid " + HAIR } }, h("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 20, letterSpacing: 1, color: INK } }, "TRANSFER", h("span", { style: { color: "#149a59" } }, "WIRE")), h("button", { onClick: () => setOffen(false), "aria-label": en ? "Close" : "Schlie\u00dfen", style: { width: 36, height: 36, borderRadius: 99, border: "1px solid " + HAIR, background: "#fff", cursor: "pointer", fontSize: 16, fontWeight: 800, color: "#3a4150" } }, "\u2715")),
         h("div", { style: { padding: "8px 8px 16px", display: "flex", flexDirection: "column", gap: 2 } }, items.map(([k, label]) => { const aktiv = view === k || (k === "community" && (view === "networking" || view === "moderation")); return h("button", { key: k, onClick: () => { setView(k); setOffen(false); try { window.scrollTo({ top: 0 }); } catch (e) {} }, style: { display: "flex", alignItems: "center", gap: 12, width: "100%", textAlign: "left", cursor: "pointer", border: "none", borderRadius: 12, padding: "12px 12px", background: aktiv ? "#0f1520" : "transparent", color: aktiv ? "#fff" : INK, fontFamily: FONT_BODY, fontSize: 15, fontWeight: 800, minHeight: 48 } }, h("span", { style: { width: 34, height: 34, borderRadius: 10, background: aktiv ? "rgba(255,255,255,.12)" : "#f1f1ec", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 17, flexShrink: 0 } }, NAV_ICONS[k] || "\u2022"), h("span", { style: { flex: 1 } }, label), h("span", { style: { width: 8, height: 8, borderRadius: 99, background: NAV_FARBE(k), flexShrink: 0 } })); })))), document.body) : null);
 }
+function VereinGeprueft({ pid }) {
+  const h = React.createElement; const en = LANG === "en";
+  const [info, setInfo] = useState(null);
+  useEffect(() => { if (!pid) return; let ok = true; fetch("/db/players?player_id=eq." + encodeURIComponent(pid) + "&select=team,team_source,team_updated_at", { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(rows => { if (ok && Array.isArray(rows) && rows[0]) setInfo(rows[0]); }).catch(() => {}); return () => { ok = false; }; }, [pid]);
+  if (!info || !info.team_updated_at) return null;
+  const q = { Spiel: en ? "last match" : "letztes Spiel", Kader: en ? "squad list" : "Kaderliste", Meldung: en ? "confirmed transfer report" : "best\u00e4tigte Transfermeldung" }[info.team_source] || info.team_source || "";
+  return h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "#149a59", marginTop: 4, fontWeight: 700 } }, "\u2713 " + (en ? "Club verified on " : "Verein gepr\u00fcft am ") + fmtDate(info.team_updated_at) + (q ? " \u00b7 " + (en ? "source: " : "Quelle: ") + q : ""));
+}
+const PT_RX = /probetraining|testspieler|trainingsgast|gastspieler|vereinslos|vertragslos|free agent|svincolato|agente libre|sans club|transfervrij|probetrainer/i;
+function ProbetrainingRadar({ news, onOpen }) {
+  const h = React.createElement; const en = LANG === "en";
+  const liste = useMemo(() => (news || []).filter(n => PT_RX.test(String(n.headline || "") + " " + String(n.summary || "") + " " + String(n.positionNeeded || ""))).slice(0, 12), [news]);
+  return h("div", { style: { marginTop: 18 } },
+    h("div", { style: { display: "flex", alignItems: "center", gap: 10, margin: "4px 0 8px", flexWrap: "wrap" } },
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, color: "#0e7490", textTransform: "uppercase", letterSpacing: 1 } }, en ? "Trial-training radar \u00b7 press & network" : "Probetraining-Radar \u00b7 Presse & Netzwerk"),
+      h("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, en ? "Reports mentioning trial training, test players or free agents \u2013 the typical lower-league signal." : "Meldungen mit Probetraining, Testspielern oder vereinslosen Spielern \u2013 das typische Unterhaus-Signal.")),
+    !liste.length ? h("div", { style: { background: "#fff", border: "1px dashed " + HAIR, borderRadius: 14, padding: "18px 16px", fontFamily: FONT_BODY, fontSize: 13, color: MUTED } }, en ? "No trial-training reports in the current feed. New reports appear here automatically." : "Aktuell keine Probetraining-Meldungen im Feed. Neue Meldungen erscheinen hier automatisch.") :
+    h("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 10 } }, liste.map((n, i) => h("div", { key: n.id || i, onClick: () => onOpen && onOpen(n), style: { cursor: "pointer", background: "#fff", border: "1px solid " + HAIR, borderLeft: "3px solid #0e7490", borderRadius: 12, padding: "11px 14px" } },
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .6, textTransform: "uppercase", color: "#0e7490", marginBottom: 4 } }, [n.league, n.publishedAt ? fmtDate(n.publishedAt) : ""].filter(Boolean).join(" \u00b7 ")),
+      h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 15.5, fontWeight: 700, color: INK, lineHeight: 1.2 } }, n.headline),
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#4a4a48", marginTop: 4, lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" } }, n.summary),
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, marginTop: 6 } }, [n.toClub || n.fromClub, (n.sources && n.sources[0] && n.sources[0].name) || n.sourceName || ""].filter(Boolean).join(" \u00b7 "))))));
+}
 function NeedCard({
   item,
   highlight,
@@ -6876,7 +6899,7 @@ function TransferApp({
       cache: "no-store"
     }).then(r => r.json()).then(raw => {
       const d = normResp(raw);
-      setPlDetail(d && d.ok ? d : null);
+      setPlDetail(d && d.ok ? Object.assign({}, d, { pid: pid }) : null);
       setPlDetailLoading(false);
     }).catch(() => {
       setPlDetail(null);
@@ -8156,7 +8179,7 @@ function TransferApp({
       marginTop: 3,
       lineHeight: 1.5
     }
-  }, d.grund)))))), view === "players" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, d.grund))))), /*#__PURE__*/React.createElement(ProbetrainingRadar, { news: news, onOpen: n => setMSel(n) })), view === "players" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       background: "transparent",
       border: "none",
@@ -9494,7 +9517,7 @@ function TransferApp({
         color: MUTED,
         marginTop: 3
       }
-    }, d.team, " · ", d.league, " · ", d.pos, d.age ? ` · ${d.age} J.` : "", d.nat ? ` · ${d.nat}` : "", d.height ? ` · ${d.height}` : "", d.weight ? ` · ${d.weight}` : "", geb ? ` · ${LANG === "en" ? "b." : "geb."} ${geb}` : "")), /*#__PURE__*/React.createElement("button", {
+    }, d.team, " · ", d.league, " · ", d.pos, d.age ? ` · ${d.age} J.` : "", d.nat ? ` · ${d.nat}` : "", d.height ? ` · ${d.height}` : "", d.weight ? ` · ${d.weight}` : "", geb ? ` · ${LANG === "en" ? "b." : "geb."} ${geb}` : ""), /*#__PURE__*/React.createElement(VereinGeprueft, { pid: plDetail.pid || d.player_id || d.pid })), /*#__PURE__*/React.createElement("button", {
       onClick: () => {
         if (on) removeWatch("spieler", d.name);else addWatch("spieler", d.name);
       },
