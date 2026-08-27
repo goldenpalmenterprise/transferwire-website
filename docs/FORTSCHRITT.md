@@ -702,3 +702,36 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
   je Spieler/Ziel (frühestes Datum); Anreicherung Position/Alter/Nationalität aus players → Transfernews (reliability 5, Quelle
   „API-Football (Transferregister)“, news_id af-<pid>-<datum>). Kein KI-Aufruf. Test: Di Gregorio (Leihe Juventus→Bournemouth), Delap
   (Chelsea→Nottingham Forest) korrekt angelegt.
+
+## 27.08. 03:30–07:35 – PUNKTE 1–5 AUS DEM QUELLEN-KONZEPT (Boss: „Go, 1–5“)
+### 1 Vertrauensregister (Quellentabelle, Spalten vertrauen + trefferquote)
+- Alle 1.112 Quellen eingestuft (Heuristik aus Master-Liste-Stufe, Typ, Gruppe, Name): A1 98 offizielle Quellen, A2 156 Qualitäts-/
+  Fachredaktionen (inkl. benannte Reporter auf X: Romano, Ornstein, Bogert, Falk, Süzgün, Manav, Sabuncuoğlu, Merlo), B 434 Fachmedien
+  (Transfermarkt-Seiten B, Gerüchteseiten C), C 43 Aggregatoren/Boulevard, D 17 Social/anonym (Club-Weibo, MLS-Transfers-X, bold.dk-X …).
+- KI-Leser des Crawlers: Vertrauensstufe im Prompt, reliability strikt A1 5/4, A2 4/3, B 3/2, C 2, D 1. RSS-Zweig: Vorfilter hängt je Zeile
+  „| Vertrauen: X“ an (Host- und Namensabgleich mit der Quellentabelle), System-Prompt mit denselben Regeln; „fix“ aus C/D bleibt geruecht.
+  RSS-Modell auf gpt-5-mini (reasoning low) umgestellt, Takt 2 h (544 Feeds), Deadline-Day-Crons bleiben.
+- Befund nebenbei: Im n8n-Code-Knoten ist die URL-Klasse nicht verfügbar → Host-Extraktion per Regex; dadurch war im Vorfilter bislang jede
+  Direkt-Feed-Quelle als „unbekannt“ gruppiert (Fairness-Rotation lief nur über Google-News-Publisher) – behoben.
+- Spiegel „TW Quellen-Spiegel: Vertrauen & Trefferquote (täglich 5:40)“ N0TZDpClMkxQlHJb → transferwire.quellen_vertrauen (id, quelle_name,
+  host, vertrauen, trefferquote, typ, land; PostgREST-lesbar, 1.112 Zeilen, 633 echte Hosts).
+- Website (Marker bi–bl): TW_QV lädt das Register (5 Seiten à 200), quellenStufen()/besteStufe() ordnen Meldungen über Host (Basis-Domain)
+  oder Namen (exakt vor Teilstring, best-eingestuft) zu; generische Social-Hosts (x.com, t.me, weibo, facebook, youtube) werden nicht auf
+  Meldungen übertragen. Signalstärke: A1 +6, A2 +3, C −6, D −12, Trefferquote ±5 um Basis 20 %. Label „Quellenvertrauen: hoch (A2 ·
+  Qualitätsmedium)“.
+### 2 Bestätigungsregel
+- istBestaetigt(): reliability 5 ODER eine A1-Quelle ODER ≥2 unabhängige A1/A2-Hosts. Fix-Karten ohne Bestätigung zeigen orange „Als fix
+  gemeldet · noch nicht offiziell bestätigt · NN/100“, bestätigte „✓ Bestätigt · offizielle Vereinsmeldung/zwei unabhängige Quellen“.
+  Filter/Zähler unverändert. rt68 live: Newsfeed 60 Karten, 9 bestätigt, 3 unbestätigte Fix; FIXER-DEAL-Ansicht 60 Karten: 15 bestätigt,
+  45 „als fix gemeldet, noch nicht offiziell bestätigt“.
+### 3 Vereinsgenaue Abdeckung
+- 364 Google-News-Vereinsfeeds (docs/quellen/vereinsfeeds_2026-08-27.sql) für alle Vereine der 20 Ligen (Landessprache, Signalwörter je
+  Liga, Aliase z. B. FC Bayern, PSG, Inter Mailand, LASK, Vitória Guimarães, chinesische Vereinsnamen); 38 DE-Klubs hatten bereits Feeds.
+  Bestand: 1.112 Quellen, 544 RSS, 364 Vereinsfeeds (gruppe verein, prioritaet 2, vertrauen B).
+### 4 Wöchentlicher Abdeckungs-Check „TW Wächter: Vereins-Abdeckung (Mo 8:30)“ J6PJYwujKjnSR6qr (aktiv)
+- Vereine aus players (≥12 Spieler) × Meldungen 7 Tage (to/from/headline, normalisierter Kern) × Quellen (Name enthält Kern, Lesestatus);
+  Mail mit Zahlen je Liga und Lückenliste. Erstlauf: 405 Vereine, 75 ohne Meldung, 11 ohne Quelle (Woche mit OpenAI-Sperre).
+### 5 Quellen-Trefferquote „TW Wächter: Quellen-Trefferquote (Mo 8:45)“ EaHE49hWsOAeOE1X (aktiv)
+- Gerüchte (30 Tage, ≥10 Tage alt) je Quelle vs. spätere Bestätigungen (fix/leihe, reliability ≥4 oder API-Register; Name sortiert +
+  Vereinskern). Schreibt Quote nur bei Freigabe (≥20 bestätigte Gerüchte und ≥40 Bestätigungen im Fenster, min. 10 Gerüchte je Quelle),
+  sonst Report ohne Schreiben. Erstlauf zeigte 0–5 % (OpenAI-Sperre, kaum Bestätigungen) → vorläufige Quoten zurückgesetzt (NULL).
