@@ -750,3 +750,32 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
 - Testlauf 08:03: 9 Kandidaten nach Filter (u. a. fnp.de „Eintracht Frankfurt plant Last-Minute-Transfers“, blueprint.ng Arsenal/Álvarez,
   Sounders-Brief) – vor der Verschärfung noch Politik-/Regionaltreffer (trend.at „Berlin“, „Standard“ als Zeitung); danach strenger Filter.
   KI-Schritt blockiert bis 1.9. (OpenAI-Limit). Kosten ab dann ≈ 12 Läufe × ≤150 Zeilen gpt-5-mini ≈ 5–10 Cent/Tag.
+
+## 27.08. 08:25–10:50 – SPIELERDATEN AKTUELL HALTEN (Boss: Marktwerte für alle, Änderungen sofort, spezialisierter Agent)
+### Marktwerte
+- Befund 08:25: 2.389 von 15.338 Spielern (15,6 %) mit Marktwert – nur die 6 großen Ligen (Handnachzug 26.08.), 14 Ligen bei 0 %, weil der
+  Transfermarkt-Import (xZDGcMSlCMFeofXw, Zeiger tm_state.liga_index) nur EINE Liga je Nacht rotiert.
+- Backfill: Trigger vorübergehend auf */5 Minuten → 27 Läufe (je ≈45 s), alle 20 Ligen einmal durch. Stand 10:44: 8.074 Spieler (52,6 %)
+  mit Marktwert, 8.360 mit TM-Vertragsende. Je Liga: Bundesliga 83 %, Premier League 73 %, 2. Bundesliga 73 %, Schweiz 61 %, Serie B 60 %,
+  Serie A 57 %, Ligue 1/LaLiga 55 %, Eredivisie 54 %, Jupiler/Ligue 2 52 %, Championship 51 %, 3. Liga/Süper Lig 50 %, Superligaen 49 %,
+  Liga Portugal 46 %, Österreich 45 %, MLS 44 %, LaLiga 2 40 %, CSL 27 %. Rest: Namens-Mismatch (Transliteration, Kurznamen) oder Spieler
+  ohne TM-Eintrag (Nachwuchs/Reserve) → nächster Schritt „Matching-Verbesserung“ (TM-ID/fuzzy), wenn gewünscht.
+- Trigger zurückgestellt (publiziert): 2:40 + 3:10 → zwei Ligen je Nacht, jede Liga alle 10 Tage frisch.
+### NEU „TW Spieler-Aktualisierer (alle 30 Min, aus Meldungen)“ C1ydwWyabs7oba1I (aktiv, Cron 10,40; SDK docs/n8n-spieler-aktualisierer*.js)
+- Ohne KI. Wasserzeichen tw_status.aktualisierer_bis → neue Transfernews (createdAt > Wasserzeichen, type fix/leihe/vertrag/verfuegbar) →
+  Verletzungen (injuries, 10 Tage) → players → Entscheiden: Spieler-Zuordnung über normalisierten Namen (Tokenreihenfolge egal), bei
+  Initialen („L. Delap“) Nachname + Anfangsbuchstabe, bei Mehrdeutigkeit Vereinskontext (from/to_club); Regeln: fix/leihe ab reliability 4 und
+  Zielverein in players bekannt → team/league/letzter_verein/team_source 'Meldung'; verfuegbar ab 3 → team 'Vereinslos'; vertrag ab 3 mit
+  Jahr im Text („bis 2028“, „verlängert … 2028“) → contract_until YYYY-06-30, contract_source 'Meldung'; Verletzungen → fitness_note
+  „Verletzt: <Grund> · seit DD.MM.“ (Grund-Filter: keine Sperren, Trainerentscheidungen, Inactive, Transferverhandlungen, Leihvereinbarungen),
+  Genesene zurück auf leer. Schreibt players (UPDATE via unnest), Datentabelle „TW Spieler“ (team/league, damit der Spiegel nichts zurückdreht),
+  Historie spieler_aenderungen (player_id, feld, alt, neu, quelle, news_id, reliability) und das Wasserzeichen.
+- Erstläufe: 90 Meldungen → 4 Vereinswechsel (Jensen→Lorient via Foot Mercato/offiziell, Di Gregorio→Bournemouth, Kellyman→Strasbourg,
+  Hadjam→Brighton via Transferregister); Verletzungen: 512 Profile mit Ausfall versehen (Witsel, Nkunku, Reus, Trippier, Musiala, de Ligt …).
+  Vorher: injuries hatte 815 Zeilen, aber kein einziges Profil einen fitness_note – Lücke geschlossen.
+- Website (Marker bm): VereinGeprueft zeigt zusätzlich die letzten 3 Änderungen (Datum · Feld: alt → neu (Quelle)) aus
+  /db/spieler_aenderungen; PostgREST-Lesezugriff für web_anon.
+### Aktualisierungs-Takte jetzt
+- Verein/Liga: ≤30 Min nach bestätigter Meldung (Aktualisierer) + täglich 5:00 Kader-Abgleich (API-Kader/Spiele) + 6:40 Transferregister.
+- Verletzungen: 6:45/13:00 API-Football + 6:50 Sportmonks → ≤30 Min später im Profil. Vertragsende: aus Meldungen ≤30 Min, TM alle 10 Tage.
+- Marktwerte: TM alle 10 Tage je Liga (Quelle aktualisiert selbst nur schubweise). Kosten: 0 € KI.
