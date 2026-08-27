@@ -637,3 +637,35 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
 - Kosten-Wächter 25.08. 23:50: 0,18 € (24 h) – nur weil OpenAI blockiert; normaler Betrieb (24.08. nach Kalibrierung) ≈ 3 $/Tag ≈ 2,8 €, damit
   unter dem Ziel 5–6 €/Tag. Auffällig: „TW Analyst: Signale → Meldungen“ läuft auf gpt-5.6-terra (0,17 $ für 5 Läufe) – im Rahmen, aber teuerstes
   Modell im Stundentakt; bei Bedarf auf mini umstellen (≈ 0,02 $/Tag).
+
+## 26.08. 14:30 – 27.08. 02:30 – KOSTEN-ERKLÄRUNG, KI-BREMSE, IDEEN-UMSETZUNG (Boss-Auftrag, Screenshots OpenAI Limits/Billing)
+### Befund Kosten
+- OpenAI-Zähler August 845,75 $ bei hartem Limit 500 $ (Reset 1.9.); Guthaben 47,51 $; Boss lässt das Limit bis Monatsende stehen.
+  Tageskosten aus n8n-Daten (Listenpreis-Schätzung): 20.08. 1,20 € · 21.08. 2,80 € · 22.08. 4,55 € · 23.08. 8,70 € · 24.08. 12,70 € (Bedarfs-
+  Scout 466 Vereine, abends behoben) · 25.08. 0,18 € (ab 05:20 blockiert). Der Großteil der 845 $ stammt aus 1.–19.08. (Bedarfs-Scout/
+  Vertrags-Scout auf gpt-5.5, bis 14.08. zusätzlich n8n-Cloud). n8n-Cloud geprüft: seit 14.08. kein erfolgreicher Lauf (4.080 Fehlläufe seit
+  24.08., alle ~40 ms) → verbraucht nichts; Kündigung vor 29.08. bleibt To-do des Boss.
+### KI-Bremse (automatisch, ohne OpenAI-Eingriff)
+- Tabelle transferwire.tw_status (key/value): ki_bremse (true/false, manuell setzbar) + kosten_24h_eur (vom Kosten-Wächter). Rechte: PUBLIC.
+- Kosten-Wächter NZzqmm9gWrQWu4N1 → „TW Kosten-Wächter (4× täglich, KI-Bremse)“: Cron 50 5,11,17,23; schreibt kosten_24h_eur; Mail nur
+  um 23:50 oder bei Alarm (>6 €). Testlauf 02:14: sauber (nach GRANT).
+- Budget-Gate (Postgres-Read + IF „KI frei?“ direkt nach dem Trigger, fail-open bei DB-Fehler) in: Bedarfs-Scout DE 4BjusAxYNt1uvLue,
+  Analyst Signale→Meldungen ifOFnqTVjThmiFEJ, Radar-Agent qoJpIltSvfTGt3Iw, Quellen-Voll-Leser BG4HJKnw43iKL55d, Vertrags-Scout
+  3MzOmjVwt8GaLvAs, Frühstarter-Scout TKgRH6vrY51HAgqt (alle publiziert). Scharftest: ki_bremse=true → Frühstarter-Scout stoppte am Gate
+  (Ausgabe false-Zweig, keine weiteren Knoten); danach zurück auf false.
+### Kader-Abgleich 7cz9uum6cWPGK8Sm erweitert (publiziert)
+- Neuer Knoten „Meldungen laden“ (n8n-DB, Transfernews type='fix', reliability ≥ 4, 14 Tage). Vergleich: Alias-Erkennung Spiel-Name ↔ Kader-Name
+  (≥4 Spieler und ≥40 % je Spiel-Team), Evidenz Spiel > Kader > Meldung; Meldungs-Verein bleibt 21 Tage vor Kader-Überschreibung geschützt;
+  Widersprüche (Spiel vs. Kader, Spiel >7 Tage alt) als Liste; Filter „Nur Aenderungen“ vor Datentabellen-Update; Report mit Quellen,
+  Aliasen, Widersprüchen. Erstlauf mit Meldungs-Evidenz: 30 Korrekturen (u. a. Goretzka→Aston Villa, Nkunku→Leipzig, Veerman→BVB).
+### Website (Commits 7b7238e, a374ed0; Marker bg/bh)
+- VereinGeprueft: liest /db/players?player_id=eq.X&select=team,team_source,team_updated_at → „✓ Verein geprüft am 26.08.2026 · Quelle:
+  Kaderliste/letztes Spiel/bestätigte Transfermeldung“ in Vollprofil (plDetail.pid gesetzt) und Schnellansicht (rt67: Schnellansicht ✓;
+  Vollprofil-Anzeige im Test nicht erfasst – bei Gelegenheit nachprüfen).
+- ProbetrainingRadar (Vertragsradar, unter den drei unveränderten Kategorien): Feed-Meldungen mit Probetraining/Testspieler/Trainingsgast/
+  vereinslos/vertragslos/free agent…, bis 12 Karten, Klick öffnet Meldung; Leerzustand. rt66: 12 Karten.
+### Quellen
+- 13 offizielle Unterhaus-Quellen (typ web, gruppe offiziell) nach Server-Prüfung: Dynamo Dresden, Waldhof, 1860, Osnabrück, Ingolstadt,
+  VfB II, Ulm, DFB 3. Liga, Verbände WDFV/NFV/NOFV/BFV, Regionalliga Südwest. Jetzt 625 Quellen (180 RSS, 336 web). 15 Vereinsseiten ohne
+  brauchbare News-URL (404/Bot-Schutz/Umleitung auf Nachwuchs) ausgelassen – Google-News-Suchen decken sie ab.
+- Zurückgestellt (kostet KI-Geld): Telegram-Kanäle von Regionalliga-Vereinen, Pressekonferenz-Transkripte.
