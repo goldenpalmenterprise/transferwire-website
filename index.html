@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-27-bh quick-geprueft -->
+<!-- tw-build: 2026-08-27-bi vertrauen -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -2419,24 +2419,65 @@ const twRelTime = iso => {
   if (diff < 1440) return en ? Math.round(diff / 60) + " h ago" : "vor " + Math.round(diff / 60) + " Std.";
   return en ? Math.round(diff / 1440) + " d ago" : "vor " + Math.round(diff / 1440) + " Tg.";
 };
+// Vertrauensregister der Quellen (A1..D + Trefferquote), gespiegelt aus der Quellentabelle (/db/quellen_vertrauen)
+const TW_QV = { host: {}, name: {}, geladen: false, hoerer: [] };
+const qvHost = u => { try { return new URL(String(u)).hostname.replace(/^www\./, "").toLowerCase(); } catch (e) { return ""; } };
+function ladeQuellenVertrauen() {
+  if (TW_QV.geladen || TW_QV.laedt) return; TW_QV.laedt = true;
+  const seite = off => fetch("/db/quellen_vertrauen?select=quelle_name,host,vertrauen,trefferquote&offset=" + off + "&limit=200", { credentials: "omit", cache: "no-store" }).then(r => r.json()).catch(() => []);
+  Promise.all([0, 200, 400, 600, 800].map(seite)).then(seiten => {
+    const rang = { A1: 1, A2: 2, B: 3, C: 4, D: 5 };
+    for (const rows of seiten) { if (!Array.isArray(rows)) continue; for (const q of rows) { const v = String(q.vertrauen || "").toUpperCase(); if (!rang[v]) continue; const eintrag = { v: v, q: q.trefferquote == null ? null : Number(q.trefferquote) };
+      const h = String(q.host || ""); if (h && !/news\.google/.test(h)) { const base = h.split(".").slice(-2).join("."); for (const k of [h, base]) { if (!TW_QV.host[k] || rang[TW_QV.host[k].v] > rang[v]) TW_QV.host[k] = eintrag; } }
+      const n = String(q.quelle_name || "").toLowerCase().replace(/\s*\((rss|x)\)\s*$/, "").trim(); if (n && n.length >= 4 && !/^(gn |google news|journalist:)/.test(n)) { if (!TW_QV.name[n] || rang[TW_QV.name[n].v] > rang[v]) TW_QV.name[n] = eintrag; } } }
+    TW_QV.geladen = true; TW_QV.hoerer.forEach(f => { try { f(); } catch (e) {} });
+  });
+}
+const QV_RANG = { A1: 1, A2: 2, B: 3, C: 4, D: 5 };
+const QV_LABEL = { A1: ["offizielle Quelle", "official source"], A2: ["Qualit\u00e4tsmedium", "quality outlet"], B: ["Fachmedium", "specialist outlet"], C: ["Aggregator/Boulevard", "aggregator/tabloid"], D: ["Social/anonym", "social/anonymous"] };
+function quellenStufen(it) {
+  const out = []; const srcs = (it && it.sources) || [];
+  const finde = (url, name) => { const h = qvHost(url); if (h && TW_QV.host[h]) return TW_QV.host[h]; const base = h ? h.split(".").slice(-2).join(".") : ""; if (base && TW_QV.host[base]) return TW_QV.host[base]; const nm = String(name || "").toLowerCase(); if (nm.length >= 4) { for (const k of Object.keys(TW_QV.name)) { if (nm.indexOf(k) >= 0 || k.indexOf(nm) >= 0) return TW_QV.name[k]; } } return null; };
+  for (const sq of srcs) { const e = finde(sq && sq.url, sq && sq.name); if (e) out.push(Object.assign({ host: qvHost(sq && sq.url) || String((sq && sq.name) || "") }, e)); }
+  if (!out.length && it && (it.sourceName || it.source_name)) { const e = finde("", it.sourceName || it.source_name); if (e) out.push(Object.assign({ host: it.sourceName || it.source_name }, e)); }
+  return out;
+}
+const besteStufe = it => { const st = quellenStufen(it); if (!st.length) return null; return st.reduce((a, b) => QV_RANG[b.v] < QV_RANG[a.v] ? b : a); };
+// Best\u00e4tigungsregel (Punkt 2): fix gilt nur als best\u00e4tigt mit offizieller Quelle (A1/API-Register, reliability 5) oder zwei unabh\u00e4ngigen A1/A2-Quellen
+function istBestaetigt(it) {
+  if (!it) return false; const r = Number(it.reliability) || 0; const st = quellenStufen(it);
+  if (r >= 5) return true;
+  if (st.some(x => x.v === "A1")) return true;
+  const hosts = new Set(st.filter(x => x.v === "A1" || x.v === "A2").map(x => x.host)); return hosts.size >= 2;
+}
 function signalScore(it) {
   const r = Math.max(0, Math.min(5, Number(it && it.reliability) || 0));
   const base = [0, 28, 45, 62, 78, 92][r];
   const n = ((it && it.sources) || []).length;
-  return Math.min(99, base + Math.min(2, Math.max(0, n - 1)) * 4 + (it && it.fee ? 2 : 0));
+  let sc = base + Math.min(2, Math.max(0, n - 1)) * 4 + (it && it.fee ? 2 : 0);
+  const b = besteStufe(it);
+  if (b) { sc += ({ A1: 6, A2: 3, B: 0, C: -6, D: -12 })[b.v] || 0; if (b.q != null && !isNaN(b.q)) sc += Math.max(-5, Math.min(5, Math.round((b.q - 0.5) * 10))); }
+  return Math.max(5, Math.min(99, sc));
 }
 const istOffiziell = it => /offiziell|official|\bbest\u00e4tigt\b|confirmed/i.test(String((it && it.headline) || "") + " " + String((it && it.summary) || "")) || Number(it && it.reliability) >= 5;
 function SignalLine({ item }) {
   const en = LANG === "en";
   const r = Math.max(0, Math.min(5, Number(item.reliability) || 0));
   const skala = (en ? RELIABILITY_EN : RELIABILITY).slice(1).join(" \u00b7 ");
-  if (r >= 5) {
-    const off = /offiziell|official/i.test(String(item.headline || "") + " " + String(item.summary || ""));
-    return React.createElement("div", { className: "tw-rel", title: (en ? "Reliability 5 of 5 \u2014 scale: " : "Belastbarkeit 5 von 5 \u2014 Skala: ") + skala, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: "#0d8a4f", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } },
-      "\u2713 " + (en ? "Confirmed" : "Best\u00e4tigt") + " \u00b7 " + (off ? (en ? "official club statement" : "offizielle Vereinsmeldung") : (en ? "confirmed report" : "best\u00e4tigte Meldung")));
+  const stufe = besteStufe(item);
+  const bestaetigt = istBestaetigt(item);
+  if (bestaetigt && (r >= 5 || item.type === "fix")) {
+    const off = /offiziell|official/i.test(String(item.headline || "") + " " + String(item.summary || "")) || (stufe && stufe.v === "A1");
+    return React.createElement("div", { className: "tw-rel", title: (en ? "Confirmed: official source or two independent A1/A2 sources \u2014 scale: " : "Best\u00e4tigt: offizielle Quelle oder zwei unabh\u00e4ngige A1/A2-Quellen \u2014 Skala: ") + skala, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: "#0d8a4f", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } },
+      "\u2713 " + (en ? "Confirmed" : "Best\u00e4tigt") + " \u00b7 " + (off ? (en ? "official statement" : "offizielle Vereinsmeldung") : (en ? "two independent sources" : "zwei unabh\u00e4ngige Quellen")));
   }
   const sc = signalScore(item);
-  const trust = (en ? "source trust: " : "Quellenvertrauen: ") + (r >= 4 ? (en ? "high" : "hoch") : r === 3 ? (en ? "medium" : "mittel") : (en ? "low" : "gering"));
+  if (item.type === "fix" && !bestaetigt) {
+    return React.createElement("div", { className: "tw-rel", title: (en ? "Reported as done, but no official confirmation yet \u2014 signal " : "Als fix gemeldet, aber noch ohne offizielle Best\u00e4tigung \u2014 Signal ") + sc + "/100", style: { display: "flex", alignItems: "center", gap: 7, minWidth: 0 } },
+      React.createElement(Signal, { value: r }),
+      React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: "#8a5a00", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, (en ? "Reported as done \u00b7 not yet officially confirmed" : "Als fix gemeldet \u00b7 noch nicht offiziell best\u00e4tigt") + " \u00b7 " + sc + "/100"));
+  }
+  const trust = (en ? "source trust: " : "Quellenvertrauen: ") + (r >= 4 ? (en ? "high" : "hoch") : r === 3 ? (en ? "medium" : "mittel") : (en ? "low" : "gering")) + (stufe ? " (" + stufe.v + " \u00b7 " + QV_LABEL[stufe.v][en ? 1 : 0] + ")" : "");
   const tip = (en ? "Signal " + sc + "/100 from reliability " + r + " of 5 and number of sources \u2014 scale: " : "Signal " + sc + "/100 aus Belastbarkeit " + r + " von 5 und Quellenzahl \u2014 Skala: ") + skala;
   return React.createElement("div", { className: "tw-rel", title: tip, style: { display: "flex", alignItems: "center", gap: 7, minWidth: 0 } },
     React.createElement(Signal, { value: r }),
@@ -6982,6 +7023,8 @@ function TransferApp({
   const [legal, setLegal] = useState(null); // null | "impressum" | "datenschutz"
   const [showSettings, setShowSettings] = useState(false);
   const [news, setNews] = useState(NEWS.filter(i => i.sport === "fussball"));
+  const [qvTick, setQvTick] = useState(0);
+  useEffect(() => { TW_QV.hoerer.push(() => setQvTick(t => t + 1)); ladeQuellenVertrauen(); }, []);
   const watchList = useMemo(() => news.filter(it => watchMatchesItem(watch, it)), [news, watch]);
   const [dataState, setDataState] = useState("demo"); // 'demo' | 'live' | 'loading'
   const [updatedAt, setUpdatedAt] = useState(null);
