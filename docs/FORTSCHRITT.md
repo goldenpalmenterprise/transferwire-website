@@ -735,3 +735,18 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
 - Gerüchte (30 Tage, ≥10 Tage alt) je Quelle vs. spätere Bestätigungen (fix/leihe, reliability ≥4 oder API-Register; Name sortiert +
   Vereinskern). Schreibt Quote nur bei Freigabe (≥20 bestätigte Gerüchte und ≥40 Bestätigungen im Fenster, min. 10 Gerüchte je Quelle),
   sonst Report ohne Schreiben. Erstlauf zeigte 0–5 % (OpenAI-Sperre, kaum Bestätigungen) → vorläufige Quoten zurückgesetzt (NULL).
+
+## 27.08. 07:45–08:20 – GDELT-FRÜHWARNSYSTEM (Boss: „Setze GDELT um“)
+- NEU „TW Quelle: GDELT Lokalmedien (alle 2 h)“ CQkmqmoN0VJvyunK (aktiv, Cron 35 */2; SDK docs/n8n-gdelt-lokalmedien.sdk.js):
+  Budget-Gate → Vereine laden (players, ≥12 Spieler) → 10 sprachspezifische GDELT-DOC-Abfragen (german, english, spanish, italian, french,
+  dutch, portuguese, turkish, danish, chinese; Transfer-Signalwörter + sourcelang:<Sprache>, timespan 3 h, max 250, 15 s Abstand, 90 s
+  Timeout, 2 Versuche – GDELT antwortet 20–40 s und drosselt bei schnellen Folgeaufrufen mit 429) → Vereinsfilter (Titel muss vollen
+  Vereinsnamen ODER Vereinskern ≥5 Zeichen + Transfer-Signalwort enthalten; Stoppliste generischer Wörter wie berlin/standard/young/city)
+  → Neu? (transferwire.gdelt_seen, INSERT … ON CONFLICT DO NOTHING RETURNING, 7-Tage-Bereinigung) → Zeilen (max 150) → KI (gpt-5-mini,
+  reasoning low; Lokalmedien = Stufe B, reliability max 3, fix nur bei klarem Vollzug) → Einzelmeldungen → Transfernews-Upsert
+  (news_id gd-…, reliability zusätzlich auf ≤3 gedeckelt, source_name = Domain). KI-Fehler enden im NoOp „KI nicht verfuegbar“.
+- GDELT-Syntax: Sprachfilter braucht den vollen Namen (sourcelang:german, nicht ger); OR-Klauseln mit CJK-Termen werden abgelehnt →
+  chinesisch als UND-Abfrage „足球 转会“.
+- Testlauf 08:03: 9 Kandidaten nach Filter (u. a. fnp.de „Eintracht Frankfurt plant Last-Minute-Transfers“, blueprint.ng Arsenal/Álvarez,
+  Sounders-Brief) – vor der Verschärfung noch Politik-/Regionaltreffer (trend.at „Berlin“, „Standard“ als Zeitung); danach strenger Filter.
+  KI-Schritt blockiert bis 1.9. (OpenAI-Limit). Kosten ab dann ≈ 12 Läufe × ≤150 Zeilen gpt-5-mini ≈ 5–10 Cent/Tag.
