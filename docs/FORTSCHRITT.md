@@ -669,3 +669,36 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
   VfB II, Ulm, DFB 3. Liga, Verbände WDFV/NFV/NOFV/BFV, Regionalliga Südwest. Jetzt 625 Quellen (180 RSS, 336 web). 15 Vereinsseiten ohne
   brauchbare News-URL (404/Bot-Schutz/Umleitung auf Nachwuchs) ausgelassen – Google-News-Suchen decken sie ab.
 - Zurückgestellt (kostet KI-Geld): Telegram-Kanäle von Regionalliga-Vereinen, Pressekonferenz-Transkripte.
+
+## 27.08. 02:40–03:30 – QUELLEN-MASTERLISTE (Boss-Datei), QUELLEN-CRAWLER, TRANSFERREGISTER
+### Master-Liste (docs/quellen/TransferWire_Source_Intelligence_Master.xlsx, Import-SQL docs/quellen/master_2026-08-27.sql)
+- Blätter: 01 Länderquellen (181), 02 DE 3./4. Liga (32), 03 APIs, 04 Monitoring, 05 Insider-Netzwerk, 06 Register, 07 Tagesworkflow,
+  08 Club-Template, 09 Suchbegriffe, 10 Source-Scoring. Importiert: 174 URL-Quellen aus 01/02 (+ KAP Börsenregister TR) → 123 neu
+  (51 bereits vorhanden; Abgleich über normalisierte URL). Bestand jetzt 748 Quellen: web 454, rss 180, spezialportal 46, news 26,
+  datenbank 17, offiziell 17, social 6, journalist 2. Vertrauen A1/A2/B → prioritaet 1/2/3, Hinweis „Master-Liste 01/02 · Typ · Stufe“.
+- Nicht importierbar (keine URL/Methoden): Club-Websites/Socials je Verein, regionale Zeitungen, Insider-Netzwerk, Register (06, außer KAP),
+  Enterprise-APIs (Opta, Sportradar, Wyscout, StatsBomb, SkillCorner, TransferRoom – Lizenz nötig, Boss-Entscheidung).
+- Blatt 09 Suchbegriffe (10 Sprachen) in den RSS-Vorfilter übernommen (publiziert).
+### Prüfung „wird jede Quelle von einer KI gelesen?“
+- RSS (180): ja – RSS-Zweig stündlich, KI-Strukturierung. Web-Quellen (≈560): bisher nur indirekt über den Voll-Leser (Websuche-Agent mit
+  15er-Paketen) – nicht nachweisbar. APIs: API-Football (Kader/Verletzungen/Spiele), Sportmonks (Gerüchte 2 h, Ausfälle), football-data,
+  Transfermarkt-Import, Google-News-Ligen (30 Min → Signale → Analyst), Telegram (15 Min), Quoten: alle aktiv und ausgewertet.
+  Lücke: API-Football-Transfers-Endpunkt war unbenutzt (alter Transfer-Radar inaktiv).
+### NEU „TW Quellen-Crawler (4× täglich, KI-Leser)“ AjYML5ljn0U18vMi (aktiv; SDK docs/n8n-quellen-crawler.sdk.js)
+- Cron 6:05/11:05/15:05/20:05 → Budget-Gate → Quellen laden → Auswahl (70 fällige, typ web/offiziell/news/spezialportal/journalist/datenbank;
+  Takt Prio 1 = 20 h, Prio 2 = 44 h, Prio 3 = 68 h, längst überfällige zuerst) → Seite laden (HTTP, UA, 20 s, 4 parallel) → Text extrahieren
+  (Skripte/Styles raus, Überschriften/Teaser 24–220 Zeichen, max 70 Zeilen/6000 Zeichen, Hash) → nur veränderte Seiten → KI-Leser
+  (Agent gpt-5-mini, reasoning low, max 1200 Tokens, Parser items[]; Regeln: Typen, Verlässlichkeit nach Quellenstufe A1/A2/B, eigene Worte,
+  max 15 je Seite) → Ergebnisse splitten → Transfernews-Upsert (dedup_key wie RSS) + Quellen-Update (zuletzt_gelesen, lese_status,
+  inhalt_hash, funde_gesamt). Unveränderte/nicht abrufbare Seiten: nur Status-Update, kein KI-Aufruf. KI-Fehler → Status ki_fehler, alter
+  Hash bleibt (Seite wird erneut gelesen). Error-Ausgang des Agenten angebunden. Neue Datentabellen-Spalten: zuletzt_gelesen, lese_status,
+  inhalt_hash, funde_gesamt.
+- Testläufe: kompletter Durchlauf grün; erste 70 Seiten: 52 lesbar (ki_fehler wegen OpenAI-Sperre), 13 nicht abrufbar (kicker, AS,
+  Telegraaf, Sky DE/AT Akamai, 2× 404), 5 leer (JS-Seiten: Transfermarkt-Gerüchte, Ligue1, beIN). Kosten: Abrufe kostenlos, KI ≈ 0,002 $/Seite
+  → ≈ 0,3–0,5 €/Tag; hängt an der KI-Bremse.
+- Voll-Leser BG4HJKnw43iKL55d (publiziert): liest nur noch typ social und Quellen mit lese_status nicht_abrufbar/leer (max 12 Pakete).
+### NEU „TW Quelle: API-Football Transferregister (täglich 6:40)“ mZ1U4AuDr6IArMLe (aktiv; SDK docs/n8n-apifootball-transferregister.sdk.js)
+- teams je Liga → transfers?team (372 Aufrufe) → Transfers der letzten 4 Tage → fix/leihe, Abgang ohne neuen Verein = verfuegbar; Dubletten
+  je Spieler/Ziel (frühestes Datum); Anreicherung Position/Alter/Nationalität aus players → Transfernews (reliability 5, Quelle
+  „API-Football (Transferregister)“, news_id af-<pid>-<datum>). Kein KI-Aufruf. Test: Di Gregorio (Leihe Juventus→Bournemouth), Delap
+  (Chelsea→Nottingham Forest) korrekt angelegt.
