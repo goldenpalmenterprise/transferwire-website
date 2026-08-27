@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-27-bj quote-baseline -->
+<!-- tw-build: 2026-08-27-bk qv-matcher -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -2437,7 +2437,7 @@ const QV_RANG = { A1: 1, A2: 2, B: 3, C: 4, D: 5 };
 const QV_LABEL = { A1: ["offizielle Quelle", "official source"], A2: ["Qualit\u00e4tsmedium", "quality outlet"], B: ["Fachmedium", "specialist outlet"], C: ["Aggregator/Boulevard", "aggregator/tabloid"], D: ["Social/anonym", "social/anonymous"] };
 function quellenStufen(it) {
   const out = []; const srcs = (it && it.sources) || [];
-  const finde = (url, name) => { const h = qvHost(url); if (h && TW_QV.host[h]) return TW_QV.host[h]; const base = h ? h.split(".").slice(-2).join(".") : ""; if (base && TW_QV.host[base]) return TW_QV.host[base]; const nm = String(name || "").toLowerCase(); if (nm.length >= 4) { for (const k of Object.keys(TW_QV.name)) { if (nm.indexOf(k) >= 0 || k.indexOf(nm) >= 0) return TW_QV.name[k]; } } return null; };
+  const finde = (url, name) => { const h = qvHost(url); if (h && TW_QV.host[h]) return TW_QV.host[h]; const base = h ? h.split(".").slice(-2).join(".") : ""; if (base && TW_QV.host[base]) return TW_QV.host[base]; const nm = String(name || "").toLowerCase().replace(/\s*\((rss|x)\)\s*$/, "").trim(); if (nm.length >= 4) { if (TW_QV.name[nm]) return TW_QV.name[nm]; let best = null; for (const k of Object.keys(TW_QV.name)) { if (k.length < 5) continue; if (nm.indexOf(k) >= 0 || k.indexOf(nm) >= 0) { const e = TW_QV.name[k]; if (!best || QV_RANG[e.v] < QV_RANG[best.v]) best = e; } } return best; } return null; };
   for (const sq of srcs) { const e = finde(sq && sq.url, sq && sq.name); if (e) out.push(Object.assign({ host: qvHost(sq && sq.url) || String((sq && sq.name) || "") }, e)); }
   if (!out.length && it && (it.sourceName || it.source_name)) { const e = finde("", it.sourceName || it.source_name); if (e) out.push(Object.assign({ host: it.sourceName || it.source_name }, e)); }
   return out;
