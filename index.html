@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-27-bk qv-matcher -->
+<!-- tw-build: 2026-08-27-bl social-hosts -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -2428,7 +2428,7 @@ function ladeQuellenVertrauen() {
   Promise.all([0, 200, 400, 600, 800].map(seite)).then(seiten => {
     const rang = { A1: 1, A2: 2, B: 3, C: 4, D: 5 };
     for (const rows of seiten) { if (!Array.isArray(rows)) continue; for (const q of rows) { const v = String(q.vertrauen || "").toUpperCase(); if (!rang[v]) continue; const eintrag = { v: v, q: q.trefferquote == null ? null : Number(q.trefferquote) };
-      const h = String(q.host || ""); if (h && !/news\.google/.test(h)) { const base = h.split(".").slice(-2).join("."); for (const k of [h, base]) { if (!TW_QV.host[k] || rang[TW_QV.host[k].v] > rang[v]) TW_QV.host[k] = eintrag; } }
+      const h = String(q.host || ""); if (h && !/news\.google|^(x\.com|twitter\.com|t\.me|facebook\.com|weibo\.com|youtube\.com|instagram\.com|bsky\.app)$/.test(h)) { const base = h.split(".").slice(-2).join("."); for (const k of [h, base]) { if (!TW_QV.host[k] || rang[TW_QV.host[k].v] > rang[v]) TW_QV.host[k] = eintrag; } }
       const n = String(q.quelle_name || "").toLowerCase().replace(/\s*\((rss|x)\)\s*$/, "").trim(); if (n && n.length >= 4 && !/^(gn |google news|journalist:)/.test(n)) { if (!TW_QV.name[n] || rang[TW_QV.name[n].v] > rang[v]) TW_QV.name[n] = eintrag; } } }
     TW_QV.geladen = true; TW_QV.hoerer.forEach(f => { try { f(); } catch (e) {} });
   });
