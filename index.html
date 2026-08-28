@@ -31,10 +31,6 @@
   button { transition: filter .14s ease; }
   button:hover { filter: brightness(.97); }
   :focus-visible { outline: 2px solid #149a59; outline-offset: 2px; border-radius: 6px; }
-  .tw-fab { width: 56px !important; height: 56px !important; border-radius: 999px !important; background: #0f1520 !important; box-shadow: 0 10px 26px rgba(15,21,32,.35) !important; position: relative; }
-  .tw-fab > * { display: none !important; }
-  .tw-fab::before { content: "TW"; color: #fff; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: .5px; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
-  .tw-fab::after { content: ""; position: absolute; top: 5px; right: 5px; width: 9px; height: 9px; border-radius: 99px; background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.25); }
   .tw-pos-grid { display: grid !important; grid-template-columns: repeat(5, minmax(0, 1fr)) !important; gap: 12px !important; } @media (max-width: 1000px) { .tw-pos-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } } @media (max-width: 700px) { .tw-pos-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } .tw-need-grid { grid-template-columns: 1fr !important; } .tw-bedarf-steps { flex-wrap: wrap; gap: 8px !important; } .tw-bedarf-link { display: none; } .tw-bedarf-intro { max-height: none !important; } }
   .tw-main.feed > * { grid-column: 1; min-width: 0; }
   .tw-main.feed > aside { grid-column: 2; grid-row: 1 / span 3; align-self: start; }
@@ -57,7 +53,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-28-bn tmfelder -->
+<!-- tw-build: 2026-08-28-bo kisuche -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -2146,6 +2142,42 @@ const cmtyFilter = (posts, q) => {
   if (!w.length) return posts;
   return posts.filter(p => { const t = cmtyNorm((p.body || "") + " " + (p.author_name || "") + " " + (p.author_rolle || "") + " " + (p.agent_headline || "")); return w.every(x => t.indexOf(x) >= 0); });
 };
+function KiSuchePanel({ schliessen, msgs, busy, treffer, frage, setFrage, senden }) {
+  const en = LANG === "en";
+  const sek = (titel, kinder) => kinder && kinder.length ? React.createElement(React.Fragment, { key: titel }, React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, color: "#8a92a3", textTransform: "uppercase", margin: "10px 2px 6px" } }, titel), kinder) : null;
+  return React.createElement("div", { className: "tw-ki-panel", style: { position: "fixed", top: 62, left: "50%", transform: "translateX(-50%)", width: "min(720px, calc(100vw - 24px))", maxHeight: "min(72vh, 640px)", overflowY: "auto", background: "#fff", border: "1px solid " + HAIR, borderRadius: 16, boxShadow: "0 24px 64px rgba(15,21,32,.28)", zIndex: 1300, padding: "14px 16px 12px", boxSizing: "border-box" } },
+    React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 8 } },
+      React.createElement("span", { style: { width: 8, height: 8, borderRadius: 99, background: "#22c55e", boxShadow: "0 0 0 3px rgba(34,197,94,.22)" } }),
+      React.createElement("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 16, color: INK } }, en ? "TW AI Search" : "TW KI-Suche"),
+      React.createElement("span", { style: { flex: 1 } }),
+      React.createElement("button", { onClick: schliessen, "aria-label": en ? "Close" : "Schliessen", style: { border: "none", background: "none", cursor: "pointer", color: "#8a92a3", fontSize: 20, lineHeight: 1, padding: 4 } }, "\u00d7")),
+    React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 8 } },
+      msgs.length === 0 && React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, lineHeight: 1.5 } }, en ? "Ask anything about players, clubs, transfers or contracts - the AI searches the whole TransferWire database and shows matching results below." : "Frag alles zu Spielern, Vereinen, Transfers oder Vertr\u00e4gen - die KI durchsucht die komplette TransferWire-Datenbank und zeigt passende Treffer direkt darunter."),
+      msgs.map((m, i) => React.createElement("div", { key: i, style: { alignSelf: m.r === "u" ? "flex-end" : "flex-start", maxWidth: "88%", fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.55, padding: "9px 13px", borderRadius: m.r === "u" ? "14px 14px 3px 14px" : "14px 14px 14px 3px", background: m.r === "u" ? "#0f1520" : "#f4f6f8", color: m.r === "u" ? "#fff" : INK, whiteSpace: "pre-wrap" } }, m.t)),
+      busy && React.createElement("div", { style: { alignSelf: "flex-start", fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "6px 2px" } }, en ? "Searching \u2026" : "Suche l\u00e4uft \u2026")),
+    treffer && React.createElement("div", { style: { marginTop: 4 } },
+      sek(en ? "Players" : "Spieler", (treffer.spieler || []).map((s, i) => React.createElement("div", { key: "s" + i, style: { border: "1px solid " + HAIR, borderRadius: 11, padding: "9px 12px", marginBottom: 6, background: "#fff" } },
+        React.createElement("span", { style: { fontFamily: FONT_BODY, fontWeight: 800, fontSize: 13.5, color: INK } }, s.name),
+        React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED } }, "  \u00b7 " + (s.team || "?") + (s.league ? " \u00b7 " + s.league : "") + (s.position ? " \u00b7 " + s.position : "") + (s.age ? " \u00b7 " + s.age + (en ? " yrs" : " J.") : ""))))),
+      sek(en ? "Reports" : "Meldungen", (treffer.meldungen || []).map((m2, i) => React.createElement("div", { key: "m" + i, style: { border: "1px solid " + HAIR, borderRadius: 11, padding: "9px 12px", marginBottom: 6 } },
+        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 7, marginBottom: 3, flexWrap: "wrap" } },
+          React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10, fontWeight: 900, letterSpacing: .8, textTransform: "uppercase", padding: "2px 8px", borderRadius: 99, background: m2.type === "fix" ? "#149a59" : "#b45309", color: "#fff" } }, m2.type === "fix" ? "Fix" : (en ? "Rumour" : "Ger\u00fccht")),
+          m2.reliability != null && React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, (en ? "Reliability " : "Verl\u00e4sslichkeit ") + m2.reliability + "/5")),
+        React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: INK, lineHeight: 1.45, marginBottom: 2 } }, m2.headline),
+        m2.source_url && React.createElement("a", { href: m2.source_url, target: "_blank", rel: "noreferrer", style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "#1e5d8f", textDecoration: "none", fontWeight: 700 } }, (m2.source_name || (en ? "Source" : "Quelle")) + " \u2197")))),
+      sek(en ? "Market signals" : "Marktsignale", (treffer.signale || []).map((g, i) => React.createElement("div", { key: "g" + i, style: { border: "1px solid #cfe3f5", background: "#eef6fd", borderRadius: 11, padding: "9px 12px", marginBottom: 6, fontFamily: FONT_BODY, fontSize: 12.5, color: "#1e5d8f", lineHeight: 1.45 } }, g.signal_text, g.quelle ? " (" + g.quelle + ")" : "")))),
+    React.createElement("div", { style: { display: "flex", gap: 8, marginTop: 10, position: "sticky", bottom: 0, background: "#fff", paddingTop: 6 } },
+      React.createElement("input", { value: frage, onChange: e => setFrage(e.target.value), onKeyDown: e => { if (e.key === "Enter" && frage.trim()) senden(); }, placeholder: en ? "Follow-up question \u2026" : "R\u00fcckfrage stellen \u2026", style: { flex: 1, fontFamily: FONT_BODY, fontSize: 16, padding: "11px 13px", borderRadius: 11, border: "1.5px solid " + HAIR, outline: "none", boxSizing: "border-box", minWidth: 0 } }),
+      React.createElement("button", { onClick: () => senden(), disabled: busy || !frage.trim(), style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 900, cursor: "pointer", padding: "0 18px", borderRadius: 11, border: "none", background: "#0f1520", color: "#fff", opacity: busy || !frage.trim() ? .5 : 1 } }, en ? "Ask" : "Fragen")));
+}
+function ScoutLeiste({ offen }) {
+  const en = LANG === "en";
+  return React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, background: "#0f1520", borderRadius: 14, padding: "12px 16px", marginBottom: 12, boxShadow: "0 8px 22px rgba(15,21,32,.22)", flexWrap: "wrap" } },
+    React.createElement("span", { style: { width: 9, height: 9, borderRadius: 99, background: "#22c55e", boxShadow: "0 0 0 3px rgba(34,197,94,.25)" } }),
+    React.createElement("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 16, color: "#fff", letterSpacing: .3 } }, "TW Scout"),
+    React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "rgba(255,255,255,.72)", flex: "1 1 220px" } }, en ? "Your AI scout for players, clubs and the market - right here in the transfer window." : "Dein KI-Scout f\u00fcr Spieler, Vereine und den Markt - direkt hier im Transferfenster."),
+    React.createElement("button", { onClick: offen, style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 900, cursor: "pointer", padding: "9px 18px", borderRadius: 999, border: "none", background: "#22c55e", color: "#0f1520" } }, en ? "Ask the scout" : "Scout fragen"));
+}
 function CmtySuche({ wert, setWert, gesamt, treffer, placeholder }) {
   return React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" } },
     React.createElement("div", { style: { position: "relative", flex: 1, minWidth: 240 } },
@@ -6847,6 +6879,25 @@ function TransferApp({
   const [chatInput, setChatInput] = useState("");
   const [chatBusy, setChatBusy] = useState(false);
   const [chatLeft, setChatLeft] = useState(null);
+  const [kiOffen, setKiOffen] = useState(false);
+  const [kiFrage, setKiFrage] = useState("");
+  const [kiMsgs, setKiMsgs] = useState([]);
+  const [kiBusy, setKiBusy] = useState(false);
+  const [kiTreffer, setKiTreffer] = useState(null);
+  const sendeKi = fr => {
+    const f = (fr || kiFrage).trim();
+    if (!f || kiBusy) return;
+    setKiOffen(true);
+    setKiMsgs(m => [...m, { r: "u", t: f }]);
+    setKiFrage("");
+    setKiBusy(true);
+    postJson("/api/tw-suche", { email: account && account.email || "", code: account && account.code || "", frage: f, lang: LANG, verlauf: kiMsgs.slice(-4) }).then(raw => {
+      const d = normResp(raw);
+      setKiBusy(false);
+      if (d && d.ok) { setKiMsgs(m => [...m, { r: "b", t: d.antwort }]); setKiTreffer(d.treffer || null); }
+      else setKiMsgs(m => [...m, { r: "b", t: d && d.err === "auth" ? (LANG === "en" ? "Please log in once again, then the AI search is ready." : "Bitte einmal neu einloggen, dann steht die KI-Suche bereit.") : (LANG === "en" ? "Search failed - please try again." : "Suche fehlgeschlagen - bitte erneut versuchen.") }]);
+    }).catch(() => { setKiBusy(false); setKiMsgs(m => [...m, { r: "b", t: LANG === "en" ? "Connection failed - please try again." : "Verbindung fehlgeschlagen - bitte erneut versuchen." }]); });
+  };
   const sendChat = frage => {
     const f = (frage || chatInput).trim();
     if (!f || chatBusy) return;
@@ -7246,9 +7297,10 @@ function TransferApp({
           .tw-headwrap .tw-livetime { display: none !important; }
           .tw-logo > span:first-child { width: 24px !important; height: 24px !important; }
           .tw-logo button { font-size: 17px !important; letter-spacing: .5px !important; }
-          .tw-gsuche-box { margin: 0 !important; min-width: 0 !important; padding: 6px 9px !important; }
-          .tw-gsuche-box input { font-size: 13px !important; }
+          .tw-gsuche-box { margin: 0 !important; min-width: 0 !important; padding: 11px 12px !important; border-radius: 12px !important; }
+          .tw-gsuche-box input { font-size: 16px !important; }
           .tw-kbd { display: none !important; }
+          .tw-ki-panel { position: fixed !important; inset: 0 !important; top: 0 !important; left: 0 !important; transform: none !important; width: 100% !important; max-width: 100% !important; max-height: 100dvh !important; border-radius: 0 !important; padding-top: 16px !important; }
           .tw-main { padding: 12px 12px 96px !important; gap: 14px !important; grid-template-columns: minmax(0, 1fr) !important; }
           .tw-main > aside { grid-column: 1 !important; min-width: 0; }
           .tw-main h2, .tw-main > div > h2, .tw-main > section > h2, .tw-main > div > div > h2:first-child { font-size: 24px !important; line-height: 30px !important; }
@@ -7356,7 +7408,7 @@ function TransferApp({
     style: {
       color: "#149a59"
     }
-  }, "WIRE"))), /*#__PURE__*/React.createElement("div", { className: "tw-gsuche-box", style: { display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 150, maxWidth: 560, margin: "0 12px", background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.14)", borderRadius: 10, padding: "7px 12px" } }, /*#__PURE__*/React.createElement(Search, { size: 15, strokeWidth: 2, color: "rgba(255,255,255,.6)" }), /*#__PURE__*/React.createElement("input", { value: query, onChange: e => { setQuery(e.target.value); if (["gesucht", "ranking", "players", "chancen", "geruechte", "listen"].indexOf(view) >= 0) setView("feed"); }, placeholder: "Spieler, Verein, Liga oder Wettbewerb suchen", id: "tw-gsuche", style: { border: "none", outline: "none", background: "transparent", fontSize: 13.5, color: "#fff", width: "100%", fontFamily: FONT_BODY } }), /*#__PURE__*/React.createElement("span", { className: "tw-kbd", style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, color: "rgba(255,255,255,.45)", border: "1px solid rgba(255,255,255,.18)", borderRadius: 5, padding: "2px 6px", letterSpacing: .5 } }, "\u2318K"), query && /*#__PURE__*/React.createElement("button", { onClick: () => setQuery(""), style: { border: "none", background: "none", cursor: "pointer", color: "rgba(255,255,255,.6)", display: "flex", padding: 0 } }, /*#__PURE__*/React.createElement(X, { size: 14 }))), /*#__PURE__*/React.createElement("div", { className: "tw-livetime",
+  }, "WIRE"))), /*#__PURE__*/React.createElement("div", { className: "tw-gsuche-box", style: { display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 150, maxWidth: 560, margin: "0 12px", background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.14)", borderRadius: 10, padding: "7px 12px" } }, /*#__PURE__*/React.createElement(Search, { size: 15, strokeWidth: 2, color: "rgba(255,255,255,.6)" }), /*#__PURE__*/React.createElement("input", { value: kiFrage, onChange: e => setKiFrage(e.target.value), onKeyDown: e => { if (e.key === "Enter" && kiFrage.trim()) sendeKi(); }, onFocus: () => { if (window.innerWidth <= 700) setKiOffen(true); }, placeholder: LANG === "en" ? "Ask the TW AI search anything \u2026" : "Frag die TW KI-Suche \u2014 Spieler, Vereine, Transfers \u2026", id: "tw-gsuche", style: { border: "none", outline: "none", background: "transparent", fontSize: 13.5, color: "#fff", width: "100%", fontFamily: FONT_BODY } }), /*#__PURE__*/React.createElement("span", { className: "tw-kbd", style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, color: "rgba(255,255,255,.45)", border: "1px solid rgba(255,255,255,.18)", borderRadius: 5, padding: "2px 6px", letterSpacing: .5 } }, "\u2318K"), kiFrage && /*#__PURE__*/React.createElement("button", { onClick: () => setKiFrage(""), style: { border: "none", background: "none", cursor: "pointer", color: "rgba(255,255,255,.6)", display: "flex", padding: 0 } }, /*#__PURE__*/React.createElement(X, { size: 14 }))), kiOffen && /*#__PURE__*/React.createElement(KiSuchePanel, { schliessen: () => setKiOffen(false), msgs: kiMsgs, busy: kiBusy, treffer: kiTreffer, frage: kiFrage, setFrage: setKiFrage, senden: sendeKi }), /*#__PURE__*/React.createElement("div", { className: "tw-livetime",
     style: {
       display: "flex",
       alignItems: "center",
@@ -8530,7 +8582,7 @@ function TransferApp({
         color: active ? meta.color : MUTED
       }
     }, label);
-  })), view === "feed" && /*#__PURE__*/React.createElement(FeedSuche, { inline: true, q: query, setQ: setQuery, club: club, setClub: setClub, alle: news, watch: watchList, geheZu: setView, fs: { sport: sport, type: type, country: country, league: league }, setFs: { setSport: setSport, setType: setType, setCountry: setCountry, setLeague: setLeague } }), /*#__PURE__*/React.createElement("div", {
+  })), view === "feed" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(ScoutLeiste, { offen: () => setChatOpen(true) }), /*#__PURE__*/React.createElement(FeedSuche, { inline: true, q: query, setQ: setQuery, club: club, setClub: setClub, alle: news, watch: watchList, geheZu: setView, fs: { sport: sport, type: type, country: country, league: league }, setFs: { setSport: setSport, setType: setType, setCountry: setCountry, setLeague: setLeague } })), /*#__PURE__*/React.createElement("div", {
     className: "tw-feedlist",
     style: {
       display: "grid",
@@ -8939,132 +8991,7 @@ function TransferApp({
       fontSize: 10.5,
       color: MUTED
     }
-  }, "(", n2.quelle, n2.datum ? `, ${n2.datum}` : "", ")")))))))), !chatOpen && /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "fixed",
-      right: 14,
-      bottom: 78,
-      zIndex: 1200,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "flex-end",
-      gap: 7
-    }
-  }, /*#__PURE__*/React.createElement("style", null, `@keyframes twFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}@keyframes twWink{0%,55%,100%{transform:rotate(0deg)}64%{transform:rotate(-30deg)}73%{transform:rotate(-6deg)}82%{transform:rotate(-30deg)}}`), /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "#fff",
-      border: `1px solid ${HAIR}`,
-      borderRadius: "14px 14px 3px 14px",
-      padding: "8px 12px",
-      boxShadow: "0 6px 18px rgba(0,0,0,.16)",
-      fontFamily: FONT_BODY,
-      fontSize: 12.5,
-      fontWeight: 700,
-      color: INK,
-      maxWidth: 188
-    }
-  }, t("chat_hi")), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setChatOpen(true),
-    "aria-label": t("chat_title"),
-    className: "tw-fab",
-    style: {
-      background: "none",
-      border: "none",
-      cursor: "pointer",
-      padding: 0,
-      animation: "twFloat 3.2s ease-in-out infinite",
-      filter: "drop-shadow(0 8px 14px rgba(0,0,0,.3))"
-    }
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: "74",
-    height: "88",
-    viewBox: "0 0 74 88",
-    "aria-hidden": "true"
-  }, /*#__PURE__*/React.createElement("rect", {
-    x: "28",
-    y: "66",
-    width: "7",
-    height: "17",
-    rx: "3",
-    fill: "#14161d"
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "39",
-    y: "66",
-    width: "7",
-    height: "17",
-    rx: "3",
-    fill: "#14161d"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M22 40 Q22 34 28 33 L46 33 Q52 34 52 40 L52 62 Q52 68 46 68 L28 68 Q22 68 22 62 Z",
-    fill: "#1f2430"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M33 33 L41 33 L37 45 Z",
-    fill: "#ffffff"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M37 36 L40 41 L37 52 L34 41 Z",
-    fill: "#149a59"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M33 33 L37 40 L29.5 45.5 Z",
-    fill: "#171b25"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M41 33 L37 40 L44.5 45.5 Z",
-    fill: "#171b25"
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "18.5",
-    y: "37.5",
-    width: "8",
-    height: "22",
-    rx: "4",
-    fill: "#1f2430"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "22.5",
-    cy: "61.5",
-    r: "3.6",
-    fill: "#e8b98a"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "37",
-    cy: "20",
-    r: "11",
-    fill: "#e8b98a"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M26 19 Q26 8 37 8 Q48 8 48 19 Q48 13 42.5 12 Q40 15 33 14.2 Q27 14.5 26 19 Z",
-    fill: "#2b2018"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "33",
-    cy: "20.5",
-    r: "1.5",
-    fill: "#14161d"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "41",
-    cy: "20.5",
-    r: "1.5",
-    fill: "#14161d"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M32 25.5 Q37 28.5 42 25.5",
-    stroke: "#b5763f",
-    strokeWidth: "1.6",
-    fill: "none",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("g", {
-    style: {
-      transformOrigin: "49px 39px",
-      transformBox: "view-box",
-      animation: "twWink 3.2s ease-in-out infinite"
-    }
-  }, /*#__PURE__*/React.createElement("rect", {
-    x: "45.5",
-    y: "24",
-    width: "8",
-    height: "20",
-    rx: "4",
-    fill: "#1f2430",
-    transform: "rotate(34 49 39)"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "59.5",
-    cy: "26.5",
-    r: "4.4",
-    fill: "#e8b98a"
-  }))))), chatOpen && /*#__PURE__*/React.createElement("div", {
+  }, "(", n2.quelle, n2.datum ? `, ${n2.datum}` : "", ")")))))))), chatOpen && /*#__PURE__*/React.createElement("div", {
     onClick: () => setChatOpen(false),
     style: {
       position: "fixed",
