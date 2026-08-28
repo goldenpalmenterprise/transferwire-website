@@ -779,3 +779,98 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
 - Verein/Liga: ≤30 Min nach bestätigter Meldung (Aktualisierer) + täglich 5:00 Kader-Abgleich (API-Kader/Spiele) + 6:40 Transferregister.
 - Verletzungen: 6:45/13:00 API-Football + 6:50 Sportmonks → ≤30 Min später im Profil. Vertragsende: aus Meldungen ≤30 Min, TM alle 10 Tage.
 - Marktwerte: TM alle 10 Tage je Liga (Quelle aktualisiert selbst nur schubweise). Kosten: 0 € KI.
+
+## 28.08. 04:20–05:00 – TM-MATCHING-VERBESSERUNG (Stufen 7–10) + SELBSTBEENDENDER BACKFILL
+### Befund (aus kader_audit, ~2.900 protokollierte Unmatched mit MW ≥ 100 Tsd.)
+- Muster: (a) Nordische Sonderzeichen – ø/æ/ß/ł/đ werden von NFD nicht zerlegt und wurden bisher ersatzlos gestrichen
+  („Gytkjaer" ↔ „Gytkjær", „Søndergaard"/„Sondergaard"); (b) Zusatz-/Spitznamen („Fiete Arp" ↔ „Jann-Fiete Arp",
+  „Marlon Mena Martinez", Mononyme wie „Suso", „Giulio", „Everson Jr"); (c) Spieler bei uns unter anderem Verein;
+  (d) echte Datenlücken (Neuzugänge ohne players-Eintrag) – nicht per Matching lösbar.
+- Geblockte Kaderseiten: 5× Süper Lig (257-Byte-Antworten), je 1× VfB II / leer – Rotation holt sie nach.
+### Import xZDGcMSlCMFeofXw erweitert (publiziert, aktive Version 1ea659a5 gegengeprüft)
+- SPEC-Transliteration vor NFD: ß→ss, æ→ae, ø→oe, œ→oe, đ/ð→d, þ→th, ł→l (zusätzlich zu ı/ş/ğ/ç).
+  Suffixe jr/junior/ii–iv aus normWorte gefiltert (nur bei mehrteiligen Namen).
+- Neue Matching-Stufen (alle nur bei Eindeutigkeit): 7 Digraph-Kollaps (ae/oe/ue/aa → Grundbuchstabe, beidseitig,
+  Team-Index); 8 Token-Teilmenge im Team (kürzerer Name vollständig im längeren, ≥ 2 Tokens); 9 Mononym (≥ 4 Zeichen)
+  gegen eindeutigen Nachnamen ODER Mononym im Team; 10 ligaweit Erster+Letzter-Wort eindeutig (Spieler unter anderem
+  Verein bei uns). Stufen-Zähler s1–s10 im Node-Output und im kader_audit-Feld korrigiert.stufen.
+- Testlauf Bundesliga (Österreich): 218/241 gematcht (90 %), 18 unmatched = fast nur echte Datenlücken, 8 Kurznamen geheilt.
+### Selbstbeendender Backfill (kein „Trigger vergessen" mehr möglich)
+- tw_status-Schlüssel tm_backfill_bis (Timestamp). Liga-Zeiger rückt nur vor, wenn Minute nicht durch 6 teilbar
+  (= Nachtläufe 2:40/3:10) ODER now() < tm_backfill_bis. Dritter Cron */6 * * * * im Trigger; nach Ablauf des Fensters
+  liefert der Zeiger keine Zeile, „Liga vorbereiten" endet leer – kein TM-Abruf, kein Audit-Eintrag.
+- Fenster gesetzt: bis 05:05 UTC (≈ 25 Läufe = kompletter 20-Ligen-Durchlauf). Erster */6-Lauf 02:30 UTC grün (31 s).
+- Für künftige Backfills: nur tm_backfill_bis neu setzen (INSERT … ON CONFLICT), kein Trigger-Umbau nötig.
+  Der */6-Cron kann dauerhaft stehen bleiben (No-Op außerhalb des Fensters, nur ein DB-Read alle 6 Min).
+### Systemcheck
+- Fehlläufe seit 27.08. mittags ausschließlich bekannte OpenAI-Sperre-Opfer (EN-Übersetzer :25/:55, Analyst :20,
+  vereinzelt Frühstarter-Scout/Voll-Leser) – erwartbar bis Limit-Reset 1.9. Nicht-KI-Strecken sauber.
+- OFFEN: Doku-Push ins Repo ausstehend (kein Klon auf dem Server, GitHub-Token lag der Session nicht vor) –
+  dieser Nachtrag als Datei übergeben, bitte in docs/FORTSCHRITT.md anhängen und committen.
+
+## 28.08. 05:55–06:10 – TM-VOLLPARSER (Boss: alle Infos auslesen, Luecken fuellen, dauerhaft aktuell)
+### Befund vorab
+- Formate in players: Groesse "187", Nationalitaet englisch, Geburtsdatum ISO; Position deutsche Buckets, aber 264x "Forward" + 7x "?" inkonsistent.
+- Luecken: 3.369 Groesse, 1.543 Geburtsdatum, 1.488 Nationalitaet. Fuss/Im-Team-seit/TM-Verein gab es gar nicht.
+- KRITISCH entdeckt: "TW DB: Spieler-Spiegel (4:30)" macht TRUNCATE players + Neuaufbau aus der n8n-Datentabelle und rettet nur eine
+  feste Spaltenliste. Dadurch wurden letzter_verein/contract_source (Spieler-Aktualisierer vom 27.08.) und der Meldungs-Vertrag
+  TAEGLICH GELOESCHT – stiller Datenverlust seit gestern.
+### Umsetzung (alles ohne KI, 0 EUR)
+- ALTER players: + foot (text), tm_joined (date), tm_team (text, in unserem Team-Vokabular = Verein laut TM-Kaderseite).
+- /opt/transferwire/tw_players_sync.sql neu (Backup .bak-2026-08-28): tm_keep-Rettungsliste erweitert um foot, tm_joined, tm_team,
+  letzter_verein, contract_source; Meldungs-Vertrag bleibt erhalten (contract_until aus keep, wenn contract_source='Meldung').
+  Syntax im Rollback-Trockenlauf geprueft. Naechster Spiegel-Lauf 29.08. 02:30 UTC nutzt die neue Datei.
+- Import xZDGcMSlCMFeofXw (publiziert, aktive Version f675d8a3): Kaderseite /plus/1 vollstaendig geparst je Zeile –
+  Position (TM-Detail -> Torwart/Abwehr/Mittelfeld/Sturm; Suche nur im Zeilenkopf, damit "Sturm Graz" in Abgebender-Verein nicht
+  faelscht), Geburtsdatum+Alter (Datum mit Klammer-Alter), Nationalitaet (erste Flagge, DE->EN-Woerterbuch ~95 Laender),
+  Groesse ("1,87 m" -> "187"), Fuss (kleingeschriebene Zelle rechts/links/beidfuessig), Im-Team-seit (mittleres von 3 Daten),
+  tm_team = zugeordneter Verein.
+- Schreiblogik: TM-eigene Felder (tm_*, foot) immer aktualisieren; Bio-Felder NUR fuellen, wenn leer – Ausnahme Position auch bei
+  "?"/"Forward" (Normalisierung). Kein Ueberschreiben gepflegter API-Werte.
+- Dual-Write: Bio-Fuellungen zusaetzlich in die n8n-Datentabelle (erweiterter Heilen-Node), damit der 4:30-Spiegel nichts zurueckdreht.
+- Vereins-Konflikte: je Lauf Liste "DB-Verein != TM-Kader-Verein" mit Beispielen im kader_audit (korrigiert.konflikte). Der Import
+  schreibt team NICHT selbst – Verein bleibt Sache von Kader-Abgleich (5:00, Evidenz Spiel>Kader>Meldung) und Spieler-Aktualisierer.
+- Test Serie B: 535/603 gematcht, Fuellgrade posi/nat/geb 100 %, gr 93 %, fuss 97 %, joined 96 %; 12 Konflikte erkannt
+  (u. a. Bonfanti Mantova->Pisa). players + Datentabelle verifiziert (Insigne 163/Sturm/rechts/Sampdoria).
+- Backfill-Fenster bis 06:34 UTC verlaengert -> kompletter 20-Ligen-Durchlauf mit Vollparser laeuft automatisch, danach Nachtbetrieb
+  (2 Ligen/Nacht, jede Liga alle 10 Tage frisch inkl. aller neuen Felder).
+### OFFEN / naechste Schritte
+- tm_team als vierte Evidenz in den Kader-Abgleich 7cz9uum6cWPGK8Sm einspeisen (eigene Session, laeuft gegen Live-Team-Daten mit
+  21-Tage-Schutzlogik – nicht im Schnellverfahren aendern).
+- Website-Anzeige der neuen Felder (Fuss, im Verein seit, TM-Verein-Vergleich im VereinGeprueft-Block): braucht index.html-Commit ->
+  GitHub-Zugang noetig. Bereits sichtbare Felder (Position/Alter/Nationalitaet/Groesse/Geburtsdatum) erscheinen sofort in den
+  Profilen, da die Seite sie aus /db/players liest.
+- "Forward"-Restbestand (260) bereinigt sich im laufenden Durchlauf, sobald MLS/die betroffenen Ligen drankommen.
+
+## 28.08. 06:30-06:45 - SCOUTING-VERTIEFUNG (Boss: bessere Quellen, Jugend-Fokus DE/EN/FR/ES, Agent auf Scout-Attribute trainieren)
+### Jugend-Datenlage (API-Football-Discovery, Draft-Sandbox im Jugend-Kader-Sync)
+- England reich: 695/696 U18 PL North/South, 702 PL2 Div One, 703 Professional Development League, 987 U18 PL Championship, 1068 FA Youth Cup.
+- Deutschland: nur 488 U19 Bundesliga (im Katalog, /players liefert 0) + 715 DFB Junioren Pokal. Frankreich/Spanien: KEINE Jugendligen in der API.
+- Jugend-Kader-Sync vCN7P6mcC9yf7kvw um alle EN-Wettbewerbe + 715 + UYL 2026 erweitert (publiziert, aktiv 3300fa5b). Produktionslauf zeigt:
+  die NEUEN Liga-IDs liefern derzeit results:0 (Coverage fehlt API-seitig) - Konfiguration bleibt, greift automatisch sobald API pflegt.
+  players_youth bleibt vorerst PL2 2025 (355) + UYL 2025 (211); DE/FR/ES-Jugend laeuft bewusst ueber Meldungsquellen + Maennerfussball-Block.
+### Quellen (25er-Jugend-Paket, gruppe='jugend', 24 neu eingespielt, Bestand 1.136)
+- 23 Google-News-RSS sprachspezifisch: DE (DFB-Nachwuchsliga, U19/U17 Talent, NLZ, A-Junioren, Profidebuet, DFB-U-Teams),
+  EN (PL2, U18 PL, FA Youth Cup, Academy Debut, Wonderkid, Professional Contract), FR (Gambardella, Centre de formation, U19 Nationaux,
+  Premier contrat pro), ES (Division de Honor Juvenil, Cantera Debut, Juvenil A, La Masia, Canterano), INT (UEFA Youth League)
+  + 2 offizielle Webquellen (dfb.de/dfb-nachwuchsliga, premierleague.com/academy; eine davon Dublette).
+### RSS-Zweig 18462puK0GA3Azyu (publiziert, aktiv a2151011)
+- Vorfilter-Schluesselwoerter um Jugend-Signale erweitert (Profivertrag/Profidebuet, hochgezogen/aufgerueckt/promoted, Jugendwettbewerbe
+  DE/EN/FR/ES, NLZ/Academy/Cantera/La Masia, U-Berufungen, Wonderkid, Talent).
+- KI-Systemprompt TALENT-REGEL: Karriereschritte von U16-U21 (erster Profivertrag, Aufruecken/Profidebuet -> type vertrag, Akademie-Wechsel
+  wie ueblich) sind Meldungen; reine Spielberichte weiter ignorieren; Jugendligen als league zulaessig.
+- Mapping: neues Feld talent (boolean, deterministisch: player_age 15-20 ODER Jugend-Signalwort in headline/summary/league) - davon liest
+  der Scout-Agent (WHERE talent=true). Talent-Pipeline nachweislich aktiv (Meldungen u.a. von Romano, TMW, Chelsea offiziell, Jugend-Feeds).
+### Scout-Agent Profil-Bau iVt2oygA1gPIMf0Y (publiziert, aktiv f9c32f37) - "Antrainierung" auf Scout-Attribute
+- Stats-Input komplett neu: Top 150 Jugendliga (season>=2025, minutes>0) + Top 130 MAENNERFUSSBALL-FRUEHSTARTER (players, Alter 15-19,
+  minutes>0) als zweiter Block; je Spieler zusaetzlich p90 (ab 180 Min), Groesse, starker Fuss, TM-Marktwert, Nationalitaet, Vertragsende
+  via LATERAL-Join auf players (Name + Alter +-1, Vereinskern-Praeferenz gegen Namensdoppler). Test: 145 Zeilen, 104x Groesse, 89x MW.
+- KI-Bremse nachgeruestet (einziger KI-Workflow ohne Gate): SQL-Gate in Stats laden - 0 Zeilen bei ki_bremse=true, fail-open.
+- Prompt: Chef-Kriterien unveraendert + neuer Attribute-Block: Alter-RELATIV lesen (16/17 mit Maennerminuten staerkstes Signal),
+  Groesse im POSITIONSKONTEXT (TW/IV ~188+ Plus, nie alleiniges K.o.), starker Fuss aus Datenfeld belegt uebernehmbar (Linksfuss/
+  beidfuessig als Marktplus in strengths), MW/Vertrag als Unentdeckt-Signal, DATENLAGE-Hinweis (EN-Jugendstats vs. DE/FR/ES via
+  Meldungen), LAENDERFOKUS DE/EN/FR/ES. Neues Ausgabefeld groesse (nur belegt, 150-210) bis in talent_profiles (Spalte ergaenzt).
+- Aktiv ab 1.9. (OpenAI-Limit); Draft-Test bestaetigt Datenfluss bis zum KI-Node (dort erwartungsgemaess 429).
+### Kosten
+- Alles Non-KI sofort aktiv, 0 EUR. Ab 1.9.: Jugend-Feeds erhoehen RSS-Volumen marginal (Cap 320 Zeilen bleibt), Scout-Agent weiterhin
+  1x taeglich gpt-5-mini (~77k Zeichen Input, Cent-Bereich). API-Football: +~15 Leerabfragen/Tag fuer Jugendligen.
