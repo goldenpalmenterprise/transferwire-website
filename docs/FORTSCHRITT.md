@@ -874,3 +874,41 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
 ### Kosten
 - Alles Non-KI sofort aktiv, 0 EUR. Ab 1.9.: Jugend-Feeds erhoehen RSS-Volumen marginal (Cap 320 Zeilen bleibt), Scout-Agent weiterhin
   1x taeglich gpt-5-mini (~77k Zeichen Input, Cent-Bereich). API-Football: +~15 Leerabfragen/Tag fuer Jugendligen.
+
+## 28.08.2026 (Vormittag): TM-Vollausbau Teil 2 - TM-ID-Matching, TM korrigiert API-Werte, Kader-Abgleich mit TM-Evidenz, Profilfelder live
+
+### Transfermarkt-Import (xZDGcMSlCMFeofXw, aktive Version d34769fc)
+- Stufe 0: Direktabgleich ueber gespeicherte tm_id VOR den Namensstufen 1-10 ("Unsere Spieler laden" inkl. tm_id, tmIdMap nur eindeutige
+  IDs). Wirkung nach Backfill: Liga Portugal 401/536 mit s0=401, Serie B 535 s0=535, Jupiler 440 s0=440, Schweiz 325 s0=317.
+- TM korrigiert jetzt DAUERHAFT falsche API-Werte bei Geburtsdatum und Groesse (COALESCE TM-first) - in players UND in der Datentabelle
+  TW Spieler (Heilen-Node), damit der 4:30-Spiegel nichts zurueckdreht. Nationalitaet/Position bewusst weiter fuell-/reparatur-only.
+- Vereins-Zuordnung zweistufig repariert: (a) Kandidaten-Sammlung statt Erster-Substring-gewinnt, (b) Token-Vergleich mit
+  Praefix-Toleranz ab 5 Zeichen + Disambiguierung ueber Erste-Token-GLEICHHEIT, sonst ueberspringen. Behobene Fehlmuster inkl.
+  Datenreparatur per gezieltem Neulauf (Zeiger setzen, manueller Lauf): Espanyol->Barcelona (LaLiga), Club Brugge->Cercle Brugge 21x
+  (Jupiler), Grasshoppers->FC Zurich 23x (Schweiz). Danach 0 Mehrfach-Muster, 60 echte Einzelfall-Konflikte.
+- Achtung Zeiger-Semantik: tm_state.liga_index zeigt auf die NAECHSTE Liga (Zeiger=2 -> Lauf macht Index 2 = PL). Nach Fensterende
+  liefert der Liga-Zeiger bei minute%6==0 nichts (Leerlauf) - dann 1 Min spaeter erneut ausfuehren.
+
+### Kader-Abgleich (7cz9uum6cWPGK8Sm, aktive Version 06e678e3)
+- TM-Kader als VIERTE Evidenz nach Spiel > API-Kader > Meldung. Guards: tm_updated_at <= 12 Tage, tm_team via findeKaderTeam aufloesbar,
+  kein Spiel fuer den bisherigen Verein in den letzten 7 Tagen, API-Kader widerspricht nicht (fehlt oder = DB-Team), 21-Tage-
+  Meldungsschutz. Quelle 'TM-Kader' in team_source; Zaehler tmTreffer im Meta; Audit-Quellen + Morgenreport-Text ergaenzt.
+- Testlauf 06:16 (nach Datenreparatur): 58 Korrekturen (55 TM-Kader, 3 Meldung), 15 Widersprueche nur geloggt. Beispiele: Bazunu
+  Stoke->Southampton, Asllani Torino->Inter, Ilic Torino->Lecce, Pinnock Brentford->Coventry, Marmoush ManCity->Tottenham, Skhiri
+  Frankfurt->1.FC Koeln. Kein einziger Fehlmove aus den reparierten Mustern. Konflikte DB<->TM danach: 5 (Guards halten sie korrekt).
+
+### Website (Commit 1a41281, Marker 2026-08-28-bn tmfelder)
+- VereinGeprueft-Block (DB-Karte + Spielerprofil) zeigt jetzt: Fuss (rechts/links/beidfuessig), "Im Verein seit" (tm_joined) und bei
+  Abweichung den Amber-Hinweis "TM-Kader fuehrt: X (Stand ...)"; Quellen-Mapping um 'TM-Kader' ergaenzt; DE/EN inline im
+  Komponentenmuster (keine EN_MAP-Eintraege noetig). PostgREST-Select um foot,tm_joined,tm_team,tm_updated_at erweitert.
+- Livetest rt69 (docs/tests/rt69.py, laeuft im tm-fetcher): Inacio "Fuss: links - Im Verein seit 01.07.2020", Bazunu-Hinweis
+  "TM-Kader fuehrt: Southampton", 0 pageerrors. Fuer kuenftige Tests: Nav-Tab heisst exakt "Spieler" (Klick am besten ueber Nachbarschaft
+  zum "Performance"-Button), DB-Suchfeld-Placeholder ist "Spielername oder Verein (mind. 2 Zeichen) ..." (NICHT "Spieler oder Verein").
+
+### Betrieb / Zahlen
+- Backfill-Fenster 06:03 geschlossen, Liga-Zeiger steht auf 18 -> heute Nacht MLS + CSL, Rotation normal (jede Liga ~alle 10 Tage).
+- Fuellstaende (15.433 Spieler): tm_id 8.578, MW 8.286, Fuss 7.924, Im-Verein-seit 7.997, tm_team 8.400; Geburtsdatum leer 1.221->1.018,
+  Groesse leer 2.718->2.256. KI-Kosten: 0 EUR.
+- Offen (Boss-Entscheidung): TM-Neuanlage komplett fehlender Spieler (z. B. Porto-Neuzugaenge Nehuen Perez, Alberto Costa, Seko Fofana,
+  Gabri Veiga; braucht Dual-Write + synthetische IDs wegen Spiegel-TRUNCATE) und Profilseiten-/Berater-Scraping (Stufe 2, rechtliche
+  Abwaegung; nicht angefasst).
