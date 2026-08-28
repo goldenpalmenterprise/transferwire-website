@@ -1017,3 +1017,36 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
 - Draft-Test 13425: 12/26 Seiten mit Text (LFP-Kommissionsentscheidungen 28.08., AIC, Lega-B-Comunicati, SFL-Ticker, KAP,
   BORME ...), Auftrag korrekt gebaut, Credential greift, Abbruch erwartungsgemaess am OpenAI-Spend-Limit (429, bis 1.9.).
   Erster Echtlauf: 1.9. um 7:20. Bis dahin liefern die Fehl-Laeufe den bekannten 429 (wie alle KI-Workflows, Waechter aktiv).
+
+## 2026-08-28 (Abend): KI-Header-Suche live, Scout-Chat repariert, FAB entfernt (Marker bo)
+- Auftrag Boss: schwarzes TW-KI-Scout-FAB-Icon weg (Handy+PC), Scout im Transfers-Fenster behalten und reparieren,
+  Header-Suchleiste als KI-Chat-Suche mit Google-artigem Treffer-Panel, Mobile-Suchleiste vergroessern.
+- Diagnose Scout-Chat: Workflow sgfKNfoJTTGGwEuX war nie kaputt. Execution 13463 (iPhone, 18:29) zeigte: Konto,
+  Limit und Datenabruf ok, beide KI-Knoten scheitern am OpenAI-Spend-Limit (429, gesperrt bis 1.9.). Frontend
+  zeigte deshalb generischen Fehler.
+- Fix Chat (publiziert 76244594): "Antwort bauen" liefert bei leerem KI-Text jetzt ok:true mit Wartungstext DE/EN
+  (ab 1. September wieder voll da) statt err:ki. "Zaehler schreiben" als Inline-Expression neu gebaut (funktional
+  identisch, RETURNING-Werte fliessen weiter in left-Anzeige). Live-curl: Wartungstext + left 29 ok.
+- NEU Workflow "TransferWire - KI-Suche Header (Webhook)" mJ9VGLRi987YfAYm (aktiv bb5acdc1), Pfad /webhook/tw-suche
+  (Frontend /api/tw-suche via Netlify-Redirect). 10 Knoten: Webhook POST -> Anfrage parsen (email/code/frage max 300,
+  lang, verlauf max 4) -> Konto lesen (n8n-DB) -> Pruefen & Begriffe (Auth aktiv|test + gueltig_bis; Wortextraktion,
+  Stopwoerter DE/EN, max 5, Umlaut-Normalisierung, SQL-ARRAY-Literale) -> Treffer laden (TW-DB: players ILIKE ANY
+  LIMIT 6 + markt_signale LIMIT 5) -> Meldungen laden (n8n-DB LIMIT 6) -> KI-Auftrag (gpt-5-mini, max 450 Tokens,
+  nur DATEN als Quelle, max 110 Woerter, reliability 5 = Fakt) -> Suche KI (onError continue) -> Antwort bauen
+  (KI-Ausfall -> ok:true ki:false + Wartungstext, Treffer stehen trotzdem drunter) -> Respond. Antwort:
+  {ok, ki, antwort, treffer:{spieler, meldungen, signale}}. Live-curl: "Murat Satin" -> 2 Meldungs-Treffer
+  (WSG-Tirol-Fix rel. 5 + Murata-Geruecht), Auth-falsch -> err:auth. Kosten: gpt-5-mini, Cent-Bereich.
+- Frontend Commit 62d7adb (Marker 2026-08-28-bo, Patchskript patch_kisuche.py, Delta +5006):
+  1) FAB-CSS + kompletter FAB-JSX-Block (Sprechblase "Frag den TW Scout" + Maennchen) entfernt, 0 Rest-Vorkommen.
+     Chat-Overlay (chatOpen) unveraendert erhalten.
+  2) Neue Komponente ScoutLeiste (dunkle Karte, gruener Punkt, Button "Scout fragen" -> Chat) im Feed-View vor der
+     eingefrorenen FeedSuche (React.Fragment-Wrap, Freeze-Bereich unangetastet).
+  3) Header-Suche (#tw-gsuche) schreibt jetzt kiFrage, Enter -> sendeKi, onFocus mobil oeffnet Panel; neuer
+     Placeholder "Frag die TW KI-Suche...". Feed-Filterung der Suchbox entfaellt (query-State bleibt ungenutzt).
+  4) Neue Komponente KiSuchePanel: Desktop fixed top 62, min(720px, 100vw-24), Chat-Bubbles, Treffer-Sektionen
+     SPIELER / MELDUNGEN (Fix gruen, Geruecht amber, Verlaesslichkeit x/5, Quelle-Link) / MARKTSIGNALE, sticky
+     Eingabe. Mobile: Vollbild (inset 0, 100dvh), Input 16px (kein iOS-Zoom), Suchbox-Padding vergroessert.
+- Livetest rt70 (docs/tests/rt70.py, Premium-Testkonto, Desktop 1280x900 + Mobile 390x844) KOMPLETT GRUEN:
+  marker=bo, fab=0, bubble weg, ScoutLeiste da, Chat oeffnet + Wartungsantwort, Mobile-Suchfont 16px,
+  KI-Panel oeffnet (720 Desktop / 390 Vollbild Mobile), Wartungsantwort + Satin-Treffer + WSG-Tirol-Fix sichtbar.
+- Ab 1.9. antworten Chat und KI-Suche automatisch mit echten KI-Antworten (gleiche Workflows, kein Eingriff noetig).
