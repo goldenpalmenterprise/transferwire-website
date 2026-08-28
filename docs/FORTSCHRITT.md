@@ -983,3 +983,37 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
   Nachtrotation (der Fueller laeuft jetzt in jedem Import-Lauf mit).
 - Folgethema (beobachten, nicht dringend): Wenn API-Football einen TM-angelegten Spieler spaeter selbst listet, kann eine
   API-Dublette entstehen -> Dubletten-Waechter beobachten; bei Bedarf Merge-Regel ueber tm_id nachruesten.
+
+## 28.08.2026 (Abend): Primaerquellen-Ebene + neuer Agent 'TW Marktanalyst' (Boss-Auftrag, Dokument 'besondere Transfer- und Primaerquellen')
+
+### Quellen (Register, gruppe='primaer', hinweis 'Primaerquellen 28.08.2026', 25 neue Eintraege ids 1207-1231)
+- Offizielle Web-Quellen (typ=web, laufen im KI-Quellen-Crawler UND im neuen Analyst): FIFA Legal/Football Regulatory, VDV
+  Spielergewerkschaft, Bundesanzeiger, EFL Squad Lists + EFL Embargo Reporting, RFEF Circulares + Normativa, BORME, Lega Serie B,
+  AIC News, LFP, Voetbal.nl, Liga Portugal, CMVM, RBFA, Bundesliga AT News, SFL, TFF, KAP (en), Scottish FA Governance, SPFL,
+  DBU, Virk/CVR, MLSPA Salary Guide, MLS Roster Rules, CFA. Dublettenschutz liess 8 bereits vorhandene aus (Pro League u.a.).
+- GN-Suchfeeds fuer saisonvariable Listen (typ=rss, laufen im 2h-RSS-Zweig): PL Retained/Released, DNCG, Bundesliga
+  Transfercenter, KNVB Licentie, UNFP Joueurs Libres, MLS Transfer Tracker, Bundesliga AT Lizenz Senat 5.
+- curl-Status beim Eintrag: 24x 200; 403 nur rfef.es (x2) und virk.dk (drin gelassen, Crawler-Fetcher + Quellen-Spiegel
+  ueberwachen). Tote URLs (fifa registration-bans direkt, mlssoccer/transfers, knvb licentiezaken, unfp.org, bundesliga.com
+  transfers) NICHT eingetragen - durch GN-Feeds bzw. Portal-Einstiege ersetzt.
+- NICHT eingebaut (kostenpflichtig/Login, pausierter Extra-Schritt): TransferRoom (+API), Wyscout Data API, Opta, Sportradar,
+  Event Registry, NewsWhip, Inoreader, Weibo/WeChat (brauchen eigene Anbindung/Accounts).
+
+### Neue Tabelle markt_signale (transferwire-DB)
+- kategorie (registrierung|free_agent|embargo|lizenz|finanzen|sperre|regel|kaderliste), land, club, player_name, richtung
+  (kauft_nicht|muss_verkaufen|verfuegbar|fix|warnung|info), staerke 1-5, signal_text, quelle, url, published_at, gueltig_bis,
+  dedupe_key UNIQUE, created_at. Zusatz-Ebene fuer Club-Signale (Embargo/Lizenz/Finanzen) - Anzeige im Vereinskontext = moeglicher
+  Folgeschritt (Website-Freeze beachten).
+
+### Neuer Workflow 'TW Agent: Primaerquellen-Analyst (taeglich 7:20)' (EWKWA7T0h2yqYKnR, aktiv 242be57a)
+- Erstellt via Workflow-SDK (validate + create_workflow_from_code). Kette: Schedule 7:20 -> Bremse pruefen (tw_status ki_bremse)
+  -> IF 'KI frei?' -> Quellen laden (gruppe=primaer, typ=web, LIMIT 26) -> Seite holen (httpRequest text, 15s, onError continue)
+  -> Agent-Auftrag (HTML-Strip, 3200 Z./Quelle, 90k-Cap, gpt-5-mini json_object) -> Marktanalyst KI (openAiApi Yp2IJGZKyLBBjk7Z)
+  -> Signale formen (Schema-Haertung, dedupe_key) -> Signale speichern (markt_signale, ON CONFLICT DO NOTHING)
+  -> Meldungen ableiten (registrierung->type fix, free_agent->type verfuegbar, reliability 5, dedup_key 'primaer:'||key,
+  source=Quellenname) in Transfernews Meldungen -> fliesst automatisch in Feed, Spieler-Aktualisierer (30min) und
+  Kader-Abgleich-Meldungsevidenz. Der antrainierte Analyst-Prompt enthaelt Kategorien + Bedeutungslehre (DNCG/Embargo/KAP/
+  Released-Lists) + strikte Nur-was-dasteht-Regeln.
+- Draft-Test 13425: 12/26 Seiten mit Text (LFP-Kommissionsentscheidungen 28.08., AIC, Lega-B-Comunicati, SFL-Ticker, KAP,
+  BORME ...), Auftrag korrekt gebaut, Credential greift, Abbruch erwartungsgemaess am OpenAI-Spend-Limit (429, bis 1.9.).
+  Erster Echtlauf: 1.9. um 7:20. Bis dahin liefern die Fehl-Laeufe den bekannten 429 (wie alle KI-Workflows, Waechter aktiv).
