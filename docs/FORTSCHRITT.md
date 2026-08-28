@@ -942,3 +942,19 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
 - Offen fuer Boss: (a) er wollte 'folgende Quellen' schicken - Liste kam nicht an, bitte nachreichen, dann ergaenzen;
   (b) API-Key-Quellen als Extra-Schritt (football-data.org kostenloser Key, Sportmonks-Planerweiterung, kommerziell
   Wyscout/Opta/StatsBomb); (c) Fruehstarter-Scout 21:40 koennte dieselbe Formkurve bekommen (kleiner Folge-Edit).
+
+### Nachtrag: Boss-Quellenliste eingearbeitet (28.08., ids 1147-1206)
+- 60 weitere Register-Eintraege, hinweis 'Scouting-Vertiefung 28.08.2026 (Boss-Quellenliste)'. Gesamt jetzt 70 neue Quellen:
+  DE 14, EN 15, FR 14, ES 22, INT 5. Davon 3 zusaetzliche live getestete RSS (kicker Junioren newsfeed.kicker.de/news/junioren,
+  Training Ground Guru /feed/, Golsmedia /feed/), 1 social (YouthHawk auf X), Rest typ=web fuer den KI-Quellen-Crawler:
+  UEFA Youth League + U17/U19/U21-Statistiken, CIES Reports, DFB U17/U19-Nachwuchsliga + U17/U19-Nationalteams + 3. Liga,
+  FUSSBALL.DE, FuPa U17/U19, kicker U17-Wettbewerbe, RevierSport Junioren/B-Jugend, Sofascore-Jugendligen (DE/FR/ES),
+  PL Youth/U18/PL2 (Spiele+Tabellen), FA Youth Cup, EFL Youth Development, England Football Youth, YouthHawk, TGG Academy
+  Rankings, NFYL, EFL + National League, FFF Epreuves, FFFTV U17/U19/Gambardella/National, FFF U17/U19-Auswahlen,
+  FFF-Ligenverzeichnis, Actufoot, Foot-National, RFEF DH Juvenil + Copa Juvenil + Sub-17/19/21 + Primera/Segunda/Tercera
+  Federacion, Futbolme DH + Liga Nacional Juvenil, Golsmedia Juvenil/Cadete, AS DH-Juvenil-Tag, Relevo, Verbaende FCF/RFFM/FFCV/RFAF.
+- Kostenlogik Crawler: Deckel 70 faellige Quellen je Lauf (4x taeglich); prio 1 ~alle 20h, prio 2 ~44h, prio 3 ~68h -> neue
+  Quellen verlaengern nur den Umlauf, KEINE Mehrkosten je Tag. curl-403 bei 4 Hosts (epreuves.fff.fr, ffftv.fff.fr, rfef.es,
+  actufoot.com) - eingetragen gelassen, Crawler-Fetcher hat eigene Methode; Quellen-Spiegel ueberwacht lese_status/vertrauen.
+- NICHT eingebaut (kostenpflichtig, Extra-Schritt mit Boss): Wyscout Youth, Eyeball, SkillCorner. FFF-YouTube-Kanal als
+  Video-Quelle notiert, kein Text-Crawling.
