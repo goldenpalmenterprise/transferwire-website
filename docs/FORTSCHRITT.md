@@ -912,3 +912,33 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
 - Offen (Boss-Entscheidung): TM-Neuanlage komplett fehlender Spieler (z. B. Porto-Neuzugaenge Nehuen Perez, Alberto Costa, Seko Fofana,
   Gabri Veiga; braucht Dual-Write + synthetische IDs wegen Spiegel-TRUNCATE) und Profilseiten-/Berater-Scraping (Stufe 2, rechtliche
   Abwaegung; nicht angefasst).
+
+## 28.08.2026 (Vormittag, Teil 2): Scouting-Vertiefung - neue Quellen DE/EN/FR/ES + Scout-Agent mit Formkurve und Performance-Analyse
+
+### Neue Quellen (Register data_table_user_IQk1uY59LjYaOsyi, alle vor Eintrag live per curl getestet)
+- 10 neue Zeilen (ids 1137-1146), gruppe jugend/unterhaus/medien, prio 2, vertrauen B, hinweis 'Scouting-Vertiefung 28.08.2026':
+  DE: kicker Amateure & Nachwuchs (newsfeed.kicker.de/news/amateure), GN Perspektivspieler, GN Regionalliga Talent Profivertrag.
+  EN: The72 (EFL). FR: Jeunes Footeux /rss/ (Talent-Blog!), Top Mercato, But! Football Club. ES: AS Segunda Division
+  (as.com/rss/futbol/segunda.xml, 68 Items), GN Cantera Perla, GN Primera Federacion Filial.
+  Football League World + Football Insider waren bereits im Register (Dubletten-Schutz via NOT EXISTS auf quelle_url).
+- Der RSS-Zweig (18462puK0GA3Azyu) nimmt automatisch ALLE aktiven typ=rss-Zeilen - kein Workflow-Edit noetig. Getestete
+  Fehlschlaege (NICHT eingetragen): transfermarkt.de/rss/news (202 Cloudflare), fussballtransfers.com (404), reviersport (403),
+  footballtalentscout.net (404/leer), teamtalk (404), footmercato (404 alle Pfade), as fichajes/mercado.xml (404), fichajes.net (404),
+  vavel (404), eldesmarque (403), relevo (404), uefa youthleague rss (timeout), estadiodeportivo (404).
+
+### Scout-Agent (iVt2oygA1gPIMf0Y, aktive Version 885bc13d)
+- Neuer Knoten 'Form laden' (Postgres n8n-DB PGn8nDB00000001, onError continue): f5 = gerundeter Durchschnitts-TW-Score der
+  letzten bis zu 5 Pflichtspiele (45-Tage-Fenster, Vortest 4.611 Spieler) + m5 = Minuten darin, aus TW Performance
+  (data_table_user_zqzCsKh0H0VlVlpX); dazu 'verletzt'-Liste aus TW Sidelined (fetched_at::text-Vergleich, items_json > leer).
+  Kette: Kalibrierung laden -> Form laden -> Agent-Auftrag.
+- 'Stats laden' liefert jetzt pid (player_id im Maennerfussball-Block, NULL bei Jugendliga); 'Agent-Auftrag' mappt f5/m5/verletzt
+  per pid in die Leistungsdaten und entfernt pid vor dem Prompt (Tokens).
+- Prompt: neuer Block PERFORMANCE-ANALYSE zwischen Scout-Attributen und Aufgabe - Wettbewerbsgewichtung (Top-5-Erstligen >
+  grosse Zweitligen > 3. Liga > UEFA Youth League > Jugendligen), p90-Richtwerte je Positionsgruppe (Stuermer 0,5/0,8;
+  Fluegel/Zehner 0,35; Achter 0,2; Verteidiger/TW nie ueber p90), Form-Lesart f5 vs r*10, Belastbarkeit 270/900 Minuten,
+  Verletzt-Malus nach Chef-Kriterium 7, Widerspruchs-Regel Zahlen > Meldungstext. CHEF-KRITERIEN und Ausgabeschema UNVERAENDERT.
+- Draft-Test 12830: Form laden success, Agent-Auftrag success, Abbruch erwartungsgemaess erst am KI-Knoten (OpenAI Spend-Limit
+  bis 1.9.). Erster Echtlauf mit KI: 1.9. um 21:15.
+- Offen fuer Boss: (a) er wollte 'folgende Quellen' schicken - Liste kam nicht an, bitte nachreichen, dann ergaenzen;
+  (b) API-Key-Quellen als Extra-Schritt (football-data.org kostenloser Key, Sportmonks-Planerweiterung, kommerziell
+  Wyscout/Opta/StatsBomb); (c) Fruehstarter-Scout 21:40 koennte dieselbe Formkurve bekommen (kleiner Folge-Edit).
