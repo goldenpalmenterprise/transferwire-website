@@ -1050,3 +1050,22 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
   marker=bo, fab=0, bubble weg, ScoutLeiste da, Chat oeffnet + Wartungsantwort, Mobile-Suchfont 16px,
   KI-Panel oeffnet (720 Desktop / 390 Vollbild Mobile), Wartungsantwort + Satin-Treffer + WSG-Tirol-Fix sichtbar.
 - Ab 1.9. antworten Chat und KI-Suche automatisch mit echten KI-Antworten (gleiche Workflows, kein Eingriff noetig).
+
+## 2026-08-28 (spaet): Mobile-Suchfeld als eigene Zeile unter der Kopfzeile (Marker br)
+- Auftrag Boss: Auf dem Handy soll das Suchfeld UNTER den Header, genauso lang wie der Header sein und den
+  gleichen Placeholder-Text wie im Web zeigen.
+- Umsetzung (nur CSS im 760er-Mobile-Block, kein JSX-Eingriff): .tw-headwrap height auto + flex-wrap wrap
+  (Padding 9/10/11, row-gap 9); .tw-gsuche-box order 99 + flex 1 1 100% -> rutscht als volle zweite Zeile
+  unter Logo/Buttons, exakt Header-Innenbreite. Header ist nicht fixed, nichts haengt an der 56px-Hoehe
+  (KI-Panel mobil inset 0) - vorher geprueft.
+- Bugfix dabei entdeckt: Das Input fuellte die Box nicht (nur 92px, width-100%-Basis griff im Flex-Kontext
+  nicht) -> Input jetzt flex 1 1 0% + width auto + min-width 0, fuellt den Restplatz (320px auf 390er).
+- Placeholder: identischer Wortlaut wie Web (ein gemeinsamer String im Code). Da 16px-Text (408px) physisch
+  nicht in 390px passt: ::placeholder mobil 12px + letter-spacing -0.1 + text-overflow ellipsis als Netz;
+  Stufe 11.5px unter 375px (verschachteltes @media, UND-verknuepft). Input-Schrift bleibt 16px (kein iOS-Zoom).
+- Livetest rt71 (docs/tests/rt71.py, misst Geometrie + Placeholder-Textbreite in echter ::placeholder-Schrift,
+  Login-Objekt wie rt70 inkl. plan/start/name - ohne diese Felder greift der localStorage-Login nicht!):
+  DESKTOP 1280: Suchfeld bleibt IN der Kopfzeile, 560px, unveraendert, Panel 720. GRUEN.
+  MOBILE 390: unter dem Header, Breite 364/364 (rechtsLuecke 0), voller Text passt (299/320), Panel 390. GRUEN.
+  MOBIL36 360: Breite 334/334, voller Text passt (286/290), Panel 360. GRUEN.
+- Commits 548d455 (bp), 4796ee7 (bq), a64fe39 (br).
