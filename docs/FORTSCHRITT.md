@@ -958,3 +958,28 @@ Sheet bündig unten (7 Auswahlfelder, 4 Haken, „383 Meldungen anzeigen“), sc
   actufoot.com) - eingetragen gelassen, Crawler-Fetcher hat eigene Methode; Quellen-Spiegel ueberwacht lese_status/vertrauen.
 - NICHT eingebaut (kostenpflichtig, Extra-Schritt mit Boss): Wyscout Youth, Eyeball, SkillCorner. FFF-YouTube-Kanal als
   Video-Quelle notiert, kein Text-Crawling.
+
+## 28.08.2026 (Nachmittag): Vollstaendigkeits-Pruefung + TM-Neuanlage fehlender Spieler (Boss-Frage 'haben wir alle?')
+
+### Befund
+- Antwort: NEIN. TM listete in den aktuellsten Liga-Audits 762 Spieler MIT Marktwert, die in players fehlten (mehrere Ligen am
+  60er-Anzeige-Cap der fehlend-Liste -> real ~850+). Beispiele: Vini Souza + Vranckx (Wolfsburg), Neuzugangswellen Nuernberg/
+  Lautern/Kiel/Hannover. Ursache: API-Football-Kader hinken hinterher oder listen Spieler gar nicht.
+- Dazu 9 'Geister-Teams' mit 1-9 Spielern (Namensvarianten/Altbestaende, z.B. 'West Ham' neben 'West Ham United') und Team-
+  Zahlen > Ligagroesse (Karteileichen mit altem team-Wert). Dubletten-Waechter 5:50 beobachtet; separates Aufraeumthema.
+- 'Alle Laender': bewusst 20 Ligen abgedeckt, nicht alle Ligen weltweit (Erweiterungsoptionen siehe Bericht an Boss).
+
+### Loesung: TM-Neuanlage im Import (xZDGcMSlCMFeofXw, aktive Version 4099cb5c)
+- Parse-Knoten sammelt Neuanlage-Kandidaten: unmatched MIT tmPid und Marktwert >= 100k, Cap 80 je Lauf, samt aller geparsten
+  Stammdaten (Pos/Alter/Nat/Groesse/Geb/Fuss/MW/Vertrag/Joined). Arrays nPids..nJoined + neuKandidaten im Output.
+- Knoten 'Fehlende anlegen' (Postgres TransferWire): INSERT players mit player_id = 900000000 + TM-ID; Guards: tm_id existiert
+  nicht, ID-Kollision nicht, kein gleicher Name (lower) in derselben Liga. team_source='TM-Kader', season 2026.
+  WICHTIG: search_name/search_team sind GENERATED COLUMNS -> NIE setzen (erster Testfehler).
+- Knoten 'Fehlende in Datentabelle' (Postgres n8n-DB): Dual-Write derselben Spieler in TW Spieler (id = MAX+rn, player_id double),
+  damit der 4:30-Spiegel (TRUNCATE) sie behaelt. Quelle: neu_liste aus 'Fehlende anlegen' via json_to_recordset.
+- Beide Knoten onError=continue + alwaysOutputData (Kette zum Audit reisst nie ab); Audit korrigiert-JSON um neu_angelegt ergaenzt.
+- Test: China-Lauf 13288 -> 14 neu angelegt (Karzev, Saulo Mineiro, Jussa, Xadas ...), 14 in players UND Datentabelle verifiziert.
+- Backfill-Fenster bis 17:54 UTC geoeffnet, Zeiger 0 -> alle 20 Ligen schliessen die Luecken noch heute; Rest + Zukunft via
+  Nachtrotation (der Fueller laeuft jetzt in jedem Import-Lauf mit).
+- Folgethema (beobachten, nicht dringend): Wenn API-Football einen TM-angelegten Spieler spaeter selbst listet, kann eine
+  API-Dublette entstehen -> Dubletten-Waechter beobachten; bei Bedarf Merge-Regel ueber tm_id nachruesten.
