@@ -57,7 +57,7 @@
   .tw-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
-<!-- tw-build: 2026-08-27-bm historie -->
+<!-- tw-build: 2026-08-28-bn tmfelder -->
 <meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
@@ -4285,13 +4285,15 @@ function VereinGeprueft({ pid }) {
   const h = React.createElement; const en = LANG === "en";
   const [info, setInfo] = useState(null);
   const [hist, setHist] = useState([]);
-  useEffect(() => { if (!pid) return; let ok = true; fetch("/db/players?player_id=eq." + encodeURIComponent(pid) + "&select=team,team_source,team_updated_at,letzter_verein,contract_source", { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(rows => { if (ok && Array.isArray(rows) && rows[0]) setInfo(rows[0]); }).catch(() => {});
+  useEffect(() => { if (!pid) return; let ok = true; fetch("/db/players?player_id=eq." + encodeURIComponent(pid) + "&select=team,team_source,team_updated_at,letzter_verein,contract_source,foot,tm_joined,tm_team,tm_updated_at", { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(rows => { if (ok && Array.isArray(rows) && rows[0]) setInfo(rows[0]); }).catch(() => {});
     fetch("/db/spieler_aenderungen?player_id=eq." + encodeURIComponent(pid) + "&select=feld,alt,neu,quelle,created_at&order=created_at.desc&limit=3", { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(rows => { if (ok && Array.isArray(rows)) setHist(rows); }).catch(() => {}); return () => { ok = false; }; }, [pid]);
   if (!info && !hist.length) return null;
-  const q = info ? ({ Spiel: en ? "last match" : "letztes Spiel", Kader: en ? "squad list" : "Kaderliste", Meldung: en ? "confirmed transfer report" : "best\u00e4tigte Transfermeldung" }[info.team_source] || info.team_source || "") : "";
+  const q = info ? ({ Spiel: en ? "last match" : "letztes Spiel", Kader: en ? "squad list" : "Kaderliste", Meldung: en ? "confirmed transfer report" : "best\u00e4tigte Transfermeldung", "TM-Kader": en ? "Transfermarkt squad" : "Transfermarkt-Kader" }[info.team_source] || info.team_source || "") : "";
   const feld = f => f === "team" ? (en ? "Club" : "Verein") : f === "contract_until" ? (en ? "Contract until" : "Vertrag bis") : f;
   return h("div", { style: { marginTop: 4 } },
     info && info.team_updated_at ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "#149a59", fontWeight: 700 } }, "\u2713 " + (en ? "Club verified on " : "Verein gepr\u00fcft am ") + fmtDate(info.team_updated_at) + (q ? " \u00b7 " + (en ? "source: " : "Quelle: ") + q : "")) : null,
+    info && (info.foot || info.tm_joined) ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, marginTop: 2 } }, [info.foot ? (en ? "Foot: " : "Fu\u00df: ") + (({ rechts: en ? "right" : "rechts", links: en ? "left" : "links", "beidf\u00fc\u00dfig": en ? "both feet" : "beidf\u00fc\u00dfig" })[info.foot] || info.foot) : "", info.tm_joined ? (en ? "At club since " : "Im Verein seit ") + fmtDate(info.tm_joined) : ""].filter(Boolean).join(" \u00b7 ")) : null,
+    info && info.tm_team && info.team && info.tm_team !== info.team ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "#b45309", fontWeight: 700, marginTop: 2 } }, (en ? "Transfermarkt squad lists: " : "TM-Kader f\u00fchrt: ") + info.tm_team + (info.tm_updated_at ? " (" + (en ? "as of " : "Stand ") + fmtDate(info.tm_updated_at) + ")" : "")) : null,
     hist.length ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, marginTop: 3, lineHeight: 1.5 } }, hist.map((x, i) => h("div", { key: i }, fmtDate(x.created_at) + " \u00b7 " + feld(x.feld) + ": " + (x.alt || "\u2013") + " \u2192 " + (x.neu || "\u2013") + (x.quelle ? " (" + x.quelle + ")" : "")))) : null);
 }
 const PT_RX = /probetraining|testspieler|trainingsgast|gastspieler|vereinslos|vertragslos|free agent|svincolato|agente libre|sans club|transfervrij|probetrainer/i;
