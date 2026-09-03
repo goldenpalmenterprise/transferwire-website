@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-<title>TransferWire — Transfermeldungen & Vereinsbedarfe</title>
+<title>TransferWire — Transfer news & club needs</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style id="tw-design">
@@ -54,28 +54,29 @@
   .tw-tabs button, .tw-tile, .tw-chip { transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
 </style>
 <!-- tw-build: 2026-08-28-br suchemobil3 -->
-<meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
+<style>.tw-lang-kurz{display:none}@media (max-width:560px){.tw-lang-text{display:none}.tw-lang-kurz{display:inline}}</style>
+<meta name="description" content="All transfer news, club needs with player matching, scout ranking and a player database from 30 leagues and 16 countries — updated hourly." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
-<meta property="og:title" content="TransferWire — Transfermeldungen & Vereinsbedarfe" />
-<meta property="og:description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
+<meta property="og:title" content="TransferWire — Transfer news & club needs" />
+<meta property="og:description" content="All transfer news, club needs with player matching, scout ranking and a player database from 30 leagues and 16 countries — updated hourly." />
 <meta property="og:url" content="https://transferwire.de/" />
 <meta property="og:image" content="https://transferwire.de/og-image.png" />
 <meta property="og:image:secure_url" content="https://transferwire.de/og-image.png" />
 <meta property="og:image:type" content="image/png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="675" />
-<meta property="og:image:alt" content="TransferWire — Transfermeldungen & Vereinsbedarfe" />
-<meta property="og:locale" content="de_DE" />
+<meta property="og:image:alt" content="TransferWire — Transfer news & club needs" />
+<meta property="og:locale" content="en_US" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="TransferWire — Transfermeldungen & Vereinsbedarfe" />
-<meta name="twitter:description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
+<meta name="twitter:title" content="TransferWire — Transfer news & club needs" />
+<meta name="twitter:description" content="All transfer news, club needs with player matching, scout ranking and a player database from 30 leagues and 16 countries — updated hourly." />
 <meta name="twitter:image" content="https://transferwire.de/og-image.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="TransferWire — Transfermeldungen & Vereinsbedarfe" />
-<meta name="twitter:description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 20 Ligen und 18 Ländern — stündlich aktualisiert." />
+<meta name="twitter:title" content="TransferWire — Transfer news & club needs" />
+<meta name="twitter:description" content="All transfer news, club needs with player matching, scout ranking and a player database from 30 leagues and 16 countries — updated hourly." />
 <meta name="twitter:image" content="https://transfer-wire-test.netlify.app/og-image.png" />
 <meta name="theme-color" content="#101012" />
 <link rel="manifest" href="manifest.webmanifest" />
@@ -1782,14 +1783,31 @@ function normResp(x) {
   return x;
 }
 function LangSwitch({ dark }) {
-  const opt = ["de", "en"];
   const [dk, setDk] = React.useState(() => { try { return localStorage.getItem("tw_dark") === "1"; } catch (e) { return false; } });
   React.useEffect(() => {
     try { document.documentElement.classList.toggle("tw-dark", dk); localStorage.setItem("tw_dark", dk ? "1" : "0"); } catch (e) {}
   }, [dk]);
+  const [open, setOpen] = React.useState(false);
+  const boxRef = React.useRef(null);
+  React.useEffect(() => {
+    if (!open) return;
+    const zu = e => { if (boxRef.current && !boxRef.current.contains(e.target)) setOpen(false); };
+    const esc = e => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", zu); document.addEventListener("keydown", esc);
+    return () => { document.removeEventListener("mousedown", zu); document.removeEventListener("keydown", esc); };
+  }, [open]);
+  const en = LANG === "en";
+  const rahmen = "1px solid " + (dark ? "rgba(255,255,255,.28)" : HAIR);
+  const waehle = o => { setOpen(false); if (__twToggleLang) __twToggleLang(o); };
+  const eintrag = (o, label) => React.createElement("button", { key: o, role: "menuitem", onClick: () => waehle(o), style: { display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", gap: 12, cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: LANG === o ? 800 : 600, padding: "9px 12px", border: "none", borderRadius: 8, background: "transparent", color: INK, textAlign: "left" } }, label, LANG === o ? React.createElement("span", { style: { color: "#149a59", fontWeight: 800 } }, "\u2713") : null);
   return React.createElement("div", { className: "tw-lang", style: { display: "inline-flex", alignItems: "center", gap: 8 } },
-    React.createElement("div", { style: { display: "inline-flex", border: "1px solid " + (dark ? "rgba(255,255,255,.28)" : HAIR), borderRadius: 9, overflow: "hidden" } },
-      opt.map(o => React.createElement("button", { key: o, onClick: () => __twToggleLang && __twToggleLang(o), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .4, padding: "5px 9px", border: "none", background: LANG === o ? (dark ? "rgba(255,255,255,.92)" : "#0f1520") : "transparent", color: LANG === o ? (dark ? "#111" : "#fff") : (dark ? "rgba(255,255,255,.72)" : "#5b6472") } }, o.toUpperCase()))),
+    React.createElement("div", { ref: boxRef, style: { position: "relative" } },
+      React.createElement("button", { type: "button", "aria-haspopup": "menu", "aria-expanded": open ? "true" : "false", onClick: () => setOpen(o => !o), title: en ? "Change language" : "Sprache \u00e4ndern", style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, letterSpacing: .3, padding: "6px 10px", borderRadius: 9, border: rahmen, background: "transparent", color: dark ? "rgba(255,255,255,.88)" : "#0f1520", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: 6 } },
+        React.createElement("span", { className: "tw-lang-text" }, en ? "Change language" : "Sprache \u00e4ndern"),
+        React.createElement("span", { className: "tw-lang-kurz" }, LANG.toUpperCase()),
+        React.createElement("span", { style: { fontSize: 9, opacity: .7 } }, "\u25BE")),
+      open ? React.createElement("div", { role: "menu", style: { position: "absolute", top: "calc(100% + 6px)", right: 0, minWidth: 172, background: CARD, border: "1px solid " + HAIR, borderRadius: 12, boxShadow: "0 12px 32px rgba(0,0,0,.16)", padding: 6, zIndex: 80 } },
+        eintrag("en", "English"), eintrag("de", "Deutsch")) : null),
     React.createElement("button", { onClick: () => setDk(d => !d), "aria-label": "Design hell/dunkel", title: dk ? "Helles Design" : "Dunkles Design", style: { cursor: "pointer", width: 30, height: 30, borderRadius: 9, border: "1px solid " + (dark ? "rgba(255,255,255,.28)" : HAIR), background: "transparent", color: dark ? "rgba(255,255,255,.85)" : "#0f1520", fontSize: 14, lineHeight: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", padding: 0 } }, dk ? "\u2600" : "\u263E"));
 }
 const fmtDate = t => new Date(t).toLocaleDateString(LANG === "en" ? "en-GB" : "de-DE", {
@@ -10464,15 +10482,21 @@ function GoHome() {
 function TransferWire() {
   const [lang, setLangState] = useState(() => {
     try {
-      const v = store.getItem("tw_lang"); return ["de", "en"].indexOf(v) >= 0 ? v : (v === "fr" || v === "es" ? "en" : "de");
+      const v = store.getItem("tw_lang"); return ["de", "en"].indexOf(v) >= 0 ? v : "en";
     } catch (e) {
-      return "de";
+      return "en";
     }
   });
   LANG = lang;
   useEffect(() => {
+    try {
+      document.documentElement.lang = lang;
+      document.title = lang === "en" ? "TransferWire — Transfer news & club needs" : "TransferWire — Transfermeldungen & Vereinsbedarfe";
+    } catch (e) {}
+  }, [lang]);
+  useEffect(() => {
     __twToggleLang = ziel => {
-      const n = ["de", "en"].indexOf(ziel) >= 0 ? ziel : "de";
+      const n = ["de", "en"].indexOf(ziel) >= 0 ? ziel : "en";
       try {
         store.setItem("tw_lang", n);
       } catch (e) {}

@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>try{if(localStorage.getItem("tw_account")&&location.hash!=="#landing"){location.replace("/app.html"+(location.hash||""));}}catch(e){}</script>
 <title>TransferWire — Football intelligence. One move ahead.</title>
-<meta name="description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 30 Ligen und 16 Ländern — stündlich aktualisiert." />
+<meta name="description" content="All transfer news, club needs with player matching, scout ranking and a player database from 30 leagues and 16 countries — updated hourly." />
 <link rel="canonical" href="https://transferwire.de/" />
 <link rel="icon" href="/icon-192.png" type="image/png" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -14,7 +14,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="TransferWire" />
 <meta property="og:title" content="TransferWire — Football intelligence. One move ahead." />
-<meta property="og:description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 30 Ligen und 16 Ländern — stündlich aktualisiert." />
+<meta property="og:description" content="All transfer news, club needs with player matching, scout ranking and a player database from 30 leagues and 16 countries — updated hourly." />
 <meta property="og:url" content="https://transferwire.de/" />
 <meta property="og:image" content="https://transferwire.de/og-image.png" />
 <meta property="og:image:secure_url" content="https://transferwire.de/og-image.png" />
@@ -23,7 +23,7 @@
 <meta property="og:image:height" content="675" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="TransferWire — Football intelligence. One move ahead." />
-<meta name="twitter:description" content="Alle Transfermeldungen, Vereinsbedarfe mit Spieler-Matching, Scout-Ranking und Spieler-Datenbank aus 30 Ligen und 16 Ländern — stündlich aktualisiert." />
+<meta name="twitter:description" content="All transfer news, club needs with player matching, scout ranking and a player database from 30 leagues and 16 countries — updated hourly." />
 <meta name="twitter:image" content="https://transferwire.de/og-image.png" />
 <style>
   :root{
@@ -64,9 +64,20 @@
   .mark{width:26px; height:26px; border-radius:8px; background:var(--ink); display:grid; place-items:center; flex:0 0 auto}
   .mark svg{width:15px; height:15px}
   .nav .rechts{margin-left:auto; display:flex; align-items:center; gap:8px}
-  .sprache{display:flex; background:#DFDEDA; border-radius:999px; padding:3px}
-  .sprache button{font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; color:#6b6b66}
-  .sprache button.akt{background:var(--ink); color:#fff}
+  .sprache{position:relative; display:flex}
+.sprache .lang-btn{display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; padding:6px 12px; border-radius:999px; border:0; cursor:pointer; font-family:inherit; background:#DFDEDA; color:#3c3c38; white-space:nowrap}
+.sprache .lang-btn:hover{background:#d3d2ce}
+.sprache .lang-btn .caret{font-size:10px; opacity:.7}
+.sprache .lang-kurz{display:none}
+.lang-menu{position:absolute; top:calc(100% + 8px); right:0; min-width:172px; background:#fff; border:1px solid #E1E5E2; border-radius:12px; box-shadow:0 12px 32px rgba(0,0,0,.14); padding:6px; z-index:60}
+.lang-menu[hidden]{display:none}
+.lang-menu button{display:flex; width:100%; align-items:center; justify-content:space-between; gap:12px; font-size:13px; font-weight:600; padding:9px 12px; border:0; border-radius:8px; cursor:pointer; font-family:inherit; background:transparent; color:#14181D; text-align:left}
+.lang-menu button:hover{background:#F5F6F2}
+.lang-menu button.akt{font-weight:800}
+.lang-menu button.akt::after{content:"\2713"; color:#149A59; font-weight:800}
+@media (max-width:560px){ .sprache .lang-text{display:none} .sprache .lang-kurz{display:inline} .sprache .lang-btn{padding:6px 10px} }
+  
+  
   .nav-login{font-size:13.5px; font-weight:700; padding:8px 12px; border-radius:999px; color:#3c3c38}
   .nav-login:hover{background:#e0dfdb}
   .nav-cta{font-size:13.5px; font-weight:800; padding:9px 16px; border-radius:999px; background:var(--ink); color:#fff; white-space:nowrap}
@@ -453,9 +464,12 @@
       <span class="wortzug">TRANSFER<b>WIRE</b></span>
     </a>
     <div class="rechts">
-      <div class="sprache">
-        <button id="btn-de" class="akt" onclick="setzeSprache('de')">DE</button>
-        <button id="btn-en" onclick="setzeSprache('en')">EN</button>
+      <div class="sprache" id="sprache">
+        <button id="btn-lang" class="lang-btn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="lang-menu" onclick="langMenu(event)"><span class="lang-text" id="lang-text">Change language</span><span class="lang-kurz" id="lang-kurz">EN</span><span class="caret">&#9662;</span></button>
+        <div id="lang-menu" class="lang-menu" role="menu" hidden>
+          <button type="button" role="menuitem" id="lang-en" onclick="setzeSprache('en'); langMenu(false)">English</button>
+          <button type="button" role="menuitem" id="lang-de" onclick="setzeSprache('de'); langMenu(false)">Deutsch</button>
+        </div>
       </div>
       <button class="nav-login" onclick="location.href='/app.html#login'" data-de="Login" data-en="Log in">Login</button>
       <button class="nav-cta" onclick="zeige('preise')" data-de="Preise &amp; Abos" data-en="Pricing &amp; plans">Preise &amp; Abos</button>
@@ -807,17 +821,31 @@
 </footer>
 
 <script>
-  /* ── Sprache DE/EN ── */
-  var LANG = "de";
+  /* ── Sprache EN/DE: Standard Englisch, gespeicherte Wahl (tw_lang) gewinnt ── */
+  var LANG = "en";
+  try { var _tl = localStorage.getItem("tw_lang"); if (_tl === "de" || _tl === "en") LANG = _tl; } catch(e){}
+  function langMenu(ev){
+    var m = document.getElementById("lang-menu"), b = document.getElementById("btn-lang");
+    var offen = (ev === false) ? false : (ev === true ? true : m.hidden);
+    m.hidden = !offen;
+    b.setAttribute("aria-expanded", offen ? "true" : "false");
+    if (ev && ev.stopPropagation) ev.stopPropagation();
+  }
+  document.addEventListener("click", function(e){ var sp = document.getElementById("sprache"); if (sp && !sp.contains(e.target)) langMenu(false); });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") langMenu(false); });
   function setzeSprache(l){
-    LANG = l;
-    document.documentElement.lang = l;
-    document.getElementById("btn-de").classList.toggle("akt", l === "de");
-    document.getElementById("btn-en").classList.toggle("akt", l === "en");
+    LANG = (l === "de") ? "de" : "en";
+    document.documentElement.lang = LANG;
+    try { localStorage.setItem("tw_lang", LANG); } catch(e){}
+    document.getElementById("lang-text").textContent = (LANG === "de") ? "Sprache ändern" : "Change language";
+    document.getElementById("lang-kurz").textContent = LANG.toUpperCase();
+    document.getElementById("lang-de").classList.toggle("akt", LANG === "de");
+    document.getElementById("lang-en").classList.toggle("akt", LANG === "en");
     document.querySelectorAll("[data-de]").forEach(function(el){
-      el.innerHTML = el.getAttribute(l === "de" ? "data-de" : "data-en");
+      el.innerHTML = el.getAttribute(LANG === "de" ? "data-de" : "data-en");
     });
   }
+  setzeSprache(LANG);
 
   /* ── Seitenwechsel Start ⇄ Preise ── */
   function zeige(name){
