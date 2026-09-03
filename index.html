@@ -222,42 +222,71 @@
   .preisnacht .kicker{color:#7BE3A4}
   .preisnacht h2{margin-top:12px; font-size:clamp(28px,3.6vw,40px); letter-spacing:.4px; font-weight:800; text-transform:uppercase}
   .preisnacht .intro{margin:12px auto 0; max-width:620px; text-align:center; color:rgba(255,255,255,.6); font-size:14px; line-height:1.6}
-  .tiergrid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:38px}
-  .tier{
-    position:relative; background:#0F1512; border:1px solid rgba(255,255,255,.09); border-radius:18px;
-    padding:24px 20px; display:flex; flex-direction:column; gap:0;
-  }
-  .tier.gr{border-color:rgba(31,181,88,.55); box-shadow:0 0 44px rgba(31,181,88,.16)}
-  .tier.go{border-color:rgba(217,164,65,.55); box-shadow:0 0 44px rgba(217,164,65,.15)}
-  .tier .tname{display:flex; align-items:center; gap:9px; font-size:18px; font-weight:800; letter-spacing:.8px; text-transform:uppercase}
-  .tbadge{font-size:9.5px; letter-spacing:1.1px; font-weight:800; border-radius:999px; padding:3px 9px}
-  .tb-or{background:rgba(245,158,11,.18); color:#F5C36B}
-  .tb-gr{background:var(--gruen); color:#06220f}
-  .tb-go{background:var(--gold); color:#231a05}
-  .tier .tsub{margin-top:5px; font-size:11.5px; color:rgba(255,255,255,.5)}
-  .wertbox{margin-top:15px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); border-radius:11px; padding:11px 13px; font-size:11.5px; line-height:1.55; color:rgba(255,255,255,.75)}
+  .preisnacht{border-radius:0 !important}
+  .testleiste{margin-top:32px; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 18px; border:1px solid rgba(255,255,255,.16); background:linear-gradient(90deg, rgba(255,255,255,.07), rgba(255,255,255,.02)); text-align:left}
+  .testleiste .tl-l{display:flex; align-items:center; gap:14px; min-width:0}
+  .testleiste .tl-tag{flex:0 0 auto; font-size:9.5px; letter-spacing:1.6px; font-weight:800; text-transform:uppercase; color:#06220f; background:#fff; padding:6px 10px}
+  .testleiste .tl-t{font-size:12.5px; color:rgba(255,255,255,.78); line-height:1.45}
+  .testleiste .tl-t b{color:#fff}
+  .testleiste .tcta{margin:0; width:auto; flex:0 0 auto; padding:11px 18px; white-space:nowrap}
+  .tiergrid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:16px; align-items:stretch}
+  .tier{position:relative; background:linear-gradient(180deg,#11171A 0%,#0C1110 100%); border:1px solid rgba(255,255,255,.12); border-radius:0; padding:26px 22px 24px; display:flex; flex-direction:column; text-align:left}
+  .tier::before{content:""; position:absolute; left:0; right:0; top:0; height:2px; background:rgba(255,255,255,.35)}
+  .tier.gr::before{background:var(--gruen)}
+  .tier.go::before{background:linear-gradient(90deg,#E8BE63,#C99532)}
+  .tier.en::before{background:linear-gradient(90deg,#E9ECEF,#9AA3AD)}
+  .tier.go{border-color:rgba(217,164,65,.5); box-shadow:0 30px 60px -30px rgba(217,164,65,.35)}
+  .tier .tname{display:flex; align-items:center; justify-content:space-between; gap:9px; font-size:13px; font-weight:800; letter-spacing:2.2px; text-transform:uppercase}
+  .tbadge{font-size:9px; letter-spacing:1.4px; font-weight:800; text-transform:uppercase; border-radius:0; padding:4px 8px; border:1px solid currentColor}
+  .tb-gr{color:#7BE3A4}
+  .tb-go{color:#E8C778}
+  .tb-en{color:#D8DEE4}
+  .tier .tsub{margin-top:8px; font-size:12px; color:rgba(255,255,255,.55); min-height:34px}
+  .wertbox{margin-top:14px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:0; padding:11px 13px; font-size:11.5px; line-height:1.55; color:rgba(255,255,255,.75)}
   .wertbox b{display:block; color:#fff; font-size:12px; margin-bottom:3px}
-  .tpreis{margin:18px 0 4px; font-size:38px; font-weight:800}
-  .tpreis span{font-size:13px; font-weight:600; color:rgba(255,255,255,.55); margin-left:6px}
-  .tk{font-size:10.5px; color:rgba(255,255,255,.4)}
-  .tcta{margin-top:16px; border-radius:11px; padding:12px; font-size:13.5px; font-weight:800; text-align:center}
+  .abrech{margin-top:18px; display:inline-flex; border:1px solid rgba(255,255,255,.2); padding:2px; align-self:flex-start}
+  .abrech button{border:0; cursor:pointer; font-family:inherit; font-size:10.5px; letter-spacing:1.2px; text-transform:uppercase; font-weight:800; padding:6px 12px; background:transparent; color:rgba(255,255,255,.55); border-radius:0}
+  .abrech button.akt{background:#fff; color:#0B0F0C}
+  .tpreis{margin:14px 0 0; font-size:40px; font-weight:800; letter-spacing:-1px; line-height:1; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap}
+  .tpreis .einheit{font-size:12.5px; font-weight:600; letter-spacing:0; color:rgba(255,255,255,.55)}
+  .talt{margin-top:7px; font-size:11.5px; color:rgba(255,255,255,.5)}
+  .talt b{color:#7BE3A4; font-weight:700}
+  .tk{margin-top:4px; font-size:10.5px; color:rgba(255,255,255,.4)}
+  .nutzer{margin-top:14px; border:1px solid rgba(255,255,255,.14); padding:8px 10px 8px 12px; display:flex; align-items:center; justify-content:space-between; gap:10px}
+  .nutzer .nz-l{font-size:10px; letter-spacing:1.4px; text-transform:uppercase; font-weight:800; color:rgba(255,255,255,.6)}
+  .nutzer .nz-s{display:flex; align-items:center; border:1px solid rgba(255,255,255,.22)}
+  .nutzer .nz-s button{border:0; cursor:pointer; font-family:inherit; width:30px; height:28px; background:transparent; color:#fff; font-size:16px; font-weight:700; line-height:1; border-radius:0}
+  .nutzer .nz-s button:hover{background:rgba(255,255,255,.1)}
+  .nutzer .nz-s button:disabled{opacity:.3; cursor:default; background:transparent}
+  .nutzer .nz-s output{min-width:36px; text-align:center; font-size:14px; font-weight:800; border-left:1px solid rgba(255,255,255,.22); border-right:1px solid rgba(255,255,255,.22); height:28px; line-height:28px}
+  .nutzer-h{margin-top:6px; font-size:10.5px; color:rgba(255,255,255,.5)}
+  .tcta{margin-top:16px; width:100%; border:0; cursor:pointer; font-family:inherit; border-radius:0; padding:13px; font-size:12.5px; font-weight:800; letter-spacing:1.2px; text-transform:uppercase; text-align:center}
   .tc-w{background:#fff; color:var(--ink)}
   .tc-gr{background:var(--gruen); color:#04200e}
   .tc-go{background:linear-gradient(135deg,#E8BE63,#C99532); color:#231a05}
-  .schlossbox{margin-top:14px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09); border-radius:11px; padding:10px 13px; font-size:10.5px}
+  .tc-en{background:transparent; color:#fff; border:1px solid rgba(255,255,255,.6)}
+  .tc-en:hover{background:#fff; color:var(--ink)}
+  .schlossbox{margin-top:14px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09); border-radius:0; padding:10px 13px; font-size:10.5px}
   .schlossbox .sb-k{letter-spacing:1.4px; font-weight:800; color:rgba(255,255,255,.55)}
   .schlossbox .sb-s{display:flex; align-items:center; justify-content:space-between; margin-top:5px; color:rgba(255,255,255,.45)}
   .schlossbox.voll .sb-s{color:#E8D9AF}
-  .draht{background:var(--gold); color:#231a05; border-radius:999px; font-size:8.5px; font-weight:800; letter-spacing:.9px; padding:2px 8px}
-  .tfeats{margin-top:16px; display:flex; flex-direction:column; gap:8px; font-size:12px; color:rgba(255,255,255,.82)}
+  .draht{background:var(--gold); color:#231a05; border-radius:0; font-size:8.5px; font-weight:800; letter-spacing:.9px; padding:2px 8px}
+  .tier.en .schlossbox.voll .sb-s{color:#E3E8ED}
+  .tier.en .draht{background:#E9ECEF; color:#101013}
+  .tfeats{margin-top:16px; display:flex; flex-direction:column; gap:8px; font-size:12px; color:rgba(255,255,255,.82); text-align:left}
   .tfeats div{display:flex; gap:8px; line-height:1.4}
-  .tfeats{text-align:left}
   .tfeats div span:last-child{flex:1}
   .tfeats div.fett span:last-child{font-weight:800; color:#fff}
-  .tfeats .plus-k{display:block; margin:8px 0 2px; padding-top:9px; border-top:1px solid rgba(217,164,65,.35);
-    font-size:9.5px; letter-spacing:1.4px; font-weight:800; text-transform:uppercase; color:var(--gold)}
+  .tfeats .plus-k{display:block; margin:8px 0 2px; padding-top:9px; border-top:1px solid rgba(255,255,255,.14); font-size:9.5px; letter-spacing:1.4px; font-weight:800; text-transform:uppercase; color:var(--gold)}
+  .tier.en .tfeats .plus-k{color:#D8DEE4}
   .hak{color:var(--gruen); font-weight:800}
   .tier.go .hak{color:var(--gold)}
+  .tier.en .hak{color:#D8DEE4}
+  .tfeats .sicher{margin-top:6px; padding:9px 10px; border:1px solid rgba(123,227,164,.35); background:rgba(31,181,88,.08); color:#CFF5DD; font-size:11.5px}
+  .tfeats .sicher .hak{color:#7BE3A4}
+  .sicherheit{margin-top:22px; display:flex; align-items:center; justify-content:center; gap:10px; font-size:11.5px; color:rgba(255,255,255,.62); flex-wrap:wrap; text-align:center}
+  .sicherheit .sh-tag{font-size:9px; letter-spacing:1.6px; text-transform:uppercase; font-weight:800; color:#7BE3A4; border:1px solid rgba(123,227,164,.45); padding:4px 8px}
+  @media (max-width:980px){ .tiergrid{grid-template-columns:1fr; max-width:460px; margin-left:auto; margin-right:auto} .testleiste{flex-direction:column; align-items:stretch; max-width:460px; margin-left:auto; margin-right:auto} .testleiste .tl-l{flex-direction:column; align-items:flex-start; gap:8px} .testleiste .tcta{width:100%} }
   .preisnacht .fuss{margin-top:26px; font-size:10.5px; color:rgba(255,255,255,.35)}
 
   /* ── Funktions-Showcase ── */
@@ -635,37 +664,26 @@
     <div class="preisnacht">
       <div class="kicker" data-de="PREISE" data-en="PRICING">PREISE</div>
       <h2 data-de="Wähle deinen Zugang" data-en="Choose your access">Wähle deinen Zugang</h2>
-      <p class="intro" data-de="Monatlich kündbar. Zugangscode kommt nach der Zahlung automatisch per E-Mail. Der Test endet von selbst — ganz ohne Zahlungsdaten." data-en="Cancel monthly. Your access code arrives automatically by e-mail after payment. The trial ends by itself — no payment details needed.">Monatlich kündbar. Zugangscode kommt nach der Zahlung automatisch per E-Mail. Der Test endet von selbst — ganz ohne Zahlungsdaten.</p>
+      <p class="intro" data-de="Monatlich oder jährlich. Zugangscode kommt nach der Zahlung automatisch per E-Mail. Jeder Zugang ist personengebunden — max. 2 Geräte, kein Account-Sharing." data-en="Monthly or yearly. Your access code arrives automatically by e-mail after payment. Every seat is personal — max. 2 devices, no account sharing.">Monatlich oder jährlich. Zugangscode kommt nach der Zahlung automatisch per E-Mail. Jeder Zugang ist personengebunden — max. 2 Geräte, kein Account-Sharing.</p>
+
+      <div class="testleiste">
+        <div class="tl-l">
+          <span class="tl-tag" data-de="Test · 3 Tage gratis" data-en="Trial · 3 days free">Test · 3 Tage gratis</span>
+          <span class="tl-t" data-de="<b>Voller Standard-Umfang für 3 Tage.</b> Endet automatisch — keine Zahlungsdaten, keine Kündigung nötig." data-en="<b>Full Standard scope for 3 days.</b> Ends automatically — no payment details, no cancellation needed."><b>Voller Standard-Umfang für 3 Tage.</b> Endet automatisch — keine Zahlungsdaten, keine Kündigung nötig.</span>
+        </div>
+        <button class="tcta tc-w" onclick="location.href='/app.html#test'" data-de="Jetzt gratis testen" data-en="Start free trial">Jetzt gratis testen</button>
+      </div>
 
       <div class="tiergrid">
-        <!-- TEST -->
-        <div class="tier">
-          <div class="tname">Test <span class="tbadge tb-or" data-de="3 Tage gratis" data-en="3 days free">3 Tage gratis</span></div>
-          <div class="tsub" data-de="Für den ersten Blick ins System" data-en="For a first look inside">Für den ersten Blick ins System</div>
-          <div class="wertbox"><b data-de="✦ Voller Standard-Umfang — 3 Tage" data-en="✦ Full Standard scope — 3 days">✦ Voller Standard-Umfang — 3 Tage</b><span data-de="Endet automatisch, keine Kündigung nötig. Keine Zahlungsdaten erforderlich." data-en="Ends automatically, no cancellation needed. No payment details required.">Endet automatisch, keine Kündigung nötig. Keine Zahlungsdaten erforderlich.</span></div>
-          <div class="tpreis">0 €<span data-de="für 3 Tage" data-en="for 3 days">für 3 Tage</span></div>
-          <div class="tk">&nbsp;</div>
-          <button class="tcta tc-w" onclick="location.href='/app.html#test'" data-de="Jetzt gratis testen" data-en="Start free trial">Jetzt gratis testen</button>
-          <div class="schlossbox"><div class="sb-k" data-de="🔒 VEREINS-KONTAKTE" data-en="🔒 CLUB CONTACTS">🔒 VEREINS-KONTAKTE</div><div class="sb-s"><span data-de="✕ Nicht enthalten" data-en="✕ Not included">✕ Nicht enthalten</span></div></div>
-          <div class="tfeats">
-            <div><span class="hak">✓</span><span data-de="Newsfeed aus 30 Ligen und über 1.200 Quellen" data-en="Newsfeed from 30 leagues and 1,200+ sources">Newsfeed aus 30 Ligen und über 1.200 Quellen</span></div>
-            <div><span class="hak">✓</span><span data-de="„Verein sucht&#8220; &mdash; wer gerade welche Spieler braucht" data-en="&#8222;Club needs&#8220; &mdash; who is looking for which players">„Verein sucht&#8220; &mdash; wer gerade welche Spieler braucht</span></div>
-            <div><span class="hak">✓</span><span data-de="Spieler-Performances &amp; Rankings" data-en="Player performances &amp; rankings">Spieler-Performances &amp; Rankings</span></div>
-            <div><span class="hak">✓</span><span data-de="Spieler-Datenbank mit über 19.000 Spielern" data-en="Player database with 19,000+ players">Spieler-Datenbank mit über 19.000 Spielern</span></div>
-            <div><span class="hak">✓</span><span data-de="Spielerverträge &amp; Vertragssituationen" data-en="Player contracts &amp; contract situations">Spielerverträge &amp; Vertragssituationen</span></div>
-            <div><span class="hak">✓</span><span data-de="Merkliste, E-Mail-Alerts &amp; Morgen-Briefing" data-en="Watchlist, e-mail alerts &amp; morning briefing">Merkliste, E-Mail-Alerts &amp; Morgen-Briefing</span></div>
-            <div><span class="hak">✓</span><span data-de="Scouting-Funktion mit Talent-Rankings" data-en="Scouting with talent rankings">Scouting-Funktion mit Talent-Rankings</span></div>
-            <div><span class="hak">✓</span><span data-de="KI-Assistent „Scout&#8220;" data-en="AI assistant &#8222;Scout&#8220;">KI-Assistent „Scout&#8220;</span></div>
-          </div>
-        </div>
-
         <!-- STANDARD -->
-        <div class="tier gr">
-          <div class="tname">Standard <span class="tbadge tb-gr" data-de="Beliebt" data-en="Popular">Beliebt</span></div>
+        <div class="tier gr" data-tarif="standard">
+          <div class="tname"><span>Standard</span> <span class="tbadge tb-gr" data-de="Beliebt" data-en="Popular">Beliebt</span></div>
           <div class="tsub" data-de="Für Berater &amp; Scouts im Tagesgeschäft" data-en="For agents &amp; scouts day to day">Für Berater &amp; Scouts im Tagesgeschäft</div>
           <div class="wertbox"><b data-de="✦ Alle Kernfunktionen inklusive" data-en="✦ All core features included">✦ Alle Kernfunktionen inklusive</b><span data-de="1.231 Quellen · 30 Ligen · 19.808 Spieler · KI-Assistent „Scout&#8220;." data-en="1,231 sources · 30 leagues · 19,808 players · AI assistant &#8222;Scout&#8220;.">1.231 Quellen · 30 Ligen · 19.808 Spieler · KI-Assistent „Scout&#8220;.</span></div>
-          <div class="tpreis">49 €<span data-de="pro Monat" data-en="per month">pro Monat</span></div>
-          <div class="tk" data-de="monatlich kündbar · inkl. MwSt." data-en="cancel monthly · incl. VAT">monatlich kündbar · inkl. MwSt.</div>
+          <div class="abrech" role="group" aria-label="Abrechnung"><button type="button" class="akt" data-ab="monat" onclick="preisAbrech('standard','monat')" data-de="Monatlich" data-en="Monthly">Monatlich</button><button type="button" data-ab="jahr" onclick="preisAbrech('standard','jahr')" data-de="Jährlich" data-en="Yearly">Jährlich</button></div>
+          <div class="tpreis"><span id="p-standard-betrag">49 €</span><span class="einheit" id="p-standard-einheit">pro Monat</span></div>
+          <div class="talt" id="p-standard-alt">oder <b>490 €</b> pro Jahr · 2 Monate geschenkt</div>
+          <div class="tk" id="p-standard-tk">monatlich kündbar · inkl. MwSt.</div>
           <button class="tcta tc-gr" onclick="location.href='/app.html#abo'" data-de="Standard wählen" data-en="Choose Standard">Standard wählen</button>
           <div class="schlossbox"><div class="sb-k" data-de="🔒 VEREINS-KONTAKTE" data-en="🔒 CLUB CONTACTS">🔒 VEREINS-KONTAKTE</div><div class="sb-s"><span data-de="✕ Nicht enthalten" data-en="✕ Not included">✕ Nicht enthalten</span></div></div>
           <div class="tfeats">
@@ -677,16 +695,19 @@
             <div><span class="hak">✓</span><span data-de="Merkliste, E-Mail-Alerts &amp; Morgen-Briefing" data-en="Watchlist, e-mail alerts &amp; morning briefing">Merkliste, E-Mail-Alerts &amp; Morgen-Briefing</span></div>
             <div><span class="hak">✓</span><span data-de="Scouting-Funktion mit Talent-Rankings" data-en="Scouting with talent rankings">Scouting-Funktion mit Talent-Rankings</span></div>
             <div><span class="hak">✓</span><span data-de="KI-Assistent „Scout&#8220;" data-en="AI assistant &#8222;Scout&#8220;">KI-Assistent „Scout&#8220;</span></div>
+            <div class="sicher"><span class="hak">✓</span><span data-de="Personengebundener Zugang: max. 2 Geräte gleichzeitig, kein Account-Sharing" data-en="Personal seat: max. 2 devices at once, no account sharing">Personengebundener Zugang: max. 2 Geräte gleichzeitig, kein Account-Sharing</span></div>
           </div>
         </div>
 
         <!-- PREMIUM -->
-        <div class="tier go">
-          <div class="tname">Premium <span class="tbadge tb-go" data-de="Alles drin" data-en="All in">Alles drin</span></div>
+        <div class="tier go" data-tarif="premium">
+          <div class="tname"><span>Premium</span> <span class="tbadge tb-go" data-de="Alles drin" data-en="All in">Alles drin</span></div>
           <div class="tsub" data-de="Für Macher mit direktem Draht" data-en="For dealmakers with a direct line">Für Macher mit direktem Draht</div>
           <div class="wertbox"><b data-de="✦ Alles aus Standard — plus:" data-en="✦ Everything in Standard — plus:">✦ Alles aus Standard — plus:</b><span data-de="Community mit Scouts, Beratern &amp; Vereinsmitarbeitern. Exklusive Vereinskontakte." data-en="Community with scouts, agents &amp; club staff. Exclusive club contacts.">Community mit Scouts, Beratern &amp; Vereinsmitarbeitern. Exklusive Vereinskontakte.</span></div>
-          <div class="tpreis">99 €<span data-de="pro Monat" data-en="per month">pro Monat</span></div>
-          <div class="tk" data-de="monatlich kündbar · inkl. MwSt." data-en="cancel monthly · incl. VAT">monatlich kündbar · inkl. MwSt.</div>
+          <div class="abrech" role="group" aria-label="Abrechnung"><button type="button" class="akt" data-ab="monat" onclick="preisAbrech('premium','monat')" data-de="Monatlich" data-en="Monthly">Monatlich</button><button type="button" data-ab="jahr" onclick="preisAbrech('premium','jahr')" data-de="Jährlich" data-en="Yearly">Jährlich</button></div>
+          <div class="tpreis"><span id="p-premium-betrag">99 €</span><span class="einheit" id="p-premium-einheit">pro Monat</span></div>
+          <div class="talt" id="p-premium-alt">oder <b>990 €</b> pro Jahr · 2 Monate geschenkt</div>
+          <div class="tk" id="p-premium-tk">monatlich kündbar · inkl. MwSt.</div>
           <button class="tcta tc-go" onclick="location.href='/app.html#abo'" data-de="Premium wählen" data-en="Choose Premium">Premium wählen</button>
           <div class="schlossbox voll"><div class="sb-k" data-de="🔒 VEREINS-KONTAKTE" data-en="🔒 CLUB CONTACTS">🔒 VEREINS-KONTAKTE</div><div class="sb-s"><span data-de="✓ Voll enthalten" data-en="✓ Fully included">✓ Voll enthalten</span><span class="draht" data-de="DIREKTER DRAHT" data-en="DIRECT LINE">DIREKTER DRAHT</span></div></div>
           <div class="tfeats">
@@ -701,10 +722,43 @@
             <div class="plus-k" data-de="Plus in Premium" data-en="Plus in Premium">Plus in Premium</div>
             <div class="fett"><span class="hak">✓</span><span data-de="Community-Zugang: Scouts, Berater &amp; Vereinsmitarbeiter" data-en="Community access: scouts, agents &amp; club staff">Community-Zugang: Scouts, Berater &amp; Vereinsmitarbeiter</span></div>
             <div class="fett"><span class="hak">✓</span><span data-de="Zugriff auf exklusive Vereinskontakte" data-en="Access to exclusive club contacts">Zugriff auf exklusive Vereinskontakte</span></div>
+            <div class="sicher"><span class="hak">✓</span><span data-de="Personengebundener Zugang: max. 2 Geräte gleichzeitig, kein Account-Sharing" data-en="Personal seat: max. 2 devices at once, no account sharing">Personengebundener Zugang: max. 2 Geräte gleichzeitig, kein Account-Sharing</span></div>
+          </div>
+        </div>
+
+        <!-- ENTERPRISE -->
+        <div class="tier en" data-tarif="enterprise">
+          <div class="tname"><span>Enterprise</span> <span class="tbadge tb-en" data-de="Für Teams" data-en="For teams">Für Teams</span></div>
+          <div class="tsub" data-de="Für Vereine, Agenturen &amp; Scouting-Teams" data-en="For clubs, agencies &amp; scouting teams">Für Vereine, Agenturen &amp; Scouting-Teams</div>
+          <div class="wertbox"><b data-de="✦ Alles aus Premium — fürs Team" data-en="✦ Everything in Premium — for teams">✦ Alles aus Premium — fürs Team</b><span data-de="5 personengebundene Nutzerzugänge inklusive. Jeder weitere Nutzer 49 € pro Monat." data-en="5 personal seats included. Each additional seat 49 € per month.">5 personengebundene Nutzerzugänge inklusive. Jeder weitere Nutzer 49 € pro Monat.</span></div>
+          <div class="abrech" role="group" aria-label="Abrechnung"><button type="button" class="akt" data-ab="monat" onclick="preisAbrech('enterprise','monat')" data-de="Monatlich" data-en="Monthly">Monatlich</button><button type="button" data-ab="jahr" onclick="preisAbrech('enterprise','jahr')" data-de="Jährlich" data-en="Yearly">Jährlich</button></div>
+          <div class="tpreis"><span id="p-enterprise-betrag">349 €</span><span class="einheit" id="p-enterprise-einheit">pro Monat · 5 Nutzer</span></div>
+          <div class="talt" id="p-enterprise-alt">oder <b>3.490 €</b> pro Jahr · 2 Monate geschenkt</div>
+          <div class="tk" id="p-enterprise-tk">monatlich kündbar · inkl. MwSt.</div>
+          <div class="nutzer"><span class="nz-l" data-de="Nutzer" data-en="Seats">Nutzer</span><span class="nz-s"><button type="button" id="nz-minus" onclick="nutzerAendern(-1)" aria-label="weniger" disabled>−</button><output id="nz-anzahl">5</output><button type="button" onclick="nutzerAendern(1)" aria-label="mehr">+</button></span></div>
+          <div class="nutzer-h" id="nz-hinweis">5 Nutzer inklusive · jeder weitere +49 €/Monat</div>
+          <button class="tcta tc-en" onclick="enterpriseAnfrage()" data-de="Enterprise anfragen" data-en="Request Enterprise">Enterprise anfragen</button>
+          <div class="schlossbox voll"><div class="sb-k" data-de="🔒 VEREINS-KONTAKTE" data-en="🔒 CLUB CONTACTS">🔒 VEREINS-KONTAKTE</div><div class="sb-s"><span data-de="✓ Voll enthalten" data-en="✓ Fully included">✓ Voll enthalten</span><span class="draht" data-de="DIREKTER DRAHT" data-en="DIRECT LINE">DIREKTER DRAHT</span></div></div>
+          <div class="tfeats">
+            <div><span class="hak">✓</span><span data-de="Newsfeed aus 30 Ligen und über 1.200 Quellen" data-en="Newsfeed from 30 leagues and 1,200+ sources">Newsfeed aus 30 Ligen und über 1.200 Quellen</span></div>
+            <div><span class="hak">✓</span><span data-de="„Verein sucht&#8220; &mdash; wer gerade welche Spieler braucht" data-en="&#8222;Club needs&#8220; &mdash; who is looking for which players">„Verein sucht&#8220; &mdash; wer gerade welche Spieler braucht</span></div>
+            <div><span class="hak">✓</span><span data-de="Spieler-Performances &amp; Rankings" data-en="Player performances &amp; rankings">Spieler-Performances &amp; Rankings</span></div>
+            <div><span class="hak">✓</span><span data-de="Spieler-Datenbank mit über 19.000 Spielern" data-en="Player database with 19,000+ players">Spieler-Datenbank mit über 19.000 Spielern</span></div>
+            <div><span class="hak">✓</span><span data-de="Spielerverträge &amp; Vertragssituationen" data-en="Player contracts &amp; contract situations">Spielerverträge &amp; Vertragssituationen</span></div>
+            <div><span class="hak">✓</span><span data-de="Merkliste, E-Mail-Alerts &amp; Morgen-Briefing" data-en="Watchlist, e-mail alerts &amp; morning briefing">Merkliste, E-Mail-Alerts &amp; Morgen-Briefing</span></div>
+            <div><span class="hak">✓</span><span data-de="Scouting-Funktion mit Talent-Rankings" data-en="Scouting with talent rankings">Scouting-Funktion mit Talent-Rankings</span></div>
+            <div><span class="hak">✓</span><span data-de="KI-Assistent „Scout&#8220;" data-en="AI assistant &#8222;Scout&#8220;">KI-Assistent „Scout&#8220;</span></div>
+            <div class="plus-k" data-de="Plus in Enterprise" data-en="Plus in Enterprise">Plus in Enterprise</div>
+            <div class="fett"><span class="hak">✓</span><span data-de="Community-Zugang: Scouts, Berater &amp; Vereinsmitarbeiter" data-en="Community access: scouts, agents &amp; club staff">Community-Zugang: Scouts, Berater &amp; Vereinsmitarbeiter</span></div>
+            <div class="fett"><span class="hak">✓</span><span data-de="Zugriff auf exklusive Vereinskontakte" data-en="Access to exclusive club contacts">Zugriff auf exklusive Vereinskontakte</span></div>
+            <div class="fett"><span class="hak">✓</span><span data-de="5 Nutzer inklusive — beliebig erweiterbar, je 49 €/Monat" data-en="5 seats included — add as many as you need, 49 €/month each">5 Nutzer inklusive — beliebig erweiterbar, je 49 €/Monat</span></div>
+            <div class="fett"><span class="hak">✓</span><span data-de="Eine Rechnung für das ganze Team" data-en="One invoice for the whole team">Eine Rechnung für das ganze Team</span></div>
+            <div class="sicher"><span class="hak">✓</span><span data-de="Jeder Nutzer personengebunden: max. 2 Geräte, kein Account-Sharing" data-en="Every seat is personal: max. 2 devices, no account sharing">Jeder Nutzer personengebunden: max. 2 Geräte, kein Account-Sharing</span></div>
           </div>
         </div>
       </div>
-      <div class="fuss" data-de="Alle Preise inkl. gesetzlicher Umsatzsteuer. Abos monatlich kündbar über das Kundenportal." data-en="All prices incl. VAT. Subscriptions can be cancelled monthly via the customer portal.">Alle Preise inkl. gesetzlicher Umsatzsteuer. Abos monatlich kündbar über das Kundenportal.</div>
+      <div class="sicherheit"><span class="sh-tag" data-de="Login-Sicherheit" data-en="Login security">Login-Sicherheit</span><span data-de="Ein Nutzer = eine Person. Pro Zugang sind maximal 2 Geräte gleichzeitig angemeldet, Account-Sharing ist ausgeschlossen. Mehr Personen? Enterprise-Nutzer hinzufügen." data-en="One seat = one person. Each seat can be signed in on at most 2 devices at once; account sharing is not possible. More people? Add Enterprise seats.">Ein Nutzer = eine Person. Pro Zugang sind maximal 2 Geräte gleichzeitig angemeldet, Account-Sharing ist ausgeschlossen. Mehr Personen? Enterprise-Nutzer hinzufügen.</span></div>
+      <div class="fuss" data-de="Alle Preise inkl. gesetzlicher Umsatzsteuer. Monatsabos monatlich kündbar, Jahresabos zum Ende der Laufzeit — über das Kundenportal." data-en="All prices incl. VAT. Monthly plans can be cancelled monthly, yearly plans at the end of the term — via the customer portal.">Alle Preise inkl. gesetzlicher Umsatzsteuer. Monatsabos monatlich kündbar, Jahresabos zum Ende der Laufzeit — über das Kundenportal.</div>
     </div>
   </section>
 
@@ -844,8 +898,51 @@
     document.querySelectorAll("[data-de]").forEach(function(el){
       el.innerHTML = el.getAttribute(LANG === "de" ? "data-de" : "data-en");
     });
+    if (window.preiseRender && window.PREISE) preiseRender();
   }
   setzeSprache(LANG);
+
+  /* ── Preise: Monat/Jahr je Tarif, Enterprise-Nutzer (5 inkl., +49 €/Nutzer/Monat bzw. +490 €/Jahr) ── */
+  var PREISE = { standard:{m:49,j:490}, premium:{m:99,j:990}, enterprise:{m:349,j:3490,inkl:5,extraM:49,extraJ:490} };
+  var ABRECH = { standard:'monat', premium:'monat', enterprise:'monat' };
+  var NUTZER = 5;
+  function eur(n){ var t = String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, LANG === 'de' ? '.' : ','); return t + ' €'; }
+  function preisAbrech(t, ab){ ABRECH[t] = ab; preiseRender(); }
+  function nutzerAendern(d){ NUTZER = Math.max(5, Math.min(500, NUTZER + d)); preiseRender(); }
+  function preiseRender(){
+    var de = LANG === 'de';
+    Object.keys(PREISE).forEach(function(t){
+      var p = PREISE[t], jahr = ABRECH[t] === 'jahr';
+      var extra = t === 'enterprise' ? (NUTZER - p.inkl) : 0;
+      var betragM = p.m + extra * (p.extraM || 0), betragJ = p.j + extra * (p.extraJ || 0);
+      var el = function(id){ return document.getElementById('p-' + t + '-' + id); };
+      if (!el('betrag')) return;
+      el('betrag').textContent = eur(jahr ? betragJ : betragM);
+      var einheit = jahr ? (de ? 'pro Jahr' : 'per year') : (de ? 'pro Monat' : 'per month');
+      if (t === 'enterprise') einheit += ' · ' + NUTZER + ' ' + (de ? 'Nutzer' : 'seats');
+      el('einheit').textContent = einheit;
+      el('alt').innerHTML = jahr
+        ? (de ? 'oder <b>' + eur(betragM) + '</b> pro Monat' : 'or <b>' + eur(betragM) + '</b> per month')
+        : (de ? 'oder <b>' + eur(betragJ) + '</b> pro Jahr · 2 Monate geschenkt' : 'or <b>' + eur(betragJ) + '</b> per year · 2 months free');
+      el('tk').textContent = jahr ? (de ? 'jährliche Zahlung · inkl. MwSt.' : 'billed yearly · incl. VAT') : (de ? 'monatlich kündbar · inkl. MwSt.' : 'cancel monthly · incl. VAT');
+      var karte = document.querySelector('.tier[data-tarif="' + t + '"]');
+      if (karte) karte.querySelectorAll('.abrech button').forEach(function(b){ b.classList.toggle('akt', b.getAttribute('data-ab') === (jahr ? 'jahr' : 'monat')); });
+    });
+    var nz = document.getElementById('nz-anzahl'); if (nz) nz.textContent = NUTZER;
+    var minus = document.getElementById('nz-minus'); if (minus) minus.disabled = NUTZER <= 5;
+    var h = document.getElementById('nz-hinweis');
+    if (h) { var jE = ABRECH.enterprise === 'jahr'; h.textContent = de ? ('5 Nutzer inklusive · jeder weitere +' + (jE ? '490 €/Jahr' : '49 €/Monat')) : ('5 seats included · each additional +' + (jE ? '490 €/year' : '49 €/month')); }
+  }
+  function enterpriseAnfrage(){
+    var de = LANG === 'de', jahr = ABRECH.enterprise === 'jahr', extra = NUTZER - 5;
+    var betrag = jahr ? 3490 + extra * 490 : 349 + extra * 49;
+    var betreff = (de ? 'Enterprise-Zugang: ' : 'Enterprise access: ') + NUTZER + (de ? ' Nutzer, ' : ' seats, ') + eur(betrag) + (jahr ? (de ? ' pro Jahr' : ' per year') : (de ? ' pro Monat' : ' per month'));
+    var text = de
+      ? ('Hallo TransferWire-Team,\n\nwir möchten Enterprise mit ' + NUTZER + ' Nutzern buchen (' + (jahr ? 'jährlich' : 'monatlich') + ', ' + eur(betrag) + ').\n\nVerein/Organisation:\nAnsprechpartner:\nTelefon:\n')
+      : ('Hello TransferWire team,\n\nwe would like to book Enterprise with ' + NUTZER + ' seats (' + (jahr ? 'yearly' : 'monthly') + ', ' + eur(betrag) + ').\n\nClub/organisation:\nContact person:\nPhone:\n');
+    location.href = 'mailto:info@transferwire.de?subject=' + encodeURIComponent(betreff) + '&body=' + encodeURIComponent(text);
+  }
+  preiseRender();
 
   /* ── Seitenwechsel Start ⇄ Preise ── */
   function zeige(name){
