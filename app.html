@@ -729,7 +729,7 @@ function scoreColor(s) {
   return s >= 85 ? "#149a59" : s >= 70 ? "#27b567" : s >= 55 ? "#b9860b" : "#b04a3a";
 }
 const STRIPE_LINK = "https://buy.stripe.com/cNieVd6mObouaUZ9XMgIo03"; // Stripe: TransferWire Standard 49 EUR/Monat (alter 60er-Link abgeloest)
-const STRIPE_LINK_YEAR = ""; // Stripe: TransferWire Jahres-Abo 600 EUR/Jahr — Link eintragen, sobald in Stripe angelegt; Buttons erscheinen dann automatisch
+const STRIPE_LINK_YEAR = ""; // Stripe: TransferWire Jahres-Abo 490/990 EUR/Jahr — Link eintragen, sobald in Stripe angelegt; Buttons erscheinen dann automatisch
 const STRIPE_PORTAL = "https://billing.stripe.com/p/login/cNi14n6mO2RY3sxfi6gIo00"; // Stripe-Kundenportal (Kündigung/Zahlungsmethoden)
 const STRIPE_LINK_STANDARD = "https://buy.stripe.com/cNieVd6mObouaUZ9XMgIo03"; // Stripe: TransferWire Standard 49 EUR/Monat
 const STRIPE_LINK_PREMIUM = "https://buy.stripe.com/dRm7sL6mOgIO6EJgmagIo02"; // Stripe: TransferWire Premium 99 EUR/Monat
@@ -871,12 +871,12 @@ const EN_MAP = {
 "Abwehr": "Defence",
 "Paraden": "Saves",
 "Entdecke": "Discover",
-"Spieler aus 20 Ligen": "players from 20 leagues",
+"Spieler aus 30 Ligen": "players from 30 leagues",
 "Marktwerte, Vertragsenden und Live-Statistiken \u2014 die Suche startet ab dem ersten Buchstaben.": "Market values, contract expiries and live statistics \u2014 the search starts from the first letter.",
 "Marktwerte": "Market values",
 "Transfermarkt-Abgleich \u00b7 t\u00e4glich": "Transfermarkt sync \u00b7 daily",
 "Vertragsenden": "Contract expiries",
-"alle 20 Ligen abgedeckt": "all 20 leagues covered",
+"alle 30 Ligen abgedeckt": "all 30 leagues covered",
 "Blitzsuche": "Instant search",
 "Antwort in ~0,15 Sekunden": "Answer in ~0.15 seconds",
 "Tabelle": "Table",
@@ -1093,7 +1093,7 @@ const I18N = {
     l_trial: "3-Tage-Test",
     l_trial_txt: "Voller Zugriff auf Feed und „Verein sucht“ für 3 Tage. Endet automatisch — keine Zahlungsdaten, keine Kündigung nötig.",
     l_trial_btn: "Jetzt gratis testen",
-    yr_btn: "Jahres-Abo — 600 €/Jahr · 2 Monate geschenkt",
+    yr_btn: "Jahres-Abo — 490 €/Jahr (Standard) · 990 €/Jahr (Premium) · 2 Monate geschenkt",
     tour_skip: "Überspringen",
     tour_next: "Weiter",
     tour_go: "Los geht’s!",
@@ -1108,7 +1108,7 @@ const I18N = {
     totw_sub12: "12. Mann — stärkster Einwechsler",
     l_abo_card: "TransferWire Abo",
     l_month: "/ Monat",
-    l_abo_txt: "Unbegrenzter Zugriff, monatlich kündbar über die Website. Zahlung per Kreditkarte oder SEPA-Lastschrift.",
+    l_abo_txt: "Unbegrenzter Zugriff, monatlich kündbar über die Website. Zahlung per Karte, Apple Pay, Google Pay oder PayPal.",
     l_abo_card_btn: "Abo abschließen",
     ticker_fallback: "TransferWire — tagesaktuelle Transfermeldungen aus Europa, USA und China",
     back: "Zurück",
@@ -1252,7 +1252,7 @@ const I18N = {
     pl_club: "Alle Vereine",
     pl_club_first: "Erst Liga w\u00e4hlen",
     pl_title: "Spieler-Datenbank",
-    pl_sub: "Alle Kader der 20 Ligen mit Saisonwerten, Formkurve aus dem Scout-System und Verletzungsstatus. Die Datenbank füllt sich Nacht für Nacht automatisch.",
+    pl_sub: "Alle Kader der 30 Ligen mit Saisonwerten, Formkurve aus dem Scout-System und Verletzungsstatus. Die Datenbank füllt sich Nacht für Nacht automatisch.",
     pl_search_ph: "Spielername oder Verein (mind. 2 Zeichen) …",
     pl_start: "Tippe mindestens 2 Zeichen, um die Datenbank zu durchsuchen.",
     pl_none: "Keine Spieler gefunden — Datenbank wird nachts erweitert, falls die Liga noch fehlt.",
@@ -1320,11 +1320,11 @@ const I18N = {
     r_btn: "Test jetzt starten",
     r_busy: "Wird gestartet …",
     s_title: "TransferWire Abo",
-    s_sub: "49 € pro Monat · unbegrenzter Zugriff · monatlich kündbar über die Website. Zahlung per Kreditkarte oder SEPA-Lastschrift — sicher über Stripe.",
+    s_sub: "Standard 49 € · Premium 99 € · Enterprise 349 € pro Monat · monatlich kündbar über die Website. Zahlung per Karte, Apple Pay, Google Pay oder PayPal — sicher über Stripe.",
     s_section: "Konto anlegen & Abo abschließen",
     s_sofort: "Ich verlange die sofortige Bereitstellung des Dienstes nach Freischaltung und weiß, dass mein Widerrufsrecht damit erlischt.",
     s_pay: "Jetzt zahlungspflichtig abonnieren — 49 €/Monat",
-    s_pay_note: "Kreditkarte oder SEPA-Lastschrift · sichere Zahlung über Stripe · automatische monatliche Abbuchung · monatlich kündbar",
+    s_pay_note: "Karte, Apple Pay, Google Pay oder PayPal · sichere Zahlung über Stripe · automatische monatliche Abbuchung · monatlich kündbar",
     s_msg: "Weiter geht es im sicheren Stripe-Fenster. Nach erfolgreicher Zahlung erhältst du deinen Zugangscode per E-Mail und kannst dich unten mit E-Mail + Code freischalten.",
     s_code_title: "Zugangscode bereits erhalten?",
     f_code: "Zugangscode",
@@ -1336,7 +1336,7 @@ const I18N = {
     e_code_bad: "Code ungültig oder abgelaufen.",
     c_title: "Verträge hier kündigen",
     c_sub: "Kündige dein TransferWire-Abo jederzeit zum Ende des laufenden Abrechnungsmonats. Gib die E-Mail-Adresse deines Kontos an.",
-    c_stripe_h: "Mit Kreditkarte oder SEPA-Lastschrift (Stripe) bezahlt?",
+    c_stripe_h: "Per Karte, Apple Pay, Google Pay oder PayPal (Stripe) bezahlt?",
     c_stripe_t: "Dann kündige direkt im Stripe-Kundenportal — die monatliche Abbuchung stoppt dort automatisch zum Ende des Abrechnungszeitraums.",
     c_stripe_btn: "Im Stripe-Kundenportal kündigen",
     c_alt: "Alternativ kannst du deine Kündigung auch direkt über dieses Formular einreichen:",
@@ -1348,7 +1348,7 @@ const I18N = {
     e_c_email: "Bitte die E-Mail-Adresse deines Kontos angeben.",
     x_title: "Dein Testzeitraum ist abgelaufen",
     x_txt: "Sichere dir mit dem TransferWire-Abo unbegrenzten Zugriff auf alle Meldungen und die „Verein sucht“-Ansicht — 49 € pro Monat, jederzeit über die Website kündbar.",
-    x_btn: "Abo abschließen — 49 €/Monat",
+    x_btn: "Abo abschließen — ab 49 €/Monat",
     logout: "Abmelden",
     st_title: "Einstellungen",
     st_account: "Account",
@@ -1364,7 +1364,7 @@ const I18N = {
     st_abo_a: "Dein Abo ist aktiv",
     st_abo_paid: " (bezahlt bis ",
     st_abo_b: ". Die Kündigung ist jederzeit zum Ende des Abrechnungsmonats möglich.",
-    st_portal_note: "Für Zahlungen per Kreditkarte / SEPA-Lastschrift. Stoppt die Abbuchung automatisch zum Ende des Abrechnungszeitraums.",
+    st_portal_note: "Für Zahlungen über Stripe (Karte, Apple Pay, Google Pay, PayPal). Stoppt die Abbuchung automatisch zum Ende des Abrechnungszeitraums.",
     st_form_cancel: "Alternativ per Formular kündigen"
   },
   en: {
@@ -1404,7 +1404,7 @@ const I18N = {
     l_trial: "3-day trial",
     l_trial_txt: "Full access to the feed and the “Club seeks” view for 3 days. Ends automatically — no payment details, no cancellation needed.",
     l_trial_btn: "Start free trial",
-    yr_btn: "Annual plan — €600/year · 2 months free",
+    yr_btn: "Annual plan — €490/year (Standard) · €990/year (Premium) · 2 months free",
     tour_skip: "Skip",
     tour_next: "Next",
     tour_go: "Let’s go!",
@@ -1419,7 +1419,7 @@ const I18N = {
     totw_sub12: "12th man — best substitute",
     l_abo_card: "TransferWire subscription",
     l_month: "/ month",
-    l_abo_txt: "Unlimited access, cancel monthly via the website. Payment by credit card or SEPA direct debit.",
+    l_abo_txt: "Unlimited access, cancel monthly via the website. Payment by card, Apple Pay, Google Pay or PayPal.",
     l_abo_card_btn: "Subscribe",
     ticker_fallback: "TransferWire — daily transfer news from Europe, the USA and China",
     back: "Back",
@@ -1563,7 +1563,7 @@ const I18N = {
     pl_club: "All clubs",
     pl_club_first: "Pick a league first",
     pl_title: "Player database",
-    pl_sub: "All squads of the 20 leagues with season stats, the scout system form curve and injury status. The database fills up automatically night by night.",
+    pl_sub: "All squads of the 30 leagues with season stats, the scout system form curve and injury status. The database fills up automatically night by night.",
     pl_search_ph: "Player or club name (min. 2 characters) …",
     pl_start: "Type at least 2 characters to search the database.",
     pl_none: "No players found — the database expands overnight if the league is still missing.",
@@ -1631,11 +1631,11 @@ const I18N = {
     r_btn: "Start trial now",
     r_busy: "Starting …",
     s_title: "TransferWire subscription",
-    s_sub: "€49 per month · unlimited access · cancel monthly via the website. Payment by credit card or SEPA direct debit — secure via Stripe.",
+    s_sub: "Standard €49 · Premium €99 · Enterprise €349 per month · cancel monthly via the website. Payment by card, Apple Pay, Google Pay or PayPal — secure via Stripe.",
     s_section: "Create account & subscribe",
     s_sofort: "I request immediate provision of the service after activation and acknowledge that my right of withdrawal expires once the service has been provided.",
     s_pay: "Subscribe now — €49/month (obligation to pay)",
-    s_pay_note: "Credit card or SEPA direct debit · secure payment via Stripe · automatic monthly billing · cancel monthly",
+    s_pay_note: "Card, Apple Pay, Google Pay or PayPal · secure payment via Stripe · automatic monthly billing · cancel monthly",
     s_msg: "Continue in the secure Stripe window. After successful payment you will receive your access code by e-mail and can activate below with e-mail + code.",
     s_code_title: "Already received an access code?",
     f_code: "Access code",
@@ -1647,7 +1647,7 @@ const I18N = {
     e_code_bad: "Code invalid or expired.",
     c_title: "Cancel contracts here",
     c_sub: "Cancel your TransferWire subscription at any time, effective at the end of the current billing month. Enter the e-mail address of your account.",
-    c_stripe_h: "Paid by credit card or SEPA direct debit (Stripe)?",
+    c_stripe_h: "Paid by card, Apple Pay, Google Pay or PayPal (Stripe)?",
     c_stripe_t: "Then cancel directly in the Stripe customer portal — the monthly charge stops there automatically at the end of the billing period.",
     c_stripe_btn: "Cancel in the Stripe customer portal",
     c_alt: "Alternatively, you can submit your cancellation directly via this form:",
@@ -1659,7 +1659,7 @@ const I18N = {
     e_c_email: "Please enter the e-mail address of your account.",
     x_title: "Your trial has ended",
     x_txt: "Get unlimited access to all news and the “Club seeks” view with the TransferWire subscription — €49 per month, cancel anytime via the website.",
-    x_btn: "Subscribe — €49/month",
+    x_btn: "Subscribe — from €49/month",
     logout: "Log out",
     st_title: "Settings",
     st_account: "Account",
@@ -1675,7 +1675,7 @@ const I18N = {
     st_abo_a: "Your subscription is active",
     st_abo_paid: " (paid until ",
     st_abo_b: ". You can cancel at any time, effective at the end of the billing month.",
-    st_portal_note: "For payments by credit card / SEPA direct debit. Stops billing automatically at the end of the period.",
+    st_portal_note: "For payments via Stripe (card, Apple Pay, Google Pay, PayPal). Stops billing automatically at the end of the period.",
     st_form_cancel: "Alternatively cancel via form"
   }
 };
@@ -4739,7 +4739,7 @@ function AgbContent() {
     style: {
       margin: 0
     }
-  }, "Die Zahlung erfolgt per Kreditkarte oder SEPA-Lastschrift über den Zahlungsdienstleister Stripe. Nach erfolgreicher Zahlung wird der Zugang automatisch freigeschaltet; der persönliche Zugangscode wird per E-Mail übermittelt und ist zusammen mit der E-Mail-Adresse für die Anmeldung erforderlich.")), /*#__PURE__*/React.createElement(LegalSection, {
+  }, "Die Zahlung erfolgt per Karte, Apple Pay, Google Pay oder PayPal über den Zahlungsdienstleister Stripe. Nach erfolgreicher Zahlung wird der Zugang automatisch freigeschaltet; der persönliche Zugangscode wird per E-Mail übermittelt und ist zusammen mit der E-Mail-Adresse für die Anmeldung erforderlich.")), /*#__PURE__*/React.createElement(LegalSection, {
     title: "6. Widerrufsrecht"
   }, /*#__PURE__*/React.createElement("p", {
     style: {
@@ -5026,7 +5026,7 @@ const PRICING_I18N = {
     t_tag: "Die komplette Plattform 3 Tage lang kennenlernen.",
     s_tag: "Das volle Werkzeug f\u00fcr Berater, Scouts und Vereine.",
     p_tag: "Alles aus Standard \u2014 plus der direkte Draht zu den Vereinen.",
-    f_feed: "Newsfeed aus 410+ Quellen und 20+ Ligen",
+    f_feed: "Newsfeed aus über 1.200 Quellen und 30 Ligen",
     f_sucht: "\u201eVerein sucht\u201c mit Spieler-Matching",
     f_db: "Spieler-Datenbank, Formkurven & Scout-Ranking",
     f_listen: "Scouting-Listen & Marktchancen",
@@ -5041,7 +5041,8 @@ const PRICING_I18N = {
     t_btn: "Jetzt gratis testen",
     s_btn: "Standard w\u00e4hlen",
     p_btn: "Premium w\u00e4hlen",
-    note: "Alle Preise inkl. gesetzlicher Umsatzsteuer. Abos monatlich k\u00fcndbar \u00fcber das Kundenportal."
+    e_name: "Enterprise", e_btn: "Enterprise anfragen", badge_ent: "F\u00dcR TEAMS", f_seats: "5 Nutzer inklusive \u2014 jeder weitere 49 \u20ac/Monat",
+    note: "Alle Preise inkl. gesetzlicher Umsatzsteuer. Abos monatlich k\u00fcndbar \u00fcber das Kundenportal. Jeder Zugang ist personengebunden \u2014 max. 2 Ger\u00e4te, kein Account-Sharing."
   },
   en: {
     kicker: "PRICING",
@@ -5056,7 +5057,7 @@ const PRICING_I18N = {
     t_tag: "Get to know the full platform for 3 days.",
     s_tag: "The complete toolkit for agents, scouts and clubs.",
     p_tag: "Everything in Standard \u2014 plus a direct line to the clubs.",
-    f_feed: "News feed from 410+ sources and 20+ leagues",
+    f_feed: "News feed from 1,200+ sources and 30 leagues",
     f_sucht: "\u201cClub seeks\u201d with player matching",
     f_db: "Player database, form curves & scout ranking",
     f_listen: "Scouting lists & market opportunities",
@@ -5071,20 +5072,23 @@ const PRICING_I18N = {
     t_btn: "Start free trial",
     s_btn: "Choose Standard",
     p_btn: "Choose Premium",
-    note: "All prices include VAT. Subscriptions can be cancelled monthly via the customer portal."
+    e_name: "Enterprise", e_btn: "Request Enterprise", badge_ent: "FOR TEAMS", f_seats: "5 seats included \u2014 each additional 49 \u20ac/month",
+    note: "All prices include VAT. Subscriptions can be cancelled monthly via the customer portal. Every seat is personal \u2014 max. 2 devices, no account sharing."
   }
 };
 const LP3 = {
   de: { t_for: "F\u00fcr den ersten Blick ins System", s_for: "F\u00fcr Berater & Scouts im Tagesgesch\u00e4ft", p_for: "F\u00fcr Macher mit direktem Draht",
     t_box: ["Voller Standard-Umfang \u2014 3 Tage", "Endet automatisch, keine K\u00fcndigung n\u00f6tig", "Keine Zahlungsdaten erforderlich"],
-    s_box: ["Alle Kernfunktionen inklusive", "410+ Quellen \u00b7 20+ Ligen \u00b7 st\u00fcndlich frisch", "KI-Scout: 30 Fragen pro Tag"],
-    p_box: ["Alles aus Standard \u2014 plus:", "750+ Vereins-Kontakte mit Suche", "Sportdirektoren & Gesch\u00e4ftsf\u00fchrer"],
+    s_box: ["Alle Kernfunktionen inklusive", "1.231 Quellen \u00b7 30 Ligen \u00b7 st\u00fcndlich frisch", "KI-Scout: 30 Fragen pro Tag"],
+    p_box: ["Alles aus Standard \u2014 plus:", "1.100+ Vereins-Kontakte mit Suche", "Sportdirektoren & Gesch\u00e4ftsf\u00fchrer"],
+    e_for: "F\u00fcr Vereine, Agenturen & Scouting-Teams", e_box: ["Alles aus Premium \u2014 f\u00fcrs Team:", "5 personengebundene Nutzerzug\u00e4nge inklusive", "Jeder weitere Nutzer 49 \u20ac pro Monat"],
     lock_head: "\ud83d\udd12 VEREINS-KONTAKTE", lock_no: "Nicht enthalten", lock_yes: "Voll enthalten", chip_p: "DIREKTER DRAHT",
     per2: "pro Monat", cancel2: "monatlich k\u00fcndbar", free2: "f\u00fcr 3 Tage" },
   en: { t_for: "For a first look at the system", s_for: "For agents & scouts in daily business", p_for: "For dealmakers with a direct line",
     t_box: ["Full Standard scope \u2014 3 days", "Ends automatically, no cancellation needed", "No payment details required"],
-    s_box: ["All core features included", "410+ sources \u00b7 20+ leagues \u00b7 hourly updates", "AI scout: 30 questions per day"],
-    p_box: ["Everything in Standard \u2014 plus:", "750+ club contacts with search", "Sporting directors & CEOs"],
+    s_box: ["All core features included", "1,231 sources \u00b7 30 leagues \u00b7 hourly updates", "AI scout: 30 questions per day"],
+    p_box: ["Everything in Standard \u2014 plus:", "1,100+ club contacts with search", "Sporting directors & CEOs"],
+    e_for: "For clubs, agencies & scouting teams", e_box: ["Everything in Premium \u2014 for teams:", "5 personal seats included", "Each additional seat 49 \u20ac per month"],
     lock_head: "\ud83d\udd12 CLUB CONTACTS", lock_no: "Not included", lock_yes: "Fully included", chip_p: "DIRECT LINE",
     per2: "per month", cancel2: "cancel monthly", free2: "for 3 days" }
 };
@@ -5122,7 +5126,7 @@ const LP2 = {
     f_h2: "Alles, was den Markt sichtbar macht",
     f_sub: "Zehn Werkzeuge, ein Ziel: dass du fr\u00fcher wei\u00dft, was der Markt vorhat \u2014 und direkt handeln kannst.",
     feats: [
-      { i: "\ud83d\udcf0", t: "Newsfeed in Echtzeit", d: "Meldungen aus 410+ Quellen und 20+ Ligen \u2014 st\u00fcndlich gepr\u00fcft, mit Zuverl\u00e4ssigkeits-Einstufung und Quellenlink." },
+      { i: "\ud83d\udcf0", t: "Newsfeed in Echtzeit", d: "Meldungen aus über 1.200 Quellen und 30 Ligen \u2014 st\u00fcndlich gepr\u00fcft, mit Zuverl\u00e4ssigkeits-Einstufung und Quellenlink." },
       { i: "\ud83c\udfaf", t: "\u201eVerein sucht\u201c", d: "Welcher Klub sucht gerade welchen Spielertyp \u2014 mit Grund, Altersfenster und passenden Kandidaten aus der Datenbank." },
       { i: "\ud83c\udfc6", t: "Scout-Ranking", d: "TW-Leistungsscore 0\u2013100 nach jedem Spieltag, Formkurven und Einsatzminuten f\u00fcr 7.000+ Profile." },
       { i: "\ud83d\udcc4", t: "Vertrags-Radar", d: "Auslaufende Vertr\u00e4ge werden automatisch erkannt und flie\u00dfen als Chancen in deine Ansichten ein." },
@@ -5135,7 +5139,7 @@ const LP2 = {
       { q: "Wie funktioniert der 3-Tage-Test?", a: "Einfach mit deiner E-Mail-Adresse registrieren \u2014 ohne Zahlungsdaten. Du bekommst sofort deinen Zugangscode per E-Mail und vollen Standard-Zugriff. Nach drei Tagen endet der Test automatisch; es entsteht keine Verpflichtung." },
       { q: "Was ist der Unterschied zwischen Standard und Premium?", a: "Standard (49\u00a0\u20ac/Monat) enth\u00e4lt die komplette Plattform: Newsfeed, \u201eVerein sucht\u201c, Spieler-Datenbank, Ranking, Listen, Merkliste, Alarme und KI-Scout. Premium (99\u00a0\u20ac/Monat) schaltet zus\u00e4tzlich die Vereins-Kontakte frei \u2014 Sportdirektoren und Gesch\u00e4ftsf\u00fchrer mit Ansprechpartner-Funktion in jedem Dossier." },
       { q: "Kann ich monatlich k\u00fcndigen?", a: "Ja. Beide Abos laufen monatlich und sind jederzeit \u00fcber das Stripe-Kundenportal k\u00fcndbar \u2014 der Link steht auf der Website und in jeder Rechnung. Nach der K\u00fcndigung endet der Zugang zum n\u00e4chsten Abrechnungstermin." },
-      { q: "Woher kommen die Daten?", a: "Aus 410+ \u00f6ffentlichen Quellen, offiziellen Vereinskan\u00e4len und Sportdaten-Partnern, kombiniert mit KI-Aufbereitung. Jede Meldung tr\u00e4gt eine Zuverl\u00e4ssigkeits-Einstufung und einen Quellenlink \u2014 du siehst immer, worauf sich eine Information st\u00fctzt." },
+      { q: "Woher kommen die Daten?", a: "Aus \u00fcber 1.200 \u00f6ffentlichen Quellen, offiziellen Vereinskan\u00e4len und Sportdaten-Partnern, kombiniert mit KI-Aufbereitung. Jede Meldung tr\u00e4gt eine Zuverl\u00e4ssigkeits-Einstufung und einen Quellenlink \u2014 du siehst immer, worauf sich eine Information st\u00fctzt." },
       { q: "Wie schnell habe ich nach dem Kauf Zugriff?", a: "Sofort: Nach der Zahlung \u00fcber Stripe erzeugt das System automatisch deinen pers\u00f6nlichen Zugangscode und schickt ihn per E-Mail. Einloggen, fertig. Die Rechnung kommt separat von Stripe." }
     ],
     cta_h2: "Bereit f\u00fcr den vollen \u00dcberblick?",
@@ -5150,7 +5154,7 @@ const LP2 = {
     f_h2: "Everything that makes the market visible",
     f_sub: "Ten tools, one goal: knowing earlier what the market is about to do \u2014 and acting on it directly.",
     feats: [
-      { i: "\ud83d\udcf0", t: "Real-time news feed", d: "Reports from 410+ sources and 20+ leagues \u2014 checked hourly, with reliability rating and source link." },
+      { i: "\ud83d\udcf0", t: "Real-time news feed", d: "Reports from 1,200+ sources and 30 leagues \u2014 checked hourly, with reliability rating and source link." },
       { i: "\ud83c\udfaf", t: "\u201cClub seeks\u201d", d: "Which club is looking for which player type \u2014 with reason, age range and matching candidates from the database." },
       { i: "\ud83c\udfc6", t: "Scout ranking", d: "TW performance score 0\u2013100 after every matchday, form curves and minutes for 7,000+ profiles." },
       { i: "\ud83d\udcc4", t: "Contract radar", d: "Expiring contracts are detected automatically and appear as opportunities across your views." },
@@ -5163,7 +5167,7 @@ const LP2 = {
       { q: "How does the 3-day trial work?", a: "Register with your email address \u2014 no payment details. You instantly receive your access code by email plus full Standard access. After three days the trial ends automatically; there is no obligation." },
       { q: "What is the difference between Standard and Premium?", a: "Standard (\u20ac49/month) includes the full platform: news feed, \u201cClub seeks\u201d, player database, ranking, lists, watchlist, alerts and the AI scout. Premium (\u20ac99/month) additionally unlocks club contacts \u2014 sporting directors and CEOs, with a contact button in every dossier." },
       { q: "Can I cancel monthly?", a: "Yes. Both plans run monthly and can be cancelled anytime via the Stripe customer portal \u2014 the link is on the website and in every invoice. After cancelling, access ends at the next billing date." },
-      { q: "Where does the data come from?", a: "From 410+ public sources, official club channels and sports data partners, combined with AI processing. Every report carries a reliability rating and a source link \u2014 you always see what an item is based on." },
+      { q: "Where does the data come from?", a: "From 1,200+ public sources, official club channels and sports data partners, combined with AI processing. Every report carries a reliability rating and a source link \u2014 you always see what an item is based on." },
       { q: "How fast do I get access after purchase?", a: "Instantly: after payment via Stripe the system automatically generates your personal access code and emails it to you. Log in, done. The invoice arrives separately from Stripe." }
     ],
     cta_h2: "Ready for the full picture?",
@@ -5413,7 +5417,7 @@ function LandingPage({
     style: {
       color: LGREEN
     }
-  }, "+++")))))))), /*#__PURE__*/React.createElement("section", { style: { background: DARK, color: "#fff", padding: "18px 20px 56px" } }, /*#__PURE__*/React.createElement("div", { id: "tw-preise", style: { maxWidth: 1100, margin: "0 auto" } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: mono, fontSize: 11.5, letterSpacing: 2.5, color: "rgba(255,255,255,.5)", margin: "20px 0 8px" } }, PRICING_I18N[LANG].kicker), /*#__PURE__*/React.createElement("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: "clamp(24px, 3.6vw, 36px)", margin: "0 0 8px", textTransform: "uppercase", color: "#fff" } }, PRICING_I18N[LANG].h2), /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.6, color: "rgba(255,255,255,.55)", maxWidth: 620, margin: "0 0 26px" } }, PRICING_I18N[LANG].sub), /*#__PURE__*/React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, alignItems: "stretch", marginBottom: 14 } }, /*#__PURE__*/React.createElement(TierCard, { name: PRICING_I18N[LANG].t_name, forWho: LP3[LANG].t_for, price: "0 \u20ac", priceSub: LP3[LANG].free2, priceNote: "", lockOk: false, box: LP3[LANG].t_box, feats: [PRICING_I18N[LANG].f_feed, PRICING_I18N[LANG].f_sucht, PRICING_I18N[LANG].f_db, PRICING_I18N[LANG].f_listen, PRICING_I18N[LANG].f_watch, PRICING_I18N[LANG].f_ki], btn: PRICING_I18N[LANG].t_btn , onClick: onTest, ac: "#e8e8e4", btnBg: "#ffffff", btnColor: "#141414", badge: PRICING_I18N[LANG].badge_test, glow: false }), /*#__PURE__*/React.createElement(TierCard, { name: PRICING_I18N[LANG].s_name, forWho: LP3[LANG].s_for, price: PRICE_STANDARD + " \u20ac", priceSub: LP3[LANG].per2, priceNote: LP3[LANG].cancel2, lockOk: false, box: LP3[LANG].s_box, feats: [PRICING_I18N[LANG].f_feed, PRICING_I18N[LANG].f_sucht, PRICING_I18N[LANG].f_db, PRICING_I18N[LANG].f_listen, PRICING_I18N[LANG].f_watch, PRICING_I18N[LANG].f_ki], btn: PRICING_I18N[LANG].s_btn , onClick: () => { if (STRIPE_LINK_STANDARD && STRIPE_LINK_STANDARD.indexOf("http") === 0) { window.open(STRIPE_LINK_STANDARD, "_blank"); } else { onAbo(); } }, ac: LGREEN, btnBg: LGREEN, btnColor: "#08130d", badge: PRICING_I18N[LANG].badge_std, glow: true }), /*#__PURE__*/React.createElement(TierCard, { name: PRICING_I18N[LANG].p_name, forWho: LP3[LANG].p_for, price: PRICE_PREMIUM + " \u20ac", priceSub: LP3[LANG].per2, priceNote: LP3[LANG].cancel2, lockOk: true, box: LP3[LANG].p_box, feats: [PRICING_I18N[LANG].f_feed, PRICING_I18N[LANG].f_sucht, PRICING_I18N[LANG].f_db, PRICING_I18N[LANG].f_listen, PRICING_I18N[LANG].f_watch, PRICING_I18N[LANG].f_ki], btn: PRICING_I18N[LANG].p_btn , onClick: () => window.open(STRIPE_LINK_PREMIUM, "_blank"), ac: "#e3b34e", btnBg: "linear-gradient(90deg,#efc25e,#d9963a)", btnColor: "#1c1508", badge: PRICING_I18N[LANG].badge_prm, glow: true })), /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "rgba(255,255,255,.4)", margin: 0 } }, PRICING_I18N[LANG].note))), /*#__PURE__*/React.createElement("section", {
+  }, "+++")))))))), /*#__PURE__*/React.createElement("section", { style: { background: DARK, color: "#fff", padding: "18px 20px 56px" } }, /*#__PURE__*/React.createElement("div", { id: "tw-preise", style: { maxWidth: 1100, margin: "0 auto" } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: mono, fontSize: 11.5, letterSpacing: 2.5, color: "rgba(255,255,255,.5)", margin: "20px 0 8px" } }, PRICING_I18N[LANG].kicker), /*#__PURE__*/React.createElement("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: "clamp(24px, 3.6vw, 36px)", margin: "0 0 8px", textTransform: "uppercase", color: "#fff" } }, PRICING_I18N[LANG].h2), /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.6, color: "rgba(255,255,255,.55)", maxWidth: 620, margin: "0 0 26px" } }, PRICING_I18N[LANG].sub), /*#__PURE__*/React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, alignItems: "stretch", marginBottom: 14 } }, /*#__PURE__*/React.createElement(TierCard, { name: PRICING_I18N[LANG].t_name, forWho: LP3[LANG].t_for, price: "0 \u20ac", priceSub: LP3[LANG].free2, priceNote: "", lockOk: false, box: LP3[LANG].t_box, feats: [PRICING_I18N[LANG].f_feed, PRICING_I18N[LANG].f_sucht, PRICING_I18N[LANG].f_db, PRICING_I18N[LANG].f_listen, PRICING_I18N[LANG].f_watch, PRICING_I18N[LANG].f_ki], btn: PRICING_I18N[LANG].t_btn , onClick: onTest, ac: "#e8e8e4", btnBg: "#ffffff", btnColor: "#141414", badge: PRICING_I18N[LANG].badge_test, glow: false }), /*#__PURE__*/React.createElement(TierCard, { name: PRICING_I18N[LANG].s_name, forWho: LP3[LANG].s_for, price: PRICE_STANDARD + " \u20ac", priceSub: LP3[LANG].per2, priceNote: LP3[LANG].cancel2, lockOk: false, box: LP3[LANG].s_box, feats: [PRICING_I18N[LANG].f_feed, PRICING_I18N[LANG].f_sucht, PRICING_I18N[LANG].f_db, PRICING_I18N[LANG].f_listen, PRICING_I18N[LANG].f_watch, PRICING_I18N[LANG].f_ki], btn: PRICING_I18N[LANG].s_btn , onClick: () => { if (STRIPE_LINK_STANDARD && STRIPE_LINK_STANDARD.indexOf("http") === 0) { window.open(STRIPE_LINK_STANDARD, "_blank"); } else { onAbo(); } }, ac: LGREEN, btnBg: LGREEN, btnColor: "#08130d", badge: PRICING_I18N[LANG].badge_std, glow: true }), /*#__PURE__*/React.createElement(TierCard, { name: PRICING_I18N[LANG].p_name, forWho: LP3[LANG].p_for, price: PRICE_PREMIUM + " \u20ac", priceSub: LP3[LANG].per2, priceNote: LP3[LANG].cancel2, lockOk: true, box: LP3[LANG].p_box, feats: [PRICING_I18N[LANG].f_feed, PRICING_I18N[LANG].f_sucht, PRICING_I18N[LANG].f_db, PRICING_I18N[LANG].f_listen, PRICING_I18N[LANG].f_watch, PRICING_I18N[LANG].f_ki], btn: PRICING_I18N[LANG].p_btn , onClick: () => window.open(STRIPE_LINK_PREMIUM, "_blank"), ac: "#e3b34e", btnBg: "linear-gradient(90deg,#efc25e,#d9963a)", btnColor: "#1c1508", badge: PRICING_I18N[LANG].badge_prm, glow: true }), /*#__PURE__*/React.createElement(TierCard, { name: PRICING_I18N[LANG].e_name, forWho: LP3[LANG].e_for, price: "349 \u20ac", priceSub: LP3[LANG].per2, priceNote: LP3[LANG].cancel2, lockOk: true, box: LP3[LANG].e_box, feats: [PRICING_I18N[LANG].f_feed, PRICING_I18N[LANG].f_sucht, PRICING_I18N[LANG].f_db, PRICING_I18N[LANG].f_listen, PRICING_I18N[LANG].f_watch, PRICING_I18N[LANG].f_ki, PRICING_I18N[LANG].f_seats], btn: PRICING_I18N[LANG].e_btn, onClick: () => { window.location.href = "mailto:info@transferwire.de?subject=" + encodeURIComponent(LANG === "en" ? "Enterprise access (5+ seats)" : "Enterprise-Zugang (5+ Nutzer)"); }, ac: "#d8dee4", btnBg: "#ffffff", btnColor: "#141414", badge: PRICING_I18N[LANG].badge_ent, glow: false })), /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "rgba(255,255,255,.4)", margin: 0 } }, PRICING_I18N[LANG].note))), /*#__PURE__*/React.createElement("section", {
     style: {
       background: DARK2,
       color: "#fff",
@@ -5884,6 +5888,18 @@ function SubscribePage({
   const [code, setCode] = useState("");
   const [cErr, setCErr] = useState("");
   const [cBusy, setCBusy] = useState(false);
+  const [plan, setPlan] = useState(() => { const h = String(location.hash || ""); return /abo-premium/.test(h) ? "premium" : /abo-enterprise/.test(h) ? "enterprise" : "standard"; });
+  const en = LANG === "en";
+  const PLAENE = [
+    { id: "standard", name: "Standard", preis: "49 \u20ac", sub: en ? "per month" : "pro Monat", hint: en ? "News feed, player database, AI scout" : "Newsfeed, Spieler-Datenbank, KI-Scout" },
+    { id: "premium", name: "Premium", preis: "99 \u20ac", sub: en ? "per month" : "pro Monat", hint: en ? "Everything in Standard + club contacts & community" : "Alles aus Standard + Vereins-Kontakte & Community" },
+    { id: "enterprise", name: "Enterprise", preis: "349 \u20ac", sub: en ? "per month \u00b7 5 seats" : "pro Monat \u00b7 5 Nutzer", hint: en ? "Everything in Premium for the whole team, +49 \u20ac per extra seat" : "Alles aus Premium f\u00fcrs Team, +49 \u20ac je weiterer Nutzer" }
+  ];
+  const planWahl = React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8, marginBottom: 16 } }, PLAENE.map(p => React.createElement("button", { key: p.id, type: "button", onClick: () => setPlan(p.id), "aria-pressed": plan === p.id, style: { cursor: "pointer", textAlign: "left", padding: "10px 10px", borderRadius: 0, border: "2px solid " + (plan === p.id ? "#149A59" : HAIR), background: plan === p.id ? "#F0FAF4" : "#fff", fontFamily: FONT_BODY } },
+    React.createElement("div", { style: { fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", fontWeight: 800, color: INK } }, p.name),
+    React.createElement("div", { style: { fontSize: 18, fontWeight: 800, color: INK, marginTop: 4 } }, p.preis, React.createElement("span", { style: { fontSize: 11, fontWeight: 600, color: MUTED, marginLeft: 4 } }, p.sub)),
+    React.createElement("div", { style: { fontSize: 11, color: MUTED, marginTop: 4, lineHeight: 1.35 } }, p.hint))));
+  const planLabel = plan === "enterprise" ? (en ? "Request Enterprise \u2014 5 seats, \u20ac349/month" : "Enterprise anfragen \u2014 5 Nutzer, 349 \u20ac/Monat") : (en ? "Subscribe now \u2014 \u20ac" + (plan === "premium" ? 99 : 49) + "/month (obligation to pay)" : "Jetzt zahlungspflichtig abonnieren \u2014 " + (plan === "premium" ? 99 : 49) + " \u20ac/Monat");
   const payStripe = () => {
     setErr("");
     setMsg("");
@@ -5891,17 +5907,23 @@ function SubscribePage({
     if (!name.trim()) return setErr(t("e_name"));
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) return setErr(t("e_email"));
     if (!legalOk || !sofort) return setErr(t("e_both"));
-    sendPing("abo_click");
+    sendPing("abo_click_" + plan);
     postJson(AUTH_URL, {
       email: em,
       name: name.trim(),
       rolle: "",
       consent_marketing: false,
-      plan: "abo_checkout",
+      plan: plan === "premium" ? "premium_checkout" : plan === "enterprise" ? "enterprise_anfrage" : "abo_checkout",
       status: "checkout_gestartet"
     }).catch(() => {});
-    const sep = STRIPE_LINK.indexOf("?") >= 0 ? "&" : "?";
-    window.open(STRIPE_LINK + sep + "prefilled_email=" + encodeURIComponent(em), "_blank");
+    if (plan === "enterprise") {
+      window.location.href = "mailto:info@transferwire.de?subject=" + encodeURIComponent((en ? "Enterprise access (5+ seats)" : "Enterprise-Zugang (5+ Nutzer)") + " - " + name.trim()) + "&body=" + encodeURIComponent((en ? "Contact: " : "Kontakt: ") + name.trim() + " / " + em);
+      setMsg(en ? "Your e-mail program opens with the request \u2014 we get back to you within one working day." : "Dein E-Mail-Programm \u00f6ffnet sich mit der Anfrage \u2014 wir melden uns innerhalb eines Werktags.");
+      return;
+    }
+    const link = plan === "premium" ? STRIPE_LINK_PREMIUM : STRIPE_LINK_STANDARD;
+    const sep = link.indexOf("?") >= 0 ? "&" : "?";
+    window.open(link + sep + "prefilled_email=" + encodeURIComponent(em), "_blank");
     setMsg(t("s_msg"));
   };
   const checkCode = () => {
@@ -5953,7 +5975,7 @@ function SubscribePage({
     title: t("s_title"),
     sub: t("s_sub"),
     onBack: onBack
-  }, /*#__PURE__*/React.createElement("div", {
+  }, planWahl, /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
       fontWeight: 700,
@@ -6001,7 +6023,7 @@ function SubscribePage({
     onClick: payStripe,
     kind: "green",
     full: true
-  }, t("s_pay")), STRIPE_LINK_YEAR && /*#__PURE__*/React.createElement("button", {
+  }, planLabel), STRIPE_LINK_YEAR && /*#__PURE__*/React.createElement("button", {
     onClick: () => window.open(STRIPE_LINK_YEAR, "_blank"),
     style: {
       width: "100%",
@@ -10507,7 +10529,7 @@ function TransferWire() {
     };
   }, []);
   const [account, setAccountState] = useState(() => loadAccount());
-  const [page, setPage] = useState(() => { var h = (location.hash || "").replace("#", ""); var a = loadAccount(); if (h === "cancel") return "cancel"; if (h === "abo") return "subscribe"; if (a) return "app"; if (h === "login") return "login"; if (h === "test") return "register"; return "landing"; });
+  const [page, setPage] = useState(() => { var h = (location.hash || "").replace("#", ""); var a = loadAccount(); if (h === "cancel") return "cancel"; if (h === "abo" || h.indexOf("abo-") === 0) return "subscribe"; if (a) return "app"; if (h === "login") return "login"; if (h === "test") return "register"; return "landing"; });
   const [pubLegal, setPubLegal] = useState(() => { var h = (location.hash || "").replace("#", ""); return (h === "impressum" || h === "datenschutz" || h === "agb") ? h : null; });
   useEffect(() => {
     try {
