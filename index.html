@@ -54,7 +54,7 @@
   .navwrap{position:sticky; top:14px; z-index:60; display:flex; justify-content:center; padding:0 14px}
   .nav{
     width:100%; max-width:1060px; background:#ECEBE7; border:1px solid #E2E1DC;
-    border-radius:999px; display:flex; align-items:center; gap:14px; padding:10px 12px 10px 18px;
+    border-radius:0; display:flex; align-items:center; gap:14px; padding:10px 12px 10px 18px;
     box-shadow:0 1px 0 rgba(255,255,255,.6) inset;
   }
   .logo{display:flex; align-items:center; gap:9px; font-weight:800; letter-spacing:.6px; font-size:15.5px}
@@ -65,7 +65,7 @@
   .mark svg{width:15px; height:15px}
   .nav .rechts{margin-left:auto; display:flex; align-items:center; gap:8px}
   .sprache{position:relative; display:flex}
-.sprache .lang-btn{display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; padding:6px 12px; border-radius:999px; border:0; cursor:pointer; font-family:inherit; background:#DFDEDA; color:#3c3c38; white-space:nowrap}
+.sprache .lang-btn{display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; padding:6px 12px; border-radius:0; border:0; cursor:pointer; font-family:inherit; background:#DFDEDA; color:#3c3c38; white-space:nowrap}
 .sprache .lang-btn:hover{background:#d3d2ce}
 .sprache .lang-btn .caret{font-size:10px; opacity:.7}
 .sprache .lang-kurz{display:none}
@@ -78,9 +78,9 @@
 @media (max-width:560px){ .sprache .lang-text{display:none} .sprache .lang-kurz{display:inline} .sprache .lang-btn{padding:6px 10px} }
   
   
-  .nav-login{font-size:13.5px; font-weight:700; padding:8px 12px; border-radius:999px; color:#3c3c38}
+  .nav-login{font-size:13.5px; font-weight:600; padding:8px 12px; border-radius:0; color:#3c3c38}
   .nav-login:hover{background:#e0dfdb}
-  .nav-cta{font-size:13.5px; font-weight:800; padding:9px 16px; border-radius:999px; background:var(--ink); color:#fff; white-space:nowrap}
+  .nav-cta{font-size:13.5px; font-weight:600; padding:9px 16px; border-radius:0; background:var(--ink); color:#fff; white-space:nowrap}
   .nav-cta:hover{background:#000}
 
   main{display:block}
@@ -104,7 +104,7 @@
   }
   .hero .uslogan b{color:#33332f; font-weight:700}
   .ctas{display:flex; gap:12px; justify-content:center; margin-top:30px; flex-wrap:wrap}
-  .btn{border-radius:999px; padding:14px 26px; font-size:15px; font-weight:800; transition:transform .15s ease, box-shadow .15s ease}
+  .btn{border-radius:0; padding:14px 26px; font-size:15px; font-weight:800; transition:transform .15s ease, box-shadow .15s ease}
   .btn:active{transform:scale(.97)}
   .btn-ink{background:var(--ink); color:#fff; box-shadow:0 10px 24px rgba(16,16,19,.22)}
   .btn-ink:hover{background:#000}
@@ -161,7 +161,7 @@
   .stext p{color:var(--muted); font-size:15px; line-height:1.72}
   .stext p b{color:#33332f}
   .spunkte{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px}
-  .spunkte span{font-size:11px; font-weight:800; letter-spacing:.2px; background:#EFEEE9; color:#4a4a45; border-radius:999px; padding:6px 12px}
+  .spunkte span{font-size:11px; font-weight:800; letter-spacing:.2px; background:#EFEEE9; color:#4a4a45; border-radius:0; padding:6px 12px}
   .shot{border-radius:16px; overflow:hidden; border:1px solid var(--line); background:#fff;
     box-shadow:0 24px 60px rgba(16,16,19,.15)}
   .shot img{width:100%; display:block}
@@ -187,12 +187,12 @@
   .puls{width:7px; height:7px; border-radius:50%; background:var(--gruen); box-shadow:0 0 0 0 rgba(31,181,88,.55); animation:puls 1.8s infinite}
   @keyframes puls{70%{box-shadow:0 0 0 9px rgba(31,181,88,0)} 100%{box-shadow:0 0 0 0 rgba(31,181,88,0)}}
   .app-filter{display:flex; gap:8px; padding:13px 18px 2px; flex-wrap:wrap}
-  .fchip{font-size:10.5px; font-weight:800; letter-spacing:.4px; color:rgba(255,255,255,.7); border:1px solid rgba(255,255,255,.16); border-radius:999px; padding:5px 11px}
+  .fchip{font-size:10.5px; font-weight:800; letter-spacing:.4px; color:rgba(255,255,255,.7); border:1px solid rgba(255,255,255,.16); border-radius:0; padding:5px 11px}
   .fchip.akt{background:var(--gruen); border-color:var(--gruen); color:#06220f}
   .app-feed{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:14px 18px 20px}
   .mkarte{background:var(--nacht-karte); border:1px solid rgba(255,255,255,.09); border-radius:13px; padding:13px 14px; color:#E8ECEA}
   .mk-kick{display:flex; justify-content:space-between; font-size:9.5px; letter-spacing:1.2px; font-weight:800; color:rgba(255,255,255,.45)}
-  .badge{border-radius:999px; padding:2px 8px; font-size:9px; letter-spacing:.6px}
+  .badge{border-radius:0; padding:2px 8px; font-size:9px; letter-spacing:.6px}
   .badge.fix{background:rgba(31,181,88,.18); color:#7BE3A4}
   .badge.ger{background:rgba(245,158,11,.16); color:#F5C36B}
   .badge.bedarf{background:rgba(96,165,250,.16); color:#93C5FD}
@@ -218,41 +218,47 @@
   @media (max-width:640px){ .lounge-plus{grid-template-columns:1fr} }
 
   /* ── SEITE 2: Preisblock dunkel ── */
-  .preisnacht{background:var(--nacht); color:#fff; border-radius:28px; padding:64px 30px 40px; position:relative; overflow:hidden}
+  .preisnacht{background:var(--nacht); color:#fff; border-radius:28px; padding:96px 30px 76px; position:relative; overflow:hidden}
   .preisnacht .kicker{color:#7BE3A4}
-  .preisnacht h2{margin-top:12px; font-size:clamp(28px,3.6vw,40px); letter-spacing:.4px; font-weight:800; text-transform:uppercase}
-  .preisnacht .intro{margin:12px auto 0; max-width:620px; text-align:center; color:rgba(255,255,255,.6); font-size:14px; line-height:1.6}
+  .preisnacht h2{margin-top:0; font-size:clamp(26px,3.2vw,36px); letter-spacing:-.022em; font-weight:700; text-transform:none}
+  .preisnacht .intro{margin:14px auto 0; max-width:54ch; text-align:center; color:rgba(255,255,255,.55); font-size:13.5px; line-height:1.65}
   .preisnacht{border-radius:0 !important}
   .testleiste{margin-top:32px; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 18px; border:1px solid rgba(255,255,255,.16); background:linear-gradient(90deg, rgba(255,255,255,.07), rgba(255,255,255,.02)); text-align:left}
   .testleiste .tl-l{display:flex; align-items:center; gap:14px; min-width:0}
-  .testleiste .tl-tag{flex:0 0 auto; font-size:9.5px; letter-spacing:1.6px; font-weight:800; text-transform:uppercase; color:#06220f; background:#fff; padding:6px 10px}
+  .testleiste .tl-tag{flex:0 0 auto; font-size:9.5px; letter-spacing:.16em; font-weight:700; text-transform:uppercase; color:rgba(255,255,255,.72); background:transparent; border:1px solid rgba(255,255,255,.22); padding:5px 9px}
   .testleiste .tl-t{font-size:12.5px; color:rgba(255,255,255,.78); line-height:1.45}
   .testleiste .tl-t b{color:#fff}
   .testleiste .tcta{margin:0; width:auto; flex:0 0 auto; padding:11px 18px; white-space:nowrap}
-  .tiergrid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:16px; align-items:stretch}
-  .tier{position:relative; background:linear-gradient(180deg,#11171A 0%,#0C1110 100%); border:1px solid rgba(255,255,255,.12); border-radius:0; padding:26px 22px 24px; display:flex; flex-direction:column; text-align:left}
-  .tier::before{content:""; position:absolute; left:0; right:0; top:0; height:2px; background:rgba(255,255,255,.35)}
-  .tier.gr::before{background:var(--gruen)}
-  .tier.go::before{background:linear-gradient(90deg,#E8BE63,#C99532)}
-  .tier.en::before{background:linear-gradient(90deg,#E9ECEF,#9AA3AD)}
-  .tier.go{border-color:rgba(217,164,65,.5); box-shadow:0 30px 60px -30px rgba(217,164,65,.35)}
+  .testleiste .tc-w{background:transparent; color:#fff; border:1px solid rgba(255,255,255,.28)}
+  .testleiste .tc-w:hover{border-color:rgba(255,255,255,.6)}
+  .tiergrid{display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(8,auto); gap:14px; margin-top:20px; align-items:stretch}
+  .tier{position:relative; background:#0E1312; border:1px solid rgba(255,255,255,.10); border-radius:0; padding:24px 22px 26px; text-align:left; display:grid; grid-row:span 8; grid-template-rows:subgrid; transition:border-color .12s ease}
+  .tier:hover{border-color:rgba(255,255,255,.2)}
+  .tier.gr{background:#121918; border-color:rgba(255,255,255,.2)}
+  @supports not (grid-template-rows:subgrid){ .tier{display:flex; flex-direction:column} }
+  @media (max-width:980px){ .tiergrid{grid-template-rows:none} .tier{display:flex; flex-direction:column; grid-row:auto} }
   .tier .tname{display:flex; align-items:center; justify-content:space-between; gap:9px; font-size:13px; font-weight:800; letter-spacing:2.2px; text-transform:uppercase}
-  .tbadge{font-size:9px; letter-spacing:1.4px; font-weight:800; text-transform:uppercase; border-radius:0; padding:4px 8px; border:1px solid currentColor}
+  .tbadge{font-size:9.5px; letter-spacing:.14em; font-weight:700; text-transform:uppercase; border-radius:0; padding:3px 7px; border:1px solid rgba(123,227,164,.45)}
   .tb-gr{color:#7BE3A4}
-  .tb-go{color:#E8C778}
-  .tb-en{color:#D8DEE4}
   .tier .tsub{margin-top:8px; font-size:12px; color:rgba(255,255,255,.55); min-height:34px}
-  .wertbox{margin-top:14px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:0; padding:11px 13px; font-size:11.5px; line-height:1.55; color:rgba(255,255,255,.75)}
-  .wertbox b{display:block; color:#fff; font-size:12px; margin-bottom:3px}
-  .abrech{margin-top:18px; display:inline-flex; border:1px solid rgba(255,255,255,.2); padding:2px; align-self:flex-start}
-  .abrech button{border:0; cursor:pointer; font-family:inherit; font-size:10.5px; letter-spacing:1.2px; text-transform:uppercase; font-weight:800; padding:6px 12px; background:transparent; color:rgba(255,255,255,.55); border-radius:0}
-  .abrech button.akt{background:#fff; color:#0B0F0C}
-  .tpreis{margin:14px 0 0; font-size:40px; font-weight:800; letter-spacing:-1px; line-height:1; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap}
-  .tpreis .einheit{font-size:12.5px; font-weight:600; letter-spacing:0; color:rgba(255,255,255,.55)}
-  .talt{margin-top:7px; font-size:11.5px; color:rgba(255,255,255,.5)}
-  .talt b{color:#7BE3A4; font-weight:700}
-  .tk{margin-top:4px; font-size:10.5px; color:rgba(255,255,255,.4)}
-  .nutzer{margin-top:14px; border:1px solid rgba(255,255,255,.14); padding:8px 10px 8px 12px; display:flex; align-items:center; justify-content:space-between; gap:10px}
+  .twert{margin-top:12px; font-size:11.5px; line-height:1.6; color:rgba(255,255,255,.5)}
+  .twert b{display:block; color:rgba(255,255,255,.9); font-size:11.5px; font-weight:600; margin-bottom:2px}
+  .abrech-z{margin:20px auto 0; display:inline-flex; border:1px solid rgba(255,255,255,.16); padding:2px}
+  .abrech-z button{border:0; cursor:pointer; font-family:inherit; font-size:11.5px; font-weight:600; padding:8px 16px; background:transparent; color:rgba(255,255,255,.5); border-radius:0; transition:color .12s ease, background .12s ease}
+  .abrech-z button:hover{color:rgba(255,255,255,.8)}
+  .abrech-z button.akt{background:rgba(255,255,255,.94); color:#0B0F0C}
+  .tpreis{margin:18px 0 0; font-size:38px; font-weight:700; letter-spacing:-.03em; line-height:1; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1}
+  .tpreis .einheit{font-size:12.5px; font-weight:500; letter-spacing:0; color:rgba(255,255,255,.5)}
+  .tmeta{margin-top:8px; font-size:11.5px; color:rgba(255,255,255,.42); display:flex; flex-wrap:wrap; gap:6px}
+  .tmeta b{color:rgba(255,255,255,.72); font-weight:600}
+  .tsep{color:rgba(255,255,255,.22)}
+  body.flugmodus .ebene .twert b, .preisnacht .twert b{color:rgba(255,255,255,.9)}
+  body.flugmodus .ebene .tmeta b, .preisnacht .tmeta b{color:rgba(255,255,255,.72)}
+  body.flugmodus .ebene .testleiste .tl-t b, .preisnacht .testleiste .tl-t b{color:#fff}
+  .seats{margin-top:14px}
+  .nz-fix{font-size:14px; font-weight:700; line-height:28px; padding:0 12px; color:rgba(255,255,255,.88)}
+  .seats.leer{margin-top:0}
+  .nutzer{border:1px solid rgba(255,255,255,.14); padding:8px 10px 8px 12px; display:flex; align-items:center; justify-content:space-between; gap:10px}
   .nutzer .nz-l{font-size:10px; letter-spacing:1.4px; text-transform:uppercase; font-weight:800; color:rgba(255,255,255,.6)}
   .nutzer .nz-s{display:flex; align-items:center; border:1px solid rgba(255,255,255,.22)}
   .nutzer .nz-s button{border:0; cursor:pointer; font-family:inherit; width:30px; height:28px; background:transparent; color:#fff; font-size:16px; font-weight:700; line-height:1; border-radius:0}
@@ -260,30 +266,22 @@
   .nutzer .nz-s button:disabled{opacity:.3; cursor:default; background:transparent}
   .nutzer .nz-s output{min-width:36px; text-align:center; font-size:14px; font-weight:800; border-left:1px solid rgba(255,255,255,.22); border-right:1px solid rgba(255,255,255,.22); height:28px; line-height:28px}
   .nutzer-h{margin-top:6px; font-size:10.5px; color:rgba(255,255,255,.5)}
-  .tcta{margin-top:16px; width:100%; border:0; cursor:pointer; font-family:inherit; border-radius:0; padding:13px; font-size:12.5px; font-weight:800; letter-spacing:1.2px; text-transform:uppercase; text-align:center}
+  .tcta{margin-top:18px; width:100%; border:0; cursor:pointer; font-family:inherit; border-radius:0; padding:12px; font-size:13px; font-weight:600; letter-spacing:0; text-transform:none; text-align:center; transition:background .12s ease, border-color .12s ease}
   .tc-w{background:#fff; color:var(--ink)}
   .tc-gr{background:var(--gruen); color:#04200e}
-  .tc-go{background:linear-gradient(135deg,#E8BE63,#C99532); color:#231a05}
-  .tc-en{background:transparent; color:#fff; border:1px solid rgba(255,255,255,.6)}
-  .tc-en:hover{background:#fff; color:var(--ink)}
-  .schlossbox{margin-top:14px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09); border-radius:0; padding:10px 13px; font-size:10.5px}
-  .schlossbox .sb-k{letter-spacing:1.4px; font-weight:800; color:rgba(255,255,255,.55)}
-  .schlossbox .sb-s{display:flex; align-items:center; justify-content:space-between; margin-top:5px; color:rgba(255,255,255,.45)}
-  .schlossbox.voll .sb-s{color:#E8D9AF}
+  .tc-gr:hover{background:#25C463}
+  .tc-go,.tc-en{background:transparent; color:#fff; border:1px solid rgba(255,255,255,.28)}
+  .tc-go:hover,.tc-en:hover{border-color:rgba(255,255,255,.62)}
   .draht{background:var(--gold); color:#231a05; border-radius:0; font-size:8.5px; font-weight:800; letter-spacing:.9px; padding:2px 8px}
-  .tier.en .schlossbox.voll .sb-s{color:#E3E8ED}
-  .tier.en .draht{background:#E9ECEF; color:#101013}
   .tfeats{margin-top:16px; display:flex; flex-direction:column; gap:8px; font-size:12px; color:rgba(255,255,255,.82); text-align:left}
   .tfeats div{display:flex; gap:8px; line-height:1.4}
   .tfeats div span:last-child{flex:1}
   .tfeats div.fett span:last-child{font-weight:800; color:#fff}
-  .tfeats .plus-k{display:block; margin:8px 0 2px; padding-top:9px; border-top:1px solid rgba(255,255,255,.14); font-size:9.5px; letter-spacing:1.4px; font-weight:800; text-transform:uppercase; color:var(--gold)}
-  .tier.en .tfeats .plus-k{color:#D8DEE4}
-  .hak{color:var(--gruen); font-weight:800}
-  .tier.go .hak{color:var(--gold)}
-  .tier.en .hak{color:#D8DEE4}
-  .tfeats .sicher{margin-top:6px; padding:9px 10px; border:1px solid rgba(123,227,164,.35); background:rgba(31,181,88,.08); color:#CFF5DD; font-size:11.5px}
-  .tfeats .sicher .hak{color:#7BE3A4}
+  .tfeats .plus-k{display:block; margin:0 0 4px; padding-top:0; border-top:0; font-size:9.5px; letter-spacing:.14em; font-weight:700; text-transform:uppercase; color:rgba(255,255,255,.42)}
+  .hak{flex:0 0 11px; width:11px; font-size:0; line-height:0; align-self:flex-start; margin-top:6px; color:rgba(255,255,255,.34)}
+  .hak::before{content:""; display:block; width:9px; height:5px; border-left:1.5px solid currentColor; border-bottom:1.5px solid currentColor; transform:rotate(-45deg)}
+  .tfeats .aus{color:rgba(255,255,255,.34)}
+  .hakx{flex:0 0 11px; width:11px; font-size:10px; line-height:1.5; color:rgba(255,255,255,.28)}
   .sicherheit{margin-top:22px; display:flex; align-items:center; justify-content:center; gap:10px; font-size:11.5px; color:rgba(255,255,255,.62); flex-wrap:wrap; text-align:center}
   .sicherheit .sh-tag{font-size:9px; letter-spacing:1.6px; text-transform:uppercase; font-weight:800; color:#7BE3A4; border:1px solid rgba(123,227,164,.45); padding:4px 8px}
   @media (max-width:980px){ .tiergrid{grid-template-columns:1fr; max-width:460px; margin-left:auto; margin-right:auto} .testleiste{flex-direction:column; align-items:stretch; max-width:460px; margin-left:auto; margin-right:auto} .testleiste .tl-l{flex-direction:column; align-items:flex-start; gap:8px} .testleiste .tcta{width:100%} }
@@ -406,10 +404,10 @@
     body.flugmodus.seite-preise .preisnacht .intro{margin:8px auto 0}
     body.flugmodus.seite-preise .tiergrid{margin-top:18px; gap:14px}
     body.flugmodus.seite-preise .tier{padding:16px 14px}
-    body.flugmodus.seite-preise .wertbox{margin-top:9px; padding:8px 10px}
+    body.flugmodus.seite-preise .twert{margin-top:9px}
     body.flugmodus.seite-preise .tpreis{margin:10px 0 2px; font-size:30px}
     body.flugmodus.seite-preise .tcta{margin-top:10px; padding:9px}
-    body.flugmodus.seite-preise .schlossbox{margin-top:8px; padding:7px 10px}
+    body.flugmodus.seite-preise .seats{margin-top:9px}
     body.flugmodus.seite-preise .tfeats{margin-top:11px; gap:4px; font-size:11.5px}
     body.flugmodus.seite-preise .tfeats .plus-k{margin:6px 0 1px; padding-top:7px}
     body.flugmodus.seite-preise .preisnacht .fuss{margin-top:14px}
@@ -437,7 +435,7 @@
   body.flugmodus .ebene .lounge-plus p{font-size:15px; line-height:1.5; color:#f6f9f7; background:rgba(4,10,18,.62);
     border:1px solid rgba(255,255,255,.16); text-shadow:0 1px 2px rgba(0,0,0,.9)}
   body.flugmodus .ebene .lounge-plus p b{color:#bff5d3; font-size:15.5px; text-shadow:0 1px 2px rgba(0,0,0,.95)}
-  body.flugmodus .ebene .vertrauen{display:inline-block; margin-top:34px; padding:9px 18px; border-radius:999px;
+  body.flugmodus .ebene .vertrauen{display:inline-block; margin-top:34px; padding:9px 18px; border-radius:0;
     color:#fff; letter-spacing:2px; background:rgba(4,10,18,.62); border:1px solid rgba(255,255,255,.14);
     text-shadow:0 1px 2px rgba(0,0,0,.95), 0 2px 8px rgba(0,0,0,.9)}
   body.flugmodus .ebene .spunkte span{background:rgba(9,20,14,.72); color:#c9f5da;
@@ -662,9 +660,10 @@
 <main id="seite-preise" hidden>
   <section class="bahn rv glas ebene klickbar" data-seite="preise" data-z="2" data-welt="himmel">
     <div class="preisnacht">
-      <div class="kicker" data-de="PREISE" data-en="PRICING">PREISE</div>
       <h2 data-de="Wähle deinen Zugang" data-en="Choose your access">Wähle deinen Zugang</h2>
       <p class="intro" data-de="Monatlich oder jährlich. Zugangscode kommt nach der Zahlung automatisch per E-Mail. Jeder Zugang ist personengebunden — max. 2 Geräte, kein Account-Sharing." data-en="Monthly or yearly. Your access code arrives automatically by e-mail after payment. Every seat is personal — max. 2 devices, no account sharing.">Monatlich oder jährlich. Zugangscode kommt nach der Zahlung automatisch per E-Mail. Jeder Zugang ist personengebunden — max. 2 Geräte, kein Account-Sharing.</p>
+
+      <div class="abrech-z" role="group" aria-label="Abrechnung"><button type="button" class="akt" data-ab="monat" onclick="preisAbrechAlle(&#39;monat&#39;)" data-de="Monatlich" data-en="Monthly">Monatlich</button><button type="button" data-ab="jahr" onclick="preisAbrechAlle(&#39;jahr&#39;)" data-de="Jährlich · 2 Monate geschenkt" data-en="Yearly · 2 months free">Jährlich · 2 Monate geschenkt</button></div>
 
       <div class="testleiste">
         <div class="tl-l">
@@ -679,13 +678,11 @@
         <div class="tier gr" data-tarif="standard">
           <div class="tname"><span>Standard</span> <span class="tbadge tb-gr" data-de="Beliebt" data-en="Popular">Beliebt</span></div>
           <div class="tsub" data-de="Für Berater &amp; Scouts im Tagesgeschäft" data-en="For agents &amp; scouts day to day">Für Berater &amp; Scouts im Tagesgeschäft</div>
-          <div class="wertbox"><b data-de="✦ Alle Kernfunktionen inklusive" data-en="✦ All core features included">✦ Alle Kernfunktionen inklusive</b><span data-de="1.231 Quellen · 31 Ligen · 20.793 Spieler · KI-Assistent „Scout&#8220;." data-en="1,231 sources · 31 leagues · 20,793 players · AI assistant &#8222;Scout&#8220;.">1.231 Quellen · 31 Ligen · 20.793 Spieler · KI-Assistent „Scout&#8220;.</span></div>
-          <div class="abrech" role="group" aria-label="Abrechnung"><button type="button" class="akt" data-ab="monat" onclick="preisAbrech('standard','monat')" data-de="Monatlich" data-en="Monthly">Monatlich</button><button type="button" data-ab="jahr" onclick="preisAbrech('standard','jahr')" data-de="Jährlich" data-en="Yearly">Jährlich</button></div>
+          <div class="twert"><b data-de="Alle Kernfunktionen inklusive" data-en="All core features included">Alle Kernfunktionen inklusive</b><span data-de="1.231 Quellen · 31 Ligen · 20.793 Spieler · KI-Assistent „Scout&#8220;." data-en="1,231 sources · 31 leagues · 20,793 players · AI assistant &#8220;Scout&#8221;.">1.231 Quellen · 31 Ligen · 20.793 Spieler · KI-Assistent „Scout&#8220;.</span></div>
           <div class="tpreis"><span id="p-standard-betrag">49 €</span><span class="einheit" id="p-standard-einheit">pro Monat</span></div>
-          <div class="talt" id="p-standard-alt">oder <b>490 €</b> pro Jahr · 2 Monate geschenkt</div>
-          <div class="tk" id="p-standard-tk">monatlich kündbar · inkl. MwSt.</div>
+          <div class="tmeta"><span id="p-standard-alt">oder <b>490 €</b> pro Jahr</span><span class="tsep">·</span><span id="p-standard-tk">monatlich kündbar</span></div>
+          <div class="seats"><div class="nutzer"><span class="nz-l" data-de="Nutzer" data-en="Seats">Nutzer</span><span class="nz-fix">1</span></div><div class="nutzer-h" data-de="1 personengebundener Zugang · max. 2 Geräte" data-en="1 personal seat · max. 2 devices">1 personengebundener Zugang · max. 2 Geräte</div></div>
           <button class="tcta tc-gr" onclick="location.href='/app.html#abo'" data-de="Standard wählen" data-en="Choose Standard">Standard wählen</button>
-          <div class="schlossbox"><div class="sb-k" data-de="🔒 VEREINS-KONTAKTE" data-en="🔒 CLUB CONTACTS">🔒 VEREINS-KONTAKTE</div><div class="sb-s"><span data-de="✕ Nicht enthalten" data-en="✕ Not included">✕ Nicht enthalten</span></div></div>
           <div class="tfeats">
             <div><span class="hak">✓</span><span data-de="Newsfeed aus 31 Ligen und über 1.200 Quellen" data-en="Newsfeed from 31 leagues and 1,200+ sources">Newsfeed aus 31 Ligen und über 1.200 Quellen</span></div>
             <div><span class="hak">✓</span><span data-de="„Verein sucht&#8220; &mdash; wer gerade welche Spieler braucht" data-en="&#8222;Club needs&#8220; &mdash; who is looking for which players">„Verein sucht&#8220; &mdash; wer gerade welche Spieler braucht</span></div>
@@ -694,66 +691,39 @@
             <div><span class="hak">✓</span><span data-de="Spielerverträge &amp; Vertragssituationen" data-en="Player contracts &amp; contract situations">Spielerverträge &amp; Vertragssituationen</span></div>
             <div><span class="hak">✓</span><span data-de="Merkliste, E-Mail-Alerts &amp; Morgen-Briefing" data-en="Watchlist, e-mail alerts &amp; morning briefing">Merkliste, E-Mail-Alerts &amp; Morgen-Briefing</span></div>
             <div><span class="hak">✓</span><span data-de="Scouting-Funktion mit Talent-Rankings" data-en="Scouting with talent rankings">Scouting-Funktion mit Talent-Rankings</span></div>
-            <div><span class="hak">✓</span><span data-de="KI-Assistent „Scout&#8220;" data-en="AI assistant &#8222;Scout&#8220;">KI-Assistent „Scout&#8220;</span></div>
-            <div class="sicher"><span class="hak">✓</span><span data-de="Personengebundener Zugang: max. 2 Geräte gleichzeitig, kein Account-Sharing" data-en="Personal seat: max. 2 devices at once, no account sharing">Personengebundener Zugang: max. 2 Geräte gleichzeitig, kein Account-Sharing</span></div>
+            <div><span class="hak">✓</span><span data-de="KI-Assistent „Scout&#8220;" data-en="AI assistant &#8220;Scout&#8221;">KI-Assistent „Scout&#8220;</span></div>
+            <div class="aus"><span class="hakx">✕</span><span data-de="Vereins-Kontakte: nicht enthalten" data-en="Club contacts: not included">Vereins-Kontakte: nicht enthalten</span></div>
           </div>
         </div>
 
         <!-- PREMIUM -->
         <div class="tier go" data-tarif="premium">
-          <div class="tname"><span>Premium</span> <span class="tbadge tb-go" data-de="Alles drin" data-en="All in">Alles drin</span></div>
+          <div class="tname"><span>Premium</span></div>
           <div class="tsub" data-de="Für Macher mit direktem Draht" data-en="For dealmakers with a direct line">Für Macher mit direktem Draht</div>
-          <div class="wertbox"><b data-de="✦ Alles aus Standard — plus:" data-en="✦ Everything in Standard — plus:">✦ Alles aus Standard — plus:</b><span data-de="Community mit Scouts, Beratern &amp; Vereinsmitarbeitern. Exklusive Vereinskontakte." data-en="Community with scouts, agents &amp; club staff. Exclusive club contacts.">Community mit Scouts, Beratern &amp; Vereinsmitarbeitern. Exklusive Vereinskontakte.</span></div>
-          <div class="abrech" role="group" aria-label="Abrechnung"><button type="button" class="akt" data-ab="monat" onclick="preisAbrech('premium','monat')" data-de="Monatlich" data-en="Monthly">Monatlich</button><button type="button" data-ab="jahr" onclick="preisAbrech('premium','jahr')" data-de="Jährlich" data-en="Yearly">Jährlich</button></div>
+          <div class="twert"><b data-de="Alles aus Standard — plus:" data-en="Everything in Standard — plus:">Alles aus Standard — plus:</b><span data-de="Community mit Scouts, Beratern &amp; Vereinsmitarbeitern. Exklusive Vereinskontakte." data-en="Community with scouts, agents &amp; club staff. Exclusive club contacts.">Community mit Scouts, Beratern &amp; Vereinsmitarbeitern. Exklusive Vereinskontakte.</span></div>
           <div class="tpreis"><span id="p-premium-betrag">99 €</span><span class="einheit" id="p-premium-einheit">pro Monat</span></div>
-          <div class="talt" id="p-premium-alt">oder <b>990 €</b> pro Jahr · 2 Monate geschenkt</div>
-          <div class="tk" id="p-premium-tk">monatlich kündbar · inkl. MwSt.</div>
+          <div class="tmeta"><span id="p-premium-alt">oder <b>990 €</b> pro Jahr</span><span class="tsep">·</span><span id="p-premium-tk">monatlich kündbar</span></div>
+          <div class="seats"><div class="nutzer"><span class="nz-l" data-de="Nutzer" data-en="Seats">Nutzer</span><span class="nz-fix">1</span></div><div class="nutzer-h" data-de="1 personengebundener Zugang · max. 2 Geräte" data-en="1 personal seat · max. 2 devices">1 personengebundener Zugang · max. 2 Geräte</div></div>
           <button class="tcta tc-go" onclick="location.href='/app.html#abo-premium'" data-de="Premium wählen" data-en="Choose Premium">Premium wählen</button>
-          <div class="schlossbox voll"><div class="sb-k" data-de="🔒 VEREINS-KONTAKTE" data-en="🔒 CLUB CONTACTS">🔒 VEREINS-KONTAKTE</div><div class="sb-s"><span data-de="✓ Voll enthalten" data-en="✓ Fully included">✓ Voll enthalten</span><span class="draht" data-de="DIREKTER DRAHT" data-en="DIRECT LINE">DIREKTER DRAHT</span></div></div>
           <div class="tfeats">
-            <div><span class="hak">✓</span><span data-de="Newsfeed aus 31 Ligen und über 1.200 Quellen" data-en="Newsfeed from 31 leagues and 1,200+ sources">Newsfeed aus 31 Ligen und über 1.200 Quellen</span></div>
-            <div><span class="hak">✓</span><span data-de="„Verein sucht&#8220; &mdash; wer gerade welche Spieler braucht" data-en="&#8222;Club needs&#8220; &mdash; who is looking for which players">„Verein sucht&#8220; &mdash; wer gerade welche Spieler braucht</span></div>
-            <div><span class="hak">✓</span><span data-de="Spieler-Performances &amp; Rankings" data-en="Player performances &amp; rankings">Spieler-Performances &amp; Rankings</span></div>
-            <div><span class="hak">✓</span><span data-de="Spieler-Datenbank mit über 20.000 Spielern" data-en="Player database with 20,000+ players">Spieler-Datenbank mit über 20.000 Spielern</span></div>
-            <div><span class="hak">✓</span><span data-de="Spielerverträge &amp; Vertragssituationen" data-en="Player contracts &amp; contract situations">Spielerverträge &amp; Vertragssituationen</span></div>
-            <div><span class="hak">✓</span><span data-de="Merkliste, E-Mail-Alerts &amp; Morgen-Briefing" data-en="Watchlist, e-mail alerts &amp; morning briefing">Merkliste, E-Mail-Alerts &amp; Morgen-Briefing</span></div>
-            <div><span class="hak">✓</span><span data-de="Scouting-Funktion mit Talent-Rankings" data-en="Scouting with talent rankings">Scouting-Funktion mit Talent-Rankings</span></div>
-            <div><span class="hak">✓</span><span data-de="KI-Assistent „Scout&#8220;" data-en="AI assistant &#8222;Scout&#8220;">KI-Assistent „Scout&#8220;</span></div>
-            <div class="plus-k" data-de="Plus in Premium" data-en="Plus in Premium">Plus in Premium</div>
-            <div class="fett"><span class="hak">✓</span><span data-de="Community-Zugang: Scouts, Berater &amp; Vereinsmitarbeiter" data-en="Community access: scouts, agents &amp; club staff">Community-Zugang: Scouts, Berater &amp; Vereinsmitarbeiter</span></div>
-            <div class="fett"><span class="hak">✓</span><span data-de="Zugriff auf exklusive Vereinskontakte" data-en="Access to exclusive club contacts">Zugriff auf exklusive Vereinskontakte</span></div>
-            <div class="sicher"><span class="hak">✓</span><span data-de="Personengebundener Zugang: max. 2 Geräte gleichzeitig, kein Account-Sharing" data-en="Personal seat: max. 2 devices at once, no account sharing">Personengebundener Zugang: max. 2 Geräte gleichzeitig, kein Account-Sharing</span></div>
+            <div><span class="hak">✓</span><span data-de="Community-Zugang: Scouts, Berater &amp; Vereinsmitarbeiter" data-en="Community access: scouts, agents &amp; club staff">Community-Zugang: Scouts, Berater &amp; Vereinsmitarbeiter</span></div>
+            <div><span class="hak">✓</span><span data-de="Zugriff auf exklusive Vereinskontakte" data-en="Access to exclusive club contacts">Zugriff auf exklusive Vereinskontakte</span></div>
           </div>
         </div>
 
         <!-- ENTERPRISE -->
         <div class="tier en" data-tarif="enterprise">
-          <div class="tname"><span>Enterprise</span> <span class="tbadge tb-en" data-de="Für Teams" data-en="For teams">Für Teams</span></div>
+          <div class="tname"><span>Enterprise</span></div>
           <div class="tsub" data-de="Für Vereine, Agenturen &amp; Scouting-Teams" data-en="For clubs, agencies &amp; scouting teams">Für Vereine, Agenturen &amp; Scouting-Teams</div>
-          <div class="wertbox"><b data-de="✦ Alles aus Premium — fürs Team" data-en="✦ Everything in Premium — for teams">✦ Alles aus Premium — fürs Team</b><span data-de="5 personengebundene Nutzerzugänge inklusive. Jeder weitere Nutzer 49 € pro Monat." data-en="5 personal seats included. Each additional seat 49 € per month.">5 personengebundene Nutzerzugänge inklusive. Jeder weitere Nutzer 49 € pro Monat.</span></div>
-          <div class="abrech" role="group" aria-label="Abrechnung"><button type="button" class="akt" data-ab="monat" onclick="preisAbrech('enterprise','monat')" data-de="Monatlich" data-en="Monthly">Monatlich</button><button type="button" data-ab="jahr" onclick="preisAbrech('enterprise','jahr')" data-de="Jährlich" data-en="Yearly">Jährlich</button></div>
+          <div class="twert"><b data-de="Alles aus Premium — fürs Team" data-en="Everything in Premium — for teams">Alles aus Premium — fürs Team</b><span data-de="5 personengebundene Nutzerzugänge inklusive. Jeder weitere Nutzer 49 € pro Monat." data-en="5 personal seats included. Each additional seat 49 € per month.">5 personengebundene Nutzerzugänge inklusive. Jeder weitere Nutzer 49 € pro Monat.</span></div>
           <div class="tpreis"><span id="p-enterprise-betrag">349 €</span><span class="einheit" id="p-enterprise-einheit">pro Monat · 5 Nutzer</span></div>
-          <div class="talt" id="p-enterprise-alt">oder <b>3.490 €</b> pro Jahr · 2 Monate geschenkt</div>
-          <div class="tk" id="p-enterprise-tk">monatlich kündbar · inkl. MwSt.</div>
-          <div class="nutzer"><span class="nz-l" data-de="Nutzer" data-en="Seats">Nutzer</span><span class="nz-s"><button type="button" id="nz-minus" onclick="nutzerAendern(-1)" aria-label="weniger" disabled>−</button><output id="nz-anzahl">5</output><button type="button" onclick="nutzerAendern(1)" aria-label="mehr">+</button></span></div>
-          <div class="nutzer-h" id="nz-hinweis">5 Nutzer inklusive · jeder weitere +49 €/Monat</div>
+          <div class="tmeta"><span id="p-enterprise-alt">oder <b>3.490 €</b> pro Jahr</span><span class="tsep">·</span><span id="p-enterprise-tk">monatlich kündbar</span></div>
+          <div class="seats"><div class="nutzer"><span class="nz-l" data-de="Nutzer" data-en="Seats">Nutzer</span><span class="nz-s"><button type="button" id="nz-minus" onclick="nutzerAendern(-1)" aria-label="weniger" disabled>−</button><output id="nz-anzahl">5</output><button type="button" onclick="nutzerAendern(1)" aria-label="mehr">+</button></span></div>
+          <div class="nutzer-h" id="nz-hinweis">5 Nutzer inklusive · jeder weitere +49 €/Monat</div></div>
           <button class="tcta tc-en" onclick="enterpriseAnfrage()" data-de="Enterprise anfragen" data-en="Request Enterprise">Enterprise anfragen</button>
-          <div class="schlossbox voll"><div class="sb-k" data-de="🔒 VEREINS-KONTAKTE" data-en="🔒 CLUB CONTACTS">🔒 VEREINS-KONTAKTE</div><div class="sb-s"><span data-de="✓ Voll enthalten" data-en="✓ Fully included">✓ Voll enthalten</span><span class="draht" data-de="DIREKTER DRAHT" data-en="DIRECT LINE">DIREKTER DRAHT</span></div></div>
           <div class="tfeats">
-            <div><span class="hak">✓</span><span data-de="Newsfeed aus 31 Ligen und über 1.200 Quellen" data-en="Newsfeed from 31 leagues and 1,200+ sources">Newsfeed aus 31 Ligen und über 1.200 Quellen</span></div>
-            <div><span class="hak">✓</span><span data-de="„Verein sucht&#8220; &mdash; wer gerade welche Spieler braucht" data-en="&#8222;Club needs&#8220; &mdash; who is looking for which players">„Verein sucht&#8220; &mdash; wer gerade welche Spieler braucht</span></div>
-            <div><span class="hak">✓</span><span data-de="Spieler-Performances &amp; Rankings" data-en="Player performances &amp; rankings">Spieler-Performances &amp; Rankings</span></div>
-            <div><span class="hak">✓</span><span data-de="Spieler-Datenbank mit über 20.000 Spielern" data-en="Player database with 20,000+ players">Spieler-Datenbank mit über 20.000 Spielern</span></div>
-            <div><span class="hak">✓</span><span data-de="Spielerverträge &amp; Vertragssituationen" data-en="Player contracts &amp; contract situations">Spielerverträge &amp; Vertragssituationen</span></div>
-            <div><span class="hak">✓</span><span data-de="Merkliste, E-Mail-Alerts &amp; Morgen-Briefing" data-en="Watchlist, e-mail alerts &amp; morning briefing">Merkliste, E-Mail-Alerts &amp; Morgen-Briefing</span></div>
-            <div><span class="hak">✓</span><span data-de="Scouting-Funktion mit Talent-Rankings" data-en="Scouting with talent rankings">Scouting-Funktion mit Talent-Rankings</span></div>
-            <div><span class="hak">✓</span><span data-de="KI-Assistent „Scout&#8220;" data-en="AI assistant &#8222;Scout&#8220;">KI-Assistent „Scout&#8220;</span></div>
-            <div class="plus-k" data-de="Plus in Enterprise" data-en="Plus in Enterprise">Plus in Enterprise</div>
-            <div class="fett"><span class="hak">✓</span><span data-de="Community-Zugang: Scouts, Berater &amp; Vereinsmitarbeiter" data-en="Community access: scouts, agents &amp; club staff">Community-Zugang: Scouts, Berater &amp; Vereinsmitarbeiter</span></div>
-            <div class="fett"><span class="hak">✓</span><span data-de="Zugriff auf exklusive Vereinskontakte" data-en="Access to exclusive club contacts">Zugriff auf exklusive Vereinskontakte</span></div>
-            <div class="fett"><span class="hak">✓</span><span data-de="5 Nutzer inklusive — beliebig erweiterbar, je 49 €/Monat" data-en="5 seats included — add as many as you need, 49 €/month each">5 Nutzer inklusive — beliebig erweiterbar, je 49 €/Monat</span></div>
-            <div class="fett"><span class="hak">✓</span><span data-de="Eine Rechnung für das ganze Team" data-en="One invoice for the whole team">Eine Rechnung für das ganze Team</span></div>
-            <div class="sicher"><span class="hak">✓</span><span data-de="Jeder Nutzer personengebunden: max. 2 Geräte, kein Account-Sharing" data-en="Every seat is personal: max. 2 devices, no account sharing">Jeder Nutzer personengebunden: max. 2 Geräte, kein Account-Sharing</span></div>
+            <div><span class="hak">✓</span><span data-de="5 personengebundene Nutzerzugänge inklusive" data-en="5 personal seats included">5 personengebundene Nutzerzugänge inklusive</span></div>
+            <div><span class="hak">✓</span><span data-de="Jeder weitere Nutzer 49 € pro Monat" data-en="Each additional seat 49 € per month">Jeder weitere Nutzer 49 € pro Monat</span></div>
           </div>
         </div>
       </div>
@@ -908,6 +878,7 @@
   var NUTZER = 5;
   function eur(n){ var t = String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, LANG === 'de' ? '.' : ','); return t + ' €'; }
   function preisAbrech(t, ab){ ABRECH[t] = ab; preiseRender(); }
+  function preisAbrechAlle(ab){ Object.keys(ABRECH).forEach(function(t){ ABRECH[t] = ab; }); preiseRender(); }
   function nutzerAendern(d){ NUTZER = Math.max(5, Math.min(500, NUTZER + d)); preiseRender(); }
   function preiseRender(){
     var de = LANG === 'de';
@@ -923,11 +894,10 @@
       el('einheit').textContent = einheit;
       el('alt').innerHTML = jahr
         ? (de ? 'oder <b>' + eur(betragM) + '</b> pro Monat' : 'or <b>' + eur(betragM) + '</b> per month')
-        : (de ? 'oder <b>' + eur(betragJ) + '</b> pro Jahr · 2 Monate geschenkt' : 'or <b>' + eur(betragJ) + '</b> per year · 2 months free');
-      el('tk').textContent = jahr ? (de ? 'jährliche Zahlung · inkl. MwSt.' : 'billed yearly · incl. VAT') : (de ? 'monatlich kündbar · inkl. MwSt.' : 'cancel monthly · incl. VAT');
-      var karte = document.querySelector('.tier[data-tarif="' + t + '"]');
-      if (karte) karte.querySelectorAll('.abrech button').forEach(function(b){ b.classList.toggle('akt', b.getAttribute('data-ab') === (jahr ? 'jahr' : 'monat')); });
+        : (de ? 'oder <b>' + eur(betragJ) + '</b> pro Jahr' : 'or <b>' + eur(betragJ) + '</b> per year');
+      el('tk').textContent = jahr ? (de ? 'jährliche Zahlung' : 'billed yearly') : (de ? 'monatlich kündbar' : 'cancel monthly');
     });
+    document.querySelectorAll('.abrech-z button').forEach(function(b){ b.classList.toggle('akt', b.getAttribute('data-ab') === (ABRECH.standard === 'jahr' ? 'jahr' : 'monat')); });
     var nz = document.getElementById('nz-anzahl'); if (nz) nz.textContent = NUTZER;
     var minus = document.getElementById('nz-minus'); if (minus) minus.disabled = NUTZER <= 5;
     var h = document.getElementById('nz-hinweis');
