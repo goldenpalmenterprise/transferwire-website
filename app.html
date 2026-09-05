@@ -574,7 +574,7 @@ const PING_URL = "/api/tw-ping";
 const MARKT_URL = "/api/tw-markt";
 const EXTRA_URL = "/api/tw-extra";
 const CHAT_URL = "/api/tw-chat";
-const LISTEN_URL = "/api/tw-listen";
+const LISTEN_URL = "/api/tw-listen"; const SCOUTSUCHE_URL = "/api/tw-scoutsuche";
 const VEREIN_URL = "/api/tw-verein";
 const RESEND_URL = "/api/tw-resend";
 const LIGEN_ALLE = ["Bundesliga", "2. Bundesliga", "3. Liga", "Premier League", "Championship", "Serie A", "Serie B", "LaLiga", "LaLiga 2", "Ligue 1", "Ligue 2", "Eredivisie", "Jupiler Pro League", "Liga Portugal", "Superligaen", "S\u00fcper Lig", "Bundesliga (\u00d6sterreich)", "Super League (Schweiz)", "MLS", "Chinese Super League"];
@@ -2134,7 +2134,7 @@ function FeedSuche({ q, setQ, club, setClub, alle, watch, geheZu, fs, setFs, inl
       React.createElement("button", { onClick: speichere, style: { marginTop: 6, fontFamily: FONT_BODY, fontSize: 12, fontWeight: 900, color: "#0f1520", background: "#f0f3f8", border: "1px solid " + HAIR, borderRadius: 8, cursor: "pointer", padding: "7px 11px" } }, "+ Aktuellen Filter speichern")));
 }
 function ScoutMenu({ view, setView }) {
-  const aktiv = view === "talente" || view === "listen" || view === "ranking";
+  const aktiv = view === "talente" || view === "listen" || view === "ranking" || view === "suche";
   const [offen, setOffen] = useState(false);
   const [pos, setPos] = useState({ top: 120, left: 12 });
   const schalte = e => {
@@ -2384,10 +2384,60 @@ function VergleichUI({ spieler, entf, leeren, offen, setOffen }) {
           zeilen.map(([lab, fn], ri) => [h("div", { key: "l" + ri, style: { padding: "8px 10px", color: "#8a92a3", fontWeight: 800, fontSize: 11, textTransform: "uppercase", letterSpacing: .6, borderBottom: "1px solid " + HAIR } }, lab), ...spieler.map(x => h("div", { key: lab + x.pid, style: { padding: "8px 10px", fontWeight: 700, color: "#232b38", borderBottom: "1px solid " + HAIR } }, fn(x)))])))));
 }
 
+function SucheVue({ onOpen }) {
+  const h = React.createElement; const en = LANG === "en";
+  const TAGS = [["Abschluss", en ? "Finishing" : "Abschluss"], ["Chancenkreation", en ? "Chance creation" : "Chancenkreation"], ["Passspiel", en ? "Passing" : "Passspiel"], ["Zweikampf", en ? "Duels" : "Zweikampf"], ["Tempo/Dribbling", en ? "Pace & dribbling" : "Tempo/Dribbling"], ["Defensive Stabilit\u00e4t", en ? "Defensive stability" : "Defensive Stabilit\u00e4t"], ["Pressing/Balleroberung", en ? "Pressing & ball winning" : "Pressing/Balleroberung"], ["Paraden/Reflexe", en ? "Saves & reflexes" : "Paraden/Reflexe"], ["Disziplin", en ? "Discipline" : "Disziplin"], ["Effizienz", en ? "Efficiency" : "Effizienz"]];
+  const POS = [["Torwart", en ? "Goalkeeper" : "Torwart"], ["Abwehr", en ? "Defender" : "Abwehr"], ["Mittelfeld", en ? "Midfield" : "Mittelfeld"], ["Sturm", en ? "Attack" : "Sturm"]];
+  const ALTER = [["", en ? "All ages" : "Alle Altersklassen"], ["19", "U19"], ["21", "U21"], ["23", "U23"], ["25", "U25"]];
+  const FUSS = [["", en ? "Any foot" : "Beide F\u00fc\u00dfe"], ["links", en ? "Left foot" : "Linksfu\u00df"], ["rechts", en ? "Right foot" : "Rechtsfu\u00df"]];
+  const [q, setQ] = useState(""); const [pos, setPos] = useState([]); const [tags, setTags] = useState([]); const [ageMax, setAgeMax] = useState(""); const [fuss, setFuss] = useState(""); const [liga, setLiga] = useState(""); const [minScore, setMinScore] = useState("");
+  const [items, setItems] = useState(null); const [busy, setBusy] = useState(false); const [info, setInfo] = useState(null); const [err, setErr] = useState("");
+  const toggle = (arr, set, v) => set(arr.indexOf(v) >= 0 ? arr.filter(x => x !== v) : arr.concat([v]));
+  const suchen = () => {
+    const p = new URLSearchParams();
+    if (q.trim()) p.set("q", q.trim()); if (pos.length) p.set("pos", pos.join(",")); if (tags.length) p.set("tags", tags.join(",")); if (ageMax) p.set("age_max", ageMax); if (fuss) p.set("fuss", fuss); if (liga) p.set("liga", liga); if (minScore) p.set("min_score", minScore);
+    p.set("limit", "50"); p.set("lang", LANG);
+    setBusy(true); setErr("");
+    fetch(SCOUTSUCHE_URL + "?" + p.toString(), { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(raw => { const d = normResp(raw); setBusy(false); if (d && d.ok) { setItems(Array.isArray(d.items) ? d.items : []); setInfo(d); try { sendPing("scoutsuche"); } catch (e) {} } else { setItems([]); setInfo(null); setErr(en ? "Search failed \u2014 please try again." : "Suche fehlgeschlagen \u2014 bitte erneut versuchen."); } }).catch(() => { setBusy(false); setItems([]); setInfo(null); setErr(en ? "No connection." : "Keine Verbindung."); });
+  };
+  const chip = (aktiv, label, onClick, key) => h("button", { key: key, type: "button", onClick: onClick, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, padding: "7px 12px", borderRadius: 999, border: "1px solid " + (aktiv ? "#087F8C" : HAIR), background: aktiv ? "#087F8C" : "#fff", color: aktiv ? "#fff" : "#3a4150" } }, label);
+  const gruppe = (titel, kinder) => h("div", { style: { marginBottom: 12 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: 1, color: "#8a92a3", textTransform: "uppercase", marginBottom: 6 } }, titel), h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6 } }, kinder));
+  const sel = (value, onChange, opts) => h("select", { value: value, onChange: e => onChange(e.target.value), style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 600, padding: "7px 10px", borderRadius: 10, border: "1px solid " + HAIR, background: "#fff", color: "#3a4150" } }, opts.map(([v, l]) => h("option", { key: v, value: v }, l)));
+  const gesetzt = !!(pos.length || tags.length || ageMax || fuss || liga || minScore || q);
+  return h("div", null,
+    h("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 22, color: INK, margin: "0 0 4px", textTransform: "uppercase", letterSpacing: .3 } }, en ? "Skill search" : "F\u00e4higkeiten-Suche"),
+    h("p", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, margin: "0 0 14px", lineHeight: 1.55 } }, en ? "Describe the player you need or set filters \u2014 TransferWire finds matching profiles from 20,000+ players and their match analyses." : "Beschreibe den gesuchten Spieler oder setze Filter \u2014 TransferWire findet passende Profile aus \u00fcber 20.000 Spielern und ihren Spielanalysen."),
+    h("div", { style: { background: "#fff", border: "1px solid " + HAIR, borderRadius: 14, padding: "14px 16px", marginBottom: 14 } },
+      h("div", { style: { display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" } },
+        h("input", { value: q, onChange: e => setQ(e.target.value), onKeyDown: e => { if (e.key === "Enter") suchen(); }, placeholder: en ? "e.g. quick left-footed winger under 21 with a good finish" : "z. B. schneller linksf\u00fc\u00dfiger Au\u00dfenst\u00fcrmer U21 mit gutem Abschluss", style: { flex: "1 1 260px", fontFamily: FONT_BODY, fontSize: 14, padding: "11px 13px", borderRadius: 10, border: "1px solid " + HAIR, outline: "none" } }),
+        h("button", { type: "button", onClick: suchen, disabled: busy, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, padding: "11px 18px", borderRadius: 10, border: "none", background: "#149A59", color: "#fff", opacity: busy ? .7 : 1 } }, busy ? (en ? "Searching\u2026" : "Suche l\u00e4uft\u2026") : (en ? "Search with AI" : "Mit KI suchen"))),
+      gruppe(en ? "Position" : "Position", POS.map(([v, l]) => chip(pos.indexOf(v) >= 0, l, () => toggle(pos, setPos, v), v))),
+      gruppe(en ? "Strengths" : "St\u00e4rken", TAGS.map(([v, l]) => chip(tags.indexOf(v) >= 0, l, () => toggle(tags, setTags, v), v))),
+      h("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" } },
+        sel(ageMax, setAgeMax, ALTER), sel(fuss, setFuss, FUSS),
+        sel(liga, setLiga, [["", en ? "All leagues" : "Alle Ligen"]].concat(LIGEN_ALLE.map(l => [l, l]))),
+        sel(minScore, setMinScore, [["", en ? "Any TW score" : "Jeder TW-Score"], ["60", "TW-Score \u2265 60"], ["70", "TW-Score \u2265 70"], ["80", "TW-Score \u2265 80"]]),
+        h("button", { type: "button", onClick: suchen, disabled: busy, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, padding: "8px 14px", borderRadius: 10, border: "1px solid #087F8C", background: "#fff", color: "#087F8C" } }, en ? "Apply filters" : "Filter anwenden"),
+        gesetzt ? h("button", { type: "button", onClick: () => { setQ(""); setPos([]); setTags([]); setAgeMax(""); setFuss(""); setLiga(""); setMinScore(""); setItems(null); setInfo(null); setErr(""); }, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, padding: "8px 12px", borderRadius: 10, border: "1px solid " + HAIR, background: "#fff", color: "#3a4150" } }, en ? "Reset" : "Zur\u00fccksetzen") : null)),
+    err ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#c22", marginBottom: 10 } }, err) : null,
+    info && info.filter ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, marginBottom: 10 } }, (en ? "Understood as: " : "Verstanden als: ") + ([(info.filter.positions || []).join("/"), (info.filter.tags || []).join(", "), info.filter.age_max ? "U" + info.filter.age_max : "", info.filter.foot ? (en ? "foot " : "Fu\u00df ") + info.filter.foot : "", info.filter.league || ""].filter(Boolean).join(" \u00b7 ") || (en ? "all players" : "alle Spieler")) + (info.filter.text && !info.ki_used ? (en ? " (keyword mode)" : " (Stichwort-Modus)") : "") + " \u00b7 " + (info.count || 0) + (en ? " hits" : " Treffer")) : null,
+    items === null ? null : items.length === 0 ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: MUTED, padding: "18px 0" } }, en ? "No players match \u2014 loosen the filters a little." : "Keine Treffer \u2014 Filter etwas lockern.") :
+    h("div", { style: { display: "flex", flexDirection: "column", gap: 8 } }, items.map(x => h("div", { key: x.pid, onClick: () => onOpen(x.pid, x.name, x.team), style: { cursor: "pointer", background: "#fff", border: "1px solid " + HAIR, borderRadius: 12, padding: "11px 14px", display: "flex", gap: 12, alignItems: "center" } },
+      h("div", { style: { flex: 1, minWidth: 0 } },
+        h("div", { style: { fontFamily: FONT_BODY, fontSize: 14.5, fontWeight: 800, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, x.name),
+        h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, marginTop: 2 } }, [x.team, x.league, x.age ? x.age + (en ? " y" : " J.") : "", x.position, x.foot ? (en ? "foot " : "Fu\u00df ") + x.foot : ""].filter(Boolean).join(" \u00b7 ")),
+        (x.staerken || []).length ? h("div", { style: { display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 } }, (x.staerken || []).slice(0, 5).map(t => h("span", { key: t, style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 700, padding: "3px 8px", borderRadius: 999, background: tags.indexOf(t) >= 0 ? "#DCF5E7" : "#f0f3f8", color: tags.indexOf(t) >= 0 ? "#0F6B3F" : "#3a4150" } }, t))) : null),
+      h("div", { style: { textAlign: "right", flexShrink: 0 } },
+        h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 22, fontWeight: 700, color: x.score >= 70 ? "#149A59" : x.score ? "#0f1520" : "#b0b6c2" } }, x.score != null ? Math.round(Number(x.score)) : "\u2013"),
+        h("div", { style: { fontFamily: FONT_BODY, fontSize: 9.5, fontWeight: 800, letterSpacing: .8, color: "#8a92a3", textTransform: "uppercase" } }, "TW-Score"),
+        x.value ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED, marginTop: 2 } }, x.value) : null))))
+  );
+}
+
 function ScoutSub({ view, setView }) {
   const h = React.createElement;
   return h("div", { style: { display: "flex", gap: 8, marginBottom: 16 } },
-    [["talente", "Talent-Rankings"], ["listen", "Scouting-Listen"]].map(([k, lab]) => {
+    [["talente", LANG === "en" ? "Talent rankings" : "Talent-Rankings"], ["listen", LANG === "en" ? "Scouting lists" : "Scouting-Listen"], ["suche", LANG === "en" ? "Skill search" : "Fähigkeiten-Suche"]].map(([k, lab]) => {
       const a = view === k;
       return h("button", { key: k, onClick: () => setView(k), style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, cursor: "pointer", padding: "9px 16px", borderRadius: 10, border: "1px solid " + (a ? "#087F8C" : HAIR), background: a ? "#087F8C" : "#fff", color: a ? "#fff" : "#3a4150" } }, lab);
     }));
@@ -7801,7 +7851,7 @@ function TransferApp({
   }, t("rank_all_sw")), PERF_TAGS.map(p => /*#__PURE__*/React.createElement("option", {
     key: p,
     value: p
-  }, p)))), /*#__PURE__*/React.createElement(PerfVue, { perf: perf, perfLoading: perfLoading, q: perfQ, lg: perfLg, pos: perfPos, st: perfSt, sw: perfSw, watch: watch.items, onWatchToggle: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); }, onOpen: x => openPlayer(x.pid, x.name, x.team), offen: perfOpen, setOffen: setPerfOpen })), view === "listen" && /*#__PURE__*/React.createElement(ScoutSub, { view: view, setView: setView }), view === "listen" && (!listActive ? /*#__PURE__*/React.createElement("div", null, React.createElement(ListenVue, { presets: LIST_PRESETS, myLists: myLists, setMyLists: setMyLists, onOpen: li => ladeListe(li.name, li.params, li.preset ? "" : li.id), onNew: () => setListFormOpen(true), onDelete: delMyList, stand: dbStats && dbStats.stand }), listFormOpen ? /*#__PURE__*/React.createElement("div", {
+  }, p)))), /*#__PURE__*/React.createElement(PerfVue, { perf: perf, perfLoading: perfLoading, q: perfQ, lg: perfLg, pos: perfPos, st: perfSt, sw: perfSw, watch: watch.items, onWatchToggle: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); }, onOpen: x => openPlayer(x.pid, x.name, x.team), offen: perfOpen, setOffen: setPerfOpen })), view === "suche" && /*#__PURE__*/React.createElement(ScoutSub, { view: view, setView: setView }), view === "suche" && /*#__PURE__*/React.createElement(SucheVue, { onOpen: (pid, name, team) => openPlayer(pid, name, team) }), view === "listen" && /*#__PURE__*/React.createElement(ScoutSub, { view: view, setView: setView }), view === "listen" && (!listActive ? /*#__PURE__*/React.createElement("div", null, React.createElement(ListenVue, { presets: LIST_PRESETS, myLists: myLists, setMyLists: setMyLists, onOpen: li => ladeListe(li.name, li.params, li.preset ? "" : li.id), onNew: () => setListFormOpen(true), onDelete: delMyList, stand: dbStats && dbStats.stand }), listFormOpen ? /*#__PURE__*/React.createElement("div", {
     style: {
       background: "#fff",
       border: `1px solid ${HAIR}`,
@@ -9154,7 +9204,7 @@ function TransferApp({
       flexDirection: "column",
       gap: 7
     }
-  }, (view === "geruechte" ? ["Welche St\u00fcrmer-Ger\u00fcchte gibt es in der S\u00fcper Lig?", "Zeig mir die st\u00e4rksten Ger\u00fcchte der letzten 24 Stunden", "Welche Vereine sind aktuell am aktivsten?"] : view === "gesucht" ? ["Welche Clubs passen zu meinem Spielerprofil?", "Welche Vereine suchen aktuell einen St\u00fcrmer?", "Wo werden Innenverteidiger gesucht?"] : view === "ranking" ? ["Wie wird der TW Performance Score berechnet?", "Wer ist der Spieler des Spieltags und warum?", "Zeig mir die Formkurve der Top-Elf"] : view === "players" ? ["Finde U23-Sechser mit auslaufendem Vertrag", "Welche Spieler haben 2027 Vertragsende?", "Zeig mir die wertvollsten U21-Spieler"] : view === "talente" || view === "listen" ? ["Erstelle eine Liste mit U21-Innenverteidigern", "Welche Talente sind noch unentdeckt?", "Wer sind die Top-Torj\u00e4ger unter 19?"] : view === "chancen" ? ["Welche Spieler sind ab Sommer abl\u00f6sefrei?", "Zeig mir vertragslose St\u00fcrmer", "Wessen Vertrag endet 2026?"] : [t("chat_sug1"), t("chat_sug2"), t("chat_sug3")]).map((s, i) => /*#__PURE__*/React.createElement("button", {
+  }, (view === "geruechte" ? ["Welche St\u00fcrmer-Ger\u00fcchte gibt es in der S\u00fcper Lig?", "Zeig mir die st\u00e4rksten Ger\u00fcchte der letzten 24 Stunden", "Welche Vereine sind aktuell am aktivsten?"] : view === "gesucht" ? ["Welche Clubs passen zu meinem Spielerprofil?", "Welche Vereine suchen aktuell einen St\u00fcrmer?", "Wo werden Innenverteidiger gesucht?"] : view === "ranking" ? ["Wie wird der TW Performance Score berechnet?", "Wer ist der Spieler des Spieltags und warum?", "Zeig mir die Formkurve der Top-Elf"] : view === "players" ? ["Finde U23-Sechser mit auslaufendem Vertrag", "Welche Spieler haben 2027 Vertragsende?", "Zeig mir die wertvollsten U21-Spieler"] : view === "talente" || view === "listen" || view === "suche" ? ["Erstelle eine Liste mit U21-Innenverteidigern", "Welche Talente sind noch unentdeckt?", "Wer sind die Top-Torj\u00e4ger unter 19?"] : view === "chancen" ? ["Welche Spieler sind ab Sommer abl\u00f6sefrei?", "Zeig mir vertragslose St\u00fcrmer", "Wessen Vertrag endet 2026?"] : [t("chat_sug1"), t("chat_sug2"), t("chat_sug3")]).map((s, i) => /*#__PURE__*/React.createElement("button", {
     key: i,
     onClick: () => sendChat(s),
     style: {
