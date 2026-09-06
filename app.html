@@ -732,7 +732,22 @@ const STRIPE_LINK = "https://buy.stripe.com/cNieVd6mObouaUZ9XMgIo03"; // Stripe:
 const STRIPE_LINK_YEAR = ""; // Stripe: TransferWire Jahres-Abo 490/990 EUR/Jahr — Link eintragen, sobald in Stripe angelegt; Buttons erscheinen dann automatisch
 const STRIPE_PORTAL = "https://billing.stripe.com/p/login/cNi14n6mO2RY3sxfi6gIo00"; // Stripe-Kundenportal (Kündigung/Zahlungsmethoden)
 const STRIPE_LINK_STANDARD = "https://buy.stripe.com/cNieVd6mObouaUZ9XMgIo03"; // Stripe: TransferWire Standard 49 EUR/Monat
-const STRIPE_LINK_PREMIUM = "https://buy.stripe.com/dRm7sL6mOgIO6EJgmagIo02"; // Stripe: TransferWire Premium 99 EUR/Monat
+const STRIPE_LINK_PREMIUM = "https://buy.stripe.com/dRm7sL6mOgIO6EJgmagIo02";
+const STRIPE_LINK_STANDARD_YEAR = "https://buy.stripe.com/cNi5kD4eG3W2gfj4DsgIo04"; // 490 EUR/Jahr (verifiziert 06.09.2026)
+const STRIPE_LINK_PREMIUM_YEAR = "https://buy.stripe.com/bJe6oHcLc9gm1kp1rggIo08"; // 990 EUR/Jahr
+const STRIPE_LINK_ENTERPRISE = "https://buy.stripe.com/dRmaEXh1s8ci8MR8TIgIo0a"; // 349 EUR/Monat, 5 Nutzer (Festpreis)
+const STRIPE_LINK_ENTERPRISE_YEAR = "https://buy.stripe.com/7sY7sLdPg8ciaUZb1QgIo09"; // 3490 EUR/Jahr, 5 Nutzer (Festpreis)
+const ENTERPRISE_SEATS_ADJUSTABLE = false; // auf true, sobald die Enterprise-Links ein Staffelmodell mit anpassbarer Menge haben
+function stripeCheckoutUrl(plan, abrech, seats, email) {
+  var jahr = abrech === "jahr";
+  var link = plan === "enterprise" ? (jahr ? STRIPE_LINK_ENTERPRISE_YEAR : STRIPE_LINK_ENTERPRISE)
+           : plan === "premium" ? (jahr ? STRIPE_LINK_PREMIUM_YEAR : STRIPE_LINK_PREMIUM)
+           : (jahr ? STRIPE_LINK_STANDARD_YEAR : STRIPE_LINK_STANDARD);
+  var n = plan === "enterprise" ? (ENTERPRISE_SEATS_ADJUSTABLE ? Math.min(50, Math.max(5, Number(seats) || 5)) : 5) : 1;
+  var ref = (plan === "premium" ? "premium" : plan === "enterprise" ? "enterprise" : "standard") + "-n" + n + "-" + (jahr ? "jahr" : "monat");
+  var q = "client_reference_id=" + ref + (email ? "&prefilled_email=" + encodeURIComponent(email) : "");
+  return link + (link.indexOf("?") >= 0 ? "&" : "?") + q;
+} // Stripe: TransferWire Premium 99 EUR/Monat
 const PRICE_STANDARD = "49";
 const PRICE_PREMIUM = "99";
 const isPremiumPlan = p => p === "premium";
@@ -5089,7 +5104,7 @@ const PRICING_I18N = {
     t_btn: "Jetzt gratis testen",
     s_btn: "Standard w\u00e4hlen",
     p_btn: "Premium w\u00e4hlen",
-    e_name: "Enterprise", e_btn: "Enterprise anfragen", badge_ent: "F\u00dcR TEAMS", f_seats: "5 Nutzer inklusive \u2014 jeder weitere 49 \u20ac/Monat",
+    e_name: "Enterprise", e_btn: "Enterprise w\u00e4hlen", badge_ent: "F\u00dcR TEAMS", f_seats: "5 Nutzer inklusive \u2014 weitere Nutzer auf Anfrage",
     note: "Alle Preise inkl. gesetzlicher Umsatzsteuer. Abos monatlich k\u00fcndbar \u00fcber das Kundenportal. Jeder Zugang ist personengebunden \u2014 max. 2 Ger\u00e4te, kein Account-Sharing."
   },
   en: {
@@ -5120,7 +5135,7 @@ const PRICING_I18N = {
     t_btn: "Start free trial",
     s_btn: "Choose Standard",
     p_btn: "Choose Premium",
-    e_name: "Enterprise", e_btn: "Request Enterprise", badge_ent: "FOR TEAMS", f_seats: "5 seats included \u2014 each additional 49 \u20ac/month",
+    e_name: "Enterprise", e_btn: "Choose Enterprise", badge_ent: "FOR TEAMS", f_seats: "5 seats included \u2014 more seats on request",
     note: "All prices include VAT. Subscriptions can be cancelled monthly via the customer portal. Every seat is personal \u2014 max. 2 devices, no account sharing."
   }
 };
@@ -5129,14 +5144,14 @@ const LP3 = {
     t_box: ["Voller Standard-Umfang \u2014 3 Tage", "Endet automatisch, keine K\u00fcndigung n\u00f6tig", "Keine Zahlungsdaten erforderlich"],
     s_box: ["Alle Kernfunktionen inklusive", "1.231 Quellen \u00b7 31 Ligen \u00b7 st\u00fcndlich frisch", "KI-Scout: 30 Fragen pro Tag"],
     p_box: ["Alles aus Standard \u2014 plus:", "1.100+ Vereins-Kontakte mit Suche", "Sportdirektoren & Gesch\u00e4ftsf\u00fchrer"],
-    e_for: "F\u00fcr Vereine, Agenturen & Scouting-Teams", e_box: ["Alles aus Premium \u2014 f\u00fcrs Team:", "5 personengebundene Nutzerzug\u00e4nge inklusive", "Jeder weitere Nutzer 49 \u20ac pro Monat"],
+    e_for: "F\u00fcr Vereine, Agenturen & Scouting-Teams", e_box: ["Alles aus Premium \u2014 f\u00fcrs Team:", "5 personengebundene Nutzerzug\u00e4nge inklusive", "Weitere Nutzer auf Anfrage"],
     lock_head: "\ud83d\udd12 VEREINS-KONTAKTE", lock_no: "Nicht enthalten", lock_yes: "Voll enthalten", chip_p: "DIREKTER DRAHT",
     per2: "pro Monat", cancel2: "monatlich k\u00fcndbar", free2: "f\u00fcr 3 Tage" },
   en: { t_for: "For a first look at the system", s_for: "For agents & scouts in daily business", p_for: "For dealmakers with a direct line",
     t_box: ["Full Standard scope \u2014 3 days", "Ends automatically, no cancellation needed", "No payment details required"],
     s_box: ["All core features included", "1,231 sources \u00b7 31 leagues \u00b7 hourly updates", "AI scout: 30 questions per day"],
     p_box: ["Everything in Standard \u2014 plus:", "1,100+ club contacts with search", "Sporting directors & CEOs"],
-    e_for: "For clubs, agencies & scouting teams", e_box: ["Everything in Premium \u2014 for teams:", "5 personal seats included", "Each additional seat 49 \u20ac per month"],
+    e_for: "For clubs, agencies & scouting teams", e_box: ["Everything in Premium \u2014 for teams:", "5 personal seats included", "More seats on request"],
     lock_head: "\ud83d\udd12 CLUB CONTACTS", lock_no: "Not included", lock_yes: "Fully included", chip_p: "DIRECT LINE",
     per2: "per month", cancel2: "cancel monthly", free2: "for 3 days" }
 };
@@ -5253,7 +5268,7 @@ function PremiumLock({ small }) {
   }, "\ud83d\udd12 " + L.lock_title.toUpperCase()), React.createElement("div", {
     style: { fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.6, color: "#3a3a38", marginBottom: 12 }
   }, L.lock_body), React.createElement("button", {
-    onClick: () => window.open(STRIPE_LINK_PREMIUM, "_blank"),
+    onClick: () => window.open(stripeCheckoutUrl("premium", "monat", 1, ""), "_blank"),
     style: { cursor: "pointer", background: LGREEN, color: "#fff", border: "none", borderRadius: 9, padding: "11px 18px", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800 }
   }, L.lock_btn), React.createElement("div", {
     style: { fontFamily: FONT_BODY, fontSize: 11, lineHeight: 1.5, color: MUTED, marginTop: 10 }
@@ -5465,7 +5480,7 @@ function LandingPage({
     style: {
       color: LGREEN
     }
-  }, "+++")))))))), /*#__PURE__*/React.createElement("section", { style: { background: DARK, color: "#fff", padding: "18px 20px 56px" } }, /*#__PURE__*/React.createElement("div", { id: "tw-preise", style: { maxWidth: 1100, margin: "0 auto" } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: mono, fontSize: 11.5, letterSpacing: 2.5, color: "rgba(255,255,255,.5)", margin: "20px 0 8px" } }, PRICING_I18N[LANG].kicker), /*#__PURE__*/React.createElement("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: "clamp(24px, 3.6vw, 36px)", margin: "0 0 8px", textTransform: "uppercase", color: "#fff" } }, PRICING_I18N[LANG].h2), /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.6, color: "rgba(255,255,255,.55)", maxWidth: 620, margin: "0 0 26px" } }, PRICING_I18N[LANG].sub), /*#__PURE__*/React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, alignItems: "stretch", marginBottom: 14 } }, /*#__PURE__*/React.createElement(TierCard, { name: PRICING_I18N[LANG].t_name, forWho: LP3[LANG].t_for, price: "0 \u20ac", priceSub: LP3[LANG].free2, priceNote: "", lockOk: false, box: LP3[LANG].t_box, feats: [PRICING_I18N[LANG].f_feed, PRICING_I18N[LANG].f_sucht, PRICING_I18N[LANG].f_db, PRICING_I18N[LANG].f_listen, PRICING_I18N[LANG].f_watch, PRICING_I18N[LANG].f_ki], btn: PRICING_I18N[LANG].t_btn , onClick: onTest, ac: "#e8e8e4", btnBg: "#ffffff", btnColor: "#141414", badge: PRICING_I18N[LANG].badge_test, glow: false }), /*#__PURE__*/React.createElement(TierCard, { name: PRICING_I18N[LANG].s_name, forWho: LP3[LANG].s_for, price: PRICE_STANDARD + " \u20ac", priceSub: LP3[LANG].per2, priceNote: LP3[LANG].cancel2, lockOk: false, box: LP3[LANG].s_box, feats: [PRICING_I18N[LANG].f_feed, PRICING_I18N[LANG].f_sucht, PRICING_I18N[LANG].f_db, PRICING_I18N[LANG].f_listen, PRICING_I18N[LANG].f_watch, PRICING_I18N[LANG].f_ki], btn: PRICING_I18N[LANG].s_btn , onClick: () => { if (STRIPE_LINK_STANDARD && STRIPE_LINK_STANDARD.indexOf("http") === 0) { window.open(STRIPE_LINK_STANDARD, "_blank"); } else { onAbo(); } }, ac: LGREEN, btnBg: LGREEN, btnColor: "#08130d", badge: PRICING_I18N[LANG].badge_std, glow: true }), /*#__PURE__*/React.createElement(TierCard, { name: PRICING_I18N[LANG].p_name, forWho: LP3[LANG].p_for, price: PRICE_PREMIUM + " \u20ac", priceSub: LP3[LANG].per2, priceNote: LP3[LANG].cancel2, lockOk: true, box: LP3[LANG].p_box, feats: [PRICING_I18N[LANG].f_feed, PRICING_I18N[LANG].f_sucht, PRICING_I18N[LANG].f_db, PRICING_I18N[LANG].f_listen, PRICING_I18N[LANG].f_watch, PRICING_I18N[LANG].f_ki], btn: PRICING_I18N[LANG].p_btn , onClick: () => window.open(STRIPE_LINK_PREMIUM, "_blank"), ac: "#e3b34e", btnBg: "linear-gradient(90deg,#efc25e,#d9963a)", btnColor: "#1c1508", badge: PRICING_I18N[LANG].badge_prm, glow: true }), /*#__PURE__*/React.createElement(TierCard, { name: PRICING_I18N[LANG].e_name, forWho: LP3[LANG].e_for, price: "349 \u20ac", priceSub: LP3[LANG].per2, priceNote: LP3[LANG].cancel2, lockOk: true, box: LP3[LANG].e_box, feats: [PRICING_I18N[LANG].f_feed, PRICING_I18N[LANG].f_sucht, PRICING_I18N[LANG].f_db, PRICING_I18N[LANG].f_listen, PRICING_I18N[LANG].f_watch, PRICING_I18N[LANG].f_ki, PRICING_I18N[LANG].f_seats], btn: PRICING_I18N[LANG].e_btn, onClick: () => { window.location.href = "mailto:info@transferwire.de?subject=" + encodeURIComponent(LANG === "en" ? "Enterprise access (5+ seats)" : "Enterprise-Zugang (5+ Nutzer)"); }, ac: "#d8dee4", btnBg: "#ffffff", btnColor: "#141414", badge: PRICING_I18N[LANG].badge_ent, glow: false })), /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "rgba(255,255,255,.4)", margin: 0 } }, PRICING_I18N[LANG].note))), /*#__PURE__*/React.createElement("section", {
+  }, "+++")))))))), /*#__PURE__*/React.createElement("section", { style: { background: DARK, color: "#fff", padding: "18px 20px 56px" } }, /*#__PURE__*/React.createElement("div", { id: "tw-preise", style: { maxWidth: 1100, margin: "0 auto" } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: mono, fontSize: 11.5, letterSpacing: 2.5, color: "rgba(255,255,255,.5)", margin: "20px 0 8px" } }, PRICING_I18N[LANG].kicker), /*#__PURE__*/React.createElement("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: "clamp(24px, 3.6vw, 36px)", margin: "0 0 8px", textTransform: "uppercase", color: "#fff" } }, PRICING_I18N[LANG].h2), /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.6, color: "rgba(255,255,255,.55)", maxWidth: 620, margin: "0 0 26px" } }, PRICING_I18N[LANG].sub), /*#__PURE__*/React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, alignItems: "stretch", marginBottom: 14 } }, /*#__PURE__*/React.createElement(TierCard, { name: PRICING_I18N[LANG].t_name, forWho: LP3[LANG].t_for, price: "0 \u20ac", priceSub: LP3[LANG].free2, priceNote: "", lockOk: false, box: LP3[LANG].t_box, feats: [PRICING_I18N[LANG].f_feed, PRICING_I18N[LANG].f_sucht, PRICING_I18N[LANG].f_db, PRICING_I18N[LANG].f_listen, PRICING_I18N[LANG].f_watch, PRICING_I18N[LANG].f_ki], btn: PRICING_I18N[LANG].t_btn , onClick: onTest, ac: "#e8e8e4", btnBg: "#ffffff", btnColor: "#141414", badge: PRICING_I18N[LANG].badge_test, glow: false }), /*#__PURE__*/React.createElement(TierCard, { name: PRICING_I18N[LANG].s_name, forWho: LP3[LANG].s_for, price: PRICE_STANDARD + " \u20ac", priceSub: LP3[LANG].per2, priceNote: LP3[LANG].cancel2, lockOk: false, box: LP3[LANG].s_box, feats: [PRICING_I18N[LANG].f_feed, PRICING_I18N[LANG].f_sucht, PRICING_I18N[LANG].f_db, PRICING_I18N[LANG].f_listen, PRICING_I18N[LANG].f_watch, PRICING_I18N[LANG].f_ki], btn: PRICING_I18N[LANG].s_btn , onClick: () => window.open(stripeCheckoutUrl("standard", "monat", 1, ""), "_blank"), ac: LGREEN, btnBg: LGREEN, btnColor: "#08130d", badge: PRICING_I18N[LANG].badge_std, glow: true }), /*#__PURE__*/React.createElement(TierCard, { name: PRICING_I18N[LANG].p_name, forWho: LP3[LANG].p_for, price: PRICE_PREMIUM + " \u20ac", priceSub: LP3[LANG].per2, priceNote: LP3[LANG].cancel2, lockOk: true, box: LP3[LANG].p_box, feats: [PRICING_I18N[LANG].f_feed, PRICING_I18N[LANG].f_sucht, PRICING_I18N[LANG].f_db, PRICING_I18N[LANG].f_listen, PRICING_I18N[LANG].f_watch, PRICING_I18N[LANG].f_ki], btn: PRICING_I18N[LANG].p_btn , onClick: () => window.open(stripeCheckoutUrl("premium", "monat", 1, ""), "_blank"), ac: "#e3b34e", btnBg: "linear-gradient(90deg,#efc25e,#d9963a)", btnColor: "#1c1508", badge: PRICING_I18N[LANG].badge_prm, glow: true }), /*#__PURE__*/React.createElement(TierCard, { name: PRICING_I18N[LANG].e_name, forWho: LP3[LANG].e_for, price: "349 \u20ac", priceSub: LP3[LANG].per2, priceNote: LP3[LANG].cancel2, lockOk: true, box: LP3[LANG].e_box, feats: [PRICING_I18N[LANG].f_feed, PRICING_I18N[LANG].f_sucht, PRICING_I18N[LANG].f_db, PRICING_I18N[LANG].f_listen, PRICING_I18N[LANG].f_watch, PRICING_I18N[LANG].f_ki, PRICING_I18N[LANG].f_seats], btn: PRICING_I18N[LANG].e_btn, onClick: () => window.open(stripeCheckoutUrl("enterprise", "monat", 5, ""), "_blank"), ac: "#d8dee4", btnBg: "#ffffff", btnColor: "#141414", badge: PRICING_I18N[LANG].badge_ent, glow: false })), /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "rgba(255,255,255,.4)", margin: 0 } }, PRICING_I18N[LANG].note))), /*#__PURE__*/React.createElement("section", {
     style: {
       background: DARK2,
       color: "#fff",
@@ -5845,7 +5860,7 @@ function LoginPage({
         onDone({
           email: em,
           code: code.trim(),
-          plan: d.plan === "test" ? "test" : d.plan === "premium" ? "premium" : "abo",
+          plan: d.plan === "test" ? "test" : (d.plan === "premium" || d.plan === "enterprise") ? "premium" : "abo",
           start: start,
           gueltig_bis: d.gueltig_bis || "",
           name: d.name || "",
@@ -5937,17 +5952,33 @@ function SubscribePage({
   const [cErr, setCErr] = useState("");
   const [cBusy, setCBusy] = useState(false);
   const [plan, setPlan] = useState(() => { const h = String(location.hash || ""); return /abo-premium/.test(h) ? "premium" : /abo-enterprise/.test(h) ? "enterprise" : "standard"; });
+  const [abrech, setAbrech] = useState(() => /jahr/.test(String(location.hash || "")) ? "jahr" : "monat");
+  const [seats, setSeats] = useState(() => { const m = String(location.hash || "").match(/-n(\d+)/); const n = m ? parseInt(m[1], 10) : 5; return Math.min(50, Math.max(5, n || 5)); });
   const en = LANG === "en";
+  const jahr = abrech === "jahr";
+  const seatsEff = ENTERPRISE_SEATS_ADJUSTABLE ? seats : 5;
+  const preisVon = (p) => p === "enterprise" ? (jahr ? 3490 + (seatsEff - 5) * 490 : 349 + (seatsEff - 5) * 49) : p === "premium" ? (jahr ? 990 : 99) : (jahr ? 490 : 49);
+  const eurFmt = (n) => n.toLocaleString(en ? "en-GB" : "de-DE") + " \u20ac";
+  const intervalTxt = en ? (jahr ? "per year" : "per month") : (jahr ? "pro Jahr" : "pro Monat");
   const PLAENE = [
-    { id: "standard", name: "Standard", preis: "49 \u20ac", sub: en ? "per month" : "pro Monat", hint: en ? "News feed, player database, AI scout" : "Newsfeed, Spieler-Datenbank, KI-Scout" },
-    { id: "premium", name: "Premium", preis: "99 \u20ac", sub: en ? "per month" : "pro Monat", hint: en ? "Everything in Standard + club contacts & community" : "Alles aus Standard + Vereins-Kontakte & Community" },
-    { id: "enterprise", name: "Enterprise", preis: "349 \u20ac", sub: en ? "per month \u00b7 5 seats" : "pro Monat \u00b7 5 Nutzer", hint: en ? "Everything in Premium for the whole team, +49 \u20ac per extra seat" : "Alles aus Premium f\u00fcrs Team, +49 \u20ac je weiterer Nutzer" }
+    { id: "standard", name: "Standard", preis: eurFmt(preisVon("standard")), sub: intervalTxt, hint: en ? "News feed, player database, AI scout" : "Newsfeed, Spieler-Datenbank, KI-Scout" },
+    { id: "premium", name: "Premium", preis: eurFmt(preisVon("premium")), sub: intervalTxt, hint: en ? "Everything in Standard + club contacts & community" : "Alles aus Standard + Vereins-Kontakte & Community" },
+    { id: "enterprise", name: "Enterprise", preis: eurFmt(preisVon("enterprise")), sub: intervalTxt + " \u00b7 " + seatsEff + (en ? " seats" : " Nutzer"), hint: ENTERPRISE_SEATS_ADJUSTABLE ? (en ? "Everything in Premium for the whole team, +49 \u20ac per extra seat" : "Alles aus Premium f\u00fcrs Team, +49 \u20ac je weiterer Nutzer") : (en ? "Everything in Premium for the whole team \u2014 5 seats included, more on request" : "Alles aus Premium f\u00fcrs Team \u2014 5 Nutzer inklusive, weitere auf Anfrage") }
   ];
-  const planWahl = React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8, marginBottom: 16 } }, PLAENE.map(p => React.createElement("button", { key: p.id, type: "button", onClick: () => setPlan(p.id), "aria-pressed": plan === p.id, style: { cursor: "pointer", textAlign: "left", padding: "10px 10px", borderRadius: 0, border: "2px solid " + (plan === p.id ? "#149A59" : HAIR), background: plan === p.id ? "#F0FAF4" : "#fff", fontFamily: FONT_BODY } },
+  const abrechBtn = (a, label) => React.createElement("button", { key: a, type: "button", onClick: () => setAbrech(a), "aria-pressed": abrech === a, style: { cursor: "pointer", padding: "8px 14px", borderRadius: 0, border: "1.5px solid " + (abrech === a ? "#149A59" : HAIR), background: abrech === a ? "#F0FAF4" : "#fff", color: INK, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700 } }, label);
+  const abrechWahl = React.createElement("div", { style: { display: "flex", gap: 6, marginBottom: 10 } }, abrechBtn("monat", en ? "Monthly" : "Monatlich"), abrechBtn("jahr", en ? "Yearly \u00b7 2 months free" : "J\u00e4hrlich \u00b7 2 Monate geschenkt"));
+  const seatBtn = (d, label) => React.createElement("button", { type: "button", onClick: () => setSeats(Math.min(50, Math.max(5, seats + d))), disabled: d < 0 ? seats <= 5 : seats >= 50, style: { width: 30, height: 30, cursor: "pointer", border: "1.5px solid " + HAIR, background: "#fff", color: INK, fontFamily: FONT_BODY, fontSize: 15, fontWeight: 700, borderRadius: 0 } }, label);
+  const seatsRow = plan !== "enterprise" ? null : ENTERPRISE_SEATS_ADJUSTABLE
+    ? React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", border: "1.5px solid " + HAIR, padding: "8px 10px", marginBottom: 14, fontFamily: FONT_BODY } },
+        React.createElement("span", { style: { fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", fontWeight: 800, color: INK } }, en ? "Seats" : "Nutzer"),
+        React.createElement("span", { style: { display: "flex", alignItems: "center", gap: 8 } }, seatBtn(-1, "\u2212"), React.createElement("b", { style: { minWidth: 22, textAlign: "center" } }, seats), seatBtn(1, "+")))
+    : React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, marginBottom: 14 } }, en ? "5 personal seats included \u00b7 more seats on request via info@transferwire.de" : "5 personengebundene Nutzerzug\u00e4nge inklusive \u00b7 weitere Nutzer auf Anfrage \u00fcber info@transferwire.de");
+  const planGrid = React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8, marginBottom: 16 } }, PLAENE.map(p => React.createElement("button", { key: p.id, type: "button", onClick: () => setPlan(p.id), "aria-pressed": plan === p.id, style: { cursor: "pointer", textAlign: "left", padding: "10px 10px", borderRadius: 0, border: "2px solid " + (plan === p.id ? "#149A59" : HAIR), background: plan === p.id ? "#F0FAF4" : "#fff", fontFamily: FONT_BODY } },
     React.createElement("div", { style: { fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", fontWeight: 800, color: INK } }, p.name),
     React.createElement("div", { style: { fontSize: 18, fontWeight: 800, color: INK, marginTop: 4 } }, p.preis, React.createElement("span", { style: { fontSize: 11, fontWeight: 600, color: MUTED, marginLeft: 4 } }, p.sub)),
     React.createElement("div", { style: { fontSize: 11, color: MUTED, marginTop: 4, lineHeight: 1.35 } }, p.hint))));
-  const planLabel = plan === "enterprise" ? (en ? "Request Enterprise \u2014 5 seats, \u20ac349/month" : "Enterprise anfragen \u2014 5 Nutzer, 349 \u20ac/Monat") : (en ? "Subscribe now \u2014 \u20ac" + (plan === "premium" ? 99 : 49) + "/month (obligation to pay)" : "Jetzt zahlungspflichtig abonnieren \u2014 " + (plan === "premium" ? 99 : 49) + " \u20ac/Monat");
+  const planWahl = React.createElement(React.Fragment, null, abrechWahl, planGrid, seatsRow);
+  const planLabel = (en ? "Subscribe now \u2014 " : "Jetzt zahlungspflichtig abonnieren \u2014 ") + eurFmt(preisVon(plan)) + (en ? (jahr ? "/year" : "/month") : (jahr ? "/Jahr" : "/Monat")) + (plan === "enterprise" ? " \u00b7 " + seatsEff + (en ? " seats" : " Nutzer") : "") + (en ? " (obligation to pay)" : "");
   const payStripe = () => {
     setErr("");
     setMsg("");
@@ -5961,17 +5992,10 @@ function SubscribePage({
       name: name.trim(),
       rolle: "",
       consent_marketing: false,
-      plan: plan === "premium" ? "premium_checkout" : plan === "enterprise" ? "enterprise_anfrage" : "abo_checkout",
+      plan: plan === "premium" ? "premium_checkout" : plan === "enterprise" ? "enterprise_checkout" : "abo_checkout",
       status: "checkout_gestartet"
     }).catch(() => {});
-    if (plan === "enterprise") {
-      window.location.href = "mailto:info@transferwire.de?subject=" + encodeURIComponent((en ? "Enterprise access (5+ seats)" : "Enterprise-Zugang (5+ Nutzer)") + " - " + name.trim()) + "&body=" + encodeURIComponent((en ? "Contact: " : "Kontakt: ") + name.trim() + " / " + em);
-      setMsg(en ? "Your e-mail program opens with the request \u2014 we get back to you within one working day." : "Dein E-Mail-Programm \u00f6ffnet sich mit der Anfrage \u2014 wir melden uns innerhalb eines Werktags.");
-      return;
-    }
-    const link = plan === "premium" ? STRIPE_LINK_PREMIUM : STRIPE_LINK_STANDARD;
-    const sep = link.indexOf("?") >= 0 ? "&" : "?";
-    window.open(link + sep + "prefilled_email=" + encodeURIComponent(em), "_blank");
+    window.open(stripeCheckoutUrl(plan, abrech, seatsEff, em), "_blank");
     setMsg(t("s_msg"));
   };
   const checkCode = () => {
@@ -5990,7 +6014,7 @@ function SubscribePage({
         const start = d.test_start ? Date.parse(d.test_start) || Date.now() : Date.now();
         onCodeOk({
           email: em,
-          plan: d.plan === "test" ? "test" : d.plan === "premium" ? "premium" : "abo",
+          plan: d.plan === "test" ? "test" : (d.plan === "premium" || d.plan === "enterprise") ? "premium" : "abo",
           code: code.trim(),
           gueltig_bis: d.gueltig_bis || "",
           start: start,
@@ -8549,7 +8573,7 @@ function TransferApp({
       /*#__PURE__*/React.createElement("div", { style: { width: 52, height: 52, borderRadius: 99, background: "#0f1520", color: "#e3b34e", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 12 } }, "\uD83D\uDD12"),
       /*#__PURE__*/React.createElement("h3", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 19, margin: "0 0 6px", textTransform: "uppercase", color: INK } }, "Nur im Premium-Abo"),
       /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, lineHeight: 1.6, margin: "0 0 16px" } }, "Networking verbindet dich direkt mit Vermittlern, Scouts und Vereinsmitarbeitern \u2014 Fragen und Angebote posten, Kontakte kn\u00fcpfen, Deals anschieben."),
-      /*#__PURE__*/React.createElement("button", { onClick: () => window.open(STRIPE_LINK_PREMIUM, "_blank"), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 900, padding: "12px 22px", borderRadius: 10, border: "none", background: "linear-gradient(90deg,#efc25e,#d9963a)", color: "#1c1508", boxShadow: "0 8px 22px rgba(217,150,58,.35)" } }, "Premium freischalten \u2014 99 \u20ac/Monat"))),
+      /*#__PURE__*/React.createElement("button", { onClick: () => window.open(stripeCheckoutUrl("premium", "monat", 1, ""), "_blank"), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 900, padding: "12px 22px", borderRadius: 10, border: "none", background: "linear-gradient(90deg,#efc25e,#d9963a)", color: "#1c1508", boxShadow: "0 8px 22px rgba(217,150,58,.35)" } }, "Premium freischalten \u2014 99 \u20ac/Monat"))),
   view === "talente" && /*#__PURE__*/React.createElement(ScoutSub, { view: view, setView: setView }), view === "talente" && /*#__PURE__*/React.createElement("div", {
     style: { background: "#e6f6f9", border: "1.5px solid #0e7490", borderRadius: 14, padding: "12px 18px", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 600, color: "#0e7490", gridColumn: "1 / -1" }
   }, "\u24D8  ", t("tal_banner"), " ", React.createElement(ScoreInfo, { kind: "talent", size: 12, label: LANG === "en" ? "View methodology" : "Methodik ansehen" })), view === "talente" && /*#__PURE__*/React.createElement(TalentScouting, { onWatch: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); }, watched: name => (watch.items || []).some(w => w.t === "spieler" && w.w === name), onOpen: openPlayer, onVergleich: p => setPlVergleich(v => v.some(y => y.pid === p.pid) ? v.filter(y => y.pid !== p.pid) : (v.length >= 3 ? v : [...v, p])), vergleich: plVergleich }), view === "feed" && neueZahl > 0 && /*#__PURE__*/React.createElement("button", { onClick: () => { ladeFeed(); window.scrollTo({ top: 0, behavior: "smooth" }); }, style: { display: "block", margin: "0 auto 12px", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 900, cursor: "pointer", padding: "9px 18px", borderRadius: 999, border: "none", background: "#149a59", color: "#fff", boxShadow: "0 8px 20px rgba(20,154,89,.35)" } }, "\u2191 " + neueZahl + " neue " + (neueZahl === 1 ? "Meldung" : "Meldungen")), view === "feed" && /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 10 } }, sportTabs.map(([k, label]) => { const a2 = sport === k; const c2 = k === "alle" ? "#0f1520" : SPORT[k].color; return /*#__PURE__*/React.createElement("button", { key: "sp" + k, onClick: () => { setSport(k); setCountry(""); setLeague(""); setClub(""); setPosFilter(""); }, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 11px", borderRadius: 999, border: "1px solid " + (a2 ? c2 : HAIR), background: a2 ? c2 : "#fff", color: a2 ? "#fff" : "#5b6472" } }, label); }), /*#__PURE__*/React.createElement("span", { style: { width: 1, height: 22, background: HAIR, margin: "0 2px" } }), [["alle", "Alle", news.length], ["fix", TYPE.fix.label, fixCount], ["geruecht", TYPE.geruecht.label, rumorCount]].map(([k, lab, n]) => { const a3 = type === k; return /*#__PURE__*/React.createElement("button", { key: "kpi" + k, onClick: () => setType(k), style: { display: "inline-flex", alignItems: "baseline", gap: 7, cursor: "pointer", padding: "7px 13px", borderRadius: 12, border: "1px solid " + (a3 ? "#0f1520" : HAIR), background: a3 ? "#0f1520" : "#fff", boxShadow: "0 1px 2px rgba(15,21,32,.05)" } }, /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: .8, textTransform: "uppercase", color: a3 ? "rgba(255,255,255,.75)" : "#8a92a3" } }, lab), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 18, fontWeight: 700, color: a3 ? "#fff" : "#0f1520" } }, Number(n).toLocaleString("de-DE"))); })), /*#__PURE__*/React.createElement("div", null, view === "feed" && cascade && /*#__PURE__*/React.createElement("div", {
