@@ -2220,12 +2220,18 @@ function AntwortButton({ onClick, eigener }) {
 const IconShare = ({ size }) => React.createElement("svg", { width: size || 15, height: size || 15, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("circle", { cx: 18, cy: 5, r: 3 }), React.createElement("circle", { cx: 6, cy: 12, r: 3 }), React.createElement("circle", { cx: 18, cy: 19, r: 3 }), React.createElement("line", { x1: 8.59, y1: 13.51, x2: 15.42, y2: 17.49 }), React.createElement("line", { x1: 15.41, y1: 6.51, x2: 8.59, y2: 10.49 }));
 const IconBookmark = ({ size, filled }) => React.createElement("svg", { width: size || 15, height: size || 15, viewBox: "0 0 24 24", fill: filled ? "currentColor" : "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("path", { d: "M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" }));
 let CLUB_LOGOS = {};
-try { fetch("/api/tw-logos", { cache: "force-cache" }).then(r => r.ok ? r.json() : null).then(d => { if (d && typeof d === "object") CLUB_LOGOS = d.logos || d; }).catch(() => {}); } catch (e) {}
+try { fetch("/api/tw-logos", { cache: "force-cache" }).then(r => r.ok ? r.json() : null).then(d => { if (d && typeof d === "object") { CLUB_LOGOS = d.logos || d; CLUB_LOGO_KEYS = {}; for (const n in CLUB_LOGOS) { const k = clubKey(n); if (k && !CLUB_LOGO_KEYS[k]) CLUB_LOGO_KEYS[k] = CLUB_LOGOS[n]; } try { window.dispatchEvent(new Event("tw-logos")); } catch (e) {} } }).catch(() => {}); } catch (e) {}
 const clubMono = n => { const w = String(n || "").replace(/^(FC|SC|SV|SK|TSV|VfB|VfL|AC|AS|US|CD|UD|RC|CF|1\. FC|1\.)\s+/i, "").split(/\s+/).filter(Boolean); return ((w[0] || "?")[0] + (w[1] ? w[1][0] : "")).toUpperCase(); };
 const clubHue = n => { let h = 0; for (const ch of String(n || "")) h = (h * 31 + ch.charCodeAt(0)) % 360; return h; };
+const CLUB_ALIAS = { "florenz": "fiorentina", "mailand": "milan", "neapel": "napoli", "rom": "roma", "genua": "genoa", "turin": "torino", "teneriffa": "tenerife", "bruegge": "brugge", "luettich": "liege", "lissabon": "lisbon", "kopenhagen": "copenhagen", "muenchen": "munich", "koeln": "cologne", "nuernberg": "nurnberg", "athen": "athens", "warschau": "warszawa", "prag": "praha", "belgrad": "beograd", "goeteborg": "goteborg" };
+const clubKey = n => { let k = String(n || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\u00df/g, "ss").replace(/ae/g, "a").replace(/oe/g, "o").replace(/ue/g, "u"); for (const a in CLUB_ALIAS) k = k.replace(a.replace(/ae/g, "a").replace(/oe/g, "o").replace(/ue/g, "u"), CLUB_ALIAS[a]); k = k.replace(/\b(1\.|fc|sc|ac|cf|sv|vfb|vfl|tsg|bsc|sk|if|ff|bk|fk|nk|hnk|gnk|rcd|ud|cd|as|ss|us|ssc|ogc|rc|afc|club|athletic|athletik|sporting|calcio|football)\b/g, " ").replace(/[^a-z0-9]+/g, ""); return k; };
+let CLUB_LOGO_KEYS = {};
+const clubLogoUrl = name => { if (!name) return null; if (CLUB_LOGOS[name]) return CLUB_LOGOS[name]; const k = clubKey(name); if (!k) return null; if (CLUB_LOGO_KEYS[k]) return CLUB_LOGO_KEYS[k]; if (k.length >= 5) { for (const kk in CLUB_LOGO_KEYS) { if (kk.length >= 5 && (kk.indexOf(k) >= 0 || k.indexOf(kk) >= 0)) return CLUB_LOGO_KEYS[kk]; } } return null; };
 function ClubLogo({ name, size }) {
   const sz = size || 20;
-  const url = name && CLUB_LOGOS[name];
+  const [, tick] = React.useState(0);
+  React.useEffect(() => { const f = () => tick(t => t + 1); window.addEventListener("tw-logos", f); return () => window.removeEventListener("tw-logos", f); }, []);
+  const url = clubLogoUrl(name);
   if (url) return React.createElement("img", { src: url, alt: "", width: sz, height: sz, loading: "lazy", style: { width: sz, height: sz, objectFit: "contain", borderRadius: 4, flexShrink: 0 } });
   return React.createElement("span", { "aria-hidden": true, style: { width: sz, height: sz, borderRadius: "50%", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_BODY, fontSize: Math.max(8, Math.round(sz * 0.42)), fontWeight: 900, color: "#fff", background: "hsl(" + clubHue(name) + " 38% 46%)", letterSpacing: .3 } }, clubMono(name));
 }
@@ -3409,11 +3415,7 @@ function NewsCard({
       gap: 8,
       minWidth: 150
     }
-  }, /*#__PURE__*/React.createElement(Target, {
-    size: 16,
-    strokeWidth: 2.2,
-    color: type.color
-  }), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(ClubLogo, { name: seekingClub(item), size: 28 }), /*#__PURE__*/React.createElement("div", {
     style: {
       minWidth: 0
     }
@@ -4488,7 +4490,7 @@ function NeedCard({
       letterSpacing: .3,
       textTransform: "uppercase"
     }
-  }, LANG === "en" ? "seeks" : "sucht"), /*#__PURE__*/React.createElement("span", {
+  }, LANG === "en" ? "seeks" : "sucht"), /*#__PURE__*/React.createElement(ClubLogo, { name: club, size: 26 }), React.createElement("span", {
     style: {
       fontFamily: FONT_DISPLAY,
       fontWeight: 600,
@@ -6803,6 +6805,7 @@ function TransferApp({
   const [plLeagues, setPlLeagues] = useState([]);
   const [plLoading, setPlLoading] = useState(false);
   const [plDetail, setPlDetail] = useState(null);
+  React.useEffect(() => { if (!plDetail) return; const prev = document.body.style.overflow; const prevH = document.documentElement.style.overflow; document.body.style.overflow = "hidden"; document.documentElement.style.overflow = "hidden"; return () => { document.body.style.overflow = prev; document.documentElement.style.overflow = prevH; }; }, [plDetail]);
   const [plDetailLoading, setPlDetailLoading] = useState(false);
   useEffect(() => {
     if (view !== "players") return;
@@ -9512,19 +9515,14 @@ function TransferApp({
       zIndex: 1300,
       background: "rgba(15,15,17,.55)",
       display: "flex",
-      alignItems: "flex-end",
+      alignItems: "center", padding: 16, overscrollBehavior: "contain",
       justifyContent: "center"
     }
   }, /*#__PURE__*/React.createElement("div", {
     onClick: e => e.stopPropagation(),
     style: {
       width: "100%",
-      maxWidth: 560,
-      maxHeight: "88vh",
-      overflowY: "auto",
-      background: "#fff",
-      borderRadius: "16px 16px 0 0",
-      padding: "18px 18px 28px"
+      maxWidth: 640, maxHeight: "88vh", overflowY: "auto", overscrollBehavior: "contain", background: "#fff", borderRadius: 18, padding: "22px 24px 26px", boxShadow: "0 24px 80px rgba(0,0,0,.35)"
     }
   }, plDetailLoading || plDetail.lade ? /*#__PURE__*/React.createElement("div", {
     style: {
