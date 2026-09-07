@@ -545,67 +545,7 @@ const CANCEL_URL = "/api/tw-cancel";
 const WATCH_URL = "/api/tw-watch";
 const PERF_URL = "/api/tw-performance";
 const SPIELER_URL = "/api/tw-spieler";
-const LAND_LIGEN = [{
-  de: "Deutschland",
-  en: "Germany",
-  ligen: ["Bundesliga", "2. Bundesliga"]
-}, {
-  de: "England",
-  en: "England",
-  ligen: ["Premier League", "Championship"]
-}, {
-  de: "Spanien",
-  en: "Spain",
-  ligen: ["La Liga", "La Liga 2"]
-}, {
-  de: "Italien",
-  en: "Italy",
-  ligen: ["Serie A", "Serie B"]
-}, {
-  de: "Frankreich",
-  en: "France",
-  ligen: ["Ligue 1", "Ligue 2"]
-}, {
-  de: "Niederlande",
-  en: "Netherlands",
-  ligen: ["Eredivisie"]
-}, {
-  de: "Portugal",
-  en: "Portugal",
-  ligen: ["Primeira Liga"]
-}, {
-  de: "Belgien",
-  en: "Belgium",
-  ligen: ["Pro League", "Jupiler Pro League"]
-}, {
-  de: "\u00d6sterreich",
-  en: "Austria",
-  ligen: ["Bundesliga (\u00d6sterreich)"]
-}, {
-  de: "Schweiz",
-  en: "Switzerland",
-  ligen: ["Super League (Schweiz)"]
-}, {
-  de: "T\u00fcrkei",
-  en: "T\u00fcrkiye",
-  ligen: ["S\u00fcper Lig"]
-}, {
-  de: "Schottland",
-  en: "Scotland",
-  ligen: ["Scottish Premiership", "Premiership"]
-}, {
-  de: "D\u00e4nemark",
-  en: "Denmark",
-  ligen: ["Superliga", "Superligaen"]
-}, {
-  de: "USA",
-  en: "USA",
-  ligen: ["MLS"]
-}, {
-  de: "China",
-  en: "China",
-  ligen: ["Chinese Super League"]
-}];
+const LAND_LIGEN = [{ de: "Deutschland", en: "Germany", ligen: ["Bundesliga", "2. Bundesliga", "3. Liga", "Regionalliga Nord", "Regionalliga Bayern", "Regionalliga Nordost", "Regionalliga S\u00fcdwest", "Regionalliga West"] }, { de: "England", en: "England", ligen: ["Premier League", "Championship"] }, { de: "Spanien", en: "Spain", ligen: ["LaLiga", "LaLiga 2", "La Liga", "La Liga 2"] }, { de: "Italien", en: "Italy", ligen: ["Serie A", "Serie B"] }, { de: "Frankreich", en: "France", ligen: ["Ligue 1", "Ligue 2"] }, { de: "Niederlande", en: "Netherlands", ligen: ["Eredivisie", "Eerste Divisie"] }, { de: "Portugal", en: "Portugal", ligen: ["Liga Portugal", "Liga Portugal 2", "Primeira Liga"] }, { de: "Belgien", en: "Belgium", ligen: ["Jupiler Pro League", "Challenger Pro League", "Pro League"] }, { de: "\u00d6sterreich", en: "Austria", ligen: ["Bundesliga (\u00d6sterreich)", "2. Liga (\u00d6sterreich)"] }, { de: "Schweiz", en: "Switzerland", ligen: ["Super League (Schweiz)"] }, { de: "T\u00fcrkei", en: "T\u00fcrkiye", ligen: ["S\u00fcper Lig", "1. Lig (T\u00fcrkei)"] }, { de: "Schottland", en: "Scotland", ligen: ["Scottish Premiership", "Premiership"] }, { de: "D\u00e4nemark", en: "Denmark", ligen: ["Superligaen", "1. Division (D\u00e4nemark)", "Superliga"] }, { de: "Norwegen", en: "Norway", ligen: ["Eliteserien"] }, { de: "Schweden", en: "Sweden", ligen: ["Allsvenskan"] }, { de: "Polen", en: "Poland", ligen: ["Ekstraklasa"] }, { de: "Serbien", en: "Serbia", ligen: ["Super Liga (Serbien)"] }, { de: "Kroatien", en: "Croatia", ligen: ["HNL (Kroatien)"] }, { de: "USA", en: "USA", ligen: ["MLS"] }, { de: "China", en: "China", ligen: ["Chinese Super League"] }];
 const PING_URL = "/api/tw-ping";
 const MARKT_URL = "/api/tw-markt";
 const EXTRA_URL = "/api/tw-extra";
@@ -613,7 +553,7 @@ const CHAT_URL = "/api/tw-chat";
 const LISTEN_URL = "/api/tw-listen"; const SCOUTSUCHE_URL = "/api/tw-scoutsuche";
 const VEREIN_URL = "/api/tw-verein";
 const RESEND_URL = "/api/tw-resend";
-const LIGEN_ALLE = ["Bundesliga", "2. Bundesliga", "3. Liga", "Premier League", "Championship", "Serie A", "Serie B", "LaLiga", "LaLiga 2", "Ligue 1", "Ligue 2", "Eredivisie", "Jupiler Pro League", "Liga Portugal", "Superligaen", "S\u00fcper Lig", "Bundesliga (\u00d6sterreich)", "Super League (Schweiz)", "MLS", "Chinese Super League"];
+const LIGEN_ALLE = ["Bundesliga", "2. Bundesliga", "3. Liga", "Regionalliga Nord", "Regionalliga Bayern", "Regionalliga Nordost", "Regionalliga S\u00fcdwest", "Regionalliga West", "Premier League", "Championship", "LaLiga", "LaLiga 2", "Serie A", "Serie B", "Ligue 1", "Ligue 2", "Eredivisie", "Eerste Divisie", "Liga Portugal", "Liga Portugal 2", "Jupiler Pro League", "Challenger Pro League", "Bundesliga (\u00d6sterreich)", "2. Liga (\u00d6sterreich)", "Super League (Schweiz)", "S\u00fcper Lig", "1. Lig (T\u00fcrkei)", "Scottish Premiership", "Superligaen", "1. Division (D\u00e4nemark)", "Eliteserien", "Allsvenskan", "Ekstraklasa", "Super Liga (Serbien)", "HNL (Kroatien)", "MLS", "Chinese Super League"];
 const LIST_PRESETS = [{
   id: "u21eu",
   de: "Top 50 U21-Talente Europa",
@@ -3850,7 +3790,7 @@ function PerfVue({ perf, perfLoading, q, lg, pos, st, sw, watch, onWatchToggle, 
       : gefiltert.length === 0 ? h("div", { style: { background: "#fff", border: "1px dashed " + HAIR, borderRadius: 14, padding: "40px 20px", textAlign: "center", color: MUTED, fontFamily: FONT_BODY, fontSize: 14 } }, t("rank_nores"))
       : h(PerfTabelle, { rows: gefiltert, portrait: portrait, watch: watch, onWatchToggle: onWatchToggle, onOpen: onOpen, offen: offen, setOffen: setOffen }));
 }
-const DB_LIGA_ALIAS = { "Jupiler Pro League": 1, "Premiership": 1, "Superligaen": 1 };
+const DB_LIGA_ALIAS = { "La Liga": 1, "La Liga 2": 1, "Primeira Liga": 1, "Pro League": 1, "Premiership": 1, "Superliga": 1 };
 const dbLigenZahl = () => LAND_LIGEN.reduce((a, l) => a + (l.ligen || []).filter(x => !DB_LIGA_ALIAS[x]).length, 0);
 const DB_COLS = [["age", "Alter", "Age"], ["pos", "Position", "Position"], ["team", "Verein/Liga", "Club/League"], ["vertrag", "Vertrag", "Contract"], ["mw", "Marktwert", "Market value"], ["min", "Minuten", "Minutes"], ["score", "TW Performance Score", "TW Performance Score"], ["form", "Form", "Form"]];
 const dbFmtZahl = n => Number(n || 0).toLocaleString("de-DE");
