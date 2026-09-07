@@ -3688,8 +3688,7 @@ function PerfPitch({ elf, portrait, onOpen }) {
     h("div", { style: { display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 10 } },
       h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, textTransform: "uppercase", color: "rgba(255,255,255,.85)" } }, t("totw_title")),
       h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "rgba(255,255,255,.6)" } }, t("totw_sub"))),
-    h("div", { className: "tw-pitch" + (portrait ? " portrait" : ""), style: { position: "relative", borderRadius: 12, overflow: "visible", aspectRatio: portrait ? "2 / 3" : "3 / 2", background: portrait ? "repeating-linear-gradient(0deg, #1f7a45 0 12.5%, #23834b 12.5% 25%)" : "repeating-linear-gradient(90deg, #1f7a45 0 12.5%, #23834b 12.5% 25%)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,.08)" } },
-      h(PitchLines, { portrait: portrait }),
+    h("div", { className: "tw-pitch" + (portrait ? " portrait" : ""), style: { position: "relative", borderRadius: 12, overflow: "visible", aspectRatio: portrait ? "2 / 3" : "3 / 2", background: portrait ? "url(/assets/pitch_p.webp) center / cover no-repeat, #1f7a45" : "url(/assets/pitch.webp) center / cover no-repeat, #1f7a45", boxShadow: "inset 0 0 0 1px rgba(255,255,255,.12)" } }, null,
       elf ? marker : h("div", { style: { position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_BODY, fontSize: 13, color: "rgba(255,255,255,.8)", textAlign: "center", padding: 20 } }, en ? "Team of the matchday appears once eleven rated players are available." : "Die Elf des Spieltags erscheint, sobald elf bewertete Spieler vorliegen.")),
     elf && elf.joker ? h("div", { style: { marginTop: 10, display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 12, color: "rgba(255,255,255,.8)", flexWrap: "wrap" } },
       h("span", { style: { fontSize: 10, fontWeight: 900, letterSpacing: 1.4, textTransform: "uppercase", color: "rgba(255,255,255,.6)" } }, t("totw_sub12")),
@@ -3775,12 +3774,13 @@ function PerfVue({ perf, perfLoading, q, lg, pos, st, sw, watch, onWatchToggle, 
   const q2 = String(q || "").toLowerCase().trim();
   const basis = (perf || []).filter(x => q2 ? true : (Number(x.min) || 0) >= 30);
   const gefiltert = basis.filter(x => (!q2 || (x.name + " " + x.team).toLowerCase().indexOf(q2) >= 0) && (!lg || x.league === lg) && (!pos || x.pos === pos) && (!st || (x.stt || "").indexOf(st) >= 0) && (!sw || (x.swt || "").indexOf(sw) >= 0));
+  const filterAktiv = !!(q2 || lg || pos || st || sw);
   const elf = useMemo(() => perfElf(basis), [perf]);
   const topP = basis.slice().sort((a, b) => (b.score || 0) - (a.score || 0))[0] || null;
   const istWatched = name => (watch || []).some(w => w.t === "spieler" && w.w === name);
   const erkl = h("span", { style: { display: "inline-flex", alignItems: "center", color: INK } }, h(ScoreInfo, { kind: "performance", size: 15, label: en ? "How is the score calculated?" : "Wie wird der Score berechnet?" }));
   return h("div", null,
-    perf && perf.length ? h("div", { className: "tw-perf-main" }, h(PerfPitch, { elf: elf, portrait: portrait, onOpen: onOpen }), topP ? h(SpieltagKarte, { x: topP, onOpen: onOpen, watched: istWatched(topP.name), onWatchToggle: onWatchToggle }) : null) : null,
+    perf && perf.length && !filterAktiv ? h("div", { className: "tw-perf-main" }, h(PerfPitch, { elf: elf, portrait: portrait, onOpen: onOpen }), topP ? h(SpieltagKarte, { x: topP, onOpen: onOpen, watched: istWatched(topP.name), onWatchToggle: onWatchToggle }) : null) : null,
     h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", margin: "16px 0 10px" } }, erkl,
       perf && perf.length ? h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED } }, gefiltert.length + " " + (en ? "appearances" : "Eins\u00e4tze") + (q2 ? "" : " \u00b7 " + (en ? "at least 30 minutes" : "ab 30 Minuten"))) : null),
     perfLoading || perf === null ? h("div", { style: { padding: "34px 20px", textAlign: "center", fontFamily: FONT_BODY, color: MUTED } }, t("rank_loading"))
