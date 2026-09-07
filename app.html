@@ -57,18 +57,19 @@
 @media (min-width: 1024px) {
   .tw-tabbar { position: fixed !important; left: 0 !important; top: 60px !important; bottom: 0; width: 240px; border-right: 1px solid #E1E5E2; border-bottom: none !important; overflow-y: auto; background: #fff; z-index: 5; }
   .tw-tabwrap { max-width: none !important; margin: 0 !important; padding: 12px 12px 16px !important; flex-direction: column; flex-wrap: nowrap !important; gap: 8px !important; min-height: 100%; box-sizing: border-box; }
-  .tw-tabs { flex-direction: column; align-items: stretch !important; gap: 2px !important; overflow: visible !important; flex-wrap: nowrap !important; }
-  .tw-tabs > .tw-tab { width: 100%; justify-content: flex-start !important; border-radius: 12px !important; padding: 9px 10px !important; font-size: 13.5px !important; border-color: transparent !important; box-shadow: none !important; background: transparent !important; color: #3a4150 !important; gap: 10px !important; }
+  .tw-tabs { flex-direction: column; align-items: stretch !important; gap: 6px !important; overflow: visible !important; flex-wrap: nowrap !important; }
+  .tw-tabs > .tw-tab { width: 100%; justify-content: flex-start !important; border-radius: 14px !important; padding: 8px 10px !important; font-size: 15px !important; font-weight: 600 !important; border-color: transparent !important; box-shadow: none !important; background: transparent !important; color: #14181D !important; gap: 12px !important; }
+  .tw-livetime { margin-left: auto !important; }
   .tw-tabs > .tw-tab:hover { background: #f3f5f2 !important; }
   .tw-tabs > .tw-tab.aktiv { background: #0f1520 !important; color: #fff !important; }
   .tw-navdot { display: none !important; }
-  .tw-navicon { display: inline-flex; width: 30px; height: 30px; align-items: center; justify-content: center; border-radius: 9px; background: #f3f5f2; color: #3a4150; flex-shrink: 0; }
+  .tw-navicon { display: inline-flex; width: 34px; height: 34px; align-items: center; justify-content: center; border-radius: 10px; background: #F3F5F2; border: 1px solid #E6E9E6; color: #14181D; flex-shrink: 0; }
   .tw-tab.aktiv .tw-navicon { background: rgba(255,255,255,.12); color: #fff; }
-  .tw-navicon svg { width: 16px; height: 16px; }
+  .tw-navicon svg { width: 17px; height: 17px; stroke-width: 1.8; }
   .tw-navlabel { flex: 1; text-align: left; }
-  .tw-navbadge { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #E8F7EE; color: #0F6B3F; }
+  .tw-navbadge { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: #E8F7EE; color: #0F6B3F; }
   .tw-tab.aktiv .tw-navbadge { background: #149A59; color: #fff; }
-  .tw-navhead { font-family: Inter, system-ui, sans-serif; font-size: 10.5px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #8a92a3; padding: 14px 10px 6px; }
+  .tw-navhead { font-family: Inter, system-ui, sans-serif; font-size: 12px; font-weight: 600; letter-spacing: .2px; color: #8a92a3; padding: 14px 10px 6px; }
   .tw-side-extra { margin-top: auto; display: flex; flex-direction: column; gap: 8px; padding-top: 16px; }
   .tw-side-community { background: #E8F7EE; border: 1px solid #BFE8CF; border-radius: 14px; padding: 12px; }
   .tw-sc-head { display: flex; align-items: center; justify-content: space-between; font-family: Inter, system-ui, sans-serif; font-size: 13.5px; font-weight: 800; color: #14181D; }
@@ -1005,7 +1006,7 @@ const EN_MARK = /[\u00e4\u00f6\u00fc\u00df\u00c4\u00d6\u00dc]|(?<![A-Za-z])(bis|
 const EN_RULES = [
   [/^vor (\d+) Min$/, (m) => m[1] + " min ago"], [/^vor (\d+) Std$/, (m) => m[1] + " h ago"], [/^vor (\d+) Tg$/, (m) => m[1] + " d ago"], [/^vor (\d+) Tagen?$/, (m) => m[1] + " d ago"],
   [/^Live \u00b7 vor (\d+) Min$/, (m) => "Live \u00b7 " + m[1] + " min ago"], [/^Live \u00b7 vor (\d+) Std$/, (m) => "Live \u00b7 " + m[1] + " h ago"], [/^Live \u00b7 gerade eben$/, () => "Live \u00b7 just now"],
-  [/^(\d+) Updates$/, (m) => m[1] + " updates"], [/^\u25CF LIVE \u00b7 aktualisiert vor (\d+) Min$/, (m) => "\u25CF LIVE \u00b7 updated " + m[1] + " min ago"], [/^\u25CF LIVE \u00b7 aktualisiert vor (\d+) Std$/, (m) => "\u25CF LIVE \u00b7 updated " + m[1] + " h ago"], [/^\u25CF LIVE \u00b7 aktualisiert vor (\d+) Tg$/, (m) => "\u25CF LIVE \u00b7 updated " + m[1] + " d ago"], [/^\u25CF LIVE \u00b7 aktualisiert gerade eben$/, () => "\u25CF LIVE \u00b7 updated just now"], [/^\u25CF LIVE \u00b7 aktuell$/, () => "\u25CF LIVE"], [/^Mehr laden \((\d+) von (\d+)\)$/, (m) => "Load more (" + m[1] + " of " + m[2] + ")"], [/^(\d+) Meldungen$/, (m) => m[1] + " reports"], [/^(\d+) Meldung$/, (m) => m[1] + " report"],
+  [/^(\d+) Updates$/, (m) => m[1] + " updates"], [/^LIVE \u00b7 aktualisiert vor (\d+) Min$/, (m) => "LIVE \u00b7 updated " + m[1] + " min ago"], [/^LIVE \u00b7 aktualisiert vor (\d+) Std$/, (m) => "LIVE \u00b7 updated " + m[1] + " h ago"], [/^LIVE \u00b7 aktualisiert vor (\d+) Tg$/, (m) => "LIVE \u00b7 updated " + m[1] + " d ago"], [/^LIVE \u00b7 aktualisiert gerade eben$/, () => "LIVE \u00b7 updated just now"], [/^LIVE \u00b7 aktuell$/, () => "LIVE"], [/^Mehr laden \((\d+) von (\d+)\)$/, (m) => "Load more (" + m[1] + " of " + m[2] + ")"], [/^(\d+) Meldungen$/, (m) => m[1] + " reports"], [/^(\d+) Meldung$/, (m) => m[1] + " report"],
   [/^(\d+) Eintr\u00e4ge$/, (m) => m[1] + " entries"], [/^(\d+) Eintrag$/, (m) => m[1] + " entry"], [/^(\d+) Treffer$/, (m) => m[1] + " results"], [/^(\d+) von (\d+) Treffern?$/, (m) => m[1] + " of " + m[2] + " results"],
   [/^(\d+) Vereine?$/, (m) => m[1] + (m[1] === "1" ? " club" : " clubs")], [/^(\d+) Spieler$/, (m) => m[1] + " players"], [/^(\d+) Anfragen?$/, (m) => m[1] + (m[1] === "1" ? " request" : " requests")], [/^(\d+) Hinweise?$/, (m) => m[1] + (m[1] === "1" ? " tip" : " tips")],
   [/^(.*)\u00b7 (\d+) J\. \u00b7(.*)$/, (m) => twEnShort(m[1]) + "\u00b7 " + m[2] + " y/o \u00b7" + twEnShort(m[3])], [/^(\d+) J\.$/, (m) => m[1] + " y/o"], [/^Talente \(Jahrgang (\d+)/, (m) => "Talents (born " + m[1]],
@@ -7527,7 +7528,7 @@ function TransferApp({
       background: dataState === "live" ? "#34d27b" : "#e0a63b",
       boxShadow: `0 0 0 3px ${dataState === "live" ? "rgba(52,210,123,.2)" : "rgba(224,166,59,.2)"}`
     }
-  }), dataState === "loading" ? t("connecting") : dataState === "live" ? `\u25CF LIVE \u00b7 ${updatedAt ? "aktualisiert " + relTime(updatedAt) : "aktuell"}` : t("demo")), /*#__PURE__*/React.createElement(LangSwitch, { dark: true }), /*#__PURE__*/React.createElement("div", {
+  }), dataState === "loading" ? t("connecting") : dataState === "live" ? `LIVE \u00b7 ${updatedAt ? "aktualisiert " + relTime(updatedAt) : "aktuell"}` : t("demo")), /*#__PURE__*/React.createElement(LangSwitch, { dark: true }), /*#__PURE__*/React.createElement("div", {
     style: {
       position: "relative"
     }
