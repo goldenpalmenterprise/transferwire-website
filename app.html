@@ -6673,6 +6673,7 @@ function TrialBanner({
   }, t("trial_cta")));
 }
 const SIDE_ICONS = {
+  kontakte: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.6-1.6 1.7-2.4 3-2.4s2.4.8 3 2.4M14 9h4M14 13h4"/></svg>',
   feed: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
   geruechte: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h13M14 4l3 3-3 3M20 17H7M10 14l-3 3 3 3"/></svg>',
   gesucht: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 21s-7-5.4-7-11a7 7 0 0 1 14 0c0 5.6-7 11-7 11z"/></svg>',
@@ -6683,6 +6684,38 @@ const SIDE_ICONS = {
   talente: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>',
   community: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>'
 };
+function KontakteVue({ isPrem, authQ, openVerein }) {
+  const h = React.createElement; const en = LANG === "en";
+  const [q, setQ] = useState(""); const [lade, setLade] = useState(false); const [erg, setErg] = useState(null); const [fehler, setFehler] = useState(false);
+  const timer = React.useRef(null);
+  React.useEffect(() => {
+    if (!isPrem) return; const qq = q.trim(); if (qq.length < 2) { setErg(null); return; }
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      setLade(true); setFehler(false);
+      fetch(MARKT_URL + "?bereich=kontakte&q=" + encodeURIComponent(qq) + (authQ || ""), { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(raw => { const d = (typeof normResp === "function") ? normResp(raw) : raw; const liste = d && Array.isArray(d.items) ? d.items : []; setErg(liste); setLade(false); }).catch(() => { setFehler(true); setLade(false); });
+    }, 350);
+    return () => clearTimeout(timer.current);
+  }, [q, isPrem]);
+  const gruppen = []; if (Array.isArray(erg)) { const map = {}; for (const c of erg) { const v = c.verein || "\u2013"; (map[v] = map[v] || { verein: v, league: c.league || c.liga || "", kontakte: [] }).kontakte.push(c); } for (const k in map) gruppen.push(map[k]); }
+  const feld = { fontFamily: FONT_BODY, fontSize: 12.5, color: "#4a4a48" };
+  return h("div", { style: { maxWidth: 980 } },
+    h("h1", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 26, margin: "0 0 4px", color: INK } }, en ? "Club contacts" : "Vereinskontakte"),
+    h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: MUTED, marginBottom: 16, lineHeight: 1.5 } }, en ? "Type a club name and get the decision-makers with e-mail and phone: sporting directors, managing directors, heads of scouting." : "Verein eingeben und die Entscheider mit E-Mail und Telefon erhalten: Sportdirektoren, Gesch\u00e4ftsf\u00fchrer, Scouting-Leiter."),
+    h("input", { value: q, onChange: e => setQ(e.target.value), autoFocus: true, placeholder: en ? "Club name (at least 2 characters) \u2026" : "Vereinsname (mind. 2 Zeichen) \u2026", style: { width: "100%", boxSizing: "border-box", fontFamily: FONT_BODY, fontSize: 16, padding: "14px 16px", borderRadius: 12, border: "1px solid " + HAIR, background: CARD, color: INK, outline: "none", marginBottom: 16 } }),
+    !isPrem ? h(PremiumLock, null) :
+    q.trim().length < 2 ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED } }, en ? "Start typing, e.g. \u201eBayern\u201c or \u201eEintracht\u201c." : "Einfach lostippen, z. B. \u201eBayern\u201c oder \u201eEintracht\u201c.") :
+    lade && !erg ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED } }, "\u2026") :
+    fehler ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "#b04a3a" } }, en ? "Contacts could not be loaded \u2013 please try again." : "Kontakte konnten nicht geladen werden \u2013 bitte erneut versuchen.") :
+    gruppen.length === 0 ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, background: CARD, border: "1px solid " + HAIR, borderRadius: 12, padding: "16px 18px" } }, (en ? "No contacts for \u201e" : "Keine Kontakte f\u00fcr \u201e") + q.trim() + (en ? "\u201c \u2013 check the club name or try a shorter form." : "\u201c \u2013 Vereinsnamen pr\u00fcfen oder Kurzform versuchen.")) :
+    h("div", { style: { display: "flex", flexDirection: "column", gap: 12 } }, gruppen.map((g, gi) => h("div", { key: gi, style: { background: CARD, border: "1px solid " + HAIR, borderRadius: 14, padding: "14px 16px" } },
+      h("div", { style: { display: "flex", alignItems: "center", gap: 10, marginBottom: 10, flexWrap: "wrap" } }, h(ClubLogo, { name: g.verein, size: 30 }), h("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 19, color: INK } }, g.verein), g.league ? h("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, g.league) : null, h("span", { style: { flex: 1 } }), h("button", { type: "button", onClick: () => openVerein && openVerein(g.verein), style: { cursor: "pointer", border: "1px solid " + HAIR, background: "#fff", borderRadius: 9, padding: "6px 10px", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, color: INK } }, en ? "Club dossier" : "Vereins-Dossier")),
+      h("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 8 } }, g.kontakte.map((c, i) => h("div", { key: i, style: { background: PAGE, borderRadius: 10, padding: "10px 12px" } },
+        h("div", { style: Object.assign({}, feld, { fontWeight: 800, color: "#0e7490", fontSize: 11.5, textTransform: "uppercase", letterSpacing: .4 }) }, c.funktion || (en ? "Contact" : "Kontakt")),
+        h("div", { style: Object.assign({}, feld, { fontWeight: 700, color: INK, fontSize: 14, marginTop: 2 }) }, !c.name || c.name === "tbd" ? h("span", { style: { color: MUTED, fontStyle: "italic", fontWeight: 500 } }, en ? "name being added" : "Name wird erg\u00e4nzt") : c.name),
+        c.email ? h("div", { style: Object.assign({}, feld, { marginTop: 4 }) }, "\u2709 ", h("a", { href: "mailto:" + c.email, style: { color: "#0e7490", textDecoration: "none" } }, c.email)) : null,
+        c.phone ? h("div", { style: Object.assign({}, feld, { marginTop: 2 }) }, "\u260e ", h("a", { href: "tel:" + String(c.phone).replace(/[^+0-9]/g, ""), style: { color: INK, textDecoration: "none" } }, c.phone)) : null)))))));
+}
 function TransferApp({
   account,
   onNavigate,
@@ -7464,7 +7497,7 @@ function TransferApp({
       alignItems: "center",
       gap: 16
     }
-  }, /*#__PURE__*/React.createElement(MobilNav, { view: view, setView: setView, items: [["feed", t("tab_feed")], ["geruechte", "Transfers"], ["gesucht", "Vereinsbedarf"], ["ranking", "Performance"], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]] }), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(MobilNav, { view: view, setView: setView, items: [["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["gesucht", "Vereinsbedarf"], ["ranking", "Performance"], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]] }), /*#__PURE__*/React.createElement("div", {
     className: "tw-logo",
     style: {
       display: "flex",
@@ -7714,7 +7747,7 @@ function TransferApp({
       flexWrap: "wrap"
     },
     className: "tw-tabs"
-  }, [["_h", LANG === "en" ? "Market" : "Markt"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["gesucht", "Vereinsbedarf"], ["ranking", "Performance"], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["_h", LANG === "en" ? "My work" : "Meine Arbeit"], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]].map(([k, label]) => {
+  }, [["_h", LANG === "en" ? "Market" : "Markt"], ["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["gesucht", "Vereinsbedarf"], ["ranking", "Performance"], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["_h", LANG === "en" ? "My work" : "Meine Arbeit"], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]].map(([k, label]) => {
     if (k === "_h") return /*#__PURE__*/React.createElement("div", { key: "h-" + label, className: "tw-navhead" }, label);
     const active = view === k || (k === "community" && (view === "networking" || view === "moderation")) || (k === "talente" && (view === "listen" || view === "suche"));
     let badge = 0; try { if (k === "feed") badge = (Array.isArray(news) ? news : []).filter(n => Date.now() - new Date(n.published_at || n.created_at || n.createdAt || 0).getTime() < 864e5).length; else if (k === "gesucht") badge = Array.isArray(needsBySport) ? needsBySport.length : 0; } catch (e) { badge = 0; }
@@ -7746,7 +7779,7 @@ function TransferApp({
       width: "100%",
       boxSizing: "border-box"
     }
-  }, view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news, onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "geruechte" && /*#__PURE__*/React.createElement("aside", null, /*#__PURE__*/React.createElement(GerAside, { s: gerSide, onApply: setGerApply })), view === "gesucht" && /*#__PURE__*/React.createElement(BedarfVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news, onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "geruechte" && /*#__PURE__*/React.createElement("aside", null, /*#__PURE__*/React.createElement(GerAside, { s: gerSide, onApply: setGerApply })), view === "gesucht" && /*#__PURE__*/React.createElement(BedarfVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       background: "transparent",
       border: "none",
