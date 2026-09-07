@@ -476,13 +476,13 @@
   }
   @media (prefers-reduced-motion: reduce){ header, #buehne, main{transition:none} }
 </style>
-<link rel="preload" as="image" href="/assets/bg_feld.webp" imagesrcset="/assets/bg_feld_m.webp 1920w, /assets/bg_feld.webp 3840w" imagesizes="100vw">
+<link rel="preload" as="image" href="/assets/bg_feld.webp" media="(min-width: 720px) and (min-height: 720px)"><link rel="preload" as="image" href="/assets/bg_feld_m.webp" media="(max-width: 719px), (max-height: 719px)">
 </head>
 <body>
 <canvas id="welt" aria-hidden="true"></canvas>
 <div id="schleier" aria-hidden="true"></div>
 <div id="blende" aria-hidden="true"></div>
-<div id="fotos" hidden aria-hidden="true"><img id="foto-feld" alt="" src="/assets/bg_feld.webp" srcset="/assets/bg_feld_m.webp 1920w, /assets/bg_feld.webp 3840w" sizes="100vw" decoding="async" fetchpriority="high"><img id="foto-tribuene" alt="" src="/assets/bg_tribuene.webp" srcset="/assets/bg_tribuene_m.webp 1920w, /assets/bg_tribuene.webp 3840w" sizes="100vw" decoding="async" fetchpriority="low"></div>
+<div id="fotos" hidden aria-hidden="true"><img id="foto-feld" alt="" data-src="/assets/bg_feld.webp" data-src-m="/assets/bg_feld_m.webp" decoding="async"><img id="foto-tribuene" alt="" data-src="/assets/bg_tribuene.webp" data-src-m="/assets/bg_tribuene_m.webp" decoding="async"><script>(function(){var m=Math.min(innerWidth,innerHeight)<720;["foto-feld","foto-tribuene"].forEach(function(id){var e=document.getElementById(id);if(e)e.src=m?e.getAttribute("data-src-m"):e.getAttribute("data-src");});})();</script></div>
 <div id="buehne"></div>
 <div id="hoehe"></div>
 
