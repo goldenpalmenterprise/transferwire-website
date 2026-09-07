@@ -89,6 +89,7 @@
 @media (max-width: 1023px) { .tw-navhead, .tw-side-extra, .tw-navicon { display: none !important; } }
 .tw-navicon, .tw-navlabel, .tw-navbadge, .tw-navdot { pointer-events: none; }
 @media (min-width: 1024px) { .tw-tab-community { display: none !important; } }
+@media (max-width: 720px) { .tw-upgrade { display: none !important; } }
 </style>
 <!-- tw-build: 2026-08-28-br suchemobil3 -->
 <style>.tw-lang-kurz{display:none}@media (max-width:560px){.tw-lang-text{display:none}.tw-lang-kurz{display:inline}}</style>
@@ -6723,6 +6724,7 @@ function TransferApp({
   const [watchDlg, setWatchDlg] = useState(false);
   const [matchProfil, setMatchProfil] = useState(null);
   const [profilSheet, setProfilSheet] = useState(false);
+  React.useEffect(() => { if (!profilSheet) return; const prev = document.body.style.overflow; const prevH = document.documentElement.style.overflow; document.body.style.overflow = "hidden"; document.documentElement.style.overflow = "hidden"; return () => { document.body.style.overflow = prev; document.documentElement.style.overflow = prevH; }; }, [profilSheet]);
   const [pfName, setPfName] = useState("");
   const [pfPos, setPfPos] = useState("DM");
   const [pfA1, setPfA1] = useState("");
@@ -7514,7 +7516,7 @@ function TransferApp({
       background: dataState === "live" ? "#34d27b" : "#e0a63b",
       boxShadow: `0 0 0 3px ${dataState === "live" ? "rgba(52,210,123,.2)" : "rgba(224,166,59,.2)"}`
     }
-  }), dataState === "loading" ? t("connecting") : dataState === "live" ? `LIVE \u00b7 ${updatedAt ? "aktualisiert " + relTime(updatedAt) : "aktuell"}` : t("demo")), /*#__PURE__*/React.createElement(LangSwitch, { dark: true }), /*#__PURE__*/React.createElement("div", {
+  }), dataState === "loading" ? t("connecting") : dataState === "live" ? `LIVE \u00b7 ${updatedAt ? "aktualisiert " + relTime(updatedAt) : "aktuell"}` : t("demo")), /*#__PURE__*/React.createElement("button", { className: "tw-upgrade", type: "button", onClick: () => onNavigate("subscribe"), title: LANG === "en" ? "Compare plans and upgrade" : "Pl\u00e4ne vergleichen und upgraden", style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, letterSpacing: .2, color: "#fff", background: "#149a59", border: "1px solid #1bb56a", borderRadius: 9, padding: "9px 14px", cursor: "pointer", whiteSpace: "nowrap" } }, (account && account.plan === "premium") ? (LANG === "en" ? "Enterprise" : "Enterprise anfragen") : (account && account.plan === "abo") ? (LANG === "en" ? "Upgrade to Premium" : "Auf Premium upgraden") : (LANG === "en" ? "Upgrade plan" : "Plan upgraden")), /*#__PURE__*/React.createElement(LangSwitch, { dark: true }), /*#__PURE__*/React.createElement("div", {
     style: {
       position: "relative"
     }
@@ -10044,23 +10046,31 @@ function TransferApp({
     }
   }, t("watch_close")))), profilSheet && /*#__PURE__*/React.createElement("div", {
     onClick: () => setProfilSheet(false),
+    className: "tw-profil-overlay",
     style: {
       position: "fixed",
       inset: 0,
       zIndex: 1200,
-      background: "rgba(15,15,17,.45)",
+      background: "rgba(15,15,17,.5)",
       display: "flex",
-      alignItems: "flex-end",
-      justifyContent: "center"
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 16,
+      overscrollBehavior: "contain"
     }
   }, /*#__PURE__*/React.createElement("div", {
     onClick: e => e.stopPropagation(),
+    className: "tw-profil-sheet",
     style: {
       width: "100%",
-      maxWidth: 480,
+      maxWidth: 680,
+      maxHeight: "88vh",
+      overflowY: "auto",
+      overscrollBehavior: "contain",
       background: "#fff",
-      borderRadius: "16px 16px 0 0",
-      padding: "18px 18px 26px"
+      borderRadius: 18,
+      padding: "24px 26px 26px",
+      boxShadow: "0 24px 80px rgba(0,0,0,.35)"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
