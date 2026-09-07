@@ -79,7 +79,8 @@
   .tw-side-foot button { background: none; border: none; padding: 0; cursor: pointer; font-family: Inter, system-ui, sans-serif; font-size: 11.5px; color: #8a92a3; }
   .tw-side-foot button:hover, .tw-side-abo:hover { color: #14181D; }
   .tw-side-abo { background: none; border: none; cursor: pointer; text-align: left; font-family: Inter, system-ui, sans-serif; font-size: 12.5px; color: #8a92a3; padding: 6px 10px 0; }
-  .tw-main { margin-left: 240px !important; width: calc(100% - 240px) !important; }
+  .tw-main { margin-left: 240px !important; width: calc(100% - 240px) !important; max-width: none !important; }
+  .tw-wrap, .tw-main .tw-wrap, footer [style*="max-width: 1440px"] { max-width: none !important; }
   .tw-main ~ footer, .tw-tabbar ~ footer { margin-left: 240px !important; }
   .tw-main [style*="max-width: 1440px"], .tw-headwrap { max-width: none !important; }
   .tw-headwrap { padding: 0 24px !important; }
