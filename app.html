@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style id="tw-design">
-  html, body { background: #F5F6F2; }
-:root { --tw-page:#F5F6F2; --tw-card:#FFFFFF; --tw-ink:#14181D; --tw-muted:#667085; --tw-hair:#E1E5E2; --tw-hair-hover:#CFD7D1; }
+  html, body { background: #F4F6F8; }
+:root { --tw-page:#F4F6F8; --tw-card:#FFFFFF; --tw-ink:#14181D; --tw-muted:#667085; --tw-hair:#E1E5E2; --tw-hair-hover:#CFD7D1; }
 .tw-card { background:#FFFFFF; border:1px solid #E1E5E2 !important; border-radius:14px !important; box-shadow:none !important; padding:20px 22px 18px !important; }
 .tw-card:hover { border-color:#CFD7D1 !important; box-shadow:0 8px 24px rgba(15,23,42,.06) !important; transform:translateY(-1px); }
 .tw-main select, .tw-main input:not([type="checkbox"]):not([type="radio"]), .tw-main textarea { min-height:44px !important; border-radius:10px !important; border:1px solid #E1E5E2 !important; background:#fff; }
@@ -90,6 +90,12 @@
 .tw-navicon, .tw-navlabel, .tw-navbadge, .tw-navdot { pointer-events: none; }
 @media (min-width: 1024px) { .tw-tab-community { display: none !important; } }
 @media (max-width: 720px) { .tw-upgrade { display: none !important; } }
+@media (min-width: 1024px) {
+  header:has(+ .tw-tabbar) { position: fixed !important; top: 0; left: 0; right: 0; z-index: 7; }
+  header:has(+ .tw-tabbar) + .tw-tabbar { top: 60px !important; }
+  .tw-main { margin-top: 60px !important; }
+  .tw-main ~ footer, .tw-tabbar ~ footer { margin-top: 0; }
+}
 </style>
 <!-- tw-build: 2026-08-28-br suchemobil3 -->
 <style>.tw-lang-kurz{display:none}@media (max-width:560px){.tw-lang-text{display:none}.tw-lang-kurz{display:inline}}</style>
@@ -1816,7 +1822,7 @@ const fmtDate = t => { if (t == null || t === "") return ""; const d = new Date(
 const INK = "#14181D";
 const MUTED = "#667085";
 const HAIR = "#E1E5E2";
-const PAGE = "#F5F6F2";
+const PAGE = "#F4F6F8";
 const CARD = "#ffffff";
 const CARD_BOX = { background: CARD, border: "1px solid " + HAIR, borderRadius: 14 };
 const istCommunity = it => !!it && (String(it.id || "").indexOf("cmty-") === 0 || (Array.isArray(it.sources) && it.sources.some(s => /community/i.test(String((s && (s.q || s.name)) || "")))));
@@ -3727,7 +3733,7 @@ function SpieltagKarte({ x, onOpen, watched, onWatchToggle, gewaehlt, zurueck })
         h("span", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1, color: "#0d8a4f", textTransform: "uppercase", display: "inline-flex", alignItems: "center" } }, "TW Performance Score", h(ScoreInfo, { kind: "performance", size: 13 })),
         h("span", { style: { marginLeft: "auto", fontFamily: FONT_DISPLAY, fontSize: 40, fontWeight: 700, color: "#0b6b3e", lineHeight: 1 } }, Math.round(x.score || 0))),
       h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, marginTop: 6, color: delta == null ? MUTED : delta > 0 ? "#0d8a4f" : delta < 0 ? "#b04a3a" : MUTED } }, prev === undefined ? (en ? "Comparing with last match \u2026" : "Vergleich mit dem letzten Spiel \u2026") : delta == null ? (en ? "First rated match" : "Erstes erfasstes Spiel") : (delta > 0 ? "\u25B2 +" + delta : delta < 0 ? "\u25BC " + delta : "\u25B6 \u00b10") + (en ? " vs. last match" : " zum letzten Spiel") + " (" + Math.round(prev) + ")")),
-    h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6 } }, werte.map((w, i) => h("span", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, color: INK, background: "#f5f6f2", border: "1px solid " + HAIR, borderRadius: 999, padding: "5px 10px" } }, w))),
+    h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6 } }, werte.map((w, i) => h("span", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, color: INK, background: "#f4f6f8", border: "1px solid " + HAIR, borderRadius: 999, padding: "5px 10px" } }, w))),
     h("div", { className: "tw-sk-analyse", style: { display: "flex", flexDirection: "column", gap: 9, fontFamily: FONT_BODY, fontSize: 12.5, color: INK, lineHeight: 1.5 } }, (x.date || x.gegner) ? h("div", { style: { fontSize: 12, color: MUTED } }, [x.date ? String(x.date).slice(8, 10) + "." + String(x.date).slice(5, 7) + "." + String(x.date).slice(0, 4) : "", x.gegner ? (en ? "vs. " : "gegen ") + x.gegner : "", x.sub ? (en ? "substitute" : "eingewechselt") : "", x.api ? (en ? "API rating " : "API-Note ") + x.api : ""].filter(Boolean).join(" \u00b7 ")) : null, x.st ? h("div", null, h("div", { style: { fontSize: 10.5, fontWeight: 900, letterSpacing: 1, textTransform: "uppercase", color: "#0d8a4f", marginBottom: 2 } }, en ? "Strengths" : "St\u00e4rken"), h("div", null, x.st)) : null, x.sw ? h("div", null, h("div", { style: { fontSize: 10.5, fontWeight: 900, letterSpacing: 1, textTransform: "uppercase", color: "#b04a3a", marginBottom: 2 } }, en ? "Weaknesses" : "Schw\u00e4chen"), h("div", null, x.sw)) : null, x.dev ? h("div", null, h("div", { style: { fontSize: 10.5, fontWeight: 900, letterSpacing: 1, textTransform: "uppercase", color: "#1e4e79", marginBottom: 2 } }, en ? "Development" : "Entwicklung"), h("div", null, x.dev)) : null, !(x.st || x.sw || x.dev) ? h("div", { style: { color: MUTED } }, en ? "The detailed analysis follows after the next nightly run." : "Die ausf\u00fchrliche Analyse folgt nach dem n\u00e4chsten Nachtlauf.") : null, (x.pid && Number(x.pid) < 900000000) ? h("button", { type: "button", onClick: () => onOpen && onOpen(x), style: { alignSelf: "flex-start", cursor: "pointer", border: "none", background: "none", padding: 0, fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: "#149a59" } }, (en ? "Open full profile " : "Vollprofil \u00f6ffnen ") + "\u2192") : null), h("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", marginTop: "auto" } }, h("button", { onClick: () => onWatchToggle && onWatchToggle(x.name), title: watched ? (en ? "Remove from watchlist" : "Von der Merkliste entfernen") : (en ? "Add to watchlist" : "Auf die Merkliste"), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 14px", borderRadius: 10, border: "1px solid " + (watched ? "#bfe3cf" : HAIR), background: watched ? "#eef7f1" : "#fff", color: watched ? "#149a59" : INK, display: "inline-flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" } }, h(IconBookmark, { size: 14, filled: watched }), watched ? (en ? "Watching" : "Beobachtet") : (en ? "Watch" : "Beobachten"))));
 }
 function PerfTabelle({ rows, portrait, watch, onWatchToggle, onOpen, offen, setOffen }) {
