@@ -6713,8 +6713,8 @@ function KontakteVue({ isPrem, authQ, openVerein }) {
       h("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 8 } }, g.kontakte.map((c, i) => h("div", { key: i, style: { background: PAGE, borderRadius: 10, padding: "10px 12px" } },
         h("div", { style: Object.assign({}, feld, { fontWeight: 800, color: "#0e7490", fontSize: 11.5, textTransform: "uppercase", letterSpacing: .4 }) }, c.funktion || (en ? "Contact" : "Kontakt")),
         h("div", { style: Object.assign({}, feld, { fontWeight: 700, color: INK, fontSize: 14, marginTop: 2 }) }, !c.name || c.name === "tbd" ? h("span", { style: { color: MUTED, fontStyle: "italic", fontWeight: 500 } }, en ? "name being added" : "Name wird erg\u00e4nzt") : c.name),
-        c.email ? h("div", { style: Object.assign({}, feld, { marginTop: 4 }) }, "\u2709 ", h("a", { href: "mailto:" + c.email, style: { color: "#0e7490", textDecoration: "none" } }, c.email)) : null,
-        c.phone ? h("div", { style: Object.assign({}, feld, { marginTop: 2 }) }, "\u260e ", h("a", { href: "tel:" + String(c.phone).replace(/[^+0-9]/g, ""), style: { color: INK, textDecoration: "none" } }, c.phone)) : null)))))));
+        (c.email && c.email !== "tbd") ? h("div", { style: Object.assign({}, feld, { marginTop: 4 }) }, "\u2709 ", h("a", { href: "mailto:" + c.email, style: { color: "#0e7490", textDecoration: "none" } }, c.email)) : h("div", { style: Object.assign({}, feld, { marginTop: 4, color: MUTED, fontStyle: "italic" }) }, "\u2709 " + (en ? "e-mail being added" : "E-Mail wird erg\u00e4nzt")),
+        (c.phone && c.phone !== "tbd") ? h("div", { style: Object.assign({}, feld, { marginTop: 2 }) }, "\u260e ", h("a", { href: "tel:" + String(c.phone).replace(/[^+0-9]/g, ""), style: { color: INK, textDecoration: "none" } }, c.phone)) : h("div", { style: Object.assign({}, feld, { marginTop: 2, color: MUTED, fontStyle: "italic" }) }, "\u260e " + (en ? "phone being added" : "Telefon wird erg\u00e4nzt")))))))));
 }
 function TransferApp({
   account,
