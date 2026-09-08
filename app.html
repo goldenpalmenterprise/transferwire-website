@@ -96,6 +96,9 @@
   .tw-main { margin-top: 60px !important; }
   .tw-main ~ footer, .tw-tabbar ~ footer { margin-top: 0; }
 }
+.tw-spin { display: inline-block; width: 22px; height: 22px; border: 3px solid #E1E5E2; border-top-color: #149a59; border-radius: 50%; animation: tw-spin .8s linear infinite; vertical-align: middle; }
+@keyframes tw-spin { to { transform: rotate(360deg); } }
+.tw-lade { display: flex; align-items: center; gap: 10px; font-family: Inter, system-ui, sans-serif; font-size: 13px; color: #667085; padding: 14px 0; }
 </style>
 <!-- tw-build: 2026-08-28-br suchemobil3 -->
 <style>.tw-lang-kurz{display:none}@media (max-width:560px){.tw-lang-text{display:none}.tw-lang-kurz{display:inline}}</style>
@@ -2220,7 +2223,7 @@ function AntwortButton({ onClick, eigener }) {
 const IconShare = ({ size }) => React.createElement("svg", { width: size || 15, height: size || 15, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("circle", { cx: 18, cy: 5, r: 3 }), React.createElement("circle", { cx: 6, cy: 12, r: 3 }), React.createElement("circle", { cx: 18, cy: 19, r: 3 }), React.createElement("line", { x1: 8.59, y1: 13.51, x2: 15.42, y2: 17.49 }), React.createElement("line", { x1: 15.41, y1: 6.51, x2: 8.59, y2: 10.49 }));
 const IconBookmark = ({ size, filled }) => React.createElement("svg", { width: size || 15, height: size || 15, viewBox: "0 0 24 24", fill: filled ? "currentColor" : "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("path", { d: "M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" }));
 let CLUB_LOGOS = {};
-try { fetch("/api/tw-logos", { cache: "force-cache" }).then(r => r.ok ? r.json() : null).then(d => { if (d && typeof d === "object") { CLUB_LOGOS = d.logos || d; CLUB_LOGO_KEYS = {}; for (const n in CLUB_LOGOS) { const k = clubKey(n); if (k && !CLUB_LOGO_KEYS[k]) CLUB_LOGO_KEYS[k] = CLUB_LOGOS[n]; } try { window.dispatchEvent(new Event("tw-logos")); } catch (e) {} } }).catch(() => {}); } catch (e) {}
+try { fetch("/api/tw-logos?v=" + new Date().toISOString().slice(0, 10).replace(/-/g, ""), { cache: "default" }).then(r => r.ok ? r.json() : null).then(d => { if (d && typeof d === "object") { CLUB_LOGOS = d.logos || d; CLUB_LOGO_KEYS = {}; for (const n in CLUB_LOGOS) { const k = clubKey(n); if (k && !CLUB_LOGO_KEYS[k]) CLUB_LOGO_KEYS[k] = CLUB_LOGOS[n]; } try { window.dispatchEvent(new Event("tw-logos")); } catch (e) {} } }).catch(() => {}); } catch (e) {}
 const clubMono = n => { const w = String(n || "").replace(/^(FC|SC|SV|SK|TSV|VfB|VfL|AC|AS|US|CD|UD|RC|CF|1\. FC|1\.)\s+/i, "").split(/\s+/).filter(Boolean); return ((w[0] || "?")[0] + (w[1] ? w[1][0] : "")).toUpperCase(); };
 const clubHue = n => { let h = 0; for (const ch of String(n || "")) h = (h * 31 + ch.charCodeAt(0)) % 360; return h; };
 const CLUB_ALIAS = { "florenz": "fiorentina", "mailand": "milan", "neapel": "napoli", "rom": "roma", "genua": "genoa", "turin": "torino", "teneriffa": "tenerife", "bruegge": "brugge", "luettich": "liege", "lissabon": "lisbon", "kopenhagen": "copenhagen", "muenchen": "munich", "koeln": "cologne", "nuernberg": "nurnberg", "athen": "athens", "warschau": "warszawa", "prag": "praha", "belgrad": "beograd", "goeteborg": "goteborg" };
@@ -2437,7 +2440,7 @@ function SucheVue({ onOpen }) {
 
 function ScoutSub({ view, setView }) {
   const h = React.createElement;
-  return h("div", { style: { display: "flex", gap: 8, marginBottom: 16 } },
+  return h("div", { style: { display: "flex", gap: 8, marginBottom: 16, alignItems: "flex-start", alignSelf: "start", flexWrap: "wrap" } },
     [["talente", LANG === "en" ? "Talent rankings" : "Talent-Rankings"], ["listen", LANG === "en" ? "Scouting lists" : "Scouting-Listen"], ["suche", LANG === "en" ? "Skill search" : "Fähigkeiten-Suche"]].map(([k, lab]) => {
       const a = view === k;
       return h("button", { key: k, onClick: () => setView(k), style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, cursor: "pointer", padding: "9px 16px", borderRadius: 10, border: "1px solid " + (a ? "#087F8C" : HAIR), background: a ? "#087F8C" : "#fff", color: a ? "#fff" : "#3a4150" } }, lab);
@@ -6450,10 +6453,7 @@ function SettingsOverlay({
   }) : null, account.rolle ? /*#__PURE__*/React.createElement(Row, {
     k: t("st_role"),
     v: account.rolle
-  }) : null, /*#__PURE__*/React.createElement(Row, {
-    k: t("st_plan"),
-    v: isTest ? t("st_plan_test") : t("st_plan_abo")
-  })), /*#__PURE__*/React.createElement("div", {
+  }) : null, /*#__PURE__*/React.createElement(Row, { k: t("st_plan"), v: isTest ? t("st_plan_test") : (account.plan === "premium" ? "Premium" : account.plan === "abo" ? "Standard" : t("st_plan_abo")) }), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginTop: 12, flexWrap: "wrap" } }, /*#__PURE__*/React.createElement("button", { type: "button", onClick: onSubscribe, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, color: "#fff", background: "#149a59", border: "1px solid #1bb56a", borderRadius: 9, padding: "10px 14px" } }, account.plan === "premium" ? (LANG === "en" ? "Enterprise \u2013 request" : "Enterprise anfragen") : account.plan === "abo" ? (LANG === "en" ? "Upgrade to Premium" : "Auf Premium upgraden") : (LANG === "en" ? "Upgrade plan" : "Plan upgraden")), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED } }, account.plan === "premium" ? (LANG === "en" ? "Teams, seats and API on request." : "Teams, Sitze und API auf Anfrage.") : account.plan === "abo" ? (LANG === "en" ? "Premium adds club contacts and community contacts." : "Premium bringt Vereins-Kontakte und Community-Kontakte.") : (LANG === "en" ? "Compare Standard and Premium." : "Standard und Premium vergleichen.")))), /*#__PURE__*/React.createElement("div", {
     style: {
       background: "#fff",
       border: `1px solid ${HAIR}`,
@@ -7219,6 +7219,7 @@ function TransferApp({
   }, []);
   const [legal, setLegal] = useState(null); // null | "impressum" | "datenschutz"
   const [showSettings, setShowSettings] = useState(false);
+  React.useEffect(() => { if (!showSettings) return; const prev = document.body.style.overflow; const prevH = document.documentElement.style.overflow; document.body.style.overflow = "hidden"; document.documentElement.style.overflow = "hidden"; return () => { document.body.style.overflow = prev; document.documentElement.style.overflow = prevH; }; }, [showSettings]);
   const [news, setNews] = useState(NEWS.filter(i => i.sport === "fussball"));
   const [qvTick, setQvTick] = useState(0);
   useEffect(() => { TW_QV.hoerer.push(() => setQvTick(t => t + 1)); ladeQuellenVertrauen(); }, []);
@@ -9557,14 +9558,7 @@ function TransferApp({
       width: "100%",
       maxWidth: 640, maxHeight: "88vh", overflowY: "auto", overscrollBehavior: "contain", background: "#fff", borderRadius: 18, padding: "22px 24px 26px", boxShadow: "0 24px 80px rgba(0,0,0,.35)"
     }
-  }, plDetailLoading || plDetail.lade ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 13,
-      color: MUTED,
-      padding: "16px 0"
-    }
-  }, "…") : (() => {
+  }, plDetailLoading || plDetail.lade ? /*#__PURE__*/React.createElement("div", { className: "tw-lade" }, /*#__PURE__*/React.createElement("span", { className: "tw-spin" }), LANG === "en" ? "Loading profile \u2026" : "Profil wird geladen \u2026") : (() => {
     const d = plDetail.detail;
     const on = (watch.items || []).some(w => w.t === "spieler" && w.w === d.name);
     const geb = d.birth_date ? new Date(d.birth_date).toLocaleDateString(LANG === "en" ? "en-GB" : "de-DE") : "";
