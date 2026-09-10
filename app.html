@@ -111,6 +111,48 @@
 @keyframes tw-ping { 0% { transform: scale(.42); opacity: .95; } 100% { transform: scale(1.12); opacity: 0; } }
 @keyframes tw-sweep { to { transform: rotate(360deg); } }
 @keyframes tw-puls { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+/* Dunkles Theme: zwei Grautoene (Leiste #111213, Flaeche #171819) */
+html, body { background: #171819 !important; }
+header:has(+ .tw-tabbar) { background: #171819 !important; border-bottom: 1px solid #2a2b2d !important; }
+.tw-tabbar { background: #111213 !important; border-right: 1px solid #2a2b2d !important; display: flex !important; flex-direction: column; padding: 0 !important; }
+.tw-tabbar .tw-tabwrap, .tw-tabbar .tw-side-extra { display: none !important; }
+.tw-tabbar ~ footer { background: #171819 !important; border-top-color: #2a2b2d !important; }
+/* Neue Seitenleiste */
+.tw-sn { display: flex; flex-direction: column; height: 100%; padding: 10px 10px 12px; font-family: Inter, system-ui, sans-serif; }
+.tw-sn button { font-family: inherit; }
+.tw-sn-ki, .tw-sn-punkt, .tw-sn-kopf, .tw-sn-unter { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; text-align: left; cursor: pointer; border-radius: 9px; color: #ececec; }
+.tw-sn-ki { padding: 9px 10px; font-weight: 700; font-size: 14px; }
+.tw-sn-ki:hover, .tw-sn-punkt:hover, .tw-sn-kopf:hover { background: #1c1d1f; }
+.tw-sn-ikon { width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; color: #ececec; flex-shrink: 0; }
+.tw-sn-ikon svg { width: 17px; height: 17px; }
+.tw-sn-funke { color: #22c55e; }
+.tw-sn-trenner { height: 1px; background: #2a2b2d; margin: 8px 6px 10px; }
+.tw-sn-menue { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+.tw-sn-punkt { padding: 9px 10px; font-weight: 700; font-size: 14px; }
+.tw-sn-punkt.aktiv { background: #262729; }
+.tw-sn-kopf { padding: 9px 10px; font-weight: 700; font-size: 14px; margin-top: 2px; }
+.tw-sn-pfeil { margin-left: auto; width: 16px; height: 16px; color: #8a8f97; transition: transform .18s ease; display: inline-flex; }
+.tw-sn-pfeil svg { width: 16px; height: 16px; }
+.tw-sn-gruppe.zu .tw-sn-pfeil { transform: rotate(-180deg); }
+.tw-sn-kinder { display: flex; flex-direction: column; gap: 1px; padding: 2px 0 6px; }
+.tw-sn-gruppe.zu .tw-sn-kinder { display: none; }
+.tw-sn-unter { padding: 8px 10px 8px 42px; font-weight: 500; font-size: 13.5px; color: #b8bbc0; }
+.tw-sn-unter:hover { background: #1c1d1f; color: #ececec; }
+.tw-sn-unter.aktiv { background: #262729; color: #fff; font-weight: 600; }
+.tw-sn-badge { margin-left: auto; font-size: 11px; font-weight: 800; color: #7fe0a8; background: rgba(20,154,89,.18); border-radius: 999px; padding: 2px 8px; }
+.tw-sn-unten { padding-top: 10px; border-top: 1px solid #2a2b2d; }
+.tw-sn-upgrade { width: 100%; background: transparent; color: #2f8f5b; border: 1.5px solid #2f8f5b; border-radius: 10px; padding: 11px 14px; font-weight: 800; font-size: 14px; cursor: pointer; }
+.tw-sn-upgrade:hover { background: rgba(47,143,91,.12); }
+.tw-sn-fuss { display: flex; gap: 12px; margin-top: 10px; padding: 0 4px; }
+.tw-sn-fuss button { border: 0; background: none; padding: 0; font-size: 11.5px; color: #8a8f97; cursor: pointer; }
+/* Harte Weiss-/Dunkeltoene aus Inline-Stilen an das Theme angleichen */
+.tw-main div[style*="background: rgb(255, 255, 255)"], .tw-main button[style*="background: rgb(255, 255, 255)"], div[style*="z-index: 1250"] div[style*="background: rgb(255, 255, 255)"], div[style*="z-index: 1300"] div[style*="background: rgb(255, 255, 255)"], div[style*="z-index: 1360"] div[style*="background: rgb(255, 255, 255)"] { background: #1e1f21 !important; }
+.tw-main [style*="color: rgb(58, 65, 80)"], .tw-main [style*="color: rgb(45, 51, 61)"], .tw-main [style*="color: rgb(74, 74, 72)"], div[style*="z-index: 12"] [style*="color: rgb(58, 65, 80)"], div[style*="z-index: 13"] [style*="color: rgb(58, 65, 80)"], div[style*="z-index: 13"] [style*="color: rgb(74, 74, 72)"] { color: #c9ced6 !important; }
+.tw-main [style*="background: rgb(244, 246, 248)"], div[style*="z-index: 12"] [style*="background: rgb(244, 246, 248)"], div[style*="z-index: 13"] [style*="background: rgb(244, 246, 248)"] { background: #26282b !important; }
+#tw-lader { background: rgba(23,24,25,.55) !important; }
+.tw-lader-text { color: #c9ced6 !important; }
+.tw-lade { color: #8a8f97 !important; }
+.tw-lade .tw-spin { border-color: #33353a; border-top-color: #149a59; }
 </style>
 <!-- tw-build: 2026-08-28-br suchemobil3 -->
 <style>.tw-lang-kurz{display:none}@media (max-width:560px){.tw-lang-text{display:none}.tw-lang-kurz{display:inline}}</style>
@@ -1857,11 +1899,11 @@ const fmtDate = t => { if (t == null || t === "") return ""; const d = new Date(
    in die Datenbank; diese Oberfläche liest sie aus und sortiert nach Tags.
    ────────────────────────────────────────────────────────────────────────── */
 
-const INK = "#14181D";
-const MUTED = "#667085";
-const HAIR = "#E1E5E2";
-const PAGE = "#F4F6F8";
-const CARD = "#ffffff";
+const INK = "#ececec";
+const MUTED = "#8a8f97";
+const HAIR = "#2f3236";
+const PAGE = "#171819";
+const CARD = "#1e1f21";
 const CARD_BOX = { background: CARD, border: "1px solid " + HAIR, borderRadius: 14 };
 const istCommunity = it => !!it && (String(it.id || "").indexOf("cmty-") === 0 || (Array.isArray(it.sources) && it.sources.some(s => /community/i.test(String((s && (s.q || s.name)) || "")))));
 const cmtyBadgeStyle = pad => ({ fontFamily: FONT_BODY, fontSize: 10, fontWeight: 900, letterSpacing: 1, color: "#6d28d9", border: "1px solid #d9ccf7", background: "#f1ecfd", borderRadius: 6, padding: pad || "3px 8px", textTransform: "uppercase", whiteSpace: "nowrap" });
@@ -6825,6 +6867,31 @@ function KontakteVue({ isPrem, authQ, openVerein }) {
     !wahl && !land && !liga ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, marginTop: 12 } }, vereine.length ? (vereine.length + (en ? " clubs in the database." : " Vereine in der Datenbank.")) : "\u2026") : null);
 }
 
+function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScout }) {
+  const h = React.createElement; const en = LANG === "en";
+  const [zu, setZu] = useState(() => { try { return JSON.parse(localStorage.getItem("tw_side_zu") || "{}"); } catch (e) { return {}; } });
+  const klappe = k => setZu(z => { const n = Object.assign({}, z, { [k]: !z[k] }); try { localStorage.setItem("tw_side_zu", JSON.stringify(n)); } catch (e) {} return n; });
+  let feedBadge = 0, gesuchtBadge = 0; try { feedBadge = (Array.isArray(news) ? news : []).filter(n => Date.now() - new Date(n.published_at || n.created_at || n.createdAt || 0).getTime() < 864e5).length; gesuchtBadge = Array.isArray(needsBySport) ? needsBySport.length : 0; } catch (e) {}
+  const aktiv = k => view === k || (k === "community" && view === "moderation") || (k === "talente" && (view === "listen" || view === "suche"));
+  const IK = { markt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21V12h6v9"/></svg>', community: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.2L4 21l1.8-5.4A8 8 0 1 1 21 12z"/></svg>', workspace: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 20V10"/></svg>', ki: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18 9.4l-4.2 1.8L12 16l-1.8-4.8L6 9.4l4.2-1.8z"/><path d="M5 18l.7 1.8L7.5 20.5l-1.8.7L5 23l-.7-1.8L2.5 20.5l1.8-.7z"/></svg>', pfeil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>' };
+  const gruppen = [
+    { k: "markt", label: en ? "Market" : "Markt", kinder: [["feed", t("tab_feed"), feedBadge], ["geruechte", "Transfers", 0], ["spieltag", en ? "Matchday" : "Spieltag", 0], ["gesucht", "Vereinsbedarf", gesuchtBadge], ["ranking", "Performance", 0], ["players", t("players_tab"), 0], ["chancen", t("ch_tab"), 0]] },
+    { k: "community", label: "Community", kinder: [["community", en ? "Posts" : "Beitr\u00e4ge", 0], ["networking", en ? "Community contacts" : "Community-Kontakte", 0]] },
+    { k: "workspace", label: "Workspace", kinder: [["watch", t("watch_tab"), 0], ["talente", "Scouting", 0]] }
+  ];
+  return h("div", { className: "tw-sn" },
+    h("button", { type: "button", className: "tw-sn-ki", onClick: onScout }, h("span", { className: "tw-sn-ikon tw-sn-funke", dangerouslySetInnerHTML: { __html: IK.ki } }), h("span", null, en ? "AI assistant" : "KI-Assistent")),
+    h("div", { className: "tw-sn-trenner" }),
+    h("nav", { className: "tw-sn-menue" },
+      h("button", { type: "button", className: "tw-sn-punkt" + (aktiv("kontakte") ? " aktiv" : ""), onClick: () => setView("kontakte") }, h("span", { className: "tw-sn-ikon", dangerouslySetInnerHTML: { __html: SIDE_ICONS.kontakte || "" } }), h("span", null, en ? "Contacts" : "Kontakte")),
+      gruppen.map(g => h("div", { key: g.k, className: "tw-sn-gruppe" + (zu[g.k] ? " zu" : "") },
+        h("button", { type: "button", className: "tw-sn-kopf", onClick: () => klappe(g.k), "aria-expanded": !zu[g.k] }, h("span", { className: "tw-sn-ikon", dangerouslySetInnerHTML: { __html: IK[g.k] } }), h("span", null, g.label), h("span", { className: "tw-sn-pfeil", dangerouslySetInnerHTML: { __html: IK.pfeil } })),
+        h("div", { className: "tw-sn-kinder" }, g.kinder.map(([k, label, badge]) => h("button", { key: k, type: "button", className: "tw-sn-unter" + (aktiv(k) ? " aktiv" : ""), onClick: () => setView(k) }, h("span", null, label), badge > 0 ? h("span", { className: "tw-sn-badge" }, badge > 999 ? "999+" : badge) : null)))))),
+    h("div", { className: "tw-sn-unten" },
+      h("button", { type: "button", className: "tw-sn-upgrade", onClick: () => onNavigate("subscribe") }, en ? "Upgrade plan" : "Upgrade Plan"),
+      h("div", { className: "tw-sn-fuss" }, h("button", { type: "button", onClick: () => onNavigate("impressum") }, en ? "Imprint" : "Impressum"), h("button", { type: "button", onClick: () => onNavigate("datenschutz") }, en ? "Privacy" : "Datenschutz"), h("button", { type: "button", onClick: () => onNavigate("agb") }, en ? "Terms" : "AGB"))));
+}
+
 function TransferApp({
   account,
   onNavigate,
@@ -7836,7 +7903,7 @@ function TransferApp({
       top: 0,
       zIndex: 5
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(SeitenleisteNeu, { view: view, setView: setView, news: news, needsBySport: needsBySport, onNavigate: onNavigate, onScout: () => { setView("feed"); setTimeout(() => { const b = Array.from(document.querySelectorAll("button")).find(x => /Scout fragen|Ask the scout/.test(x.innerText || "")); if (b) b.click(); else { const i = document.querySelector("header input"); if (i) i.focus(); } }, 350); } }), /*#__PURE__*/React.createElement("div", {
     className: "tw-tabwrap",
     style: {
       maxWidth: 1440,
