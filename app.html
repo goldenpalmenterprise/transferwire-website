@@ -208,6 +208,11 @@ html.tw-dark .tw-sn-funke { color: #149a59; }
 /* Spielfeld-Marker: solide Karte statt Tonung auf dem Rasen */
 .tw-main span[style*="border-radius: 99px"][style*="border: 2.5px solid"] { background: var(--karte) !important; }
 .tw-main span[style*="background: rgb(238, 241, 238)"] { background: var(--karte2) !important; }
+
+.tw-pitch span[style*="border-radius: 99px"] { background: var(--karte) !important; }
+header:has(+ .tw-tabbar) .tw-livetime { color: var(--gruen-text) !important; }
+header:has(+ .tw-tabbar) button[style*="color: inherit"] { color: var(--t1) !important; }
+.tw-card { background: var(--karte); }
 </style>
 <!-- tw-build: 2026-08-28-br suchemobil3 -->
 </style>
@@ -215,7 +220,7 @@ html.tw-dark .tw-sn-funke { color: #149a59; }
 <style>
 /* ===== Farbsystem: zwei getrennte Farbsaetze (Standard dunkel, html.tw-dark = hell) ===== */
 :root { --t1: #EDEDED; --t2: #A8A8A8; --t3: #6E6E6E; --aus: #5A5A5A; --zebra: #151515; --seite: var(--seite); --karte: var(--karte); --karte2: var(--karte2); --leiste: var(--leiste); --linie: var(--linie); --linie2: var(--linie2); --hover: var(--hover); --aktiv: var(--aktiv); --dunkel: #2e3238; --gruen: #149a59; --gruen-text: #4ADE8A; --gruen-tint: var(--gruen-tint); --sc-hi-bg: rgba(22,166,95,.16); --sc-hi-rand: rgba(74,222,138,.28); --sc-hi-text: #4ADE8A; --sc-gut-bg: rgba(39,181,103,.14); --sc-gut-rand: rgba(39,181,103,.28); --sc-gut-text: #5fd48b; --sc-mittel-bg: rgba(185,134,11,.16); --sc-mittel-rand: rgba(232,177,55,.3); --sc-mittel-text: #e8b137; --sc-schwach-bg: rgba(176,74,58,.16); --sc-schwach-rand: rgba(224,123,106,.3); --sc-schwach-text: #e07b6a; --scout-bg: #1c1f2b; --scout-rand: #2c3048; --scout-text: #b9b3ff; --scout-knopf: #5f5cb3; --scout-chip: #2a2d3f; --lader-bg: rgba(23,24,25,.55); }
-html.tw-dark { --t1: #0F1720; --t2: #4A5560; --t3: #7A8592; --aus: #9AA4B1; --zebra: #F8FAFB; --seite: var(--seite); --karte: #FFFFFF; --karte2: var(--karte2); --leiste: var(--karte2); --linie: var(--linie); --linie2: #D3D7DC; --hover: #E3E6EA; --aktiv: #FFFFFF; --dunkel: #0f1520; --gruen-text: var(--gruen-text); --gruen-tint: var(--gruen-tint); --sc-hi-bg: rgba(22,166,95,.12); --sc-hi-rand: rgba(22,166,95,.35); --sc-hi-text: var(--gruen-text); --sc-gut-bg: rgba(39,181,103,.12); --sc-gut-rand: rgba(39,181,103,.35); --sc-gut-text: #1a7a45; --sc-mittel-bg: rgba(185,134,11,.12); --sc-mittel-rand: rgba(185,134,11,.35); --sc-mittel-text: #8a6208; --sc-schwach-bg: rgba(176,74,58,.12); --sc-schwach-rand: rgba(176,74,58,.35); --sc-schwach-text: #9a3d2e; --scout-bg: #EEF1FB; --scout-rand: #d9d2f7; --scout-text: #5b58c7; --scout-knopf: #5b58c7; --scout-chip: #E4E8FA; --lader-bg: rgba(244,246,248,.55); }
+html.tw-dark { --t1: #0F1720; --t2: #4A5560; --t3: #7A8592; --aus: #9AA4B1; --zebra: #F8FAFB; --seite: #F4F6F8; --karte: #FFFFFF; --karte2: #F1F3F5; --leiste: #E9ECEF; --linie: #E1E5E2; --linie2: #D3D7DC; --hover: #E3E6EA; --aktiv: #FFFFFF; --dunkel: #0f1520; --gruen-text: #0F6B3F; --gruen-tint: #E8F7EE; --sc-hi-bg: rgba(22,166,95,.12); --sc-hi-rand: rgba(22,166,95,.35); --sc-hi-text: #0F6B3F; --sc-gut-bg: rgba(39,181,103,.12); --sc-gut-rand: rgba(39,181,103,.35); --sc-gut-text: #1a7a45; --sc-mittel-bg: rgba(185,134,11,.12); --sc-mittel-rand: rgba(185,134,11,.35); --sc-mittel-text: #8a6208; --sc-schwach-bg: rgba(176,74,58,.12); --sc-schwach-rand: rgba(176,74,58,.35); --sc-schwach-text: #9a3d2e; --scout-bg: #EEF1FB; --scout-rand: #d9d2f7; --scout-text: #5b58c7; --scout-knopf: #5b58c7; --scout-chip: #E4E8FA; --lader-bg: rgba(244,246,248,.55); }
 html, body { background: var(--seite); color: var(--t1); }
 .tw-lang-kurz{display:none}@media (max-width:560px){.tw-lang-text{display:none}.tw-lang-kurz{display:inline}}</style>
 <meta name="description" content="All transfer news, club needs with player matching, scout ranking and a player database from 37 leagues and 20 countries — updated hourly." />
