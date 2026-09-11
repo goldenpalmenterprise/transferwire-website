@@ -6872,6 +6872,15 @@ function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScou
       h("div", { className: "tw-sn-fuss" }, h("button", { type: "button", onClick: () => onNavigate("impressum") }, en ? "Imprint" : "Impressum"), h("button", { type: "button", onClick: () => onNavigate("datenschutz") }, en ? "Privacy" : "Datenschutz"), h("button", { type: "button", onClick: () => onNavigate("agb") }, en ? "Terms" : "AGB"))));
 }
 
+const VERL_DE = [[/yellow card suspension|red card suspension|suspension|suspended/i, ''], [/heel problems?/i, 'Fersenprobleme'], [/ankle surgery/i, 'Sprunggelenk-OP'], [/ankle (injury|problems?|ligament)/i, 'Sprunggelenkverletzung'], [/knee surgery/i, 'Knie-OP'], [/knee (injury|problems?)/i, 'Knieverletzung'], [/cruciate/i, 'Kreuzbandriss'], [/hamstring/i, 'Oberschenkelverletzung (hintere Muskulatur)'], [/thigh (injury|problems?)/i, 'Oberschenkelverletzung'], [/calf (injury|problems?)/i, 'Wadenverletzung'], [/groin (injury|problems?|strain)/i, 'Leistenverletzung'], [/muscle (injury|problems?)/i, 'Muskelverletzung'], [/muscular/i, 'Muskul\u00e4re Probleme'], [/back (injury|problems?)/i, 'R\u00fcckenprobleme'], [/shoulder (injury|problems?)/i, 'Schulterverletzung'], [/hip (injury|problems?)/i, 'H\u00fcftverletzung'], [/foot (injury|problems?)/i, 'Fu\u00dfverletzung'], [/concussion/i, 'Gehirnersch\u00fctterung'], [/fracture|broken/i, 'Bruch'], [/surgery/i, 'Operation'], [/illness|virus|ill\b/i, 'Krankheit'], [/knock/i, 'Prellung'], [/fitness/i, 'Fitnessr\u00fcckstand'], [/injury/i, 'Verletzung']];
+function istSperre(h) { return !!h && (h.kategorie === 'Sperre' || /suspension|sperre|card\b|rote karte|gelbe karte/i.test(String(h.grund || ''))); }
+function historieOhneSperren(liste) { return (liste || []).filter(h => !istSperre(h)); }
+function verletzungDe(grund) { const g = String(grund || '').trim(); if (LANG === 'en') return g; for (const [re, de] of VERL_DE) if (re.test(g)) return de || g; return g; }
+function tageZwischen(a, b) { const x = a ? new Date(a) : null; const y = b ? new Date(b) : new Date(); if (!x || isNaN(x)) return 0; return Math.max(0, Math.round((y - x) / 86400000)); }
+function verletzungSumme(liste) { const l = historieOhneSperren(liste); const seit = Date.now() - 365 * 86400000; const jahr = l.filter(h => h.von && new Date(h.von).getTime() >= seit); const tage = jahr.reduce((a, h) => a + tageZwischen(h.von, h.bis), 0); const n = jahr.length; const en = LANG === 'en'; return (en ? 'Last 12 months: ' : 'Letzte 12 Monate: ') + n + (en ? (n === 1 ? ' absence' : ' absences') : (n === 1 ? ' Ausfall' : ' Ausf\u00e4lle')) + (n ? ' \u00b7 ~' + tage + (en ? ' days' : ' Tage') : ''); }
+function masz(v, einheit) { if (v === null || v === undefined || v === '') return ''; const t = String(v).trim(); if (/[a-z]/i.test(t)) return t; const n = parseFloat(t.replace(',', '.')); return isNaN(n) ? t : Math.round(n) + ' ' + einheit; }
+function gesuchAlter(n) { const t = n && (n.published || n.published_at || n.createdAt); if (!t) return n && n.publishedAt ? String(n.publishedAt) : ''; const d = new Date(t); if (isNaN(d)) return String(n.publishedAt || ''); const tage = Math.round((Date.now() - d.getTime()) / 86400000); if (LANG === 'en') return tage <= 0 ? 'today' : tage === 1 ? 'since 1 day' : 'since ' + tage + ' days'; return tage <= 0 ? 'heute' : tage === 1 ? 'seit 1 Tag' : 'seit ' + tage + ' Tagen'; }
+function gesucheBlock(passende, onKontakt) { if (!passende || !passende.length) return null; return React.createElement(React.Fragment, null, React.createElement('div', { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 700, color: MUTED, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 } }, t('pl_needs')), React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 7, marginBottom: 14 } }, passende.map(n => { const club = seekingClub(n); return React.createElement('div', { key: n.id, style: { display: 'flex', alignItems: 'center', gap: 10, background: 'var(--karte2)', border: '1px solid var(--linie)', borderRadius: 10, padding: '8px 11px', fontFamily: FONT_BODY, fontSize: 12.5, color: INK } }, React.createElement(ClubLogo, { name: club, size: 26 }), React.createElement('div', { style: { flex: 1, minWidth: 0 } }, React.createElement('div', { style: { fontWeight: 700 } }, club, React.createElement('span', { style: { color: MUTED, fontWeight: 500 } }, n.league ? ' \u00b7 ' + n.league : '')), React.createElement('div', { style: { fontSize: 12, color: MUTED, marginTop: 1 } }, [n.positionNeeded, gesuchAlter(n)].filter(Boolean).join(' \u00b7 '))), React.createElement('button', { onClick: e => { e.stopPropagation(); if (typeof onKontakt === 'function') onKontakt(club); }, style: { cursor: 'pointer', background: 'transparent', border: '1px solid var(--teal)', color: 'var(--teal)', borderRadius: 8, padding: '6px 10px', fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 700, whiteSpace: 'nowrap' } }, t('kt_btn'))); }))); }
 function TransferApp({
   account,
   onNavigate,
@@ -9655,30 +9664,16 @@ function TransferApp({
         textTransform: "uppercase",
         lineHeight: 1.1
       }
-    }, d.name), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontFamily: FONT_BODY,
-        fontSize: 12.5,
-        color: MUTED,
-        marginTop: 3
-      }
-    }, d.team, " · ", d.league, " · ", d.pos, d.age ? ` · ${d.age} J.` : "", d.nat ? ` · ${d.nat}` : "", d.height ? ` · ${d.height}` : "", d.weight ? ` · ${d.weight}` : "", geb ? ` · ${LANG === "en" ? "b." : "geb."} ${geb}` : ""), /*#__PURE__*/React.createElement(VereinGeprueft, { pid: plDetail.pid || d.player_id || d.pid })), /*#__PURE__*/React.createElement("button", {
+    }, d.name), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 7, marginTop: 5, fontFamily: FONT_BODY, fontSize: 14, fontWeight: 700, color: INK } }, React.createElement(ClubLogo, { name: d.team, size: 20 }), d.team, React.createElement("span", { style: { color: MUTED, fontWeight: 500 } }, d.league ? " · " + d.league : "")), React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, marginTop: 3 } }, [d.age ? d.age + (LANG === "en" ? " years" : " Jahre") : "", masz(d.height, "cm"), masz(d.weight, "kg"), d.pos].filter(Boolean).join(" · ")), /*#__PURE__*/React.createElement(VereinGeprueft, { pid: plDetail.pid || d.player_id || d.pid })), /*#__PURE__*/React.createElement("button", {
       onClick: () => {
         if (on) removeWatch("spieler", d.name);else addWatch("spieler", d.name);
       },
       style: {
         cursor: "pointer",
-        background: on ? "#eef7f1" : "#27b567",
-        border: on ? "1px solid #bfe3cf" : "none",
-        borderRadius: 9,
-        padding: "9px 13px",
-        fontFamily: FONT_BODY,
-        fontSize: 12,
-        fontWeight: 800,
-        color: on ? "#149a59" : "#fff",
+        background: on ? "var(--gruen-tint)" : "transparent", border: on ? "1px solid var(--sc-hi-rand)" : "1px solid var(--linie2)", borderRadius: 9, padding: "9px 13px", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, color: on ? "var(--gruen-text)" : INK,
         flexShrink: 0
       }
-    }, on ? "✓" : t("watch_add"))), plDetail.historie && plDetail.historie.length > 0 ? /*#__PURE__*/React.createElement("div", { style: { background: "#F4F6F8", border: "1px solid var(--linie)", borderRadius: 10, padding: "9px 12px", marginBottom: 12, fontFamily: FONT_BODY, fontSize: 12.5, color: INK } }, /*#__PURE__*/React.createElement("div", { style: { display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap", marginBottom: 6 } }, /*#__PURE__*/React.createElement("strong", null, LANG === "en" ? "Injury history" : "Verletzungshistorie"), plDetail.verletzung_summe ? /*#__PURE__*/React.createElement("span", { style: { color: MUTED, fontSize: 12 } }, (LANG === "en" ? "Last 12 months: " : "Letzte 12 Monate: ") + plDetail.verletzung_summe.anzahl_12m + (LANG === "en" ? " absences, ~" : " Ausf\u00e4lle, ~") + plDetail.verletzung_summe.tage_12m + (LANG === "en" ? " days" : " Tage") + (plDetail.verletzung_summe.gesamt > plDetail.historie.length ? " \u00b7 " + plDetail.verletzung_summe.gesamt + (LANG === "en" ? " total" : " gesamt") : "")) : null), /*#__PURE__*/React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 3, maxHeight: 190, overflowY: "auto" } }, plDetail.historie.slice(0, 20).map((h, i) => /*#__PURE__*/React.createElement("div", { key: i, style: { display: "flex", gap: 8, alignItems: "baseline", fontSize: 12 } }, /*#__PURE__*/React.createElement("span", { style: { color: h.aktiv && !h.bis ? "#b04a3a" : MUTED, minWidth: 150, fontVariantNumeric: "tabular-nums" } }, (h.von ? h.von.slice(8, 10) + "." + h.von.slice(5, 7) + "." + h.von.slice(0, 4) : "?") + " \u2013 " + (h.bis ? h.bis.slice(8, 10) + "." + h.bis.slice(5, 7) + "." + h.bis.slice(0, 4) : (LANG === "en" ? "ongoing" : "laufend"))), /*#__PURE__*/React.createElement("span", { style: { flex: 1, fontWeight: h.aktiv && !h.bis ? 700 : 500 } }, (h.kategorie === "Sperre" ? "" : "") + h.grund), h.spiele ? /*#__PURE__*/React.createElement("span", { style: { color: MUTED } }, h.spiele + (LANG === "en" ? " games" : " Spiele")) : null)))) : null, plDetail.injuries && plDetail.injuries.length > 0 && /*#__PURE__*/React.createElement("div", {
+    }, on ? "✓" : t("watch_add"))), gesucheBlock(passende, setContactClub), plDetail.historie && plDetail.historie.length > 0 ? /*#__PURE__*/React.createElement("div", { style: { background: "var(--karte2)", border: "1px solid var(--linie)", borderRadius: 10, padding: "9px 12px", marginBottom: 12, fontFamily: FONT_BODY, fontSize: 12.5, color: INK } }, /*#__PURE__*/React.createElement("div", { style: { display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap", marginBottom: 6 } }, /*#__PURE__*/React.createElement("strong", null, LANG === "en" ? "Injury history" : "Verletzungshistorie"), /*#__PURE__*/React.createElement("span", { style: { color: INK, fontSize: 13, fontWeight: 700 } }, verletzungSumme(plDetail.historie))), /*#__PURE__*/React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 3, maxHeight: 190, overflowY: "auto" } }, historieOhneSperren(plDetail.historie).slice(0, 20).map((h, i) => /*#__PURE__*/React.createElement("div", { key: i, style: { display: "flex", gap: 8, alignItems: "baseline", fontSize: 12 } }, /*#__PURE__*/React.createElement("span", { style: { color: h.aktiv && !h.bis ? "#b04a3a" : MUTED, minWidth: 150, fontVariantNumeric: "tabular-nums" } }, (h.von ? h.von.slice(8, 10) + "." + h.von.slice(5, 7) + "." + h.von.slice(0, 4) : "?") + " \u2013 " + (h.bis ? h.bis.slice(8, 10) + "." + h.bis.slice(5, 7) + "." + h.bis.slice(0, 4) : (LANG === "en" ? "ongoing" : "laufend"))), /*#__PURE__*/React.createElement("span", { style: { flex: 1, fontWeight: (h.aktiv && !h.bis) || Number(h.spiele) >= 10 || tageZwischen(h.von, h.bis) >= 30 ? 700 : 500, color: Number(h.spiele) >= 10 || tageZwischen(h.von, h.bis) >= 30 ? "var(--sc-schwach-text)" : INK } }, verletzungDe(h.grund)), h.spiele ? /*#__PURE__*/React.createElement("span", { style: { color: MUTED } }, h.spiele + (LANG === "en" ? " games" : " Spiele")) : null)))) : null, plDetail.injuries && plDetail.injuries.length > 0 && /*#__PURE__*/React.createElement("div", {
       style: {
         background: "#fbeeeb",
         border: "1px solid #e8c4bc",
@@ -9709,17 +9704,14 @@ function TransferApp({
         color: "#4a4a48",
         marginBottom: 14
       }
-    }, /*#__PURE__*/React.createElement("span", null, d.apps, " Sp."), /*#__PURE__*/React.createElement("span", null, d.min, "′"), d.rating > 0 && /*#__PURE__*/React.createElement("span", null, "Note ", d.rating), /*#__PURE__*/React.createElement("span", null, d.goals, "T / ", d.assists, "A"), d.pass_acc > 0 && /*#__PURE__*/React.createElement("span", null, "Pässe ", d.pass_acc, "%"), d.duels_pct > 0 && /*#__PURE__*/React.createElement("span", null, "Zweikämpfe ", d.duels_pct, "%"), /*#__PURE__*/React.createElement("span", null, "G", d.yellow, "/R", d.red)), /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("span", null, d.apps, LANG === "en" ? " games" : " Spiele"), /*#__PURE__*/React.createElement("span", null, d.min, " Min."), d.rating > 0 && /*#__PURE__*/React.createElement("span", null, (LANG === "en" ? "Rating " : "Note "), d.rating), /*#__PURE__*/React.createElement("span", null, d.goals, (LANG === "en" ? " goals / " : " Tore / "), d.assists, " Assists"), d.pass_acc > 0 && /*#__PURE__*/React.createElement("span", null, (LANG === "en" ? "Pass accuracy " : "Passquote "), Math.round(Number(d.pass_acc)), " %"), d.duels_pct > 0 && /*#__PURE__*/React.createElement("span", null, (LANG === "en" ? "Duels won " : "Zweikämpfe "), Math.round(Number(d.duels_pct)), " %"), /*#__PURE__*/React.createElement("span", null, d.yellow, (LANG === "en" ? " yellow / " : " Gelb / "), d.red, (LANG === "en" ? " red" : " Rot"))), /*#__PURE__*/React.createElement("div", {
       style: {
         fontFamily: FONT_BODY,
         fontSize: 11,
         fontWeight: 700,
         color: MUTED,
         textTransform: "uppercase",
-        letterSpacing: 1,
-        marginBottom: 6
-      }
-    }, t("pl_form"), /*#__PURE__*/React.createElement(ScoreInfo, { kind: "performance", size: 13 })), !plDetail.form || plDetail.form.length === 0 ? /*#__PURE__*/React.createElement("div", {
+        letterSpacing: 1, marginBottom: 6 } }, (plDetail.form && plDetail.form.length === 1 ? (LANG === "en" ? "Last appearance — TW Performance Score" : "Letzter Einsatz — TW Performance Score") : t("pl_form")), /*#__PURE__*/React.createElement(ScoreInfo, { kind: "performance", size: 13 })), !plDetail.form || plDetail.form.length === 0 ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontFamily: FONT_BODY,
         fontSize: 12.5,
@@ -9941,38 +9933,7 @@ function TransferApp({
         alignSelf: "center",
         textDecoration: "underline"
       }
-    }, t("px_yt"))))), passende.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontFamily: FONT_BODY,
-        fontSize: 11,
-        fontWeight: 700,
-        color: MUTED,
-        textTransform: "uppercase",
-        letterSpacing: 1,
-        marginBottom: 6
-      }
-    }, t("pl_needs")), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        gap: 7,
-        marginBottom: 6
-      }
-    }, passende.map(n => /*#__PURE__*/React.createElement("div", {
-      key: n.id,
-      style: {
-        background: "var(--karte2)",
-        borderRadius: 9,
-        padding: "8px 11px",
-        fontFamily: FONT_BODY,
-        fontSize: 12.5,
-        color: INK
-      }
-    }, /*#__PURE__*/React.createElement("strong", null, n.fromClub || n.toClub), " · ", n.positionNeeded, n.seekStrengths ? /*#__PURE__*/React.createElement("span", {
-      style: {
-        color: "#0f6a3f"
-      }
-    }, " · ", n.seekStrengths) : null)))), /*#__PURE__*/React.createElement("button", {
+    }, t("px_yt"))))), React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: 1, marginBottom: 5 } }, LANG === "en" ? "Personal data" : "Stammdaten"), React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)", marginBottom: 6 } }, [geb ? (LANG === "en" ? "born " : "geb. ") + geb : "", d.nat ? (LANG === "en" ? "nationality " : "Nationalität ") + d.nat : "", masz(d.height, "cm"), masz(d.weight, "kg")].filter(Boolean).join(" · ")), /*#__PURE__*/React.createElement("button", {
       onClick: () => setPlDetail(null),
       style: {
         width: "100%",
