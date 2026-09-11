@@ -7034,6 +7034,7 @@ function TransferApp({
   const [perfSw, setPerfSw] = useState("");
   const [perfOpen, setPerfOpen] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [glockeOffen, setGlockeOffen] = useState(false);
   const [notifyMode, setNotifyMode] = useState(null);
   const [tourStep, setTourStep] = useState(() => {
     try {
@@ -7783,21 +7784,7 @@ function TransferApp({
     style: {
       position: "relative"
     }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => setMenuOpen(!menuOpen),
-    "aria-label": "Menü",
-    style: {
-      display: "inline-flex",
-      flexDirection: "column",
-      justifyContent: "center",
-      gap: 4,
-      cursor: "pointer",
-      background: "rgba(255,255,255,.06)",
-      border: "1px solid rgba(255,255,255,.16)",
-      borderRadius: 9,
-      padding: "11px 12px"
-    }
-  }, /*#__PURE__*/React.createElement("span", { style: { width: 26, height: 26, borderRadius: 99, background: "#149a59", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 900, letterSpacing: .3 } }, account && account.email ? account.email[0].toUpperCase() : "\u2261")), menuOpen && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("button", { type: "button", onClick: () => { setGlockeOffen(!glockeOffen); setMenuOpen(false); }, "aria-label": "Benachrichtigungen", title: LANG === "en" ? "Notifications" : "Benachrichtigungen", style: { position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.16)", borderRadius: 9, padding: "10px 11px", marginRight: 8, color: "#ececec" } }, /*#__PURE__*/React.createElement("span", { style: { width: 20, height: 20, display: "inline-flex" }, dangerouslySetInnerHTML: { __html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>' } }), (watch && (watch.alerts || watch.digest)) ? /*#__PURE__*/React.createElement("span", { style: { position: "absolute", top: 7, right: 8, width: 8, height: 8, borderRadius: 99, background: "#22c55e", border: "2px solid #171819" } }) : null), glockeOffen && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", { onClick: () => setGlockeOffen(false), style: { position: "fixed", inset: 0, zIndex: 1100 } }), /*#__PURE__*/React.createElement("div", { style: { position: "absolute", right: 52, top: "calc(100% + 8px)", zIndex: 1110, background: CARD, border: `1px solid ${HAIR}`, borderRadius: 12, boxShadow: "0 14px 38px rgba(0,0,0,.45)", minWidth: 300, padding: "12px 14px" } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, color: MUTED, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 } }, t("set_notif")), /*#__PURE__*/React.createElement("label", { style: { display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 13, color: INK, marginBottom: 8, cursor: "pointer" } }, /*#__PURE__*/React.createElement("input", { type: "checkbox", checked: !!(watch && watch.alerts), onChange: e => updateWatch(Object.assign({}, watch, { alerts: e.target.checked, asked: true })) }), /*#__PURE__*/React.createElement("span", null, t("set_alerts"))), /*#__PURE__*/React.createElement("label", { style: { display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 13, color: INK, marginBottom: 10, cursor: "pointer" } }, /*#__PURE__*/React.createElement("input", { type: "checkbox", checked: !!(watch && watch.digest), onChange: e => updateWatch(Object.assign({}, watch, { digest: e.target.checked, asked: true })) }), /*#__PURE__*/React.createElement("span", null, t("set_digest"))), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, (watch && watch.alertEmail) || (account && account.email) || ""), /*#__PURE__*/React.createElement("button", { type: "button", onClick: () => { setGlockeOffen(false); setShowSettings(true); }, style: { marginTop: 10, cursor: "pointer", background: "none", border: "none", padding: 0, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "#22c55e" } }, LANG === "en" ? "All settings \u2192" : "Alle Einstellungen \u2192"))), /*#__PURE__*/React.createElement("button", { onClick: () => { setMenuOpen(!menuOpen); setGlockeOffen(false); }, "aria-label": "Men\u00fc", title: LANG === "en" ? "Settings" : "Einstellungen", style: { display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.16)", borderRadius: 9, padding: "10px 11px", color: "#ececec" } }, /*#__PURE__*/React.createElement("span", { style: { width: 20, height: 20, display: "inline-flex" }, dangerouslySetInnerHTML: { __html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>' } })), menuOpen && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     onClick: () => setMenuOpen(false),
     style: {
       position: "fixed",
@@ -7809,12 +7796,7 @@ function TransferApp({
       position: "absolute",
       right: 0,
       top: "calc(100% + 8px)",
-      zIndex: 1110,
-      background: "#fff",
-      border: `1px solid ${HAIR}`,
-      borderRadius: 12,
-      boxShadow: "0 14px 38px rgba(0,0,0,.22)",
-      minWidth: 262,
+      zIndex: 1110, background: CARD, border: `1px solid ${HAIR}`, borderRadius: 12, boxShadow: "0 14px 38px rgba(0,0,0,.45)", minWidth: 262,
       overflow: "hidden"
     }
   }, /*#__PURE__*/React.createElement("button", {
@@ -7873,10 +7855,7 @@ function TransferApp({
     style: {
       fontSize: 10.5,
       fontWeight: 800,
-      color: "#149a59",
-      background: "#eef7f1",
-      borderRadius: 6,
-      padding: "2px 7px"
+      color: "#7fe0a8", background: "rgba(20,154,89,.18)", borderRadius: 6, padding: "2px 7px"
     }
   }, t("state_on"))), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
@@ -7912,10 +7891,7 @@ function TransferApp({
     style: {
       fontSize: 10.5,
       fontWeight: 800,
-      color: "#149a59",
-      background: "#eef7f1",
-      borderRadius: 6,
-      padding: "2px 7px"
+      color: "#7fe0a8", background: "rgba(20,154,89,.18)", borderRadius: 6, padding: "2px 7px"
     }
   }, t("state_on"))), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
@@ -7927,14 +7903,7 @@ function TransferApp({
       width: "100%",
       alignItems: "center",
       gap: 10,
-      background: "#faf6f5",
-      border: "none",
-      cursor: "pointer",
-      padding: "13px 15px",
-      fontFamily: FONT_BODY,
-      fontSize: 13.5,
-      fontWeight: 700,
-      color: "#b04a3a",
+      background: "#26282b", border: "none", cursor: "pointer", padding: "13px 15px", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 700, color: "#e07b6a",
       textAlign: "left",
       borderTop: `1px solid ${HAIR}`
     }
