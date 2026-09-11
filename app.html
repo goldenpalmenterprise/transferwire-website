@@ -3461,7 +3461,7 @@ function RouteLine({ item, color }) { if (item && item.fromClub && item.toClub &
   const wrap = kids => React.createElement("div", { style: { flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 9, minWidth: 0 } }, kids);
   if (von && zu) return wrap([club(von, "von", true), pfeil, club(zu, "zu", false)]);
   if (frei && zu) return wrap([React.createElement("span", { key: "frei", style: { flex: 1, textAlign: "right", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 600, color: MUTED } }, en ? "Free agent" : "Vertragslos"), pfeil, club(zu, "zu", false)]);
-  if (zu) return wrap([lab(en ? "Target club" : "Zielverein", "l"), club(zu, "zu", false)]);
+  if (zu) return wrap([lab(en ? "Target club" : ((item.type === "vertrag" || item.type === "vertrag_verlaengert" || item.type === "trainer") ? "Verein" : "Zielverein"), "l"), club(zu, "zu", false)]);
   if (von) return wrap([lab(frei ? (en ? "Free agent \u00b7 last club" : "Vertragslos \u00b7 zuletzt") : (en ? "Current club" : "Aktueller Verein"), "l"), club(von, "von", false)]);
   return null;
 }
