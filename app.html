@@ -4560,6 +4560,15 @@ function ProbetrainingRadar({ news, onOpen }) {
       h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#4a4a48", marginTop: 4, lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" } }, n.summary),
       h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, marginTop: 6 } }, [n.toClub || n.fromClub, (n.sources && n.sources[0] && n.sources[0].name) || n.sourceName || ""].filter(Boolean).join(" \u00b7 "))))));
 }
+function bedarfStruktur(text) { const t = String(text || "").replace(/\s+/g, " ").trim(); if (!t) return { fakten: [], empfehlung: "" };
+  if (t.indexOf(" \u00b7 ") >= 0 && !/[.!?]\s+[A-Z\u00c4\u00d6\u00dc]/.test(t)) { const teile = t.split(/\s*\|\|\s*|\s*Empfehlung:\s*/i); return { fakten: teile[0].split(" \u00b7 ").map(x => x.trim()).filter(Boolean).slice(0, 5), empfehlung: (teile[1] || "").trim() }; }
+  const saetze = t.split(/(?<=[.!?])\s+(?=[A-Z\u00c4\u00d6\u00dc\u201e"(])/).map(x => x.trim()).filter(Boolean);
+  const empfRe = /^(sinnvoll|ideal|gesucht|passend|denkbar|empfehl|infrage|in frage|profil|ein (?:laufstarker|junger|erfahrener|schneller|robuster|spielstarker|kopfballstarker|zweikampfstarker))|\b(w[\u00e4a]re ein|br[\u00e4a]uchte|sollte|bietet sich|k[\u00f6o]nnte ein|w[\u00fcu]rde passen|passt ein|gesucht wird|gesucht ist|w[\u00fcu]nschenswert|priorit[\u00e4a]t)\b/i;
+  const empf = saetze.filter(x => empfRe.test(x)); const fakten = saetze.filter(x => !empfRe.test(x)); const frag = [];
+  for (const x of fakten) { const teile = x.replace(/[.!?]$/, "").split(/;|,\s*(?=(?:auch wenn|wobei|sofern|zumal|allerdings|w\u00e4hrend)\b)|\s(?:zudem|au\u00dferdem|ebenso|zugleich|dar\u00fcber hinaus)\s/i); for (let f of teile) { f = f.replace(/^(?:die|der|das|ein|eine|zusammen mit|dazu|zudem|au\u00dferdem|nach|laut|wie|so|dabei)\s+/i, "").replace(/\s*\([^)]*\)\s*/g, " ").replace(/\s+/g, " ").trim(); if (f.length >= 8 && !/^(?:auch wenn|wobei|sofern|zumal|allerdings|w\u00e4hrend|die quellen|die vereinszuordnung|quellenanalyse)/i.test(f)) frag.push(f.charAt(0).toUpperCase() + f.slice(1)); } }
+  return { fakten: frag.slice(0, 4), empfehlung: empf.join(" ") }; }
+function bedarfBlock(text, v) { const b = bedarfStruktur(text); if (!b.fakten.length) return null; return React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, lineHeight: 1.55, color: "var(--t2)", margin: "0 0 11px" } }, b.fakten.map((f, i) => React.createElement(React.Fragment, { key: i }, i ? React.createElement("span", { style: { color: "var(--t3)", padding: "0 6px" } }, "\u00b7") : null, React.createElement("span", { style: { color: i === 0 ? "var(--t1)" : "var(--t2)", fontWeight: i === 0 ? 700 : 500 } }, f)))); }
+function bedarfEmpfehlung(text) { const b = bedarfStruktur(text); if (!b.empfehlung) return null; return React.createElement("div", { style: { width: "100%", fontFamily: FONT_BODY, fontSize: 12.5, lineHeight: 1.5, color: "var(--t2)", marginTop: 4 } }, b.empfehlung); }
 function NeedCard({
   item,
   highlight,
@@ -4630,20 +4639,7 @@ function NeedCard({
       marginBottom: 10,
       flexWrap: "wrap"
     }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontFamily: FONT_DISPLAY,
-      fontWeight: 700,
-      fontSize: 13,
-      color: v.color,
-      background: v.soft,
-      borderRadius: 8,
-      padding: "3px 9px",
-      flexShrink: 0,
-      letterSpacing: .3,
-      textTransform: "uppercase"
-    }
-  }, LANG === "en" ? "seeks" : "sucht"), /*#__PURE__*/React.createElement(ClubLogo, { name: club, size: 26 }), React.createElement("span", {
+  }, /*#__PURE__*/React.createElement(ClubLogo, { name: club, size: 26 }), React.createElement("span", {
     style: {
       fontFamily: FONT_DISPLAY,
       fontWeight: 600,
@@ -4671,15 +4667,7 @@ function NeedCard({
       borderRadius: 999,
       padding: "3px 10px"
     }
-  }, c))), dS(item) && /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 12.5,
-      color: "#4a4a48",
-      lineHeight: 1.5,
-      margin: "0 0 11px"
-    }
-  }, dS(item)), item.seekStrengths && /*#__PURE__*/React.createElement("div", {
+  }, c))), bedarfBlock(dS(item), v), item.seekStrengths && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexWrap: "wrap",
@@ -4708,29 +4696,11 @@ function NeedCard({
       borderRadius: 7,
       padding: "3px 8px"
     }
-  }, s.trim()))), onContacts && /*#__PURE__*/React.createElement("button", {
+  }, s.trim()))), bedarfEmpfehlung(dS(item)), onContacts && /*#__PURE__*/React.createElement("button", {
     onClick: () => onContacts(club),
     style: {
       cursor: "pointer",
-      background: "#e8f4f6",
-      border: "1px solid #bcdde3",
-      color: "var(--teal)",
-      borderRadius: 8,
-      padding: "6px 11px",
-      fontFamily: FONT_BODY,
-      fontSize: 11.5,
-      fontWeight: 800,
-      marginBottom: 11
-    }
-  }, "☎ ", t("kt_btn")), dS(item) && /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 12.5,
-      lineHeight: 1.5,
-      color: "#4a4a48",
-      margin: "0 0 12px"
-    }
-  }, dS(item)), match ? /*#__PURE__*/React.createElement("div", { className: "tw-match", style: { marginTop: 10, paddingTop: 10, borderTop: "1px dashed " + HAIR } },
+      background: "transparent", border: "1px solid var(--teal)", color: "var(--teal)", borderRadius: 8, padding: "6px 11px", fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 700, marginBottom: 11, alignSelf: "flex-start" } }, t("kt_btn")), match ? /*#__PURE__*/React.createElement("div", { className: "tw-match", style: { marginTop: 10, paddingTop: 10, borderTop: "1px dashed " + HAIR } },
     null,
     /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: INK, marginBottom: 5 } }, LANG === "en" ? "Why this match?" : "Warum dieses Match?"),
     /*#__PURE__*/React.createElement("ul", { style: { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 3 } }, (match.gruende || []).slice(0, 6).map((g, i) => /*#__PURE__*/React.createElement("li", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12.5, lineHeight: 1.4, color: g.ok ? INK : MUTED, display: "flex", gap: 6 } }, /*#__PURE__*/React.createElement("span", { style: { color: g.ok ? "#149a59" : MUTED, fontWeight: 800, flexShrink: 0 } }, g.ok ? "\u2713" : "\u25CB"), /*#__PURE__*/React.createElement("span", null, g.t)))),
@@ -4754,7 +4724,7 @@ function NeedCard({
       padding: "3px 10px",
       borderRadius: 999
     }
-  }, item.fee), ((String(item.summary || "").indexOf("KI-Prognose") >= 0) || /Prognose/.test(String(item.source_name || item.source || "")) || ((item.sources || []).some(x => /Prognose/.test(String(x && x.name || ""))))) && /*#__PURE__*/React.createElement("span", { title: LANG === "en" ? "AI forecast by the TransferWire prediction agent \u2014 not a confirmed report" : "KI-Prognose des TransferWire Prognose-Agenten \u2014 keine best\u00e4tigte Meldung", style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .6, textTransform: "uppercase", padding: "3px 9px", borderRadius: 999, background: "#EEF0FF", color: "#3B44B8", border: "1px solid #C9CEFF" } }, LANG === "en" ? "AI forecast" : "KI-Prognose"), /*#__PURE__*/React.createElement(Reliability, { value: item.reliability, size: 11 }), (item.sources || []).slice(0, 2).map((s, i) => /*#__PURE__*/React.createElement("a", {
+  }, item.fee), ((String(item.summary || "").indexOf("KI-Prognose") >= 0) || /Prognose/.test(String(item.source_name || item.source || "")) || ((item.sources || []).some(x => /Prognose/.test(String(x && x.name || ""))))) && /*#__PURE__*/React.createElement("span", { title: LANG === "en" ? "AI forecast by the TransferWire prediction agent \u2014 not a confirmed report" : "KI-Prognose des TransferWire Prognose-Agenten \u2014 keine best\u00e4tigte Meldung", style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .6, textTransform: "uppercase", padding: "3px 9px", borderRadius: 999, background: "#EEF0FF", color: "#3B44B8", border: "1px solid #C9CEFF" } }, LANG === "en" ? "AI forecast" : "KI-Prognose"), /*#__PURE__*/React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 6 } }, /*#__PURE__*/React.createElement(Reliability, { value: item.reliability, size: 11 }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, "· " + (LANG === "en" ? "reliability " : "Verlässlichkeit ") + (Number(item.reliability) || 0) + "/5")), (item.sources || []).slice(0, 2).map((s, i) => /*#__PURE__*/React.createElement("a", {
     key: i,
     href: s.url,
     onClick: e => { e.preventDefault(); e.stopPropagation(); if (s.url) window.open(s.url, "_blank"); },
