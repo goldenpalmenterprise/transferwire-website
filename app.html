@@ -9675,7 +9675,7 @@ function TransferApp({
         textTransform: "uppercase",
         lineHeight: 1.1
       }
-    }, d.name), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 7, marginTop: 5, fontFamily: FONT_BODY, fontSize: 14, fontWeight: 700, color: INK } }, React.createElement(ClubLogo, { name: d.team, size: 20 }), d.team, React.createElement("span", { style: { color: MUTED, fontWeight: 500 } }, d.league ? " · " + d.league : "")), React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, marginTop: 3 } }, [d.age ? d.age + (LANG === "en" ? " years" : " Jahre") : "", masz(d.height, "cm"), masz(d.weight, "kg"), d.pos].filter(Boolean).join(" · ")), /*#__PURE__*/React.createElement(VereinGeprueft, { pid: plDetail.pid || d.player_id || d.pid })), /*#__PURE__*/React.createElement("button", {
+    }, d.name), /*#__PURE__*/), /*#__PURE__*/React.createElement("button", {
       onClick: () => {
         if (on) removeWatch("spieler", d.name);else addWatch("spieler", d.name);
       },
