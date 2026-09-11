@@ -184,6 +184,9 @@ div[style*="z-index: 1100"] input[type="text"], div[style*="z-index: 1100"] inpu
 div[style*="z-index: 1100"] input[type="checkbox"] { accent-color: #149a59; width: 15px; height: 15px; }
 div[style*="z-index: 1100"] label { color: #dfe3e8 !important; }
 div[style*="z-index: 1100"] button[style*="background: rgb(255, 255, 255)"] { background: #26282b !important; color: #ececec !important; border-color: #3a3d42 !important; }
+div[style*="z-index: 1100"] div[style*="background: rgb(255, 255, 255)"] { background: #1e1f21 !important; }
+div[style*="z-index: 1100"] [style*="color: rgb(20, 24, 29)"] { color: #ececec !important; }
+div[style*="z-index: 1100"] > div { border-color: #2f3236 !important; }
 </style>
 <!-- tw-build: 2026-08-28-br suchemobil3 -->
 <style>.tw-lang-kurz{display:none}@media (max-width:560px){.tw-lang-text{display:none}.tw-lang-kurz{display:inline}}</style>
@@ -6526,7 +6529,7 @@ function SettingsOverlay({
     onClick: onClose,
     style: {
       cursor: "pointer",
-      background: "#fff",
+      background: CARD,
       border: `1px solid ${HAIR}`,
       borderRadius: 8,
       padding: 7
@@ -6535,7 +6538,7 @@ function SettingsOverlay({
     size: 15
   }))), /*#__PURE__*/React.createElement("div", {
     style: {
-      background: "#fff",
+      background: CARD,
       border: `1px solid ${HAIR}`,
       borderRadius: 12,
       padding: "14px 16px",
@@ -6560,7 +6563,7 @@ function SettingsOverlay({
     v: account.rolle
   }) : null, /*#__PURE__*/React.createElement(Row, { k: t("st_plan"), v: isTest ? t("st_plan_test") : (account.plan === "premium" ? "Premium" : account.plan === "abo" ? "Standard" : t("st_plan_abo")) }), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginTop: 12, flexWrap: "wrap" } }, /*#__PURE__*/React.createElement("button", { type: "button", onClick: onSubscribe, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, color: "#fff", background: "#149a59", border: "1px solid #1bb56a", borderRadius: 9, padding: "10px 14px" } }, account.plan === "premium" ? (LANG === "en" ? "Enterprise \u2013 request" : "Enterprise anfragen") : account.plan === "abo" ? (LANG === "en" ? "Upgrade to Premium" : "Auf Premium upgraden") : (LANG === "en" ? "Upgrade plan" : "Plan upgraden")), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED } }, account.plan === "premium" ? (LANG === "en" ? "Teams, seats and API on request." : "Teams, Sitze und API auf Anfrage.") : account.plan === "abo" ? (LANG === "en" ? "Premium adds club contacts and community contacts." : "Premium bringt Vereins-Kontakte und Community-Kontakte.") : (LANG === "en" ? "Compare Standard and Premium." : "Standard und Premium vergleichen.")))), /*#__PURE__*/React.createElement("div", {
     style: {
-      background: "#fff",
+      background: CARD,
       border: `1px solid ${HAIR}`,
       borderRadius: 12,
       padding: "14px 16px",
