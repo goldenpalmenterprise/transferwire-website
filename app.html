@@ -205,6 +205,9 @@ html.tw-dark header:has(+ .tw-tabbar) [style*="background: rgba(255, 255, 255"] 
 html.tw-dark header:has(+ .tw-tabbar) input { color: var(--t1) !important; }
 .tw-sn-kopf, .tw-sn-punkt, .tw-sn-ki { color: var(--t1); }
 html.tw-dark .tw-sn-funke { color: #149a59; }
+/* Spielfeld-Marker: solide Karte statt Tonung auf dem Rasen */
+.tw-main span[style*="border-radius: 99px"][style*="border: 2.5px solid"] { background: var(--karte) !important; }
+.tw-main span[style*="background: rgb(238, 241, 238)"] { background: var(--karte2) !important; }
 </style>
 <!-- tw-build: 2026-08-28-br suchemobil3 -->
 <style>
