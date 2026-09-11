@@ -1996,8 +1996,7 @@ const TYPE = {
   vertrag_verlaengert: { label: "Verl\u00e4ngert", en: "Extended", color: "#0f8e8e", soft: "#def0f0" },
   vertrag: { label: "Vertrag", en: "Contract", color: "#0f8e8e", soft: "#def0f0" },
   vertragslos: { label: "Vertragslos", en: "Free agent", color: "var(--t3)", soft: "#eef0f3" },
-  trade: { label: "Trade", en: "Trade", color: "#6b4fd8", soft: "#ece7fb" }
-};
+  trade: { label: "Trade", en: "Trade", color: "#6b4fd8", soft: "#ece7fb" }, trainer: { label: "Trainerwechsel", en: "Coaching change", color: "#c2410c", soft: "rgba(194,65,12,.14)" } };
 const RELIABILITY = ["", "Spekulation", "Unbest\u00e4tigt", "Belastbar", "Sehr wahrscheinlich", "Best\u00e4tigt"];
 const RELIABILITY_EN = ["", "Speculation", "Unconfirmed", "Solid", "Very likely", "Confirmed"];
 const POS_LABEL = {
@@ -2737,10 +2736,7 @@ function SignalLine({ item }) {
     React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: relColor(r), whiteSpace: "nowrap" } }, (en ? "Signal strength " : "Signalst\u00e4rke ") + sc + "/100"),
     React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, " \u00b7 " + trust));
 }
-function SourceLine({ sources }) {
-  const en = LANG === "en";
-  const list = (sources || []).filter(s => s && s.url);
-  if (!list.length) return React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, en ? "Source: TransferWire" : "Quelle: TransferWire");
+function SourceLine({ sources, fallback }) { const en = LANG === "en"; const list = (sources || []).filter(s => s && s.url); if (!list.length) { const q = fallback && fallback !== "TransferWire" ? fallback : "TransferWire"; return React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, (en ? "Source: " : "Quelle: ") + q); }
   const dom = twDomain(list[0].url);
   return React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 6, minWidth: 0, fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } },
     React.createElement("span", null, list.length + " " + (en ? (list.length === 1 ? "source" : "sources") : (list.length === 1 ? "Quelle" : "Quellen")) + " \u00b7 "),
@@ -2916,7 +2912,7 @@ function GerVue({ alle, onWatch, onOpen, updatedAt, watch, onSide, apply }) {
     weitere ? h("div", { className: "tw-card", style: { padding: "14px 16px", marginBottom: 12, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 14 } },
       h("div", null, h("div", { style: labelStyle }, en ? "Source trust" : "Quellenvertrauen"), sel(f.qv, v => setFeld("qv", v), [["3", en ? "medium or higher" : "mindestens mittel"], ["4", en ? "high only" : "nur hoch"], ["5", en ? "confirmed only" : "nur best\u00e4tigt"]], en ? "All" : "Alle", { width: "100%" })),
       h("div", null, h("div", { style: labelStyle }, en ? "Age" : "Alter"), h("div", { style: { display: "flex", gap: 6 } }, sel(f.alterVon, v => setFeld("alterVon", v), ALTER_OPTS, en ? "from" : "von", { width: "50%" }), sel(f.alterBis, v => setFeld("alterBis", v), ALTER_OPTS, en ? "to" : "bis", { width: "50%" }))),
-      h("div", null, h("div", { style: labelStyle }, en ? "Transfer type" : "Transferart"), sel(f.art, v => setFeld("art", v), [["fix", en ? "Done deals" : "Fixe Deals"], ["leihe", en ? "Loans" : "Leihen"], ["verlaengert", en ? "Extensions" : "Verl\u00e4ngerungen"], ["vertragslos", en ? "Free agents" : "Vertragslos"]], en ? "All" : "Alle", { width: "100%" })),
+      h("div", null, h("div", { style: labelStyle }, en ? "Transfer type" : "Transferart"), sel(f.art, v => setFeld("art", v), [["fix", en ? "Done deals" : "Fixe Deals"], ["leihe", en ? "Loans" : "Leihen"], ["verlaengert", en ? "Extensions" : "Verl\u00e4ngerungen"], ["vertragslos", en ? "Free agents" : "Vertragslos"], ["trainer", en ? "Coaching changes" : "Trainerwechsel"]], en ? "All" : "Alle", { width: "100%" })),
       h("div", null, h("div", { style: labelStyle }, en ? "Fee range" : "Abl\u00f6sebereich"), sel(f.abloese, v => setFeld("abloese", v), [["u1", en ? "under \u20ac1m" : "unter 1 Mio. \u20ac"], ["1-5", "1\u20135 Mio. \u20ac"], ["5-20", "5\u201320 Mio. \u20ac"], ["20+", en ? "over \u20ac20m" : "\u00fcber 20 Mio. \u20ac"]], en ? "All" : "Alle", { width: "100%" })),
       h("div", { style: { gridColumn: "1 / -1", display: "flex", gap: 16, flexWrap: "wrap", paddingTop: 2 } }, check("leihe", en ? "Loan" : "Leihe"), check("vertragslos", en ? "free agent" : "vertragslos"), check("beob", en ? "watched clubs only" : "nur beobachtete Vereine"), check("offiziell", en ? "official sources only" : "nur offizielle Quellen"))) : null,
     sheet ? h("div", { style: { position: "fixed", inset: 0, zIndex: 1250 } },
@@ -2934,7 +2930,7 @@ function GerVue({ alle, onWatch, onOpen, updatedAt, watch, onSide, apply }) {
         h("div", { className: "tw-card", style: { padding: "14px 16px", marginBottom: 12, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 14 } },
       h("div", null, h("div", { style: labelStyle }, en ? "Source trust" : "Quellenvertrauen"), sel(f.qv, v => setFeld("qv", v), [["3", en ? "medium or higher" : "mindestens mittel"], ["4", en ? "high only" : "nur hoch"], ["5", en ? "confirmed only" : "nur best\u00e4tigt"]], en ? "All" : "Alle", { width: "100%" })),
       h("div", null, h("div", { style: labelStyle }, en ? "Age" : "Alter"), h("div", { style: { display: "flex", gap: 6 } }, h("input", { type: "number", min: 15, max: 45, value: f.alterVon, onChange: e => setFeld("alterVon", e.target.value), placeholder: en ? "from" : "von", style: { width: "50%", fontFamily: FONT_BODY, fontSize: 13, height: 40, padding: "0 10px", borderRadius: 10, border: "1.5px solid " + HAIR, outline: "none" } }), h("input", { type: "number", min: 15, max: 45, value: f.alterBis, onChange: e => setFeld("alterBis", e.target.value), placeholder: en ? "to" : "bis", style: { width: "50%", fontFamily: FONT_BODY, fontSize: 13, height: 40, padding: "0 10px", borderRadius: 10, border: "1.5px solid " + HAIR, outline: "none" } }))),
-      h("div", null, h("div", { style: labelStyle }, en ? "Transfer type" : "Transferart"), sel(f.art, v => setFeld("art", v), [["fix", en ? "Done deals" : "Fixe Deals"], ["leihe", en ? "Loans" : "Leihen"], ["verlaengert", en ? "Extensions" : "Verl\u00e4ngerungen"], ["vertragslos", en ? "Free agents" : "Vertragslos"]], en ? "All" : "Alle", { width: "100%" })),
+      h("div", null, h("div", { style: labelStyle }, en ? "Transfer type" : "Transferart"), sel(f.art, v => setFeld("art", v), [["fix", en ? "Done deals" : "Fixe Deals"], ["leihe", en ? "Loans" : "Leihen"], ["verlaengert", en ? "Extensions" : "Verl\u00e4ngerungen"], ["vertragslos", en ? "Free agents" : "Vertragslos"], ["trainer", en ? "Coaching changes" : "Trainerwechsel"]], en ? "All" : "Alle", { width: "100%" })),
       h("div", null, h("div", { style: labelStyle }, en ? "Fee range" : "Abl\u00f6sebereich"), sel(f.abloese, v => setFeld("abloese", v), [["u1", en ? "under \u20ac1m" : "unter 1 Mio. \u20ac"], ["1-5", "1\u20135 Mio. \u20ac"], ["5-20", "5\u201320 Mio. \u20ac"], ["20+", en ? "over \u20ac20m" : "\u00fcber 20 Mio. \u20ac"]], en ? "All" : "Alle", { width: "100%" })),
       h("div", { style: { gridColumn: "1 / -1", display: "flex", gap: 16, flexWrap: "wrap", paddingTop: 2 } }, check("leihe", en ? "Loan" : "Leihe"), check("vertragslos", en ? "free agent" : "vertragslos"), check("beob", en ? "watched clubs only" : "nur beobachtete Vereine"), check("offiziell", en ? "official sources only" : "nur offizielle Quellen"))),
         h("div", { style: { display: "flex", gap: 8, marginTop: 12 } },
@@ -3469,14 +3465,17 @@ function RouteLine({ item, color }) {
   if (von) return wrap([lab(frei ? (en ? "Free agent \u00b7 last club" : "Vertragslos \u00b7 zuletzt") : (en ? "Current club" : "Aktueller Verein"), "l"), club(von, "von", false)]);
   return null;
 }
+function kurzText(text, max) { const t = String(text || "").replace(/\s+/g, " ").trim(); max = max || 280; if (t.length <= max) return t; const teil = t.slice(0, max); const ende = Math.max(teil.lastIndexOf(". "), teil.lastIndexOf("! "), teil.lastIndexOf("? ")); if (ende >= 60) return teil.slice(0, ende + 1); const wort = teil.lastIndexOf(" "); return teil.slice(0, wort > 40 ? wort : max).replace(/[,;:\u00b7-]\s*$/, "") + " \u2026"; }
+function istTrainer(it) { return !!it && (it.type === "trainer" || /^Trainerwechsel:/i.test(String(it.headline || "")) || /Trainerregister/.test(String(it.sourceName || "") + String(it.summary || ""))); }
+function bereinigeText(text, headline) { let t = String(text || "").replace(/\s+/g, " ").trim(); t = t.replace(/\s*Ein Trainerwechsel ist erfahrungsgem\u00e4\u00df[^.]*\./g, "").replace(/\s*Quelle: [^.]+\.\s*/g, " ").replace(/\s+/g, " ").trim(); const m = t.match(/^(.+?) ist neuer Cheftrainer von (.+?)(?: und folgt auf (.+?))?(?: \(im Amt seit (\d{4}-\d{2}-\d{2})\))?\.\s*/); if (m) { const d = m[4] ? m[4].slice(8, 10) + "." + m[4].slice(5, 7) + "." + m[4].slice(0, 4) : ""; const teile = []; if (m[3]) teile.push((LANG === "en" ? "Successor of " : "Nachfolger von ") + m[3]); if (d) teile.push((LANG === "en" ? "in charge since " : "im Amt seit ") + d); t = (teile.join(" \u00b7 ") + " " + t.slice(m[0].length)).trim(); } return t; }
+function dHClean(it) { return String(dH(it) || "").replace(/^Trainerwechsel:\s*/i, ""); }
 function NewsCard({
   onWatch,
   item,
   onOpen
 }) {
   const sport = SPORT[normSport(item.sport)] || SPORT.fussball;
-  const type = TYPE[item.type] || TYPE.geruecht;
-  const isNeed = item.type === "verein_sucht";
+  const trainer = istTrainer(item); const type = trainer ? TYPE.trainer : (TYPE[item.type] || TYPE.geruecht); const isNeed = item.type === "verein_sucht";
   return /*#__PURE__*/React.createElement("article", {
     className: "tw-card",
     onClick: () => { if (typeof onOpen === "function") onOpen(item); },
@@ -3538,18 +3537,7 @@ function NewsCard({
       lineHeight: 1.05,
       color: INK,
       margin: "0 0 8px",
-      letterSpacing: 0.2
-    }
-  }, dH(item)), /*#__PURE__*/React.createElement("p", {
-    className: "tw-clamp3",
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 13.5,
-      lineHeight: 1.55,
-      color: "#4a4a48",
-      margin: "0 0 14px"
-    }
-  }, dS(item)), isNeed ? /*#__PURE__*/React.createElement("div", {
+      letterSpacing: 0.2 } }, dHClean(item)), /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.55, color: "var(--t2)", margin: "0 0 14px" } }, kurzText(bereinigeText(dS(item), dH(item)), 280)), isNeed ? /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
@@ -3619,7 +3607,7 @@ function NewsCard({
       borderRadius: 8,
       whiteSpace: "nowrap"
     }
-  }, item.fee)) : (item.player || item.fromClub || item.toClub || item.fee || item.type === "fix" || item.type === "leihe") ? /*#__PURE__*/React.createElement("div", {
+  }, item.fee)) : trainer ? /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", background: PAGE, border: `1px solid ${HAIR}`, borderRadius: 10, padding: "10px 13px", marginBottom: 12 } }, /*#__PURE__*/React.createElement("div", { style: { minWidth: 0, flex: 1 } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, color: MUTED, fontWeight: 700, textTransform: "uppercase", letterSpacing: .4 } }, LANG === "en" ? "New head coach" : "Neuer Cheftrainer"), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 17, color: INK, lineHeight: 1.1 } }, (item.player && item.player.name) || dHClean(item).split(" übernimmt ")[0])), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8 } }, /*#__PURE__*/React.createElement(ClubLogo, { name: item.toClub || "", size: 26 }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontWeight: 700, fontSize: 14, color: INK } }, item.toClub || ""))) : (item.player || item.fromClub || item.toClub || item.fee || item.type === "fix" || item.type === "leihe") ? /*#__PURE__*/React.createElement("div", {
     style: { background: PAGE, border: `1px solid ${HAIR}`, borderRadius: 10, padding: "10px 13px", marginBottom: 12 }
   }, /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, flexWrap: "nowrap" } },
     item.player && /*#__PURE__*/React.createElement("div", { style: { minWidth: 110, maxWidth: 170, flexShrink: 0 } },
@@ -3629,7 +3617,7 @@ function NewsCard({
     (item.fee || item.type === "fix" || item.type === "leihe") ? /*#__PURE__*/React.createElement("div", { style: { textAlign: "right", marginTop: 6 } }, item.fee ? /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 15, color: sport.color, background: sport.soft, padding: "2px 10px", borderRadius: 8, whiteSpace: "nowrap", display: "inline-block", maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis" } }, item.fee) : /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, LANG === "en" ? "Fee not disclosed" : "Abl\u00f6se nicht ver\u00f6ffentlicht")) : null) : null, /*#__PURE__*/React.createElement("div", { style: { marginTop: "auto", paddingTop: 4 } },
     /*#__PURE__*/React.createElement(SignalLine, { item: item }),
     /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 7, flexWrap: "wrap" } },
-      /*#__PURE__*/React.createElement(SourceLine, { sources: item.sources }),
+      /*#__PURE__*/React.createElement(SourceLine, { sources: item.sources, fallback: item.sourceName }),
       typeof onOpen === "function" ? /*#__PURE__*/React.createElement("button", { onClick: e => { e.stopPropagation(); onOpen(item); }, style: { cursor: "pointer", background: "none", border: "none", padding: 0, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "#0f1520", whiteSpace: "nowrap" } }, "Details \u2192") : (item.url ? /*#__PURE__*/React.createElement("a", { href: item.url, target: "_blank", rel: "noopener", onClick: e => e.stopPropagation(), style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "#0f1520", textDecoration: "none", whiteSpace: "nowrap" } }, (LANG === "en" ? "Source" : "Quelle") + " \u2192") : null))));
 }
 
