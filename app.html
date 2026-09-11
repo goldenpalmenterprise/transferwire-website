@@ -2736,7 +2736,7 @@ function SignalLine({ item }) {
     React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: relColor(r), whiteSpace: "nowrap" } }, (en ? "Signal strength " : "Signalst\u00e4rke ") + sc + "/100"),
     React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, " \u00b7 " + trust));
 }
-function SourceLine({ sources, fallback }) { const en = LANG === "en"; const list = (sources || []).filter(s => s && s.url); if (!list.length) { const q = fallback && fallback !== "TransferWire" ? fallback : "TransferWire"; return React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, (en ? "Source: " : "Quelle: ") + q); }
+function SourceLine({ sources, fallback }) { const en = LANG === "en"; const list = (sources || []).filter(s => s && s.url); if (!list.length) { const named = (sources || []).filter(x => x && x.name && x.name !== "Quelle" && x.name !== "TransferWire"); const q = (fallback && fallback !== "TransferWire") ? fallback : (named[0] ? named[0].name : "TransferWire"); return React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, (en ? "Source: " : "Quelle: ") + q); }
   const dom = twDomain(list[0].url);
   return React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 6, minWidth: 0, fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } },
     React.createElement("span", null, list.length + " " + (en ? (list.length === 1 ? "source" : "sources") : (list.length === 1 ? "Quelle" : "Quellen")) + " \u00b7 "),
