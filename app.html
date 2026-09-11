@@ -170,6 +170,10 @@ header input { background: #1e1f21 !important; color: #dfe3e8 !important; }
 .tw-main [style*="border: 2.5px solid rgb(255, 255, 255)"] { border-color: #26282b !important; }
 .tw-main [style*="border-style: dashed"] { border-color: #3a3d42 !important; }
 .tw-sn-ki.aktiv { background: #262729; }
+.tw-formshell { background: linear-gradient(rgba(17,18,19,.72), rgba(23,24,25,.9)), url(/assets/abo_hintergrund.webp) center/cover no-repeat fixed; }
+@media (max-width: 900px) { .tw-formshell { background-image: linear-gradient(rgba(17,18,19,.72), rgba(23,24,25,.9)), url(/assets/abo_hintergrund_m.webp); background-attachment: scroll; } }
+.tw-formshell input:not([type="checkbox"]):not([type="radio"]), .tw-formshell textarea, .tw-formshell select { background: #26282b !important; color: #ececec !important; border-color: #2f3236 !important; }
+.tw-formshell button[style*="background: rgb(255, 255, 255)"], .tw-formshell div[style*="background: rgb(255, 255, 255)"] { background: #26282b !important; }
 </style>
 <!-- tw-build: 2026-08-28-br suchemobil3 -->
 <style>.tw-lang-kurz{display:none}@media (max-width:560px){.tw-lang-text{display:none}.tw-lang-kurz{display:inline}}</style>
@@ -5022,7 +5026,7 @@ function FInput({
       padding: "11px 12px",
       border: `1px solid ${HAIR}`,
       borderRadius: 9,
-      background: "#fff",
+      background: "#26282b",
       color: INK,
       outline: "none"
     }
@@ -5088,10 +5092,7 @@ function FormShell({
   onBack
 }) {
   return /*#__PURE__*/React.createElement("div", {
-    style: {
-      minHeight: "100vh",
-      background: PAGE
-    }
+    className: "tw-formshell", style: { minHeight: "100vh" }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       maxWidth: 560,
@@ -5112,7 +5113,7 @@ function FormShell({
       gap: 6,
       cursor: "pointer",
       border: `1px solid ${HAIR}`,
-      background: "#fff",
+      background: "#26282b",
       borderRadius: 9,
       padding: "8px 14px",
       fontFamily: FONT_BODY,
@@ -5146,7 +5147,7 @@ function FormShell({
     }
   }, sub), /*#__PURE__*/React.createElement("div", {
     style: {
-      background: "#fff",
+      background: "rgba(30,31,33,.94)", backdropFilter: "blur(6px)",
       border: `1px solid ${HAIR}`,
       borderRadius: 14,
       padding: "20px 20px"
@@ -6043,15 +6044,15 @@ function SubscribePage({
     { id: "premium", name: "Premium", preis: eurFmt(preisVon("premium")), sub: intervalTxt, hint: en ? "Everything in Standard + club contacts & community" : "Alles aus Standard + Vereins-Kontakte & Community" },
     { id: "enterprise", name: "Enterprise", preis: eurFmt(preisVon("enterprise")), sub: intervalTxt + " \u00b7 " + seatsEff + (en ? " seats" : " Nutzer"), hint: ENTERPRISE_SEATS_ADJUSTABLE ? (en ? "Everything in Premium for the whole team, +49 \u20ac per extra seat" : "Alles aus Premium f\u00fcrs Team, +49 \u20ac je weiterer Nutzer") : (en ? "Everything in Premium for the whole team \u2014 5 seats included, more on request" : "Alles aus Premium f\u00fcrs Team \u2014 5 Nutzer inklusive, weitere auf Anfrage") }
   ];
-  const abrechBtn = (a, label) => React.createElement("button", { key: a, type: "button", onClick: () => setAbrech(a), "aria-pressed": abrech === a, style: { cursor: "pointer", padding: "8px 14px", borderRadius: 0, border: "1.5px solid " + (abrech === a ? "#149A59" : HAIR), background: abrech === a ? "#F0FAF4" : "#fff", color: INK, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700 } }, label);
+  const abrechBtn = (a, label) => React.createElement("button", { key: a, type: "button", onClick: () => setAbrech(a), "aria-pressed": abrech === a, style: { cursor: "pointer", padding: "8px 14px", borderRadius: 0, border: "1.5px solid " + (abrech === a ? "#149A59" : HAIR), background: abrech === a ? "rgba(20,154,89,.16)" : "#fff", color: INK, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700 } }, label);
   const abrechWahl = React.createElement("div", { style: { display: "flex", gap: 6, marginBottom: 10 } }, abrechBtn("monat", en ? "Monthly" : "Monatlich"), abrechBtn("jahr", en ? "Yearly \u00b7 2 months free" : "J\u00e4hrlich \u00b7 2 Monate geschenkt"));
-  const seatBtn = (d, label) => React.createElement("button", { type: "button", onClick: () => setSeats(Math.min(50, Math.max(5, seats + d))), disabled: d < 0 ? seats <= 5 : seats >= 50, style: { width: 30, height: 30, cursor: "pointer", border: "1.5px solid " + HAIR, background: "#fff", color: INK, fontFamily: FONT_BODY, fontSize: 15, fontWeight: 700, borderRadius: 0 } }, label);
+  const seatBtn = (d, label) => React.createElement("button", { type: "button", onClick: () => setSeats(Math.min(50, Math.max(5, seats + d))), disabled: d < 0 ? seats <= 5 : seats >= 50, style: { width: 30, height: 30, cursor: "pointer", border: "1.5px solid " + HAIR, background: "#26282b", color: INK, fontFamily: FONT_BODY, fontSize: 15, fontWeight: 700, borderRadius: 0 } }, label);
   const seatsRow = plan !== "enterprise" ? null : ENTERPRISE_SEATS_ADJUSTABLE
     ? React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", border: "1.5px solid " + HAIR, padding: "8px 10px", marginBottom: 14, fontFamily: FONT_BODY } },
         React.createElement("span", { style: { fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", fontWeight: 800, color: INK } }, en ? "Seats" : "Nutzer"),
         React.createElement("span", { style: { display: "flex", alignItems: "center", gap: 8 } }, seatBtn(-1, "\u2212"), React.createElement("b", { style: { minWidth: 22, textAlign: "center" } }, seats), seatBtn(1, "+")))
     : React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, marginBottom: 14 } }, en ? "5 personal seats included \u00b7 more seats on request via info@transferwire.de" : "5 personengebundene Nutzerzug\u00e4nge inklusive \u00b7 weitere Nutzer auf Anfrage \u00fcber info@transferwire.de");
-  const planGrid = React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8, marginBottom: 16 } }, PLAENE.map(p => React.createElement("button", { key: p.id, type: "button", onClick: () => setPlan(p.id), "aria-pressed": plan === p.id, style: { cursor: "pointer", textAlign: "left", padding: "10px 10px", borderRadius: 0, border: "2px solid " + (plan === p.id ? "#149A59" : HAIR), background: plan === p.id ? "#F0FAF4" : "#fff", fontFamily: FONT_BODY } },
+  const planGrid = React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8, marginBottom: 16 } }, PLAENE.map(p => React.createElement("button", { key: p.id, type: "button", onClick: () => setPlan(p.id), "aria-pressed": plan === p.id, style: { cursor: "pointer", textAlign: "left", padding: "10px 10px", borderRadius: 0, border: "2px solid " + (plan === p.id ? "#149A59" : HAIR), background: plan === p.id ? "rgba(20,154,89,.16)" : "#26282b", fontFamily: FONT_BODY } },
     React.createElement("div", { style: { fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", fontWeight: 800, color: INK } }, p.name),
     React.createElement("div", { style: { fontSize: 18, fontWeight: 800, color: INK, marginTop: 4 } }, p.preis, React.createElement("span", { style: { fontSize: 11, fontWeight: 600, color: MUTED, marginLeft: 4 } }, p.sub)),
     React.createElement("div", { style: { fontSize: 11, color: MUTED, marginTop: 4, lineHeight: 1.35 } }, p.hint))));
