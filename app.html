@@ -176,6 +176,14 @@ header input { background: #1e1f21 !important; color: #dfe3e8 !important; }
 .tw-formshell button[style*="background: rgb(255, 255, 255)"], .tw-formshell div[style*="background: rgb(255, 255, 255)"] { background: #26282b !important; }
 .tw-formshell [style*="color: rgb(20, 24, 29)"], .tw-formshell [style*="color: rgb(15, 21, 32)"] { color: #ececec !important; }
 .tw-formshell [style*="background: rgb(15, 21, 32)"] { background: #33363b !important; }
+/* Einstellungen: Kontrast und Linien */
+div[style*="z-index: 1100"] h2, div[style*="z-index: 1100"] h3 { color: #ececec; }
+div[style*="z-index: 1100"] [style*="color: rgb(102, 112, 133)"], div[style*="z-index: 1100"] [style*="color: rgb(138, 143, 151)"] { color: #a9b0ba !important; }
+div[style*="z-index: 1100"] [style*="color: rgb(74, 74, 72)"] { color: #c9ced6 !important; }
+div[style*="z-index: 1100"] input[type="text"], div[style*="z-index: 1100"] input:not([type]), div[style*="z-index: 1100"] input[type="email"] { background: #26282b !important; color: #ececec !important; border: 1px solid #3a3d42 !important; }
+div[style*="z-index: 1100"] input[type="checkbox"] { accent-color: #149a59; width: 15px; height: 15px; }
+div[style*="z-index: 1100"] label { color: #dfe3e8 !important; }
+div[style*="z-index: 1100"] button[style*="background: rgb(255, 255, 255)"] { background: #26282b !important; color: #ececec !important; border-color: #3a3d42 !important; }
 </style>
 <!-- tw-build: 2026-08-28-br suchemobil3 -->
 <style>.tw-lang-kurz{display:none}@media (max-width:560px){.tw-lang-text{display:none}.tw-lang-kurz{display:inline}}</style>
@@ -6570,7 +6578,7 @@ function SettingsOverlay({
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12.5,
-      color: "#4a4a48",
+      color: MUTED,
       lineHeight: 1.55,
       margin: "0 0 12px"
     }
@@ -6582,7 +6590,7 @@ function SettingsOverlay({
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12.5,
-      color: "#4a4a48",
+      color: MUTED,
       lineHeight: 1.55,
       margin: "0 0 12px"
     }
@@ -7783,7 +7791,7 @@ function TransferApp({
       background: dataState === "live" ? "#34d27b" : "#e0a63b",
       boxShadow: `0 0 0 3px ${dataState === "live" ? "rgba(52,210,123,.2)" : "rgba(224,166,59,.2)"}`
     }
-  }), dataState === "loading" ? t("connecting") : dataState === "live" ? `LIVE \u00b7 ${updatedAt ? "aktualisiert " + relTime(updatedAt) : "aktuell"}` : t("demo")), /*#__PURE__*/React.createElement("button", { className: "tw-upgrade", type: "button", onClick: () => onNavigate("subscribe"), title: LANG === "en" ? "Compare plans and upgrade" : "Pl\u00e4ne vergleichen und upgraden", style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, letterSpacing: .2, color: "#fff", background: "#149a59", border: "1px solid #1bb56a", borderRadius: 9, padding: "9px 14px", cursor: "pointer", whiteSpace: "nowrap" } }, (account && account.plan === "premium") ? (LANG === "en" ? "Enterprise" : "Enterprise anfragen") : (account && account.plan === "abo") ? (LANG === "en" ? "Upgrade to Premium" : "Auf Premium upgraden") : (LANG === "en" ? "Upgrade plan" : "Plan upgraden")), /*#__PURE__*/React.createElement(LangSwitch, { dark: true }), /*#__PURE__*/React.createElement("div", {
+  }), dataState === "loading" ? t("connecting") : dataState === "live" ? `LIVE \u00b7 ${updatedAt ? "aktualisiert " + relTime(updatedAt) : "aktuell"}` : t("demo")), /*#__PURE__*/React.createElement(LangSwitch, { dark: true }), /*#__PURE__*/React.createElement("div", {
     style: {
       position: "relative"
     }
