@@ -2733,7 +2733,7 @@ function SignalLine({ item }) {
   const tip = (en ? "Signal " + sc + "/100 from reliability " + r + " of 5 and number of sources \u2014 scale: " : "Signal " + sc + "/100 aus Belastbarkeit " + r + " von 5 und Quellenzahl \u2014 Skala: ") + skala;
   return React.createElement("div", { className: "tw-rel", title: tip, style: { display: "flex", alignItems: "center", gap: 7, minWidth: 0 } },
     React.createElement(Signal, { value: r }),
-    React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: relColor(r), whiteSpace: "nowrap" } }, (en ? "Signal strength " : "Signalst\u00e4rke ") + sc + "/100"),
+    React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, color: "var(--t2)", whiteSpace: "nowrap" } }, (en ? "Signal strength " : "Signalst\u00e4rke ") + sc + "/100"),
     React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, " \u00b7 " + trust));
 }
 function SourceLine({ sources, fallback }) { const en = LANG === "en"; const list = (sources || []).filter(s => s && s.url); if (!list.length) { const named = (sources || []).filter(x => x && x.name && x.name !== "Quelle" && x.name !== "TransferWire"); const q = (fallback && fallback !== "TransferWire") ? fallback : (named[0] ? named[0].name : "TransferWire"); return React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, (en ? "Source: " : "Quelle: ") + q); }
@@ -3408,7 +3408,7 @@ function Signal({
       width: 4,
       height: 3 + i * 2.2,
       borderRadius: 1,
-      background: i <= value ? c : "#dad9d4"
+      background: i <= value ? c : "var(--linie2)"
     }
   })));
 }
@@ -3467,7 +3467,8 @@ function RouteLine({ item, color }) {
 }
 function kurzText(text, max) { const t = String(text || "").replace(/\s+/g, " ").trim(); max = max || 280; if (t.length <= max) return t; const teil = t.slice(0, max); const ende = Math.max(teil.lastIndexOf(". "), teil.lastIndexOf("! "), teil.lastIndexOf("? ")); if (ende >= 60) return teil.slice(0, ende + 1); const wort = teil.lastIndexOf(" "); return teil.slice(0, wort > 40 ? wort : max).replace(/[,;:\u00b7-]\s*$/, "") + " \u2026"; }
 function istTrainer(it) { return !!it && (it.type === "trainer" || /^Trainerwechsel:/i.test(String(it.headline || "")) || /Trainerregister/.test(String(it.sourceName || "") + String(it.summary || ""))); }
-function bereinigeText(text, headline) { let t = String(text || "").replace(/\s+/g, " ").trim(); t = t.replace(/\s*Ein Trainerwechsel ist erfahrungsgem\u00e4\u00df[^.]*\./g, "").replace(/\s*Quelle: [^.]+\.\s*/g, " ").replace(/\s+/g, " ").trim(); const m = t.match(/^(.+?) ist neuer Cheftrainer von (.+?)(?: und folgt auf (.+?))?(?: \(im Amt seit (\d{4}-\d{2}-\d{2})\))?\.\s*/); if (m) { const d = m[4] ? m[4].slice(8, 10) + "." + m[4].slice(5, 7) + "." + m[4].slice(0, 4) : ""; const teile = []; if (m[3]) teile.push((LANG === "en" ? "Successor of " : "Nachfolger von ") + m[3]); if (d) teile.push((LANG === "en" ? "in charge since " : "im Amt seit ") + d); t = (teile.join(" \u00b7 ") + " " + t.slice(m[0].length)).trim(); } return t; }
+function signalQuelle(it) { const m = String((it && it.summary) || "").match(/\[Signal(?:e)?:\s*([^\]]+)\]/); return m ? m[1].trim() : ""; }
+function bereinigeText(text, headline) { let t = String(text || "").replace(/\s+/g, " ").trim(); t = t.replace(/\s*\[Signal(?:e)?:[^\]]*\]\s*/g, " ").replace(/\s*Erfahrungsgem\u00e4\u00df entsteht auf dieser Position Handlungsbedarf[^.]*\.\s*/g, " ").replace(/^Vertragslage:\s*/i, "").replace(/\((\d{4})-(\d{2})\)/g, "($2/$1)").replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g, "$3.$2.$1").replace(/\s+/g, " ").trim(); t = t.replace(/\s*Ein Trainerwechsel ist erfahrungsgem\u00e4\u00df[^.]*\./g, "").replace(/\s*Quelle: [^.]+\.\s*/g, " ").replace(/\s+/g, " ").trim(); const m = t.match(/^(.+?) ist neuer Cheftrainer von (.+?)(?: und folgt auf (.+?))?(?: \(im Amt seit (\d{4}-\d{2}-\d{2})\))?\.\s*/); if (m) { const d = m[4] ? m[4].slice(8, 10) + "." + m[4].slice(5, 7) + "." + m[4].slice(0, 4) : ""; const teile = []; if (m[3]) teile.push((LANG === "en" ? "Successor of " : "Nachfolger von ") + m[3]); if (d) teile.push((LANG === "en" ? "in charge since " : "im Amt seit ") + d); t = (teile.join(" \u00b7 ") + " " + t.slice(m[0].length)).trim(); } return t; }
 function dHClean(it) { return String(dH(it) || "").replace(/^Trainerwechsel:\s*/i, ""); }
 function NewsCard({
   onWatch,
@@ -3528,86 +3529,7 @@ function NewsCard({
     style: { cursor: "pointer", background: "none", border: "none", borderRadius: 6, padding: "3px 5px", color: "var(--t3)", display: "inline-flex", alignItems: "center", gap: 4, fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 700, whiteSpace: "nowrap" }
   }, /*#__PURE__*/React.createElement(IconBookmark, { size: 14 }), LANG === "en" ? "Watch" : "Beobachten"), /*#__PURE__*/React.createElement("span", {
     style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, whiteSpace: "nowrap", flexShrink: 0 }
-  }, "\u00b7 " + (LANG === "en" ? (twRelTime(item.published) || item.publishedAt || "") : String(item.publishedAt || twRelTime(item.published) || "").replace(/\b(Min|Std|Tg)$/, "$1.")))), /*#__PURE__*/React.createElement("h3", {
-    className: "tw-clamp2",
-    style: {
-      fontFamily: FONT_DISPLAY,
-      fontWeight: 600,
-      fontSize: 21,
-      lineHeight: 1.05,
-      color: INK,
-      margin: "0 0 8px",
-      letterSpacing: 0.2 } }, dHClean(item)), /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.55, color: "var(--t2)", margin: "0 0 14px" } }, kurzText(bereinigeText(dS(item), dH(item)), 280)), isNeed ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 12,
-      flexWrap: "wrap",
-      background: PAGE,
-      border: `1px solid ${HAIR}`,
-      borderRadius: 10,
-      padding: "10px 13px",
-      marginBottom: 12
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 8,
-      minWidth: 150
-    }
-  }, /*#__PURE__*/React.createElement(ClubLogo, { name: seekingClub(item), size: 28 }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      minWidth: 0
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 10.5,
-      color: MUTED,
-      fontWeight: 700,
-      textTransform: "uppercase",
-      letterSpacing: .4
-    }
-  }, LANG === "en" ? "Club need" : "Vereinsbedarf"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_DISPLAY,
-      fontWeight: 600,
-      fontSize: 17,
-      color: INK,
-      lineHeight: 1.1
-    }
-  }, seekingClub(item)))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1,
-      display: "flex",
-      flexWrap: "wrap",
-      gap: 6,
-      minWidth: 150
-    }
-  }, splitPositions(item.positionNeeded).slice(0, 5).map((c, i) => /*#__PURE__*/React.createElement("span", {
-    key: i,
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 11.5,
-      fontWeight: 600,
-      color: type.color,
-      background: type.soft,
-      borderRadius: 999,
-      padding: "3px 9px"
-    }
-  }, c))), item.fee && /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_DISPLAY,
-      fontWeight: 600,
-      fontSize: 16,
-      color: sport.color,
-      background: sport.soft,
-      padding: "2px 11px",
-      borderRadius: 8,
-      whiteSpace: "nowrap"
-    }
-  }, item.fee)) : trainer ? /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", background: PAGE, border: `1px solid ${HAIR}`, borderRadius: 10, padding: "10px 13px", marginBottom: 12 } }, /*#__PURE__*/React.createElement("div", { style: { minWidth: 0, flex: 1 } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, color: MUTED, fontWeight: 700, textTransform: "uppercase", letterSpacing: .4 } }, LANG === "en" ? "New head coach" : "Neuer Cheftrainer"), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 17, color: INK, lineHeight: 1.1 } }, (item.player && item.player.name) || dHClean(item).split(" übernimmt ")[0])), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8 } }, /*#__PURE__*/React.createElement(ClubLogo, { name: item.toClub || "", size: 26 }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontWeight: 700, fontSize: 14, color: INK } }, item.toClub || ""))) : (item.player || item.fromClub || item.toClub || item.fee || item.type === "fix" || item.type === "leihe") ? /*#__PURE__*/React.createElement("div", {
+  }, "\u00b7 " + (LANG === "en" ? (twRelTime(item.published) || item.publishedAt || "") : String(item.publishedAt || twRelTime(item.published) || "").replace(/\b(Min|Std|Tg)$/, "$1.")))), /*#__PURE__*/React.createElement("h3", { className: "tw-clamp2", style: { fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 21, lineHeight: 1.05, color: INK, margin: "0 0 8px", letterSpacing: 0.2, display: isNeed ? "flex" : undefined, alignItems: isNeed ? "center" : undefined, gap: isNeed ? 9 : undefined } }, isNeed ? React.createElement(ClubLogo, { name: seekingClub(item), size: 24 }) : null, dHClean(item)), /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.55, color: "var(--t2)", margin: "0 0 14px" } }, kurzText(bereinigeText(dS(item), dH(item)), 280)), isNeed ? null : trainer ? /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", background: PAGE, border: `1px solid ${HAIR}`, borderRadius: 10, padding: "10px 13px", marginBottom: 12 } }, /*#__PURE__*/React.createElement("div", { style: { minWidth: 0, flex: 1 } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, color: MUTED, fontWeight: 700, textTransform: "uppercase", letterSpacing: .4 } }, LANG === "en" ? "New head coach" : "Neuer Cheftrainer"), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 17, color: INK, lineHeight: 1.1 } }, (item.player && item.player.name) || dHClean(item).split(" übernimmt ")[0])), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8 } }, /*#__PURE__*/React.createElement(ClubLogo, { name: item.toClub || "", size: 26 }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontWeight: 700, fontSize: 14, color: INK } }, item.toClub || ""))) : (item.player || item.fromClub || item.toClub || item.fee || item.type === "fix" || item.type === "leihe") ? /*#__PURE__*/React.createElement("div", {
     style: { background: PAGE, border: `1px solid ${HAIR}`, borderRadius: 10, padding: "10px 13px", marginBottom: 12 }
   }, /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, flexWrap: "nowrap" } },
     item.player && /*#__PURE__*/React.createElement("div", { style: { minWidth: 110, maxWidth: 170, flexShrink: 0 } },
@@ -3617,7 +3539,7 @@ function NewsCard({
     (item.fee || item.type === "fix" || item.type === "leihe") ? /*#__PURE__*/React.createElement("div", { style: { textAlign: "right", marginTop: 6 } }, item.fee ? /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 15, color: sport.color, background: sport.soft, padding: "2px 10px", borderRadius: 8, whiteSpace: "nowrap", display: "inline-block", maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis" } }, item.fee) : /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, LANG === "en" ? "Fee not disclosed" : "Abl\u00f6se nicht ver\u00f6ffentlicht")) : null) : null, /*#__PURE__*/React.createElement("div", { style: { marginTop: "auto", paddingTop: 4 } },
     /*#__PURE__*/React.createElement(SignalLine, { item: item }),
     /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 7, flexWrap: "wrap" } },
-      /*#__PURE__*/React.createElement(SourceLine, { sources: item.sources, fallback: item.sourceName || item.source_name || item.source }),
+      /*#__PURE__*/React.createElement(SourceLine, { sources: item.sources, fallback: signalQuelle(item) || item.sourceName || item.source_name || item.source }),
       typeof onOpen === "function" ? /*#__PURE__*/React.createElement("button", { onClick: e => { e.stopPropagation(); onOpen(item); }, style: { cursor: "pointer", background: "none", border: "none", padding: 0, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "#0f1520", whiteSpace: "nowrap" } }, "Details \u2192") : (item.url ? /*#__PURE__*/React.createElement("a", { href: item.url, target: "_blank", rel: "noopener", onClick: e => e.stopPropagation(), style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "#0f1520", textDecoration: "none", whiteSpace: "nowrap" } }, (LANG === "en" ? "Source" : "Quelle") + " \u2192") : null))));
 }
 
