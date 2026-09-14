@@ -1315,7 +1315,7 @@ const I18N = {
     vd_fitness: "Fitness-Notizen",
     vd_none: "Zu diesem Verein liegen noch keine Daten in der Datenbank vor.",
     vd_open: "Vereins-Dossier",
-    vd_zahl: "Spieler in der Datenbank",
+    vd_zahl: "Spieler in der Datenbank", vd_einsatz: "mit Einsatz",
     vd_einsatz: "mit Einsatz",
     lg_resend: "Zugangscode erneut senden",
     lg_resent: "Wenn ein Konto mit dieser E-Mail existiert, ist der Code unterwegs \u2014 bitte auch den Spam-Ordner pr\u00fcfen.",
@@ -1627,7 +1627,7 @@ const I18N = {
     vd_fitness: "Fitness notes",
     vd_none: "No data on this club in the database yet.",
     vd_open: "Club dossier",
-    vd_zahl: "players in the database",
+    vd_zahl: "players in the database", vd_einsatz: "with minutes played",
     vd_einsatz: "with minutes",
     lg_resend: "Resend access code",
     lg_resent: "If an account with this email exists, the code is on its way \u2014 please also check your spam folder.",
@@ -8930,7 +8930,7 @@ function TransferApp({
       letterSpacing: 1,
       marginBottom: 12
     }
-  }, t("vd_title"), vereinData && vereinData.ok && vereinData.league ? ` · ${vereinData.league}` : "", vereinData && vereinData.ok ? ` · ${vereinData.kaderZahl} ${t("vd_zahl")}${vereinData.kaderMitEinsatz != null ? ", " + vereinData.kaderMitEinsatz + " " + t("vd_einsatz") : ""}` : ""), !vereinData ? /*#__PURE__*/React.createElement("div", {
+  }, t("vd_title"), vereinData && vereinData.ok && vereinData.league ? ` · ${vereinData.league}` : "", vereinData && vereinData.ok ? ` · ${vereinData.kaderZahl} ${t("vd_zahl")}${(vereinData.kaderMitEinsatz || vereinData.kaderMitEinsatz === 0) ? ` · ${vereinData.kaderMitEinsatz} ${t("vd_einsatz")}` : ""}${vereinData.kaderMitEinsatz != null ? ", " + vereinData.kaderMitEinsatz + " " + t("vd_einsatz") : ""}` : ""), !vereinData ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 13,
@@ -9114,7 +9114,7 @@ function TransferApp({
       gap: 6,
       marginBottom: 12
     }
-  }, vereinData.kader.slice(0, 15).map(k => /*#__PURE__*/React.createElement("div", {
+  }, [...vereinData.kader].sort((a, b) => (Number(b.min) || 0) - (Number(a.min) || 0)).slice(0, 15).map(k => /*#__PURE__*/React.createElement("div", {
     key: k.pid,
     onClick: () => {
       const vn = vereinData.verein;
