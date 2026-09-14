@@ -715,6 +715,35 @@ const CHAT_URL = "/api/tw-chat";
 const LISTEN_URL = "/api/tw-listen"; const SCOUTSUCHE_URL = "/api/tw-scoutsuche";
 const VEREIN_URL = "/api/tw-verein";
 const RESEND_URL = "/api/tw-resend";
+// Liganamen sind Datenbank-SCHLUESSEL und bleiben unveraendert - hier nur die ANZEIGE (14.09.).
+// So sieht ein englischer Nutzer "Liga I (Romania)" statt "Superliga (Rum\u00e4nien)", ohne dass Filter oder Abfragen brechen.
+const LIGA_EN = {
+  "Bundesliga": "Bundesliga", "2. Bundesliga": "2. Bundesliga", "3. Liga": "3. Liga",
+  "Regionalliga Nord": "Regionalliga North", "Regionalliga Bayern": "Regionalliga Bavaria",
+  "Regionalliga Nordost": "Regionalliga Northeast", "Regionalliga S\u00fcdwest": "Regionalliga Southwest",
+  "Regionalliga West": "Regionalliga West", "Regionalliga Nord (\u00d6sterreich)": "Regionalliga North (Austria)",
+  "Premier League": "Premier League", "Championship": "Championship",
+  "LaLiga": "LaLiga", "LaLiga 2": "LaLiga 2", "Serie A": "Serie A", "Serie B": "Serie B",
+  "Ligue 1": "Ligue 1", "Ligue 2": "Ligue 2", "Eredivisie": "Eredivisie", "Eerste Divisie": "Eerste Divisie",
+  "Jupiler Pro League": "Jupiler Pro League", "Challenger Pro League": "Challenger Pro League",
+  "Liga Portugal": "Liga Portugal", "Liga Portugal 2": "Liga Portugal 2",
+  "S\u00fcper Lig": "S\u00fcper Lig", "1. Lig (T\u00fcrkei)": "1. Lig (Turkey)",
+  "Bundesliga (\u00d6sterreich)": "Bundesliga (Austria)", "2. Liga (\u00d6sterreich)": "2. Liga (Austria)",
+  "Superligaen": "Superliga (Denmark)", "1. Division (D\u00e4nemark)": "1st Division (Denmark)",
+  "Super League (Schweiz)": "Super League (Switzerland)", "Challenge League (Schweiz)": "Challenge League (Switzerland)",
+  "Allsvenskan": "Allsvenskan", "Superettan (Schweden)": "Superettan (Sweden)",
+  "Eliteserien": "Eliteserien", "Ekstraklasa": "Ekstraklasa", "1. Liga (Polen)": "I liga (Poland)",
+  "Scottish Premiership": "Scottish Premiership", "Super Liga (Serbien)": "SuperLiga (Serbia)",
+  "HNL (Kroatien)": "HNL (Croatia)", "MLS": "MLS", "Chinese Super League": "Chinese Super League",
+  "Chance Liga (Tschechien)": "Chance Liga (Czechia)", "Nik\u00e9 Liga (Slowakei)": "Nik\u00e9 Liga (Slovakia)",
+  "NB I (Ungarn)": "NB I (Hungary)", "Superliga (Rum\u00e4nien)": "Liga I (Romania)",
+  "Parva Liga (Bulgarien)": "First League (Bulgaria)", "1. Division (Zypern)": "1st Division (Cyprus)",
+  "Ligat HaAl (Israel)": "Ligat ha'Al (Israel)", "Saudi Pro League": "Saudi Pro League",
+  "J1 League (Japan)": "J1 League (Japan)", "K League 1 (S\u00fcdkorea)": "K League 1 (South Korea)",
+  "S\u00e9rie A (Brasilien)": "S\u00e9rie A (Brazil)", "Liga Profesional (Argentinien)": "Liga Profesional (Argentina)",
+  "DFB-Pokal": "DFB-Pokal", "Champions League": "Champions League", "Europa League": "Europa League"
+};
+const ligaAnz = (l) => { const k = String(l || ""); try { const L = (typeof LANG !== "undefined" && LANG) ? LANG : (localStorage.getItem("tw_lang") || "de"); return (L === "en" && LIGA_EN[k]) ? LIGA_EN[k] : k; } catch (e) { return k; } };
 const LIGEN_ALLE = ["Bundesliga", "2. Bundesliga", "3. Liga", "Regionalliga Nord", "Regionalliga Bayern", "Regionalliga Nordost", "Regionalliga S\u00fcdwest", "Regionalliga West", "Premier League", "Championship", "LaLiga", "LaLiga 2", "Serie A", "Serie B", "Ligue 1", "Ligue 2", "Eredivisie", "Eerste Divisie", "Liga Portugal", "Liga Portugal 2", "Jupiler Pro League", "Challenger Pro League", "Bundesliga (\u00d6sterreich)", "2. Liga (\u00d6sterreich)", "Super League (Schweiz)", "S\u00fcper Lig", "1. Lig (T\u00fcrkei)", "Scottish Premiership", "Superligaen", "1. Division (D\u00e4nemark)", "Eliteserien", "Allsvenskan", "Ekstraklasa", "Super Liga (Serbien)", "HNL (Kroatien)", "MLS", "Chinese Super League", "Challenge League (Schweiz)", "1. Liga (Polen)", "Superettan (Schweden)", "Regionalliga Nord (Österreich)", "Chance Liga (Tschechien)", "Niké Liga (Slowakei)", "NB I (Ungarn)", "Superliga (Rumänien)", "Parva Liga (Bulgarien)", "1. Division (Zypern)", "Ligat HaAl (Israel)", "Saudi Pro League", "J1 League (Japan)", "K League 1 (Südkorea)", "Série A (Brasilien)", "Liga Profesional (Argentinien)"];
 const LIST_PRESETS = [{
   id: "u21eu",
@@ -2184,7 +2213,7 @@ function TalentScouting({ onWatch, watched, onOpen, onVergleich, vergleich }) {
   const zus = z => zusatz[z.name] || {};
   const imScout = z => scout.some(s => (zus(z).pid && s.pid === zus(z).pid) || s.key === z.id);
   const scoutToggle = z => { const p = { pid: zus(z).pid || null, key: z.id, name: z.name, team: z.club }; const n = imScout(z) ? scout.filter(s => !((p.pid && s.pid === p.pid) || s.key === z.id)) : [...scout, p]; setScout(n); try { localStorage.setItem("tw_scoutlist", JSON.stringify(n)); } catch (e) {} };
-  const exportieren = z => { const f = z.f; const kopf = ["Spieler", "Alter", "Position", "Verein", "Liga", "Minuten", "TW Talent Score", "Leistung", "Potenzial", "Entwicklung", "Einsatzzeit", "Altersfaktor", "Gegnerstaerke", "Staerken"]; const zeile = [z.name, z.age || "", z.position || "", z.club || "", z.league || "", z.minutes || zus(z).minutes || "", z.score != null ? talFmt(z.score) : "", Math.round(f.leistung), Math.round(f.potenzial), Math.round(f.entwicklung), Math.round(f.einsatz), Math.round(f.alter), Math.round(f.gegner), z.strengths || ""]; const csv = [kopf, zeile].map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(";")).join("\r\n"); const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "talent-" + talSlug(z.name) + ".csv"; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); };
+  const exportieren = z => { const f = z.f; const kopf = ["Spieler", "Alter", "Position", "Verein", "Liga", "Minuten", "TW Talent Score", "Leistung", "Potenzial", "Entwicklung", "Einsatzzeit", "Altersfaktor", "Gegnerstaerke", "Staerken"]; const zeile = [z.name, z.age || "", z.position || "", z.club || "", ligaAnz(z.league), z.minutes || zus(z).minutes || "", z.score != null ? talFmt(z.score) : "", Math.round(f.leistung), Math.round(f.potenzial), Math.round(f.entwicklung), Math.round(f.einsatz), Math.round(f.alter), Math.round(f.gegner), z.strengths || ""]; const csv = [kopf, zeile].map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(";")).join("\r\n"); const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "talent-" + talSlug(z.name) + ".csv"; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); };
   const staerke = z => String(z.strengths || "").split(",").map(x => x.trim()).filter(Boolean)[0] || "";
   const deltaText = z => { const d = delta(z); if (d === null) return { t: en ? "first rating in this ranking" : "erste Bewertung in diesem Ranking", c: MUTED }; return { t: (d > 0 ? "+" : "") + talFmt(d) + (en ? " vs. last week" : " gegen\u00fcber Vorwoche"), c: d > 0 ? "#0d8a4f" : d < 0 ? "#b04a3a" : MUTED }; };
   const trend = z => { const d = delta(z); if (d === null) return h("span", { title: en ? "Trend after the next weekly update" : "Trend nach der n\u00e4chsten Wochenaktualisierung", style: { color: "#9aa0a6" } }, "\u2013"); return h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: d > 0 ? "#0d8a4f" : d < 0 ? "#b04a3a" : MUTED, whiteSpace: "nowrap" } }, (d > 0 ? "\u25B2 +" : d < 0 ? "\u25BC " : "\u25B6 ") + talFmt(d)); };
@@ -2204,7 +2233,7 @@ function TalentScouting({ onWatch, watched, onOpen, onVergleich, vergleich }) {
       td(h("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 15, fontWeight: 700, color: i < 3 ? "var(--teal)" : MUTED } }, "#" + (i + 1)), "right"),
       td(h("span", { style: { display: "inline-flex", alignItems: "center", gap: 8 } }, foto(z, 30), h("span", { style: { fontWeight: 800, color: INK, fontSize: 13.5 } }, z.name))),
       td(z.age || "\u2013", "right"), td(z.position || "\u2013"),
-      td(h("span", { style: { display: "inline-flex", alignItems: "center", gap: 7 } }, h(ClubLogo, { name: z.club, size: 16 }), h("span", { style: { display: "inline-flex", flexDirection: "column" } }, h("span", { style: { fontWeight: 700, color: INK } }, z.club), h("span", { style: { fontSize: 11, color: MUTED } }, z.league || "")))),
+      td(h("span", { style: { display: "inline-flex", alignItems: "center", gap: 7 } }, h(ClubLogo, { name: z.club, size: 16 }), h("span", { style: { display: "inline-flex", flexDirection: "column" } }, h("span", { style: { fontWeight: 700, color: INK } }, z.club), h("span", { style: { fontSize: 11, color: MUTED } }, ligaAnz(z.league))))),
       td((Number(z.minutes) || Number(zus(z).minutes) || 0) ? dbFmtZahl(Number(z.minutes) || Number(zus(z).minutes)) : "\u2013", "right"),
       td(zus(z).vertrag ? dbDatum(zus(z).vertrag) : "\u2013", "right"),
       td(bewertet ? trend(z) : "\u2013", "right"),
@@ -2572,7 +2601,7 @@ function SucheVue({ onOpen }) {
         h("button", { type: "button", onClick: suchen, disabled: busy, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, padding: "8px 14px", borderRadius: 10, border: "1px solid #087F8C", background: "var(--karte)", color: "#087F8C" } }, en ? "Apply filters" : "Filter anwenden"),
         gesetzt ? h("button", { type: "button", onClick: () => { setQ(""); setPos([]); setTags([]); setAgeMax(""); setFuss(""); setLiga(""); setMinScore(""); setItems(null); setInfo(null); setErr(""); }, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, padding: "8px 12px", borderRadius: 10, border: "1px solid " + HAIR, background: "var(--karte)", color: "var(--t2)" } }, en ? "Reset" : "Zur\u00fccksetzen") : null)),
     err ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#c22", marginBottom: 10 } }, err) : null,
-    info && info.filter ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, marginBottom: 10 } }, (en ? "Understood as: " : "Verstanden als: ") + ([(info.filter.positions || []).join("/"), (info.filter.tags || []).join(", "), info.filter.age_max ? "U" + info.filter.age_max : "", info.filter.foot ? (en ? "foot " : "Fu\u00df ") + info.filter.foot : "", info.filter.league || ""].filter(Boolean).join(" \u00b7 ") || (en ? "all players" : "alle Spieler")) + (info.filter.text && !info.ki_used ? (en ? " (keyword mode)" : " (Stichwort-Modus)") : "") + " \u00b7 " + (info.count || 0) + (en ? " hits" : " Treffer")) : null,
+    info && info.filter ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, marginBottom: 10 } }, (en ? "Understood as: " : "Verstanden als: ") + ([(info.filter.positions || []).join("/"), (info.filter.tags || []).join(", "), info.filter.age_max ? "U" + info.filter.age_max : "", info.filter.foot ? (en ? "foot " : "Fu\u00df ") + info.filter.foot : "", ligaAnz(info.filter.league)].filter(Boolean).join(" \u00b7 ") || (en ? "all players" : "alle Spieler")) + (info.filter.text && !info.ki_used ? (en ? " (keyword mode)" : " (Stichwort-Modus)") : "") + " \u00b7 " + (info.count || 0) + (en ? " hits" : " Treffer")) : null,
     items === null ? null : items.length === 0 ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: MUTED, padding: "18px 0" } }, en ? "No players match \u2014 loosen the filters a little." : "Keine Treffer \u2014 Filter etwas lockern.") :
     h("div", { style: { display: "flex", flexDirection: "column", gap: 8 } }, items.map((x, xi) => h("div", { key: x.pid || ("j" + xi), onClick: x.pid ? () => onOpen(x.pid, x.name, x.team) : undefined, title: x.pid ? "" : (en ? "Youth entry \u2014 no full profile yet" : "Jugend-Eintrag \u2014 noch kein Vollprofil"), style: { cursor: x.pid ? "pointer" : "default", background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 12, padding: "11px 14px", display: "flex", gap: 12, alignItems: "center" } },
       h("div", { style: { flex: 1, minWidth: 0 } },
