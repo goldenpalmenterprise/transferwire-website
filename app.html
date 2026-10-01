@@ -3496,7 +3496,7 @@ function NewsCard({
     style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 10, minWidth: 0 }
   }, /*#__PURE__*/React.createElement("span", { className: "tw-kicker", style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, letterSpacing: .7, textTransform: "uppercase", color: type.color, whiteSpace: "nowrap", minWidth: 0, flex: "1 1 auto", display: "inline-flex", alignItems: "center", gap: 6, overflow: "hidden" } },
     /*#__PURE__*/React.createElement("span", { style: { width: 7, height: 7, borderRadius: 99, background: type.color, flexShrink: 0 } }),
-    /*#__PURE__*/React.createElement("span", { style: { overflow: "hidden", textOverflow: "ellipsis" } }, (LANG === "en" ? (type.en || type.label) : type.label) + (item.league ? " \u00b7 " + item.league : ""))),
+    /*#__PURE__*/React.createElement("span", { style: { overflow: "hidden", textOverflow: "ellipsis" } }, (LANG === "en" ? (type.en || type.label) : type.label) + (item.league ? " \u00b7 " + item.league : "")), item.ausgang ? /*#__PURE__*/React.createElement("span", { style: { marginLeft: 6, fontSize: 10, fontWeight: 800, padding: "1px 6px", borderRadius: 6, whiteSpace: "nowrap", background: item.ausgang === "bestaetigt" ? "#e2f5e8" : "#fbe4e4", color: item.ausgang === "bestaetigt" ? "#1f7a3e" : "#a12b2b" } }, item.ausgang === "bestaetigt" ? (LANG === "en" ? "\u2713 confirmed" : "\u2713 best\u00e4tigt") : (LANG === "en" ? "\u2717 collapsed" : "\u2717 geplatzt")) : null, (Number(item.sourceCount) || 0) > 1 ? /*#__PURE__*/React.createElement("span", { style: { marginLeft: 6, fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 6, whiteSpace: "nowrap", background: "var(--karte)", border: `1px solid ${HAIR}`, color: MUTED } }, item.sourceCount + (LANG === "en" ? " sources" : " Quellen")) : null),
   istCommunity(item) && /*#__PURE__*/React.createElement("span", { style: cmtyBadgeStyle("3px 8px") }, CMTY_BADGE_TEXT), /*#__PURE__*/React.createElement("button", {
     onClick: e => {
       e.stopPropagation();
@@ -3615,6 +3615,46 @@ function PitchIcon({ pos, color }) {
     React.createElement("rect", { x: 1, y: 8, width: 5, height: 12, fill: "none", stroke: "#9ccbb0", strokeWidth: 1 }),
     React.createElement("rect", { x: 34, y: 8, width: 5, height: 12, fill: "none", stroke: "#9ccbb0", strokeWidth: 1 }),
     dots.map((d, i) => React.createElement("circle", { key: i, cx: d[0], cy: d[1], r: 3.2, fill: c, stroke: "#fff", strokeWidth: 1.2 })));
+}
+// ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
+const VS_NEU = (() => { try { const q = location.search || ""; if (/[?&]vs=neu(&|$)/.test(q)) localStorage.setItem("tw_vs_neu", "1"); else if (/[?&]vs=alt(&|$)/.test(q)) localStorage.removeItem("tw_vs_neu"); return localStorage.getItem("tw_vs_neu") === "1"; } catch (e) { return false; } })();
+const VS_VERSION = "20261001a";
+let vsLadePromise = null;
+const ladeVereinSucht = () => {
+  if (window.VS) return Promise.resolve(window.VS);
+  if (vsLadePromise) return vsLadePromise;
+  vsLadePromise = new Promise((ok, nein) => {
+    try {
+      if (!document.getElementById("vs-css")) { const l = document.createElement("link"); l.id = "vs-css"; l.rel = "stylesheet"; l.href = "/verein-sucht.css?v=" + VS_VERSION; document.head.appendChild(l); }
+      const s = document.createElement("script"); s.src = "/verein-sucht.js?v=" + VS_VERSION; s.async = true;
+      s.onload = () => { if (window.VS) ok(window.VS); else nein(new Error("VS fehlt")); };
+      s.onerror = () => { vsLadePromise = null; nein(new Error("Laden fehlgeschlagen")); };
+      document.head.appendChild(s);
+    } catch (e) { nein(e); }
+  });
+  return vsLadePromise;
+};
+function VereinSuchtVue(props) {
+  const en = LANG === "en";
+  const [sub, setSub] = React.useState(() => { try { return localStorage.getItem("tw_vs_sub") || "position"; } catch (e) { return "position"; } });
+  const [start, setStart] = React.useState(null);
+  const [bereit, setBereit] = React.useState(!!window.VS);
+  const [fehler, setFehler] = React.useState("");
+  const ref = React.useRef(null);
+  const wechsel = (k, st) => { setStart(st || null); setSub(k); try { localStorage.setItem("tw_vs_sub", k); } catch (e) {} };
+  React.useEffect(() => { if (props.matchProfil) setSub("matching"); }, [props.matchProfil]);
+  React.useEffect(() => { let aktiv = true; ladeVereinSucht().then(() => { if (aktiv) setBereit(true); }).catch(() => { if (aktiv) setFehler(en ? "The new view could not be loaded. Please reload the page." : "Die neue Ansicht konnte nicht geladen werden. Bitte Seite neu laden."); }); return () => { aktiv = false; }; }, []);
+  React.useEffect(() => {
+    if (!bereit || sub === "matching" || !ref.current || !window.VS) return undefined;
+    const acct = loadAccount() || {};
+    let h = null;
+    try { h = window.VS.mount(ref.current, { seite: sub, start: start, code: acct.zugangscode || acct.code || "", email: acct.email || "", premium: isPremiumPlan(acct.plan), lang: LANG, watch: props.watch, onWatchClub: props.onWatchClub, onContacts: props.openContacts, onOpen: props.onOpen, onSeite: wechsel }); } catch (e) { setFehler(en ? "The new view could not be started." : "Die neue Ansicht konnte nicht gestartet werden."); }
+    return () => { try { if (h) h.unmount(); } catch (e) {} };
+  }, [bereit, sub, start]);
+  const tabs = [["position", en ? "By position" : "Nach Position", en ? "Which clubs seek which position" : "Welche Vereine welche Position suchen"], ["matching", en ? "Player matching" : "Spieler-Matching", en ? "Where my player fits" : "Wo mein Spieler passt"], ["verein", en ? "Club view" : "Vereinsansicht", en ? "All needs of one club" : "Alle Bedarfe eines Vereins"]];
+  return React.createElement("div", { className: "vs-wurzel" },
+    React.createElement("div", { className: "vs-unterseiten" }, tabs.map(([k, t, u]) => React.createElement("button", { key: k, type: "button", className: "vs-useite" + (sub === k ? " ist-aktiv" : ""), onClick: () => wechsel(k) }, React.createElement("b", null, t), React.createElement("small", null, u)))),
+    sub === "matching" ? React.createElement(BedarfVue, props) : fehler ? React.createElement("p", { className: "vs-fehler" }, fehler) : React.createElement("div", { ref: ref, key: sub + "|" + (start ? start.team : "") }));
 }
 function BedarfVue({ needs, profiles, matchProfil, setMatchProfil, posSet, activePos, setPosFilter, onNewProfile, onEditProfile, removeProfil, openContacts, onOpen, onWatchClub, watch }) {
   const h = React.createElement;
@@ -4637,7 +4677,7 @@ function NeedCard({
       padding: "3px 10px",
       borderRadius: 999
     }
-  }, item.fee), ((String(item.summary || "").indexOf("KI-Prognose") >= 0) || /Prognose/.test(String(item.source_name || item.source || "")) || ((item.sources || []).some(x => /Prognose/.test(String(x && x.name || ""))))) && /*#__PURE__*/React.createElement("span", { title: LANG === "en" ? "AI forecast by the TransferWire prediction agent \u2014 not a confirmed report" : "KI-Prognose des TransferWire Prognose-Agenten \u2014 keine best\u00e4tigte Meldung", style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .6, textTransform: "uppercase", padding: "3px 9px", borderRadius: 999, background: "#EEF0FF", color: "#3B44B8", border: "1px solid #C9CEFF" } }, LANG === "en" ? "AI forecast" : "KI-Prognose"), /*#__PURE__*/React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 6 } }, /*#__PURE__*/React.createElement(Reliability, { value: item.reliability, size: 11 }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, "· " + (LANG === "en" ? "reliability " : "Verlässlichkeit ") + (Number(item.reliability) || 0) + "/5")), (item.sources || []).slice(0, 2).map((s, i) => /*#__PURE__*/React.createElement("a", {
+  }, item.fee), ((String(item.summary || "").indexOf("KI-Prognose") >= 0) || /Prognose/.test(String(item.source_name || item.source || "")) || ((item.sources || []).some(x => /Prognose/.test(String(x && x.name || ""))))) && /*#__PURE__*/React.createElement("span", { title: LANG === "en" ? "AI forecast by the TransferWire prediction agent \u2014 not a confirmed report" : "KI-Prognose des TransferWire Prognose-Agenten \u2014 keine best\u00e4tigte Meldung", style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .6, textTransform: "uppercase", padding: "3px 9px", borderRadius: 999, background: "#EEF0FF", color: "#3B44B8", border: "1px solid #C9CEFF" } }, LANG === "en" ? "AI forecast" : "KI-Prognose"), /*#__PURE__*/React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 6 } }, /*#__PURE__*/React.createElement(Reliability, { value: item.reliability, size: 11 }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, "· " + (LANG === "en" ? "reliability " : "Verlässlichkeit ") + (Number(item.reliability) || 0) + "/5"), (Number(item.sourceCount) || 0) > 1 ? /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, " \u00b7 " + item.sourceCount + (LANG === "en" ? " sources confirm" : " Quellen best\u00e4tigen")) : null, item.ausgang ? /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: item.ausgang === "bestaetigt" ? "#1f7a3e" : "#a12b2b" } }, " \u00b7 " + (item.ausgang === "bestaetigt" ? (LANG === "en" ? "\u2713 confirmed" : "\u2713 best\u00e4tigt") : (LANG === "en" ? "\u2717 collapsed" : "\u2717 geplatzt"))) : null), (item.sources || []).slice(0, 2).map((s, i) => /*#__PURE__*/React.createElement("a", {
     key: i,
     href: s.url,
     onClick: e => { e.preventDefault(); e.stopPropagation(); if (s.url) window.open(s.url, "_blank"); },
@@ -6857,7 +6897,7 @@ function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScou
   const aktiv = k => view === k || (k === "community" && view === "moderation") || (k === "talente" && (view === "listen" || view === "suche"));
   const IK = { markt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21V12h6v9"/></svg>', community: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.2L4 21l1.8-5.4A8 8 0 1 1 21 12z"/></svg>', workspace: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 20V10"/></svg>', ki: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18 9.4l-4.2 1.8L12 16l-1.8-4.8L6 9.4l4.2-1.8z"/><path d="M5 18l.7 1.8L7.5 20.5l-1.8.7L5 23l-.7-1.8L2.5 20.5l1.8-.7z"/></svg>', pfeil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>' };
   const gruppen = [
-    { k: "markt", label: en ? "Market" : "Markt", kinder: [["feed", t("tab_feed"), feedBadge], ["geruechte", "Transfers", 0], ["spieltag", en ? "Matchday" : "Spieltag", 0], ["gesucht", "Vereinsbedarf", gesuchtBadge], ["ranking", "Performance", 0], ["players", t("players_tab"), 0], ["chancen", t("ch_tab"), 0]] },
+    { k: "markt", label: en ? "Market" : "Markt", kinder: [["feed", t("tab_feed"), feedBadge], ["geruechte", "Transfers", 0], ["spieltag", en ? "Matchday" : "Spieltag", 0], ["gesucht", VS_NEU ? (LANG === "en" ? "Club seeks" : "Verein sucht") : "Vereinsbedarf", gesuchtBadge], ["ranking", "Performance", 0], ["players", t("players_tab"), 0], ["chancen", t("ch_tab"), 0]] },
     { k: "community", label: "Community", kinder: [["community", en ? "Posts" : "Beitr\u00e4ge", 0], ["networking", en ? "Community contacts" : "Community-Kontakte", 0]] },
     { k: "workspace", label: "Workspace", kinder: [["watch", t("watch_tab"), 0], ["talente", "Scouting", 0]] }
   ];
@@ -7920,7 +7960,7 @@ function TransferApp({
       width: "100%",
       boxSizing: "border-box"
     }
-  }, view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news, onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(BedarfVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news, onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(VS_NEU ? VereinSuchtVue : BedarfVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       background: "transparent",
       border: "none",
@@ -9015,7 +9055,23 @@ function TransferApp({
       fontSize: 11,
       color: MUTED
     }
-  }, " · ✉ ", c.email, " · ☎ ", c.phone))))), vereinData.sucht && vereinData.sucht.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, " · ✉ ", c.email, " · ☎ ", c.phone))))), vereinData.bedarf_ampel && vereinData.bedarf_ampel.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: MUTED, textTransform: "uppercase", letterSpacing: 1, margin: "2px 0 6px" }
+  }, "Bedarfsampel"), /*#__PURE__*/React.createElement("div", {
+    style: { display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }
+  }, vereinData.bedarf_ampel.map((a, i) => /*#__PURE__*/React.createElement("div", {
+    key: "amp" + i,
+    style: { background: "var(--karte)", border: `1px solid ${HAIR}`, borderRadius: 10, padding: "8px 11px", fontFamily: FONT_BODY, fontSize: 12.5, color: INK }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: { display: "flex", alignItems: "center", gap: 8 }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: { width: 10, height: 10, borderRadius: 5, flex: "0 0 10px", display: "inline-block", background: a.ampel === "rot" ? "#d64545" : a.ampel === "gelb" ? "#e0a800" : "#2e9e5b" }
+  }), /*#__PURE__*/React.createElement("strong", null, ({ TW: "Torwart", ABW: "Abwehr", MF: "Mittelfeld", ST: "Sturm", IV: "Innenverteidigung", AV: "Außenverteidigung", ZM: "Zentrales Mittelfeld", FL: "Flügel" })[a.position] || a.position), /*#__PURE__*/React.createElement("span", {
+    style: { fontSize: 11, color: MUTED }
+  }, (a.score || 0) + " / 100")), (a.gruende || []).slice(0, 3).map((g, j) => /*#__PURE__*/React.createElement("div", {
+    key: "g" + j,
+    style: { fontSize: 11.5, color: MUTED, marginTop: 3 }
+  }, "• " + (g.text || ""))))))), vereinData.sucht && vereinData.sucht.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 11,
