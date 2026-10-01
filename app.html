@@ -3645,7 +3645,7 @@ function VereinSuchtVue(props) {
   React.useEffect(() => { if (props.matchProfil) setSub("matching"); }, [props.matchProfil]);
   React.useEffect(() => { let aktiv = true; ladeVereinSucht().then(() => { if (aktiv) setBereit(true); }).catch(() => { if (aktiv) setFehler(en ? "The new view could not be loaded. Please reload the page." : "Die neue Ansicht konnte nicht geladen werden. Bitte Seite neu laden."); }); return () => { aktiv = false; }; }, []);
   React.useEffect(() => {
-    if (!bereit || sub === "matching" || !ref.current || !window.VS) return undefined;
+    if (!bereit || !ref.current || !window.VS) return undefined;
     const acct = loadAccount() || {};
     let h = null;
     try { h = window.VS.mount(ref.current, { seite: sub, start: start, code: acct.zugangscode || acct.code || "", email: acct.email || "", premium: isPremiumPlan(acct.plan), lang: LANG, watch: props.watch, onWatchClub: props.onWatchClub, onContacts: props.openContacts, onOpen: props.onOpen, onSeite: wechsel }); } catch (e) { setFehler(en ? "The new view could not be started." : "Die neue Ansicht konnte nicht gestartet werden."); }
@@ -3654,7 +3654,7 @@ function VereinSuchtVue(props) {
   const tabs = [["position", en ? "By position" : "Nach Position", en ? "Which clubs seek which position" : "Welche Vereine welche Position suchen"], ["matching", en ? "Player matching" : "Spieler-Matching", en ? "Where my player fits" : "Wo mein Spieler passt"], ["verein", en ? "Club view" : "Vereinsansicht", en ? "All needs of one club" : "Alle Bedarfe eines Vereins"]];
   return React.createElement("div", { className: "vs-wurzel" },
     React.createElement("div", { className: "vs-unterseiten" }, tabs.map(([k, t, u]) => React.createElement("button", { key: k, type: "button", className: "vs-useite" + (sub === k ? " ist-aktiv" : ""), onClick: () => wechsel(k) }, React.createElement("b", null, t), React.createElement("small", null, u)))),
-    sub === "matching" ? React.createElement(BedarfVue, props) : fehler ? React.createElement("p", { className: "vs-fehler" }, fehler) : React.createElement("div", { ref: ref, key: sub + "|" + (start ? start.team : "") }));
+    fehler ? React.createElement("p", { className: "vs-fehler" }, fehler) : React.createElement("div", { ref: ref, key: sub + "|" + (start ? start.team : "") }));
 }
 function BedarfVue({ needs, profiles, matchProfil, setMatchProfil, posSet, activePos, setPosFilter, onNewProfile, onEditProfile, removeProfil, openContacts, onOpen, onWatchClub, watch }) {
   const h = React.createElement;
