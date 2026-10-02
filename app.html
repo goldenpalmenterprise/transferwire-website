@@ -7315,7 +7315,16 @@ function TransferApp({
   };
   const [contactClub, setContactClub] = useState(null);
   const [contactList, setContactList] = useState(null);
-  const openContacts = club => {
+  /* Punkt 95 (02.10.2026): Kontakte exakt, dann normalisiert, dann Teilstring */ const twKontakteFiltern = (items, club) => {
+  const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\butd\b/g, 'united').replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter((t) => t && !/^(fc|sc|cf|ac|afc|sv|tsv|vfb|vfl|bsc|fsv|ssc|us|as|ogc|ca|fk|sk|bk|if|rcd|ud|cd|club|1|ev)$/.test(t)).join(' ');
+  const c0 = String(club || '').toLowerCase().trim(); const cn = norm(club); const liste = Array.isArray(items) ? items : [];
+  const exakt = liste.filter((c) => String(c.verein || '').toLowerCase().trim() === c0); if (exakt.length) return exakt;
+  const nrm = liste.filter((c) => cn && norm(c.verein) === cn); if (nrm.length) return nrm;
+  const teil = liste.filter((c) => { const v = String(c.verein || '').toLowerCase().trim(); return !!c0 && (v.indexOf(c0) >= 0 || (c0.length >= 5 && c0.indexOf(v) >= 0)); });
+  if (teil.length <= 1) return teil;
+  const namen = Array.from(new Set(teil.map((c) => String(c.verein || '')))).sort((a, b) => Math.abs(a.length - c0.length) - Math.abs(b.length - c0.length));
+  return teil.filter((c) => String(c.verein || '') === namen[0]);
+}; const openContacts = club => {
     setContactClub(club);
     if (!isPrem) {
       setContactList("locked");
@@ -7327,7 +7336,7 @@ function TransferApp({
       cache: "no-store"
     }).then(r => r.json()).then(raw => {
       const d = normResp(raw);
-      setContactList(d && Array.isArray(d.items) ? d.items.filter(c => c.verein.toLowerCase().indexOf(club.toLowerCase()) >= 0 || club.toLowerCase().indexOf(c.verein.toLowerCase()) >= 0) : []);
+      setContactList(d && Array.isArray(d.items) ? twKontakteFiltern(d.items, club) : []);
     }).catch(() => setContactList([]));
   };
   const [plExtra, setPlExtra] = useState(null);
