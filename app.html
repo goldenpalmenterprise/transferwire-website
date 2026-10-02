@@ -3843,8 +3843,7 @@ function SpieltagKarte({ x, onOpen, watched, onWatchToggle, gewaehlt, zurueck })
     h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6 } }, werte.map((w, i) => h("span", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, color: INK, background: "#f4f6f8", border: "1px solid " + HAIR, borderRadius: 999, padding: "5px 10px" } }, w))),
     h("div", { className: "tw-sk-analyse", style: { display: "flex", flexDirection: "column", gap: 9, fontFamily: FONT_BODY, fontSize: 12.5, color: INK, lineHeight: 1.5 } }, x.bereiche ? h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6 } }, Object.entries(x.bereiche).filter(([k, v]) => v !== null && v !== undefined).map(([k, v]) => h("span", { key: k, title: ({ A: "Abschluss", B: "Chancenkreation", C: "Ballf\u00fchrung", D: "Ballsicherheit", E: "Defensive", S: "Schussabwehr", K: "Strafraum", P: "Spielaufbau" })[k] || k, style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, padding: "4px 9px", borderRadius: 999, background: v >= 70 ? "var(--gruen-tint)" : v <= 35 ? "#FBE9E7" : "var(--karte2)", color: v >= 70 ? "var(--gruen-text)" : v <= 35 ? "#B04A3A" : "var(--t2)" } }, (({ A: "Abschluss", B: "Kreation", C: "Ballf\u00fchrung", D: "Sicherheit", E: "Defensive", S: "Paraden", K: "Strafraum", P: "Aufbau" })[k] || k) + " " + Math.round(v)))) : null, x.belastbar && x.belastbar.stufe ? h("div", { style: { fontSize: 11.5, color: MUTED } }, (en ? "Reliability: " : "Belastbarkeit: ") + x.belastbar.stufe + " \u00b7 " + (x.belastbar.minuten || x.min || 0) + " Min." + (x.xg_schicht ? " \u00b7 xG-Schicht" : "") + (x.woche && x.woche.score ? " \u00b7 " + (en ? "Week " : "Woche ") + x.woche.score + " (" + x.woche.spiele + " Sp.)" : "")) : null, (x.date || x.gegner) ? h("div", { style: { fontSize: 12, color: MUTED } }, [x.date ? String(x.date).slice(8, 10) + "." + String(x.date).slice(5, 7) + "." + String(x.date).slice(0, 4) : "", x.gegner ? (en ? "vs. " : "gegen ") + x.gegner : "", x.sub ? (en ? "substitute" : "eingewechselt") : "", x.api ? (en ? "API rating " : "API-Note ") + x.api : ""].filter(Boolean).join(" \u00b7 ")) : null, (x.woche && x.woche.begruendung) ? h("div", { style: { background: "#F1F7F4", borderRadius: 10, padding: "9px 11px", fontSize: 12.5, lineHeight: 1.5 } }, h("div", { style: { fontSize: 10.5, fontWeight: 900, letterSpacing: 1, textTransform: "uppercase", color: "#0d8a4f", marginBottom: 3 } }, en ? "Why this score" : "Warum dieser Score"), x.woche.begruendung) : null, x.st ? h("div", null, h("div", { style: { fontSize: 10.5, fontWeight: 900, letterSpacing: 1, textTransform: "uppercase", color: "#0d8a4f", marginBottom: 2 } }, en ? "Strengths" : "St\u00e4rken"), h("div", null, x.st)) : null, x.sw ? h("div", null, h("div", { style: { fontSize: 10.5, fontWeight: 900, letterSpacing: 1, textTransform: "uppercase", color: "#b04a3a", marginBottom: 2 } }, en ? "Weaknesses" : "Schw\u00e4chen"), h("div", null, x.sw)) : null, x.dev ? h("div", null, h("div", { style: { fontSize: 10.5, fontWeight: 900, letterSpacing: 1, textTransform: "uppercase", color: "var(--blau-text)", marginBottom: 2 } }, en ? "Development" : "Entwicklung"), h("div", null, x.dev)) : null, !(x.st || x.sw || x.dev || (x.woche && x.woche.begruendung)) ? h("div", { style: { color: MUTED } }, en ? "The detailed analysis follows after the next nightly run." : "Die ausf\u00fchrliche Analyse folgt nach dem n\u00e4chsten Nachtlauf.") : null, (x.pid && Number(x.pid) < 900000000) ? h("button", { type: "button", onClick: () => onOpen && onOpen(x), style: { alignSelf: "flex-start", cursor: "pointer", border: "none", background: "none", padding: 0, fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: "#149a59" } }, (en ? "Open full profile " : "Vollprofil \u00f6ffnen ") + "\u2192") : null), h("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", marginTop: "auto" } }, h("button", { onClick: () => onWatchToggle && onWatchToggle(x.name), title: watched ? (en ? "Remove from watchlist" : "Von der Merkliste entfernen") : (en ? "Add to watchlist" : "Auf die Merkliste"), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 14px", borderRadius: 10, border: "1px solid " + (watched ? "var(--sc-hi-rand)" : "var(--linie2)"), background: watched ? "var(--gruen-tint)" : "var(--karte2)", color: watched ? "var(--gruen-text)" : INK, display: "inline-flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" } }, h(IconBookmark, { size: 14, filled: watched }), watched ? (en ? "Watching" : "Beobachtet") : (en ? "Watch" : "Beobachten"))));
 }
-function PerfTabelle({ rows, portrait, watch, onWatchToggle, onOpen, offen, setOffen }) {
-  const h = React.createElement; const en = LANG === "en";
+function PerfTabelle({ rows, portrait, watch, onWatchToggle, onOpen, offen, setOffen }) { const h = React.createElement; const en = LANG === "en"; const [fotos, setFotos] = useState({}); useEffect(() => { const namen = Array.from(new Set((rows || []).map(x => x && x.name).filter(Boolean))).filter(n => !(String(n).toLowerCase() in fotos)).slice(0, 60); if (!namen.length) return; let aktiv = true; const inListe = "in.(" + namen.map(n => '"' + String(n).replace(/"/g, "") + '"').join(",") + ")"; const hole = tab => fetch("/db/" + tab + "?select=name,photo&name=" + encodeURIComponent(inListe) + "&limit=200", { credentials: "omit" }).then(r => r.ok ? r.json() : []).catch(() => []); Promise.all([hole("players"), hole("players_youth")]).then(([a, b]) => { if (!aktiv) return; const m = {}; for (const n of namen) m[String(n).toLowerCase()] = ""; for (const p of [].concat(Array.isArray(b) ? b : [], Array.isArray(a) ? a : [])) { if (p && p.name && p.photo) m[String(p.name).toLowerCase()] = p.photo; } setFotos(f => Object.assign({}, f, m)); }); return () => { aktiv = false; }; }, [rows]); const fotoVon = (x, s) => h(DbFoto, { x: { name: x.name, photo: fotos[String(x.name || "").toLowerCase()] || "" }, size: s });
   const istWatched = name => (watch || []).some(w => w.t === "spieler" && w.w === name);
   const datum = d => d ? String(d).slice(8, 10) + "." + String(d).slice(5, 7) + "." : "";
   const details = x => h("div", { style: { gridColumn: "1 / -1", borderTop: "1px solid " + HAIR, padding: "10px 12px 12px", background: "var(--karte2)" } },
@@ -3857,9 +3856,7 @@ function PerfTabelle({ rows, portrait, watch, onWatchToggle, onOpen, offen, setO
   const trend = h("span", { title: en ? "Trend from the second rated matchday" : "Trend ab dem zweiten erfassten Spieltag", style: { color: "#9aa0a6", fontWeight: 700 } }, "\u2013");
   if (portrait) return h("div", { style: { display: "flex", flexDirection: "column", gap: 8 } }, rows.map((x, i) => { const on = offen === x.k; return h("div", { key: x.k, className: "tw-card", onClick: () => setOffen(on ? null : x.k), style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 12, cursor: "pointer", overflow: "hidden" } },
     h("div", { style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 12px" } },
-      h("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 14, fontWeight: 700, color: MUTED, width: 28, flexShrink: 0 } }, "#" + (i + 1)),
-      h("div", { style: { flex: 1, minWidth: 0 } },
-        h("div", { style: { display: "flex", alignItems: "center", gap: 6, minWidth: 0 } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, x.name), watchBtn(x)),
+      h("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 14, fontWeight: 700, color: MUTED, width: 28, flexShrink: 0 } }, "#" + (i + 1)), fotoVon(x, 40), h("div", { style: { flex: 1, minWidth: 0 } }, h("div", { style: { display: "flex", alignItems: "center", gap: 6, minWidth: 0 } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, x.name), watchBtn(x)),
         h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, [x.team + (x.gegner ? " \u2013 " + x.gegner : ""), x.pos, (x.min || 0) + "\u2032"].join(" \u00b7 ")),
         h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t2)", marginTop: 2 } }, perfKurz(x))),
       pill(x)), on ? details(x) : null); }));
@@ -3869,7 +3866,7 @@ function PerfTabelle({ rows, portrait, watch, onWatchToggle, onOpen, offen, setO
     rows.map((x, i) => { const on = offen === x.k; return h(React.Fragment, { key: x.k },
       h("div", { className: "tw-prow" + (on ? " on" : ""), onClick: () => setOffen(on ? null : x.k) },
         h("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 15, fontWeight: 700, color: i < 3 ? INK : MUTED } }, "#" + (i + 1)),
-        h("span", { style: { display: "inline-flex", alignItems: "center", gap: 6, minWidth: 0 } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, x.name), x.sub ? h("span", { style: { fontFamily: FONT_BODY, fontSize: 9.5, fontWeight: 900, letterSpacing: .6, textTransform: "uppercase", color: "#8a5a00", background: "#fdf3da", borderRadius: 5, padding: "2px 5px", flexShrink: 0 } }, t("rank_sub_badge")) : null, watchBtn(x)),
+        h("span", { style: { display: "inline-flex", alignItems: "center", gap: 8, minWidth: 0 } }, fotoVon(x, 30), h("span", { style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, x.name), x.sub ? h("span", { style: { fontFamily: FONT_BODY, fontSize: 9.5, fontWeight: 900, letterSpacing: .6, textTransform: "uppercase", color: "#8a5a00", background: "#fdf3da", borderRadius: 5, padding: "2px 5px", flexShrink: 0 } }, t("rank_sub_badge")) : null, watchBtn(x)),
         h("span", { style: { display: "inline-flex", alignItems: "center", gap: 6, minWidth: 0, fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)" } }, h(ClubLogo, { name: x.team, size: 16 }), h("span", { style: { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, clubName(x.team) + (x.gegner ? " \u2013 " + x.gegner : "")), x.date ? h("span", { style: { color: "#9aa0a6", flexShrink: 0 } }, datum(x.date)) : null),
         h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)" } }, x.pos),
         h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)" } }, (x.min || 0) + "\u2032"),
@@ -4469,18 +4466,18 @@ function CommunityVue({ posts, suche, onSubmit, busy, msg, account, onMelden, on
 }
 const NAV_ICONS = { feed: "", geruechte: "", gesucht: "", ranking: "", players: "", chancen: "", watch: "\u2606", talente: "", community: "" };
 const NAV_FARBE = k => k === "talente" ? "var(--teal)" : k === "geruechte" ? "#b3541e" : k === "gesucht" ? "var(--violett)" : k === "ranking" ? "#b9860b" : k === "watch" ? "#6b4fd8" : k === "players" ? "#1a6dc0" : k === "chancen" ? "#c2410c" : "#149a59";
-function MobilNav({ view, setView, items }) {
+function MobilNav({ view, setView, items, news, needsBySport, onNavigate, onScout }) {
   const h = React.createElement; const en = LANG === "en";
   const [offen, setOffen] = useState(false);
   useEffect(() => { if (!offen) return; const k = e => { if (e.key === "Escape") setOffen(false); }; document.addEventListener("keydown", k); const alt = document.body.style.overflow; document.body.style.overflow = "hidden"; return () => { document.removeEventListener("keydown", k); document.body.style.overflow = alt; }; }, [offen]);
-  const strich = h("span", { style: { display: "block", width: 18, height: 2, background: "var(--karte)", borderRadius: 2 } });
+  const strich = h("span", { style: { display: "block", width: 18, height: 2.5, background: "#1fb264", borderRadius: 2 } });
   return h(React.Fragment, null,
     h("button", { className: "tw-burger", onClick: () => setOffen(true), "aria-label": en ? "Open navigation" : "Navigation \u00f6ffnen", "aria-expanded": offen, style: { flexDirection: "column", justifyContent: "center", alignItems: "center", gap: 4, width: 40, height: 40, borderRadius: 10, border: "1px solid rgba(255,255,255,.18)", background: "rgba(255,255,255,.07)", cursor: "pointer", padding: 0, flexShrink: 0 } }, strich, strich, strich),
     offen ? ReactDOM.createPortal(h("div", { style: { position: "fixed", inset: 0, zIndex: 1300 } },
       h("div", { onClick: () => setOffen(false), style: { position: "absolute", inset: 0, background: "rgba(15,21,32,.5)" } }),
       h("nav", { className: "tw-mobnav", style: { position: "absolute", top: 0, left: 0, bottom: 0, width: "min(320px, 86vw)", background: "var(--karte)", boxShadow: "12px 0 40px rgba(15,21,32,.3)", display: "flex", flexDirection: "column", overflowY: "auto" } },
         h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderBottom: "1px solid " + HAIR } }, h("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 20, letterSpacing: 1, color: INK } }, "TRANSFER", h("span", { style: { color: "#149a59" } }, "WIRE")), h("button", { onClick: () => setOffen(false), "aria-label": en ? "Close" : "Schlie\u00dfen", style: { width: 36, height: 36, borderRadius: 99, border: "1px solid " + HAIR, background: "var(--karte)", cursor: "pointer", fontSize: 16, fontWeight: 800, color: "var(--t2)" } }, "\u2715")),
-        h("div", { style: { padding: "8px 8px 16px", display: "flex", flexDirection: "column", gap: 2 } }, items.map(([k, label]) => { const aktiv = view === k || (k === "community" && (view === "networking" || view === "moderation")); return h("button", { key: k, onClick: () => { setView(k); setOffen(false); try { window.scrollTo({ top: 0 }); } catch (e) {} }, style: { display: "flex", alignItems: "center", gap: 12, width: "100%", textAlign: "left", cursor: "pointer", border: "none", borderRadius: 12, padding: "12px 12px", background: aktiv ? "var(--dunkel)" : "transparent", color: aktiv ? "#fff" : INK, fontFamily: FONT_BODY, fontSize: 15, fontWeight: 800, minHeight: 48 } }, h("span", { style: { width: 34, height: 34, borderRadius: 10, background: aktiv ? "rgba(255,255,255,.12)" : "#f1f1ec", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 17, flexShrink: 0 } }, NAV_ICONS[k] || "\u2022"), h("span", { style: { flex: 1 } }, label), h("span", { style: { width: 8, height: 8, borderRadius: 99, background: NAV_FARBE(k), flexShrink: 0 } })); })))), document.body) : null);
+        h("div", { className: "tw-mobnav-inhalt", style: { flex: 1, display: "flex", flexDirection: "column", minHeight: 0 } }, h(SeitenleisteNeu, { view: view, setView: k => { setView(k); setOffen(false); try { window.scrollTo({ top: 0 }); } catch (e) {} }, news: news, needsBySport: needsBySport, onNavigate: onNavigate, onScout: () => { setOffen(false); if (onScout) onScout(); } })))), document.body) : null);
 }
 function VereinGeprueft({ pid }) {
   const h = React.createElement; const en = LANG === "en";
@@ -7654,7 +7651,7 @@ function TransferApp({
         @media (max-width: 760px) {
           html, body { overflow-x: hidden; }
           .tw-burger { display: inline-flex !important; }
-          .tw-tabbar { display: none !important; }
+          .tw-tabbar { display: none !important; } .tw-mobnav .tw-sn { padding: 6px 10px 18px; } .tw-mobnav .tw-sn-punkt, .tw-mobnav .tw-sn-kopf, .tw-mobnav .tw-sn-unter, .tw-mobnav .tw-sn-ki { font-size: 15px; min-height: 46px; } .tw-mobnav .tw-sn-ikon { width: 26px; height: 26px; } .tw-mobnav .tw-sn-ikon svg { width: 20px; height: 20px; }
           .tw-headwrap { height: auto !important; flex-wrap: wrap !important; gap: 8px !important; row-gap: 9px !important; padding: 9px 10px 11px !important; }
           .tw-headwrap .tw-livetime { display: none !important; }
           .tw-logo > span:first-child { width: 24px !important; height: 24px !important; }
@@ -7712,7 +7709,7 @@ function TransferApp({
       alignItems: "center",
       gap: 16
     }
-  }, /*#__PURE__*/React.createElement(MobilNav, { view: view, setView: setView, items: [["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["spieltag", LANG === "en" ? "Matchday" : "Spieltag"], ["gesucht", "Vereinsbedarf"], ["ranking", "Performance"], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]] }), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(MobilNav, { view: view, setView: setView, news: news, needsBySport: needsBySport, onNavigate: onNavigate, onScout: () => setView("assistent"), items: [["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["spieltag", LANG === "en" ? "Matchday" : "Spieltag"], ["gesucht", "Vereinsbedarf"], ["ranking", "Performance"], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]] }), /*#__PURE__*/React.createElement("div", {
     className: "tw-logo",
     style: {
       display: "flex",
@@ -9613,19 +9610,10 @@ function TransferApp({
     style: {
       fontFamily: FONT_DISPLAY,
       fontWeight: 700,
-      fontSize: 30,
-      color: "#15181C",
-      marginBottom: 8
-    }
-  }, t(`tour${tourStep}_t`)), /*#__PURE__*/React.createElement("p", {
+      fontSize: 30, color: "var(--t1)", marginBottom: 8 } }, t(`tour${tourStep}_t`)), /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: FONT_BODY,
-      fontSize: 13.5,
-      color: "#4a4a48",
-      lineHeight: 1.65,
-      margin: "0 0 18px"
-    }
-  }, t(`tour${tourStep}_d`)), /*#__PURE__*/React.createElement("div", {
+      fontSize: 14, color: "var(--t1)", opacity: .92, lineHeight: 1.65, margin: "0 0 18px" } }, t(`tour${tourStep}_d`)), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "center",
@@ -9638,9 +9626,7 @@ function TransferApp({
       width: 8,
       height: 8,
       borderRadius: 99,
-      background: s === tourStep ? "#149a59" : "#dcdcd6"
-    }
-  }))), /*#__PURE__*/React.createElement("button", {
+      background: s === tourStep ? "#149a59" : "var(--linie2)" } }))), /*#__PURE__*/React.createElement("button", {
     onClick: () => tourStep < 3 ? setTourStep(tourStep + 1) : endTour(),
     style: {
       width: "100%",
