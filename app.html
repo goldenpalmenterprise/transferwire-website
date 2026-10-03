@@ -3617,7 +3617,7 @@ function PitchIcon({ pos, color }) {
     dots.map((d, i) => React.createElement("circle", { key: i, cx: d[0], cy: d[1], r: 3.2, fill: c, stroke: "#fff", strokeWidth: 1.2 })));
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
-const VS_NEU = (() => { try { const q = location.search || ""; if (/[?&]vs=neu(&|$)/.test(q)) localStorage.setItem("tw_vs_neu", "1"); else if (/[?&]vs=alt(&|$)/.test(q)) localStorage.removeItem("tw_vs_neu"); return localStorage.getItem("tw_vs_neu") === "1"; } catch (e) { return false; } })();
+const VS_NEU = (() => { try { const q = location.search || ""; if (/[?&]vs=neu(&|$)/.test(q)) localStorage.removeItem("tw_vs_alt"); else if (/[?&]vs=alt(&|$)/.test(q)) localStorage.setItem("tw_vs_alt", "1"); return localStorage.getItem("tw_vs_alt") !== "1"; } catch (e) { return true; } })();
 const VS_VERSION = "20261001a";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
