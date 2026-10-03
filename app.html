@@ -239,7 +239,7 @@ html.tw-dark [style*="color: rgb(154, 160, 166)"] { color: #5E6873 !important; }
 .tw-sn-upgrade { color: #45D08A !important; border-color: #45D08A !important; }
 html.tw-dark .tw-sn-upgrade { color: #096B3C !important; border-color: #096B3C !important; }
 /* Performance-Score auf dunkler Kachel im hellen Thema */
-html.tw-dark [style*="rgb(15, 21, 32)"] { --sc-hi-text: #4ADE8A; --sc-gut-text: #7EE2A8; }
+/* 124: Score-Variablen nur im dunklen Tooltip */
 
 /* 124 Nachtrag: weitere hart codierte Farben je Thema */
 :root [style*="color: rgb(138, 90, 0)"] { color: #E6B04A !important; }
@@ -257,7 +257,8 @@ html.tw-dark [style*="color: rgb(176, 74, 58)"] { color: #B04A3A !important; }
 html.tw-dark [style*="color: rgb(194, 65, 12)"] { color: #C2410C !important; }
 html.tw-dark [style*="color: rgb(107, 79, 216)"] { color: #6B4FD8 !important; }
 /* Score-Farben auf dunklen Flaechen im hellen Thema */
-html.tw-dark [style*="background: var(--dunkel)"], html.tw-dark [style*="background-color: var(--dunkel)"], html.tw-dark [style*="background: rgb(15, 21, 32)"], html.tw-dark [style*="background-color: rgb(15, 21, 32)"] { --sc-hi-text: #4ADE8A; --sc-gut-text: #7EE2A8; --sc-mittel-text: #F2C14E; }
+html.tw-dark .tw-pm-tip { --sc-hi-text: #4ADE8A; --sc-gut-text: #7EE2A8; --sc-mittel-text: #F2C14E; }
+:root:not(.tw-dark) p[style*="max-width: 760px"] { color: #9AA3B2 !important; }
 
 /* 124 Nachtrag 3: helle Hinterlegungen behalten dunkle Schrift (muss nach allen Farbregeln stehen), gedaempfter Text im dunklen Thema */
 [style*="rgb(253, 243, 218)"][style*="color"], [style*="rgb(253, 243, 218)"] [style*="color"], [style*="rgb(250, 240, 216)"][style*="color"], [style*="rgb(250, 240, 216)"] [style*="color"] { color: #7A4F00 !important; }
@@ -1234,6 +1235,55 @@ function twEn(s) {
   for (const [re, fn] of EN_RULES) { const m = core.match(re); if (m) return m0[1] + fn(m) + m0[3]; }
   return m0[1] + twEnShort(core) + m0[3];
 }
+/* 128 (03.10.2026): Sprachwechsel — englische Vereinsnamen, Länder in Ligennamen, häufige Satzmuster der Meldungen und fehlende App-Texte */
+(function () { try {
+  const VEREINE = { "FC Bayern München": "Bayern Munich", "Bayern München": "Bayern Munich", "FC Bayern München II": "Bayern Munich II", "Bayern München II": "Bayern Munich II", "1860 München": "1860 Munich",
+    "Inter Mailand": "Inter Milan", "AC Mailand": "AC Milan", "Juventus Turin": "Juventus", "SSC Neapel": "Napoli", "AS Rom": "AS Roma", "Lazio Rom": "Lazio", "AC Florenz": "Fiorentina", "FC Turin": "Torino",
+    "Atalanta Bergamo": "Atalanta", "FC Genua": "Genoa", "Sampdoria Genua": "Sampdoria", "FC Bologna": "Bologna", "FC Sevilla": "Sevilla", "FC Valencia": "Valencia", "Betis Sevilla": "Real Betis",
+    "Espanyol Barcelona": "Espanyol", "FC Villarreal": "Villarreal", "FC Girona": "Girona", "FC Getafe": "Getafe", "Olympique Lyon": "Lyon", "Olympique Marseille": "Marseille", "OGC Nizza": "Nice",
+    "Racing Straßburg": "Strasbourg", "Stade Rennes": "Rennes", "FC Nantes": "Nantes", "OSC Lille": "Lille", "Stade Brest": "Brest", "Benfica Lissabon": "Benfica", "Sporting Lissabon": "Sporting CP",
+    "Sporting Braga": "Braga", "Galatasaray Istanbul": "Galatasaray", "Fenerbahce Istanbul": "Fenerbahçe", "Besiktas Istanbul": "Beşiktaş", "Roter Stern Belgrad": "Red Star Belgrade",
+    "Partizan Belgrad": "Partizan", "Dynamo Kiew": "Dynamo Kyiv", "Schachtar Donezk": "Shakhtar Donetsk", "Spartak Moskau": "Spartak Moscow", "ZSKA Moskau": "CSKA Moscow",
+    "Lokomotive Moskau": "Lokomotiv Moscow", "Dynamo Moskau": "Dynamo Moscow", "Zenit St. Petersburg": "Zenit Saint Petersburg", "Celtic Glasgow": "Celtic", "Glasgow Rangers": "Rangers",
+    "Ajax Amsterdam": "Ajax", "PSV Eindhoven": "PSV", "Feyenoord Rotterdam": "Feyenoord", "FC Brügge": "Club Brugge", "Royal Antwerpen": "Royal Antwerp", "Standard Lüttich": "Standard Liège",
+    "RSC Anderlecht": "Anderlecht", "Olympiakos Piräus": "Olympiacos", "Panathinaikos Athen": "Panathinaikos", "AEK Athen": "AEK Athens", "PAOK Saloniki": "PAOK", "Slavia Prag": "Slavia Prague",
+    "Sparta Prag": "Sparta Prague", "Viktoria Pilsen": "Viktoria Plzeň", "Legia Warschau": "Legia Warsaw", "Lech Posen": "Lech Poznań", "Ferencváros Budapest": "Ferencváros", "FC Kopenhagen": "FC Copenhagen",
+    "Bröndby IF": "Brøndby", "BSC Young Boys": "Young Boys", "Grasshoppers Zürich": "Grasshopper", "Rapid Wien": "Rapid Vienna", "Austria Wien": "Austria Vienna", "Lewski Sofia": "Levski Sofia", "unbekannt": "unknown club" };
+  const LAND = { "Südkorea": "South Korea", "Serbien": "Serbia", "Slowakei": "Slovakia", "Argentinien": "Argentina", "Bulgarien": "Bulgaria", "Österreich": "Austria", "Tschechien": "Czechia", "Rumänien": "Romania",
+    "Polen": "Poland", "Kroatien": "Croatia", "Ungarn": "Hungary", "Griechenland": "Greece", "Türkei": "Türkiye", "Dänemark": "Denmark", "Schweden": "Sweden", "Norwegen": "Norway", "Schweiz": "Switzerland",
+    "Belgien": "Belgium", "Niederlande": "Netherlands", "Spanien": "Spain", "Italien": "Italy", "Frankreich": "France", "Deutschland": "Germany", "Brasilien": "Brazil", "Mexiko": "Mexico", "Japan": "Japan",
+    "China": "China", "Saudi-Arabien": "Saudi Arabia", "Zypern": "Cyprus", "Schottland": "Scotland", "Russland": "Russia", "Ukraine": "Ukraine", "Slowenien": "Slovenia", "Bosnien": "Bosnia", "Israel": "Israel",
+    "Kasachstan": "Kazakhstan", "Aserbaidschan": "Azerbaijan", "Katar": "Qatar", "Ägypten": "Egypt", "Marokko": "Morocco", "Kolumbien": "Colombia", "Chile": "Chile", "Uruguay": "Uruguay", "Ecuador": "Ecuador", "Peru": "Peru" };
+  Object.assign(EN_MAP, VEREINE, LAND, {
+    "Signal wird gesucht": "Searching for signals", "Source: TW Kaderlücken-KI (10-Signal-Analyse)": "Source: TW squad-gap AI (10-signal analysis)", "Verein gezielt suchen": "Search for a specific club",
+    "1 · Land wählen": "1 · Choose country", "2 · Liga wählen": "2 · Choose league", "3 · Verein wählen": "3 · Choose club", "nicht genannt": "not disclosed", "Defensive Stabilität": "Defensive stability",
+    "Strafraumpräsenz": "Box presence", "Länderspiele · Friendly International": "Internationals · Friendly International", "Ballführung": "Ball carrying", "Chancenkreation": "Chance creation", "Defensive": "Defending" });
+  const V = (x) => VEREINE[x] || EN_MAP[x] || x;
+  const K = (x) => String(x).replace(/\(Gerücht\)/g, "(rumour)").replace(/\(Spekulation\)/g, "(speculation)").replace(/\(sondiert\)/g, "(exploring)").replace(/unbestätigt/g, "unconfirmed").replace(/Schätzung/g, "estimate").replace(/Zweijahresvertrag/g, "two-year contract");
+  const landRe = new RegExp("^(.*)\\((" + Object.keys(LAND).join("|") + ")\\)(.*)$");
+  const regeln = [
+    [landRe, (m) => m[1] + "(" + LAND[m[2]] + ")" + m[3]],
+    [/^(.+?) wechselt zum (\d{2}\.\d{2}\.\d{4}) von (.+?) zu (.+?)( \((?:loan|free transfer)\))?$/, (m) => m[1] + " moves from " + V(m[3]) + " to " + V(m[4]) + " on " + m[2] + (m[5] || "")],
+    [/^(.+?) wechselt von (.+?) zu (.+?)( \((?:loan|free transfer)\))?(?: für (.+))?$/, (m) => m[1] + " moves from " + V(m[2]) + " to " + V(m[3]) + (m[4] || "") + (m[5] ? " for " + m[5].replace(/ Mio\. €/, "m €") : "")],
+    [/^(.+?) sucht (?:einen )?neuen Verein$/, (m) => m[1] + " is looking for a new club"],
+    [/^(.+?) unterschreibt (?:fest )?bei (.+?)$/, (m) => m[1] + " signs for " + K(V(m[2]))],
+    [/^(.+?) verpflichtet (.+)$/, (m) => V(m[1]) + " signs " + m[2]],
+    [/^(.+?) an (.+?) interessiert$/, (m) => V(m[1]) + " interested in " + m[2]],
+    [/^(.+?): Verlängerung mit (.+?) im Gespräch$/, (m) => V(m[1]) + ": contract extension with " + m[2] + " under discussion"],
+    [/^(.+?) steht vor Verpflichtung von (.+)$/, (m) => V(m[1]) + " close to signing " + m[2]],
+    [/^(.+?) ist vereinslos(.*)$/, (m) => m[1] + " is a free agent" + m[2]],
+    [/^(.+?) (?:aktuell|derzeit) ohne Vertrag$/, (m) => m[1] + " currently without a contract"],
+    [/^(.+?) verlässt den Klub als Free Agent$/, (m) => m[1] + " leaves the club as a free agent"],
+    [/^Wie ist die Form von (.+?) und wann laeuft sein Vertrag aus\?$/, (m) => "How is " + m[1] + "'s form and when does his contract expire?"],
+    [/^Wie ist die Form von (.+?)\?$/, (m) => "How is " + m[1] + "'s form?"],
+    [/^spielt (\d+) Jahre? unter Liganormal$/, (m) => "plays " + m[1] + " years below league level"],
+    [/^Leistungsschnitt der Position nur (\d+)\/100 · nur (\d+) Spieler mit Einsatzzeit$/, (m) => "Position performance average only " + m[1] + "/100 · only " + m[2] + " players with minutes"],
+    [/^(Ballführung|Chancenkreation|Defensive) (\d+)$/, (m) => EN_MAP[m[1]] + " " + m[2]],
+    [/^(FC Bayern München|Bayern München)( .+)$/, (m) => "Bayern Munich" + K(m[2])]
+  ];
+  for (let i = regeln.length - 1; i >= 0; i--) EN_RULES.unshift(regeln[i]);
+} catch (e) { /* Uebersetzungszusatz darf die App nie stoeren */ } })();
+
 (function () {
   const ce = React.createElement;
   React.createElement = function (type, props) {
