@@ -1330,7 +1330,7 @@ window.twDossierPdf = async function (x, vorhanden) {
       + (aendHtml ? "<section><h3>" + L("Was sich zuletzt geändert hat", "Recent changes") + "</h3>" + aendHtml + "</section>" : "")
       + "<section><h3>" + L("Passende Vereine mit Bedarf", "Matching clubs with a need") + "</h3>" + passendHtml + "</section>"
       + "<div class=\"hinweis\">" + L("Erstellt am ", "Created on ") + stand + L(" mit TransferWire. Quellen: Transfermarkt (Profil, Marktwerte, Verletzungen" + (pr.stand ? ", Stand " + datum(pr.stand) : "") + "), API-Football und Sportmonks (Leistungsdaten), eigene Auswertungen. Alle Angaben ohne Gewähr.", " with TransferWire. Sources: Transfermarkt (profile, market values, injuries" + (pr.stand ? ", as of " + datum(pr.stand) : "") + "), API-Football and Sportmonks (performance data), own analysis. All information without guarantee.") + "</div>";
-    const html = "<!DOCTYPE html><html lang=\"" + (en ? "en" : "de") + "\"><head><meta charset=\"utf-8\"><title>" + esc(L("Spielerdossier ", "Player dossier ") + name) + "</title><style>" + css + "</style></head><body>" + inhalt + "</body></html>";
+    const html = "<!DOCTYPE html><html lang=\"" + (en ? "en" : "de") + "\"><head><title>" + esc(L("Spielerdossier ", "Player dossier ") + name) + "</title><style>" + css + "</style></head><body>" + inhalt + "</body></html>";
     const datei = ["TransferWire", L("Spielerdossier", "Player-dossier"), name, heute.toISOString().slice(0, 10)].join("_").replace(/[^A-Za-z0-9ÄÖÜäöüßÀ-ÿ_.-]+/g, "-") + ".pdf";
     const pr2 = await fetch("/api/vs-pdf", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code, email, lang: en ? "en" : "de", datei, html }) });
     const typ = pr2.headers.get("content-type") || "";
