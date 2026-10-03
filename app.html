@@ -318,7 +318,7 @@ header:has(+ .tw-tabbar) button[style*="color: inherit"] { color: var(--t1) !imp
 </style>
 </head>
 <body>
-<div id="tw-lader" aria-hidden="true"><div class="tw-lader-kern"><span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span><span class="sweep"></span><img src="/assets/logo-icon.png" alt=""></div><div class="tw-lader-text">Signal wird gesucht</div></div>
+<div id="tw-lader" aria-hidden="true"><div class="tw-lader-kern"><span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span><span class="sweep"></span><img src="/assets/logo-icon.png" alt=""></div><div class="tw-lader-text" id="tw-lader-text">Signal wird gesucht</div><script>try{if(localStorage.getItem("tw_lang")==="en"){document.getElementById("tw-lader-text").textContent="Searching for signals";}}catch(e){}</script></div>
 <script>
 (function () {
   // Globaler Lade-Waechter: zeigt das Logo nur, wenn nach einem Klick ein API-Aufruf laenger als 220 ms dauert.
@@ -1373,6 +1373,16 @@ window.twDossierPdf = async function (x, vorhanden) {
   });
   const start = () => { try { mo.observe(document.body, { childList: true, subtree: true }); lauf(document.body); } catch (e) { } };
   if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
+} catch (e) { } })();
+
+/* 128 Rest (04.10.2026): Sprache des Kontos für E-Mails merken (POST /api/tw-sprache, nur bei Änderung) */
+(function () { try {
+  const sync = () => { try {
+    const a = JSON.parse(localStorage.getItem("tw_account") || "{}") || {}; const code = a.zugangscode || a.code, email = a.email; if (!code || !email) return;
+    const l = LANG === "en" ? "en" : "de"; const k = "tw_lang_sync"; if (localStorage.getItem(k) === email + "|" + l) return;
+    fetch("/api/tw-sprache", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code, email, lang: l }) }).then((r) => { if (r.ok) localStorage.setItem(k, email + "|" + l); }).catch(() => { });
+  } catch (e) { } };
+  setTimeout(sync, 5000); setInterval(sync, 20000);
 } catch (e) { } })();
 
 /* 128 (03.10.2026): Sprachwechsel — englische Vereinsnamen, Länder in Ligennamen, häufige Satzmuster der Meldungen und fehlende App-Texte */
