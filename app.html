@@ -1346,6 +1346,35 @@ window.twDossierPdf = async function (x, vorhanden) {
   }
 };
 
+/* 128 Rest (04.10.2026): Übersetzung auch für Texte außerhalb der React-Darstellung (Modul „Verein sucht", Ladehinweise, Länder in „Land · Liga") */
+(function () { try {
+  if (typeof EN_MAP === "undefined") return;
+  const ZUSATZ = { "Signal wird gesucht": "Searching for signals", "Signal wird gesucht …": "Searching for signals …", "Signal wird gesucht...": "Searching for signals..." };
+  Object.keys(ZUSATZ).forEach((k) => { if (!EN_MAP[k]) EN_MAP[k] = ZUSATZ[k]; });
+  const tr = (t) => {
+    const m = t.match(/^(\s*)([\s\S]*?)(\s*)$/); const kern = m ? m[2] : ""; if (!kern) return null;
+    const direkt = EN_MAP[kern]; if (direkt && direkt !== kern) return m[1] + direkt + m[3];
+    let neu = kern, geaendert = false;
+    if (kern.indexOf(" · ") > 0) { neu = kern.split(" · ").map((x) => { const y = EN_MAP[x]; if (y && y !== x) { geaendert = true; return y; } return x; }).join(" · "); }
+    neu = neu.replace(/\(([^()]{3,40})\)/g, (a, x) => { const y = EN_MAP[x]; if (y && y !== x) { geaendert = true; return "(" + y + ")"; } return a; });
+    return geaendert ? m[1] + neu + m[3] : null;
+  };
+  const lauf = (wurzel) => {
+    if (LANG !== "en" || !wurzel) return;
+    if (wurzel.nodeType === 3) { const v = wurzel.nodeValue; const u = v && v.length <= 160 ? tr(v) : null; if (u != null && u !== v) wurzel.nodeValue = u; return; }
+    const w = document.createTreeWalker(wurzel, 4); const liste = []; let n; while ((n = w.nextNode())) liste.push(n);
+    for (const k of liste) { const p = k.parentNode; if (!p || /^(SCRIPT|STYLE|TEXTAREA|INPUT)$/.test(p.nodeName)) continue; const v = k.nodeValue; if (!v || v.length > 160 || !/[A-Za-zÄÖÜäöüß]/.test(v)) continue; const u = tr(v); if (u != null && u !== v) k.nodeValue = u; }
+  };
+  let offen = new Set(); let geplant = false;
+  const mo = new MutationObserver((recs) => {
+    if (LANG !== "en") return;
+    for (const r of recs) for (const n of r.addedNodes) { if (n.nodeType === 1 || n.nodeType === 3) offen.add(n); }
+    if (!geplant) { geplant = true; requestAnimationFrame(() => { geplant = false; const s = offen; offen = new Set(); s.forEach((x) => { try { if (x && x.isConnected) lauf(x); } catch (e) { } }); }); }
+  });
+  const start = () => { try { mo.observe(document.body, { childList: true, subtree: true }); lauf(document.body); } catch (e) { } };
+  if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
+} catch (e) { } })();
+
 /* 128 (03.10.2026): Sprachwechsel — englische Vereinsnamen, Länder in Ligennamen, häufige Satzmuster der Meldungen und fehlende App-Texte */
 (function () { try {
   const VEREINE = { "FC Bayern München": "Bayern Munich", "Bayern München": "Bayern Munich", "FC Bayern München II": "Bayern Munich II", "Bayern München II": "Bayern Munich II", "1860 München": "1860 Munich",
@@ -7002,7 +7031,7 @@ function SpieltagVue({ openPlayer, openVerein }) {
     h("div", { style: { display: "flex", alignItems: "center", gap: 8, justifyContent: "flex-end", minWidth: 0 } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 700, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, s.heim), h(ClubLogo, { name: s.heim, size: 26 })),
     h("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 22, color: s.status === "live" ? "#149a59" : INK, minWidth: 64, textAlign: "center", background: PAGE, borderRadius: 10, padding: "4px 10px" } }, s.tore_heim === null || s.tore_heim === undefined ? "\u2013 : \u2013" : s.tore_heim + " : " + s.tore_gast),
     h("div", { style: { display: "flex", alignItems: "center", gap: 8, minWidth: 0 } }, h(ClubLogo, { name: s.gast, size: 26 }), h("span", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 700, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, clubName(s.gast))),
-    h("div", { style: { textAlign: "right", fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, s.xg_heim !== null && s.xg_heim !== undefined ? "xG " + Number(s.xg_heim).toFixed(2) + " \u2013 " + Number(s.xg_gast).toFixed(2) : "", h("div", { style: { color: "#149a59", fontWeight: 800, fontSize: 11.5 } }, s.hat_stats ? (en ? "Analysis \u2192" : "Analyse \u2192") : (s.status === "beendet" ? (en ? "stats pending" : "Statistik folgt") : ""))));
+    h("div", { style: { textAlign: "right", fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, s.xg_heim !== null && s.xg_heim !== undefined ? "xG " + Number(s.xg_heim).toFixed(2) + " \u2013 " + Number(s.xg_gast).toFixed(2) : "", h("div", { style: { color: "#149a59", fontWeight: 800, fontSize: 11.5 } }, s.hat_stats ? (en ? "Analysis \u2192" : "Analyse \u2192") : (s.status === "beendet" ? (en ? "stats pending" : "Statistik folgt") : "")), (s.status === "beendet" || s.hat_stats) ? h("a", { href: "https://www.youtube.com/results?search_query=" + encodeURIComponent((s.heim || "") + " " + (s.gast || "") + " highlights"), target: "_blank", rel: "noopener noreferrer", onClick: e => e.stopPropagation(), title: en ? "Match highlights on YouTube (official channels first)" : "Spiel-Highlights auf YouTube (offizielle Kanäle zuerst)", style: { display: "inline-block", marginTop: 4, color: "var(--t2)", fontWeight: 800, fontSize: 11.5, textDecoration: "none" } }, "Highlights \u25B8") : null));
   // Analyse-Fenster: hoher Kontrast
   const analyse = s => { const gr = {}; (s.stats || []).forEach(x => { (gr[x.gruppe] = gr[x.gruppe] || []).push(x); }); const tore = (s.ereignisse || []).filter(e => /Goal|Penalty/i.test(e.typ)); const karten = (s.ereignisse || []).filter(e => /card/i.test(e.typ)); const HEIM = "var(--dunkel)", GAST = "#149a59";
     const zeile = (x, i) => { const a = Number(x.heim) || 0, b = Number(x.gast) || 0; const tot = a + b; const pa = tot ? Math.round(a / tot * 100) : 50; const hv = x.heim === null ? "\u2013" : x.heim + (x.einheit || ""), gv = x.gast === null ? "\u2013" : x.gast + (x.einheit || ""); return h("div", { key: x.k, style: { padding: "8px 10px", borderRadius: 10, background: i % 2 ? "#F4F6F8" : "#fff" } }, h("div", { style: { display: "grid", gridTemplateColumns: "72px 1fr 72px", alignItems: "center", marginBottom: 5 } }, h("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 18, color: a > b ? HEIM : "var(--t3)" } }, hv), h("span", { style: { textAlign: "center", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, color: "var(--t2)" } }, x.k), h("span", { style: { textAlign: "right", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 18, color: b > a ? GAST : "var(--t3)" } }, gv)), h("div", { style: { display: "flex", height: 8, borderRadius: 4, overflow: "hidden", background: "#DDE2E8" } }, h("div", { style: { width: pa + "%", background: HEIM } }), h("div", { style: { flex: 1, background: GAST } }))); };
