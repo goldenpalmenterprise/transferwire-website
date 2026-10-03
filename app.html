@@ -240,6 +240,16 @@ html.tw-dark [style*="color: rgb(154, 160, 166)"] { color: #5E6873 !important; }
 html.tw-dark .tw-sn-upgrade { color: #096B3C !important; border-color: #096B3C !important; }
 /* Performance-Score auf dunkler Kachel im hellen Thema */
 html.tw-dark [style*="rgb(15, 21, 32)"] { --sc-hi-text: #4ADE8A; --sc-gut-text: #7EE2A8; }
+
+/* 124 Nachtrag: weitere hart codierte Farben je Thema */
+:root [style*="color: rgb(138, 90, 0)"] { color: #E6B04A !important; }
+:root [style*="color: rgb(176, 74, 58)"] { color: #F07A66 !important; }
+:root [style*="color: rgb(194, 65, 12)"] { color: #F59A6B !important; }
+:root [style*="color: rgb(107, 79, 216)"] { color: #B3A6F5 !important; }
+html.tw-dark [style*="color: rgb(138, 136, 128)"] { color: #5E6873 !important; }
+:root:not(.tw-dark) { --tw-muted: #9AA3B2; }
+html.tw-dark [style*="rgb(15, 21, 32)"] [style*="color: rgb(15, 107, 63)"], html.tw-dark [style*="var(--dunkel)"] [style*="color: rgb(15, 107, 63)"] { color: #4ADE8A !important; }
+html.tw-dark [style*="rgb(15, 21, 32)"] [style*="color: rgb(26, 122, 69)"], html.tw-dark [style*="var(--dunkel)"] [style*="color: rgb(26, 122, 69)"] { color: #7EE2A8 !important; }
 </style>
 <!-- tw-build: 2026-08-28-br suchemobil3 -->
 </style>
@@ -2409,7 +2419,7 @@ function ClubLogo({ name, size }) {
   React.useEffect(() => { const f = () => tick(t => t + 1); window.addEventListener("tw-logos", f); return () => window.removeEventListener("tw-logos", f); }, []);
   const url = clubLogoUrl(name);
   if (url) return React.createElement("img", { src: url, alt: "", width: sz, height: sz, loading: "lazy", style: { width: sz, height: sz, objectFit: "contain", borderRadius: 4, flexShrink: 0 } });
-  return React.createElement("span", { "aria-hidden": true, style: { width: sz, height: sz, borderRadius: "50%", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_BODY, fontSize: Math.max(8, Math.round(sz * 0.42)), fontWeight: 900, color: "#fff", background: "hsl(" + clubHue(name) + " 38% 36%)", letterSpacing: .3 } }, clubMono(name));
+  return React.createElement("span", { "aria-hidden": true, style: { width: sz, height: sz, borderRadius: "50%", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_BODY, fontSize: Math.max(8, Math.round(sz * 0.42)), fontWeight: 900, color: "#fff", background: "hsl(" + clubHue(name) + " 38% 32%)", letterSpacing: .3 } }, clubMono(name));
 }
 const SCORES = {
   performance: {
