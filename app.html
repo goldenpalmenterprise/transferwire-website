@@ -257,7 +257,12 @@ html.tw-dark [style*="color: rgb(176, 74, 58)"] { color: #B04A3A !important; }
 html.tw-dark [style*="color: rgb(194, 65, 12)"] { color: #C2410C !important; }
 html.tw-dark [style*="color: rgb(107, 79, 216)"] { color: #6B4FD8 !important; }
 /* Score-Farben auf dunklen Flaechen im hellen Thema */
-html.tw-dark [style*="var(--dunkel)"], html.tw-dark [style*="background: rgb(15, 21, 32)"], html.tw-dark [style*="background-color: rgb(15, 21, 32)"], html.tw-dark .tw-tab.aktiv { --sc-hi-text: #4ADE8A; --sc-gut-text: #7EE2A8; --sc-mittel-text: #F2C14E; --gruen-text: #4ADE8A; }
+html.tw-dark [style*="background: var(--dunkel)"], html.tw-dark [style*="background-color: var(--dunkel)"], html.tw-dark [style*="background: rgb(15, 21, 32)"], html.tw-dark [style*="background-color: rgb(15, 21, 32)"] { --sc-hi-text: #4ADE8A; --sc-gut-text: #7EE2A8; --sc-mittel-text: #F2C14E; }
+
+/* 124 Nachtrag 3: helle Hinterlegungen behalten dunkle Schrift (muss nach allen Farbregeln stehen), gedaempfter Text im dunklen Thema */
+[style*="rgb(253, 243, 218)"][style*="color"], [style*="rgb(253, 243, 218)"] [style*="color"], [style*="rgb(250, 240, 216)"][style*="color"], [style*="rgb(250, 240, 216)"] [style*="color"] { color: #7A4F00 !important; }
+[style*="rgb(228, 244, 235)"][style*="color"], [style*="rgb(228, 244, 235)"] [style*="color"], [style*="rgb(226, 243, 234)"][style*="color"], [style*="rgb(226, 243, 234)"] [style*="color"], [style*="rgb(232, 247, 238)"][style*="color"], [style*="rgb(232, 247, 238)"] [style*="color"] { color: #0B6E3F !important; }
+:root:not(.tw-dark) [style*="color: rgb(102, 112, 133)"] { color: #9AA3B2 !important; }
 </style>
 <!-- tw-build: 2026-08-28-br suchemobil3 -->
 </style>
