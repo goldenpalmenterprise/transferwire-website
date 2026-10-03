@@ -217,14 +217,37 @@ header:has(+ .tw-tabbar) button[style*="color: inherit"] { color: var(--t1) !imp
 html.tw-dark span[style*="width: 22px"][style*="border-radius: 99px"] { color: #4ADE8A !important; border-color: rgba(74,222,138,.4) !important; }
 .tw-formshell h1 { color: #FFFFFF !important; text-shadow: 0 2px 14px rgba(0,0,0,.8), 0 0 2px rgba(0,0,0,.6); }
 .tw-formshell > div > p { color: #E6E8EB !important; text-shadow: 0 1px 10px rgba(0,0,0,.8); }
+
+/* 124 (03.10.2026): Lesbarkeit nach WCAG (4,5:1) in hell und dunkel — hart codierte Textfarben je Thema */
+:root [style*="color: rgb(13, 138, 79)"], :root [style*="color: rgb(20, 154, 89)"] { color: #45D08A !important; }
+html.tw-dark [style*="color: rgb(13, 138, 79)"], html.tw-dark [style*="color: rgb(20, 154, 89)"] { color: #0B7A45 !important; }
+:root [style*="color: rgb(176, 122, 5)"] { color: #E6B04A !important; }
+html.tw-dark [style*="color: rgb(176, 122, 5)"] { color: #8A5A00 !important; }
+:root [style*="color: rgb(26, 109, 192)"] { color: #7DB8F2 !important; }
+html.tw-dark [style*="color: rgb(26, 109, 192)"] { color: #175FA8 !important; }
+:root [style*="color: rgb(15, 142, 142)"] { color: #4CCFCF !important; }
+html.tw-dark [style*="color: rgb(15, 142, 142)"] { color: #0B6E6E !important; }
+html.tw-dark [style*="color: rgb(154, 160, 166)"] { color: #5E6873 !important; }
+/* helle Hinterlegungen behalten in beiden Themen dunkle Schrift */
+[style*="rgb(228, 244, 235)"][style*="color"], [style*="rgb(228, 244, 235)"] [style*="color"], [style*="rgb(226, 243, 234)"][style*="color"], [style*="rgb(226, 243, 234)"] [style*="color"], [style*="rgb(232, 247, 238)"][style*="color"], [style*="rgb(232, 247, 238)"] [style*="color"] { color: #0B6E3F !important; }
+[style*="rgb(253, 243, 218)"][style*="color"], [style*="rgb(253, 243, 218)"] [style*="color"], [style*="rgb(250, 240, 216)"][style*="color"], [style*="rgb(250, 240, 216)"] [style*="color"] { color: #7A4F00 !important; }
+[style*="rgb(227, 238, 251)"][style*="color"], [style*="rgb(227, 238, 251)"] [style*="color"] { color: #154F8A !important; }
+[style*="rgb(222, 240, 240)"][style*="color"], [style*="rgb(222, 240, 240)"] [style*="color"] { color: #0A5E5E !important; }
+/* gefuellte Gruenflaechen mit weisser Schrift */
+[style*="background: rgb(20, 154, 89)"], [style*="background-color: rgb(20, 154, 89)"], .tw-tab.aktiv .tw-navbadge { background: #0B7A45 !important; }
+/* Upgrade-Knopf in der Seitenleiste */
+.tw-sn-upgrade { color: #45D08A !important; border-color: #45D08A !important; }
+html.tw-dark .tw-sn-upgrade { color: #096B3C !important; border-color: #096B3C !important; }
+/* Performance-Score auf dunkler Kachel im hellen Thema */
+html.tw-dark [style*="rgb(15, 21, 32)"] { --sc-hi-text: #4ADE8A; --sc-gut-text: #7EE2A8; }
 </style>
 <!-- tw-build: 2026-08-28-br suchemobil3 -->
 </style>
 <!-- tw-build: 2026-08-28-br suchemobil3 -->
 <style>
 /* ===== Farbsystem: zwei getrennte Farbsaetze (Standard dunkel, html.tw-dark = hell) ===== */
-:root { --t1: #EDEDED; --t2: #A8A8A8; --t3: #6E6E6E; --aus: #5A5A5A; --zebra: #151515; --seite: #171819; --karte: #1e1f21; --karte2: #26282b; --leiste: #111213; --linie: #2a2b2d; --linie2: #2f3236; --hover: #1c1d1f; --aktiv: #262729; --dunkel: #2e3238; --gruen: #149a59; --gruen-text: #4ADE8A; --gruen-tint: rgba(20,154,89,.16); --sc-hi-bg: rgba(22,166,95,.16); --sc-hi-rand: rgba(74,222,138,.28); --sc-hi-text: #4ADE8A; --sc-gut-bg: rgba(39,181,103,.14); --sc-gut-rand: rgba(39,181,103,.28); --sc-gut-text: #5fd48b; --sc-mittel-bg: rgba(185,134,11,.16); --sc-mittel-rand: rgba(232,177,55,.3); --sc-mittel-text: #e8b137; --sc-schwach-bg: rgba(176,74,58,.16); --sc-schwach-rand: rgba(224,123,106,.3); --sc-schwach-text: #e07b6a; --scout-bg: #1c1f2b; --scout-rand: #2c3048; --scout-text: #b9b3ff; --scout-knopf: #5f5cb3; --scout-chip: #2a2d3f; --lader-bg: rgba(23,24,25,.55); --zeile-hover: rgba(255,255,255,.05); --zeile-aktiv: rgba(74,222,138,.10); --glas: rgba(30,31,33,.94); --violett: #a99cf0; --violett-tint: rgba(109,75,199,.18); --blau-text: #7fb6e6; --teal: #5ec8e6; --teal-tint: rgba(14,116,144,.18); --teal-bg: #0e7490; }
-html.tw-dark { --t1: #0F1720; --t2: #4A5560; --t3: #7A8592; --aus: #9AA4B1; --zebra: #F8FAFB; --seite: #F4F6F8; --karte: #FFFFFF; --karte2: #F1F3F5; --leiste: #E9ECEF; --linie: #E1E5E2; --linie2: #D3D7DC; --hover: #E3E6EA; --aktiv: #FFFFFF; --dunkel: #0f1520; --gruen-text: #0F6B3F; --gruen-tint: #E8F7EE; --sc-hi-bg: rgba(22,166,95,.12); --sc-hi-rand: rgba(22,166,95,.35); --sc-hi-text: #0F6B3F; --sc-gut-bg: rgba(39,181,103,.12); --sc-gut-rand: rgba(39,181,103,.35); --sc-gut-text: #1a7a45; --sc-mittel-bg: rgba(185,134,11,.12); --sc-mittel-rand: rgba(185,134,11,.35); --sc-mittel-text: #8a6208; --sc-schwach-bg: rgba(176,74,58,.12); --sc-schwach-rand: rgba(176,74,58,.35); --sc-schwach-text: #9a3d2e; --scout-bg: #EEF1FB; --scout-rand: #d9d2f7; --scout-text: #5b58c7; --scout-knopf: #5b58c7; --scout-chip: #E4E8FA; --lader-bg: rgba(244,246,248,.55); --zeile-hover: #F1F3F5; --zeile-aktiv: #E8F7EE; --glas: rgba(255,255,255,.95); --violett: #6d4bc7; --violett-tint: #EFEBFF; --blau-text: #1e4e79; --teal: #0e7490; --teal-tint: #e6f6f9; --teal-bg: #0e7490; }
+:root { --t1: #EDEDED; --t2: #A8A8A8; --t3: #939393; --aus: #5A5A5A; --zebra: #151515; --seite: #171819; --karte: #1e1f21; --karte2: #26282b; --leiste: #111213; --linie: #2a2b2d; --linie2: #2f3236; --hover: #1c1d1f; --aktiv: #262729; --dunkel: #2e3238; --gruen: #149a59; --gruen-text: #4ADE8A; --gruen-tint: rgba(20,154,89,.16); --sc-hi-bg: rgba(22,166,95,.16); --sc-hi-rand: rgba(74,222,138,.28); --sc-hi-text: #4ADE8A; --sc-gut-bg: rgba(39,181,103,.14); --sc-gut-rand: rgba(39,181,103,.28); --sc-gut-text: #5fd48b; --sc-mittel-bg: rgba(185,134,11,.16); --sc-mittel-rand: rgba(232,177,55,.3); --sc-mittel-text: #e8b137; --sc-schwach-bg: rgba(176,74,58,.16); --sc-schwach-rand: rgba(224,123,106,.3); --sc-schwach-text: #e07b6a; --scout-bg: #1c1f2b; --scout-rand: #2c3048; --scout-text: #b9b3ff; --scout-knopf: #5f5cb3; --scout-chip: #2a2d3f; --lader-bg: rgba(23,24,25,.55); --zeile-hover: rgba(255,255,255,.05); --zeile-aktiv: rgba(74,222,138,.10); --glas: rgba(30,31,33,.94); --violett: #a99cf0; --violett-tint: rgba(109,75,199,.18); --blau-text: #7fb6e6; --teal: #5ec8e6; --teal-tint: rgba(14,116,144,.18); --teal-bg: #0e7490; }
+html.tw-dark { --t1: #0F1720; --t2: #4A5560; --t3: #5E6873; --aus: #9AA4B1; --zebra: #F8FAFB; --seite: #F4F6F8; --karte: #FFFFFF; --karte2: #F1F3F5; --leiste: #E9ECEF; --linie: #E1E5E2; --linie2: #D3D7DC; --hover: #E3E6EA; --aktiv: #FFFFFF; --dunkel: #0f1520; --gruen-text: #0F6B3F; --gruen-tint: #E8F7EE; --sc-hi-bg: rgba(22,166,95,.12); --sc-hi-rand: rgba(22,166,95,.35); --sc-hi-text: #0F6B3F; --sc-gut-bg: rgba(39,181,103,.12); --sc-gut-rand: rgba(39,181,103,.35); --sc-gut-text: #1a7a45; --sc-mittel-bg: rgba(185,134,11,.12); --sc-mittel-rand: rgba(185,134,11,.35); --sc-mittel-text: #8a6208; --sc-schwach-bg: rgba(176,74,58,.12); --sc-schwach-rand: rgba(176,74,58,.35); --sc-schwach-text: #9a3d2e; --scout-bg: #EEF1FB; --scout-rand: #d9d2f7; --scout-text: #5b58c7; --scout-knopf: #5b58c7; --scout-chip: #E4E8FA; --lader-bg: rgba(244,246,248,.55); --zeile-hover: #F1F3F5; --zeile-aktiv: #E8F7EE; --glas: rgba(255,255,255,.95); --violett: #6d4bc7; --violett-tint: #EFEBFF; --blau-text: #1e4e79; --teal: #0e7490; --teal-tint: #e6f6f9; --teal-bg: #0e7490; }
 html, body { background: var(--seite); color: var(--t1); }
 .tw-lang-kurz{display:none}@media (max-width:560px){.tw-lang-text{display:none}.tw-lang-kurz{display:inline}}</style>
 <meta name="description" content="All transfer news, club needs with player matching, scout ranking and a player database from 53 leagues and 32 countries — updated hourly." />
@@ -2386,7 +2409,7 @@ function ClubLogo({ name, size }) {
   React.useEffect(() => { const f = () => tick(t => t + 1); window.addEventListener("tw-logos", f); return () => window.removeEventListener("tw-logos", f); }, []);
   const url = clubLogoUrl(name);
   if (url) return React.createElement("img", { src: url, alt: "", width: sz, height: sz, loading: "lazy", style: { width: sz, height: sz, objectFit: "contain", borderRadius: 4, flexShrink: 0 } });
-  return React.createElement("span", { "aria-hidden": true, style: { width: sz, height: sz, borderRadius: "50%", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_BODY, fontSize: Math.max(8, Math.round(sz * 0.42)), fontWeight: 900, color: "#fff", background: "hsl(" + clubHue(name) + " 38% 46%)", letterSpacing: .3 } }, clubMono(name));
+  return React.createElement("span", { "aria-hidden": true, style: { width: sz, height: sz, borderRadius: "50%", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_BODY, fontSize: Math.max(8, Math.round(sz * 0.42)), fontWeight: 900, color: "#fff", background: "hsl(" + clubHue(name) + " 38% 36%)", letterSpacing: .3 } }, clubMono(name));
 }
 const SCORES = {
   performance: {
