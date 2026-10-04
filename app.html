@@ -244,6 +244,7 @@ html.tw-dark .tw-sn-upgrade { color: #096B3C !important; border-color: #096B3C !
 /* 124 Nachtrag: weitere hart codierte Farben je Thema */
 :root [style*="color: rgb(138, 90, 0)"] { color: #E6B04A !important; }
 :root [style*="color: rgb(176, 74, 58)"] { color: #F07A66 !important; }
+:root [style*="color: rgb(180, 35, 24)"] { color: #ff8a80 !important; }
 :root [style*="color: rgb(194, 65, 12)"] { color: #F59A6B !important; }
 :root [style*="color: rgb(107, 79, 216)"] { color: #B3A6F5 !important; }
 html.tw-dark [style*="color: rgb(138, 136, 128)"] { color: #5E6873 !important; }
@@ -8035,7 +8036,7 @@ function TransferApp({
       const items = Array.isArray(payload) ? payload : payload && payload.items;
       if (Array.isArray(items) && items.length > 0) {
         setNews(items.map(normItem));
-        fetch("/api/tw-ausfaelle?tage=10").then(r => r.ok ? r.json() : null).then(d => { const inj = d && Array.isArray(d.items) ? d.items.map(normItem) : []; if (!inj.length) return; setNews(prev => { const ids = new Set(prev.map(x => String(x.id))); const neu = inj.filter(x => !ids.has(String(x.id))); if (!neu.length) return prev; const ts = x => new Date(x.published || x.publishedAt || x.published_at || 0).getTime() || 0; let sortiert = true; for (let i = 1; i < Math.min(prev.length, 25); i++) { if (ts(prev[i]) > ts(prev[i - 1])) { sortiert = false; break; } } const alle = prev.concat(neu); if (sortiert) alle.sort((a, b) => ts(b) - ts(a)); return alle; }); }).catch(() => {});
+        fetch("/api/tw-ausfaelle?tage=10").then(r => r.ok ? r.json() : null).then(d => { const inj = d && Array.isArray(d.items) ? d.items.map(normItem) : []; if (!inj.length) return; setNews(prev => { const ids = new Set(prev.map(x => String(x.id))); const neu = inj.filter(x => !ids.has(String(x.id))); if (!neu.length) return prev; neu.sort((a, b) => (Number(b.relevanz) || 0) - (Number(a.relevanz) || 0)); neu.forEach((x, i) => { x.feedTop = i < 8; }); const ts = x => new Date(x.published || x.publishedAt || x.published_at || 0).getTime() || 0; let sortiert = true; for (let i = 1; i < Math.min(prev.length, 25); i++) { if (ts(prev[i]) > ts(prev[i - 1])) { sortiert = false; break; } } const alle = prev.concat(neu); if (sortiert) alle.sort((a, b) => ts(b) - ts(a)); return alle; }); }).catch(() => {});
         setDataState("live");
         setUpdatedAt(payload && payload.updated || new Date().toISOString());
         setNeueZahl(0);
@@ -8077,6 +8078,7 @@ function TransferApp({
       if (view === "feed" && String(n.id || "").startsWith("tal-")) return false;
       if (sport !== "alle" && n.sport !== sport) return false;
       if (type !== "alle" && !feedTypPasst(n, type)) return false;
+      if (type === "alle" && n.type === "verletzung" && !n.feedTop) return false;
       if (club && n.fromClub !== club && n.toClub !== club) return false;
       if (q) {
         const hay = `${n.headline} ${n.summary} ${n.fromClub} ${n.toClub} ${n.player?.name || ""} ${n.league}`.toLowerCase();
@@ -8430,7 +8432,7 @@ function TransferApp({
       width: "100%",
       boxSizing: "border-box"
     }
-  }, view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news, onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(VS_NEU ? VereinSuchtVue : BedarfVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news.filter(n => n.type !== "verletzung"), onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(VS_NEU ? VereinSuchtVue : BedarfVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       background: "transparent",
       border: "none",
@@ -9362,8 +9364,8 @@ function TransferApp({
         padding: "5px 12px",
         borderRadius: 999,
         border: `1px solid ${active ? meta.color : HAIR}`,
-        background: active ? meta.soft : "#fff",
-        color: active ? meta.color : MUTED
+        background: active ? meta.soft : "var(--karte)",
+        color: active ? meta.color : "var(--t2)"
       }
     }, label);
   })), view === "feed" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(ScoutLeiste, { offen: () => setChatOpen(true) }), /*#__PURE__*/React.createElement(FeedSuche, { inline: true, q: query, setQ: setQuery, club: club, setClub: setClub, alle: news, watch: watchList, geheZu: setView, fs: { sport: sport, type: type, country: country, league: league }, setFs: { setSport: setSport, setType: setType, setCountry: setCountry, setLeague: setLeague } })), /*#__PURE__*/React.createElement("div", {
