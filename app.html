@@ -217,61 +217,14 @@ header:has(+ .tw-tabbar) button[style*="color: inherit"] { color: var(--t1) !imp
 html.tw-dark span[style*="width: 22px"][style*="border-radius: 99px"] { color: #4ADE8A !important; border-color: rgba(74,222,138,.4) !important; }
 .tw-formshell h1 { color: #FFFFFF !important; text-shadow: 0 2px 14px rgba(0,0,0,.8), 0 0 2px rgba(0,0,0,.6); }
 .tw-formshell > div > p { color: #E6E8EB !important; text-shadow: 0 1px 10px rgba(0,0,0,.8); }
-
-/* 124 (03.10.2026): Lesbarkeit nach WCAG (4,5:1) in hell und dunkel — hart codierte Textfarben je Thema */
-:root [style*="color: rgb(13, 138, 79)"], :root [style*="color: rgb(20, 154, 89)"] { color: #45D08A !important; }
-html.tw-dark [style*="color: rgb(13, 138, 79)"], html.tw-dark [style*="color: rgb(20, 154, 89)"] { color: #0B7A45 !important; }
-:root [style*="color: rgb(176, 122, 5)"] { color: #E6B04A !important; }
-html.tw-dark [style*="color: rgb(176, 122, 5)"] { color: #8A5A00 !important; }
-:root [style*="color: rgb(26, 109, 192)"] { color: #7DB8F2 !important; }
-html.tw-dark [style*="color: rgb(26, 109, 192)"] { color: #175FA8 !important; }
-:root [style*="color: rgb(15, 142, 142)"] { color: #4CCFCF !important; }
-html.tw-dark [style*="color: rgb(15, 142, 142)"] { color: #0B6E6E !important; }
-html.tw-dark [style*="color: rgb(154, 160, 166)"] { color: #5E6873 !important; }
-/* helle Hinterlegungen behalten in beiden Themen dunkle Schrift */
-[style*="rgb(228, 244, 235)"][style*="color"], [style*="rgb(228, 244, 235)"] [style*="color"], [style*="rgb(226, 243, 234)"][style*="color"], [style*="rgb(226, 243, 234)"] [style*="color"], [style*="rgb(232, 247, 238)"][style*="color"], [style*="rgb(232, 247, 238)"] [style*="color"] { color: #0B6E3F !important; }
-[style*="rgb(253, 243, 218)"][style*="color"], [style*="rgb(253, 243, 218)"] [style*="color"], [style*="rgb(250, 240, 216)"][style*="color"], [style*="rgb(250, 240, 216)"] [style*="color"] { color: #7A4F00 !important; }
-[style*="rgb(227, 238, 251)"][style*="color"], [style*="rgb(227, 238, 251)"] [style*="color"] { color: #154F8A !important; }
-[style*="rgb(222, 240, 240)"][style*="color"], [style*="rgb(222, 240, 240)"] [style*="color"] { color: #0A5E5E !important; }
-/* gefuellte Gruenflaechen mit weisser Schrift */
-[style*="background: rgb(20, 154, 89)"], [style*="background-color: rgb(20, 154, 89)"], .tw-tab.aktiv .tw-navbadge { background: #0B7A45 !important; }
-/* Upgrade-Knopf in der Seitenleiste */
-.tw-sn-upgrade { color: #45D08A !important; border-color: #45D08A !important; }
-html.tw-dark .tw-sn-upgrade { color: #096B3C !important; border-color: #096B3C !important; }
-/* Performance-Score auf dunkler Kachel im hellen Thema */
-/* 124: Score-Variablen nur im dunklen Tooltip */
-
-/* 124 Nachtrag: weitere hart codierte Farben je Thema */
-:root [style*="color: rgb(138, 90, 0)"] { color: #E6B04A !important; }
-:root [style*="color: rgb(176, 74, 58)"] { color: #F07A66 !important; }
-:root [style*="color: rgb(194, 65, 12)"] { color: #F59A6B !important; }
-:root [style*="color: rgb(107, 79, 216)"] { color: #B3A6F5 !important; }
-html.tw-dark [style*="color: rgb(138, 136, 128)"] { color: #5E6873 !important; }
-:root:not(.tw-dark) { --tw-muted: #9AA3B2; }
-html.tw-dark [style*="rgb(15, 21, 32)"] [style*="color: rgb(15, 107, 63)"], html.tw-dark [style*="var(--dunkel)"] [style*="color: rgb(15, 107, 63)"] { color: #4ADE8A !important; }
-html.tw-dark [style*="rgb(15, 21, 32)"] [style*="color: rgb(26, 122, 69)"], html.tw-dark [style*="var(--dunkel)"] [style*="color: rgb(26, 122, 69)"] { color: #7EE2A8 !important; }
-
-/* 124 Nachtrag 2: im hellen Thema die dunklen Originalfarben behalten (dort lesbar) */
-html.tw-dark [style*="color: rgb(138, 90, 0)"] { color: #8A5A00 !important; }
-html.tw-dark [style*="color: rgb(176, 74, 58)"] { color: #B04A3A !important; }
-html.tw-dark [style*="color: rgb(194, 65, 12)"] { color: #C2410C !important; }
-html.tw-dark [style*="color: rgb(107, 79, 216)"] { color: #6B4FD8 !important; }
-/* Score-Farben auf dunklen Flaechen im hellen Thema */
-html.tw-dark .tw-pm-tip { --sc-hi-text: #4ADE8A; --sc-gut-text: #7EE2A8; --sc-mittel-text: #F2C14E; }
-:root:not(.tw-dark) p[style*="max-width: 760px"] { color: #9AA3B2 !important; }
-
-/* 124 Nachtrag 3: helle Hinterlegungen behalten dunkle Schrift (muss nach allen Farbregeln stehen), gedaempfter Text im dunklen Thema */
-[style*="rgb(253, 243, 218)"][style*="color"], [style*="rgb(253, 243, 218)"] [style*="color"], [style*="rgb(250, 240, 216)"][style*="color"], [style*="rgb(250, 240, 216)"] [style*="color"] { color: #7A4F00 !important; }
-[style*="rgb(228, 244, 235)"][style*="color"], [style*="rgb(228, 244, 235)"] [style*="color"], [style*="rgb(226, 243, 234)"][style*="color"], [style*="rgb(226, 243, 234)"] [style*="color"], [style*="rgb(232, 247, 238)"][style*="color"], [style*="rgb(232, 247, 238)"] [style*="color"] { color: #0B6E3F !important; }
-:root:not(.tw-dark) [style*="color: rgb(102, 112, 133)"] { color: #9AA3B2 !important; }
 </style>
 <!-- tw-build: 2026-08-28-br suchemobil3 -->
 </style>
 <!-- tw-build: 2026-08-28-br suchemobil3 -->
 <style>
 /* ===== Farbsystem: zwei getrennte Farbsaetze (Standard dunkel, html.tw-dark = hell) ===== */
-:root { --t1: #EDEDED; --t2: #A8A8A8; --t3: #939393; --aus: #5A5A5A; --zebra: #151515; --seite: #171819; --karte: #1e1f21; --karte2: #26282b; --leiste: #111213; --linie: #2a2b2d; --linie2: #2f3236; --hover: #1c1d1f; --aktiv: #262729; --dunkel: #2e3238; --gruen: #149a59; --gruen-text: #4ADE8A; --gruen-tint: rgba(20,154,89,.16); --sc-hi-bg: rgba(22,166,95,.16); --sc-hi-rand: rgba(74,222,138,.28); --sc-hi-text: #4ADE8A; --sc-gut-bg: rgba(39,181,103,.14); --sc-gut-rand: rgba(39,181,103,.28); --sc-gut-text: #5fd48b; --sc-mittel-bg: rgba(185,134,11,.16); --sc-mittel-rand: rgba(232,177,55,.3); --sc-mittel-text: #e8b137; --sc-schwach-bg: rgba(176,74,58,.16); --sc-schwach-rand: rgba(224,123,106,.3); --sc-schwach-text: #e07b6a; --scout-bg: #1c1f2b; --scout-rand: #2c3048; --scout-text: #b9b3ff; --scout-knopf: #5f5cb3; --scout-chip: #2a2d3f; --lader-bg: rgba(23,24,25,.55); --zeile-hover: rgba(255,255,255,.05); --zeile-aktiv: rgba(74,222,138,.10); --glas: rgba(30,31,33,.94); --violett: #a99cf0; --violett-tint: rgba(109,75,199,.18); --blau-text: #7fb6e6; --teal: #5ec8e6; --teal-tint: rgba(14,116,144,.18); --teal-bg: #0e7490; }
-html.tw-dark { --t1: #0F1720; --t2: #4A5560; --t3: #5E6873; --aus: #9AA4B1; --zebra: #F8FAFB; --seite: #F4F6F8; --karte: #FFFFFF; --karte2: #F1F3F5; --leiste: #E9ECEF; --linie: #E1E5E2; --linie2: #D3D7DC; --hover: #E3E6EA; --aktiv: #FFFFFF; --dunkel: #0f1520; --gruen-text: #0F6B3F; --gruen-tint: #E8F7EE; --sc-hi-bg: rgba(22,166,95,.12); --sc-hi-rand: rgba(22,166,95,.35); --sc-hi-text: #0F6B3F; --sc-gut-bg: rgba(39,181,103,.12); --sc-gut-rand: rgba(39,181,103,.35); --sc-gut-text: #1a7a45; --sc-mittel-bg: rgba(185,134,11,.12); --sc-mittel-rand: rgba(185,134,11,.35); --sc-mittel-text: #8a6208; --sc-schwach-bg: rgba(176,74,58,.12); --sc-schwach-rand: rgba(176,74,58,.35); --sc-schwach-text: #9a3d2e; --scout-bg: #EEF1FB; --scout-rand: #d9d2f7; --scout-text: #5b58c7; --scout-knopf: #5b58c7; --scout-chip: #E4E8FA; --lader-bg: rgba(244,246,248,.55); --zeile-hover: #F1F3F5; --zeile-aktiv: #E8F7EE; --glas: rgba(255,255,255,.95); --violett: #6d4bc7; --violett-tint: #EFEBFF; --blau-text: #1e4e79; --teal: #0e7490; --teal-tint: #e6f6f9; --teal-bg: #0e7490; }
+:root { --t1: #EDEDED; --t2: #A8A8A8; --t3: #6E6E6E; --aus: #5A5A5A; --zebra: #151515; --seite: #171819; --karte: #1e1f21; --karte2: #26282b; --leiste: #111213; --linie: #2a2b2d; --linie2: #2f3236; --hover: #1c1d1f; --aktiv: #262729; --dunkel: #2e3238; --gruen: #149a59; --gruen-text: #4ADE8A; --gruen-tint: rgba(20,154,89,.16); --sc-hi-bg: rgba(22,166,95,.16); --sc-hi-rand: rgba(74,222,138,.28); --sc-hi-text: #4ADE8A; --sc-gut-bg: rgba(39,181,103,.14); --sc-gut-rand: rgba(39,181,103,.28); --sc-gut-text: #5fd48b; --sc-mittel-bg: rgba(185,134,11,.16); --sc-mittel-rand: rgba(232,177,55,.3); --sc-mittel-text: #e8b137; --sc-schwach-bg: rgba(176,74,58,.16); --sc-schwach-rand: rgba(224,123,106,.3); --sc-schwach-text: #e07b6a; --scout-bg: #1c1f2b; --scout-rand: #2c3048; --scout-text: #b9b3ff; --scout-knopf: #5f5cb3; --scout-chip: #2a2d3f; --lader-bg: rgba(23,24,25,.55); --zeile-hover: rgba(255,255,255,.05); --zeile-aktiv: rgba(74,222,138,.10); --glas: rgba(30,31,33,.94); --violett: #a99cf0; --violett-tint: rgba(109,75,199,.18); --blau-text: #7fb6e6; --teal: #5ec8e6; --teal-tint: rgba(14,116,144,.18); --teal-bg: #0e7490; }
+html.tw-dark { --t1: #0F1720; --t2: #4A5560; --t3: #7A8592; --aus: #9AA4B1; --zebra: #F8FAFB; --seite: #F4F6F8; --karte: #FFFFFF; --karte2: #F1F3F5; --leiste: #E9ECEF; --linie: #E1E5E2; --linie2: #D3D7DC; --hover: #E3E6EA; --aktiv: #FFFFFF; --dunkel: #0f1520; --gruen-text: #0F6B3F; --gruen-tint: #E8F7EE; --sc-hi-bg: rgba(22,166,95,.12); --sc-hi-rand: rgba(22,166,95,.35); --sc-hi-text: #0F6B3F; --sc-gut-bg: rgba(39,181,103,.12); --sc-gut-rand: rgba(39,181,103,.35); --sc-gut-text: #1a7a45; --sc-mittel-bg: rgba(185,134,11,.12); --sc-mittel-rand: rgba(185,134,11,.35); --sc-mittel-text: #8a6208; --sc-schwach-bg: rgba(176,74,58,.12); --sc-schwach-rand: rgba(176,74,58,.35); --sc-schwach-text: #9a3d2e; --scout-bg: #EEF1FB; --scout-rand: #d9d2f7; --scout-text: #5b58c7; --scout-knopf: #5b58c7; --scout-chip: #E4E8FA; --lader-bg: rgba(244,246,248,.55); --zeile-hover: #F1F3F5; --zeile-aktiv: #E8F7EE; --glas: rgba(255,255,255,.95); --violett: #6d4bc7; --violett-tint: #EFEBFF; --blau-text: #1e4e79; --teal: #0e7490; --teal-tint: #e6f6f9; --teal-bg: #0e7490; }
 html, body { background: var(--seite); color: var(--t1); }
 .tw-lang-kurz{display:none}@media (max-width:560px){.tw-lang-text{display:none}.tw-lang-kurz{display:inline}}</style>
 <meta name="description" content="All transfer news, club needs with player matching, scout ranking and a player database from 53 leagues and 32 countries — updated hourly." />
@@ -318,7 +271,7 @@ header:has(+ .tw-tabbar) button[style*="color: inherit"] { color: var(--t1) !imp
 </style>
 </head>
 <body>
-<div id="tw-lader" aria-hidden="true"><div class="tw-lader-kern"><span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span><span class="sweep"></span><img src="/assets/logo-icon.png" alt=""></div><div class="tw-lader-text" id="tw-lader-text">Signal wird gesucht</div><script>try{if(localStorage.getItem("tw_lang")==="en"){document.getElementById("tw-lader-text").textContent="Searching for signals";}}catch(e){}</script></div>
+<div id="tw-lader" aria-hidden="true"><div class="tw-lader-kern"><span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span><span class="sweep"></span><img src="/assets/logo-icon.png" alt=""></div><div class="tw-lader-text">Signal wird gesucht</div></div>
 <script>
 (function () {
   // Globaler Lade-Waechter: zeigt das Logo nur, wenn nach einem Klick ein API-Aufruf laenger als 220 ms dauert.
@@ -1235,205 +1188,6 @@ function twEn(s) {
   for (const [re, fn] of EN_RULES) { const m = core.match(re); if (m) return m0[1] + fn(m) + m0[3]; }
   return m0[1] + twEnShort(core) + m0[3];
 }
-/* 37 (03.10.2026): Spielerdossier als PDF — Daten aus der Spieler-API, passende Vereine aus „Verein sucht", Ausgabe über den PDF-Dienst /api/vs-pdf (Premium) */
-window.twDossierPdf = async function (x, vorhanden) {
-  const en = LANG === "en"; const L = (de, e) => (en ? e : de);
-  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const meldung = (t) => { try { let el = document.getElementById("tw-dossier-toast"); if (!el) { el = document.createElement("div"); el.id = "tw-dossier-toast"; el.style.cssText = "position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:99999;background:#0f1520;color:#fff;padding:11px 18px;border-radius:10px;font:600 14px Inter,system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.25);max-width:90vw;text-align:center"; document.body.appendChild(el); } el.textContent = t; el.style.display = "block"; clearTimeout(el._t); el._t = setTimeout(() => { el.style.display = "none"; }, 4200); } catch (e) { } };
-  const datum = (s) => { const m = String(s || "").match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? (en ? m[1] + "-" + m[2] + "-" + m[3] : m[3] + "." + m[2] + "." + m[1]) : ""; };
-  const geld = (v) => { const n = Number(v); if (!n) return "–"; return n >= 1e6 ? (Math.round(n / 1e5) / 10).toLocaleString(en ? "en-GB" : "de-DE") + (en ? "m €" : " Mio. €") : Math.round(n / 1e3).toLocaleString(en ? "en-GB" : "de-DE") + (en ? "k €" : " Tsd. €"); };
-  const vn = (t) => { try { return en && typeof EN_MAP !== "undefined" && EN_MAP[t] ? EN_MAP[t] : t; } catch (e) { return t; } };
-  const zahl = (v, d) => (v == null || v === "" || isNaN(Number(v)) ? "–" : Number(v).toLocaleString(en ? "en-GB" : "de-DE", { maximumFractionDigits: d || 0 }));
-  let konto = {}; try { konto = JSON.parse(localStorage.getItem("tw_account") || "{}") || {}; } catch (e) { konto = {}; }
-  const code = konto.zugangscode || konto.code || "", email = konto.email || "";
-  if (!x || !x.pid) { meldung(L("Kein Spieler gewählt", "No player selected")); return; }
-  meldung(L("Dossier wird erstellt …", "Creating dossier …"));
-  try {
-    let det = vorhanden && vorhanden.detail ? vorhanden : null;
-    if (!det) { const r = await fetch(SPIELER_URL + "?pid=" + encodeURIComponent(x.pid), { credentials: "omit", cache: "no-store" }); det = normResp(await r.json()) || {}; }
-    const d = det.detail || {}; const pr = det.profil || {};
-    const name = d.name || x.name || ""; const team = d.team || x.team || ""; const liga = d.league || x.league || "";
-    const pos = d.pos || x.pos || x.position || "";
-    const GR = { Torwart: "TW", Abwehr: "ABW", Mittelfeld: "MF", Sturm: "ST" }; const POS_EN = { Torwart: "Goalkeeper", Abwehr: "Defender", Mittelfeld: "Midfielder", Sturm: "Forward" };
-    const mw = (det.marktwert_historie || []).filter((m) => m && m.datum).sort((a, b) => String(a.datum).localeCompare(String(b.datum)));
-    const mwAkt = pr.marktwert_eur || (mw.length ? mw[mw.length - 1].mw : 0);
-    const mwMax = mw.reduce((a, m) => Math.max(a, Number(m.mw) || 0), 0);
-    const form = (det.form || []).filter((f) => f && f.score != null).sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 10);
-    const schnitt = (n) => { const f = form.slice(0, n); return f.length ? Math.round(f.reduce((a, b) => a + Number(b.score || 0), 0) / f.length) : null; };
-    const verl = (det.verletzungen || []).slice().sort((a, b) => String(b.von).localeCompare(String(a.von))).slice(0, 10);
-    const vereine = (det.vereine || []).slice().sort((a, b) => String(b.von).localeCompare(String(a.von))).slice(0, 8);
-    const aend = (det.aenderungen || []).slice(0, 8);
-    let passend = []; const gruppe = GR[pos] || "";
-    if (gruppe && code && email) {
-      try {
-        const u = new URLSearchParams({ code, email, was: "liste", gruppe, limit: "500" }); if (en) u.set("lang", "en");
-        const lr = await fetch("/api/verein-sucht?" + u.toString(), { headers: { Accept: "application/json" } }); const ld = await lr.json();
-        const alter = Number(d.age) || 0; const stufe = { rot: 0, gelb: 1, gruen: 2 };
-        passend = ((ld && ld.karten) || []).filter((k) => k && k.team && k.team !== team && (!alter || !k.alter_von || (alter >= Number(k.alter_von) - 1 && alter <= Number(k.alter_bis || 99) + 1)))
-          .sort((a, b) => (stufe[a.ampel] ?? 3) - (stufe[b.ampel] ?? 3) || (Number(b.score) || 0) - (Number(a.score) || 0)).slice(0, 8);
-      } catch (e) { passend = []; }
-    }
-    const fotoOk = /^https:\/\/(media\.api-sports\.io|cdn\.sportmonks\.com|(www\.)?transferwire\.de)\//.test(d.photo || "");
-    const initialen = name.split(/\s+/).filter(Boolean).map((t) => t[0]).slice(0, 2).join("").toUpperCase();
-    const fakt = (lab, val) => (val == null || val === "" || val === "–" ? "" : "<div class=\"fakt\"><span>" + esc(lab) + "</span><b>" + esc(val) + "</b></div>");
-    const vertrag = pr.vertrag_bis || d.contract_until || "";
-    const fakten = [
-      fakt(L("Alter", "Age"), d.age ? d.age + (d.birth_date ? " (" + datum(d.birth_date) + ")" : "") : ""),
-      fakt(L("Nationalität", "Nationality"), d.nat), fakt(L("Geburtsort", "Place of birth"), pr.geburtsort),
-      fakt(L("Größe / Gewicht", "Height / weight"), (d.height ? d.height + " cm" : "") + (d.weight ? " / " + d.weight + " kg" : "")),
-      fakt(L("Vertrag bis", "Contract until"), datum(vertrag) || (d.contract_note || "")), fakt(L("Option", "Option"), pr.vertragsoption),
-      fakt(L("Letzte Verlängerung", "Last extension"), datum(pr.letzte_verlaengerung)), fakt(L("Im Verein seit", "At club since"), datum(pr.im_team_seit)),
-      fakt(L("Marktwert", "Market value"), mwAkt ? geld(mwAkt) : ""), fakt(L("Höchster Marktwert", "Peak market value"), mwMax ? geld(mwMax) : ""),
-      fakt(L("Berater", "Agent"), pr.berater), fakt(L("Länderspiele", "Caps"), pr.laenderspiele ? pr.laenderspiele + (pr.laenderspiel_tore ? " / " + pr.laenderspiel_tore + L(" Tore", " goals") : "") : ""),
-      fakt(L("Ausgeliehen von", "On loan from"), pr.ausgeliehen_von ? pr.ausgeliehen_von + (pr.vertrag_dort_bis ? " (" + L("Vertrag dort bis ", "contract there until ") + datum(pr.vertrag_dort_bis) + ")" : "") : ""),
-      fakt(L("Ausrüster", "Kit supplier"), pr.ausruester), fakt(L("Fitness", "Fitness"), d.fitness_note)
-    ].join("");
-    const kachel = (lab, val) => "<div class=\"kachel\"><b>" + esc(val) + "</b><span>" + esc(lab) + "</span></div>";
-    const saison = "<div class=\"kacheln\">" + [kachel(L("Einsätze", "Apps"), zahl(d.apps)), kachel(L("Minuten", "Minutes"), zahl(d.min)), kachel(L("Tore", "Goals"), zahl(d.goals)), kachel(L("Vorlagen", "Assists"), zahl(d.assists)),
-      kachel("xG", d.xg != null ? zahl(d.xg, 2) : "–"), kachel(L("Bewertung", "Rating"), d.rating ? zahl(d.rating, 1) : "–"), kachel(L("Passquote", "Pass acc."), d.pass_acc ? d.pass_acc + " %" : "–"), kachel(L("Zweikämpfe", "Duels won"), d.duels_pct ? d.duels_pct + " %" : "–")].join("") + "</div>";
-    const formHtml = form.length
-      ? "<p class=\"klein\">" + L("Ø TW Performance Score letzte 5 Spiele: ", "Avg. TW Performance Score last 5 matches: ") + "<b>" + schnitt(5) + "</b> · " + L("letzte 10: ", "last 10: ") + "<b>" + schnitt(10) + "</b></p><table><tr><th>" + L("Datum", "Date") + "</th><th>" + L("Gegner", "Opponent") + "</th><th class=\"r\">" + L("Min.", "Min.") + "</th><th>Score</th></tr>"
-        + form.map((f) => "<tr><td>" + datum(f.date) + "</td><td>" + esc(f.gegner) + (f.sub ? " <i>(" + L("eingewechselt", "sub") + ")</i>" : "") + "</td><td class=\"r\">" + zahl(f.min) + "</td><td><div class=\"bar\"><span style=\"width:" + Math.max(3, Math.min(100, Number(f.score) || 0)) + "%\"></span><em>" + zahl(f.score) + "</em></div></td></tr>").join("") + "</table>"
-      : "<p class=\"klein\">" + L("Für diese Saison liegen noch keine TW-Spielbewertungen vor.", "No TW match ratings for this season yet.") + "</p>";
-    const mwZeilen = mw.slice(-12);
-    const mwHtml = mwZeilen.length
-      ? "<table><tr><th>" + L("Datum", "Date") + "</th><th>" + L("Verein", "Club") + "</th><th class=\"r\">" + L("Alter", "Age") + "</th><th>" + L("Marktwert", "Market value") + "</th></tr>" + mwZeilen.slice().reverse().map((m) => "<tr><td>" + datum(m.datum) + "</td><td>" + esc(vn(m.verein || "")) + "</td><td class=\"r\">" + esc(m.alter || "") + "</td><td><div class=\"bar blau\"><span style=\"width:" + (mwMax ? Math.max(3, Math.round(100 * (Number(m.mw) || 0) / mwMax)) : 0) + "%\"></span><em>" + geld(m.mw) + "</em></div></td></tr>").join("") + "</table>"
-      : "<p class=\"klein\">" + L("Keine Marktwert-Historie vorhanden.", "No market value history available.") + "</p>";
-    const verlHtml = verl.length
-      ? "<table><tr><th>" + L("Saison", "Season") + "</th><th>" + L("Ausfall", "Absence") + "</th><th>" + L("von", "from") + "</th><th>" + L("bis", "until") + "</th><th class=\"r\">" + L("Tage", "Days") + "</th><th class=\"r\">" + L("Spiele", "Games") + "</th></tr>" + verl.map((v) => "<tr><td>" + esc(v.saison || "") + "</td><td>" + esc(v.verletzung || v.grund || "") + "</td><td>" + datum(v.von) + "</td><td>" + (datum(v.bis) || L("offen", "ongoing")) + "</td><td class=\"r\">" + zahl(v.tage) + "</td><td class=\"r\">" + zahl(v.spiele) + "</td></tr>").join("") + "</table>"
-      : "<p class=\"klein\">" + L("Keine Verletzungen erfasst.", "No injuries recorded.") + "</p>";
-    const vereinHtml = vereine.length ? "<table>" + vereine.map((v) => "<tr><td>" + esc(vn(v.team)) + "</td><td>" + esc(v.liga || "") + "</td><td>" + (v.genau ? "" : L("seit mind. ", "since at least ")) + datum(v.von) + " – " + (v.aktuell ? L("heute", "today") : datum(v.bis)) + "</td></tr>").join("") + "</table>" : "";
-    const AEND = { team: L("Verein", "Club"), league: L("Liga", "League"), tm_value_eur: L("Marktwert", "Market value"), marktwert: L("Marktwert", "Market value"), tm_contract_until: L("Vertrag", "Contract"), vertrag_bis: L("Vertrag", "Contract"), fitness_note: "Fitness", position: "Position" };
-    const wert = (f, v) => (v == null || v === "" ? "–" : /marktwert|value/.test(f) ? geld(v) : /contract|vertrag/.test(f) ? (datum(v) || v) : v);
-    const aendHtml = aend.length ? "<table>" + aend.map((a) => "<tr><td>" + datum(a.created_at || a.datum || a.am || "") + "</td><td>" + esc(AEND[a.feld] || a.feld || "") + "</td><td>" + esc(vn(wert(a.feld, a.alt))) + " → <b>" + esc(vn(wert(a.feld, a.neu))) + "</b></td></tr>").join("") + "</table>" : "";
-    const passendHtml = passend.length
-      ? "<table><tr><th>" + L("Verein", "Club") + "</th><th>" + L("Liga", "League") + "</th><th>" + L("Bedarf", "Need") + "</th><th>" + L("Wunschalter", "Target age") + "</th><th>" + L("Zeitfenster", "Window") + "</th></tr>" + passend.map((k) => "<tr><td><span class=\"punkt " + esc(k.ampel || "") + "\"></span>" + esc(vn(k.team)) + "</td><td>" + esc(k.league || "") + "</td><td>" + esc(k.titel || k.position || "") + (k.score ? " · " + zahl(k.score) : "") + "</td><td>" + (k.alter_von ? esc(k.alter_von + "–" + (k.alter_bis || "")) : "–") + "</td><td>" + esc(k.zeitfenster === "winter" ? L("Winter", "Winter") : k.zeitfenster === "sommer" ? L("Sommer", "Summer") : (k.zeitfenster || "–")) + "</td></tr>").join("") + "</table><p class=\"klein\">" + L("Vereine mit aktuellem Bedarf auf seiner Position (Ampel rot = dringend), Wunschalter passend zum Spieler. Grundlage: TransferWire „Verein sucht“.", "Clubs with a current need in his position (red = urgent) and a matching target age. Source: TransferWire “Club seeks”.") + "</p>"
-      : "<p class=\"klein\">" + L("Gerade keine passenden Vereinsgesuche.", "No matching club needs at the moment.") + "</p>";
-    const heute = new Date(); const stand = en ? heute.toISOString().slice(0, 10) : heute.toLocaleDateString("de-DE");
-    const css = "*{box-sizing:border-box}body{margin:0;font-family:\"Liberation Sans\",Arial,Helvetica,sans-serif;font-size:9.3pt;line-height:1.42;color:#111827}"
-      + ".kopf{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #111827;padding-bottom:6px;margin-bottom:12px}.marke{font-weight:700;font-size:14pt}.marke span{color:#16a34a}.art{font-size:8.4pt;color:#4b5563;text-align:right}"
-      + ".steck{display:flex;gap:16px;align-items:flex-start;margin-bottom:8px}.bild{width:92px;height:92px;border-radius:12px;overflow:hidden;flex:none;background:#0f1520;color:#fff;display:flex;align-items:center;justify-content:center;font-size:26pt;font-weight:700}.bild img{width:100%;height:100%;object-fit:cover;background:#f3f4f6}"
-      + "h1{font-size:19pt;margin:0 0 2px;line-height:1.15}.unter{color:#374151;font-size:10pt;margin-bottom:8px}.fakten{display:grid;grid-template-columns:1fr 1fr;gap:3px 22px}.fakt{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #eef0f2;padding:2px 0}.fakt span{color:#4b5563}.fakt b{text-align:right}"
-      + "h3{font-size:10pt;margin:14px 0 6px;color:#111827;text-transform:uppercase;letter-spacing:.45px;border-bottom:1px solid #d1d5db;padding-bottom:3px}section{break-inside:avoid}"
-      + ".kacheln{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}.kachel{border:1px solid #e5e7eb;border-radius:8px;padding:6px 4px;text-align:center}.kachel b{display:block;font-size:12pt}.kachel span{font-size:7.6pt;color:#4b5563}"
-      + "table{width:100%;border-collapse:collapse;font-size:8.8pt}th{text-align:left;font-size:7.8pt;color:#4b5563;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid #d1d5db;padding:3px 5px}td{padding:3px 5px;border-bottom:1px solid #f0f1f3;vertical-align:top}.r{text-align:right}"
-      + ".bar{position:relative;background:#f3f4f6;border-radius:4px;height:14px;min-width:120px}.bar span{position:absolute;left:0;top:0;bottom:0;background:#16a34a;border-radius:4px;opacity:.85}.bar.blau span{background:#2563eb}.bar em{position:relative;font-style:normal;font-size:8pt;padding-left:5px;font-weight:700}"
-      + ".klein{font-size:8.4pt;color:#4b5563;margin:4px 0}.punkt{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:#9ca3af}.punkt.rot{background:#dc2626}.punkt.gelb{background:#d97706}.punkt.gruen{background:#16a34a}"
-      + ".hinweis{margin-top:16px;font-size:7.8pt;color:#6b7280;border-top:1px solid #e5e7eb;padding-top:6px}";
-    const inhalt = "<div class=\"kopf\"><div class=\"marke\">Transfer<span>Wire</span></div><div class=\"art\">" + L("Spielerdossier", "Player dossier") + "<br>" + L("Stand: ", "As of: ") + stand + "</div></div>"
-      + "<div class=\"steck\"><div class=\"bild\">" + (fotoOk ? "<img src=\"" + esc(d.photo) + "\" alt=\"\">" : esc(initialen)) + "</div><div style=\"flex:1\"><h1>" + esc(name) + "</h1><div class=\"unter\">" + esc([en ? (POS_EN[pos] || pos) : pos, vn(team), liga].filter(Boolean).join(" · ")) + "</div><div class=\"fakten\">" + fakten + "</div></div></div>"
-      + "<section><h3>" + L("Saisonwerte", "Season stats") + (d.season ? " " + esc(d.season) : "") + "</h3>" + saison + "</section>"
-      + "<section><h3>" + L("TW Performance – Formkurve", "TW Performance – form") + "</h3>" + formHtml + "</section>"
-      + "<section><h3>" + L("Marktwert-Verlauf", "Market value history") + "</h3>" + mwHtml + "</section>"
-      + "<section><h3>" + L("Verletzungshistorie", "Injury history") + "</h3>" + verlHtml + "</section>"
-      + (vereinHtml ? "<section><h3>" + L("Vereinsstationen", "Clubs") + "</h3>" + vereinHtml + "</section>" : "")
-      + (aendHtml ? "<section><h3>" + L("Was sich zuletzt geändert hat", "Recent changes") + "</h3>" + aendHtml + "</section>" : "")
-      + "<section><h3>" + L("Passende Vereine mit Bedarf", "Matching clubs with a need") + "</h3>" + passendHtml + "</section>"
-      + "<div class=\"hinweis\">" + L("Erstellt am ", "Created on ") + stand + L(" mit TransferWire. Quellen: Transfermarkt (Profil, Marktwerte, Verletzungen" + (pr.stand ? ", Stand " + datum(pr.stand) : "") + "), API-Football und Sportmonks (Leistungsdaten), eigene Auswertungen. Alle Angaben ohne Gewähr.", " with TransferWire. Sources: Transfermarkt (profile, market values, injuries" + (pr.stand ? ", as of " + datum(pr.stand) : "") + "), API-Football and Sportmonks (performance data), own analysis. All information without guarantee.") + "</div>";
-    const html = "<!DOCTYPE html><html lang=\"" + (en ? "en" : "de") + "\"><head><title>" + esc(L("Spielerdossier ", "Player dossier ") + name) + "</title><style>" + css + "</style></head><body>" + inhalt + "</body></html>";
-    const datei = ["TransferWire", L("Spielerdossier", "Player-dossier"), name, heute.toISOString().slice(0, 10)].join("_").replace(/[^A-Za-z0-9ÄÖÜäöüßÀ-ÿ_.-]+/g, "-") + ".pdf";
-    const pr2 = await fetch("/api/vs-pdf", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code, email, lang: en ? "en" : "de", datei, html }) });
-    const typ = pr2.headers.get("content-type") || "";
-    if (!pr2.ok || typ.indexOf("application/pdf") < 0) { let f = ""; try { f = ((await pr2.json()) || {}).fehler || ""; } catch (e) { } throw new Error(f || ("HTTP " + pr2.status)); }
-    const blob = await pr2.blob(); if (!blob || blob.size < 1000) throw new Error("leer");
-    const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = datei; a.rel = "noopener"; a.style.display = "none";
-    document.body.appendChild(a); a.click(); setTimeout(() => { try { URL.revokeObjectURL(url); a.remove(); } catch (e) { } }, 10000);
-    meldung(L("Dossier heruntergeladen", "Dossier downloaded"));
-    return { ok: true, datei, groesse: blob.size };
-  } catch (e) {
-    meldung(String(e && e.message) === "premium" ? L("Das PDF-Dossier gehört zu Premium", "The PDF dossier is a Premium feature") : L("Dossier konnte nicht erstellt werden", "Could not create the dossier"));
-    return { ok: false, fehler: String(e && e.message) };
-  }
-};
-
-/* 128 Rest (04.10.2026): Übersetzung auch für Texte außerhalb der React-Darstellung (Modul „Verein sucht", Ladehinweise, Länder in „Land · Liga") */
-(function () { try {
-  if (typeof EN_MAP === "undefined") return;
-  const ZUSATZ = { "Signal wird gesucht": "Searching for signals", "Signal wird gesucht …": "Searching for signals …", "Signal wird gesucht...": "Searching for signals..." };
-  Object.keys(ZUSATZ).forEach((k) => { if (!EN_MAP[k]) EN_MAP[k] = ZUSATZ[k]; });
-  const tr = (t) => {
-    const m = t.match(/^(\s*)([\s\S]*?)(\s*)$/); const kern = m ? m[2] : ""; if (!kern) return null;
-    const direkt = EN_MAP[kern]; if (direkt && direkt !== kern) return m[1] + direkt + m[3];
-    let neu = kern, geaendert = false;
-    if (kern.indexOf(" · ") > 0) { neu = kern.split(" · ").map((x) => { const y = EN_MAP[x]; if (y && y !== x) { geaendert = true; return y; } return x; }).join(" · "); }
-    neu = neu.replace(/\(([^()]{3,40})\)/g, (a, x) => { const y = EN_MAP[x]; if (y && y !== x) { geaendert = true; return "(" + y + ")"; } return a; });
-    return geaendert ? m[1] + neu + m[3] : null;
-  };
-  const lauf = (wurzel) => {
-    if (LANG !== "en" || !wurzel) return;
-    if (wurzel.nodeType === 3) { const v = wurzel.nodeValue; const u = v && v.length <= 160 ? tr(v) : null; if (u != null && u !== v) wurzel.nodeValue = u; return; }
-    const w = document.createTreeWalker(wurzel, 4); const liste = []; let n; while ((n = w.nextNode())) liste.push(n);
-    for (const k of liste) { const p = k.parentNode; if (!p || /^(SCRIPT|STYLE|TEXTAREA|INPUT)$/.test(p.nodeName)) continue; const v = k.nodeValue; if (!v || v.length > 160 || !/[A-Za-zÄÖÜäöüß]/.test(v)) continue; const u = tr(v); if (u != null && u !== v) k.nodeValue = u; }
-  };
-  let offen = new Set(); let geplant = false;
-  const mo = new MutationObserver((recs) => {
-    if (LANG !== "en") return;
-    for (const r of recs) for (const n of r.addedNodes) { if (n.nodeType === 1 || n.nodeType === 3) offen.add(n); }
-    if (!geplant) { geplant = true; requestAnimationFrame(() => { geplant = false; const s = offen; offen = new Set(); s.forEach((x) => { try { if (x && x.isConnected) lauf(x); } catch (e) { } }); }); }
-  });
-  const start = () => { try { mo.observe(document.body, { childList: true, subtree: true }); lauf(document.body); } catch (e) { } };
-  if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
-} catch (e) { } })();
-
-/* 128 Rest (04.10.2026): Sprache des Kontos für E-Mails merken (POST /api/tw-sprache, nur bei Änderung) */
-(function () { try {
-  const sync = () => { try {
-    const a = JSON.parse(localStorage.getItem("tw_account") || "{}") || {}; const code = a.zugangscode || a.code, email = a.email; if (!code || !email) return;
-    const l = LANG === "en" ? "en" : "de"; const k = "tw_lang_sync"; if (localStorage.getItem(k) === email + "|" + l) return;
-    fetch("/api/tw-sprache", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code, email, lang: l }) }).then((r) => { if (r.ok) localStorage.setItem(k, email + "|" + l); }).catch(() => { });
-  } catch (e) { } };
-  setTimeout(sync, 5000); setInterval(sync, 20000);
-} catch (e) { } })();
-
-/* 128 (03.10.2026): Sprachwechsel — englische Vereinsnamen, Länder in Ligennamen, häufige Satzmuster der Meldungen und fehlende App-Texte */
-(function () { try {
-  const VEREINE = { "FC Bayern München": "Bayern Munich", "Bayern München": "Bayern Munich", "FC Bayern München II": "Bayern Munich II", "Bayern München II": "Bayern Munich II", "1860 München": "1860 Munich",
-    "Inter Mailand": "Inter Milan", "AC Mailand": "AC Milan", "Juventus Turin": "Juventus", "SSC Neapel": "Napoli", "AS Rom": "AS Roma", "Lazio Rom": "Lazio", "AC Florenz": "Fiorentina", "FC Turin": "Torino",
-    "Atalanta Bergamo": "Atalanta", "FC Genua": "Genoa", "Sampdoria Genua": "Sampdoria", "FC Bologna": "Bologna", "FC Sevilla": "Sevilla", "FC Valencia": "Valencia", "Betis Sevilla": "Real Betis",
-    "Espanyol Barcelona": "Espanyol", "FC Villarreal": "Villarreal", "FC Girona": "Girona", "FC Getafe": "Getafe", "Olympique Lyon": "Lyon", "Olympique Marseille": "Marseille", "OGC Nizza": "Nice",
-    "Racing Straßburg": "Strasbourg", "Stade Rennes": "Rennes", "FC Nantes": "Nantes", "OSC Lille": "Lille", "Stade Brest": "Brest", "Benfica Lissabon": "Benfica", "Sporting Lissabon": "Sporting CP",
-    "Sporting Braga": "Braga", "Galatasaray Istanbul": "Galatasaray", "Fenerbahce Istanbul": "Fenerbahçe", "Besiktas Istanbul": "Beşiktaş", "Roter Stern Belgrad": "Red Star Belgrade",
-    "Partizan Belgrad": "Partizan", "Dynamo Kiew": "Dynamo Kyiv", "Schachtar Donezk": "Shakhtar Donetsk", "Spartak Moskau": "Spartak Moscow", "ZSKA Moskau": "CSKA Moscow",
-    "Lokomotive Moskau": "Lokomotiv Moscow", "Dynamo Moskau": "Dynamo Moscow", "Zenit St. Petersburg": "Zenit Saint Petersburg", "Celtic Glasgow": "Celtic", "Glasgow Rangers": "Rangers",
-    "Ajax Amsterdam": "Ajax", "PSV Eindhoven": "PSV", "Feyenoord Rotterdam": "Feyenoord", "FC Brügge": "Club Brugge", "Royal Antwerpen": "Royal Antwerp", "Standard Lüttich": "Standard Liège",
-    "RSC Anderlecht": "Anderlecht", "Olympiakos Piräus": "Olympiacos", "Panathinaikos Athen": "Panathinaikos", "AEK Athen": "AEK Athens", "PAOK Saloniki": "PAOK", "Slavia Prag": "Slavia Prague",
-    "Sparta Prag": "Sparta Prague", "Viktoria Pilsen": "Viktoria Plzeň", "Legia Warschau": "Legia Warsaw", "Lech Posen": "Lech Poznań", "Ferencváros Budapest": "Ferencváros", "FC Kopenhagen": "FC Copenhagen",
-    "Bröndby IF": "Brøndby", "BSC Young Boys": "Young Boys", "Grasshoppers Zürich": "Grasshopper", "Rapid Wien": "Rapid Vienna", "Austria Wien": "Austria Vienna", "Lewski Sofia": "Levski Sofia", "unbekannt": "unknown club" };
-  const LAND = { "Südkorea": "South Korea", "Serbien": "Serbia", "Slowakei": "Slovakia", "Argentinien": "Argentina", "Bulgarien": "Bulgaria", "Österreich": "Austria", "Tschechien": "Czechia", "Rumänien": "Romania",
-    "Polen": "Poland", "Kroatien": "Croatia", "Ungarn": "Hungary", "Griechenland": "Greece", "Türkei": "Türkiye", "Dänemark": "Denmark", "Schweden": "Sweden", "Norwegen": "Norway", "Schweiz": "Switzerland",
-    "Belgien": "Belgium", "Niederlande": "Netherlands", "Spanien": "Spain", "Italien": "Italy", "Frankreich": "France", "Deutschland": "Germany", "Brasilien": "Brazil", "Mexiko": "Mexico", "Japan": "Japan",
-    "China": "China", "Saudi-Arabien": "Saudi Arabia", "Zypern": "Cyprus", "Schottland": "Scotland", "Russland": "Russia", "Ukraine": "Ukraine", "Slowenien": "Slovenia", "Bosnien": "Bosnia", "Israel": "Israel",
-    "Kasachstan": "Kazakhstan", "Aserbaidschan": "Azerbaijan", "Katar": "Qatar", "Ägypten": "Egypt", "Marokko": "Morocco", "Kolumbien": "Colombia", "Chile": "Chile", "Uruguay": "Uruguay", "Ecuador": "Ecuador", "Peru": "Peru" };
-  Object.assign(EN_MAP, VEREINE, LAND, {
-    "Signal wird gesucht": "Searching for signals", "Source: TW Kaderlücken-KI (10-Signal-Analyse)": "Source: TW squad-gap AI (10-signal analysis)", "Verein gezielt suchen": "Search for a specific club",
-    "1 · Land wählen": "1 · Choose country", "2 · Liga wählen": "2 · Choose league", "3 · Verein wählen": "3 · Choose club", "nicht genannt": "not disclosed", "Defensive Stabilität": "Defensive stability",
-    "Strafraumpräsenz": "Box presence", "Länderspiele · Friendly International": "Internationals · Friendly International", "Ballführung": "Ball carrying", "Chancenkreation": "Chance creation", "Defensive": "Defending" });
-  const V = (x) => VEREINE[x] || EN_MAP[x] || x;
-  const K = (x) => String(x).replace(/\(Gerücht\)/g, "(rumour)").replace(/\(Spekulation\)/g, "(speculation)").replace(/\(sondiert\)/g, "(exploring)").replace(/unbestätigt/g, "unconfirmed").replace(/Schätzung/g, "estimate").replace(/Zweijahresvertrag/g, "two-year contract");
-  const landRe = new RegExp("^(.*)\\((" + Object.keys(LAND).join("|") + ")\\)(.*)$");
-  const regeln = [
-    [landRe, (m) => m[1] + "(" + LAND[m[2]] + ")" + m[3]],
-    [/^(.+?) wechselt zum (\d{2}\.\d{2}\.\d{4}) von (.+?) zu (.+?)( \((?:loan|free transfer)\))?$/, (m) => m[1] + " moves from " + V(m[3]) + " to " + V(m[4]) + " on " + m[2] + (m[5] || "")],
-    [/^(.+?) wechselt von (.+?) zu (.+?)( \((?:loan|free transfer)\))?(?: für (.+))?$/, (m) => m[1] + " moves from " + V(m[2]) + " to " + V(m[3]) + (m[4] || "") + (m[5] ? " for " + m[5].replace(/ Mio\. €/, "m €") : "")],
-    [/^(.+?) sucht (?:einen )?neuen Verein$/, (m) => m[1] + " is looking for a new club"],
-    [/^(.+?) unterschreibt (?:fest )?bei (.+?)$/, (m) => m[1] + " signs for " + K(V(m[2]))],
-    [/^(.+?) verpflichtet (.+)$/, (m) => V(m[1]) + " signs " + m[2]],
-    [/^(.+?) an (.+?) interessiert$/, (m) => V(m[1]) + " interested in " + m[2]],
-    [/^(.+?): Verlängerung mit (.+?) im Gespräch$/, (m) => V(m[1]) + ": contract extension with " + m[2] + " under discussion"],
-    [/^(.+?) steht vor Verpflichtung von (.+)$/, (m) => V(m[1]) + " close to signing " + m[2]],
-    [/^(.+?) ist vereinslos(.*)$/, (m) => m[1] + " is a free agent" + m[2]],
-    [/^(.+?) (?:aktuell|derzeit) ohne Vertrag$/, (m) => m[1] + " currently without a contract"],
-    [/^(.+?) verlässt den Klub als Free Agent$/, (m) => m[1] + " leaves the club as a free agent"],
-    [/^Wie ist die Form von (.+?) und wann laeuft sein Vertrag aus\?$/, (m) => "How is " + m[1] + "'s form and when does his contract expire?"],
-    [/^Wie ist die Form von (.+?)\?$/, (m) => "How is " + m[1] + "'s form?"],
-    [/^spielt (\d+) Jahre? unter Liganormal$/, (m) => "plays " + m[1] + " years below league level"],
-    [/^Leistungsschnitt der Position nur (\d+)\/100 · nur (\d+) Spieler mit Einsatzzeit$/, (m) => "Position performance average only " + m[1] + "/100 · only " + m[2] + " players with minutes"],
-    [/^(Ballführung|Chancenkreation|Defensive) (\d+)$/, (m) => EN_MAP[m[1]] + " " + m[2]],
-    [/^(FC Bayern München|Bayern München)( .+)$/, (m) => "Bayern Munich" + K(m[2])]
-  ];
-  for (let i = regeln.length - 1; i >= 0; i--) EN_RULES.unshift(regeln[i]);
-} catch (e) { /* Uebersetzungszusatz darf die App nie stoeren */ } })();
-
 (function () {
   const ce = React.createElement;
   React.createElement = function (type, props) {
@@ -2632,7 +2386,7 @@ function ClubLogo({ name, size }) {
   React.useEffect(() => { const f = () => tick(t => t + 1); window.addEventListener("tw-logos", f); return () => window.removeEventListener("tw-logos", f); }, []);
   const url = clubLogoUrl(name);
   if (url) return React.createElement("img", { src: url, alt: "", width: sz, height: sz, loading: "lazy", style: { width: sz, height: sz, objectFit: "contain", borderRadius: 4, flexShrink: 0 } });
-  return React.createElement("span", { "aria-hidden": true, style: { width: sz, height: sz, borderRadius: "50%", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_BODY, fontSize: Math.max(8, Math.round(sz * 0.42)), fontWeight: 900, color: "#fff", background: "hsl(" + clubHue(name) + " 38% 32%)", letterSpacing: .3 } }, clubMono(name));
+  return React.createElement("span", { "aria-hidden": true, style: { width: sz, height: sz, borderRadius: "50%", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_BODY, fontSize: Math.max(8, Math.round(sz * 0.42)), fontWeight: 900, color: "#fff", background: "hsl(" + clubHue(name) + " 38% 46%)", letterSpacing: .3 } }, clubMono(name));
 }
 const SCORES = {
   performance: {
@@ -3742,7 +3496,7 @@ function NewsCard({
     style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 10, minWidth: 0 }
   }, /*#__PURE__*/React.createElement("span", { className: "tw-kicker", style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, letterSpacing: .7, textTransform: "uppercase", color: type.color, whiteSpace: "nowrap", minWidth: 0, flex: "1 1 auto", display: "inline-flex", alignItems: "center", gap: 6, overflow: "hidden" } },
     /*#__PURE__*/React.createElement("span", { style: { width: 7, height: 7, borderRadius: 99, background: type.color, flexShrink: 0 } }),
-    /*#__PURE__*/React.createElement("span", { style: { overflow: "hidden", textOverflow: "ellipsis" } }, (LANG === "en" ? (type.en || type.label) : type.label) + (item.league ? " \u00b7 " + item.league : "")), item.ausgang ? /*#__PURE__*/React.createElement("span", { style: { marginLeft: 6, fontSize: 10, fontWeight: 800, padding: "1px 6px", borderRadius: 6, whiteSpace: "nowrap", background: item.ausgang === "bestaetigt" ? "#e2f5e8" : "#fbe4e4", color: item.ausgang === "bestaetigt" ? "#1f7a3e" : "#a12b2b" } }, item.ausgang === "bestaetigt" ? (LANG === "en" ? "\u2713 confirmed" : "\u2713 best\u00e4tigt") : (LANG === "en" ? "\u2717 collapsed" : "\u2717 geplatzt")) : null, (Number(item.sourceCount) || 0) > 1 ? /*#__PURE__*/React.createElement("span", { style: { marginLeft: 6, fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 6, whiteSpace: "nowrap", background: "var(--karte)", border: `1px solid ${HAIR}`, color: MUTED } }, item.sourceCount + (LANG === "en" ? " sources" : " Quellen")) : null),
+    /*#__PURE__*/React.createElement("span", { style: { overflow: "hidden", textOverflow: "ellipsis" } }, (LANG === "en" ? (type.en || type.label) : type.label) + (item.league ? " \u00b7 " + item.league : ""))),
   istCommunity(item) && /*#__PURE__*/React.createElement("span", { style: cmtyBadgeStyle("3px 8px") }, CMTY_BADGE_TEXT), /*#__PURE__*/React.createElement("button", {
     onClick: e => {
       e.stopPropagation();
@@ -3861,46 +3615,6 @@ function PitchIcon({ pos, color }) {
     React.createElement("rect", { x: 1, y: 8, width: 5, height: 12, fill: "none", stroke: "#9ccbb0", strokeWidth: 1 }),
     React.createElement("rect", { x: 34, y: 8, width: 5, height: 12, fill: "none", stroke: "#9ccbb0", strokeWidth: 1 }),
     dots.map((d, i) => React.createElement("circle", { key: i, cx: d[0], cy: d[1], r: 3.2, fill: c, stroke: "#fff", strokeWidth: 1.2 })));
-}
-// ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
-const VS_NEU = (() => { try { const q = location.search || ""; if (/[?&]vs=neu(&|$)/.test(q)) localStorage.removeItem("tw_vs_alt"); else if (/[?&]vs=alt(&|$)/.test(q)) localStorage.setItem("tw_vs_alt", "1"); return localStorage.getItem("tw_vs_alt") !== "1"; } catch (e) { return true; } })();
-const VS_VERSION = "20261001a";
-let vsLadePromise = null;
-const ladeVereinSucht = () => {
-  if (window.VS) return Promise.resolve(window.VS);
-  if (vsLadePromise) return vsLadePromise;
-  vsLadePromise = new Promise((ok, nein) => {
-    try {
-      if (!document.getElementById("vs-css")) { const l = document.createElement("link"); l.id = "vs-css"; l.rel = "stylesheet"; l.href = "/verein-sucht.css?v=" + VS_VERSION; document.head.appendChild(l); }
-      const s = document.createElement("script"); s.src = "/verein-sucht.js?v=" + VS_VERSION; s.async = true;
-      s.onload = () => { if (window.VS) ok(window.VS); else nein(new Error("VS fehlt")); };
-      s.onerror = () => { vsLadePromise = null; nein(new Error("Laden fehlgeschlagen")); };
-      document.head.appendChild(s);
-    } catch (e) { nein(e); }
-  });
-  return vsLadePromise;
-};
-function VereinSuchtVue(props) {
-  const en = LANG === "en";
-  const [sub, setSub] = React.useState(() => { try { return localStorage.getItem("tw_vs_sub") || "position"; } catch (e) { return "position"; } });
-  const [start, setStart] = React.useState(null);
-  const [bereit, setBereit] = React.useState(!!window.VS);
-  const [fehler, setFehler] = React.useState("");
-  const ref = React.useRef(null);
-  const wechsel = (k, st) => { setStart(st || null); setSub(k); try { localStorage.setItem("tw_vs_sub", k); } catch (e) {} };
-  React.useEffect(() => { if (props.matchProfil) setSub("matching"); }, [props.matchProfil]);
-  React.useEffect(() => { let aktiv = true; ladeVereinSucht().then(() => { if (aktiv) setBereit(true); }).catch(() => { if (aktiv) setFehler(en ? "The new view could not be loaded. Please reload the page." : "Die neue Ansicht konnte nicht geladen werden. Bitte Seite neu laden."); }); return () => { aktiv = false; }; }, []);
-  React.useEffect(() => {
-    if (!bereit || !ref.current || !window.VS) return undefined;
-    const acct = loadAccount() || {};
-    let h = null;
-    try { h = window.VS.mount(ref.current, { seite: sub, start: start, code: acct.zugangscode || acct.code || "", email: acct.email || "", premium: isPremiumPlan(acct.plan), lang: LANG, watch: props.watch, onWatchClub: props.onWatchClub, onContacts: props.openContacts, onOpen: props.onOpen, onSeite: wechsel }); } catch (e) { setFehler(en ? "The new view could not be started." : "Die neue Ansicht konnte nicht gestartet werden."); }
-    return () => { try { if (h) h.unmount(); } catch (e) {} };
-  }, [bereit, sub, start]);
-  const tabs = [["position", en ? "By position" : "Nach Position", en ? "Which clubs seek which position" : "Welche Vereine welche Position suchen"], ["matching", en ? "Player matching" : "Spieler-Matching", en ? "Where my player fits" : "Wo mein Spieler passt"], ["verein", en ? "Club view" : "Vereinsansicht", en ? "All needs of one club" : "Alle Bedarfe eines Vereins"], ["beobachtet", en ? "Watched" : "Beobachtet", en ? "My clubs, new events" : "Meine Vereine, neue Ereignisse"]];
-  return React.createElement("div", { className: "vs-wurzel" },
-    React.createElement("div", { className: "vs-unterseiten" }, tabs.map(([k, t, u]) => React.createElement("button", { key: k, type: "button", className: "vs-useite" + (sub === k ? " ist-aktiv" : ""), onClick: () => wechsel(k) }, React.createElement("b", null, t), React.createElement("small", null, u)))),
-    fehler ? React.createElement("p", { className: "vs-fehler" }, fehler) : React.createElement("div", { ref: ref, key: sub + "|" + (start ? start.team : "") }));
 }
 function BedarfVue({ needs, profiles, matchProfil, setMatchProfil, posSet, activePos, setPosFilter, onNewProfile, onEditProfile, removeProfil, openContacts, onOpen, onWatchClub, watch }) {
   const h = React.createElement;
@@ -4089,7 +3803,8 @@ function SpieltagKarte({ x, onOpen, watched, onWatchToggle, gewaehlt, zurueck })
     h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6 } }, werte.map((w, i) => h("span", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, color: INK, background: "#f4f6f8", border: "1px solid " + HAIR, borderRadius: 999, padding: "5px 10px" } }, w))),
     h("div", { className: "tw-sk-analyse", style: { display: "flex", flexDirection: "column", gap: 9, fontFamily: FONT_BODY, fontSize: 12.5, color: INK, lineHeight: 1.5 } }, x.bereiche ? h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6 } }, Object.entries(x.bereiche).filter(([k, v]) => v !== null && v !== undefined).map(([k, v]) => h("span", { key: k, title: ({ A: "Abschluss", B: "Chancenkreation", C: "Ballf\u00fchrung", D: "Ballsicherheit", E: "Defensive", S: "Schussabwehr", K: "Strafraum", P: "Spielaufbau" })[k] || k, style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, padding: "4px 9px", borderRadius: 999, background: v >= 70 ? "var(--gruen-tint)" : v <= 35 ? "#FBE9E7" : "var(--karte2)", color: v >= 70 ? "var(--gruen-text)" : v <= 35 ? "#B04A3A" : "var(--t2)" } }, (({ A: "Abschluss", B: "Kreation", C: "Ballf\u00fchrung", D: "Sicherheit", E: "Defensive", S: "Paraden", K: "Strafraum", P: "Aufbau" })[k] || k) + " " + Math.round(v)))) : null, x.belastbar && x.belastbar.stufe ? h("div", { style: { fontSize: 11.5, color: MUTED } }, (en ? "Reliability: " : "Belastbarkeit: ") + x.belastbar.stufe + " \u00b7 " + (x.belastbar.minuten || x.min || 0) + " Min." + (x.xg_schicht ? " \u00b7 xG-Schicht" : "") + (x.woche && x.woche.score ? " \u00b7 " + (en ? "Week " : "Woche ") + x.woche.score + " (" + x.woche.spiele + " Sp.)" : "")) : null, (x.date || x.gegner) ? h("div", { style: { fontSize: 12, color: MUTED } }, [x.date ? String(x.date).slice(8, 10) + "." + String(x.date).slice(5, 7) + "." + String(x.date).slice(0, 4) : "", x.gegner ? (en ? "vs. " : "gegen ") + x.gegner : "", x.sub ? (en ? "substitute" : "eingewechselt") : "", x.api ? (en ? "API rating " : "API-Note ") + x.api : ""].filter(Boolean).join(" \u00b7 ")) : null, (x.woche && x.woche.begruendung) ? h("div", { style: { background: "#F1F7F4", borderRadius: 10, padding: "9px 11px", fontSize: 12.5, lineHeight: 1.5 } }, h("div", { style: { fontSize: 10.5, fontWeight: 900, letterSpacing: 1, textTransform: "uppercase", color: "#0d8a4f", marginBottom: 3 } }, en ? "Why this score" : "Warum dieser Score"), x.woche.begruendung) : null, x.st ? h("div", null, h("div", { style: { fontSize: 10.5, fontWeight: 900, letterSpacing: 1, textTransform: "uppercase", color: "#0d8a4f", marginBottom: 2 } }, en ? "Strengths" : "St\u00e4rken"), h("div", null, x.st)) : null, x.sw ? h("div", null, h("div", { style: { fontSize: 10.5, fontWeight: 900, letterSpacing: 1, textTransform: "uppercase", color: "#b04a3a", marginBottom: 2 } }, en ? "Weaknesses" : "Schw\u00e4chen"), h("div", null, x.sw)) : null, x.dev ? h("div", null, h("div", { style: { fontSize: 10.5, fontWeight: 900, letterSpacing: 1, textTransform: "uppercase", color: "var(--blau-text)", marginBottom: 2 } }, en ? "Development" : "Entwicklung"), h("div", null, x.dev)) : null, !(x.st || x.sw || x.dev || (x.woche && x.woche.begruendung)) ? h("div", { style: { color: MUTED } }, en ? "The detailed analysis follows after the next nightly run." : "Die ausf\u00fchrliche Analyse folgt nach dem n\u00e4chsten Nachtlauf.") : null, (x.pid && Number(x.pid) < 900000000) ? h("button", { type: "button", onClick: () => onOpen && onOpen(x), style: { alignSelf: "flex-start", cursor: "pointer", border: "none", background: "none", padding: 0, fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: "#149a59" } }, (en ? "Open full profile " : "Vollprofil \u00f6ffnen ") + "\u2192") : null), h("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", marginTop: "auto" } }, h("button", { onClick: () => onWatchToggle && onWatchToggle(x.name), title: watched ? (en ? "Remove from watchlist" : "Von der Merkliste entfernen") : (en ? "Add to watchlist" : "Auf die Merkliste"), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 14px", borderRadius: 10, border: "1px solid " + (watched ? "var(--sc-hi-rand)" : "var(--linie2)"), background: watched ? "var(--gruen-tint)" : "var(--karte2)", color: watched ? "var(--gruen-text)" : INK, display: "inline-flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" } }, h(IconBookmark, { size: 14, filled: watched }), watched ? (en ? "Watching" : "Beobachtet") : (en ? "Watch" : "Beobachten"))));
 }
-function PerfTabelle({ rows, portrait, watch, onWatchToggle, onOpen, offen, setOffen }) { const h = React.createElement; const en = LANG === "en"; const [fotos, setFotos] = useState({}); useEffect(() => { const namen = Array.from(new Set((rows || []).filter(x => x && x.name && !x.photo).map(x => x.name))).filter(n => !(String(n).toLowerCase() in fotos)).slice(0, 60); if (!namen.length) return; let aktiv = true; const inListe = "in.(" + namen.map(n => '"' + String(n).replace(/"/g, "") + '"').join(",") + ")"; const hole = tab => fetch("/db/" + tab + "?select=name,photo&name=" + encodeURIComponent(inListe) + "&limit=200", { credentials: "omit" }).then(r => r.ok ? r.json() : []).catch(() => []); Promise.all([hole("players"), hole("players_youth")]).then(([a, b]) => { if (!aktiv) return; const m = {}; for (const n of namen) m[String(n).toLowerCase()] = ""; for (const p of [].concat(Array.isArray(b) ? b : [], Array.isArray(a) ? a : [])) { if (p && p.name && p.photo) m[String(p.name).toLowerCase()] = p.photo; } setFotos(f => Object.assign({}, f, m)); }); return () => { aktiv = false; }; }, [rows]); const fotoVon = (x, s) => h(DbFoto, { x: { name: x.name, photo: x.photo || fotos[String(x.name || "").toLowerCase()] || "" }, size: s });
+function PerfTabelle({ rows, portrait, watch, onWatchToggle, onOpen, offen, setOffen }) {
+  const h = React.createElement; const en = LANG === "en";
   const istWatched = name => (watch || []).some(w => w.t === "spieler" && w.w === name);
   const datum = d => d ? String(d).slice(8, 10) + "." + String(d).slice(5, 7) + "." : "";
   const details = x => h("div", { style: { gridColumn: "1 / -1", borderTop: "1px solid " + HAIR, padding: "10px 12px 12px", background: "var(--karte2)" } },
@@ -4102,7 +3817,9 @@ function PerfTabelle({ rows, portrait, watch, onWatchToggle, onOpen, offen, setO
   const trend = h("span", { title: en ? "Trend from the second rated matchday" : "Trend ab dem zweiten erfassten Spieltag", style: { color: "#9aa0a6", fontWeight: 700 } }, "\u2013");
   if (portrait) return h("div", { style: { display: "flex", flexDirection: "column", gap: 8 } }, rows.map((x, i) => { const on = offen === x.k; return h("div", { key: x.k, className: "tw-card", onClick: () => setOffen(on ? null : x.k), style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 12, cursor: "pointer", overflow: "hidden" } },
     h("div", { style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 12px" } },
-      h("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 14, fontWeight: 700, color: MUTED, width: 28, flexShrink: 0 } }, "#" + (i + 1)), fotoVon(x, 40), h("div", { style: { flex: 1, minWidth: 0 } }, h("div", { style: { display: "flex", alignItems: "center", gap: 6, minWidth: 0 } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, x.name), watchBtn(x)),
+      h("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 14, fontWeight: 700, color: MUTED, width: 28, flexShrink: 0 } }, "#" + (i + 1)),
+      h("div", { style: { flex: 1, minWidth: 0 } },
+        h("div", { style: { display: "flex", alignItems: "center", gap: 6, minWidth: 0 } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, x.name), watchBtn(x)),
         h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, [x.team + (x.gegner ? " \u2013 " + x.gegner : ""), x.pos, (x.min || 0) + "\u2032"].join(" \u00b7 ")),
         h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t2)", marginTop: 2 } }, perfKurz(x))),
       pill(x)), on ? details(x) : null); }));
@@ -4112,7 +3829,7 @@ function PerfTabelle({ rows, portrait, watch, onWatchToggle, onOpen, offen, setO
     rows.map((x, i) => { const on = offen === x.k; return h(React.Fragment, { key: x.k },
       h("div", { className: "tw-prow" + (on ? " on" : ""), onClick: () => setOffen(on ? null : x.k) },
         h("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 15, fontWeight: 700, color: i < 3 ? INK : MUTED } }, "#" + (i + 1)),
-        h("span", { style: { display: "inline-flex", alignItems: "center", gap: 8, minWidth: 0 } }, fotoVon(x, 30), h("span", { style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, x.name), x.sub ? h("span", { style: { fontFamily: FONT_BODY, fontSize: 9.5, fontWeight: 900, letterSpacing: .6, textTransform: "uppercase", color: "#8a5a00", background: "#fdf3da", borderRadius: 5, padding: "2px 5px", flexShrink: 0 } }, t("rank_sub_badge")) : null, watchBtn(x)),
+        h("span", { style: { display: "inline-flex", alignItems: "center", gap: 6, minWidth: 0 } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, x.name), x.sub ? h("span", { style: { fontFamily: FONT_BODY, fontSize: 9.5, fontWeight: 900, letterSpacing: .6, textTransform: "uppercase", color: "#8a5a00", background: "#fdf3da", borderRadius: 5, padding: "2px 5px", flexShrink: 0 } }, t("rank_sub_badge")) : null, watchBtn(x)),
         h("span", { style: { display: "inline-flex", alignItems: "center", gap: 6, minWidth: 0, fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)" } }, h(ClubLogo, { name: x.team, size: 16 }), h("span", { style: { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, clubName(x.team) + (x.gegner ? " \u2013 " + x.gegner : "")), x.date ? h("span", { style: { color: "#9aa0a6", flexShrink: 0 } }, datum(x.date)) : null),
         h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)" } }, x.pos),
         h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)" } }, (x.min || 0) + "\u2032"),
@@ -4185,7 +3902,7 @@ function SpielerQuick({ x, onClose, onOpen, watched, onWatchToggle }) {
       h("div", null, zeile(en ? "Market value" : "Marktwert", x.mw), zeile(en ? "Contract until" : "Vertragsende", x.vertrag ? dbDatum(x.vertrag) : ""), (det && det.kader && det.kader.status === "nicht_im_tm_kader") ? zeile(en ? "Squad status" : "Kaderstatus", en ? ("Not in the Transfermarkt squad since " + (det.kader.seit ? dbDatum(det.kader.seit) : "")) : ("Seit " + (det.kader.seit ? dbDatum(det.kader.seit) : "") + " nicht mehr im Transfermarkt-Kader")) : null, (det && det.kader && det.kader.status === "jugend_kein_profikader") ? zeile(en ? "Squad status" : "Kaderstatus", en ? "Youth – not in a professional squad" : "Jugend – kein Profikader") : null, (det && det.kader && det.kader.status === "laut_tm_woanders") ? zeile(en ? "Squad status" : "Kaderstatus", en ? "Listed at another club on Transfermarkt" : "Laut Transfermarkt bei einem anderen Verein") : null, (det && det.kader && det.kader.status === "nicht_im_sm_kader") ? zeile(en ? "Squad status" : "Kaderstatus", en ? ("Not in the Sportmonks squad since " + (det.kader.seit ? dbDatum(det.kader.seit) : "")) : ("Seit " + (det.kader.seit ? dbDatum(det.kader.seit) : "") + " nicht mehr im Sportmonks-Kader")) : null, (det && det.profil && det.profil.berater) ? zeile(en ? "Agent" : "Berater", det.profil.berater) : null, (det && det.profil && det.profil.letzte_verlaengerung) ? zeile(en ? "Last extension" : "Letzte Verlängerung", dbDatum(det.profil.letzte_verlaengerung)) : null, (det && det.profil && det.profil.vertragsoption) ? zeile(en ? "Contract option" : "Vertragsoption", det.profil.vertragsoption) : null, (det && det.profil && det.profil.ausgeliehen_von) ? zeile(en ? "On loan from" : "Leihe von", clubName(det.profil.ausgeliehen_von) + (det.profil.vertrag_dort_bis ? " · " + (en ? "contract there until " : "Vertrag dort bis ") + dbDatum(det.profil.vertrag_dort_bis) : "")) : null, zeile(en ? "Minutes (season)" : "Minuten (Saison)", x.min != null ? dbFmtZahl(x.min) : ""), x.fit ? zeile(en ? "Fitness" : "Fitness", x.fit) : null), ((det && Array.isArray(det.stationen) && det.stationen.length) ? h("div", null, h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--t3)", marginBottom: 6 } }, en ? "Other clubs this season" : "Weitere Stationen"), det.stationen.map((st, i) => h("div", { key: st.pid || i, style: { display: "flex", alignItems: "center", gap: 8, padding: "6px 0", borderTop: "1px solid " + HAIR, fontFamily: FONT_BODY, fontSize: 13 } }, h(ClubLogo, { name: st.team, size: 16 }), h("span", { style: { fontWeight: 800, color: INK } }, clubName(st.team)), h("span", { style: { color: MUTED } }, [st.liga, st.saison ? (en ? "season " : "Saison ") + st.saison : "", st.minuten ? dbFmtZahl(st.minuten) + " min" : ""].filter(Boolean).join(" · "))))) : null), ((det && Array.isArray(det.vereine) && det.vereine.length >= 2) ? h("div", null, h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--t3)", marginBottom: 6, marginTop: 10 } }, en ? "Club history" : "Vereinshistorie"), det.vereine.map((v, i) => h("div", { key: (v.team || "") + i, style: { display: "flex", alignItems: "center", gap: 8, padding: "6px 0", borderTop: "1px solid " + HAIR, fontFamily: FONT_BODY, fontSize: 13 } }, h(ClubLogo, { name: v.team, size: 16 }), h("span", { style: { fontWeight: 800, color: INK } }, clubName(v.team)), h("span", { style: { color: MUTED } }, [v.liga, (v.genau ? "" : (en ? "since at least " : "seit mind. ")) + (v.von ? dbDatum(v.von) : "") + (v.bis ? " – " + dbDatum(v.bis) : (en ? " – today" : " – heute"))].filter(Boolean).join(" · "))))) : null), ((det && Array.isArray(det.aenderungen) && det.aenderungen.length) ? h("div", null, h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--t3)", marginBottom: 6, marginTop: 10 } }, en ? "Recent changes" : "Was sich geändert hat"), det.aenderungen.map((a, i) => { const FL = { team: ["Verein", "Club"], league: ["Liga", "League"], tm_value_eur: ["Marktwert", "Market value"], tm_contract_until: ["Vertrag", "Contract"], fitness_note: ["Fitness", "Fitness"], position: ["Position", "Position"], tm_team: ["Verein (TM)", "Club (TM)"] }; const fl = FL[a.feld] ? FL[a.feld][en ? 1 : 0] : a.feld; return h("div", { key: "ae" + i, style: { display: "flex", gap: 8, padding: "5px 0", borderTop: "1px solid " + HAIR, fontFamily: FONT_BODY, fontSize: 12.5 } }, h("span", { style: { color: MUTED, minWidth: 52 } }, a.am ? dbDatum(a.am) : ""), h("span", { style: { fontWeight: 800, color: INK, minWidth: 84 } }, fl), h("span", { style: { color: MUTED } }, (a.alt ? a.alt + " → " : "") + (a.neu || ""))); })) : null),
       h("div", null, h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--t3)", marginBottom: 6 } }, en ? "Form curve" : "Formkurve"), det === null ? h("div", { className: "tw-skel", style: { height: 40 } }) : form.length ? h("div", { style: { display: "flex", alignItems: "center", gap: 12 } }, h(DbSpark, { werte: form.slice(-8).map(f => f.score), breite: 180, hoehe: 44 }), h("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED } }, form.length + (en ? " analysed matches" : " analysierte Spiele"))) : h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED } }, en ? "No TW match analyses yet." : "Noch keine TW-Spielanalysen.")),
       h("div", null, h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--t3)", marginBottom: 6 } }, en ? "Strengths" : "St\u00e4rken"), staerken.length ? h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6 } }, staerken.map((st, i) => h("span", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, color: "var(--gruen-text)", background: "var(--gruen-tint)", borderRadius: 999, padding: "4px 10px" } }, st))) : h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED } }, det === null ? "\u2026" : (en ? "Strengths appear after the first TW match analysis." : "St\u00e4rken erscheinen nach der ersten TW-Spielanalyse."))),
-      h("div", { style: { display: "flex", gap: 8, marginTop: "auto", paddingTop: 8, flexWrap: "wrap" } }, h("button", { onClick: () => { try { window.twDossierPdf && window.twDossierPdf(x, det); } catch (e) { } }, title: en ? "Download the player dossier as PDF (Premium)" : "Spielerdossier als PDF herunterladen (Premium)", style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "11px 14px", borderRadius: 10, border: "1px solid var(--linie)", background: "transparent", color: "var(--t1)" } }, en ? "PDF dossier" : "PDF-Dossier"), h("button", { onClick: () => { onOpen(x); onClose(); }, style: { flex: 1, cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "11px 14px", borderRadius: 10, border: "none", background: "var(--dunkel)", color: "#fff" } }, en ? "Open full profile" : "Volles Profil \u00f6ffnen"), h("button", { onClick: () => onWatchToggle(x.name), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "11px 14px", borderRadius: 10, border: "1px solid " + (watched ? "var(--sc-hi-rand)" : "var(--linie2)"), background: watched ? "var(--gruen-tint)" : "var(--karte2)", color: watched ? "var(--gruen-text)" : INK, display: "inline-flex", alignItems: "center", gap: 6 } }, h(IconBookmark, { size: 14, filled: watched }), watched ? (en ? "Watching" : "Beobachtet") : (en ? "Watch" : "Beobachten"))))), document.body);
+      h("div", { style: { display: "flex", gap: 8, marginTop: "auto", paddingTop: 8 } }, h("button", { onClick: () => { onOpen(x); onClose(); }, style: { flex: 1, cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "11px 14px", borderRadius: 10, border: "none", background: "var(--dunkel)", color: "#fff" } }, en ? "Open full profile" : "Volles Profil \u00f6ffnen"), h("button", { onClick: () => onWatchToggle(x.name), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "11px 14px", borderRadius: 10, border: "1px solid " + (watched ? "var(--sc-hi-rand)" : "var(--linie2)"), background: watched ? "var(--gruen-tint)" : "var(--karte2)", color: watched ? "var(--gruen-text)" : INK, display: "inline-flex", alignItems: "center", gap: 6 } }, h(IconBookmark, { size: 14, filled: watched }), watched ? (en ? "Watching" : "Beobachtet") : (en ? "Watch" : "Beobachten"))))), document.body);
 }
 function DbVue({ q, hatFilter, items, loading, stats, watch, onWatchToggle, onOpen, vergleich, setVergleich, filters, setFilters }) {
   const h = React.createElement; const en = LANG === "en";
@@ -4712,18 +4429,18 @@ function CommunityVue({ posts, suche, onSubmit, busy, msg, account, onMelden, on
 }
 const NAV_ICONS = { feed: "", geruechte: "", gesucht: "", ranking: "", players: "", chancen: "", watch: "\u2606", talente: "", community: "" };
 const NAV_FARBE = k => k === "talente" ? "var(--teal)" : k === "geruechte" ? "#b3541e" : k === "gesucht" ? "var(--violett)" : k === "ranking" ? "#b9860b" : k === "watch" ? "#6b4fd8" : k === "players" ? "#1a6dc0" : k === "chancen" ? "#c2410c" : "#149a59";
-function MobilNav({ view, setView, items, news, needsBySport, onNavigate, onScout }) {
+function MobilNav({ view, setView, items }) {
   const h = React.createElement; const en = LANG === "en";
   const [offen, setOffen] = useState(false);
   useEffect(() => { if (!offen) return; const k = e => { if (e.key === "Escape") setOffen(false); }; document.addEventListener("keydown", k); const alt = document.body.style.overflow; document.body.style.overflow = "hidden"; return () => { document.removeEventListener("keydown", k); document.body.style.overflow = alt; }; }, [offen]);
-  const strich = h("span", { style: { display: "block", width: 18, height: 2.5, background: "#1fb264", borderRadius: 2 } });
+  const strich = h("span", { style: { display: "block", width: 18, height: 2, background: "var(--karte)", borderRadius: 2 } });
   return h(React.Fragment, null,
     h("button", { className: "tw-burger", onClick: () => setOffen(true), "aria-label": en ? "Open navigation" : "Navigation \u00f6ffnen", "aria-expanded": offen, style: { flexDirection: "column", justifyContent: "center", alignItems: "center", gap: 4, width: 40, height: 40, borderRadius: 10, border: "1px solid rgba(255,255,255,.18)", background: "rgba(255,255,255,.07)", cursor: "pointer", padding: 0, flexShrink: 0 } }, strich, strich, strich),
     offen ? ReactDOM.createPortal(h("div", { style: { position: "fixed", inset: 0, zIndex: 1300 } },
       h("div", { onClick: () => setOffen(false), style: { position: "absolute", inset: 0, background: "rgba(15,21,32,.5)" } }),
       h("nav", { className: "tw-mobnav", style: { position: "absolute", top: 0, left: 0, bottom: 0, width: "min(320px, 86vw)", background: "var(--karte)", boxShadow: "12px 0 40px rgba(15,21,32,.3)", display: "flex", flexDirection: "column", overflowY: "auto" } },
         h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderBottom: "1px solid " + HAIR } }, h("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 20, letterSpacing: 1, color: INK } }, "TRANSFER", h("span", { style: { color: "#149a59" } }, "WIRE")), h("button", { onClick: () => setOffen(false), "aria-label": en ? "Close" : "Schlie\u00dfen", style: { width: 36, height: 36, borderRadius: 99, border: "1px solid " + HAIR, background: "var(--karte)", cursor: "pointer", fontSize: 16, fontWeight: 800, color: "var(--t2)" } }, "\u2715")),
-        h("div", { className: "tw-mobnav-inhalt", style: { flex: 1, display: "flex", flexDirection: "column", minHeight: 0 } }, h(SeitenleisteNeu, { view: view, setView: k => { setView(k); setOffen(false); try { window.scrollTo({ top: 0 }); } catch (e) {} }, news: news, needsBySport: needsBySport, onNavigate: onNavigate, onScout: () => { setOffen(false); if (onScout) onScout(); } })))), document.body) : null);
+        h("div", { style: { padding: "8px 8px 16px", display: "flex", flexDirection: "column", gap: 2 } }, items.map(([k, label]) => { const aktiv = view === k || (k === "community" && (view === "networking" || view === "moderation")); return h("button", { key: k, onClick: () => { setView(k); setOffen(false); try { window.scrollTo({ top: 0 }); } catch (e) {} }, style: { display: "flex", alignItems: "center", gap: 12, width: "100%", textAlign: "left", cursor: "pointer", border: "none", borderRadius: 12, padding: "12px 12px", background: aktiv ? "var(--dunkel)" : "transparent", color: aktiv ? "#fff" : INK, fontFamily: FONT_BODY, fontSize: 15, fontWeight: 800, minHeight: 48 } }, h("span", { style: { width: 34, height: 34, borderRadius: 10, background: aktiv ? "rgba(255,255,255,.12)" : "#f1f1ec", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 17, flexShrink: 0 } }, NAV_ICONS[k] || "\u2022"), h("span", { style: { flex: 1 } }, label), h("span", { style: { width: 8, height: 8, borderRadius: 99, background: NAV_FARBE(k), flexShrink: 0 } })); })))), document.body) : null);
 }
 function VereinGeprueft({ pid }) {
   const h = React.createElement; const en = LANG === "en";
@@ -4920,7 +4637,7 @@ function NeedCard({
       padding: "3px 10px",
       borderRadius: 999
     }
-  }, item.fee), ((String(item.summary || "").indexOf("KI-Prognose") >= 0) || /Prognose/.test(String(item.source_name || item.source || "")) || ((item.sources || []).some(x => /Prognose/.test(String(x && x.name || ""))))) && /*#__PURE__*/React.createElement("span", { title: LANG === "en" ? "AI forecast by the TransferWire prediction agent \u2014 not a confirmed report" : "KI-Prognose des TransferWire Prognose-Agenten \u2014 keine best\u00e4tigte Meldung", style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .6, textTransform: "uppercase", padding: "3px 9px", borderRadius: 999, background: "#EEF0FF", color: "#3B44B8", border: "1px solid #C9CEFF" } }, LANG === "en" ? "AI forecast" : "KI-Prognose"), /*#__PURE__*/React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 6 } }, /*#__PURE__*/React.createElement(Reliability, { value: item.reliability, size: 11 }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, "· " + (LANG === "en" ? "reliability " : "Verlässlichkeit ") + (Number(item.reliability) || 0) + "/5"), (Number(item.sourceCount) || 0) > 1 ? /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, " \u00b7 " + item.sourceCount + (LANG === "en" ? " sources confirm" : " Quellen best\u00e4tigen")) : null, item.ausgang ? /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: item.ausgang === "bestaetigt" ? "#1f7a3e" : "#a12b2b" } }, " \u00b7 " + (item.ausgang === "bestaetigt" ? (LANG === "en" ? "\u2713 confirmed" : "\u2713 best\u00e4tigt") : (LANG === "en" ? "\u2717 collapsed" : "\u2717 geplatzt"))) : null), (item.sources || []).slice(0, 2).map((s, i) => /*#__PURE__*/React.createElement("a", {
+  }, item.fee), ((String(item.summary || "").indexOf("KI-Prognose") >= 0) || /Prognose/.test(String(item.source_name || item.source || "")) || ((item.sources || []).some(x => /Prognose/.test(String(x && x.name || ""))))) && /*#__PURE__*/React.createElement("span", { title: LANG === "en" ? "AI forecast by the TransferWire prediction agent \u2014 not a confirmed report" : "KI-Prognose des TransferWire Prognose-Agenten \u2014 keine best\u00e4tigte Meldung", style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .6, textTransform: "uppercase", padding: "3px 9px", borderRadius: 999, background: "#EEF0FF", color: "#3B44B8", border: "1px solid #C9CEFF" } }, LANG === "en" ? "AI forecast" : "KI-Prognose"), /*#__PURE__*/React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 6 } }, /*#__PURE__*/React.createElement(Reliability, { value: item.reliability, size: 11 }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, "· " + (LANG === "en" ? "reliability " : "Verlässlichkeit ") + (Number(item.reliability) || 0) + "/5")), (item.sources || []).slice(0, 2).map((s, i) => /*#__PURE__*/React.createElement("a", {
     key: i,
     href: s.url,
     onClick: e => { e.preventDefault(); e.stopPropagation(); if (s.url) window.open(s.url, "_blank"); },
@@ -7041,7 +6758,7 @@ function SpieltagVue({ openPlayer, openVerein }) {
     h("div", { style: { display: "flex", alignItems: "center", gap: 8, justifyContent: "flex-end", minWidth: 0 } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 700, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, s.heim), h(ClubLogo, { name: s.heim, size: 26 })),
     h("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 22, color: s.status === "live" ? "#149a59" : INK, minWidth: 64, textAlign: "center", background: PAGE, borderRadius: 10, padding: "4px 10px" } }, s.tore_heim === null || s.tore_heim === undefined ? "\u2013 : \u2013" : s.tore_heim + " : " + s.tore_gast),
     h("div", { style: { display: "flex", alignItems: "center", gap: 8, minWidth: 0 } }, h(ClubLogo, { name: s.gast, size: 26 }), h("span", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 700, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, clubName(s.gast))),
-    h("div", { style: { textAlign: "right", fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, s.xg_heim !== null && s.xg_heim !== undefined ? "xG " + Number(s.xg_heim).toFixed(2) + " \u2013 " + Number(s.xg_gast).toFixed(2) : "", h("div", { style: { color: "#149a59", fontWeight: 800, fontSize: 11.5 } }, s.hat_stats ? (en ? "Analysis \u2192" : "Analyse \u2192") : (s.status === "beendet" ? (en ? "stats pending" : "Statistik folgt") : "")), (s.status === "beendet" || s.hat_stats) ? h("a", { href: "https://www.youtube.com/results?search_query=" + encodeURIComponent((s.heim || "") + " " + (s.gast || "") + " highlights"), target: "_blank", rel: "noopener noreferrer", onClick: e => e.stopPropagation(), title: en ? "Match highlights on YouTube (official channels first)" : "Spiel-Highlights auf YouTube (offizielle Kanäle zuerst)", style: { display: "inline-block", marginTop: 4, color: "var(--t2)", fontWeight: 800, fontSize: 11.5, textDecoration: "none" } }, "Highlights \u25B8") : null));
+    h("div", { style: { textAlign: "right", fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, s.xg_heim !== null && s.xg_heim !== undefined ? "xG " + Number(s.xg_heim).toFixed(2) + " \u2013 " + Number(s.xg_gast).toFixed(2) : "", h("div", { style: { color: "#149a59", fontWeight: 800, fontSize: 11.5 } }, s.hat_stats ? (en ? "Analysis \u2192" : "Analyse \u2192") : (s.status === "beendet" ? (en ? "stats pending" : "Statistik folgt") : ""))));
   // Analyse-Fenster: hoher Kontrast
   const analyse = s => { const gr = {}; (s.stats || []).forEach(x => { (gr[x.gruppe] = gr[x.gruppe] || []).push(x); }); const tore = (s.ereignisse || []).filter(e => /Goal|Penalty/i.test(e.typ)); const karten = (s.ereignisse || []).filter(e => /card/i.test(e.typ)); const HEIM = "var(--dunkel)", GAST = "#149a59";
     const zeile = (x, i) => { const a = Number(x.heim) || 0, b = Number(x.gast) || 0; const tot = a + b; const pa = tot ? Math.round(a / tot * 100) : 50; const hv = x.heim === null ? "\u2013" : x.heim + (x.einheit || ""), gv = x.gast === null ? "\u2013" : x.gast + (x.einheit || ""); return h("div", { key: x.k, style: { padding: "8px 10px", borderRadius: 10, background: i % 2 ? "#F4F6F8" : "#fff" } }, h("div", { style: { display: "grid", gridTemplateColumns: "72px 1fr 72px", alignItems: "center", marginBottom: 5 } }, h("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 18, color: a > b ? HEIM : "var(--t3)" } }, hv), h("span", { style: { textAlign: "center", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, color: "var(--t2)" } }, x.k), h("span", { style: { textAlign: "right", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 18, color: b > a ? GAST : "var(--t3)" } }, gv)), h("div", { style: { display: "flex", height: 8, borderRadius: 4, overflow: "hidden", background: "#DDE2E8" } }, h("div", { style: { width: pa + "%", background: HEIM } }), h("div", { style: { flex: 1, background: GAST } }))); };
@@ -7078,7 +6795,7 @@ function AssistentVue({ account, openPlayer }) {
   const md = text => { const zeilen = String(text || "").split(/\n/); const out = []; let liste = null; const inline = s => { const teile = []; let rest = s; let i = 0; while (rest.length) { const m = rest.match(/\*\*(.+?)\*\*/); if (!m) { teile.push(rest); break; } if (m.index > 0) teile.push(rest.slice(0, m.index)); teile.push(h("strong", { key: "b" + (i++) }, m[1])); rest = rest.slice(m.index + m[0].length); } return teile; }; zeilen.forEach((z, i) => { const l = z.match(/^\s*[-\u2022*]\s+(.*)$/); if (l) { if (!liste) { liste = []; out.push(h("ul", { key: "ul" + i, style: { margin: "4px 0 6px", paddingLeft: 18 } }, liste)); } liste.push(h("li", { key: "li" + i, style: { marginBottom: 2 } }, inline(l[1]))); return; } liste = null; if (!z.trim()) return; out.push(h("p", { key: "p" + i, style: { margin: "0 0 8px" } }, inline(z.replace(/^#+\s*/, "")))); }); return out; };
   const blase = (m, i) => h("div", { key: i, style: { display: "flex", justifyContent: m.rolle === "user" ? "flex-end" : "flex-start", marginBottom: 12 } }, m.rolle !== "user" ? h("div", { style: { width: 30, height: 30, borderRadius: 9, background: "#149a59", color: "#fff", display: "grid", placeItems: "center", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 12, marginRight: 10, flexShrink: 0 } }, "TW") : null, h("div", { style: { maxWidth: "78%", background: m.rolle === "user" ? "var(--karte2)" : CARD, border: "1px solid " + HAIR, borderRadius: 14, padding: "11px 14px", fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.55, color: INK } }, md(m.inhalt), m.quellen && m.quellen.length ? h("div", { style: { marginTop: 6, fontSize: 11.5, color: MUTED } }, (en ? "Sources: " : "Quellen: "), m.quellen.slice(0, 5).map((q, k) => h("a", { key: k, href: q.url, target: "_blank", rel: "noopener", style: { color: "#5ec8e6", marginRight: 8 } }, (q.titel || q.url).slice(0, 50)))) : null, m.rolle !== "user" && m.ki === false ? h("div", { style: { marginTop: 6, fontSize: 11, color: "#c9a227" } }, en ? "Data only \u2013 AI part currently unavailable" : "Nur Daten \u2013 KI-Teil gerade nicht verf\u00fcgbar") : null));
   const vorschlaege = [en ? "Which strikers under 23 have expiring contracts?" : "Welche St\u00fcrmer unter 23 haben auslaufende Vertr\u00e4ge?", en ? "What is the current form of Harry Kane?" : "Wie ist die aktuelle Form von Harry Kane?", en ? "What does Bayern need this winter?" : "Was braucht Bayern M\u00fcnchen im Winter?", en ? "Summarise yesterday's matchday" : "Fasse den gestrigen Spieltag zusammen"];
-  return h("div", { className: "tw-assist", style: { display: "grid", gridTemplateColumns: "250px 1fr", gap: 16, minHeight: "calc(100vh - 140px)" } },
+  return h("div", { style: { display: "grid", gridTemplateColumns: "250px 1fr", gap: 16, minHeight: "calc(100vh - 140px)" } },
     h("div", { style: { background: CARD, border: "1px solid " + HAIR, borderRadius: 14, padding: 10, display: "flex", flexDirection: "column", minHeight: 0 } },
       h("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 17, color: INK, padding: "6px 8px 10px" } }, en ? "AI assistant" : "KI-Assistent"),
       h("button", { type: "button", onClick: () => oeffne(null), style: { display: "flex", alignItems: "center", gap: 8, cursor: "pointer", background: "var(--karte2)", border: "1px solid " + HAIR, borderRadius: 10, padding: "9px 11px", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, color: INK, textAlign: "left" } }, "+ " + (en ? "New chat" : "Neuer Chat")),
@@ -7136,13 +6853,11 @@ function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScou
   const h = React.createElement; const en = LANG === "en";
   const [zu, setZu] = useState(() => { try { return JSON.parse(localStorage.getItem("tw_side_zu") || "{}"); } catch (e) { return {}; } });
   const klappe = k => setZu(z => { const n = Object.assign({}, z, { [k]: !z[k] }); try { localStorage.setItem("tw_side_zu", JSON.stringify(n)); } catch (e) {} return n; });
-  const [vsZahl, setVsZahl] = useState(() => { try { return Number(window.VS_ZAHL) || 0; } catch (e) { return 0; } });
-  React.useEffect(() => { const f = () => setVsZahl(Number(window.VS_ZAHL) || 0); window.addEventListener("vs-zahl", f); if (VS_NEU && !(Number(window.VS_ZAHL) || 0)) { try { const a = JSON.parse(localStorage.getItem("tw_account") || "{}"); const code = a.zugangscode || a.code; if (code && a.email) fetch("/api/verein-sucht?was=liste&gruppe=TW&limit=1&code=" + encodeURIComponent(code) + "&email=" + encodeURIComponent(a.email)).then(r => r.ok ? r.json() : null).then(d => { if (d && d.meta && Array.isArray(d.meta.gruppen)) { const n = d.meta.gruppen.reduce((s, g) => s + (g.konkret != null ? (Number(g.konkret) || 0) : (Number(g.n) || 0)), 0); if (n > 0) { window.VS_ZAHL = n; setVsZahl(n); } } }).catch(() => {}); } catch (e) {} } return () => window.removeEventListener("vs-zahl", f); }, []);
-  let feedBadge = 0, gesuchtBadge = 0; try { feedBadge = (Array.isArray(news) ? news : []).filter(n => Date.now() - new Date(n.published_at || n.created_at || n.createdAt || 0).getTime() < 864e5).length; gesuchtBadge = (VS_NEU && vsZahl) ? vsZahl : (Array.isArray(needsBySport) ? needsBySport.length : 0); } catch (e) {}
+  let feedBadge = 0, gesuchtBadge = 0; try { feedBadge = (Array.isArray(news) ? news : []).filter(n => Date.now() - new Date(n.published_at || n.created_at || n.createdAt || 0).getTime() < 864e5).length; gesuchtBadge = Array.isArray(needsBySport) ? needsBySport.length : 0; } catch (e) {}
   const aktiv = k => view === k || (k === "community" && view === "moderation") || (k === "talente" && (view === "listen" || view === "suche"));
   const IK = { markt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21V12h6v9"/></svg>', community: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.2L4 21l1.8-5.4A8 8 0 1 1 21 12z"/></svg>', workspace: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 20V10"/></svg>', ki: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18 9.4l-4.2 1.8L12 16l-1.8-4.8L6 9.4l4.2-1.8z"/><path d="M5 18l.7 1.8L7.5 20.5l-1.8.7L5 23l-.7-1.8L2.5 20.5l1.8-.7z"/></svg>', pfeil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>' };
   const gruppen = [
-    { k: "markt", label: en ? "Market" : "Markt", kinder: [["feed", t("tab_feed"), feedBadge], ["geruechte", "Transfers", 0], ["spieltag", en ? "Matchday" : "Spieltag", 0], ["gesucht", VS_NEU ? (LANG === "en" ? "Club seeks" : "Verein sucht") : "Vereinsbedarf", gesuchtBadge], ["ranking", "Performance", 0], ["players", t("players_tab"), 0], ["chancen", t("ch_tab"), 0]] },
+    { k: "markt", label: en ? "Market" : "Markt", kinder: [["feed", t("tab_feed"), feedBadge], ["geruechte", "Transfers", 0], ["spieltag", en ? "Matchday" : "Spieltag", 0], ["gesucht", "Vereinsbedarf", gesuchtBadge], ["ranking", "Performance", 0], ["players", t("players_tab"), 0], ["chancen", t("ch_tab"), 0]] },
     { k: "community", label: "Community", kinder: [["community", en ? "Posts" : "Beitr\u00e4ge", 0], ["networking", en ? "Community contacts" : "Community-Kontakte", 0]] },
     { k: "workspace", label: "Workspace", kinder: [["watch", t("watch_tab"), 0], ["talente", "Scouting", 0]] }
   ];
@@ -7153,7 +6868,7 @@ function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScou
       h("button", { type: "button", className: "tw-sn-punkt" + (aktiv("kontakte") ? " aktiv" : ""), onClick: () => setView("kontakte") }, h("span", { className: "tw-sn-ikon", dangerouslySetInnerHTML: { __html: SIDE_ICONS.kontakte || "" } }), h("span", null, en ? "Contacts" : "Kontakte")),
       gruppen.map(g => h("div", { key: g.k, className: "tw-sn-gruppe" + (zu[g.k] ? " zu" : "") },
         h("button", { type: "button", className: "tw-sn-kopf", onClick: () => klappe(g.k), "aria-expanded": !zu[g.k] }, h("span", { className: "tw-sn-ikon", dangerouslySetInnerHTML: { __html: IK[g.k] } }), h("span", null, g.label), h("span", { className: "tw-sn-pfeil", dangerouslySetInnerHTML: { __html: IK.pfeil } })),
-        h("div", { className: "tw-sn-kinder" }, g.kinder.map(([k, label, badge]) => h("button", { key: k, type: "button", className: "tw-sn-unter" + (aktiv(k) ? " aktiv" : ""), onClick: () => setView(k) }, h("span", null, label), badge > 0 ? h("span", { className: "tw-sn-badge" }, k === "gesucht" ? badge : (badge > 999 ? "999+" : badge)) : null)))))),
+        h("div", { className: "tw-sn-kinder" }, g.kinder.map(([k, label, badge]) => h("button", { key: k, type: "button", className: "tw-sn-unter" + (aktiv(k) ? " aktiv" : ""), onClick: () => setView(k) }, h("span", null, label), badge > 0 ? h("span", { className: "tw-sn-badge" }, badge > 999 ? "999+" : badge) : null)))))),
     h("div", { className: "tw-sn-unten" },
       h("button", { type: "button", className: "tw-sn-upgrade", onClick: () => onNavigate("subscribe") }, en ? "Upgrade plan" : "Upgrade Plan"),
       h("div", { className: "tw-sn-fuss" }, h("button", { type: "button", onClick: () => onNavigate("impressum") }, en ? "Imprint" : "Impressum"), h("button", { type: "button", onClick: () => onNavigate("datenschutz") }, en ? "Privacy" : "Datenschutz"), h("button", { type: "button", onClick: () => onNavigate("agb") }, en ? "Terms" : "AGB"))));
@@ -7561,16 +7276,7 @@ function TransferApp({
   };
   const [contactClub, setContactClub] = useState(null);
   const [contactList, setContactList] = useState(null);
-  /* Punkt 95 (02.10.2026): Kontakte exakt, dann normalisiert, dann Teilstring */ const twKontakteFiltern = (items, club) => {
-  const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\butd\b/g, 'united').replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter((t) => t && !/^(fc|sc|cf|ac|afc|sv|tsv|vfb|vfl|bsc|fsv|ssc|us|as|ogc|ca|fk|sk|bk|if|rcd|ud|cd|club|1|ev)$/.test(t)).join(' ');
-  const c0 = String(club || '').toLowerCase().trim(); const cn = norm(club); const liste = Array.isArray(items) ? items : [];
-  const exakt = liste.filter((c) => String(c.verein || '').toLowerCase().trim() === c0); if (exakt.length) return exakt;
-  const nrm = liste.filter((c) => cn && norm(c.verein) === cn); if (nrm.length) return nrm;
-  const teil = liste.filter((c) => { const v = String(c.verein || '').toLowerCase().trim(); return !!c0 && (v.indexOf(c0) >= 0 || (c0.length >= 5 && c0.indexOf(v) >= 0)); });
-  if (teil.length <= 1) return teil;
-  const namen = Array.from(new Set(teil.map((c) => String(c.verein || '')))).sort((a, b) => Math.abs(a.length - c0.length) - Math.abs(b.length - c0.length));
-  return teil.filter((c) => String(c.verein || '') === namen[0]);
-}; const openContacts = club => {
+  const openContacts = club => {
     setContactClub(club);
     if (!isPrem) {
       setContactList("locked");
@@ -7582,7 +7288,7 @@ function TransferApp({
       cache: "no-store"
     }).then(r => r.json()).then(raw => {
       const d = normResp(raw);
-      setContactList(d && Array.isArray(d.items) ? twKontakteFiltern(d.items, club) : []);
+      setContactList(d && Array.isArray(d.items) ? d.items.filter(c => c.verein.toLowerCase().indexOf(club.toLowerCase()) >= 0 || club.toLowerCase().indexOf(c.verein.toLowerCase()) >= 0) : []);
     }).catch(() => setContactList([]));
   };
   const [plExtra, setPlExtra] = useState(null);
@@ -7906,7 +7612,7 @@ function TransferApp({
         @media (max-width: 760px) {
           html, body { overflow-x: hidden; }
           .tw-burger { display: inline-flex !important; }
-          .tw-tabbar { display: none !important; } .tw-mobnav .tw-sn { padding: 6px 10px 18px; } .tw-mobnav .tw-sn-punkt, .tw-mobnav .tw-sn-kopf, .tw-mobnav .tw-sn-unter, .tw-mobnav .tw-sn-ki { font-size: 15px; min-height: 46px; } .tw-mobnav .tw-sn-ikon { width: 26px; height: 26px; } .tw-mobnav .tw-sn-ikon svg { width: 20px; height: 20px; } .tw-assist { grid-template-columns: minmax(0, 1fr) !important; min-height: auto !important; gap: 10px !important; } .tw-assist > div { min-width: 0; max-width: 100%; } .tw-assist > div:first-child { max-height: 190px; } .tw-assist * { max-width: 100%; }
+          .tw-tabbar { display: none !important; }
           .tw-headwrap { height: auto !important; flex-wrap: wrap !important; gap: 8px !important; row-gap: 9px !important; padding: 9px 10px 11px !important; }
           .tw-headwrap .tw-livetime { display: none !important; }
           .tw-logo > span:first-child { width: 24px !important; height: 24px !important; }
@@ -7964,7 +7670,7 @@ function TransferApp({
       alignItems: "center",
       gap: 16
     }
-  }, /*#__PURE__*/React.createElement(MobilNav, { view: view, setView: setView, news: news, needsBySport: needsBySport, onNavigate: onNavigate, onScout: () => setView("assistent"), items: [["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["spieltag", LANG === "en" ? "Matchday" : "Spieltag"], ["gesucht", "Vereinsbedarf"], ["ranking", "Performance"], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]] }), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(MobilNav, { view: view, setView: setView, items: [["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["spieltag", LANG === "en" ? "Matchday" : "Spieltag"], ["gesucht", "Vereinsbedarf"], ["ranking", "Performance"], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]] }), /*#__PURE__*/React.createElement("div", {
     className: "tw-logo",
     style: {
       display: "flex",
@@ -8214,7 +7920,7 @@ function TransferApp({
       width: "100%",
       boxSizing: "border-box"
     }
-  }, view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news, onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(VS_NEU ? VereinSuchtVue : BedarfVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news, onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(BedarfVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       background: "transparent",
       border: "none",
@@ -9309,23 +9015,7 @@ function TransferApp({
       fontSize: 11,
       color: MUTED
     }
-  }, " · ✉ ", c.email, " · ☎ ", c.phone))))), vereinData.bedarf_ampel && vereinData.bedarf_ampel.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: MUTED, textTransform: "uppercase", letterSpacing: 1, margin: "2px 0 6px" }
-  }, "Bedarfsampel"), /*#__PURE__*/React.createElement("div", {
-    style: { display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }
-  }, vereinData.bedarf_ampel.map((a, i) => /*#__PURE__*/React.createElement("div", {
-    key: "amp" + i,
-    style: { background: "var(--karte)", border: `1px solid ${HAIR}`, borderRadius: 10, padding: "8px 11px", fontFamily: FONT_BODY, fontSize: 12.5, color: INK }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: { display: "flex", alignItems: "center", gap: 8 }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: { width: 10, height: 10, borderRadius: 5, flex: "0 0 10px", display: "inline-block", background: a.ampel === "rot" ? "#d64545" : a.ampel === "gelb" ? "#e0a800" : "#2e9e5b" }
-  }), /*#__PURE__*/React.createElement("strong", null, ({ TW: "Torwart", ABW: "Abwehr", MF: "Mittelfeld", ST: "Sturm", IV: "Innenverteidigung", AV: "Außenverteidigung", ZM: "Zentrales Mittelfeld", FL: "Flügel" })[a.position] || a.position), /*#__PURE__*/React.createElement("span", {
-    style: { fontSize: 11, color: MUTED }
-  }, (a.score || 0) + " / 100")), (a.gruende || []).slice(0, 3).map((g, j) => /*#__PURE__*/React.createElement("div", {
-    key: "g" + j,
-    style: { fontSize: 11.5, color: MUTED, marginTop: 3 }
-  }, "• " + (g.text || ""))))))), vereinData.sucht && vereinData.sucht.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, " · ✉ ", c.email, " · ☎ ", c.phone))))), vereinData.sucht && vereinData.sucht.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 11,
@@ -9865,10 +9555,19 @@ function TransferApp({
     style: {
       fontFamily: FONT_DISPLAY,
       fontWeight: 700,
-      fontSize: 30, color: "var(--t1)", marginBottom: 8 } }, t(`tour${tourStep}_t`)), /*#__PURE__*/React.createElement("p", {
+      fontSize: 30,
+      color: "#15181C",
+      marginBottom: 8
+    }
+  }, t(`tour${tourStep}_t`)), /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: FONT_BODY,
-      fontSize: 14, color: "var(--t1)", opacity: .92, lineHeight: 1.65, margin: "0 0 18px" } }, t(`tour${tourStep}_d`)), /*#__PURE__*/React.createElement("div", {
+      fontSize: 13.5,
+      color: "#4a4a48",
+      lineHeight: 1.65,
+      margin: "0 0 18px"
+    }
+  }, t(`tour${tourStep}_d`)), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "center",
@@ -9881,7 +9580,9 @@ function TransferApp({
       width: 8,
       height: 8,
       borderRadius: 99,
-      background: s === tourStep ? "#149a59" : "var(--linie2)" } }))), /*#__PURE__*/React.createElement("button", {
+      background: s === tourStep ? "#149a59" : "#dcdcd6"
+    }
+  }))), /*#__PURE__*/React.createElement("button", {
     onClick: () => tourStep < 3 ? setTourStep(tourStep + 1) : endTour(),
     style: {
       width: "100%",
