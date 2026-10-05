@@ -8002,7 +8002,7 @@ function MuTitel({ titel, unter }) {
 function MuTag({ it, hell }) {
   const ty = muTyp(it);
   return React.createElement("span", { style: { alignSelf: "flex-start", flex: "none", fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: ".05em", textTransform: "uppercase",
-    color: hell ? "#fff" : ty.color, background: hell ? (String(ty.color).startsWith("#") ? ty.color : MU_NAVY) : ty.soft, padding: "2px 8px", borderRadius: 4, whiteSpace: "nowrap" } }, ty.label);
+    color: hell ? "#fff" : ty.color, background: hell ? "rgba(8,14,28,.86)" : ty.soft, borderLeft: hell ? "3px solid " + (String(ty.color).startsWith("#") ? ty.color : "#0B7A45") : "none", padding: "2px 8px", borderRadius: 4, whiteSpace: "nowrap" } }, ty.label);
 }
 function MuBildnachweis({ foto }) {
   const hh = React.createElement; const en = muEn();
