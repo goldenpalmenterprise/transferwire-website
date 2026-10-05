@@ -7932,6 +7932,297 @@ function SpielerdatenTabelle({ d, pid }) { const h = React.createElement; const 
   const nat = x.nationality || x.nat || ''; const vertrag = x.tm_contract_until || x.contract_until || '';
   const zeilen = [[en ? 'Name' : 'Name', x.name], [en ? 'Born/age' : 'Geb./Alter', geb ? geb + alter : ''], [en ? 'Height' : 'Gr\u00f6\u00dfe', groesse], [en ? 'Weight' : 'Gewicht', gewicht], [en ? 'Citizenship' : 'Staatsb\u00fcrgerschaft', nat ? h('span', null, landFlagge(nat), nat) : ''], [en ? 'Position' : 'Position', x.position || x.pos], [en ? 'Foot' : 'Fu\u00df', fuss], [en ? 'Current club' : 'Aktueller Verein', x.team ? h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6 } }, h(ClubLogo, { name: x.team, size: 18 }), clubName(x.team), x.league ? h('span', { style: { color: MUTED, fontWeight: 500 } }, ' \u00b7 ' + x.league) : null) : ''], [en ? 'In the team since' : 'Im Team seit', x.tm_joined ? fmtTag(x.tm_joined) : ''], [en ? 'Contract until' : 'Vertrag bis', vertrag ? fmtTag(vertrag) : ''], [en ? 'Market value' : 'Marktwert', x.tm_value_text || '']].filter(z => z[1]);
   return h('div', { style: { marginBottom: 12 } }, h('div', { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 700, color: MUTED, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 } }, en ? 'Player data' : 'Spielerdaten'), h('div', { style: { border: '1px solid var(--linie)', borderRadius: 10, overflow: 'hidden' } }, zeilen.map((z, i) => h('div', { key: i, style: { display: 'flex', alignItems: 'center', gap: 12, padding: '7px 12px', borderTop: i ? '1px solid var(--linie)' : 'none', background: i % 2 ? 'var(--zebra)' : 'transparent', fontFamily: FONT_BODY, fontSize: 12.5 } }, h('span', { style: { minWidth: 150, color: MUTED } }, z[0] + ':'), h('span', { style: { color: INK, fontWeight: 700, display: 'inline-flex', alignItems: 'center' } }, z[1]))))); }
+/* 24 Magazinansicht der Newsseite: Aufmacher, Nachrichten-Ticker, Transfers & Verträge, Spiele & Tabellen, Leistungen, Talente, Verletzungen, Community */
+const MU_NAVY = "#12233f";
+function muCss() {
+  if (typeof document === "undefined" || document.getElementById("mu-css")) return;
+  const st = document.createElement("style"); st.id = "mu-css";
+  st.textContent = ".mu-top{display:grid;grid-template-columns:minmax(0,2fr) minmax(270px,1fr);gap:14px;align-items:stretch}" +
+    ".mu-t3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.mu-l3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}" +
+    ".mu-g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}.mu-st{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);gap:14px;align-items:start}" +
+    ".mu-karte{transition:border-color .15s,box-shadow .15s}.mu-karte:hover{border-color:var(--t3);box-shadow:0 2px 10px rgba(15,21,32,.08)}.mu-zeile{transition:background .12s}.mu-zeile:hover{background:var(--karte2)}" +
+    ".mu-c1{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}.mu-c2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.mu-c3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}" +
+    ".mu-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}" +
+    "@media (max-width:1020px){.mu-top,.mu-st{grid-template-columns:minmax(0,1fr)}.mu-l3{grid-template-columns:repeat(2,minmax(0,1fr))}}" +
+    "@media (max-width:700px){.mu-t3,.mu-l3,.mu-g2{grid-template-columns:minmax(0,1fr)}.mu-hero{height:300px!important}.mu-hero h2{font-size:23px!important}.mu-teaserbild{height:180px!important}}";
+  document.head.appendChild(st);
+}
+function muEn() { return LANG === "en"; }
+function muNorm(s) { return String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim(); }
+function muTitel(it) { return (muEn() && it.headline_en) || it.headline || ""; }
+function muIntro(it) { const t = String((muEn() && it.summary_en) || it.summary || "").trim(); const m = t.match(/^.{25,230}?[.!?](\s|$)/); return m ? m[0].trim() : (t.length > 200 ? t.slice(0, 197) + "\u2026" : t); }
+function muTs(it) { const d = new Date(it.publishedAt || it.published || 0); return isNaN(d.getTime()) ? 0 : d.getTime(); }
+function muZeit(it) { const ts = muTs(it); if (!ts) return ""; const d = new Date(ts); const p = n => String(n).padStart(2, "0"); return p(d.getDate()) + "." + p(d.getMonth() + 1) + "." + d.getFullYear() + " \u00b7 " + p(d.getHours()) + ":" + p(d.getMinutes()); }
+function muTyp(it) { const t = TYPE[it.type] || TYPE.geruecht; return { label: muEn() ? (t.en || t.label) : t.label, color: t.color, soft: t.soft }; }
+function muClub(v) { if (!v) return ""; if (typeof v === "string") return v; return v.club || v.name || v.team || ""; }
+function muVon(it) { return it.fromClub || it.from_club || muClub(it.from) || ""; }
+function muNach(it) { return it.toClub || it.to_club || muClub(it.to) || ""; }
+function muName(it) { const sp = typeof tkSpieler === "function" ? tkSpieler(it) : null; return (sp && sp.name) || it.player_name || (it.player && it.player.name) || ""; }
+function muPos(it) { const sp = typeof tkSpieler === "function" ? tkSpieler(it) : null; return (sp && (sp.pos || sp.position)) || it.position || it.pos || ""; }
+function muAktivApp(view, type, query, club, league, country, sport) { return view === "feed" && type === "alle" && !query && !club && !league && !country && (!sport || sport === "alle"); }
+const MU_HAUPT = { fix: 30, leihe: 22, trade: 20, trainer: 18, vertrag_verlaengert: 16, vertrag: 14, geruecht: 12 };
+function muAuswahl(liste) {
+  const jetzt = Date.now();
+  const wert = it => MU_HAUPT[it.type] + (Number(it.reliability) || 3) * 6 + Math.min(20, (Number(it.relevanz || it.relevance) || 0) / 5) - (jetzt - muTs(it)) / 36e5 / 3;
+  let kand = liste.filter(it => MU_HAUPT[it.type] != null && muTitel(it) && muTs(it) && jetzt - muTs(it) < 72 * 36e5);
+  if (kand.length < 4) kand = liste.filter(it => MU_HAUPT[it.type] != null && muTitel(it));
+  kand = kand.slice().sort((a, b) => wert(b) - wert(a));
+  const gew = [], seen = new Set();
+  for (const it of kand) { const k = muNorm(muName(it)) || it.id; if (seen.has(k)) continue; seen.add(k); gew.push(it); if (gew.length >= 4) break; }
+  return { hero: gew[0] || null, teaser: gew.slice(1, 4), ids: new Set(gew.map(x => x.id)) };
+}
+function muOhneAufmacher(liste) { const ids = muAuswahl(liste).ids; return liste.filter(it => !ids.has(it.id) && it.type !== "leistung"); }
+/* Fotos: frei lizenzierte Archivfotos (Wikimedia Commons) und Porträts der Datenanbieter */
+const MU_BILDER = {}; const MU_BILD_WART = new Set(); const muBildHoerer = new Set();
+function muBildAnfordern(namen) {
+  const neu = namen.filter(n => n && !(n in MU_BILDER) && !MU_BILD_WART.has(n)); if (!neu.length) return;
+  neu.forEach(n => MU_BILD_WART.add(n));
+  const fertig = (b) => { neu.forEach(n => { MU_BILDER[n] = (b && b[n]) || null; MU_BILD_WART.delete(n); }); muBildHoerer.forEach(f => f()); };
+  fetch("/api/tw-bilder?namen=" + encodeURIComponent(neu.join("|"))).then(r => r.json()).then(d => { const x = d && d.items && !Array.isArray(d.items) ? d.items : d; fertig(x && x.bilder); }).catch(() => fertig(null));
+}
+function useMuBilder(namen) {
+  const [, tick] = React.useState(0); const schl = namen.filter(Boolean).join("|");
+  React.useEffect(() => { const f = () => tick(t => t + 1); muBildHoerer.add(f); muBildAnfordern(namen.filter(Boolean)); return () => { muBildHoerer.delete(f); }; }, [schl]);
+  return MU_BILDER;
+}
+function MuFoto({ name, url, w, h, radius }) {
+  const hh = React.createElement; const [f, setF] = React.useState(url || null); const [fehler, setFehler] = React.useState(false);
+  React.useEffect(() => { setFehler(false); if (url) { setF(url); return; } let a = true; if (name && typeof fotoAnfordern === "function") fotoAnfordern(name, (x) => { if (a && x && x.photo) setF(x.photo); }); return () => { a = false; }; }, [name, url]);
+  const box = { width: w, height: h, borderRadius: radius == null ? 6 : radius, flexShrink: 0, overflow: "hidden", background: "var(--karte2)", display: "flex", alignItems: "center", justifyContent: "center" };
+  if (f && !fehler) return hh("div", { style: box }, hh("img", { src: f, alt: name || "", loading: "lazy", onError: () => setFehler(true), style: { width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 18%", display: "block" } }));
+  const ini = String(name || "?").split(/\s+/).filter(Boolean).map(s => s[0]).slice(0, 2).join("").toUpperCase();
+  return hh("div", { style: Object.assign({}, box, { fontFamily: FONT_DISPLAY, fontWeight: 800, fontSize: Math.max(12, Math.round(h / 2.8)), color: "var(--t3)" }) }, ini);
+}
+function MuTitel({ titel, unter }) {
+  const hh = React.createElement;
+  return hh("div", { style: { display: "flex", alignItems: "baseline", gap: 12, margin: "26px 0 12px", borderBottom: "2px solid " + MU_NAVY, paddingBottom: 6 } },
+    hh("h2", { style: { margin: 0, fontFamily: FONT_DISPLAY, fontSize: 25, fontWeight: 800, letterSpacing: ".01em", textTransform: "uppercase", color: "var(--t1)" } }, titel),
+    unter ? hh("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t3)" } }, unter) : null);
+}
+function MuTag({ it, hell }) {
+  const ty = muTyp(it);
+  return React.createElement("span", { style: { alignSelf: "flex-start", flex: "none", fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: ".05em", textTransform: "uppercase",
+    color: hell ? "#fff" : ty.color, background: hell ? (String(ty.color).startsWith("#") ? ty.color : MU_NAVY) : ty.soft, padding: "2px 8px", borderRadius: 4, whiteSpace: "nowrap" } }, ty.label);
+}
+function MuBildnachweis({ foto }) {
+  const hh = React.createElement; const en = muEn();
+  const text = (en ? "Archive photo" : "Archivfoto") + (foto.urheber ? " \u00b7 " + foto.urheber : "") + (foto.lizenz ? " \u00b7 " + foto.lizenz : "") + " \u00b7 Wikimedia Commons";
+  return hh("a", { href: foto.quelle || "#", target: "_blank", rel: "noopener noreferrer", onClick: e => e.stopPropagation(), title: text,
+    style: { position: "absolute", top: 8, right: 8, maxWidth: "70%", fontFamily: FONT_BODY, fontSize: 10.5, color: "#fff", background: "rgba(8,14,28,.62)", padding: "3px 7px", borderRadius: 4, textDecoration: "none", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, text);
+}
+/* Bildfläche: Archivfoto, sonst Komposition aus Porträt und Vereinslogo, sonst Ersatzfläche */
+function MuBildflaeche({ it, bild, hoehe, gross }) {
+  const hh = React.createElement; const foto = bild && bild.foto; const portrait = (bild && bild.portrait) || it.photo || null; const verein = muNach(it) || it.team || muVon(it) || "";
+  const [fehler, setFehler] = React.useState(false);
+  return hh("div", { className: gross ? "" : "mu-teaserbild", style: { position: "relative", height: hoehe, overflow: "hidden", background: "linear-gradient(135deg, " + MU_NAVY + " 0%, #1c3a6a 58%, #0B7A45 135%)" } },
+    foto && !fehler ? hh("img", { src: foto.url, alt: muName(it), loading: gross ? "eager" : "lazy", onError: () => setFehler(true), style: { position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 22%" } })
+      : hh(React.Fragment, null,
+          hh("div", { style: { position: "absolute", inset: 0, background: "radial-gradient(circle at 78% 35%, rgba(255,255,255,.16), rgba(255,255,255,0) 55%)" } }),
+          verein ? hh("div", { style: { position: "absolute", left: gross ? 22 : 12, top: gross ? 20 : 12, background: "#fff", borderRadius: 10, padding: gross ? 10 : 6, boxShadow: "0 4px 16px rgba(0,0,0,.25)", display: "flex" } }, hh(ClubLogo, { name: verein, size: gross ? 64 : 38 })) : null,
+          !portrait && !verein ? hh("div", { style: { position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8 } },
+            hh("span", { style: { fontFamily: FONT_DISPLAY, fontSize: gross ? 46 : 30, fontWeight: 800, letterSpacing: ".06em", color: "rgba(255,255,255,.92)" } }, "TRANSFERWIRE"),
+            hh("span", { style: { fontFamily: FONT_BODY, fontSize: gross ? 14 : 12, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "rgba(255,255,255,.75)" } }, muTyp(it).label)) : null,
+          portrait ? hh("img", { src: portrait, alt: muName(it), loading: gross ? "eager" : "lazy", style: { position: "absolute", right: gross ? "7%" : "6%", bottom: 0, height: gross ? "86%" : "82%", aspectRatio: "1 / 1", objectFit: "cover", objectPosition: "50% 15%", borderRadius: "12px 12px 0 0", boxShadow: "0 8px 26px rgba(0,0,0,.35)" } }) : null),
+    foto && !fehler && gross ? hh(MuBildnachweis, { foto }) : null);
+}
+function MuHero({ it, bild, onOpen }) {
+  const hh = React.createElement; const intro = muIntro(it);
+  return hh("div", { className: "mu-hero mu-karte", role: "button", tabIndex: 0, onClick: () => onOpen(it), onKeyDown: e => { if (e.key === "Enter") onOpen(it); },
+      style: { position: "relative", height: 430, borderRadius: 12, overflow: "hidden", cursor: "pointer", border: "1px solid " + HAIR } },
+    hh("div", { style: { position: "absolute", inset: 0 } }, hh(MuBildflaeche, { it, bild, hoehe: "100%", gross: true })),
+    hh("div", { style: { position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(8,14,28,0) 38%, rgba(8,14,28,.62) 66%, rgba(8,14,28,.94) 100%)", pointerEvents: "none" } }),
+    hh("div", { style: { position: "absolute", left: 22, right: 22, bottom: 20, display: "flex", flexDirection: "column", gap: 8 } },
+      hh(MuTag, { it, hell: true }),
+      hh("h2", { className: "mu-c3", style: { margin: 0, fontFamily: FONT_DISPLAY, fontSize: 34, lineHeight: 1.08, fontWeight: 800, color: "#fff", textShadow: "0 2px 12px rgba(0,0,0,.45)" } }, muTitel(it)),
+      intro ? hh("p", { className: "mu-c2", style: { margin: 0, fontFamily: FONT_BODY, fontSize: 14.5, lineHeight: 1.45, color: "rgba(255,255,255,.9)", maxWidth: 780 } }, intro) : null));
+}
+function MuTeaser({ it, bild, onOpen }) {
+  const hh = React.createElement; const verein = muNach(it) || it.team || muVon(it) || "";
+  return hh("div", { className: "mu-karte", role: "button", tabIndex: 0, onClick: () => onOpen(it), onKeyDown: e => { if (e.key === "Enter") onOpen(it); },
+      style: { display: "flex", flexDirection: "column", borderRadius: 10, overflow: "hidden", cursor: "pointer", background: "var(--karte)", border: "1px solid " + HAIR, minWidth: 0 } },
+    hh("div", { style: { position: "relative" } }, hh(MuBildflaeche, { it, bild, hoehe: 172 }),
+      hh("div", { style: { position: "absolute", left: 10, bottom: 10 } }, hh(MuTag, { it, hell: true }))),
+    hh("div", { style: { display: "flex", gap: 10, padding: "11px 12px 13px", alignItems: "flex-start" } },
+      verein ? hh("div", { style: { flex: "none", width: 34, height: 34, borderRadius: 6, background: "#fff", border: "1px solid " + HAIR, display: "flex", alignItems: "center", justifyContent: "center" } }, hh(ClubLogo, { name: verein, size: 26 })) : null,
+      hh("div", { className: "mu-c3", style: { fontFamily: FONT_DISPLAY, fontSize: 17, lineHeight: 1.2, fontWeight: 700, color: "var(--t1)" } }, muTitel(it))));
+}
+function MuKopf({ titel, rechts }) {
+  return React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, background: MU_NAVY, color: "#fff", padding: "8px 12px", fontFamily: FONT_DISPLAY, fontSize: 15.5, fontWeight: 800, letterSpacing: ".04em", textTransform: "uppercase" } },
+    React.createElement("span", { style: { minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, titel), rechts || null);
+}
+function MuScore({ wert }) {
+  const sc = Number(wert); if (wert == null || wert === "" || isNaN(sc)) return null;
+  return React.createElement("span", { title: "TW Performance Score", style: { flex: "none", fontFamily: FONT_DISPLAY, fontWeight: 800, fontSize: 13, lineHeight: "18px", color: "#fff", background: sc >= 85 ? "#0B7A45" : sc >= 70 ? "#8a5f00" : "#475569", borderRadius: 5, padding: "1px 7px" } }, Math.round(sc));
+}
+function MuFokus({ liste, onOpen }) {
+  const hh = React.createElement; const en = muEn();
+  const top = liste.filter(it => it.type === "leistung").sort((a, b) => (Number(b.tw_score) || 0) - (Number(a.tw_score) || 0)).slice(0, 6);
+  return hh("div", { style: { display: "flex", flexDirection: "column", borderRadius: 12, overflow: "hidden", background: "var(--karte)", border: "1px solid " + HAIR, minWidth: 0 } },
+    hh(MuKopf, { titel: en ? "Players in focus" : "Spieler im Fokus" }),
+    top.length ? top.map((it, i) => hh("div", { key: it.id || i, className: "mu-zeile", role: "button", tabIndex: 0, onClick: () => onOpen(it), onKeyDown: e => { if (e.key === "Enter") onOpen(it); },
+        style: { display: "flex", gap: 10, alignItems: "center", padding: "9px 12px", borderTop: i ? "1px solid " + HAIR : "none", cursor: "pointer" } },
+      hh(MuFoto, { name: muName(it), url: it.photo, w: 44, h: 52 }),
+      hh("div", { style: { flex: 1, minWidth: 0 } },
+        hh("div", { className: "mu-c1", style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, color: "var(--t1)" } }, muName(it)),
+        hh("div", { style: { display: "flex", alignItems: "center", gap: 5, minWidth: 0, fontFamily: FONT_BODY, fontSize: 12, color: "var(--t2)" } }, it.team ? hh(ClubLogo, { name: it.team, size: 15 }) : null, hh("span", { className: "mu-c1" }, it.team || "")),
+        hh("div", { className: "mu-c1", style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t3)", marginTop: 1 } }, muTitel(it))),
+      hh(MuScore, { wert: it.tw_score }))) : hh("div", { style: { padding: 16, fontFamily: FONT_BODY, fontSize: 13, color: "var(--t3)" } }, en ? "No standout performances yet." : "Noch keine herausragenden Leistungen."));
+}
+function MuAufmacher({ liste, onOpen }) {
+  muCss(); const hh = React.createElement;
+  const aus = React.useMemo(() => muAuswahl(liste), [liste]);
+  const namen = [aus.hero, ...aus.teaser].filter(Boolean).map(muName);
+  const bilder = useMuBilder(namen);
+  if (!aus.hero) return null;
+  return hh("section", { "aria-label": muEn() ? "Top stories" : "Hauptmeldungen", style: { marginBottom: 8 } },
+    hh("div", { className: "mu-top" }, hh(MuHero, { it: aus.hero, bild: bilder[muName(aus.hero)], onOpen }), hh(MuFokus, { liste, onOpen })),
+    aus.teaser.length ? hh("div", { className: "mu-t3", style: { marginTop: 14 } }, aus.teaser.map(t => hh(MuTeaser, { key: t.id, it: t, bild: bilder[muName(t)], onOpen }))) : null);
+}
+/* Kompakte horizontale Nachrichtenkarte (Ticker) */
+function TickerKarte({ item, onOpen }) {
+  muCss(); const hh = React.createElement; const it = item; const en = muEn(); const name = muName(it);
+  const verein = it.type === "leistung" ? (it.team || "") : (muNach(it) || it.team || it.club || muVon(it) || "");
+  const zusatz = [];
+  if (it.type === "leistung") {
+    if (it.minuten != null) zusatz.push(it.minuten + (en ? " min" : " Min."));
+    if (it.tore) zusatz.push(it.tore + " " + (en ? (it.tore === 1 ? "goal" : "goals") : (it.tore === 1 ? "Tor" : "Tore")));
+    if (it.vorlagen) zusatz.push(it.vorlagen + " " + (en ? (it.vorlagen === 1 ? "assist" : "assists") : (it.vorlagen === 1 ? "Vorlage" : "Vorlagen")));
+    if (it.posgruppe === "TW" && it.paraden != null) zusatz.push(it.paraden + " " + (en ? "saves" : "Paraden"));
+  } else if ((it.type === "fix" || it.type === "leihe" || it.type === "geruecht") && (muVon(it) || muNach(it))) zusatz.push((muVon(it) || "?") + " \u2192 " + (muNach(it) || "?"));
+  const meta = [muZeit(it), typeof tkQuelle === "function" ? tkQuelle(it) : ""].filter(Boolean).join(" \u00b7 ");
+  return hh("div", { className: "mu-karte", role: "button", tabIndex: 0, onClick: () => onOpen && onOpen(it), onKeyDown: e => { if (e.key === "Enter" && onOpen) onOpen(it); },
+      style: { display: "flex", gap: 12, padding: 10, minHeight: 112, borderRadius: 10, background: "var(--karte)", border: "1px solid " + HAIR, cursor: "pointer", boxSizing: "border-box", minWidth: 0 } },
+    name ? hh(MuFoto, { name, url: it.photo, w: 72, h: 90 })
+      : hh("div", { style: { width: 72, height: 90, flexShrink: 0, borderRadius: 6, background: "#fff", border: "1px solid " + HAIR, display: "flex", alignItems: "center", justifyContent: "center" } }, verein ? hh(ClubLogo, { name: verein, size: 46 }) : null),
+    hh("div", { style: { flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 5 } },
+      hh("div", { style: { display: "flex", alignItems: "center", gap: 8, minWidth: 0 } },
+        hh(MuTag, { it }),
+        hh("span", { style: { flex: 1, minWidth: 0, fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, meta),
+        it.type === "leistung" ? hh(MuScore, { wert: it.tw_score }) : (verein ? hh("div", { style: { flex: "none", width: 26, height: 26, display: "flex", alignItems: "center", justifyContent: "center" } }, hh(ClubLogo, { name: verein, size: 24 })) : null)),
+      hh("div", { className: "mu-c3", style: { fontFamily: FONT_DISPLAY, fontSize: 17.5, fontWeight: 700, lineHeight: 1.2, color: "var(--t1)" } }, muTitel(it)),
+      zusatz.length ? hh("div", { className: "mu-c1", style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t2)" } }, zusatz.join(" \u00b7 ")) : null));
+}
+/* Listenmodule */
+function MuModul({ titel, spalten, kinder, leer }) {
+  const hh = React.createElement;
+  return hh("div", { style: { borderRadius: 10, overflow: "hidden", background: "var(--karte)", border: "1px solid " + HAIR, minWidth: 0 } },
+    hh(MuKopf, { titel }),
+    spalten ? hh("div", { style: { display: "flex", gap: 8, padding: "6px 12px", background: "var(--karte2)", fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 700, color: "var(--t3)" } }, spalten.map((s, i) => hh("span", { key: i, style: { flex: i === 0 ? 1 : "none", textAlign: i === 0 ? "left" : "right", minWidth: i === 0 ? 0 : 54 } }, s))) : null,
+    kinder && kinder.length ? kinder : hh("div", { style: { padding: 14, fontFamily: FONT_BODY, fontSize: 13, color: "var(--t3)" } }, leer));
+}
+function MuZeile({ name, foto, unter, mitte, rechts, onClick, erste }) {
+  const hh = React.createElement;
+  return hh("div", { className: "mu-zeile", role: "button", tabIndex: 0, onClick, onKeyDown: e => { if (e.key === "Enter" && onClick) onClick(); },
+      style: { display: "flex", alignItems: "center", gap: 10, padding: "7px 12px", borderTop: erste ? "none" : "1px solid " + HAIR, cursor: onClick ? "pointer" : "default", minHeight: 50 } },
+    hh(MuFoto, { name, url: foto, w: 36, h: 40, radius: 5 }),
+    hh("div", { style: { flex: 1, minWidth: 0 } },
+      hh("div", { className: "mu-c1", style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, color: "var(--t1)" } }, name),
+      unter ? hh("div", { className: "mu-c1", style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t3)" } }, unter) : null),
+    mitte || null,
+    hh("div", { style: { flex: "none", minWidth: 54, textAlign: "right", fontFamily: FONT_DISPLAY, fontSize: 15, fontWeight: 800, color: "var(--t1)", whiteSpace: "nowrap" } }, rechts));
+}
+function muAbloese(it) {
+  const en = muEn(); if (it.type === "leihe") return en ? "Loan" : "Leihe";
+  const t = typeof tkAbloese === "function" ? String(tkAbloese(it) || "") : String(it.fee || "");
+  return !t || /nicht|not |unbekannt|unknown|undisclosed/i.test(t) ? "\u2013" : t.replace(/^ca\.\s*/i, "");
+}
+function MuTransfers({ liste, onOpen }) {
+  const hh = React.createElement; const en = muEn();
+  const [markt, setMarkt] = React.useState(null);
+  React.useEffect(() => { let a = true; fetch("/api/tw-vertraege?n=8").then(r => r.json()).then(d => { if (a) setMarkt(d && d.items && !Array.isArray(d.items) ? d.items : d); }).catch(() => { if (a) setMarkt({ auslaufend: [] }); }); return () => { a = false; }; }, []);
+  const tr = liste.filter(it => it.type === "fix" || it.type === "leihe").slice(0, 6);
+  const vl = liste.filter(it => it.type === "vertrag_verlaengert" || it.type === "vertrag").slice(0, 6);
+  const al = ((markt && markt.auslaufend) || []).filter(x => /^\d{4}-\d{2}-\d{2}/.test(String(x.bis || ""))).slice(0, 6);
+  const wertTxt = (w) => { const n = Number(w); if (!n) return ""; return n >= 1e6 ? (en ? "\u20ac" + (n / 1e6).toFixed(1) + "m" : (n / 1e6).toFixed(1).replace(".", ",") + " Mio. \u20ac") : (en ? "\u20ac" + Math.round(n / 1e3) + "k" : Math.round(n / 1e3) + " Tsd. \u20ac"); };
+  const logos = (it) => hh("div", { style: { flex: "none", display: "flex", alignItems: "center", gap: 3 } }, hh(ClubLogo, { name: muVon(it), size: 20 }), hh("span", { style: { fontSize: 11, color: "var(--t3)" } }, "\u2192"), hh(ClubLogo, { name: muNach(it), size: 20 }));
+  const jahr = (it) => { const m = String((it.headline || "") + " " + (it.summary || "")).match(/\b(20[2-4]\d)\b/); return m ? (en ? "until " : "bis ") + m[1] : (en ? "extended" : "verl\u00e4ngert"); };
+  return hh("div", { className: "mu-l3" },
+    hh(MuModul, { titel: en ? "Latest transfers" : "Letzte Transfers", spalten: [en ? "Player" : "Spieler", en ? "Clubs" : "Vereine", en ? "Fee" : "Abl\u00f6se"], leer: en ? "No confirmed transfers." : "Keine best\u00e4tigten Transfers.",
+      kinder: tr.map((it, i) => hh(MuZeile, { key: it.id, erste: !i, name: muName(it) || muTitel(it), foto: it.photo, unter: muPos(it) || (muNach(it) ? (en ? "to " : "zu ") + muNach(it) : ""), mitte: logos(it), rechts: muAbloese(it), onClick: () => onOpen(it) })) }),
+    hh(MuModul, { titel: en ? "Contract extensions" : "Vertragsverl\u00e4ngerungen", spalten: [en ? "Player" : "Spieler", en ? "Club" : "Verein", en ? "Until" : "Bis"], leer: en ? "No extensions reported." : "Keine Verl\u00e4ngerungen gemeldet.",
+      kinder: vl.map((it, i) => hh(MuZeile, { key: it.id, erste: !i, name: muName(it) || muTitel(it), foto: it.photo, unter: muPos(it) || (it.team || muNach(it) || ""), mitte: hh(ClubLogo, { name: it.team || muNach(it) || muVon(it), size: 22 }), rechts: jahr(it), onClick: () => onOpen(it) })) }),
+    hh(MuModul, { titel: en ? "Expiring contracts" : "Auslaufende Vertr\u00e4ge", spalten: [en ? "Player" : "Spieler", en ? "Club" : "Verein", en ? "Until" : "Vertrag bis"], leer: markt ? (en ? "No data." : "Keine Daten.") : (en ? "Loading \u2026" : "Wird geladen \u2026"),
+      kinder: al.map((x, i) => hh(MuZeile, { key: x.pid || i, erste: !i, name: x.name, foto: x.photo, unter: [x.pos, x.alter ? x.alter + (en ? " yrs" : " J.") : "", wertTxt(x.wert)].filter(Boolean).join(" \u00b7 "), mitte: hh(ClubLogo, { name: x.team, size: 22 }),
+        rechts: typeof dbDatum === "function" ? dbDatum(String(x.bis).slice(0, 10)) : x.bis, onClick: () => { if (window.twPerfOeffnen && x.pid) window.twPerfOeffnen({ pid: x.pid, name: x.name, team: x.team }); } })) }));
+}
+function muSpielBox(s) {
+  const fertig = ["FT", "AET", "PEN"].includes(s.status); const live = ["1H", "HT", "2H", "ET", "BT", "P", "LIVE", "INT"].includes(s.status);
+  if ((fertig || live) && s.tore_heim != null) return { text: s.tore_heim + ":" + s.tore_gast, bg: live ? "#0B7A45" : MU_NAVY, fg: "#fff" };
+  if (["PST", "CANC", "ABD", "SUSP"].includes(s.status)) return { text: muEn() ? "off" : "abg.", bg: "var(--karte2)", fg: "var(--t2)" };
+  const d = new Date(s.anstoss); return { text: isNaN(d.getTime()) ? "\u2013" : String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"), bg: "var(--karte2)", fg: "var(--t1)" };
+}
+function MuSpieleTabellen() {
+  const hh = React.createElement; const en = muEn();
+  const [liga, setLiga] = React.useState(null); const [d, setD] = React.useState(null);
+  React.useEffect(() => { let a = true; fetch("/api/tw-tabellen" + (liga ? "?liga=" + liga : "")).then(r => r.json()).then(x => { if (a) setD(x && x.items && !Array.isArray(x.items) ? x.items : x); }).catch(() => { if (a) setD({ ok: false }); }); return () => { a = false; }; }, [liga]);
+  if (!d) return hh("div", { style: { padding: 14, fontFamily: FONT_BODY, fontSize: 13, color: "var(--t3)" } }, en ? "Loading \u2026" : "Wird geladen \u2026");
+  if (!d.ok || !(d.ligen || []).length) return hh("div", { style: { padding: 14, fontFamily: FONT_BODY, fontSize: 13, color: "var(--t3)" } }, en ? "No tables available yet." : "Noch keine Tabellen verf\u00fcgbar.");
+  const aktiv = d.liga; const ligaName = ((d.ligen || []).find(l => l.id === aktiv) || {}).name || "";
+  const tage = []; (d.spiele || []).forEach(s => { const dt = new Date(s.anstoss); const k = isNaN(dt.getTime()) ? "" : dt.toLocaleDateString(en ? "en-GB" : "de-DE", { weekday: "short", day: "2-digit", month: "2-digit" }); const t = tage[tage.length - 1]; if (t && t.k === k) t.s.push(s); else tage.push({ k, s: [s] }); });
+  const spalteR = { textAlign: "right", fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)" };
+  return hh("div", null,
+    hh("div", { className: "mu-chips", style: { marginBottom: 10 } }, (d.ligen || []).map(l => hh("button", { key: l.id, type: "button", onClick: () => setLiga(l.id),
+      style: { flex: "none", display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer", padding: "5px 11px", borderRadius: 999, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700,
+        border: "1px solid " + (l.id === aktiv ? MU_NAVY : HAIR), background: l.id === aktiv ? MU_NAVY : "var(--karte)", color: l.id === aktiv ? "#fff" : "var(--t1)" } },
+      l.logo ? hh("span", { style: { width: 18, height: 18, borderRadius: 4, background: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center" } }, hh("img", { src: l.logo, alt: "", width: 15, height: 15, loading: "lazy", style: { objectFit: "contain" } })) : null, l.name))),
+    hh("div", { className: "mu-st" },
+      hh("div", { style: { borderRadius: 10, overflow: "hidden", background: "var(--karte)", border: "1px solid " + HAIR, minWidth: 0 } },
+        hh(MuKopf, { titel: (en ? "Matches" : "Spiele") + " \u00b7 " + ligaName + (d.runde ? " \u00b7 " + String(d.runde).replace("Regular Season - ", en ? "Matchday " : "Spieltag ") : "") }),
+        tage.length ? tage.map((t, ti) => hh(React.Fragment, { key: ti },
+          hh("div", { style: { padding: "6px 12px", background: "var(--karte2)", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: "var(--t2)", borderTop: ti ? "1px solid " + HAIR : "none" } }, t.k),
+          t.s.map(s => { const b = muSpielBox(s); return hh("div", { key: s.id, className: "mu-zeile", style: { display: "grid", gridTemplateColumns: "minmax(0,1fr) 22px 58px 22px minmax(0,1fr)", alignItems: "center", gap: 8, padding: "7px 12px", borderTop: "1px solid " + HAIR } },
+            hh("span", { className: "mu-c1", style: { textAlign: "right", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 700, color: "var(--t1)" } }, s.heim),
+            hh("img", { src: s.heim_logo, alt: "", width: 22, height: 22, loading: "lazy", style: { objectFit: "contain" } }),
+            hh("span", { style: { textAlign: "center", fontFamily: FONT_DISPLAY, fontSize: 15, fontWeight: 800, background: b.bg, color: b.fg, borderRadius: 5, padding: "2px 0" } }, b.text),
+            hh("img", { src: s.gast_logo, alt: "", width: 22, height: 22, loading: "lazy", style: { objectFit: "contain" } }),
+            hh("span", { className: "mu-c1", style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 700, color: "var(--t1)" } }, s.gast)); }))) : hh("div", { style: { padding: 14, fontFamily: FONT_BODY, fontSize: 13, color: "var(--t3)" } }, en ? "No matches in this round." : "Keine Spiele in dieser Runde.")),
+      hh("div", { style: { borderRadius: 10, overflow: "hidden", background: "var(--karte)", border: "1px solid " + HAIR, minWidth: 0 } },
+        hh(MuKopf, { titel: (en ? "Table" : "Tabelle") + " \u00b7 " + ligaName }),
+        hh("div", { style: { display: "grid", gridTemplateColumns: "24px 20px minmax(0,1fr) 30px 38px 36px", gap: 7, padding: "6px 12px", background: "var(--karte2)", fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 700, color: "var(--t3)" } },
+          hh("span", null, "#"), hh("span"), hh("span", null, en ? "Club" : "Verein"), hh("span", { style: { textAlign: "right" } }, en ? "P" : "Sp."), hh("span", { style: { textAlign: "right" } }, "+/\u2212"), hh("span", { style: { textAlign: "right" } }, en ? "Pts" : "Pkt.")),
+        (d.tabelle || []).map((z, i) => hh(React.Fragment, { key: (z.gruppe || "") + z.rang + z.team },
+          z.gruppe && (i === 0 || d.tabelle[i - 1].gruppe !== z.gruppe) ? hh("div", { style: { padding: "5px 12px", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: "var(--t2)", borderTop: "1px solid " + HAIR } }, z.gruppe) : null,
+          hh("div", { style: { display: "grid", gridTemplateColumns: "24px 20px minmax(0,1fr) 30px 38px 36px", gap: 7, alignItems: "center", padding: "5px 12px", borderTop: "1px solid " + HAIR } },
+            hh("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 14, fontWeight: 800, color: "var(--t2)" } }, z.rang),
+            hh("img", { src: z.logo, alt: "", width: 18, height: 18, loading: "lazy", style: { objectFit: "contain" } }),
+            hh("span", { className: "mu-c1", style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 700, color: "var(--t1)" } }, z.team),
+            hh("span", { style: spalteR }, z.spiele), hh("span", { style: spalteR }, (z.diff > 0 ? "+" : "") + z.diff),
+            hh("span", { style: Object.assign({}, spalteR, { fontFamily: FONT_DISPLAY, fontSize: 15, fontWeight: 800, color: "var(--t1)" }) }, z.punkte)))))));
+}
+function MuTalente() {
+  const hh = React.createElement; const en = muEn(); const [d, setD] = React.useState(null);
+  React.useEffect(() => { let a = true; fetch("/api/tw-listen").then(r => r.json()).then(x => { if (a) setD(x); }).catch(() => { if (a) setD({ items: [] }); }); return () => { a = false; }; }, []);
+  const liste = ((d && d.items) || []).filter(x => !x.age || x.age <= 21).sort((a, b) => (Number(b.score) || 0) - (Number(a.score) || 0)).slice(0, 8);
+  if (!d) return null;
+  const halb = Math.ceil(liste.length / 2);
+  const spalte = (teil) => hh(MuModul, { titel: en ? "Talents" : "Talente", spalten: [en ? "Player" : "Spieler", "", "Score"], leer: en ? "No talents listed." : "Keine Talente gelistet.",
+    kinder: teil.map((x, i) => hh(MuZeile, { key: x.pid || i, erste: !i, name: x.name, foto: x.photo, unter: [x.age ? x.age + (en ? " yrs" : " J.") : "", x.pos, x.team].filter(Boolean).join(" \u00b7 "),
+      mitte: hh("span", { style: { flex: "none", fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t3)", whiteSpace: "nowrap" } }, [x.goals != null ? x.goals + (en ? " G" : " T") : "", x.assists != null ? x.assists + (en ? " A" : " V") : ""].filter(Boolean).join(" / ")),
+      rechts: hh(MuScore, { wert: x.score }), onClick: () => { if (window.twPerfOeffnen && x.pid) window.twPerfOeffnen({ pid: x.pid, name: x.name, team: x.team, league: x.league }); } })) });
+  return liste.length ? hh("div", { className: "mu-g2" }, spalte(liste.slice(0, halb)), liste.length > halb ? spalte(liste.slice(halb)) : null) : null;
+}
+function MuRaster({ items, onOpen, leer }) {
+  const hh = React.createElement;
+  return items.length ? hh("div", { className: "mu-g2" }, items.map(it => hh(TickerKarte, { key: it.id, item: it, onOpen })))
+    : hh("div", { style: { padding: 14, borderRadius: 10, border: "1px dashed " + HAIR, fontFamily: FONT_BODY, fontSize: 13, color: "var(--t3)" } }, leer);
+}
+function MuUnten({ liste, onOpen, geheZu }) {
+  muCss(); const hh = React.createElement; const en = muEn();
+  const leist = liste.filter(it => it.type === "leistung").sort((a, b) => (Number(b.tw_score) || 0) - (Number(a.tw_score) || 0)).slice(0, 8);
+  const verl = liste.filter(it => it.type === "verletzung").slice(0, 6);
+  const comm = liste.filter(it => it.type === "community" || it.kat === "community" || it.community).slice(0, 4);
+  return hh("div", { style: { gridColumn: "1 / -1", minWidth: 0 } },
+    hh(MuTitel, { titel: en ? "Transfers & contracts" : "Transfers & Vertr\u00e4ge" }), hh(MuTransfers, { liste, onOpen }),
+    hh(MuTitel, { titel: en ? "Matches & tables" : "Spiele & Tabellen" }), hh(MuSpieleTabellen),
+    hh(MuTitel, { titel: en ? "Performances" : "Leistungen", unter: en ? "TW Performance Score in the badge" : "TW Performance Score im Kästchen" }), hh(MuRaster, { items: leist, onOpen, leer: en ? "No performances yet." : "Noch keine Leistungen." }),
+    hh(MuTitel, { titel: en ? "Talents" : "Talente" }), hh(MuTalente),
+    hh(MuTitel, { titel: en ? "Injuries" : "Verletzungen" }), hh(MuRaster, { items: verl, onOpen, leer: en ? "No new injuries." : "Keine neuen Verletzungen." }),
+    hh(MuTitel, { titel: "Community" }),
+    comm.length ? hh(MuRaster, { items: comm, onOpen, leer: "" }) : hh("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", padding: "14px 16px", borderRadius: 10, background: "var(--karte)", border: "1px solid " + HAIR } },
+      hh("span", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: "var(--t2)" } }, en ? "Discussions, requests and contacts from scouts, agents and clubs." : "Diskussionen, Gesuche und Kontakte von Scouts, Beratern und Vereinen."),
+      hh("button", { type: "button", onClick: () => geheZu && geheZu("community"), style: { cursor: "pointer", padding: "8px 16px", borderRadius: 8, border: "none", background: "#0B7A45", color: "#fff", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800 } }, en ? "Open community" : "Zur Community")));
+}
+
 function TransferApp({
   account,
   onNavigate,
@@ -9877,7 +10168,7 @@ function TransferApp({
     style: {
       color: INK
     }
-  }, club), " — ", filtered.length, " ", filtered.length === 1 ? "Meldung" : "Meldungen", ".")), view !== "talente" && view !== "community" && view !== "networking" && view !== "moderation" && /*#__PURE__*/React.createElement("div", {
+  }, club), " — ", filtered.length, " ", filtered.length === 1 ? "Meldung" : "Meldungen", ".")), muAktivApp(view, type, query, club, league, country, sport) && React.createElement(MuAufmacher, { liste: filtered, onOpen: it2 => twOeffnen(it2, setMSel) }), muAktivApp(view, type, query, club, league, country, sport) && React.createElement(MuTitel, { titel: LANG === "en" ? "Latest news" : "Aktuelle Nachrichten" }), view !== "talente" && view !== "community" && view !== "networking" && view !== "moderation" && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 7,
@@ -9910,7 +10201,7 @@ function TransferApp({
     className: "tw-feedlist",
     style: {
       display: "grid",
-      gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
+      gridTemplateColumns: view === "feed" ? "repeat(auto-fill, minmax(min(100%, 430px), 1fr))" : "repeat(auto-fill, minmax(340px, 1fr))",
       gap: 12,
       alignItems: "start"
     }
@@ -9925,7 +10216,7 @@ function TransferApp({
       fontSize: 14,
       gridColumn: "1 / -1"
     }
-  }, "Keine Meldungen für diese Auswahl. Filter zurücksetzen und erneut versuchen.") : (() => { const listeAlle = (view === "watch" ? watchList : filtered); const liste = listeAlle.slice(0, feedLimit); let seen = 0; try { seen = Number(localStorage.getItem("tw_seen") || 0); } catch (e) {} const heute = new Date(); heute.setHours(0, 0, 0, 0); const gesternTs = heute.getTime() - 86400000; const gruppe = it => { const d = new Date(it.published || it.publishedAt || 0); if (isNaN(d.getTime())) return ""; const ts = d.getTime(); if (ts >= heute.getTime()) return "Heute"; if (ts >= gesternTs) return "Gestern"; return "Fr\u00fcher"; }; const aus = []; let letzte = null; let neuMarke = false; liste.forEach(it => { const g = gruppe(it); if (g && g !== letzte) { aus.push(/*#__PURE__*/React.createElement("div", { key: "g" + g, style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 900, letterSpacing: 1.6, color: "var(--t3)", margin: "8px 2px 0", textTransform: "uppercase", gridColumn: "1 / -1" } }, g)); letzte = g; } const ts = new Date(it.published || it.publishedAt || 0).getTime(); if (!neuMarke && seen && !isNaN(ts) && ts > 0 && ts <= seen) { aus.push(/*#__PURE__*/React.createElement("div", { key: "seenline", style: { display: "flex", alignItems: "center", gap: 10, margin: "2px 0", gridColumn: "1 / -1" } }, /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, color: "#149a59" } }, "NEU SEIT DEINEM LETZTEN BESUCH \u2191"), /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }))); neuMarke = true; } aus.push(/*#__PURE__*/React.createElement(FeedKarte, { onWatch: it2 => setAddSheet(it2), onOpen: it2 => twOeffnen(it2, setMSel), key: it.id, item: it })); }); if (listeAlle.length > liste.length) aus.push(/*#__PURE__*/React.createElement("div", { key: "mehr", style: { display: "flex", justifyContent: "center", padding: "8px 0 4px", gridColumn: "1 / -1" } }, /*#__PURE__*/React.createElement("button", { onClick: () => setFeedLimit(l => l + FEED_SEITE), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 22px", borderRadius: 999, border: "1px solid var(--dunkel)", background: "var(--karte)", color: "#0f1520", boxShadow: "0 1px 2px rgba(15,21,32,.05)" } }, "Mehr laden (" + liste.length + " von " + listeAlle.length + ")"))); return aus; })())), /*#__PURE__*/React.createElement("aside", null, view === "watch" ? React.createElement(MerkAside, { watch: watch, onAlertDialog: () => setWatchDlg(true), onOpen: openPlayer }) : view !== "feed" && view !== "talente" && view !== "community" && view !== "networking" && view !== "moderation" && React.createElement(FeedSuche, { q: query, setQ: setQuery, club: club, setClub: setClub, alle: news, watch: watchList, geheZu: setView, fs: { sport: sport, type: type, country: country, league: league }, setFs: { setSport: setSport, setType: setType, setCountry: setCountry, setLeague: setLeague } }))), perfKarte && /*#__PURE__*/React.createElement(PerfKarte, { x: perfKarte, onClose: () => setPerfKarte(null), onProfil: p => { setPerfZurueck(p); setPerfKarte(null); openPlayer(p.pid, p.name, p.team); }, watched: (watch.items || []).some(w => w.t === "spieler" && w.w === (perfKarte.name || "")), onWatchToggle: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); } }), plSel && /*#__PURE__*/React.createElement(SpielerDrawer, { x: plSel, news: news, schliessen: () => setPlSel(null) }), mSel && /*#__PURE__*/React.createElement(istTransferTyp(mSel) ? TransferPanel : MeldungsPanel, { m: mSel, schliessen: () => setMSel(null), onWatch: it => { setAddSheet(it); setMSel(null); } }), plVergleich.length > 0 && /*#__PURE__*/React.createElement(VergleichUI, { spieler: plVergleich, entf: pid => setPlVergleich(v => v.filter(y => y.pid !== pid)), leeren: () => { setPlVergleich([]); setPlVglOffen(false); }, offen: plVglOffen, setOffen: setPlVglOffen })), /*#__PURE__*/React.createElement("footer", {
+  }, "Keine Meldungen für diese Auswahl. Filter zurücksetzen und erneut versuchen.") : (() => { const muAn = muAktivApp(view, type, query, club, league, country, sport); const listeAlle = (view === "watch" ? watchList : (muAn ? muOhneAufmacher(filtered) : filtered)); const liste = listeAlle.slice(0, muAn && feedLimit === FEED_SEITE ? Math.min(12, FEED_SEITE) : feedLimit); let seen = 0; try { seen = Number(localStorage.getItem("tw_seen") || 0); } catch (e) {} const heute = new Date(); heute.setHours(0, 0, 0, 0); const gesternTs = heute.getTime() - 86400000; const gruppe = it => { const d = new Date(it.published || it.publishedAt || 0); if (isNaN(d.getTime())) return ""; const ts = d.getTime(); if (ts >= heute.getTime()) return "Heute"; if (ts >= gesternTs) return "Gestern"; return "Fr\u00fcher"; }; const aus = []; let letzte = null; let neuMarke = false; liste.forEach(it => { const g = gruppe(it); if (g && g !== letzte) { aus.push(/*#__PURE__*/React.createElement("div", { key: "g" + g, style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 900, letterSpacing: 1.6, color: "var(--t3)", margin: "8px 2px 0", textTransform: "uppercase", gridColumn: "1 / -1" } }, g)); letzte = g; } const ts = new Date(it.published || it.publishedAt || 0).getTime(); if (!neuMarke && seen && !isNaN(ts) && ts > 0 && ts <= seen) { aus.push(/*#__PURE__*/React.createElement("div", { key: "seenline", style: { display: "flex", alignItems: "center", gap: 10, margin: "2px 0", gridColumn: "1 / -1" } }, /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, color: "#149a59" } }, "NEU SEIT DEINEM LETZTEN BESUCH \u2191"), /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }))); neuMarke = true; } aus.push(/*#__PURE__*/React.createElement(view === "feed" ? TickerKarte : FeedKarte, { onWatch: it2 => setAddSheet(it2), onOpen: it2 => twOeffnen(it2, setMSel), key: it.id, item: it })); }); if (listeAlle.length > liste.length) aus.push(/*#__PURE__*/React.createElement("div", { key: "mehr", style: { display: "flex", justifyContent: "center", padding: "8px 0 4px", gridColumn: "1 / -1" } }, /*#__PURE__*/React.createElement("button", { onClick: () => setFeedLimit(l => l + FEED_SEITE), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 22px", borderRadius: 999, border: "1px solid var(--dunkel)", background: "var(--karte)", color: "#0f1520", boxShadow: "0 1px 2px rgba(15,21,32,.05)" } }, "Mehr laden (" + liste.length + " von " + listeAlle.length + ")"))); if (muAn) aus.push(React.createElement(MuUnten, { key: "mu-unten", liste: filtered, onOpen: it2 => twOeffnen(it2, setMSel), geheZu: setView })); return aus; })())), /*#__PURE__*/React.createElement("aside", null, view === "watch" ? React.createElement(MerkAside, { watch: watch, onAlertDialog: () => setWatchDlg(true), onOpen: openPlayer }) : view !== "feed" && view !== "talente" && view !== "community" && view !== "networking" && view !== "moderation" && React.createElement(FeedSuche, { q: query, setQ: setQuery, club: club, setClub: setClub, alle: news, watch: watchList, geheZu: setView, fs: { sport: sport, type: type, country: country, league: league }, setFs: { setSport: setSport, setType: setType, setCountry: setCountry, setLeague: setLeague } }))), perfKarte && /*#__PURE__*/React.createElement(PerfKarte, { x: perfKarte, onClose: () => setPerfKarte(null), onProfil: p => { setPerfZurueck(p); setPerfKarte(null); openPlayer(p.pid, p.name, p.team); }, watched: (watch.items || []).some(w => w.t === "spieler" && w.w === (perfKarte.name || "")), onWatchToggle: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); } }), plSel && /*#__PURE__*/React.createElement(SpielerDrawer, { x: plSel, news: news, schliessen: () => setPlSel(null) }), mSel && /*#__PURE__*/React.createElement(istTransferTyp(mSel) ? TransferPanel : MeldungsPanel, { m: mSel, schliessen: () => setMSel(null), onWatch: it => { setAddSheet(it); setMSel(null); } }), plVergleich.length > 0 && /*#__PURE__*/React.createElement(VergleichUI, { spieler: plVergleich, entf: pid => setPlVergleich(v => v.filter(y => y.pid !== pid)), leeren: () => { setPlVergleich([]); setPlVglOffen(false); }, offen: plVglOffen, setOffen: setPlVglOffen })), /*#__PURE__*/React.createElement("footer", {
     style: {
       borderTop: `1px solid ${HAIR}`,
       background: "var(--karte)",
