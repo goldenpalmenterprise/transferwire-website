@@ -7943,6 +7943,8 @@ function muCss() {
     ".mu-karte{transition:border-color .15s,box-shadow .15s}.mu-karte:hover{border-color:var(--t3);box-shadow:0 2px 10px rgba(15,21,32,.08)}.mu-zeile{transition:background .12s}.mu-zeile:hover{background:var(--karte2)}" +
     ".mu-c1{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}.mu-c2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.mu-c3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}" +
     ".mu-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}" +
+    ".mu-modal{position:fixed;inset:0;z-index:2000;background:rgba(8,14,28,.58);display:flex;align-items:flex-start;justify-content:center;padding:4vh 12px;overflow-y:auto}" +
+    ".mu-modal-box{width:min(800px,100%);background:var(--karte);color:var(--t1);border:1px solid " + "rgba(127,127,127,.35)" + ";border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden}" +
     "@media (max-width:1020px){.mu-top,.mu-st{grid-template-columns:minmax(0,1fr)}.mu-l3{grid-template-columns:repeat(2,minmax(0,1fr))}}" +
     "@media (max-width:700px){.mu-t3,.mu-l3,.mu-g2{grid-template-columns:minmax(0,1fr)}.mu-hero{height:300px!important}.mu-hero h2{font-size:23px!important}.mu-teaserbild{height:180px!important}}";
   document.head.appendChild(st);
@@ -7969,7 +7971,7 @@ function muAuswahl(liste) {
   kand = kand.slice().sort((a, b) => wert(b) - wert(a));
   const gew = [], seen = new Set();
   for (const it of kand) { const k = muNorm(muName(it)) || it.id; if (seen.has(k)) continue; seen.add(k); gew.push(it); if (gew.length >= 4) break; }
-  return { hero: gew[0] || null, teaser: gew.slice(1, 4), ids: new Set(gew.map(x => x.id)) };
+  return { hero: gew[0] || null, teaser: gew.slice(1, 4), ids: new Set(gew.map(x => x.id)), alle: gew, wert: new Map(gew.map(x => [x.id, wert(x)])) };
 }
 function muOhneAufmacher(liste) { const ids = muAuswahl(liste).ids; return liste.filter(it => !ids.has(it.id) && it.type !== "leistung"); }
 /* Fotos: frei lizenzierte Archivfotos (Wikimedia Commons) und Porträts der Datenanbieter */
@@ -7985,6 +7987,19 @@ function useMuBilder(namen) {
   React.useEffect(() => { const f = () => tick(t => t + 1); muBildHoerer.add(f); muBildAnfordern(namen.filter(Boolean)); return () => { muBildHoerer.delete(f); }; }, [schl]);
   return MU_BILDER;
 }
+const MU_MBILDER = {}; const MU_MB_WART = new Set(); const muMbHoerer = new Set();
+function muMbAnfordern(ids) {
+  const neu = ids.filter(i => i && !(i in MU_MBILDER) && !MU_MB_WART.has(i)); if (!neu.length) return;
+  neu.forEach(i => MU_MB_WART.add(i));
+  const fertig = (b) => { neu.forEach(i => { MU_MBILDER[i] = (b && b[i]) || null; MU_MB_WART.delete(i); }); muMbHoerer.forEach(f => f()); };
+  fetch("/api/tw-meldungbilder?ids=" + encodeURIComponent(neu.join("|"))).then(r => r.json()).then(d => { const x = d && d.items && !Array.isArray(d.items) ? d.items : d; fertig(x && x.bilder); }).catch(() => fertig(null));
+}
+function useMuMeldungBilder(ids) {
+  const [, tick] = React.useState(0); const schl = ids.filter(Boolean).join("|");
+  React.useEffect(() => { const f = () => tick(t => t + 1); muMbHoerer.add(f); muMbAnfordern(ids.filter(Boolean)); return () => { muMbHoerer.delete(f); }; }, [schl]);
+  return MU_MBILDER;
+}
+function muEchtesBild(mb, bild) { return !!((mb && mb.url) || (bild && bild.foto)); }
 function MuFoto({ name, url, w, h, radius }) {
   const hh = React.createElement; const [f, setF] = React.useState(url || null); const [fehler, setFehler] = React.useState(false);
   React.useEffect(() => { setFehler(false); if (url) { setF(url); return; } let a = true; if (name && typeof fotoAnfordern === "function") fotoAnfordern(name, (x) => { if (a && x && x.photo) setF(x.photo); }); return () => { a = false; }; }, [name, url]);
@@ -8004,15 +8019,19 @@ function MuTag({ it, hell }) {
   return React.createElement("span", { style: { alignSelf: "flex-start", flex: "none", fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: ".05em", textTransform: "uppercase",
     color: hell ? "#fff" : ty.color, background: hell ? "rgba(8,14,28,.86)" : ty.soft, borderLeft: hell ? "3px solid " + (String(ty.color).startsWith("#") ? ty.color : "#0B7A45") : "none", padding: "2px 8px", borderRadius: 4, whiteSpace: "nowrap" } }, ty.label);
 }
-function MuBildnachweis({ foto }) {
+function MuBildnachweis({ foto, mb }) {
   const hh = React.createElement; const en = muEn();
-  const text = (en ? "Archive photo" : "Archivfoto") + (foto.urheber ? " \u00b7 " + foto.urheber : "") + (foto.lizenz ? " \u00b7 " + foto.lizenz : "") + " \u00b7 Wikimedia Commons";
+  const video = mb && (mb.art === "spielszene" || mb.art === "video");
+  const text = video ? ((en ? "Still from official video" : "Standbild aus offiziellem Video") + " \u00b7 " + String(mb.quelle || "").replace(/^YouTube \u00b7 /, "") + " \u00b7 YouTube")
+    : (en ? "Archive photo" : "Archivfoto") + (foto.urheber ? " \u00b7 " + foto.urheber : "") + (foto.lizenz ? " \u00b7 " + foto.lizenz : "") + " \u00b7 Wikimedia Commons";
+  foto = mb ? { quelle: mb.quelle_url || mb.link } : foto;
   return hh("a", { href: foto.quelle || "#", target: "_blank", rel: "noopener noreferrer", onClick: e => e.stopPropagation(), title: text,
     style: { position: "absolute", top: 8, right: 8, maxWidth: "70%", fontFamily: FONT_BODY, fontSize: 10.5, color: "#fff", background: "rgba(8,14,28,.62)", padding: "3px 7px", borderRadius: 4, textDecoration: "none", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, text);
 }
 /* Bildfläche: Archivfoto, sonst Komposition aus Porträt und Vereinslogo, sonst Ersatzfläche */
-function MuBildflaeche({ it, bild, hoehe, gross }) {
-  const hh = React.createElement; const foto = bild && bild.foto; const portrait = (bild && bild.portrait) || it.photo || null; const verein = muNach(it) || it.team || muVon(it) || "";
+function MuBildflaeche({ it, bild, mb, hoehe, gross }) {
+  const hh = React.createElement; const mbild = mb && mb.url ? mb : null; const foto = mbild ? { url: mbild.url, urheber: mbild.urheber, lizenz: mbild.lizenz, quelle: mbild.quelle_url } : (bild && bild.foto);
+  const video = mbild && (mbild.art === "spielszene" || mbild.art === "video"); const portrait = (bild && bild.portrait) || it.photo || null; const verein = muNach(it) || it.team || muVon(it) || "";
   const [fehler, setFehler] = React.useState(false);
   return hh("div", { className: gross ? "" : "mu-teaserbild", style: { position: "relative", height: hoehe, overflow: "hidden", background: "linear-gradient(135deg, " + MU_NAVY + " 0%, #1c3a6a 58%, #0B7A45 135%)" } },
     foto && !fehler ? hh("img", { src: foto.url, alt: muName(it), loading: gross ? "eager" : "lazy", onError: () => setFehler(true), style: { position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 22%" } })
@@ -8023,24 +8042,26 @@ function MuBildflaeche({ it, bild, hoehe, gross }) {
             hh("span", { style: { fontFamily: FONT_DISPLAY, fontSize: gross ? 46 : 30, fontWeight: 800, letterSpacing: ".06em", color: "rgba(255,255,255,.92)" } }, "TRANSFERWIRE"),
             hh("span", { style: { fontFamily: FONT_BODY, fontSize: gross ? 14 : 12, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "rgba(255,255,255,.75)" } }, muTyp(it).label)) : null,
           portrait ? hh("img", { src: portrait, alt: muName(it), loading: gross ? "eager" : "lazy", style: { position: "absolute", right: gross ? "7%" : "6%", bottom: 0, height: gross ? "86%" : "82%", aspectRatio: "1 / 1", objectFit: "cover", objectPosition: "50% 15%", borderRadius: "12px 12px 0 0", boxShadow: "0 8px 26px rgba(0,0,0,.35)" } }) : null),
-    foto && !fehler && gross ? hh(MuBildnachweis, { foto }) : null);
+    foto && !fehler && video ? hh("a", { href: mbild.link || mbild.quelle_url, target: "_blank", rel: "noopener noreferrer", onClick: e => e.stopPropagation(), "aria-label": muEn() ? "Watch official video" : "Offizielles Video ansehen",
+      style: { position: "absolute", left: "50%", top: gross ? "38%" : "42%", transform: "translate(-50%,-50%)", width: gross ? 64 : 44, height: gross ? 64 : 44, borderRadius: 999, background: "rgba(8,14,28,.72)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: gross ? 26 : 18, textDecoration: "none" } }, "\u25b6") : null,
+    foto && !fehler && (gross || video) ? hh(MuBildnachweis, { foto, mb: mbild }) : null);
 }
-function MuHero({ it, bild, onOpen }) {
+function MuHero({ it, bild, mb, onOpen }) {
   const hh = React.createElement; const intro = muIntro(it);
   return hh("div", { className: "mu-hero mu-karte", role: "button", tabIndex: 0, onClick: () => onOpen(it), onKeyDown: e => { if (e.key === "Enter") onOpen(it); },
       style: { position: "relative", height: 430, borderRadius: 12, overflow: "hidden", cursor: "pointer", border: "1px solid " + HAIR, background: MU_NAVY } },
-    hh("div", { style: { position: "absolute", inset: 0 } }, hh(MuBildflaeche, { it, bild, hoehe: "100%", gross: true })),
+    hh("div", { style: { position: "absolute", inset: 0 } }, hh(MuBildflaeche, { it, bild, mb, hoehe: "100%", gross: true })),
     hh("div", { style: { position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(8,14,28,0) 38%, rgba(8,14,28,.62) 66%, rgba(8,14,28,.94) 100%)", pointerEvents: "none" } }),
     hh("div", { style: { position: "absolute", left: 22, right: 22, bottom: 20, display: "flex", flexDirection: "column", gap: 8 } },
       hh(MuTag, { it, hell: true }),
       hh("h2", { className: "mu-c3", style: { margin: 0, fontFamily: FONT_DISPLAY, fontSize: 34, lineHeight: 1.08, fontWeight: 800, color: "#fff", textShadow: "0 2px 12px rgba(0,0,0,.45)" } }, muTitel(it)),
       intro ? hh("p", { className: "mu-c2", style: { margin: 0, fontFamily: FONT_BODY, fontSize: 14.5, lineHeight: 1.45, color: "rgba(255,255,255,.9)", maxWidth: 780 } }, intro) : null));
 }
-function MuTeaser({ it, bild, onOpen }) {
+function MuTeaser({ it, bild, mb, onOpen }) {
   const hh = React.createElement; const verein = muNach(it) || it.team || muVon(it) || "";
   return hh("div", { className: "mu-karte", role: "button", tabIndex: 0, onClick: () => onOpen(it), onKeyDown: e => { if (e.key === "Enter") onOpen(it); },
       style: { display: "flex", flexDirection: "column", borderRadius: 10, overflow: "hidden", cursor: "pointer", background: "var(--karte)", border: "1px solid " + HAIR, minWidth: 0 } },
-    hh("div", { style: { position: "relative" } }, hh(MuBildflaeche, { it, bild, hoehe: 172 }),
+    hh("div", { style: { position: "relative" } }, hh(MuBildflaeche, { it, bild, mb, hoehe: 172 }),
       hh("div", { style: { position: "absolute", left: 10, bottom: 10 } }, hh(MuTag, { it, hell: true }))),
     hh("div", { style: { display: "flex", gap: 10, padding: "11px 12px 13px", alignItems: "flex-start" } },
       verein ? hh("div", { style: { flex: "none", width: 34, height: 34, borderRadius: 6, background: "#fff", border: "1px solid " + HAIR, display: "flex", alignItems: "center", justifyContent: "center" } }, hh(ClubLogo, { name: verein, size: 26 })) : null,
@@ -8071,12 +8092,16 @@ function MuFokus({ liste, onOpen }) {
 function MuAufmacher({ liste, onOpen }) {
   muCss(); const hh = React.createElement;
   const aus = React.useMemo(() => muAuswahl(liste), [liste]);
-  const namen = [aus.hero, ...aus.teaser].filter(Boolean).map(muName);
-  const bilder = useMuBilder(namen);
+  const namen = aus.alle.map(muName);
+  const bilder = useMuBilder(namen); const mbilder = useMuMeldungBilder(aus.alle.map(x => x.id));
   if (!aus.hero) return null;
+  let reihe = aus.alle.slice();
+  const echt = (x) => muEchtesBild(mbilder[x.id], bilder[muName(x)]);
+  if (!echt(reihe[0])) { const k = reihe.findIndex((x, i) => i > 0 && echt(x) && (aus.wert.get(x.id) || 0) >= 0.85 * (aus.wert.get(reihe[0].id) || 0)); if (k > 0) { const t = reihe[k]; reihe.splice(k, 1); reihe.unshift(t); } }
+  const hero = reihe[0]; const teaser = reihe.slice(1, 4);
   return hh("section", { "aria-label": muEn() ? "Top stories" : "Hauptmeldungen", style: { marginBottom: 8 } },
-    hh("div", { className: "mu-top" }, hh(MuHero, { it: aus.hero, bild: bilder[muName(aus.hero)], onOpen }), hh(MuFokus, { liste, onOpen })),
-    aus.teaser.length ? hh("div", { className: "mu-t3", style: { marginTop: 14 } }, aus.teaser.map(t => hh(MuTeaser, { key: t.id, it: t, bild: bilder[muName(t)], onOpen }))) : null);
+    hh("div", { className: "mu-top" }, hh(MuHero, { it: hero, bild: bilder[muName(hero)], mb: mbilder[hero.id], onOpen }), hh(MuFokus, { liste, onOpen })),
+    teaser.length ? hh("div", { className: "mu-t3", style: { marginTop: 14 } }, teaser.map(t => hh(MuTeaser, { key: t.id, it: t, bild: bilder[muName(t)], mb: mbilder[t.id], onOpen }))) : null);
 }
 /* Kompakte horizontale Nachrichtenkarte (Ticker) */
 function TickerKarte({ item, onOpen }) {
@@ -8153,7 +8178,7 @@ function muSpielBox(s) {
 }
 function MuSpieleTabellen() {
   const hh = React.createElement; const en = muEn();
-  const [liga, setLiga] = React.useState(null); const [d, setD] = React.useState(null);
+  const [liga, setLiga] = React.useState(null); const [d, setD] = React.useState(null); const [spiel, setSpiel] = React.useState(null);
   React.useEffect(() => { let a = true; fetch("/api/tw-tabellen" + (liga ? "?liga=" + liga : "")).then(r => r.json()).then(x => { if (a) setD(x && x.items && !Array.isArray(x.items) ? x.items : x); }).catch(() => { if (a) setD({ ok: false }); }); return () => { a = false; }; }, [liga]);
   if (!d) return hh("div", { style: { padding: 14, fontFamily: FONT_BODY, fontSize: 13, color: "var(--t3)" } }, en ? "Loading \u2026" : "Wird geladen \u2026");
   if (!d.ok || !(d.ligen || []).length) return hh("div", { style: { padding: 14, fontFamily: FONT_BODY, fontSize: 13, color: "var(--t3)" } }, en ? "No tables available yet." : "Noch keine Tabellen verf\u00fcgbar.");
@@ -8161,6 +8186,7 @@ function MuSpieleTabellen() {
   const tage = []; (d.spiele || []).forEach(s => { const dt = new Date(s.anstoss); const k = isNaN(dt.getTime()) ? "" : dt.toLocaleDateString(en ? "en-GB" : "de-DE", { weekday: "short", day: "2-digit", month: "2-digit" }); const t = tage[tage.length - 1]; if (t && t.k === k) t.s.push(s); else tage.push({ k, s: [s] }); });
   const spalteR = { textAlign: "right", fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)" };
   return hh("div", null,
+    spiel ? hh(MuSpielDetail, { s: spiel, liga: ligaName, onClose: () => setSpiel(null) }) : null,
     hh("div", { className: "mu-chips", style: { marginBottom: 10 } }, (d.ligen || []).map(l => hh("button", { key: l.id, type: "button", onClick: () => setLiga(l.id),
       style: { flex: "none", display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer", padding: "5px 11px", borderRadius: 999, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700,
         border: "1px solid " + (l.id === aktiv ? MU_NAVY : HAIR), background: l.id === aktiv ? MU_NAVY : "var(--karte)", color: l.id === aktiv ? "#fff" : "var(--t1)" } },
@@ -8170,7 +8196,8 @@ function MuSpieleTabellen() {
         hh(MuKopf, { titel: (en ? "Matches" : "Spiele") + " \u00b7 " + ligaName + (d.runde ? " \u00b7 " + String(d.runde).replace("Regular Season - ", en ? "Matchday " : "Spieltag ") : "") }),
         tage.length ? tage.map((t, ti) => hh(React.Fragment, { key: ti },
           hh("div", { style: { padding: "6px 12px", background: "var(--karte2)", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: "var(--t2)", borderTop: ti ? "1px solid " + HAIR : "none" } }, t.k),
-          t.s.map(s => { const b = muSpielBox(s); return hh("div", { key: s.id, className: "mu-zeile", style: { display: "grid", gridTemplateColumns: "minmax(0,1fr) 22px 58px 22px minmax(0,1fr)", alignItems: "center", gap: 8, padding: "7px 12px", borderTop: "1px solid " + HAIR } },
+          t.s.map(s => { const b = muSpielBox(s); return hh("div", { key: s.id, className: "mu-zeile mu-spielzeile", "data-spiel": s.id, "data-status": s.status || "", role: "button", tabIndex: 0, title: en ? "Open match details" : "Spieldetails \u00f6ffnen", onClick: () => setSpiel(s), onKeyDown: e => { if (e.key === "Enter") setSpiel(s); },
+              style: { display: "grid", gridTemplateColumns: "minmax(0,1fr) 22px 58px 22px minmax(0,1fr)", alignItems: "center", gap: 8, padding: "7px 12px", borderTop: "1px solid " + HAIR, cursor: "pointer" } },
             hh("span", { className: "mu-c1", style: { textAlign: "right", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 700, color: "var(--t1)" } }, s.heim),
             hh("img", { src: s.heim_logo, alt: "", width: 22, height: 22, loading: "lazy", style: { objectFit: "contain" } }),
             hh("span", { style: { textAlign: "center", fontFamily: FONT_DISPLAY, fontSize: 15, fontWeight: 800, background: b.bg, color: b.fg, borderRadius: 5, padding: "2px 0" } }, b.text),
@@ -8217,10 +8244,137 @@ function MuUnten({ liste, onOpen, geheZu }) {
     hh(MuTitel, { titel: en ? "Performances" : "Leistungen", unter: en ? "TW Performance Score in the badge" : "TW Performance Score im Kästchen" }), hh(MuRaster, { items: leist, onOpen, leer: en ? "No performances yet." : "Noch keine Leistungen." }),
     hh(MuTitel, { titel: en ? "Talents" : "Talente" }), hh(MuTalente),
     hh(MuTitel, { titel: en ? "Injuries" : "Verletzungen" }), hh(MuRaster, { items: verl, onOpen, leer: en ? "No new injuries." : "Keine neuen Verletzungen." }),
-    hh(MuTitel, { titel: "Community" }),
-    comm.length ? hh(MuRaster, { items: comm, onOpen, leer: "" }) : hh("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", padding: "14px 16px", borderRadius: 10, background: "var(--karte)", border: "1px solid " + HAIR } },
+    hh(MuTitel, { titel: "Community" }), hh(MuCommunity, { geheZu, alt: comm }), null && hh("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", padding: "14px 16px", borderRadius: 10, background: "var(--karte)", border: "1px solid " + HAIR } },
       hh("span", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: "var(--t2)" } }, en ? "Discussions, requests and contacts from scouts, agents and clubs." : "Diskussionen, Gesuche und Kontakte von Scouts, Beratern und Vereinen."),
       hh("button", { type: "button", onClick: () => geheZu && geheZu("community"), style: { cursor: "pointer", padding: "8px 16px", borderRadius: 8, border: "none", background: "#0B7A45", color: "#fff", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800 } }, en ? "Open community" : "Zur Community")));
+}
+
+function muStatusText(st, min, en) {
+  const m = { NS: en ? "Not started" : "Angesetzt", TBD: en ? "Time to be confirmed" : "Termin offen", "1H": en ? "1st half" : "1. Halbzeit", HT: en ? "Half-time" : "Halbzeit", "2H": en ? "2nd half" : "2. Halbzeit",
+    ET: en ? "Extra time" : "Verl\u00e4ngerung", BT: en ? "Break" : "Pause", P: en ? "Penalties" : "Elfmeterschie\u00dfen", FT: en ? "Full time" : "Beendet", AET: en ? "After extra time" : "Beendet n. V.",
+    PEN: en ? "After penalties" : "Beendet n. E.", PST: en ? "Postponed" : "Verschoben", CANC: en ? "Cancelled" : "Abgesagt", ABD: en ? "Abandoned" : "Abgebrochen", SUSP: en ? "Suspended" : "Unterbrochen", LIVE: "Live" };
+  return (m[st] || st || "") + (min && ["1H", "2H", "ET", "LIVE"].includes(st) ? " \u00b7 " + min + "\u2032" : "");
+}
+const MU_STATS = [["Ball Possession", "Ballbesitz"], ["expected_goals", "Expected Goals (xG)"], ["Total Shots", "Sch\u00fcsse"], ["Shots on Goal", "Sch\u00fcsse aufs Tor"], ["Corner Kicks", "Ecken"],
+  ["Passes %", "Passquote"], ["Fouls", "Fouls"], ["Offsides", "Abseits"], ["Yellow Cards", "Gelbe Karten"], ["Red Cards", "Rote Karten"], ["Goalkeeper Saves", "Paraden"]];
+function MuSpielDetail({ s, liga, onClose }) {
+  const hh = React.createElement; const en = muEn();
+  const [d, setD] = React.useState(null); const [lade, setLade] = React.useState(true);
+  React.useEffect(() => {
+    let a = true; const un = (x) => (x && x.items && !Array.isArray(x.items) ? x.items : x);
+    const laden = () => fetch("/api/tw-spiel-laden?id=" + s.id).then(r => r.json()).then(x => { x = un(x); if (a && x && x.spiel) setD(x); }).catch(() => {}).finally(() => { if (a) setLade(false); });
+    fetch("/api/tw-spiel?id=" + s.id).then(r => r.json()).then(x => { x = un(x); if (!a) return; if (x && x.spiel) setD(x); if (x && x.frisch) setLade(false); else laden(); }).catch(() => laden());
+    const esc = (e) => { if (e.key === "Escape") onClose(); }; window.addEventListener("keydown", esc);
+    const alt = document.body.style.overflow; document.body.style.overflow = "hidden";
+    return () => { a = false; window.removeEventListener("keydown", esc); document.body.style.overflow = alt; };
+  }, [s.id]);
+  const sp = (d && d.spiel) || null; const fx = (sp && sp.fixture) || {};
+  const st = fx.status || s.status; const th = sp && sp.tore ? sp.tore.home : s.tore_heim; const tg = sp && sp.tore ? sp.tore.away : s.tore_gast;
+  const box = muSpielBox(Object.assign({}, s, { status: st, tore_heim: th, tore_gast: tg }));
+  const dt = new Date(fx.datum || s.anstoss); const zeit = isNaN(dt.getTime()) ? "" : dt.toLocaleDateString(en ? "en-GB" : "de-DE", { weekday: "long", day: "2-digit", month: "long", year: "numeric" }) + " \u00b7 " + dt.toLocaleTimeString(en ? "en-GB" : "de-DE", { hour: "2-digit", minute: "2-digit" });
+  const angesetzt = ["NS", "TBD", "PST", "CANC"].includes(st);
+  const heimId = sp && sp.heim ? sp.heim.id : null;
+  const leer = (t) => hh("div", { className: "mu-spiel-leer", style: { padding: "10px 0", fontFamily: FONT_BODY, fontSize: 13, color: "var(--t3)" } }, t);
+  const kopf = (t) => hh("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 16, fontWeight: 800, letterSpacing: ".04em", textTransform: "uppercase", color: "var(--t1)", borderBottom: "2px solid " + MU_NAVY, padding: "16px 0 6px", marginBottom: 6 } }, t);
+  const team = (name, logo) => hh("div", { style: { flex: 1, minWidth: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, textAlign: "center" } },
+    hh("div", { style: { width: 64, height: 64, borderRadius: 12, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid " + HAIR } }, logo ? hh("img", { src: logo, alt: "", width: 50, height: 50, style: { objectFit: "contain" } }) : null),
+    hh("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 19, fontWeight: 800, color: "var(--t1)", lineHeight: 1.15 } }, name));
+  const ereignisse = ((sp && sp.ereignisse) || []).slice().sort((a, b) => (a.min || 0) - (b.min || 0) || (a.plus || 0) - (b.plus || 0));
+  const ereignisText = (e) => {
+    if (e.typ === "Goal") return (/Own/i.test(e.detail || "") ? (en ? "Own goal: " : "Eigentor: ") : /Missed/i.test(e.detail || "") ? (en ? "Missed penalty: " : "Elfmeter verschossen: ") : /Penalty/i.test(e.detail || "") ? (en ? "Penalty goal: " : "Elfmetertor: ") : (en ? "Goal: " : "Tor: ")) + (e.spieler || "") + (e.vorlage && !/Missed/i.test(e.detail || "") ? (en ? " (assist " : " (Vorlage ") + e.vorlage + ")" : "");
+    if (e.typ === "Card") return (/Red|Second/i.test(e.detail || "") ? (/Second/i.test(e.detail || "") ? (en ? "Second yellow: " : "Gelb-Rot: ") : (en ? "Red card: " : "Rote Karte: ")) : (en ? "Yellow card: " : "Gelbe Karte: ")) + (e.spieler || "");
+    if (/subst/i.test(e.typ || "")) return (en ? "Substitution: " : "Wechsel: ") + (e.spieler || "") + (e.vorlage ? " \u21c4 " + e.vorlage : "");
+    if (/var/i.test(e.typ || "")) return "VAR: " + (e.detail || "") + (e.spieler ? " (" + e.spieler + ")" : "");
+    return (e.typ || "") + (e.detail ? " \u00b7 " + e.detail : "") + (e.spieler ? " \u00b7 " + e.spieler : "");
+  };
+  const symbol = (e) => e.typ === "Goal" ? "\u26bd" : e.typ === "Card" ? (/Red|Second/i.test(e.detail || "") ? "\ud83d\udfe5" : "\ud83d\udfe8") : /subst/i.test(e.typ || "") ? "\u21c4" : "\u2022";
+  const aufst = (sp && sp.aufstellungen) || []; const stat = (sp && sp.statistik) || [];
+  const wert = (team, k) => { const t = stat.find(x => x.team === team); const v = t && (t.werte || []).find(w => w.k === k); return v ? v.v : null; };
+  const zahl = (v) => v == null ? null : Number(String(v).replace("%", ""));
+  const sh = stat[0] ? stat[0].team : null; const sg = stat[1] ? stat[1].team : null;
+  return hh("div", { className: "mu-modal", onClick: (e) => { if (e.target === e.currentTarget) onClose(); } },
+    hh("div", { className: "mu-modal-box mu-spiel", role: "dialog", "aria-modal": "true", "aria-label": (s.heim || "") + " \u2013 " + (s.gast || "") },
+      hh("div", { style: { display: "flex", alignItems: "center", gap: 10, background: MU_NAVY, color: "#fff", padding: "10px 14px" } },
+        sp && sp.liga && sp.liga.logo ? hh("span", { style: { width: 24, height: 24, borderRadius: 5, background: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center" } }, hh("img", { src: sp.liga.logo, alt: "", width: 20, height: 20, style: { objectFit: "contain" } })) : null,
+        hh("div", { style: { flex: 1, minWidth: 0, fontFamily: FONT_DISPLAY, fontSize: 15.5, fontWeight: 800, letterSpacing: ".03em", textTransform: "uppercase", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } },
+          [(sp && sp.liga && sp.liga.name) || liga, String((sp && sp.liga && sp.liga.runde) || "").replace("Regular Season - ", en ? "Matchday " : "Spieltag ")].filter(Boolean).join(" \u00b7 ")),
+        hh("button", { type: "button", className: "mu-spiel-zu", onClick: onClose, "aria-label": en ? "Close" : "Schlie\u00dfen", style: { cursor: "pointer", border: "none", background: "transparent", color: "#fff", fontSize: 24, lineHeight: 1, padding: 4 } }, "\u00d7")),
+      hh("div", { style: { padding: "16px 18px 20px" } },
+        hh("div", { style: { textAlign: "center", fontFamily: FONT_BODY, fontSize: 13, color: "var(--t2)" } }, zeit, fx.stadion ? " \u00b7 " + fx.stadion + (fx.ort ? ", " + fx.ort : "") : ""),
+        hh("div", { style: { display: "flex", alignItems: "center", gap: 14, margin: "14px 0 6px" } },
+          team(s.heim, s.heim_logo || (sp && sp.heim && sp.heim.logo)),
+          hh("div", { style: { flex: "none", textAlign: "center" } },
+            hh("div", { className: "mu-spiel-stand", style: { fontFamily: FONT_DISPLAY, fontSize: 34, fontWeight: 800, background: box.bg, color: box.fg, borderRadius: 10, padding: "4px 16px", minWidth: 96 } }, box.text),
+            hh("div", { className: "mu-spiel-status", style: { marginTop: 6, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, color: "var(--t2)" } }, muStatusText(st, fx.minute, en)),
+            sp && sp.stand && sp.stand.halftime && sp.stand.halftime.home != null ? hh("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t3)" } }, (en ? "HT " : "HZ ") + sp.stand.halftime.home + ":" + sp.stand.halftime.away) : null),
+          team(s.gast, s.gast_logo || (sp && sp.gast && sp.gast.logo))),
+        lade && !sp ? leer(en ? "Loading match data \u2026" : "Spieldaten werden geladen \u2026") : null,
+        kopf(en ? "Events" : "Ereignisse"),
+        ereignisse.length ? hh("div", { className: "mu-spiel-ereignisse" }, ereignisse.map((e, i) => { const links = heimId == null || e.team === heimId;
+          return hh("div", { key: i, style: { display: "flex", flexDirection: links ? "row" : "row-reverse", alignItems: "center", gap: 10, padding: "5px 0", borderTop: i ? "1px solid " + HAIR : "none", fontFamily: FONT_BODY, fontSize: 13.5, color: "var(--t1)" } },
+            hh("span", { style: { flex: "none", width: 42, textAlign: "center", fontFamily: FONT_DISPLAY, fontWeight: 800, color: "var(--t2)" } }, (e.min != null ? e.min : "") + (e.plus ? "+" + e.plus : "") + "\u2032"),
+            hh("span", { "aria-hidden": "true", style: { flex: "none", width: 20, textAlign: "center" } }, symbol(e)),
+            hh("span", { style: { flex: 1, minWidth: 0, textAlign: links ? "left" : "right" } }, ereignisText(e))); }))
+          : leer(angesetzt ? (en ? "The match has not started yet. Events appear during the match." : "Das Spiel hat noch nicht begonnen. Ereignisse erscheinen w\u00e4hrend des Spiels.") : sp ? (en ? "The data provider has no events for this match." : "F\u00fcr dieses Spiel liefert der Datenanbieter keine Ereignisse.") : (en ? "No data loaded." : "Keine Daten geladen.")),
+        kopf(en ? "Line-ups" : "Aufstellungen"),
+        aufst.length ? hh("div", { className: "mu-g2 mu-spiel-aufstellungen" }, aufst.slice(0, 2).map((l, i) => hh("div", { key: i, style: { border: "1px solid " + HAIR, borderRadius: 10, padding: "10px 12px", minWidth: 0 } },
+            hh("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, color: "var(--t1)" } }, (i === 0 ? s.heim : s.gast) + (l.formation ? " \u00b7 " + l.formation : "")),
+            l.trainer ? hh("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t3)", marginBottom: 6 } }, (en ? "Coach: " : "Trainer: ") + l.trainer) : null,
+            (l.startelf || []).map((p, k) => hh("div", { key: k, style: { display: "flex", gap: 8, fontFamily: FONT_BODY, fontSize: 13, color: "var(--t1)", padding: "2px 0" } }, hh("span", { style: { width: 22, textAlign: "right", color: "var(--t3)" } }, p.nr != null ? p.nr : ""), hh("span", { style: { flex: 1, minWidth: 0 } }, p.name), hh("span", { style: { color: "var(--t3)" } }, p.pos || ""))),
+            (l.bank || []).length ? hh("div", { style: { marginTop: 6, fontFamily: FONT_BODY, fontSize: 12, color: "var(--t2)" } }, (en ? "Bench: " : "Bank: ") + l.bank.map(p => p.name).join(", ")) : null)))
+          : leer(angesetzt ? (en ? "Line-ups are published shortly before kick-off." : "Aufstellungen werden kurz vor Ansto\u00df ver\u00f6ffentlicht.") : (en ? "The data provider has no line-ups for this match." : "F\u00fcr dieses Spiel liefert der Datenanbieter keine Aufstellungen.")),
+        kopf(en ? "Statistics" : "Statistiken"),
+        stat.length >= 2 ? hh("div", { className: "mu-spiel-statistik" }, MU_STATS.map(([k, de]) => { const a = wert(sh, k), b = wert(sg, k); if (a == null && b == null) return null; const za = zahl(a) || 0, zb = zahl(b) || 0, sum = za + zb || 1;
+            return hh("div", { key: k, style: { padding: "5px 0" } },
+              hh("div", { style: { display: "flex", justifyContent: "space-between", fontFamily: FONT_BODY, fontSize: 13, color: "var(--t1)" } }, hh("b", null, a == null ? "\u2013" : a), hh("span", { style: { color: "var(--t2)" } }, en ? k.replace("expected_goals", "Expected goals (xG)") : de), hh("b", null, b == null ? "\u2013" : b)),
+              hh("div", { style: { display: "flex", gap: 4, marginTop: 3 } }, hh("div", { style: { flex: za / sum, height: 6, borderRadius: 3, background: "#0B7A45", minWidth: za ? 3 : 0 } }), hh("div", { style: { flex: zb / sum, height: 6, borderRadius: 3, background: MU_NAVY, minWidth: zb ? 3 : 0 } }))); }))
+          : leer(angesetzt ? (en ? "Statistics appear once the match is under way." : "Statistiken erscheinen, sobald das Spiel l\u00e4uft.") : (en ? "The data provider has no statistics for this match." : "F\u00fcr dieses Spiel liefert der Datenanbieter keine Statistiken.")),
+        hh("div", { style: { marginTop: 14, fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t3)" } }, (en ? "Data: API-Football" : "Daten: API-Football") + (d && d.geholt_am ? " \u00b7 " + (en ? "as of " : "Stand ") + new Date(d.geholt_am).toLocaleTimeString(en ? "en-GB" : "de-DE", { hour: "2-digit", minute: "2-digit" }) : "") + " \u00b7 ID " + s.id))));
+}
+function muKonto() { try { return JSON.parse(localStorage.getItem("tw_account") || "null") || {}; } catch (e) { return {}; } }
+const MU_COMM_OK = ["veroeffentlicht", "freigegeben", "notiert"];
+function muCommStatus(st, en) { return st === "veroeffentlicht" ? (en ? "Published as news" : "Als Meldung ver\u00f6ffentlicht") : st === "freigegeben" ? (en ? "Approved \u00b7 unconfirmed" : "Freigegeben \u00b7 unbest\u00e4tigt") : st === "notiert" ? (en ? "Noted \u00b7 unconfirmed" : "Notiert \u00b7 unbest\u00e4tigt") : (st || ""); }
+function muCommZeit(t) { const d = new Date(t); if (isNaN(d.getTime())) return ""; const p = n => String(n).padStart(2, "0"); return p(d.getDate()) + "." + p(d.getMonth() + 1) + "." + d.getFullYear() + " \u00b7 " + p(d.getHours()) + ":" + p(d.getMinutes()); }
+function muCommText(p, en) { return String((en && p.body_en) || p.body || ""); }
+function muCommTitel(p, en) { const t = String(p.agent_headline || "").trim() || muCommText(p, en).replace(/\s+/g, " ").trim(); return t.length > 110 ? t.slice(0, 107) + "\u2026" : t; }
+function MuCommunity({ geheZu }) {
+  const hh = React.createElement; const en = muEn();
+  const [d, setD] = React.useState(null); const [offen, setOffen] = React.useState(null);
+  React.useEffect(() => { let a = true; const k = muKonto();
+    fetch("/api/tw-community?kind=community&email=" + encodeURIComponent(k.email || "") + "&code=" + encodeURIComponent(k.code || k.zugangscode || "")).then(r => r.json()).then(x => { if (!a) return;
+      x = x && x.items && !Array.isArray(x.items) ? x.items : x; const arr = Array.isArray(x) ? x : (x && (x.posts || x.items || x.liste || x.rows || x.data)) || [];
+      setD({ posts: Array.isArray(arr) ? arr : [], ok: !(x && x.ok === false) }); }).catch(() => { if (a) setD({ posts: [], ok: false }); });
+    return () => { a = false; }; }, []);
+  React.useEffect(() => { if (!offen) return; const esc = (e) => { if (e.key === "Escape") setOffen(null); }; window.addEventListener("keydown", esc); const alt = document.body.style.overflow; document.body.style.overflow = "hidden";
+    return () => { window.removeEventListener("keydown", esc); document.body.style.overflow = alt; }; }, [offen]);
+  const knopf = hh("button", { type: "button", onClick: () => geheZu && geheZu("community"), style: { cursor: "pointer", padding: "8px 16px", borderRadius: 8, border: "none", background: "#0B7A45", color: "#fff", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800 } }, en ? "Open community" : "Zur Community");
+  if (!d) return hh("div", { style: { padding: 14, fontFamily: FONT_BODY, fontSize: 13, color: "var(--t3)" } }, en ? "Loading \u2026" : "Wird geladen \u2026");
+  const posts = d.posts.filter(p => p && MU_COMM_OK.includes(p.status)).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))).slice(0, 4);
+  if (!posts.length) return hh("div", { className: "mu-comm-leer", style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", padding: "14px 16px", borderRadius: 10, background: "var(--karte)", border: "1px solid " + HAIR } },
+    hh("span", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: "var(--t2)" } }, en ? "There are no approved community posts yet. New posts appear here once they have been approved." : "Es gibt noch keine freigegebenen Community-Beitr\u00e4ge. Neue Beitr\u00e4ge erscheinen hier, sobald sie freigegeben sind."), knopf);
+  const karte = (p) => hh("div", { key: p.id, className: "mu-karte mu-comm-karte", role: "button", tabIndex: 0, onClick: () => setOffen(p), onKeyDown: e => { if (e.key === "Enter") setOffen(p); },
+      style: { display: "flex", gap: 12, padding: 10, minHeight: 96, borderRadius: 10, background: "var(--karte)", border: "1px solid " + HAIR, cursor: "pointer", minWidth: 0 } },
+    hh("div", { "aria-hidden": "true", style: { width: 56, height: 72, flexShrink: 0, borderRadius: 6, background: "#ede9fe", color: "#5b21b6", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontSize: 30, fontWeight: 800 } }, "\u201d"),
+    hh("div", { style: { flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 5 } },
+      hh("div", { style: { display: "flex", alignItems: "center", gap: 8, minWidth: 0 } },
+        hh("span", { style: { flex: "none", fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: ".05em", textTransform: "uppercase", color: "#5b21b6", background: "#ede9fe", padding: "2px 8px", borderRadius: 4 } }, en ? "Community post" : "Community-Beitrag"),
+        hh("span", { style: { flex: 1, minWidth: 0, fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, [muCommZeit(p.created_at), p.author_rolle].filter(Boolean).join(" \u00b7 "))),
+      hh("div", { className: "mu-c2", style: { fontFamily: FONT_DISPLAY, fontSize: 17, fontWeight: 700, lineHeight: 1.2, color: "var(--t1)" } }, muCommTitel(p, en)),
+      hh("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t2)" } }, muCommStatus(p.status, en))));
+  return hh(React.Fragment, null,
+    hh("div", { className: "mu-g2" }, posts.map(karte)),
+    hh("div", { style: { marginTop: 10 } }, knopf),
+    offen ? hh("div", { className: "mu-modal", onClick: (e) => { if (e.target === e.currentTarget) setOffen(null); } },
+      hh("div", { className: "mu-modal-box mu-comm-detail", role: "dialog", "aria-modal": "true" },
+        hh("div", { style: { display: "flex", alignItems: "center", gap: 10, background: MU_NAVY, color: "#fff", padding: "10px 14px" } },
+          hh("div", { style: { flex: 1, fontFamily: FONT_DISPLAY, fontSize: 15.5, fontWeight: 800, letterSpacing: ".03em", textTransform: "uppercase" } }, en ? "Community post" : "Community-Beitrag"),
+          hh("button", { type: "button", onClick: () => setOffen(null), "aria-label": en ? "Close" : "Schlie\u00dfen", style: { cursor: "pointer", border: "none", background: "transparent", color: "#fff", fontSize: 24, lineHeight: 1, padding: 4 } }, "\u00d7")),
+        hh("div", { style: { padding: "16px 18px 20px", display: "flex", flexDirection: "column", gap: 10 } },
+          hh("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t3)" } }, [muCommZeit(offen.created_at), offen.author_rolle, muCommStatus(offen.status, en)].filter(Boolean).join(" \u00b7 ")),
+          hh("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 21, fontWeight: 800, color: "var(--t1)", lineHeight: 1.2 } }, muCommTitel(offen, en)),
+          hh("div", { style: { fontFamily: FONT_BODY, fontSize: 14.5, lineHeight: 1.6, color: "var(--t1)", whiteSpace: "pre-wrap" } }, muCommText(offen, en)),
+          hh("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t3)" } }, en ? "Community statements are unconfirmed unless marked otherwise." : "Community-Aussagen sind unbest\u00e4tigt, sofern nicht anders gekennzeichnet."),
+          hh("div", null, knopf)))) : null);
 }
 
 function TransferApp({
