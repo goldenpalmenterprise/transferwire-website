@@ -7959,7 +7959,7 @@ function muTitel(it) { return (muEn() && it.headline_en) || it.headline || ""; }
 function muIntro(it) { const t = String((muEn() && it.summary_en) || it.summary || "").trim(); const m = t.match(/^.{25,230}?[.!?](\s|$)/); return m ? m[0].trim() : (t.length > 200 ? t.slice(0, 197) + "\u2026" : t); }
 function muTs(it) { const d = new Date(it.publishedAt || it.published || 0); return isNaN(d.getTime()) ? 0 : d.getTime(); }
 function muZeit(it) { const ts = muTs(it); if (!ts) return ""; const d = new Date(ts); const p = n => String(n).padStart(2, "0"); return p(d.getDate()) + "." + p(d.getMonth() + 1) + "." + d.getFullYear() + " \u00b7 " + p(d.getHours()) + ":" + p(d.getMinutes()); }
-const MU_KAT = { leistung: { de: "Leistung", en: "Performance", color: "#0e7490", soft: "#dff1f6" }, topleistung: { de: "Top-Leistung", en: "Top performance", color: "#b45309", soft: "#fdf0dc" },
+const MU_KAT = { leistung: { de: "Leistung", en: "Performance", color: "#0e7490", soft: "#dff1f6" }, topleistung: { de: "Top-Leistung", en: "Top performance", color: "#9a3412", soft: "#fdf0dc" },
   talent: { de: "Talent im Fokus", en: "Talent in focus", color: "#6d28d9", soft: "#ede9fe" }, bericht: { de: "Transferbericht", en: "Transfer report" }, geruecht: { de: "Transfergerücht", en: "Transfer rumour" },
   vertrag_verlaengert: { de: "Vertragsverlängerung", en: "Contract extension" }, rueckkehr: { de: "Rückkehr", en: "Return", color: "#0B7A45", soft: "#e2f3ea" }, verletzung: { de: "Verletzung", en: "Injury", color: "#b91c1c", soft: "#fde8e8" } };
 const MU_RE_PERF = /\btrifft\b|\btor\b|\btore\b|doppelpack|dreierpack|hattrick|hat-trick|vorlage|torschütz|elfmetertor|zu null|spieler des spiels|\bassist|\bscores?\b|\bgoals?\b|\bbrace\b|man of the match|clean sheet/;
@@ -8189,7 +8189,7 @@ function MuTalentTop({ items }) {
   const grund = (x) => { const t = []; if (x.goals) t.push(x.goals + " " + (en ? (x.goals === 1 ? "goal" : "goals") : (x.goals === 1 ? "Tor" : "Tore"))); if (x.assists) t.push(x.assists + " " + (en ? (x.assists === 1 ? "assist" : "assists") : (x.assists === 1 ? "Vorlage" : "Vorlagen")));
     let r = "TW Score " + x.score; if (t.length) r += " \u00b7 " + t.join(en ? " and " : " und ") + (x.min ? (en ? " in " : " in ") + x.min + (en ? " minutes" : " Spielminuten") : ""); else if (x.min) r += " \u00b7 " + x.min + (en ? " minutes played this season" : " Spielminuten in dieser Saison"); return r; };
   return hh("div", { className: "mu-g2 mu-talent-top", style: { marginBottom: 14 } }, items.map(x => hh("div", { key: x.pid, className: "mu-karte", role: "button", tabIndex: 0,
-      onClick: () => { if (window.twPerfOeffnen && x.pid) window.twPerfOeffnen({ pid: x.pid, name: x.name, team: x.team, league: x.league }); }, onKeyDown: e => { if (e.key === "Enter" && window.twPerfOeffnen && x.pid) window.twPerfOeffnen({ pid: x.pid, name: x.name, team: x.team, league: x.league }); },
+      onClick: () => { if (window.twPerfOeffnen && x.pid) window.twPerfOeffnen({ pid: x.pid, name: x.name, player: { name: x.name }, team: x.team, league: x.league }); }, onKeyDown: e => { if (e.key === "Enter" && window.twPerfOeffnen && x.pid) window.twPerfOeffnen({ pid: x.pid, name: x.name, player: { name: x.name }, team: x.team, league: x.league }); },
       style: { display: "flex", flexDirection: "column", borderRadius: 12, overflow: "hidden", cursor: "pointer", background: "var(--karte)", border: "1px solid " + HAIR, minWidth: 0 } },
     hh(MuThumb, { it: { type: "talent" }, name: x.name, foto: x.photo, logos: [x.team] }),
     hh("div", { style: { display: "flex", flexDirection: "column", gap: 6, padding: "11px 12px 13px" } },
@@ -8357,7 +8357,7 @@ function MuTalente() {
   const spalte = (teil) => hh(MuModul, { titel: en ? "Talents" : "Talente", spalten: [en ? "Player" : "Spieler", "", "Score"], leer: en ? "No talents listed." : "Keine Talente gelistet.",
     kinder: teil.map((x, i) => hh(MuZeile, { key: x.pid || i, erste: !i, name: x.name, foto: x.photo, unter: [x.age ? x.age + (en ? " yrs" : " J.") : "", x.pos, x.team].filter(Boolean).join(" \u00b7 "),
       mitte: hh("span", { style: { flex: "none", fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t3)", whiteSpace: "nowrap" } }, [x.goals != null ? x.goals + (en ? " G" : " T") : "", x.assists != null ? x.assists + (en ? " A" : " V") : ""].filter(Boolean).join(" / ")),
-      rechts: hh(MuScore, { wert: x.score }), onClick: () => { if (window.twPerfOeffnen && x.pid) window.twPerfOeffnen({ pid: x.pid, name: x.name, team: x.team, league: x.league }); } })) });
+      rechts: hh(MuScore, { wert: x.score }), onClick: () => { if (window.twPerfOeffnen && x.pid) window.twPerfOeffnen({ pid: x.pid, name: x.name, player: { name: x.name }, team: x.team, league: x.league }); } })) });
   return hh(React.Fragment, null, hh(MuTalentTop, { items: top }), liste.length ? hh("div", { className: "mu-g2" }, spalte(liste.slice(0, halb)), liste.length > halb ? spalte(liste.slice(halb)) : null) : null);
 }
 function MuRaster({ items, onOpen, leer }) {
