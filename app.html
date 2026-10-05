@@ -327,15 +327,15 @@ header:has(+ .tw-tabbar) button[style*="color: inherit"] { color: var(--t1) !imp
 (function () {
   // Globaler Lade-Waechter: zeigt das Logo nur, wenn nach einem Klick ein API-Aufruf laenger als 220 ms dauert.
   var orig = window.fetch; var offen = 0; var timer = null; var letzterKlick = 0;
-  document.addEventListener("pointerdown", function () { letzterKlick = Date.now(); }, true);
+  document.addEventListener("pointerdown", function (e) { var t = e.target && e.target.closest ? e.target.closest("button,a,[role=button],input,select,textarea,label,summary") : null; if (t) letzterKlick = Date.now(); }, true);
   document.addEventListener("keydown", function (e) { if (e.key === "Enter") letzterKlick = Date.now(); }, true);
   function el() { return document.getElementById("tw-lader"); }
   function zeige() { var e = el(); if (e) e.classList.add("an"); }
   function verstecke() { var e = el(); if (e) e.classList.remove("an"); }
   window.fetch = function (input) {
     var url = typeof input === "string" ? input : (input && input.url) || "";
-    var relevant = /\/api\//.test(url) && !/tw-analytics|tw-logos|tw-fehler|tw-code/.test(url) && (Date.now() - letzterKlick < 2500);
-    if (relevant) { offen++; if (!timer) timer = setTimeout(function () { if (offen > 0) zeige(); }, 220); }
+    var relevant = /\/api\//.test(url) && !/tw-analytics|tw-logos|tw-fehler|tw-code|tw-fotos|tw-bild\b|tw-bilder|tw-meldungbilder|tw-tabellen|tw-listen|tw-leistungen|tw-vertraege|tw-korrekturen|tw-community\?|tw-spiel\b|tw-spiel-laden|tw-ping|tw-spiele|tw-markt|tw-geruechte|tw-ausfaelle/.test(url) && (Date.now() - letzterKlick < 1500);
+    if (relevant) { offen++; if (!timer) timer = setTimeout(function () { if (offen > 0) zeige(); }, 400); }
     var p = orig.apply(this, arguments);
     if (relevant) { var fertig = function () { offen = Math.max(0, offen - 1); if (offen === 0) { clearTimeout(timer); timer = null; verstecke(); } }; p.then(fertig, fertig); }
     return p;
@@ -7946,19 +7946,34 @@ function muCss() {
     ".mu-thumb{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:12px 12px 0 0}" +
     ".mu-heroneu{display:grid;grid-template-columns:minmax(0,1fr) 44%;height:430px}" +
     ".mu-hero-foto{position:relative;min-width:0}" +
-    "@media (max-width:700px){.mu-heroneu{grid-template-columns:1fr;height:auto}.mu-hero-foto{aspect-ratio:16/9;order:-1}}" +
+    "@media (max-width:700px){.mu-heroneu{grid-template-columns:1fr;height:auto}.mu-hero-foto{aspect-ratio:16/9;order:-1}.mu-hero-netz .mu-hero-netzbild{position:absolute;left:0;right:0;top:0;height:auto;aspect-ratio:16/9;bottom:auto}.mu-hero-netz .mu-heroneu>div:first-child{background:var(--karte)}.mu-hero-netz .mu-heroneu h2,.mu-hero-netz .mu-heroneu p,.mu-hero-netz .mu-heroneu div{color:var(--t1)}}" +
     ".mu-modal{position:fixed;inset:0;z-index:2000;background:rgba(8,14,28,.58);display:flex;align-items:flex-start;justify-content:center;padding:4vh 12px;overflow-y:auto}" +
     ".mu-modal-box{width:min(800px,100%);background:var(--karte);color:var(--t1);border:1px solid " + "rgba(127,127,127,.35)" + ";border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden}" +
     "@media (max-width:1020px){.mu-top,.mu-st{grid-template-columns:minmax(0,1fr)}.mu-l3{grid-template-columns:repeat(2,minmax(0,1fr))}}" +
-    "@media (max-width:700px){.mu-t3,.mu-l3,.mu-g2{grid-template-columns:minmax(0,1fr)}.mu-hero{height:300px!important}.mu-hero h2{font-size:23px!important}.mu-teaserbild{height:180px!important}}";
+    "@media (max-width:700px){.mu-t3,.mu-l3,.mu-g2{grid-template-columns:minmax(0,1fr)}.mu-hero{height:auto!important}.mu-hero h2{font-size:23px!important}.mu-teaserbild{height:180px!important}}";
   document.head.appendChild(st);
 }
 function muEn() { return LANG === "en"; }
 function muNorm(s) { return String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim(); }
 function muTitel(it) { return (muEn() && it.headline_en) || it.headline || ""; }
 function muIntro(it) { const t = String((muEn() && it.summary_en) || it.summary || "").trim(); const m = t.match(/^.{25,230}?[.!?](\s|$)/); return m ? m[0].trim() : (t.length > 200 ? t.slice(0, 197) + "\u2026" : t); }
-function muTs(it) { const d = new Date(it.publishedAt || it.published || 0); return isNaN(d.getTime()) ? 0 : d.getTime(); }
-function muZeit(it) { const ts = muTs(it); if (!ts) return ""; const d = new Date(ts); const p = n => String(n).padStart(2, "0"); return p(d.getDate()) + "." + p(d.getMonth() + 1) + "." + d.getFullYear() + " \u00b7 " + p(d.getHours()) + ":" + p(d.getMinutes()); }
+function muTs(it) {
+  if (it.published_iso || it.published_at || it.ts) { const d = new Date(it.published_iso || it.published_at || it.ts); if (!isNaN(d.getTime())) return d.getTime(); }
+  const e = String(it.publishedAt || it.published || "").trim(); if (!e) return 0; const jetzt = Date.now(); let m;
+  if (/^(gerade eben|just now|live)/i.test(e)) return jetzt;
+  if ((m = /vor (\d+) Min|(\d+) min ago/i.exec(e))) return jetzt - Number(m[1] || m[2]) * 6e4;
+  if ((m = /vor (\d+) Std|(\d+) h ago/i.exec(e))) return jetzt - Number(m[1] || m[2]) * 36e5;
+  if ((m = /vor (\d+) T(?:g|ag)|(\d+) d ago/i.exec(e))) return jetzt - Number(m[1] || m[2]) * 864e5;
+  if (/^gestern|^yesterday/i.test(e)) return jetzt - 864e5;
+  if ((m = /^(\d{1,2})\.(\d{1,2})\.(\d{4})?/.exec(e))) { const j = new Date(); let y = m[3] ? Number(m[3]) : j.getFullYear(); let d = new Date(y, Number(m[2]) - 1, Number(m[1]), 12); if (!m[3] && d.getTime() > jetzt + 864e5) d = new Date(y - 1, Number(m[2]) - 1, Number(m[1]), 12); return d.getTime(); }
+  const d = new Date(e); return isNaN(d.getTime()) ? 0 : d.getTime();
+}
+function muZeit(it) {
+  const e = String(it.publishedAt || "").trim(); const en = muEn(); let m;
+  if (en && e) { if (/^gerade eben/i.test(e)) return "just now"; if ((m = /^vor (\d+) Min/.exec(e))) return m[1] + " min ago"; if ((m = /^vor (\d+) Std/.exec(e))) return m[1] + " h ago"; if ((m = /^vor (\d+) T/.exec(e))) return m[1] + " d ago"; if (/^gestern/i.test(e)) return "yesterday"; }
+  if (e) return e;
+  const ts = muTs(it); if (!ts) return ""; const d = new Date(ts); const p = n => String(n).padStart(2, "0"); return p(d.getDate()) + "." + p(d.getMonth() + 1) + "." + d.getFullYear();
+}
 const MU_KAT = { leistung: { de: "Leistung", en: "Performance", color: "#0e7490", soft: "#dff1f6" }, topleistung: { de: "Top-Leistung", en: "Top performance", color: "#9a3412", soft: "#fdf0dc" },
   talent: { de: "Talent im Fokus", en: "Talent in focus", color: "#6d28d9", soft: "#ede9fe" }, bericht: { de: "Transferbericht", en: "Transfer report" }, geruecht: { de: "Transfergerücht", en: "Transfer rumour" },
   vertrag_verlaengert: { de: "Vertragsverlängerung", en: "Contract extension" }, rueckkehr: { de: "Rückkehr", en: "Return", color: "#0B7A45", soft: "#e2f3ea" }, verletzung: { de: "Verletzung", en: "Injury", color: "#b91c1c", soft: "#fde8e8" } };
@@ -7975,6 +7990,7 @@ function muKategorie(it) {
   if (t0 === "community") return "community";
   if (it.talent || t0 === "talent") return "talent";
   if (MU_RE_PERF.test(h) && !MU_RE_TRANSFER.test(h)) return "leistung";
+  if (t0 === "trainer" || /^trainerwechsel|neuer trainer|cheftrainer|interimstrainer|head coach|new manager|appointed as|\bcoach\b.*(appointed|named)/.test(h)) return "trainer";
   if (t0 === "rueckkehr" || MU_RE_RUECK.test(h)) return "rueckkehr";
   if (t0 === "verletzung" || MU_RE_VERLETZ.test(h)) return "verletzung";
   if (t0 === "vertrag_verlaengert" || MU_RE_VERL.test(h)) return "vertrag_verlaengert";
@@ -8053,8 +8069,8 @@ function MuTag({ it, hell }) {
 }
 function MuBildnachweis({ foto, mb }) {
   const hh = React.createElement; const en = muEn();
-  const video = mb && (mb.art === "spielszene" || mb.art === "video");
-  const text = video ? ((en ? "Still from official video" : "Standbild aus offiziellem Video") + " \u00b7 " + String(mb.quelle || "").replace(/^YouTube \u00b7 /, "") + " \u00b7 YouTube")
+  const video = mb && (mb.art === "spielszene" || mb.art === "video"); const netz = mb && (mb.art === "netz" || mb.art === "redaktion");
+  const text = netz ? ((en ? "Photo: " : "Foto: ") + String(mb.quelle || "").replace(/^Netz \u00b7 /, "")) : video ? ((en ? "Still from official video" : "Standbild aus offiziellem Video") + " \u00b7 " + String(mb.quelle || "").replace(/^YouTube \u00b7 /, "") + " \u00b7 YouTube")
     : (en ? "Archive photo" : "Archivfoto") + (foto.urheber ? " \u00b7 " + foto.urheber : "") + (foto.lizenz ? " \u00b7 " + foto.lizenz : "") + " \u00b7 Wikimedia Commons";
   foto = mb ? { quelle: mb.quelle_url || mb.link } : foto;
   return hh("a", { href: foto.quelle || "#", target: "_blank", rel: "noopener noreferrer", onClick: e => e.stopPropagation(), title: text,
@@ -8106,15 +8122,26 @@ function MuLogos({ logos, groesse, pfeil }) {
   const kachel = (v) => hh("span", { key: v, title: typeof clubName === "function" ? clubName(v) : v, style: { width: g, height: g, borderRadius: Math.round(g / 5), background: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,.25)", display: "inline-flex", alignItems: "center", justifyContent: "center" } }, hh(ClubLogo, { name: v, size: Math.round(g * 0.72) }));
   return hh("div", { style: { display: "flex", alignItems: "center", gap: 8 } }, kachel(l[0]), l.length > 1 ? hh("span", { "aria-label": pfeil || "→", style: { color: "#fff", fontFamily: FONT_DISPLAY, fontSize: Math.round(g * 0.5), fontWeight: 800, textShadow: "0 1px 4px rgba(0,0,0,.4)" } }, "\u2192") : null, l.length > 1 ? kachel(l[1]) : null);
 }
-function MuSpielerBild({ name, url, commons, gross }) {
+function MuNetzfoto({ mb, gross }) {
+  const hh = React.createElement; const [fehler, setFehler] = React.useState(false);
+  React.useEffect(() => { setFehler(false); }, [mb && mb.url]);
+  if (fehler) return null;
+  return hh(React.Fragment, null,
+    hh("img", { src: mb.url, alt: "", onError: () => setFehler(true), style: { position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 22%", display: "block" } }),
+    hh("div", { style: { position: "absolute", inset: 0, background: gross ? "linear-gradient(90deg, rgba(10,22,40,.92) 0%, rgba(10,22,40,.55) 45%, rgba(10,22,40,.05) 75%)" : "linear-gradient(180deg, rgba(10,22,40,.05) 40%, rgba(10,22,40,.72) 100%)" } }),
+    hh(MuBildnachweis, { foto: { quelle: mb.quelle_url || mb.link }, mb }));
+}
+function muNetz(mb) { return !!(mb && mb.url && (mb.art === "netz" || mb.art === "redaktion")); }
+function MuSpielerBild({ name, url, commons, gross, mb }) {
   const hh = React.createElement; const foto = useMuFotoUrl(name, url); const [frei] = useMuFrei(foto); const [fehler, setFehler] = React.useState(false);
   React.useEffect(() => { setFehler(false); }, [foto]);
+  if (muNetz(mb)) return hh(MuNetzfoto, { mb, gross });
   const freiUrl = muFreiUrl(foto);
   const rahmen = (kind, extra) => hh("div", { style: Object.assign({ position: "absolute", right: gross ? "9%" : "8%", top: "50%", transform: "translateY(-50%)", borderRadius: 14, border: "2px solid rgba(255,255,255,.85)", overflow: "hidden", boxShadow: "0 10px 24px rgba(0,0,0,.35)", background: "#0f2744" }, extra) }, kind);
   if (gross && commons && commons.url) {
     const hochkant = !(commons.breite && commons.hoehe) || commons.hoehe >= commons.breite;
     return hh(React.Fragment, null,
-      rahmen(hh("img", { src: commons.url, alt: name || "", style: hochkant ? { height: "100%", width: "auto", display: "block", objectFit: "contain" } : { width: "100%", height: "auto", display: "block" } }), hochkant ? { height: "88%" } : { width: "78%", right: "11%" }),
+      rahmen(hh("img", { src: commons.url, alt: name || "", style: { width: "100%", height: "100%", display: "block", objectFit: "contain" } }), hochkant ? { height: "88%", aspectRatio: String((commons.breite || 3) / (commons.hoehe || 4)) } : { height: "80%", maxWidth: "84%", right: "8%", aspectRatio: String((commons.breite || 3) / (commons.hoehe || 2)) }),
       hh(MuBildnachweis, { foto: commons }));
   }
   if (foto && !fehler && frei === "ok") return hh("img", { src: freiUrl, alt: name || "", onError: () => setFehler(true),
@@ -8131,10 +8158,10 @@ function muLogosFuer(it) {
   if (von && nach && ["fix", "leihe", "bericht", "geruecht", "trade"].includes(k)) return [von, nach];
   return [nach || it.team || it.club || von].filter(Boolean);
 }
-function MuThumb({ it, name, foto, logos, commons, kat, link }) {
+function MuThumb({ it, name, foto, logos, commons, kat, link, mb }) {
   const hh = React.createElement; const en = muEn();
   return hh("div", { className: "mu-thumb", style: { background: MU_RUHIG } },
-    hh(MuSpielerBild, { name, url: foto, commons }),
+    hh(MuSpielerBild, { name, url: foto, commons, mb }),
     hh("div", { style: { position: "absolute", left: 12, top: 12 } }, hh(MuLogos, { logos })),
     hh("div", { style: { position: "absolute", left: 12, bottom: 12 } }, hh(MuTag, { it: kat || it, hell: true })),
     link ? hh("a", { href: link, target: "_blank", rel: "noopener noreferrer", onClick: e => e.stopPropagation(), style: { position: "absolute", right: 12, bottom: 12, fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: "#fff", background: "rgba(8,14,28,.72)", padding: "4px 9px", borderRadius: 999, textDecoration: "none" } }, "\u25b6 " + (en ? "Highlights" : "Highlights")) : null);
@@ -8142,9 +8169,11 @@ function MuThumb({ it, name, foto, logos, commons, kat, link }) {
 function MuHero({ it, bild, mb, onOpen }) {
   const hh = React.createElement; const intro = muIntro(it); const en = muEn(); const name = muName(it); const commons = bild && bild.foto;
   const meta = [muZeit(it), typeof tkQuelle === "function" ? tkQuelle(it) : ""].filter(Boolean).join(" \u00b7 ");
-  return hh("div", { className: "mu-hero mu-karte", role: "button", tabIndex: 0, onClick: () => onOpen(it), onKeyDown: e => { if (e.key === "Enter") onOpen(it); },
+  const netz = muNetz(mb);
+  return hh("div", { className: "mu-hero mu-karte" + (netz ? " mu-hero-netz" : ""), "data-id": it.id, role: "button", tabIndex: 0, onClick: () => onOpen(it), onKeyDown: e => { if (e.key === "Enter") onOpen(it); },
       style: { position: "relative", borderRadius: 12, overflow: "hidden", cursor: "pointer", border: "1px solid " + HAIR, background: MU_RUHIG } },
-    hh("div", { className: "mu-heroneu" },
+    netz ? hh("div", { className: "mu-hero-netzbild", style: { position: "absolute", inset: 0 } }, hh(MuNetzfoto, { mb, gross: true })) : null,
+    hh("div", { className: "mu-heroneu", style: { position: "relative" } },
       hh("div", { style: { display: "flex", flexDirection: "column", gap: 10, padding: "20px 22px 22px", minWidth: 0 } },
         hh(MuLogos, { logos: muLogosFuer(it), groesse: 58 }),
         hh("div", { style: { flex: 1 } }),
@@ -8152,13 +8181,13 @@ function MuHero({ it, bild, mb, onOpen }) {
         hh("h2", { className: "mu-c3", style: { margin: 0, fontFamily: FONT_DISPLAY, fontSize: 30, lineHeight: 1.1, fontWeight: 800, color: "#fff" } }, muTitel(it)),
         intro ? hh("p", { className: "mu-c2", style: { margin: 0, fontFamily: FONT_BODY, fontSize: 14.5, lineHeight: 1.45, color: "rgba(255,255,255,.88)" } }, intro) : null,
         meta ? hh("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "rgba(255,255,255,.7)" } }, meta) : null),
-      hh("div", { className: "mu-hero-foto" }, hh(MuSpielerBild, { name, url: it.photo, commons, gross: true }))));
+      hh("div", { className: "mu-hero-foto" }, netz ? null : hh(MuSpielerBild, { name, url: it.photo, commons, gross: true }))));
 }
 function MuTeaser({ it, bild, mb, onOpen }) {
   const hh = React.createElement; const name = muName(it); const meta = [muZeit(it), typeof tkQuelle === "function" ? tkQuelle(it) : ""].filter(Boolean).join(" \u00b7 ");
-  return hh("div", { className: "mu-karte", role: "button", tabIndex: 0, onClick: () => onOpen(it), onKeyDown: e => { if (e.key === "Enter") onOpen(it); },
+  return hh("div", { className: "mu-karte mu-teaser", "data-id": it.id, role: "button", tabIndex: 0, onClick: () => onOpen(it), onKeyDown: e => { if (e.key === "Enter") onOpen(it); },
       style: { display: "flex", flexDirection: "column", borderRadius: 12, overflow: "hidden", cursor: "pointer", background: "var(--karte)", border: "1px solid " + HAIR, minWidth: 0 } },
-    hh(MuThumb, { it, name, foto: it.photo, logos: muLogosFuer(it), commons: bild && bild.foto }),
+    hh(MuThumb, { it, name, foto: it.photo, logos: muLogosFuer(it), commons: bild && bild.foto, mb }),
     hh("div", { style: { display: "flex", flexDirection: "column", gap: 6, padding: "11px 12px 13px" } },
       hh("div", { className: "mu-c3", style: { fontFamily: FONT_DISPLAY, fontSize: 17, lineHeight: 1.2, fontWeight: 700, color: "var(--t1)" } }, muTitel(it)),
       meta ? hh("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, meta) : null));
