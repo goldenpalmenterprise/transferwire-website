@@ -2250,7 +2250,7 @@ const TYPE = {
   vertrag_verlaengert: { label: "Verl\u00e4ngert", en: "Extended", color: "#0f8e8e", soft: "#def0f0" },
   vertrag: { label: "Vertrag", en: "Contract", color: "#0f8e8e", soft: "#def0f0" },
   vertragslos: { label: "Vertragslos", en: "Free agent", color: "var(--t3)", soft: "#eef0f3" },
-  trade: { label: "Trade", en: "Trade", color: "#6b4fd8", soft: "#ece7fb" }, trainer: { label: "Trainerwechsel", en: "Coaching change", color: "#c2410c", soft: "rgba(194,65,12,.14)" }, leistung: { label: "Leistung", en: "Performance", color: "#0e7490", soft: "rgba(14,116,144,.13)" }, meldung: { label: "Meldung", en: "News", color: "var(--t3)", soft: "rgba(120,130,145,.14)" }, verfuegbar: { label: "Verf\u00fcgbar", en: "Available", color: "#5b6b7b", soft: "rgba(91,107,123,.14)" } };
+  trade: { label: "Trade", en: "Trade", color: "#6b4fd8", soft: "#ece7fb" }, trainer: { label: "Trainerwechsel", en: "Coaching change", color: "#c2410c", soft: "rgba(194,65,12,.14)" }, leistung: { label: "Leistung", en: "Performance", color: "#0b5f76", soft: "#dff1f6" }, meldung: { label: "Meldung", en: "News", color: "#4b5563", soft: "#eef0f3" }, verfuegbar: { label: "Verf\u00fcgbar", en: "Available", color: "#475569", soft: "#eef1f4" } };
 const RELIABILITY = ["", "Spekulation", "Unbest\u00e4tigt", "Belastbar", "Sehr wahrscheinlich", "Best\u00e4tigt"];
 const RELIABILITY_EN = ["", "Speculation", "Unconfirmed", "Solid", "Very likely", "Confirmed"];
 const POS_LABEL = {
@@ -3387,7 +3387,7 @@ function LeistungsKarte({ item, onOpen }) {
     style: { cursor: "pointer", background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, padding: "12px 14px", display: "flex", flexDirection: "column", gap: 9, minWidth: 0, alignSelf: "start", boxShadow: "0 1px 2px rgba(15,21,32,.04)" } },
     h("div", { style: { display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t3)", minWidth: 0 } },
       h("span", { style: { flex: "none", padding: "2px 8px", borderRadius: 6, background: TYPE.leistung.soft, color: TYPE.leistung.color, fontWeight: 800, letterSpacing: 0.4, textTransform: "uppercase", fontSize: 10.5 } }, en ? "Performance" : "Leistung"),
-      it.highlight ? h("span", { style: { flex: "none", fontWeight: 800, color: "#b07a05" } }, en ? "Top performance" : "Top-Leistung") : null,
+      it.highlight ? h("span", { style: { flex: "none", fontWeight: 800, color: "#8a5f00", background: "#faf0d8", padding: "2px 7px", borderRadius: 6, fontSize: 10.5 } }, en ? "Top performance" : "Top-Leistung") : null,
       h("span", { style: { flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, [it.league, datum].filter(Boolean).join(" \u00b7 "))),
     h("div", { style: { display: "flex", alignItems: "center", gap: 11, minWidth: 0 } },
       h(TkFoto, { foto: foto, name: sp.name, size: 44 }),
@@ -3405,7 +3405,7 @@ function LeistungsKarte({ item, onOpen }) {
       werte) : null,
     h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, borderTop: "1px solid " + HAIR, paddingTop: 8 } },
       vUrl ? h("a", { href: vUrl, target: "_blank", rel: "noopener noreferrer", className: "tw-hl-link", onClick: (e) => e.stopPropagation(), onKeyDown: (e) => e.stopPropagation(), title: [video.titel, video.kanal].filter(Boolean).join(" \u00b7 "),
-          style: { display: "inline-flex", alignItems: "center", gap: 6, fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, color: "#0d8a4f", textDecoration: "none" } }, "\u25b6 ", en ? "Watch highlights" : "Highlights ansehen")
+          style: { display: "inline-flex", alignItems: "center", gap: 6, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "#fff", background: "#0B7A45", padding: "5px 11px", borderRadius: 8, textDecoration: "none" } }, "\u25b6 ", en ? "Watch highlights" : "Highlights ansehen")
         : h("span", { className: "tw-hl-keine", style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t3)" } }, en ? "Highlights currently unavailable" : "Highlights derzeit nicht verf\u00fcgbar"),
       h("span", { style: { flex: "none", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "var(--t2)" } }, it.pid ? (en ? "Analysis \u203a" : "Analyse \u203a") : (en ? "Details \u203a" : "Details \u203a"))));
 }
