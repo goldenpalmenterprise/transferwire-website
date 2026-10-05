@@ -8028,7 +8028,7 @@ function MuBildflaeche({ it, bild, hoehe, gross }) {
 function MuHero({ it, bild, onOpen }) {
   const hh = React.createElement; const intro = muIntro(it);
   return hh("div", { className: "mu-hero mu-karte", role: "button", tabIndex: 0, onClick: () => onOpen(it), onKeyDown: e => { if (e.key === "Enter") onOpen(it); },
-      style: { position: "relative", height: 430, borderRadius: 12, overflow: "hidden", cursor: "pointer", border: "1px solid " + HAIR } },
+      style: { position: "relative", height: 430, borderRadius: 12, overflow: "hidden", cursor: "pointer", border: "1px solid " + HAIR, background: MU_NAVY } },
     hh("div", { style: { position: "absolute", inset: 0 } }, hh(MuBildflaeche, { it, bild, hoehe: "100%", gross: true })),
     hh("div", { style: { position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(8,14,28,0) 38%, rgba(8,14,28,.62) 66%, rgba(8,14,28,.94) 100%)", pointerEvents: "none" } }),
     hh("div", { style: { position: "absolute", left: 22, right: 22, bottom: 20, display: "flex", flexDirection: "column", gap: 8 } },
