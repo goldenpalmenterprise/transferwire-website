@@ -7943,6 +7943,10 @@ function muCss() {
     ".mu-karte{transition:border-color .15s,box-shadow .15s}.mu-karte:hover{border-color:var(--t3);box-shadow:0 2px 10px rgba(15,21,32,.08)}.mu-zeile{transition:background .12s}.mu-zeile:hover{background:var(--karte2)}" +
     ".mu-c1{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}.mu-c2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.mu-c3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}" +
     ".mu-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}" +
+    ".mu-thumb{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:12px 12px 0 0}" +
+    ".mu-heroneu{display:grid;grid-template-columns:minmax(0,1fr) 44%;height:430px}" +
+    ".mu-hero-foto{position:relative;min-width:0}" +
+    "@media (max-width:700px){.mu-heroneu{grid-template-columns:1fr;height:auto}.mu-hero-foto{aspect-ratio:16/9;order:-1}}" +
     ".mu-modal{position:fixed;inset:0;z-index:2000;background:rgba(8,14,28,.58);display:flex;align-items:flex-start;justify-content:center;padding:4vh 12px;overflow-y:auto}" +
     ".mu-modal-box{width:min(800px,100%);background:var(--karte);color:var(--t1);border:1px solid " + "rgba(127,127,127,.35)" + ";border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden}" +
     "@media (max-width:1020px){.mu-top,.mu-st{grid-template-columns:minmax(0,1fr)}.mu-l3{grid-template-columns:repeat(2,minmax(0,1fr))}}" +
@@ -7955,19 +7959,47 @@ function muTitel(it) { return (muEn() && it.headline_en) || it.headline || ""; }
 function muIntro(it) { const t = String((muEn() && it.summary_en) || it.summary || "").trim(); const m = t.match(/^.{25,230}?[.!?](\s|$)/); return m ? m[0].trim() : (t.length > 200 ? t.slice(0, 197) + "\u2026" : t); }
 function muTs(it) { const d = new Date(it.publishedAt || it.published || 0); return isNaN(d.getTime()) ? 0 : d.getTime(); }
 function muZeit(it) { const ts = muTs(it); if (!ts) return ""; const d = new Date(ts); const p = n => String(n).padStart(2, "0"); return p(d.getDate()) + "." + p(d.getMonth() + 1) + "." + d.getFullYear() + " \u00b7 " + p(d.getHours()) + ":" + p(d.getMinutes()); }
-function muTyp(it) { const t = TYPE[it.type] || TYPE.geruecht; return { label: muEn() ? (t.en || t.label) : t.label, color: t.color, soft: t.soft }; }
+const MU_KAT = { leistung: { de: "Leistung", en: "Performance", color: "#0e7490", soft: "#dff1f6" }, topleistung: { de: "Top-Leistung", en: "Top performance", color: "#b45309", soft: "#fdf0dc" },
+  talent: { de: "Talent im Fokus", en: "Talent in focus", color: "#6d28d9", soft: "#ede9fe" }, bericht: { de: "Transferbericht", en: "Transfer report" }, geruecht: { de: "Transfergerücht", en: "Transfer rumour" },
+  vertrag_verlaengert: { de: "Vertragsverlängerung", en: "Contract extension" }, rueckkehr: { de: "Rückkehr", en: "Return", color: "#0B7A45", soft: "#e2f3ea" }, verletzung: { de: "Verletzung", en: "Injury", color: "#b91c1c", soft: "#fde8e8" } };
+const MU_RE_PERF = /\btrifft\b|\btor\b|\btore\b|doppelpack|dreierpack|hattrick|hat-trick|vorlage|torschütz|elfmetertor|zu null|spieler des spiels|\bassist|\bscores?\b|\bgoals?\b|\bbrace\b|man of the match|clean sheet/;
+const MU_RE_TRANSFER = /wechselt|wechsel\b|verpflichtet|unterschreibt|unterschrieben|unterschrift|ablöse|leihe\b|leihgeschäft|ausgeliehen|\bjoins\b|\bsigns\b|\bsigned\b|\bmoves? to\b|\btransfer\b|\bloan\b|\bdeal\b/;
+const MU_RE_ZWEIFEL = /unklar|widerspr|andere quellen|unbestätigt|gerücht|angeblich|\bsoll\b|könnte|berichtet|berichten|\blaut\b|interesse|im visier|kandidat|offenbar|\bwohl\b|rumou?r|reported|reportedly|\bcould\b|interest|linked|target|unclear|conflicting|\bmay\b/;
+const MU_RE_FIX = /bestätigt|offiziell|\bfix\b|perfekt|unterschreibt|unterschrieben|vollzogen|verkündet|\bconfirmed\b|\bofficial|completed|done deal|announced|here we go/;
+const MU_RE_VERL = /verlängert|verlängerung|\bextends\b|extension|\brenews\b|\brenewal\b/;
+const MU_RE_RUECK = /comeback|rückkehr|kehrt zurück|zurück im|\breturns\b|back in training|back in the squad/;
+const MU_RE_VERLETZ = /verletz|ausfall|fällt aus|fällt .* aus|fehlt .* wochen|\binjur|sidelined|ruled out|out for/;
+function muKategorie(it) {
+  const t0 = String(it.type || ""); const h = (String(it.headline || "") + " " + String(it.headline_en || "")).toLowerCase();
+  if (t0 === "leistung" || it.tw_score != null) return Number(it.tw_score) >= 85 ? "topleistung" : "leistung";
+  if (t0 === "community") return "community";
+  if (it.talent || t0 === "talent") return "talent";
+  if (MU_RE_PERF.test(h) && !MU_RE_TRANSFER.test(h)) return "leistung";
+  if (t0 === "rueckkehr" || MU_RE_RUECK.test(h)) return "rueckkehr";
+  if (t0 === "verletzung" || MU_RE_VERLETZ.test(h)) return "verletzung";
+  if (t0 === "vertrag_verlaengert" || MU_RE_VERL.test(h)) return "vertrag_verlaengert";
+  if (t0 === "vertrag" || t0 === "trainer" || t0 === "trade") return t0;
+  const rel = Number(it.reliability) || 3; const zweifel = MU_RE_ZWEIFEL.test(h); const fix = MU_RE_FIX.test(h);
+  if ((t0 === "fix" || t0 === "leihe") && (!zweifel || fix) && rel >= 3) return t0;
+  if (t0 === "geruecht" && rel >= 4 && !/gerücht|rumou?r/.test(h)) return "bericht";
+  return rel >= 4 && zweifel && !/gerücht|rumou?r/.test(h) ? "bericht" : "geruecht";
+}
+function muTyp(it) {
+  const k = muKategorie(it); const t = TYPE[k] || (k === "bericht" ? TYPE.geruecht : null) || TYPE.geruecht; const m = MU_KAT[k] || {};
+  return { key: k, label: m[muEn() ? "en" : "de"] || (muEn() ? (t.en || t.label) : t.label), color: m.color || t.color, soft: m.soft || t.soft };
+}
 function muClub(v) { if (!v) return ""; if (typeof v === "string") return v; return v.club || v.name || v.team || ""; }
 function muVon(it) { return it.fromClub || it.from_club || muClub(it.from) || ""; }
 function muNach(it) { return it.toClub || it.to_club || muClub(it.to) || ""; }
 function muName(it) { const sp = typeof tkSpieler === "function" ? tkSpieler(it) : null; return (sp && sp.name) || it.player_name || (it.player && it.player.name) || ""; }
 function muPos(it) { const sp = typeof tkSpieler === "function" ? tkSpieler(it) : null; return (sp && (sp.pos || sp.position)) || it.position || it.pos || ""; }
 function muAktivApp(view, type, query, club, league, country, sport) { return view === "feed" && type === "alle" && !query && !club && !league && !country && (!sport || sport === "alle"); }
-const MU_HAUPT = { fix: 30, leihe: 22, trade: 20, trainer: 18, vertrag_verlaengert: 16, vertrag: 14, geruecht: 12 };
+const MU_HAUPT = { fix: 30, leihe: 22, trade: 20, trainer: 18, vertrag_verlaengert: 16, vertrag: 14, bericht: 13, geruecht: 12 };
 function muAuswahl(liste) {
   const jetzt = Date.now();
-  const wert = it => MU_HAUPT[it.type] + (Number(it.reliability) || 3) * 6 + Math.min(20, (Number(it.relevanz || it.relevance) || 0) / 5) - (jetzt - muTs(it)) / 36e5 / 3;
-  let kand = liste.filter(it => MU_HAUPT[it.type] != null && muTitel(it) && muTs(it) && jetzt - muTs(it) < 72 * 36e5);
-  if (kand.length < 4) kand = liste.filter(it => MU_HAUPT[it.type] != null && muTitel(it));
+  const wert = it => MU_HAUPT[muKategorie(it)] + (Number(it.reliability) || 3) * 6 + Math.min(20, (Number(it.relevanz || it.relevance) || 0) / 5) - (jetzt - muTs(it)) / 36e5 / 3;
+  let kand = liste.filter(it => MU_HAUPT[muKategorie(it)] != null && muTitel(it) && muTs(it) && jetzt - muTs(it) < 72 * 36e5);
+  if (kand.length < 4) kand = liste.filter(it => MU_HAUPT[muKategorie(it)] != null && muTitel(it));
   kand = kand.slice().sort((a, b) => wert(b) - wert(a));
   const gew = [], seen = new Set();
   for (const it of kand) { const k = muNorm(muName(it)) || it.id; if (seen.has(k)) continue; seen.add(k); gew.push(it); if (gew.length >= 4) break; }
@@ -8046,26 +8078,124 @@ function MuBildflaeche({ it, bild, mb, hoehe, gross }) {
       style: { position: "absolute", left: "50%", top: gross ? "38%" : "42%", transform: "translate(-50%,-50%)", width: gross ? 64 : 44, height: gross ? 64 : 44, borderRadius: 999, background: "rgba(8,14,28,.72)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: gross ? 26 : 18, textDecoration: "none" } }, "\u25b6") : null,
     foto && !fehler && (gross || video) ? hh(MuBildnachweis, { foto, mb: mbild }) : null);
 }
+const MU_RUHIG = "radial-gradient(110% 80% at 88% 112%, rgba(11,122,69,.55), rgba(11,122,69,0) 60%), radial-gradient(70% 60% at 8% -10%, rgba(255,255,255,.12), rgba(255,255,255,0) 60%), linear-gradient(135deg, #10284a 0%, #163a5c 100%)";
+const MU_FREI = {}; const MU_FOTO_CACHE = {};
+function muFreiUrl(url) {
+  const u = String(url || ""); if (!u || /placeholder/i.test(u)) return null;
+  const m = /players\/(?:\d+\/)*(\d+)\.png/i.exec(u); if (!m) return null;
+  if (/api-sports\.io/i.test(u)) return "/api/tw-bild?f=af-" + m[1] + ".png";
+  if (/sportmonks\.com/i.test(u)) return "/api/tw-bild?f=sm-" + m[1] + ".png";
+  return null;
+}
+function useMuFrei(url) {
+  const fu = muFreiUrl(url); const [st, setSt] = React.useState(fu ? (MU_FREI[fu] || "lade") : "fehlt");
+  React.useEffect(() => { if (!fu) { setSt("fehlt"); return; } if (MU_FREI[fu]) { setSt(MU_FREI[fu]); return; } let a = true; const im = new Image();
+    im.onload = () => { MU_FREI[fu] = "ok"; if (a) setSt("ok"); }; im.onerror = () => { MU_FREI[fu] = "fehlt"; if (a) setSt("fehlt"); }; im.src = fu; return () => { a = false; }; }, [fu]);
+  return [st, fu];
+}
+function useMuFotoUrl(name, url) {
+  const ok = u => (u && !/placeholder/i.test(String(u))) ? u : null;
+  const [f, setF] = React.useState(ok(url) || (name && MU_FOTO_CACHE[name]) || null);
+  React.useEffect(() => { if (ok(url)) { setF(url); return; } if (name && MU_FOTO_CACHE[name] !== undefined) { setF(MU_FOTO_CACHE[name]); return; } let a = true;
+    if (name && typeof fotoAnfordern === "function") fotoAnfordern(name, (x) => { const p = ok(x && x.photo); MU_FOTO_CACHE[name] = p; if (a) setF(p); }); return () => { a = false; }; }, [name, url]);
+  return f;
+}
+function MuLogos({ logos, groesse, pfeil }) {
+  const hh = React.createElement; const g = groesse || 52; const l = (logos || []).filter(Boolean).slice(0, 2);
+  if (!l.length) return null;
+  const kachel = (v) => hh("span", { key: v, title: typeof clubName === "function" ? clubName(v) : v, style: { width: g, height: g, borderRadius: Math.round(g / 5), background: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,.25)", display: "inline-flex", alignItems: "center", justifyContent: "center" } }, hh(ClubLogo, { name: v, size: Math.round(g * 0.72) }));
+  return hh("div", { style: { display: "flex", alignItems: "center", gap: 8 } }, kachel(l[0]), l.length > 1 ? hh("span", { "aria-label": pfeil || "→", style: { color: "#fff", fontFamily: FONT_DISPLAY, fontSize: Math.round(g * 0.5), fontWeight: 800, textShadow: "0 1px 4px rgba(0,0,0,.4)" } }, "\u2192") : null, l.length > 1 ? kachel(l[1]) : null);
+}
+function MuSpielerBild({ name, url, commons, gross }) {
+  const hh = React.createElement; const foto = useMuFotoUrl(name, url); const [frei] = useMuFrei(foto); const [fehler, setFehler] = React.useState(false);
+  React.useEffect(() => { setFehler(false); }, [foto]);
+  const freiUrl = muFreiUrl(foto);
+  const rahmen = (kind, extra) => hh("div", { style: Object.assign({ position: "absolute", right: gross ? "9%" : "8%", top: "50%", transform: "translateY(-50%)", borderRadius: 14, border: "2px solid rgba(255,255,255,.85)", overflow: "hidden", boxShadow: "0 10px 24px rgba(0,0,0,.35)", background: "#0f2744" }, extra) }, kind);
+  if (gross && commons && commons.url) {
+    const hochkant = !(commons.breite && commons.hoehe) || commons.hoehe >= commons.breite;
+    return hh(React.Fragment, null,
+      rahmen(hh("img", { src: commons.url, alt: name || "", style: hochkant ? { height: "100%", width: "auto", display: "block", objectFit: "contain" } : { width: "100%", height: "auto", display: "block" } }), hochkant ? { height: "88%" } : { width: "78%", right: "11%" }),
+      hh(MuBildnachweis, { foto: commons }));
+  }
+  if (foto && !fehler && frei === "ok") return hh("img", { src: freiUrl, alt: name || "", onError: () => setFehler(true),
+    style: { position: "absolute", bottom: 0, right: gross ? "8%" : "6%", height: gross ? "90%" : "94%", width: "auto", maxWidth: "62%", objectFit: "contain", objectPosition: "bottom", filter: "drop-shadow(0 10px 18px rgba(0,0,0,.4))" } });
+  if (foto && !fehler) return rahmen(hh("img", { src: foto, alt: name || "", loading: "lazy", onError: () => setFehler(true), style: { width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 15%", display: "block" } }), { height: gross ? "70%" : "74%", aspectRatio: "1 / 1" });
+  if (commons && commons.url) return hh(React.Fragment, null, rahmen(hh("img", { src: commons.url, alt: name || "", style: { height: "100%", width: "auto", display: "block" } }), { height: gross ? "88%" : "84%" }), hh(MuBildnachweis, { foto: commons }));
+  const ini = String(name || "?").split(/\s+/).filter(Boolean).map(x => x[0]).slice(0, 2).join("").toUpperCase();
+  return hh("div", { style: { position: "absolute", right: "12%", top: "50%", transform: "translateY(-50%)", width: gross ? 150 : 92, height: gross ? 150 : 92, borderRadius: 999, background: "rgba(255,255,255,.14)", border: "2px solid rgba(255,255,255,.5)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontWeight: 800, fontSize: gross ? 54 : 34, color: "#fff" } }, ini);
+}
+function muLogosFuer(it) {
+  const k = muKategorie(it);
+  if (k === "leistung" || k === "topleistung") return [it.team].filter(Boolean);
+  const von = muVon(it), nach = muNach(it);
+  if (von && nach && ["fix", "leihe", "bericht", "geruecht", "trade"].includes(k)) return [von, nach];
+  return [nach || it.team || it.club || von].filter(Boolean);
+}
+function MuThumb({ it, name, foto, logos, commons, kat, link }) {
+  const hh = React.createElement; const en = muEn();
+  return hh("div", { className: "mu-thumb", style: { background: MU_RUHIG } },
+    hh(MuSpielerBild, { name, url: foto, commons }),
+    hh("div", { style: { position: "absolute", left: 12, top: 12 } }, hh(MuLogos, { logos })),
+    hh("div", { style: { position: "absolute", left: 12, bottom: 12 } }, hh(MuTag, { it: kat || it, hell: true })),
+    link ? hh("a", { href: link, target: "_blank", rel: "noopener noreferrer", onClick: e => e.stopPropagation(), style: { position: "absolute", right: 12, bottom: 12, fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: "#fff", background: "rgba(8,14,28,.72)", padding: "4px 9px", borderRadius: 999, textDecoration: "none" } }, "\u25b6 " + (en ? "Highlights" : "Highlights")) : null);
+}
 function MuHero({ it, bild, mb, onOpen }) {
-  const hh = React.createElement; const intro = muIntro(it);
+  const hh = React.createElement; const intro = muIntro(it); const en = muEn(); const name = muName(it); const commons = bild && bild.foto;
+  const meta = [muZeit(it), typeof tkQuelle === "function" ? tkQuelle(it) : ""].filter(Boolean).join(" \u00b7 ");
   return hh("div", { className: "mu-hero mu-karte", role: "button", tabIndex: 0, onClick: () => onOpen(it), onKeyDown: e => { if (e.key === "Enter") onOpen(it); },
-      style: { position: "relative", height: 430, borderRadius: 12, overflow: "hidden", cursor: "pointer", border: "1px solid " + HAIR, background: MU_NAVY } },
-    hh("div", { style: { position: "absolute", inset: 0 } }, hh(MuBildflaeche, { it, bild, mb, hoehe: "100%", gross: true })),
-    hh("div", { style: { position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(8,14,28,0) 38%, rgba(8,14,28,.62) 66%, rgba(8,14,28,.94) 100%)", pointerEvents: "none" } }),
-    hh("div", { style: { position: "absolute", left: 22, right: 22, bottom: 20, display: "flex", flexDirection: "column", gap: 8 } },
-      hh(MuTag, { it, hell: true }),
-      hh("h2", { className: "mu-c3", style: { margin: 0, fontFamily: FONT_DISPLAY, fontSize: 34, lineHeight: 1.08, fontWeight: 800, color: "#fff", textShadow: "0 2px 12px rgba(0,0,0,.45)" } }, muTitel(it)),
-      intro ? hh("p", { className: "mu-c2", style: { margin: 0, fontFamily: FONT_BODY, fontSize: 14.5, lineHeight: 1.45, color: "rgba(255,255,255,.9)", maxWidth: 780 } }, intro) : null));
+      style: { position: "relative", borderRadius: 12, overflow: "hidden", cursor: "pointer", border: "1px solid " + HAIR, background: MU_RUHIG } },
+    hh("div", { className: "mu-heroneu" },
+      hh("div", { style: { display: "flex", flexDirection: "column", gap: 10, padding: "20px 22px 22px", minWidth: 0 } },
+        hh(MuLogos, { logos: muLogosFuer(it), groesse: 58 }),
+        hh("div", { style: { flex: 1 } }),
+        hh(MuTag, { it, hell: true }),
+        hh("h2", { className: "mu-c3", style: { margin: 0, fontFamily: FONT_DISPLAY, fontSize: 30, lineHeight: 1.1, fontWeight: 800, color: "#fff" } }, muTitel(it)),
+        intro ? hh("p", { className: "mu-c2", style: { margin: 0, fontFamily: FONT_BODY, fontSize: 14.5, lineHeight: 1.45, color: "rgba(255,255,255,.88)" } }, intro) : null,
+        meta ? hh("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "rgba(255,255,255,.7)" } }, meta) : null),
+      hh("div", { className: "mu-hero-foto" }, hh(MuSpielerBild, { name, url: it.photo, commons, gross: true }))));
 }
 function MuTeaser({ it, bild, mb, onOpen }) {
-  const hh = React.createElement; const verein = muNach(it) || it.team || muVon(it) || "";
+  const hh = React.createElement; const name = muName(it); const meta = [muZeit(it), typeof tkQuelle === "function" ? tkQuelle(it) : ""].filter(Boolean).join(" \u00b7 ");
   return hh("div", { className: "mu-karte", role: "button", tabIndex: 0, onClick: () => onOpen(it), onKeyDown: e => { if (e.key === "Enter") onOpen(it); },
-      style: { display: "flex", flexDirection: "column", borderRadius: 10, overflow: "hidden", cursor: "pointer", background: "var(--karte)", border: "1px solid " + HAIR, minWidth: 0 } },
-    hh("div", { style: { position: "relative" } }, hh(MuBildflaeche, { it, bild, mb, hoehe: 172 }),
-      hh("div", { style: { position: "absolute", left: 10, bottom: 10 } }, hh(MuTag, { it, hell: true }))),
-    hh("div", { style: { display: "flex", gap: 10, padding: "11px 12px 13px", alignItems: "flex-start" } },
-      verein ? hh("div", { style: { flex: "none", width: 34, height: 34, borderRadius: 6, background: "#fff", border: "1px solid " + HAIR, display: "flex", alignItems: "center", justifyContent: "center" } }, hh(ClubLogo, { name: verein, size: 26 })) : null,
-      hh("div", { className: "mu-c3", style: { fontFamily: FONT_DISPLAY, fontSize: 17, lineHeight: 1.2, fontWeight: 700, color: "var(--t1)" } }, muTitel(it))));
+      style: { display: "flex", flexDirection: "column", borderRadius: 12, overflow: "hidden", cursor: "pointer", background: "var(--karte)", border: "1px solid " + HAIR, minWidth: 0 } },
+    hh(MuThumb, { it, name, foto: it.photo, logos: muLogosFuer(it), commons: bild && bild.foto }),
+    hh("div", { style: { display: "flex", flexDirection: "column", gap: 6, padding: "11px 12px 13px" } },
+      hh("div", { className: "mu-c3", style: { fontFamily: FONT_DISPLAY, fontSize: 17, lineHeight: 1.2, fontWeight: 700, color: "var(--t1)" } }, muTitel(it)),
+      meta ? hh("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, meta) : null));
+}
+function muDatumKurz(d) { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(d || "")); return m ? m[3] + "." + m[2] + "." + m[1] : ""; }
+function MuLeistungTop({ items, onOpen }) {
+  const hh = React.createElement; const en = muEn();
+  if (!items.length) return null;
+  const chip = (t) => hh("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 700, color: "var(--t2)", background: "var(--karte2)", padding: "3px 8px", borderRadius: 999 } }, t);
+  return hh("div", { className: "mu-t3 mu-leistung-top", style: { marginBottom: 14 } }, items.map(it => {
+    const zahlen = [];
+    if (it.tore) zahlen.push(it.tore + " " + (en ? (it.tore === 1 ? "goal" : "goals") : (it.tore === 1 ? "Tor" : "Tore")));
+    if (it.vorlagen) zahlen.push(it.vorlagen + " " + (en ? (it.vorlagen === 1 ? "assist" : "assists") : (it.vorlagen === 1 ? "Vorlage" : "Vorlagen")));
+    if (it.paraden != null && it.posgruppe === "TW") zahlen.push(it.paraden + " " + (en ? "saves" : "Paraden"));
+    if (it.minuten != null) zahlen.push(it.minuten + (en ? " min" : " Min."));
+    return hh("div", { key: it.id, className: "mu-karte", role: "button", tabIndex: 0, onClick: () => onOpen(it), onKeyDown: e => { if (e.key === "Enter") onOpen(it); },
+        style: { display: "flex", flexDirection: "column", borderRadius: 12, overflow: "hidden", cursor: "pointer", background: "var(--karte)", border: "1px solid " + HAIR, minWidth: 0 } },
+      hh(MuThumb, { it, name: muName(it), foto: it.photo, logos: [it.team], link: it.highlight_url || it.video_url || null }),
+      hh("div", { style: { display: "flex", flexDirection: "column", gap: 7, padding: "11px 12px 13px" } },
+        hh("div", { className: "mu-c2", style: { fontFamily: FONT_DISPLAY, fontSize: 17, lineHeight: 1.2, fontWeight: 700, color: "var(--t1)" } }, muTitel(it)),
+        hh("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t3)" } }, [it.gegner ? (en ? "vs " : "gegen ") + it.gegner : "", muDatumKurz(it.datum), it.league].filter(Boolean).join(" \u00b7 ")),
+        hh("div", { style: { display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" } }, zahlen.slice(0, 3).map(chip), hh("span", { style: { flex: 1 } }), hh(MuScore, { wert: it.tw_score }))));
+  }));
+}
+function MuTalentTop({ items }) {
+  const hh = React.createElement; const en = muEn();
+  if (!items.length) return null;
+  const grund = (x) => { const t = []; if (x.goals) t.push(x.goals + " " + (en ? (x.goals === 1 ? "goal" : "goals") : (x.goals === 1 ? "Tor" : "Tore"))); if (x.assists) t.push(x.assists + " " + (en ? (x.assists === 1 ? "assist" : "assists") : (x.assists === 1 ? "Vorlage" : "Vorlagen")));
+    let r = "TW Score " + x.score; if (t.length) r += " \u00b7 " + t.join(en ? " and " : " und ") + (x.min ? (en ? " in " : " in ") + x.min + (en ? " minutes" : " Spielminuten") : ""); else if (x.min) r += " \u00b7 " + x.min + (en ? " minutes played this season" : " Spielminuten in dieser Saison"); return r; };
+  return hh("div", { className: "mu-g2 mu-talent-top", style: { marginBottom: 14 } }, items.map(x => hh("div", { key: x.pid, className: "mu-karte", role: "button", tabIndex: 0,
+      onClick: () => { if (window.twPerfOeffnen && x.pid) window.twPerfOeffnen({ pid: x.pid, name: x.name, team: x.team, league: x.league }); }, onKeyDown: e => { if (e.key === "Enter" && window.twPerfOeffnen && x.pid) window.twPerfOeffnen({ pid: x.pid, name: x.name, team: x.team, league: x.league }); },
+      style: { display: "flex", flexDirection: "column", borderRadius: 12, overflow: "hidden", cursor: "pointer", background: "var(--karte)", border: "1px solid " + HAIR, minWidth: 0 } },
+    hh(MuThumb, { it: { type: "talent" }, name: x.name, foto: x.photo, logos: [x.team] }),
+    hh("div", { style: { display: "flex", flexDirection: "column", gap: 6, padding: "11px 12px 13px" } },
+      hh("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 18, lineHeight: 1.2, fontWeight: 800, color: "var(--t1)" } }, x.name),
+      hh("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)" } }, [x.age ? x.age + (en ? " yrs" : " Jahre") : "", x.pos, x.team ? x.team + (x.league ? " (" + x.league + ")" : "") : ""].filter(Boolean).join(" \u00b7 ")),
+      hh("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t3)" } }, grund(x))))));
 }
 function MuKopf({ titel, rechts }) {
   return React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, background: MU_NAVY, color: "#fff", padding: "8px 12px", fontFamily: FONT_DISPLAY, fontSize: 15.5, fontWeight: 800, letterSpacing: ".04em", textTransform: "uppercase" } },
@@ -8219,32 +8349,37 @@ function MuSpieleTabellen() {
 function MuTalente() {
   const hh = React.createElement; const en = muEn(); const [d, setD] = React.useState(null);
   React.useEffect(() => { let a = true; fetch("/api/tw-listen").then(r => r.json()).then(x => { if (a) setD(x); }).catch(() => { if (a) setD({ items: [] }); }); return () => { a = false; }; }, []);
-  const liste = ((d && d.items) || []).filter(x => !x.age || x.age <= 21).sort((a, b) => (Number(b.score) || 0) - (Number(a.score) || 0)).slice(0, 8);
+  const alle = ((d && d.items) || []).filter(x => !x.age || x.age <= 21).sort((a, b) => (Number(b.score) || 0) - (Number(a.score) || 0));
+  const top = alle.filter(x => x.score != null && (x.min > 0 || x.goals || x.assists)).slice(0, 2); const topIds = new Set(top.map(x => x.pid));
+  const liste = alle.filter(x => !topIds.has(x.pid)).slice(0, 8);
   if (!d) return null;
   const halb = Math.ceil(liste.length / 2);
   const spalte = (teil) => hh(MuModul, { titel: en ? "Talents" : "Talente", spalten: [en ? "Player" : "Spieler", "", "Score"], leer: en ? "No talents listed." : "Keine Talente gelistet.",
     kinder: teil.map((x, i) => hh(MuZeile, { key: x.pid || i, erste: !i, name: x.name, foto: x.photo, unter: [x.age ? x.age + (en ? " yrs" : " J.") : "", x.pos, x.team].filter(Boolean).join(" \u00b7 "),
       mitte: hh("span", { style: { flex: "none", fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t3)", whiteSpace: "nowrap" } }, [x.goals != null ? x.goals + (en ? " G" : " T") : "", x.assists != null ? x.assists + (en ? " A" : " V") : ""].filter(Boolean).join(" / ")),
       rechts: hh(MuScore, { wert: x.score }), onClick: () => { if (window.twPerfOeffnen && x.pid) window.twPerfOeffnen({ pid: x.pid, name: x.name, team: x.team, league: x.league }); } })) });
-  return liste.length ? hh("div", { className: "mu-g2" }, spalte(liste.slice(0, halb)), liste.length > halb ? spalte(liste.slice(halb)) : null) : null;
+  return hh(React.Fragment, null, hh(MuTalentTop, { items: top }), liste.length ? hh("div", { className: "mu-g2" }, spalte(liste.slice(0, halb)), liste.length > halb ? spalte(liste.slice(halb)) : null) : null);
 }
 function MuRaster({ items, onOpen, leer }) {
   const hh = React.createElement;
   return items.length ? hh("div", { className: "mu-g2" }, items.map(it => hh(TickerKarte, { key: it.id, item: it, onOpen })))
-    : hh("div", { style: { padding: 14, borderRadius: 10, border: "1px dashed " + HAIR, fontFamily: FONT_BODY, fontSize: 13, color: "var(--t3)" } }, leer);
+    : !leer ? null : hh("div", { style: { padding: 14, borderRadius: 10, border: "1px dashed " + HAIR, fontFamily: FONT_BODY, fontSize: 13, color: "var(--t3)" } }, leer);
 }
 function MuUnten({ liste, onOpen, geheZu }) {
   muCss(); const hh = React.createElement; const en = muEn();
-  const leist = liste.filter(it => it.type === "leistung").sort((a, b) => (Number(b.tw_score) || 0) - (Number(a.tw_score) || 0)).slice(0, 8);
-  const verl = liste.filter(it => it.type === "verletzung").slice(0, 6);
+  const leistAlle = liste.filter(it => it.type === "leistung").sort((a, b) => (Number(b.tw_score) || 0) - (Number(a.tw_score) || 0));
+  const leistTop = leistAlle.filter(it => it.tw_score != null && it.gegner && it.datum && (it.tore || it.vorlagen || (it.posgruppe === "TW" && it.paraden != null))).slice(0, 3); const topIds = new Set(leistTop.map(it => it.id));
+  const leist = leistAlle.filter(it => !topIds.has(it.id)).slice(0, 8);
+  const verl = liste.filter(it => { const k = muKategorie(it); return it.type === "verletzung" || k === "verletzung" || k === "rueckkehr"; }).slice(0, 6);
   const comm = liste.filter(it => it.type === "community" || it.kat === "community" || it.community).slice(0, 4);
   return hh("div", { style: { gridColumn: "1 / -1", minWidth: 0 } },
+    hh(MuTitel, { titel: en ? "Performances" : "Leistungen", unter: en ? "TW Performance Score in the badge" : "TW Performance Score im Kästchen" }), hh(MuLeistungTop, { items: leistTop, onOpen }),
+    hh(MuRaster, { items: leist, onOpen, leer: leistTop.length ? "" : (en ? "No performances yet." : "Noch keine Leistungen.") }),
     hh(MuTitel, { titel: en ? "Transfers & contracts" : "Transfers & Vertr\u00e4ge" }), hh(MuTransfers, { liste, onOpen }),
     hh(MuTitel, { titel: en ? "Matches & tables" : "Spiele & Tabellen" }), hh(MuSpieleTabellen),
-    hh(MuTitel, { titel: en ? "Performances" : "Leistungen", unter: en ? "TW Performance Score in the badge" : "TW Performance Score im Kästchen" }), hh(MuRaster, { items: leist, onOpen, leer: en ? "No performances yet." : "Noch keine Leistungen." }),
     hh(MuTitel, { titel: en ? "Talents" : "Talente" }), hh(MuTalente),
-    hh(MuTitel, { titel: en ? "Injuries" : "Verletzungen" }), hh(MuRaster, { items: verl, onOpen, leer: en ? "No new injuries." : "Keine neuen Verletzungen." }),
-    hh(MuTitel, { titel: "Community" }), hh(MuCommunity, { geheZu, alt: comm }), null && hh("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", padding: "14px 16px", borderRadius: 10, background: "var(--karte)", border: "1px solid " + HAIR } },
+    hh(MuTitel, { titel: "Community" }), hh(MuCommunity, { geheZu, alt: comm }),
+    hh(MuTitel, { titel: en ? "Injuries & returns" : "Verletzungen & R\u00fcckkehr" }), hh(MuRaster, { items: verl, onOpen, leer: en ? "No new injuries." : "Keine neuen Verletzungen." }), null && hh("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", padding: "14px 16px", borderRadius: 10, background: "var(--karte)", border: "1px solid " + HAIR } },
       hh("span", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: "var(--t2)" } }, en ? "Discussions, requests and contacts from scouts, agents and clubs." : "Diskussionen, Gesuche und Kontakte von Scouts, Beratern und Vereinen."),
       hh("button", { type: "button", onClick: () => geheZu && geheZu("community"), style: { cursor: "pointer", padding: "8px 16px", borderRadius: 8, border: "none", background: "#0B7A45", color: "#fff", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800 } }, en ? "Open community" : "Zur Community")));
 }
