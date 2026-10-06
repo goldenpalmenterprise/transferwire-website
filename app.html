@@ -8109,12 +8109,25 @@ function useMuFrei(url) {
     im.onload = () => { MU_FREI[fu] = "ok"; if (a) setSt("ok"); }; im.onerror = () => { MU_FREI[fu] = "fehlt"; if (a) setSt("fehlt"); }; im.src = fu; return () => { a = false; }; }, [fu]);
   return [st, fu];
 }
+// Gesichtsbilder aus eigener Suche (Dateiname = gesicht-<FNV-Hash des normierten Namens>.jpg), Verzeichnis einmal je Stunde geladen
+const MU_GES = { liste: null, laden: false, hoerer: new Set() };
+function useMuGesichter() {
+  const [, tick] = React.useState(0);
+  React.useEffect(() => { const f = () => tick(t => t + 1); MU_GES.hoerer.add(f);
+    if (!MU_GES.liste && !MU_GES.laden) { MU_GES.laden = true; fetch("/api/tw-bild?f=gesichter-liste.json&t=" + Math.floor(Date.now() / 36e5)).then(r => r.json()).then(l => { MU_GES.liste = new Set((Array.isArray(l) ? l : []).map(e => typeof e === "string" ? e : (e && e.datei) || "")); }).catch(() => { MU_GES.liste = new Set(); }).finally(() => { MU_GES.laden = false; MU_GES.hoerer.forEach(g => g()); }); }
+    return () => { MU_GES.hoerer.delete(f); }; }, []);
+  return MU_GES.liste;
+}
+function muGesichtDatei(name) { return "gesicht-" + ("00000000" + muHash(muNorm(name)).toString(16)).slice(-8) + ".jpg"; }
 function useMuFotoUrl(name, url) {
   const ok = u => (u && !/placeholder/i.test(String(u))) ? u : null;
   const [f, setF] = React.useState(ok(url) || (name && MU_FOTO_CACHE[name]) || null);
+  const ges = useMuGesichter();
   React.useEffect(() => { if (ok(url)) { setF(url); return; } if (name && MU_FOTO_CACHE[name] !== undefined) { setF(MU_FOTO_CACHE[name]); return; } let a = true;
     if (name && typeof fotoAnfordern === "function") fotoAnfordern(name, (x) => { const p = ok(x && x.photo); MU_FOTO_CACHE[name] = p; if (a) setF(p); }); return () => { a = false; }; }, [name, url]);
-  return f;
+  if (f) return f;
+  if (name && ges && ges.size) { const d = muGesichtDatei(name); if (ges.has(d)) return "/api/tw-bild?f=" + d; }
+  return null;
 }
 function MuLogos({ logos, groesse, pfeil }) {
   const hh = React.createElement; const g = groesse || 52; const l = (logos || []).filter(Boolean).slice(0, 2);
