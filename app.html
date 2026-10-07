@@ -4616,7 +4616,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261001a";
+const VS_VERSION = "20261007-lage";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -8338,7 +8338,8 @@ function MuSpieleTabellen() {
             hh("img", { src: s.gast_logo, alt: "", width: 22, height: 22, loading: "lazy", style: { objectFit: "contain" } }),
             hh("span", { className: "mu-c1", style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 700, color: "var(--t1)" } }, s.gast),
             (s.q && s.q.h != null && !["FT", "AET", "PEN"].includes(s.status)) ? hh("span", { className: "mu-quote", style: { gridColumn: "1 / -1", textAlign: "center", fontFamily: FONT_BODY, fontSize: 11, color: "var(--t3)" } },
-              (en ? "Win probability " : "Siegwahrscheinlichkeit ") + s.q.h + " % \u00b7 " + (en ? "draw " : "Remis ") + s.q.d + " % \u00b7 " + s.q.a + " %" + (s.q.b ? " \u00b7 " + s.q.b + (en ? " bookmakers" : " Wettanbieter") : "")) : null); }))) : hh("div", { style: { padding: 14, fontFamily: FONT_BODY, fontSize: 13, color: "var(--t3)" } }, en ? "No matches in this round." : "Keine Spiele in dieser Runde.")),
+              (en ? "Win probability " : "Siegwahrscheinlichkeit ") + s.q.h + " % \u00b7 " + (en ? "draw " : "Remis ") + s.q.d + " % \u00b7 " + s.q.a + " %" + (s.q.b ? " \u00b7 " + s.q.b + (en ? " bookmakers" : " Wettanbieter") : "")) : null,
+            (s.v && s.v.h != null && !["FT", "AET", "PEN"].includes(s.status)) ? hh("span", { className: "mu-prognose", title: "API-Football", style: { gridColumn: "1 / -1", textAlign: "center", fontFamily: FONT_BODY, fontSize: 11, color: "var(--t3)" } }, muPrognoseText(s.v, en)) : null); }))) : hh("div", { style: { padding: 14, fontFamily: FONT_BODY, fontSize: 13, color: "var(--t3)" } }, en ? "No matches in this round." : "Keine Spiele in dieser Runde.")),
       hh("div", { style: { borderRadius: 10, overflow: "hidden", background: "var(--karte)", border: "1px solid " + HAIR, minWidth: 0 } },
         hh(MuKopf, { titel: (en ? "Table" : "Tabelle") + " \u00b7 " + ligaName }),
         hh("div", { style: { display: "grid", gridTemplateColumns: "24px 20px minmax(0,1fr) 30px 38px 36px", gap: 7, padding: "6px 12px", background: "var(--karte2)", fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 700, color: "var(--t3)" } },
@@ -8516,6 +8517,13 @@ function MuCommunity({ geheZu }) {
           hh("div", { style: { fontFamily: FONT_BODY, fontSize: 14.5, lineHeight: 1.6, color: "var(--t1)", whiteSpace: "pre-wrap" } }, muCommText(offen, en)),
           hh("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t3)" } }, en ? "Community statements are unconfirmed unless marked otherwise." : "Community-Aussagen sind unbest\u00e4tigt, sofern nicht anders gekennzeichnet."),
           hh("div", null, knopf)))) : null);
+}
+/* 27 Spiele & Tabellen: Prognose von API-Football je Spiel (07.10.2026, Punkt 13) */
+function muPrognoseText(v, en) {
+  const h = Number(v.h) || 0, d = Number(v.d) || 0, a = Number(v.a) || 0, mx = Math.max(h, d, a);
+  const k = (h === mx ? "h" : "") + (d === mx ? "d" : "") + (a === mx ? "a" : "");
+  const T = { h: en ? "home win" : "Heimsieg", d: en ? "draw" : "Remis", a: en ? "away win" : "Ausw\u00e4rtssieg", hd: en ? "home win or draw" : "Heimsieg oder Remis", da: en ? "draw or away win" : "Remis oder Ausw\u00e4rtssieg", ha: en ? "no draw" : "kein Remis" };
+  return (en ? "Prediction: " : "Prognose: ") + (T[k] || (en ? "open" : "offen")) + " (" + h + " / " + d + " / " + a + " %)";
 }
 /* 26 Spiele & Tabellen: Siegwahrscheinlichkeiten aus Wettquoten (07.10.2026) im Spielzeilen-Renderer oben */
 /* 25 Transferticker: Ansicht in der Transfers-Seite, Knopf im Newsfeed (06./07.10.2026). Die Seitenfilter (Land, Liga, Suche, Position, Zeitraum, weitere Filter) gelten auch im Ticker. */
