@@ -5145,9 +5145,10 @@ function MerkSpielerZeile({ item, news, onOpen, onRemove, onAlert, onVergleich, 
       if (!p) { setD({ ok: false }); return; }
       const basis = { ok: true, pid: p.player_id, team: p.team, league: p.league, pos: p.position, age: p.age, photo: p.photo, rating: p.rating, minutes: p.minutes, mw: p.tm_value_text || "", ende: p.tm_contract_until || p.contract_until || "", stand: p.imported_at || "", score: p.rating ? Math.round(Number(p.rating) * 10) : null, src: "api", delta: null, letztes: "" };
       setD(basis);
-      fetch(SPIELER_URL + "?pid=" + p.player_id, { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(raw => {
-        if (!aktiv) return; const dd = normResp(raw); const form = dd && Array.isArray(dd.form) ? dd.form.filter(f => f && f.score != null).sort((a, b) => String(b.date || "").localeCompare(String(a.date || ""))) : [];
-        if (form.length) setD(Object.assign({}, basis, { score: Math.round(Number(form[0].score)), src: "tw", delta: form.length > 1 ? Math.round(Number(form[0].score) - Number(form[1].score)) : null, letztes: form[0].date || "" }));
+      // Punkt 26 (07.10.2026): gemeinsame Bewertungsbasis (tw_leistung_watch)
+      fetch("/db/spieler_leistung?player_id=eq." + p.player_id + "&select=score,quelle,trend,spiele,letzte", { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(rows => {
+        if (!aktiv) return; const l = Array.isArray(rows) && rows[0] ? rows[0] : null; if (!l || l.score == null) return;
+        const le = Array.isArray(l.letzte) ? l.letzte : []; setD(Object.assign({}, basis, { score: Math.round(Number(l.score)), src: l.quelle === "api" ? "api" : "tw", q: l.quelle, delta: le.length > 1 ? Math.round(Number(le[0].score) - Number(le[1].score)) : null, letztes: le[0] ? (le[0].datum || "") : "" }));
       }).catch(() => {});
     }).catch(() => { if (aktiv) setD({ ok: false }); });
     return () => { aktiv = false; };
@@ -7745,8 +7746,10 @@ function SpieltagVue({ openPlayer, openVerein }) {
         tore.length ? h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6, marginTop: 14 } }, tore.map((e, i) => h("span", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, padding: "5px 10px", borderRadius: 999, background: e.team === "heim" ? "#fff" : GAST, color: e.team === "heim" ? HEIM : "#fff" } }, "" + (e.min || "") + "' " + e.spieler + (e.zu ? " (" + e.zu + ")" : "") + (e.ergebnis ? " \u00b7 " + e.ergebnis : "")))) : null),
       h("div", { style: { padding: "16px 22px 24px" } },
         h("div", { style: { display: "flex", justifyContent: "space-between", fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, color: "var(--t2)", marginBottom: 8 } }, h("span", null, h("span", { style: { display: "inline-block", width: 12, height: 12, borderRadius: 3, background: HEIM, marginRight: 6, verticalAlign: "-1px" } }), s.heim), h("span", null, s.gast, h("span", { style: { display: "inline-block", width: 12, height: 12, borderRadius: 3, background: GAST, marginLeft: 6, verticalAlign: "-1px" } }))),
+        (s.xg_heim !== null && s.xg_heim !== undefined) ? h("div", { style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, padding: "8px 12px", marginBottom: 10 } }, h(TwXgBalken, { xh: s.xg_heim, xg: s.xg_gast, heim: s.heim, gast: s.gast, en: en })) : null,
         !s.hat_stats ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: "var(--t2)", background: "var(--karte)", borderRadius: 12, padding: "14px 16px", marginBottom: 12 } }, en ? "Statistics arrive about 15\u201330 minutes after the final whistle." : "Die Statistik kommt etwa 15\u201330 Minuten nach Abpfiff.") : null,
         Object.keys(gr).map(g => h("div", { key: g, style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, padding: "10px 8px 6px", marginBottom: 10 } }, h("div", { style: { display: "inline-block", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: "#fff", background: "var(--t2)", padding: "4px 10px", borderRadius: 999, margin: "0 0 6px 10px" } }, g), gr[g].map(zeile))),
+        (s.aufstellungen && (twHatRaster((s.aufstellungen.heim || {}).startelf) || twHatRaster((s.aufstellungen.gast || {}).startelf))) ? h("div", { style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, padding: "10px 12px", marginBottom: 10 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--t2)", margin: "0 0 8px" } }, en ? "Line-ups" : "Aufstellungen"), h(TwSpielfeld, { heim: Object.assign({ name: s.heim }, s.aufstellungen.heim || {}), gast: Object.assign({ name: s.gast }, s.aufstellungen.gast || {}), en: en })) : null,
         karten.length ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 600, color: "var(--t2)", background: "var(--karte)", borderRadius: 12, padding: "10px 14px", marginBottom: 12 } }, karten.map(e => (e.min || "") + "' " + (/red/i.test(e.typ) ? (en ? "Red" : "Rot") : (en ? "Yellow" : "Gelb")) + " " + e.spieler).join("  \u00b7  ")) : null,
         (s.top || []).length ? h("div", null, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--t2)", margin: "14px 0 8px" } }, en ? "Standout players (Score v2)" : "Auff\u00e4llige Spieler (Score v2)"), h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 } }, h("div", { style: { display: "grid", gap: 8, alignContent: "start" } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: HEIM } }, s.heim), (heimTop.length ? heimTop : []).map(spielerKarte)), h("div", { style: { display: "grid", gap: 8, alignContent: "start" } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: GAST } }, s.gast), gastTop.map(spielerKarte)))) : (s.status === "beendet" ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)", marginTop: 10 } }, en ? "Player scores follow after the next scoring run." : "Die Spieler-Scores folgen nach dem n\u00e4chsten Bewertungslauf.") : null)))); };
   return h("div", null,
@@ -8434,6 +8437,10 @@ function MuSpielDetail({ s, liga, onClose }) {
   const wert = (team, k) => { const t = stat.find(x => x.team === team); const v = t && (t.werte || []).find(w => w.k === k); return v ? v.v : null; };
   const zahl = (v) => v == null ? null : Number(String(v).replace("%", ""));
   const sh = stat[0] ? stat[0].team : null; const sg = stat[1] ? stat[1].team : null;
+  // Punkt 27 (07.10.2026): Aufstellung als Spielfeld (Raster aus API-Football), Team-xG aus der Statistik
+  const aufH = aufst.find(l => heimId != null && l.team === heimId) || aufst[0] || null; const aufG = aufst.find(l => l !== aufH) || null;
+  const feldOk = !!(aufH && typeof twHatRaster === "function" && (twHatRaster(aufH.startelf) || (aufG && twHatRaster(aufG.startelf))));
+  const xgTeam = typeof twXgAusStatistik === "function" ? twXgAusStatistik(stat, sh, sg) : null;
   return hh("div", { className: "mu-modal", onClick: (e) => { if (e.target === e.currentTarget) onClose(); } },
     hh("div", { className: "mu-modal-box mu-spiel", role: "dialog", "aria-modal": "true", "aria-label": (s.heim || "") + " \u2013 " + (s.gast || "") },
       hh("div", { style: { display: "flex", alignItems: "center", gap: 10, background: MU_NAVY, color: "#fff", padding: "10px 14px" } },
@@ -8450,6 +8457,7 @@ function MuSpielDetail({ s, liga, onClose }) {
             hh("div", { className: "mu-spiel-status", style: { marginTop: 6, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, color: "var(--t2)" } }, muStatusText(st, fx.minute, en)),
             sp && sp.stand && sp.stand.halftime && sp.stand.halftime.home != null ? hh("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t3)" } }, (en ? "HT " : "HZ ") + sp.stand.halftime.home + ":" + sp.stand.halftime.away) : null),
           team(s.gast, s.gast_logo || (sp && sp.gast && sp.gast.logo))),
+        xgTeam ? hh("div", { style: { margin: "2px 0 6px" } }, hh(TwXgBalken, { xh: xgTeam.xh, xg: xgTeam.xg, heim: s.heim, gast: s.gast, en: en })) : null,
         lade && !sp ? leer(en ? "Loading match data \u2026" : "Spieldaten werden geladen \u2026") : null,
         kopf(en ? "Events" : "Ereignisse"),
         ereignisse.length ? hh("div", { className: "mu-spiel-ereignisse" }, ereignisse.map((e, i) => { const links = heimId == null || e.team === heimId;
@@ -8459,11 +8467,11 @@ function MuSpielDetail({ s, liga, onClose }) {
             hh("span", { style: { flex: 1, minWidth: 0, textAlign: links ? "left" : "right" } }, ereignisText(e))); }))
           : leer(angesetzt ? (en ? "The match has not started yet. Events appear during the match." : "Das Spiel hat noch nicht begonnen. Ereignisse erscheinen w\u00e4hrend des Spiels.") : sp ? (en ? "The data provider has no events for this match." : "F\u00fcr dieses Spiel liefert der Datenanbieter keine Ereignisse.") : (en ? "No data loaded." : "Keine Daten geladen.")),
         kopf(en ? "Line-ups" : "Aufstellungen"),
-        aufst.length ? hh("div", { className: "mu-g2 mu-spiel-aufstellungen" }, aufst.slice(0, 2).map((l, i) => hh("div", { key: i, style: { border: "1px solid " + HAIR, borderRadius: 10, padding: "10px 12px", minWidth: 0 } },
+        aufst.length ? (feldOk ? hh(TwSpielfeld, { heim: Object.assign({ name: s.heim }, aufH || {}), gast: Object.assign({ name: s.gast }, aufG || {}), en: en }) : hh("div", { className: "mu-g2 mu-spiel-aufstellungen" }, aufst.slice(0, 2).map((l, i) => hh("div", { key: i, style: { border: "1px solid " + HAIR, borderRadius: 10, padding: "10px 12px", minWidth: 0 } },
             hh("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, color: "var(--t1)" } }, (i === 0 ? s.heim : s.gast) + (l.formation ? " \u00b7 " + l.formation : "")),
             l.trainer ? hh("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t3)", marginBottom: 6 } }, (en ? "Coach: " : "Trainer: ") + l.trainer) : null,
             (l.startelf || []).map((p, k) => hh("div", { key: k, style: { display: "flex", gap: 8, fontFamily: FONT_BODY, fontSize: 13, color: "var(--t1)", padding: "2px 0" } }, hh("span", { style: { width: 22, textAlign: "right", color: "var(--t3)" } }, p.nr != null ? p.nr : ""), hh("span", { style: { flex: 1, minWidth: 0 } }, p.name), hh("span", { style: { color: "var(--t3)" } }, p.pos || ""))),
-            (l.bank || []).length ? hh("div", { style: { marginTop: 6, fontFamily: FONT_BODY, fontSize: 12, color: "var(--t2)" } }, (en ? "Bench: " : "Bank: ") + l.bank.map(p => p.name).join(", ")) : null)))
+            (l.bank || []).length ? hh("div", { style: { marginTop: 6, fontFamily: FONT_BODY, fontSize: 12, color: "var(--t2)" } }, (en ? "Bench: " : "Bank: ") + l.bank.map(p => p.name).join(", ")) : null))))
           : leer(angesetzt ? (en ? "Line-ups are published shortly before kick-off." : "Aufstellungen werden kurz vor Ansto\u00df ver\u00f6ffentlicht.") : (en ? "The data provider has no line-ups for this match." : "F\u00fcr dieses Spiel liefert der Datenanbieter keine Aufstellungen.")),
         kopf(en ? "Statistics" : "Statistiken"),
         stat.length >= 2 ? hh("div", { className: "mu-spiel-statistik" }, MU_STATS.map(([k, de]) => { const a = wert(sh, k), b = wert(sg, k); if (a == null && b == null) return null; const za = zahl(a) || 0, zb = zahl(b) || 0, sum = za + zb || 1;
@@ -8647,6 +8655,291 @@ function TwTickerAnsicht({ daten, laden, alle, onOpen, beobClubs, filter }) {
   "@media (max-width:760px){.tw-tk-zeile{grid-template-columns:40px minmax(0,1fr) 84px}.tw-tk-logos{grid-column:1/-1;padding-left:52px}.tw-tk-verein{max-width:40%}.tw-tk-kennz{gap:6px!important}.tw-tk-kennz>div{padding:8px 10px!important}.tw-tk-kennz>div>div:last-child{font-size:18px!important}}" +
   "@media (max-width:700px){.tw-gchips{flex-wrap:wrap!important;overflow-x:visible!important}}";
   document.head.appendChild(st); })();
+
+/* 27 Vereinsdatenbank und Vereinsseite (07.10.2026, Punkte 24/25): Umschalter "Spielerdatenbank | Vereinsdatenbank" auf der Datenbankseite,
+   Liste aller Vereine (Suche, Filter, Sortierung, Karten/Tabelle) und Vereinsseite (Übersicht, Kader komplett, Spiele, Transfers, Meldungen, Kontakte).
+   Daten: /api/tw-vereine-liste (tw_vereine_liste) und /api/tw-vereinsseite (tw_vereinsseite). */
+const VDB_URL = "/api/tw-vereine-liste";
+const VS_URL = "/api/tw-vereinsseite";
+let VDB_CACHE = null;
+const VDB_TXT = {
+  de: { spieler: "Spielerdatenbank", vereine: "Vereinsdatenbank", titel: "Vereinsdatenbank", sub: "Alle erfassten Vereine mit Liga, Tabellenlage, Trainer, Kader, Bedarf und voraussichtlichen Abgängen. Ein Klick öffnet die Vereinsseite mit dem kompletten Kader.",
+    suche: "Verein, Liga, Land oder Trainer suchen …", land: "Alle Länder", liga: "Alle Ligen", lage: "Lage", lage_alle: "Alle Lagen", abstieg: "Abstiegskampf", titel_r: "Titelrennen", druck: "Trainerdruck", bedarf: "Bedarf", bedarf_alle: "Jeder Bedarf", rot: "Dringend (rot)", gelb: "Erhöht (gelb)", kein: "Ohne akuten Bedarf",
+    reserve: "Zweite Mannschaften zeigen", sort: "Sortierung", s_name: "Name", s_rang: "Tabellenplatz", s_wert: "Kaderwert", s_kader: "Kadergröße", s_alter: "Altersschnitt", s_bedarf: "Bedarf", s_abg: "Abgänge", karten: "Karten", tabelle: "Tabelle",
+    treffer: "Vereine", laden: "Vereine werden geladen …", keine: "Keine Vereine für diese Auswahl.", platz: "Platz", pkt: "Pkt.", kader: "Kader", wert: "Wert", alter: "Ø Alter", trainer: "Trainer", abg: "Abgänge", bedarf_k: "Bedarf", offen: "Vereinsseite öffnen",
+    tab_ueb: "Übersicht", tab_kader: "Kader", tab_spiele: "Spiele", tab_transfers: "Transfers", tab_news: "Meldungen", tab_kontakte: "Kontakte", schliessen: "Schließen", lade_seite: "Vereinsseite wird geladen …", fehler: "Verein nicht gefunden.",
+    lage_h: "Tabellenlage", form_h: "Form (letzte Spiele)", tabelle_h: "Tabelle", ampel_h: "Bedarf nach Position (Verein sucht)", abg_h: "Voraussichtliche Abgänge", sucht_h: "Gemeldeter Bedarf", ger_h: "Wechselgerüchte", trainer_h: "Trainer", seit: "seit", wechsel: "Trainerwechsel", alle_pos: "Alle", nur_kader: "Nur aktueller Kader", alle_spieler: "Alle erfassten Spieler",
+    k_nr: "Nr.", k_name: "Spieler", k_pos: "Position", k_alter: "Alter", k_nat: "Nation", k_vertrag: "Vertrag bis", k_mw: "Marktwert", k_eins: "Einsätze", k_min: "Minuten", k_tore: "Tore", k_vorl: "Vorl.", k_form: "Form", k_status: "Status", verletzt: "verletzt", leihe: "Leihe von", abgang: "Abgang", stamm: "Stammspieler", bis: "bis",
+    st_tm: "nicht im TM-Kader", st_sm: "nicht im SM-Kader", st_woanders: "laut TM woanders", keine_spieler: "Keine Spieler erfasst.", spiele_keine: "Keine Spiele erfasst.", kommend: "Kommende Spiele", gespielt: "Letzte Spiele", prognose: "Prognose", aufst: "Aufstellung", xg: "xG",
+    zugaenge: "Zugänge", abgaenge: "Abgänge", keine_tr: "Keine Transfers in dieser Saison erfasst.", ablfrei: "ablösefrei", keine_news: "Keine Meldungen der letzten 30 Tage.", keine_ger: "Keine aktuellen Gerüchte.", kontakte_locked: "Kontakte sind Premium-Mitgliedern vorbehalten.", kontakte_zahl: "hinterlegte Kontakte", keine_kontakte: "Keine Kontakte hinterlegt.", quelle: "Quelle", mio: "Mio. €", tsd: "Tsd. €", wahrscheinlichkeit: "Wahrscheinlichkeit", heim: "H", ausw: "A", stand: "Stand", zweite: "Zweite Mannschaft", alias: "Auch bekannt als" },
+  en: { spieler: "Player database", vereine: "Club database", titel: "Club database", sub: "All clubs on file with league, table position, coach, squad, needs and likely departures. Click a club to open its page with the full squad.",
+    suche: "Search club, league, country or coach …", land: "All countries", liga: "All leagues", lage: "Situation", lage_alle: "Any situation", abstieg: "Relegation battle", titel_r: "Title race", druck: "Coach under pressure", bedarf: "Needs", bedarf_alle: "Any need", rot: "Urgent (red)", gelb: "Elevated (amber)", kein: "No acute need",
+    reserve: "Show reserve teams", sort: "Sort", s_name: "Name", s_rang: "Table position", s_wert: "Squad value", s_kader: "Squad size", s_alter: "Average age", s_bedarf: "Need", s_abg: "Departures", karten: "Cards", tabelle: "Table",
+    treffer: "clubs", laden: "Loading clubs …", keine: "No clubs match this selection.", platz: "Pos.", pkt: "pts", kader: "Squad", wert: "Value", alter: "Avg. age", trainer: "Coach", abg: "Departures", bedarf_k: "Need", offen: "Open club page",
+    tab_ueb: "Overview", tab_kader: "Squad", tab_spiele: "Matches", tab_transfers: "Transfers", tab_news: "News", tab_kontakte: "Contacts", schliessen: "Close", lade_seite: "Loading club page …", fehler: "Club not found.",
+    lage_h: "Table situation", form_h: "Form (recent matches)", tabelle_h: "Table", ampel_h: "Needs by position (club seeks)", abg_h: "Likely departures", sucht_h: "Reported needs", ger_h: "Transfer rumours", trainer_h: "Coach", seit: "since", wechsel: "coach change", alle_pos: "All", nur_kader: "Current squad only", alle_spieler: "All players on file",
+    k_nr: "No.", k_name: "Player", k_pos: "Position", k_alter: "Age", k_nat: "Nat.", k_vertrag: "Contract", k_mw: "Market value", k_eins: "Apps", k_min: "Minutes", k_tore: "Goals", k_vorl: "Assists", k_form: "Form", k_status: "Status", verletzt: "injured", leihe: "on loan from", abgang: "departure", stamm: "regular starter", bis: "until",
+    st_tm: "not in TM squad", st_sm: "not in SM squad", st_woanders: "elsewhere per TM", keine_spieler: "No players on file.", spiele_keine: "No matches on file.", kommend: "Upcoming", gespielt: "Recent matches", prognose: "Forecast", aufst: "Line-up", xg: "xG",
+    zugaenge: "Arrivals", abgaenge: "Departures", keine_tr: "No transfers recorded this season.", ablfrei: "free transfer", keine_news: "No news in the last 30 days.", keine_ger: "No current rumours.", kontakte_locked: "Contacts are reserved for premium members.", kontakte_zahl: "contacts on file", keine_kontakte: "No contacts on file.", quelle: "Source", mio: "M €", tsd: "K €", wahrscheinlichkeit: "probability", heim: "H", ausw: "A", stand: "As of", zweite: "Reserve team", alias: "Also known as" }
+};
+function vdbT(k) { const l = (typeof LANG !== "undefined" && LANG === "en") ? VDB_TXT.en : VDB_TXT.de; return l[k] != null ? l[k] : (VDB_TXT.de[k] != null ? VDB_TXT.de[k] : k); }
+function vdbEur(n) { n = Number(n) || 0; if (!n) return "–"; const en = typeof LANG !== "undefined" && LANG === "en"; if (n >= 1e6) { const v = n / 1e6; const s = (v >= 100 ? Math.round(v) : Math.round(v * 10) / 10).toString(); return (en ? s : s.replace(".", ",")) + " " + vdbT("mio"); } const k = Math.round(n / 1e3); return (en ? k : String(k).replace(".", ",")) + " " + vdbT("tsd"); }
+function vdbDatum(d) { if (!d) return ""; const s = String(d).slice(0, 10); const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/); if (!m) return s; return (typeof LANG !== "undefined" && LANG === "en") ? `${m[3]}/${m[2]}/${m[1]}` : `${m[3]}.${m[2]}.${m[1]}`; }
+function vdbMonat(d) { if (!d) return "–"; const s = String(d).slice(0, 7); const m = s.match(/^(\d{4})-(\d{2})$/); return m ? `${m[2]}/${m[1]}` : s; }
+const VDB_AMPEL = { rot: "#d64545", gelb: "#e0a800", gruen: "#2e9e5b" };
+function vdbLogo(x, size) { const h = React.createElement; const url = (x && x.logo) || (typeof clubLogoUrl === "function" ? clubLogoUrl(x && x.name) : null); size = size || 36;
+  return url ? h("img", { src: url, alt: "", loading: "lazy", style: { width: size, height: size, objectFit: "contain", borderRadius: 8, background: "var(--karte2)", flex: "none" }, onError: e => { e.currentTarget.style.visibility = "hidden"; } })
+    : h("div", { style: { width: size, height: size, borderRadius: 8, background: "var(--karte2)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: Math.round(size * 0.42), color: "var(--t3)", flex: "none" } }, String((x && x.name) || "?").replace(/^(FC|SC|SV|TSV|VfB|VfL|1\.|Borussia|Eintracht|Real|AC|AS|US|CD|CF|RC) /i, "").slice(0, 2).toUpperCase()); }
+function vdbChip(text, farbe, hintergrund) { return React.createElement("span", { style: { display: "inline-block", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 999, color: farbe || "var(--t2)", background: hintergrund || "var(--karte2)", border: `1px solid ${farbe ? farbe + "33" : "var(--linie)"}`, whiteSpace: "nowrap" } }, text); }
+const vdbSel = { fontFamily: FONT_BODY, fontSize: 13, padding: "10px 10px", border: "1px solid var(--linie)", borderRadius: 9, background: "var(--karte)", color: "var(--t1)" };
+
+function DbUmschalter({ tab, setTab }) {
+  const h = React.createElement;
+  const knopf = (k, text) => h("button", { type: "button", onClick: () => setTab(k), "aria-pressed": tab === k, style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 700, padding: "9px 18px", border: "none", borderRadius: 999, cursor: "pointer", background: tab === k ? "var(--t1)" : "transparent", color: tab === k ? "var(--karte)" : "var(--t2)", transition: "background .15s" } }, text);
+  return h("div", { role: "tablist", style: { display: "inline-flex", gap: 4, padding: 4, border: "1px solid var(--linie)", borderRadius: 999, background: "var(--karte)", marginBottom: 18 } }, knopf("spieler", vdbT("spieler")), knopf("vereine", vdbT("vereine")));
+}
+
+function VereineDbVue({ onOpen }) {
+  const h = React.createElement; const en = typeof LANG !== "undefined" && LANG === "en";
+  const [items, setItems] = useState(VDB_CACHE ? VDB_CACHE.vereine : null);
+  const [stand, setStand] = useState(VDB_CACHE ? VDB_CACHE.stand : null);
+  const [fehler, setFehler] = useState(false);
+  const [q, setQ] = useState(""); const [land, setLand] = useState(""); const [liga, setLiga] = useState(""); const [lage, setLage] = useState(""); const [bedarf, setBedarf] = useState("");
+  const [reserve, setReserve] = useState(false); const [sort, setSort] = useState("name"); const [ansicht, setAnsicht] = useState(() => (typeof window !== "undefined" && window.innerWidth <= 760) ? "karten" : "karten");
+  const [mobil, setMobil] = useState(() => typeof window !== "undefined" && window.innerWidth <= 760);
+  useEffect(() => { const f = () => setMobil(window.innerWidth <= 760); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);
+  useEffect(() => {
+    if (VDB_CACHE) return; let aktiv = true;
+    fetch(VDB_URL, { credentials: "omit", cache: "default" }).then(r => r.json()).then(raw => {
+      const d = (typeof normResp === "function" ? normResp(raw) : raw) || {}; const v = Array.isArray(d.vereine) ? d.vereine : [];
+      VDB_CACHE = { stand: d.stand || null, vereine: v }; if (!aktiv) return; setItems(v); setStand(d.stand || null);
+    }).catch(() => { if (aktiv) { setFehler(true); setItems([]); } });
+    return () => { aktiv = false; };
+  }, []);
+  const laender = useMemo(() => { const s = {}; (items || []).forEach(x => { if (x.land) s[x.land] = (s[x.land] || 0) + 1; }); return Object.keys(s).sort((a, b) => a.localeCompare(b)); }, [items]);
+  const ligen = useMemo(() => { const s = {}; (items || []).forEach(x => { if (x.liga && (!land || x.land === land)) s[x.liga] = (s[x.liga] || 0) + 1; }); return Object.keys(s).sort((a, b) => (a.localeCompare(b))); }, [items, land]);
+  const liste = useMemo(() => {
+    if (!items) return [];
+    const toks = q.toLowerCase().split(/\s+/).map(t => t.trim()).filter(Boolean);
+    let out = items.filter(x => {
+      if (!reserve && x.reserve && !toks.length) return false;
+      if (land && x.land !== land) return false;
+      if (liga && x.liga !== liga) return false;
+      if (lage === "abstieg" && !x.abstieg) return false; if (lage === "titel" && !x.titel) return false; if (lage === "druck" && !x.druck) return false;
+      if (bedarf === "rot" && !(Number(x.rot) > 0)) return false; if (bedarf === "gelb" && !(Number(x.gelb) > 0)) return false; if (bedarf === "kein" && (Number(x.rot) > 0 || Number(x.gelb) > 0)) return false;
+      if (toks.length) { const s = x.suche || x.name.toLowerCase(); if (!toks.every(t => s.indexOf(t) >= 0)) return false; }
+      return true;
+    });
+    const num = (v, d) => v == null || v === "" ? d : Number(v);
+    const cmp = {
+      name: (a, b) => a.name.localeCompare(b.name), rang: (a, b) => num(a.rang, 999) - num(b.rang, 999) || a.name.localeCompare(b.name), wert: (a, b) => num(b.wert, -1) - num(a.wert, -1),
+      kader: (a, b) => num(b.kader, -1) - num(a.kader, -1), alter: (a, b) => num(a.alter, 99) - num(b.alter, 99), bedarf: (a, b) => (num(b.rot, 0) * 3 + num(b.gelb, 0)) - (num(a.rot, 0) * 3 + num(a.gelb, 0)) || num(b.bedarf_score, 0) - num(a.bedarf_score, 0), abg: (a, b) => num(b.abgaenge, 0) - num(a.abgaenge, 0)
+    }[sort] || ((a, b) => a.name.localeCompare(b.name));
+    out = out.slice().sort(cmp);
+    if (toks.length) { const t0 = toks[0]; out.sort((a, b) => (b.name.toLowerCase().startsWith(t0) ? 1 : 0) - (a.name.toLowerCase().startsWith(t0) ? 1 : 0) || cmp(a, b)); }
+    return out;
+  }, [items, q, land, liga, lage, bedarf, reserve, sort]);
+  const landName = l => (typeof LAND_LIGEN !== "undefined" && en) ? ((LAND_LIGEN.find(x => x.de === l) || {}).en || l) : l;
+  const bedarfChips = x => { const c = []; if (Number(x.rot) > 0) c.push(vdbChip(`${x.rot} ${en ? "red" : "rot"}`, VDB_AMPEL.rot, "rgba(214,69,69,.1)")); if (Number(x.gelb) > 0) c.push(vdbChip(`${x.gelb} ${en ? "amber" : "gelb"}`, "#9a7200", "rgba(224,168,0,.14)")); if (!c.length && x.bedarf) c.push(vdbChip(en ? "no acute need" : "kein akuter Bedarf", "var(--gruen-text)", "var(--gruen-tint)")); return c; };
+  const lageChips = x => { const c = []; if (x.abstieg) c.push(vdbChip(vdbT("abstieg"), VDB_AMPEL.rot, "rgba(214,69,69,.1)")); if (x.titel) c.push(vdbChip(vdbT("titel_r"), "var(--gruen-text)", "var(--gruen-tint)")); if (x.druck) c.push(vdbChip(vdbT("druck"), "#9a7200", "rgba(224,168,0,.14)")); if (x.reserve) c.push(vdbChip(vdbT("zweite"))); return c; };
+  const karte = x => h("button", { key: x.id, type: "button", onClick: () => onOpen(x), style: { textAlign: "left", cursor: "pointer", background: "var(--karte)", border: "1px solid var(--linie)", borderRadius: 14, padding: 14, display: "flex", gap: 12, alignItems: "flex-start", color: "var(--t1)", width: "100%" } },
+    vdbLogo(x, 44),
+    h("div", { style: { minWidth: 0, flex: 1 } },
+      h("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 19, lineHeight: "22px", textTransform: "uppercase", letterSpacing: .2 } }, typeof clubName === "function" ? clubName(x.name) : x.name),
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)", marginTop: 2 } }, [landName(x.land), x.liga].filter(Boolean).join(" · "), x.rang ? ` · ${vdbT("platz")} ${x.rang}${x.teams ? "/" + x.teams : ""}${x.pkt != null ? " · " + x.pkt + " " + vdbT("pkt") : ""}` : ""),
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)", marginTop: 4 } }, x.trainer ? `${vdbT("trainer")}: ${x.trainer} · ` : "", `${vdbT("kader")} ${x.kader || "–"} · ${vdbT("wert")} ${vdbEur(x.wert)} · ${vdbT("alter")} ${x.alter != null ? String(x.alter).replace(".", en ? "." : ",") : "–"}`),
+      h("div", { style: { display: "flex", flexWrap: "wrap", gap: 5, marginTop: 8 } }, ...lageChips(x), ...bedarfChips(x), Number(x.abgaenge) > 0 ? vdbChip(`${x.abgaenge} ${vdbT("abg").toLowerCase()}`, "var(--blau-text)", "rgba(30,78,121,.1)") : null)));
+  const th = (t, extra) => h("th", { style: Object.assign({ textAlign: "left", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: .6, color: "var(--t3)", padding: "8px 10px", borderBottom: "1px solid var(--linie)", whiteSpace: "nowrap" }, extra || {}) }, t);
+  const td = (c, extra) => h("td", { style: Object.assign({ fontFamily: FONT_BODY, fontSize: 13, padding: "8px 10px", borderBottom: "1px solid var(--linie)", verticalAlign: "middle" }, extra || {}) }, c);
+  const tabelle = h("div", { style: { overflowX: "auto", border: "1px solid var(--linie)", borderRadius: 12, background: "var(--karte)" } }, h("table", { style: { borderCollapse: "collapse", width: "100%", minWidth: 860 } },
+    h("thead", null, h("tr", null, th(vdbT("k_name")), th(en ? "Country" : "Land"), th(en ? "League" : "Liga"), th(vdbT("platz"), { textAlign: "right" }), th(vdbT("pkt"), { textAlign: "right" }), th(vdbT("kader"), { textAlign: "right" }), th(vdbT("wert"), { textAlign: "right" }), th(vdbT("alter"), { textAlign: "right" }), th(vdbT("trainer")), th(vdbT("bedarf_k")), th(vdbT("abg"), { textAlign: "right" }))),
+    h("tbody", null, liste.map(x => h("tr", { key: x.id, onClick: () => onOpen(x), style: { cursor: "pointer" }, className: "vdb-zeile" },
+      td(h("div", { style: { display: "flex", alignItems: "center", gap: 8 } }, vdbLogo(x, 24), h("span", { style: { fontWeight: 700 } }, typeof clubName === "function" ? clubName(x.name) : x.name), x.reserve ? vdbChip("II") : null)),
+      td(landName(x.land) || "–"), td(x.liga || "–"), td(x.rang ? `${x.rang}${x.teams ? "/" + x.teams : ""}` : "–", { textAlign: "right" }), td(x.pkt != null ? x.pkt : "–", { textAlign: "right" }), td(x.kader || "–", { textAlign: "right" }), td(vdbEur(x.wert), { textAlign: "right" }), td(x.alter != null ? String(x.alter).replace(".", en ? "." : ",") : "–", { textAlign: "right" }), td(x.trainer || "–"),
+      td(h("div", { style: { display: "flex", gap: 4, flexWrap: "wrap" } }, ...bedarfChips(x), ...lageChips(x))), td(Number(x.abgaenge) > 0 ? x.abgaenge : "–", { textAlign: "right" }))))));
+  return h("div", null,
+    h("style", null, ".vdb-zeile:hover td{background:var(--zeile-hover)}"),
+    h("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 30, lineHeight: "38px", color: INK, marginBottom: 6 } }, vdbT("titel")),
+    h("p", { style: { fontFamily: FONT_BODY, fontSize: 14.5, color: MUTED, lineHeight: 1.5, margin: "0 0 18px" } }, vdbT("sub"), items ? ` ${items.length} ${vdbT("treffer")}${stand ? ` · ${vdbT("stand")} ${vdbDatum(stand)}` : ""}.` : ""),
+    h("div", { style: { display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 } },
+      h("input", { value: q, onChange: e => setQ(e.target.value), placeholder: vdbT("suche"), "aria-label": vdbT("suche"), style: { flex: "1 1 240px", fontFamily: FONT_BODY, fontSize: 16, padding: "10px 12px", border: "1px solid var(--linie)", borderRadius: 9, boxSizing: "border-box", background: "var(--karte)", color: "var(--t1)" } }),
+      h("select", { value: land, onChange: e => { setLand(e.target.value); setLiga(""); }, style: vdbSel }, h("option", { value: "" }, vdbT("land")), laender.map(l => h("option", { key: l, value: l }, landName(l)))),
+      h("select", { value: liga, onChange: e => setLiga(e.target.value), style: Object.assign({ maxWidth: 200 }, vdbSel) }, h("option", { value: "" }, vdbT("liga")), ligen.map(l => h("option", { key: l, value: l }, l))),
+      h("select", { value: lage, onChange: e => setLage(e.target.value), style: vdbSel }, h("option", { value: "" }, vdbT("lage_alle")), h("option", { value: "abstieg" }, vdbT("abstieg")), h("option", { value: "titel" }, vdbT("titel_r")), h("option", { value: "druck" }, vdbT("druck"))),
+      h("select", { value: bedarf, onChange: e => setBedarf(e.target.value), style: vdbSel }, h("option", { value: "" }, vdbT("bedarf_alle")), h("option", { value: "rot" }, vdbT("rot")), h("option", { value: "gelb" }, vdbT("gelb")), h("option", { value: "kein" }, vdbT("kein")))),
+    h("div", { style: { display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", marginBottom: 14, fontFamily: FONT_BODY, fontSize: 13, color: "var(--t2)" } },
+      h("span", { style: { fontWeight: 700, color: "var(--t1)" } }, items ? `${liste.length} ${vdbT("treffer")}` : vdbT("laden")),
+      h("label", { style: { display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer" } }, h("input", { type: "checkbox", checked: reserve, onChange: e => setReserve(e.target.checked) }), vdbT("reserve")),
+      h("span", { style: { marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 6 } }, vdbT("sort") + ":", h("select", { value: sort, onChange: e => setSort(e.target.value), style: Object.assign({}, vdbSel, { padding: "6px 8px" }) }, h("option", { value: "name" }, vdbT("s_name")), h("option", { value: "rang" }, vdbT("s_rang")), h("option", { value: "wert" }, vdbT("s_wert")), h("option", { value: "kader" }, vdbT("s_kader")), h("option", { value: "alter" }, vdbT("s_alter")), h("option", { value: "bedarf" }, vdbT("s_bedarf")), h("option", { value: "abg" }, vdbT("s_abg")))),
+      !mobil ? h("span", { style: { display: "inline-flex", border: "1px solid var(--linie)", borderRadius: 8, overflow: "hidden" } }, ["karten", "tabelle"].map(a => h("button", { key: a, type: "button", onClick: () => setAnsicht(a), style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, padding: "6px 10px", border: "none", cursor: "pointer", background: ansicht === a ? "var(--t1)" : "var(--karte)", color: ansicht === a ? "var(--karte)" : "var(--t2)" } }, vdbT(a)))) : null),
+    fehler ? h("div", { style: { fontFamily: FONT_BODY, color: "var(--t2)" } }, vdbT("keine")) : !items ? h("div", { style: { fontFamily: FONT_BODY, color: "var(--t2)", padding: 20 } }, vdbT("laden")) : !liste.length ? h("div", { style: { fontFamily: FONT_BODY, color: "var(--t2)", padding: 20 } }, vdbT("keine")) :
+      (ansicht === "tabelle" && !mobil) ? tabelle : h("div", { style: { display: "grid", gridTemplateColumns: mobil ? "1fr" : "repeat(auto-fill, minmax(300px, 1fr))", gap: 10 } }, liste.slice(0, 400).map(karte)));
+}
+
+function VereinsSeite({ id, name, authQ, isPrem, onClose, onOpenPlayer }) {
+  const h = React.createElement; const en = typeof LANG !== "undefined" && LANG === "en";
+  const [d, setD] = useState(null); const [tab, setTab] = useState("ueb"); const [grp, setGrp] = useState(""); const [alleSp, setAlleSp] = useState(true); const [aufOffen, setAufOffen] = useState(null);
+  const [mobil, setMobil] = useState(() => typeof window !== "undefined" && window.innerWidth <= 760);
+  useEffect(() => { const f = () => setMobil(window.innerWidth <= 760); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);
+  useEffect(() => {
+    let aktiv = true; setD(null); setTab("ueb"); setGrp("");
+    const u = VS_URL + "?" + (id ? "id=" + encodeURIComponent(id) : "name=" + encodeURIComponent(name || "")) + (authQ || "");
+    fetch(u, { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(raw => { const x = (typeof normResp === "function" ? normResp(raw) : raw) || {}; if (aktiv) setD(x && x.ok ? x : { ok: false }); }).catch(() => { if (aktiv) setD({ ok: false }); });
+    return () => { aktiv = false; };
+  }, [id, name, authQ]);
+  useEffect(() => { const f = e => { if (e.key === "Escape") onClose(); }; window.addEventListener("keydown", f); return () => window.removeEventListener("keydown", f); }, [onClose]);
+  const v = d && d.ok ? d.verein : null;
+  const H = (t, extra) => h("div", { style: Object.assign({ fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: "var(--blau-text)", textTransform: "uppercase", letterSpacing: 1, margin: "14px 0 8px" }, extra || {}) }, t);
+  const kasten = (kinder, extra) => h("div", { style: Object.assign({ background: "var(--karte)", border: "1px solid var(--linie)", borderRadius: 12, padding: "12px 14px", fontFamily: FONT_BODY, fontSize: 13, color: "var(--t1)", lineHeight: 1.5 }, extra || {}) }, kinder);
+  const spielerLink = (pid, text, team) => h("button", { type: "button", onClick: () => pid && onOpenPlayer && onOpenPlayer(pid, text, team || (v && v.name)), style: { background: "none", border: "none", padding: 0, cursor: pid ? "pointer" : "default", fontFamily: FONT_BODY, fontSize: "inherit", fontWeight: 700, color: pid ? "var(--blau-text)" : "var(--t1)", textAlign: "left" } }, text);
+  const tabs = [["ueb", vdbT("tab_ueb")], ["kader", `${vdbT("tab_kader")}${d && d.ok ? ` (${(d.kader || []).length})` : ""}`], ["spiele", vdbT("tab_spiele")], ["transfers", vdbT("tab_transfers")], ["news", vdbT("tab_news")], ["kontakte", `${vdbT("tab_kontakte")}${d && d.ok && d.kontakte_zahl ? ` (${d.kontakte_zahl})` : ""}`]];
+  const ergebnisChip = s => { if (s.th == null) return null; const eig = s.ist_heim ? s.th : s.tg, geg = s.ist_heim ? s.tg : s.th; const f = eig > geg ? VDB_AMPEL.gruen : eig < geg ? VDB_AMPEL.rot : "#9a7200"; return h("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 15, color: "#fff", background: f, borderRadius: 6, padding: "1px 7px", minWidth: 38, textAlign: "center", display: "inline-block" } }, `${s.th}:${s.tg}`); };
+  const xgBalken = s => { if (s.xh == null && s.xg == null) return null; const a = Number(s.xh) || 0, b = Number(s.xg) || 0, sum = a + b || 1; return h("div", { title: `${vdbT("xg")} ${a.toFixed(2)} : ${b.toFixed(2)}`, style: { display: "flex", alignItems: "center", gap: 6, fontFamily: FONT_BODY, fontSize: 11, color: "var(--t2)", minWidth: 150 } }, h("span", null, a.toFixed(2)), h("div", { style: { flex: 1, height: 6, borderRadius: 3, background: "var(--karte2)", overflow: "hidden", display: "flex" } }, h("div", { style: { width: `${Math.round(a / sum * 100)}%`, background: "var(--teal)" } }), h("div", { style: { flex: 1, background: "var(--linie2)" } })), h("span", null, b.toFixed(2)), h("span", { style: { fontWeight: 700 } }, vdbT("xg"))); };
+  const hatAufst = s => s.aufst && typeof twHatRaster === "function" && (twHatRaster((s.aufst.heim || {}).startelf) || twHatRaster((s.aufst.gast || {}).startelf));
+  const spielZeile = s => h("div", { key: s.id, style: { borderBottom: "1px solid var(--linie)" } }, h("div", { style: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, padding: "8px 0", fontFamily: FONT_BODY, fontSize: 13 } },
+    h("span", { style: { color: "var(--t3)", minWidth: 72 } }, vdbDatum(s.datum)), h("span", { style: { fontWeight: 700, minWidth: 220, flex: "1 1 220px" } }, `${typeof clubName === "function" ? clubName(s.heim) : s.heim} – ${typeof clubName === "function" ? clubName(s.gast) : s.gast}`, s.liga ? h("span", { style: { color: "var(--t3)", fontWeight: 400 } }, ` · ${s.liga}`) : null),
+    ergebnisChip(s) || (s.prog ? h("span", { style: { color: "var(--t2)", fontSize: 12 } }, `${vdbT("prognose")}: ${s.prog.h}% / ${s.prog.u}% / ${s.prog.g}%`) : h("span", { style: { color: "var(--t3)" } }, s.status || "–")),
+    xgBalken(s), hatAufst(s) ? h("button", { type: "button", onClick: () => setAufOffen(aufOffen === s.id ? null : s.id), style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 999, border: "1px solid var(--linie)", background: aufOffen === s.id ? "var(--t1)" : "var(--karte)", color: aufOffen === s.id ? "var(--karte)" : "var(--blau-text)", cursor: "pointer" } }, vdbT("aufst") + (aufOffen === s.id ? " ▴" : " ▾")) : (s.auf ? vdbChip(vdbT("aufst"), "var(--blau-text)", "rgba(30,78,121,.1)") : null)),
+    aufOffen === s.id && hatAufst(s) ? h("div", { style: { padding: "4px 0 10px" } }, h(TwSpielfeld, { heim: Object.assign({ name: s.heim }, s.aufst.heim || {}), gast: Object.assign({ name: s.gast }, s.aufst.gast || {}), en: en })) : null);
+  const kaderListe = () => {
+    const alle = (d.kader || []).filter(k => (alleSp || !k.status) && (!grp || k.grp === grp));
+    const grpName = g => ({ TW: en ? "Goalkeepers" : "Torhüter", ABW: en ? "Defence" : "Abwehr", MF: en ? "Midfield" : "Mittelfeld", ST: en ? "Attack" : "Sturm" })[g] || (en ? "Other" : "Sonstige");
+    const statusText = k => { const t = []; if (k.verletzt) t.push(`${vdbT("verletzt")}${k.verletzt_bis ? " " + vdbT("bis") + " " + vdbDatum(k.verletzt_bis) : ""}`); if (k.leihe) t.push(`${vdbT("leihe")} ${k.leihe}`); if (k.abgang != null && k.abgang >= 35) t.push(`${vdbT("abgang")} ${k.abgang} %`); if (k.status) t.push(vdbT(k.status === "nicht_im_tm_kader" ? "st_tm" : k.status === "nicht_im_sm_kader" ? "st_sm" : k.status === "laut_tm_woanders" ? "st_woanders" : k.status)); return t; };
+    const chips = k => statusText(k).map((t, i) => vdbChip(t, /verletzt|injured/.test(t) ? VDB_AMPEL.rot : /Abgang|departure/.test(t) ? "var(--blau-text)" : "var(--t2)", /verletzt|injured/.test(t) ? "rgba(214,69,69,.1)" : "var(--karte2)"));
+    const formChip = k => k.form != null ? h("span", { title: `${vdbT("k_form")} (${k.form_spiele || 0})`, style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 14, color: "#fff", background: k.form >= 70 ? VDB_AMPEL.gruen : k.form >= 50 ? "#9a7200" : VDB_AMPEL.rot, borderRadius: 6, padding: "1px 6px" } }, Math.round(k.form)) : h("span", { style: { color: "var(--t3)" } }, "–");
+    const filter = h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", margin: "6px 0 12px", fontFamily: FONT_BODY, fontSize: 13 } },
+      ["", "TW", "ABW", "MF", "ST"].map(g => h("button", { key: g || "alle", type: "button", onClick: () => setGrp(g), style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, padding: "5px 11px", borderRadius: 999, border: "1px solid var(--linie)", cursor: "pointer", background: grp === g ? "var(--t1)" : "var(--karte)", color: grp === g ? "var(--karte)" : "var(--t2)" } }, g ? grpName(g) : vdbT("alle_pos"))),
+      h("label", { style: { marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 6, color: "var(--t2)", cursor: "pointer" } }, h("input", { type: "checkbox", checked: alleSp, onChange: e => setAlleSp(e.target.checked) }), vdbT("alle_spieler")));
+    if (!alle.length) return h("div", null, filter, h("div", { style: { fontFamily: FONT_BODY, color: "var(--t2)" } }, vdbT("keine_spieler")));
+    if (mobil) return h("div", null, filter, alle.map(k => h("div", { key: k.pid, style: { display: "flex", gap: 10, padding: "9px 0", borderBottom: "1px solid var(--linie)", fontFamily: FONT_BODY, fontSize: 13 } },
+      k.photo ? h("img", { src: k.photo, alt: "", loading: "lazy", style: { width: 40, height: 40, borderRadius: 20, objectFit: "cover", background: "var(--karte2)", flex: "none" } }) : h("div", { style: { width: 40, height: 40, borderRadius: 20, background: "var(--karte2)", flex: "none" } }),
+      h("div", { style: { flex: 1, minWidth: 0 } }, h("div", { style: { display: "flex", alignItems: "center", gap: 6 } }, k.nr != null ? h("span", { style: { color: "var(--t3)", fontSize: 12 } }, k.nr) : null, spielerLink(k.pid, k.name), formChip(k)),
+        h("div", { style: { color: "var(--t2)", fontSize: 12 } }, [k.pos_tm || k.pos, k.age ? `${k.age} ${en ? "y" : "J."}` : null, k.nat, k.vertrag ? `${vdbT("k_vertrag")} ${vdbMonat(k.vertrag)}` : null, k.mw ? vdbEur(k.mw) : null].filter(Boolean).join(" · ")),
+        h("div", { style: { color: "var(--t2)", fontSize: 12 } }, `${k.apps != null ? k.apps : 0} ${vdbT("k_eins")} · ${k.min != null ? k.min : 0} ${vdbT("k_min")} · ${k.tore || 0} ${vdbT("k_tore")} · ${k.vorlagen || 0} ${vdbT("k_vorl")}`),
+        statusText(k).length ? h("div", { style: { display: "flex", flexWrap: "wrap", gap: 4, marginTop: 4 } }, ...chips(k)) : null))));
+    const th = (t, r) => h("th", { style: { textAlign: r ? "right" : "left", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: .6, color: "var(--t3)", padding: "7px 8px", borderBottom: "1px solid var(--linie)", whiteSpace: "nowrap" } }, t);
+    const td = (c, r, extra) => h("td", { style: Object.assign({ fontFamily: FONT_BODY, fontSize: 13, padding: "7px 8px", borderBottom: "1px solid var(--linie)", textAlign: r ? "right" : "left", verticalAlign: "middle", whiteSpace: "nowrap" }, extra || {}) }, c);
+    let letzteGrp = null; const zeilen = [];
+    alle.forEach(k => { if (k.grp !== letzteGrp && !grp) { letzteGrp = k.grp; zeilen.push(h("tr", { key: "g" + k.grp }, h("td", { colSpan: 13, style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: .8, color: "var(--blau-text)", padding: "12px 8px 4px" } }, grpName(k.grp)))); }
+      zeilen.push(h("tr", { key: k.pid, style: { opacity: k.status ? .72 : 1 } }, td(k.nr != null ? k.nr : "", true, { color: "var(--t3)" }), td(h("div", { style: { display: "flex", alignItems: "center", gap: 8 } }, k.photo ? h("img", { src: k.photo, alt: "", loading: "lazy", style: { width: 28, height: 28, borderRadius: 14, objectFit: "cover", background: "var(--karte2)" } }) : h("div", { style: { width: 28, height: 28, borderRadius: 14, background: "var(--karte2)" } }), spielerLink(k.pid, k.name), k.nationalspieler ? h("span", { title: k.nationalspieler, style: { fontSize: 11, color: "var(--t3)" } }, "★") : null)),
+        td(k.pos_tm || k.pos || "–"), td(k.age || "–", true), td(k.nat || "–"), td(k.vertrag ? vdbMonat(k.vertrag) : "–", true), td(vdbEur(k.mw), true), td(k.apps != null ? k.apps : "–", true), td(k.min != null ? k.min : "–", true), td(k.tore != null ? k.tore : "–", true), td(k.vorlagen != null ? k.vorlagen : "–", true), td(formChip(k), true), td(h("div", { style: { display: "flex", gap: 4, flexWrap: "wrap" } }, ...chips(k)), false, { whiteSpace: "normal", minWidth: 140 }))); });
+    return h("div", null, filter, h("div", { style: { overflowX: "auto", border: "1px solid var(--linie)", borderRadius: 12, background: "var(--karte)" } }, h("table", { style: { borderCollapse: "collapse", width: "100%", minWidth: 980 } }, h("thead", null, h("tr", null, th(vdbT("k_nr"), true), th(vdbT("k_name")), th(vdbT("k_pos")), th(vdbT("k_alter"), true), th(vdbT("k_nat")), th(vdbT("k_vertrag"), true), th(vdbT("k_mw"), true), th(vdbT("k_eins"), true), th(vdbT("k_min"), true), th(vdbT("k_tore"), true), th(vdbT("k_vorl"), true), th(vdbT("k_form"), true), th(vdbT("k_status")))), h("tbody", null, zeilen))));
+  };
+  const uebersicht = () => {
+    const l = d.lage; const f = d.form; const tbl = d.tabelle || []; const ich = tbl.findIndex(r => r.ist); const aus = ich >= 0 ? tbl.slice(Math.max(0, Math.min(ich - 2, tbl.length - 5)), Math.max(0, Math.min(ich - 2, tbl.length - 5)) + 5) : tbl.slice(0, 5);
+    const ampel = (d.ampel || []).filter(a => ["TW", "ABW", "MF", "ST"].indexOf(a.position) >= 0);
+    return h("div", { style: { display: "grid", gridTemplateColumns: mobil ? "1fr" : "1fr 1fr", gap: 14 } },
+      h("div", null,
+        H(vdbT("lage_h"), { marginTop: 0 }), kasten(l ? h("div", null, h("div", { style: { fontWeight: 700 } }, `${vdbT("platz")} ${l.rang || "–"}${l.teams ? "/" + l.teams : ""} · ${l.punkte != null ? l.punkte + " " + vdbT("pkt") : ""}${l.spiele != null ? ` (${l.spiele} ${en ? "matches" : "Spiele"})` : ""}`), h("div", { style: { color: "var(--t2)" } }, en ? (l.lage_en || l.lage_de) : (l.lage_de || l.lage_en)), h("div", { style: { display: "flex", gap: 5, flexWrap: "wrap", marginTop: 6 } }, l.abstiegskampf ? vdbChip(vdbT("abstieg"), VDB_AMPEL.rot, "rgba(214,69,69,.1)") : null, l.titelrennen ? vdbChip(vdbT("titel_r"), "var(--gruen-text)", "var(--gruen-tint)") : null, l.trainerdruck ? vdbChip(vdbT("druck"), "#9a7200", "rgba(224,168,0,.14)") : null, l.form ? vdbChip(`${en ? "Form" : "Form"} ${l.form}`) : null)) : h("span", { style: { color: "var(--t2)" } }, "–")),
+        aus.length ? h("div", null, H(vdbT("tabelle_h")), kasten(h("table", { style: { borderCollapse: "collapse", width: "100%" } }, h("tbody", null, aus.map(r => h("tr", { key: r.rang, style: { fontWeight: r.ist ? 800 : 400, background: r.ist ? "var(--karte2)" : "transparent" } }, h("td", { style: { padding: "4px 6px", width: 28, color: "var(--t3)" } }, r.rang), h("td", { style: { padding: "4px 6px" } }, typeof clubName === "function" ? clubName(r.team) : r.team), h("td", { style: { padding: "4px 6px", textAlign: "right", color: "var(--t2)" } }, r.sp), h("td", { style: { padding: "4px 6px", textAlign: "right", color: "var(--t2)" } }, r.diff > 0 ? "+" + r.diff : r.diff), h("td", { style: { padding: "4px 6px", textAlign: "right" } }, r.pkt))))), { padding: "6px 8px" })) : null,
+        H(vdbT("trainer_h")), kasten(d.trainer && (d.trainer.name || (v && v.trainer)) ? h("div", null, h("div", { style: { fontWeight: 700 } }, d.trainer.name || v.trainer, d.trainer.nat ? h("span", { style: { fontWeight: 400, color: "var(--t2)" } }, ` · ${d.trainer.nat}${d.trainer.alter ? ", " + d.trainer.alter : ""}`) : null), d.trainer.seit ? h("div", { style: { color: "var(--t2)" } }, `${vdbT("seit")} ${vdbDatum(d.trainer.seit)}`) : null, d.trainer.wechsel ? h("div", { style: { color: "var(--t2)" } }, `${vdbT("wechsel")}: ${d.trainer.wechsel.alt || "?"} → ${d.trainer.wechsel.neu || "?"} (${vdbDatum(d.trainer.wechsel.seit)})`) : null) : h("span", { style: { color: "var(--t2)" } }, "–")),
+        f && f.spiele ? h("div", null, H(vdbT("form_h")), kasten(h("div", null, h("div", { style: { display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 6 } }, (f.letzte || []).slice(0, 8).reverse().map((s, i) => h("span", { key: i, title: `${vdbDatum(s.datum)} ${s.heim ? "vs" : "@"} ${s.gegner} ${s.tore}:${s.gegentore}${s.xg != null ? " · xG " + s.xg : ""}`, style: { width: 26, height: 26, borderRadius: 6, display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontFamily: FONT_DISPLAY, fontWeight: 700, background: s.tore > s.gegentore ? VDB_AMPEL.gruen : s.tore < s.gegentore ? VDB_AMPEL.rot : "#9a7200" } }, s.tore > s.gegentore ? (en ? "W" : "S") : s.tore < s.gegentore ? (en ? "L" : "N") : (en ? "D" : "U")))), h("div", { style: { color: "var(--t2)" } }, `${f.spiele} ${en ? "matches" : "Spiele"}: ${f.tore}:${f.gegentore} ${en ? "goals" : "Tore"}${f.bb != null ? ` · ${en ? "possession" : "Ballbesitz"} ${f.bb} %` : ""}${f.schuesse != null ? ` · ${f.schuesse} ${en ? "shots/match" : "Schüsse/Spiel"}` : ""}${f.xg != null ? ` · ${vdbT("xg")} ${f.xg}/${en ? "match" : "Spiel"}` : ""}`))) ) : null),
+      h("div", null,
+        H(vdbT("ampel_h"), { marginTop: 0 }), kasten(ampel.length ? ampel.map(a => h("div", { key: a.position, style: { padding: "6px 0", borderBottom: "1px solid var(--linie)" } }, h("div", { style: { display: "flex", alignItems: "center", gap: 8 } }, h("span", { style: { width: 10, height: 10, borderRadius: 5, background: VDB_AMPEL[a.ampel] || "var(--t3)", display: "inline-block" } }), h("span", { style: { fontWeight: 800, minWidth: 36 } }, a.position), h("span", { style: { color: "var(--t2)" } }, `${a.score} ${en ? "pts" : "Punkte"}`)), (a.gruende || []).slice(0, 3).map((g, i) => h("div", { key: i, style: { color: "var(--t2)", fontSize: 12, paddingLeft: 18 } }, "• " + g)))) : h("span", { style: { color: "var(--t2)" } }, "–")),
+        H(vdbT("abg_h")), kasten((d.abgaenge || []).length ? (d.abgaenge || []).map(k => h("div", { key: k.pid, style: { padding: "5px 0", borderBottom: "1px solid var(--linie)" } }, h("div", { style: { display: "flex", alignItems: "center", gap: 8 } }, spielerLink(k.pid, k.name), h("span", { style: { color: "var(--t2)", fontSize: 12 } }, `${k.pos || k.grp || ""}${k.age ? ", " + k.age : ""}`), h("span", { style: { marginLeft: "auto", fontFamily: FONT_DISPLAY, fontWeight: 700, color: k.p >= 60 ? VDB_AMPEL.rot : k.p >= 45 ? "#9a7200" : "var(--t2)" } }, `${k.p} %`), k.stamm ? vdbChip(vdbT("stamm"), "var(--blau-text)", "rgba(30,78,121,.1)") : null), h("div", { style: { color: "var(--t2)", fontSize: 12 } }, k.text))) : h("span", { style: { color: "var(--t2)" } }, "–")),
+        (d.sucht || []).length ? h("div", null, H(vdbT("sucht_h")), kasten((d.sucht || []).map((s, i) => h("div", { key: i, style: { padding: "5px 0", borderBottom: "1px solid var(--linie)" } }, h("div", { style: { fontWeight: 700 } }, en ? (s.titel_en || s.titel) : s.titel), h("div", { style: { color: "var(--t2)", fontSize: 12 } }, [s.position, s.staerken, s.quelle, vdbDatum(s.datum)].filter(Boolean).join(" · ")))))) : null,
+        H(vdbT("ger_h")), kasten((d.geruechte || []).length ? (d.geruechte || []).map((g, i) => h("div", { key: i, style: { padding: "5px 0", borderBottom: "1px solid var(--linie)" } }, h("div", { style: { display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" } }, vdbChip(g.richtung === "zugang" ? (en ? "in" : "Zugang") : (en ? "out" : "Abgang"), g.richtung === "zugang" ? "var(--gruen-text)" : "var(--blau-text)", g.richtung === "zugang" ? "var(--gruen-tint)" : "rgba(30,78,121,.1)"), h("span", { style: { fontWeight: 700 } }, g.spieler || "–"), h("span", { style: { color: "var(--t2)", fontSize: 12 } }, g.richtung === "zugang" ? `← ${g.von || "?"}` : `→ ${g.zu || "?"}`)), h("div", { style: { color: "var(--t2)", fontSize: 12 } }, g.url ? h("a", { href: g.url, target: "_blank", rel: "noopener", style: { color: "var(--t2)" } }, en ? (g.titel_en || g.titel) : g.titel) : (en ? (g.titel_en || g.titel) : g.titel), ` · ${g.quelle || ""} · ${vdbDatum(g.datum)}`))) : h("span", { style: { color: "var(--t2)" } }, vdbT("keine_ger")))));
+  };
+  const transfers = () => { const tr = d.transfers || []; const zu = tr.filter(t => t.richtung === "zugang"), ab = tr.filter(t => t.richtung !== "zugang");
+    const zeile = t => h("div", { key: (t.name || "") + (t.datum || ""), style: { display: "flex", gap: 8, alignItems: "center", padding: "6px 0", borderBottom: "1px solid var(--linie)", fontFamily: FONT_BODY, fontSize: 13, flexWrap: "wrap" } }, t.foto ? h("img", { src: t.foto, alt: "", loading: "lazy", style: { width: 30, height: 30, borderRadius: 15, objectFit: "cover", background: "var(--karte2)" } }) : null, h("span", { style: { fontWeight: 700 } }, t.pid ? spielerLink(t.pid, t.name) : t.name), h("span", { style: { color: "var(--t2)", fontSize: 12 } }, [t.pos, t.age ? `${t.age} ${en ? "y" : "J."}` : null].filter(Boolean).join(", ")), h("span", { style: { color: "var(--t2)", fontSize: 12 } }, t.richtung === "zugang" ? `← ${t.von || "?"}` : `→ ${t.zu || "?"}`), h("span", { style: { marginLeft: "auto", color: "var(--t2)", fontSize: 12 } }, `${t.abloese_text || (t.abloese ? vdbEur(t.abloese) : (/leih|loan/i.test(t.art || "") ? (en ? "loan" : "Leihe") : /frei|free/i.test(t.art || "") ? vdbT("ablfrei") : (t.art || "")))} · ${vdbDatum(t.datum)}`));
+    return h("div", { style: { display: "grid", gridTemplateColumns: mobil ? "1fr" : "1fr 1fr", gap: 14 } }, h("div", null, H(vdbT("zugaenge"), { marginTop: 0 }), kasten(zu.length ? zu.map(zeile) : h("span", { style: { color: "var(--t2)" } }, vdbT("keine_tr")))), h("div", null, H(vdbT("abgaenge"), { marginTop: 0 }), kasten(ab.length ? ab.map(zeile) : h("span", { style: { color: "var(--t2)" } }, vdbT("keine_tr"))))); };
+  const news = () => kasten((d.news || []).length ? (d.news || []).map((n, i) => h("div", { key: i, style: { padding: "7px 0", borderBottom: "1px solid var(--linie)" } }, h("div", { style: { display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" } }, vdbChip(n.typ || ""), h("span", { style: { fontWeight: 700 } }, n.url ? h("a", { href: n.url, target: "_blank", rel: "noopener", style: { color: "var(--t1)" } }, en ? (n.titel_en || n.titel) : n.titel) : (en ? (n.titel_en || n.titel) : n.titel))), n.text ? h("div", { style: { color: "var(--t2)", fontSize: 12.5 } }, en ? (n.text_en || n.text) : n.text) : null, h("div", { style: { color: "var(--t3)", fontSize: 12 } }, `${n.quelle || ""} · ${vdbDatum(n.datum)}`))) : h("span", { style: { color: "var(--t2)" } }, vdbT("keine_news")));
+  const kontakte = () => d.kontakte_locked ? kasten(h("div", null, h("div", { style: { fontWeight: 700 } }, "🔒 " + vdbT("kontakte_locked")), d.kontakte_zahl ? h("div", { style: { color: "var(--t2)" } }, `${d.kontakte_zahl} ${vdbT("kontakte_zahl")}`) : null)) : kasten((d.kontakte || []).length ? (d.kontakte || []).map((c, i) => h("div", { key: i, style: { padding: "6px 0", borderBottom: "1px solid var(--linie)" } }, h("div", { style: { fontWeight: 700 } }, c.name || "–", c.funktion ? h("span", { style: { fontWeight: 400, color: "var(--t2)" } }, ` · ${c.funktion}`) : null), h("div", { style: { color: "var(--t2)", fontSize: 12.5 } }, [c.email ? "✉ " + c.email : null, c.phone ? "☎ " + c.phone : null, c.quelle ? `${vdbT("quelle")}: ${c.quelle}` : null].filter(Boolean).join(" · ")))) : h("span", { style: { color: "var(--t2)" } }, vdbT("keine_kontakte")));
+  const spiele = () => { const sp = d.spiele || []; const kommend = sp.filter(s => s.th == null).slice().reverse(); const gespielt = sp.filter(s => s.th != null); return h("div", null, kommend.length ? h("div", null, H(vdbT("kommend"), { marginTop: 0 }), kasten(kommend.map(spielZeile))) : null, H(vdbT("gespielt"), { marginTop: kommend.length ? 14 : 0 }), kasten(gespielt.length ? gespielt.map(spielZeile) : h("span", { style: { color: "var(--t2)" } }, vdbT("spiele_keine")))); };
+  return h("div", { role: "dialog", "aria-modal": true, onClick: e => { if (e.target === e.currentTarget) onClose(); }, style: { position: "fixed", inset: 0, zIndex: 1200, background: "rgba(10,12,16,.55)", overflowY: "auto", WebkitOverflowScrolling: "touch", padding: mobil ? 0 : "28px 16px" } },
+    h("div", { style: { maxWidth: 1100, margin: "0 auto", background: "var(--seite)", color: "var(--t1)", borderRadius: mobil ? 0 : 18, minHeight: mobil ? "100%" : "auto", boxShadow: "0 24px 60px rgba(0,0,0,.35)", overflow: "hidden" } },
+      h("div", { style: { display: "flex", gap: 14, alignItems: "center", padding: mobil ? "14px 14px 10px" : "18px 22px 12px", borderBottom: "1px solid var(--linie)", background: "var(--karte)", position: "sticky", top: 0, zIndex: 2 } },
+        vdbLogo(v || { name: name }, mobil ? 44 : 56),
+        h("div", { style: { flex: 1, minWidth: 0 } },
+          h("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: mobil ? 22 : 28, lineHeight: 1.05, textTransform: "uppercase" } }, typeof clubName === "function" ? clubName((v && v.name) || name) : ((v && v.name) || name)),
+          v ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "var(--t2)", marginTop: 4 } }, [v.land, v.liga, v.ebene ? `${v.ebene}. ${en ? "tier" : "Liga-Ebene"}` : null, d.lage && d.lage.rang ? `${vdbT("platz")} ${d.lage.rang}${d.lage.teams ? "/" + d.lage.teams : ""}` : null].filter(Boolean).join(" · ")) : null,
+          v ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "var(--t2)", marginTop: 2 } }, [v.trainer ? `${vdbT("trainer")}: ${v.trainer}` : null, `${vdbT("kader")} ${v.kader || "–"}`, `${vdbT("wert")} ${vdbEur(v.wert)}`, v.alter != null ? `${vdbT("alter")} ${String(v.alter).replace(".", en ? "." : ",")}` : null].filter(Boolean).join(" · ")) : null),
+        h("button", { type: "button", onClick: onClose, "aria-label": vdbT("schliessen"), style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 700, padding: "8px 12px", border: "1px solid var(--linie)", borderRadius: 9, background: "var(--karte)", color: "var(--t1)", cursor: "pointer", flex: "none" } }, mobil ? "✕" : vdbT("schliessen"))),
+      !d ? h("div", { style: { padding: 30, fontFamily: FONT_BODY, color: "var(--t2)" } }, vdbT("lade_seite")) : !d.ok ? h("div", { style: { padding: 30, fontFamily: FONT_BODY, color: "var(--t2)" } }, vdbT("fehler")) : h("div", null,
+        h("div", { role: "tablist", style: { display: "flex", gap: 2, overflowX: "auto", padding: mobil ? "8px 10px 0" : "8px 18px 0", borderBottom: "1px solid var(--linie)", background: "var(--karte)" } }, tabs.map(([k, text]) => h("button", { key: k, role: "tab", "aria-selected": tab === k, type: "button", onClick: () => setTab(k), style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 700, padding: "9px 12px", border: "none", borderBottom: tab === k ? "3px solid var(--teal)" : "3px solid transparent", background: "transparent", color: tab === k ? "var(--t1)" : "var(--t2)", cursor: "pointer", whiteSpace: "nowrap" } }, text))),
+        h("div", { style: { padding: mobil ? "10px 12px 24px" : "14px 22px 28px" } }, tab === "ueb" ? uebersicht() : tab === "kader" ? kaderListe() : tab === "spiele" ? spiele() : tab === "transfers" ? transfers() : tab === "news" ? news() : kontakte()),
+        v && v.aliasse && v.aliasse.length ? h("div", { style: { padding: "0 22px 18px", fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t3)" } }, `${vdbT("alias")}: ${v.aliasse.join(", ")}`) : null)));
+}
+/* 28 Spielfeld-Grafik und Team-xG (07.10.2026, Punkt 27): Aufstellungen als Spielfeld (Raster aus API-Football "grid" bzw. Sportmonks "feld" = "Reihe:Spalte", sonst aus Formation/Reihenfolge/Positionen abgeleitet),
+   xG-Balken je Spiel. Verwendet im Spieldetail der Newsseite (MuSpielDetail), im Spieltag und auf der Vereinsseite. */
+function twFeldRaster(p) { const g = String(p.grid || p.feld || "").split(":").map(Number); return g.length === 2 && g[0] > 0 && g[1] > 0 ? { r: g[0], c: g[1] } : null; }
+function twPosGruppe(p) { const t = String(p.pos || p.position || "").toUpperCase().trim(); if (!t) return -1; if (/^(G|TW|GK|TOR)/.test(t)) return 0; if (/^(D|ABW|DEF|CB|LB|RB|LWB|RWB|IV|AV|VERT)/.test(t)) return 1; if (/^(M|MF|MID|DM|CM|AM|LM|RM|ZM|OM|MITTEL)/.test(t)) return 2; if (/^(F|ST|FW|ATT|CF|LW|RW|STURM|ANG)/.test(t)) return 3; return -1; }
+/* Raster je Startelf: 1) geliefertes Feldraster (grid/feld), 2) Formation + Reihenfolge (pos_nr bzw. Lieferreihenfolge), 3) Positionsgruppen TW/ABW/MF/ST, 4) Standard 4-3-3 */
+function twStartelfRaster(team) {
+  const elf = ((team && team.startelf) || []).filter(p => p && (p.name || p.nr != null));
+  const direkt = elf.map(p => Object.assign({}, p, { rc: twFeldRaster(p) })).filter(p => p.rc);
+  if (direkt.length >= 7) return direkt;
+  if (elf.length < 7) return [];
+  const form = String((team && team.formation) || "").split(/[-–:x]/).map(Number).filter(n => n > 0);
+  const sortiert = elf.slice().sort((a, b) => (Number(a.pos_nr) > 0 ? Number(a.pos_nr) : 99) - (Number(b.pos_nr) > 0 ? Number(b.pos_nr) : 99));
+  let reihen = null;
+  if (form.length >= 2 && form.reduce((a, b) => a + b, 0) === elf.length - 1 && twPosGruppe(sortiert[0]) !== 1 && twPosGruppe(sortiert[0]) !== 2 && twPosGruppe(sortiert[0]) !== 3) {
+    reihen = [[sortiert[0]]]; let i = 1; form.forEach(n => { reihen.push(sortiert.slice(i, i + n)); i += n; });
+  } else {
+    const g = [[], [], [], []]; let unbekannt = 0; elf.forEach(p => { const k = twPosGruppe(p); if (k < 0) unbekannt++; else g[k].push(p); });
+    if (!unbekannt && g[0].length === 1 && g.filter(r => r.length).length >= 3) reihen = g.filter(r => r.length);
+    else if (elf.length === 11) { const st = [1, 4, 3, 3]; reihen = []; let i = 0; st.forEach(n => { reihen.push(sortiert.slice(i, i + n)); i += n; }); }
+    else reihen = g.filter(r => r.length).length ? g.filter(r => r.length) : [elf];
+  }
+  const out = []; reihen.forEach((r, ri) => r.forEach((p, ci) => out.push(Object.assign({}, p, { rc: { r: ri + 1, c: ci + 1 } }))));
+  return out;
+}
+function twHatRaster(startelf) { return Array.isArray(startelf) && (startelf.filter(p => twFeldRaster(p)).length >= 7 || startelf.filter(p => p && (p.name || p.nr != null)).length >= 10); }
+function TwSpielfeldHaelfte({ team, farbe, en, oben }) {
+  const h = React.createElement;
+  const mitRaster = twStartelfRaster(team);
+  const reihen = Math.max(1, ...mitRaster.map(p => p.rc.r)); const proReihe = {}; mitRaster.forEach(p => { proReihe[p.rc.r] = Math.max(proReihe[p.rc.r] || 0, p.rc.c); });
+  const pos = p => { const yUnten = reihen > 1 ? 91 - (p.rc.r - 1) * (76 / (reihen - 1)) : 60; const y = oben ? 100 - yUnten : yUnten; const n = proReihe[p.rc.r] || 1; const x = (p.rc.c - 0.5) / n * 100; return { left: x + "%", top: y + "%" }; };
+  const kurz = n => { const t = String(n || "").trim(); const teile = t.split(" "); return teile.length > 1 && t.length > 14 ? teile[0][0] + ". " + teile.slice(1).join(" ") : t; };
+  return h("div", { style: { minWidth: 0 } },
+    h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, color: "var(--t1)", marginBottom: 6, display: "flex", gap: 8, alignItems: "center" } }, h("span", { style: { width: 10, height: 10, borderRadius: 5, background: farbe, display: "inline-block" } }), team.name || "", team.formation ? h("span", { style: { color: "var(--t2)", fontWeight: 400 } }, " · " + team.formation) : null, team.trainer ? h("span", { style: { color: "var(--t3)", fontWeight: 400, fontSize: 12 } }, " · " + (en ? "Coach " : "Trainer ") + team.trainer) : null),
+    h("div", { className: "tw-spielfeld", style: { position: "relative", width: "100%", aspectRatio: "4 / 5", borderRadius: 10, overflow: "hidden", background: "linear-gradient(180deg, #2f9d5c 0%, #27874e 100%)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,.25)" } },
+      h("svg", { viewBox: "0 0 100 125", preserveAspectRatio: "none", style: { position: "absolute", inset: 0, width: "100%", height: "100%" }, "aria-hidden": true },
+        h("g", { fill: "none", stroke: "rgba(255,255,255,.55)", strokeWidth: .8 },
+          h("rect", { x: 3, y: 3, width: 94, height: 119 }),
+          oben ? h("path", { d: "M3 122 A 47 20 0 0 1 97 122" }) : h("path", { d: "M3 3 A 47 20 0 0 0 97 3" }),
+          oben ? h("rect", { x: 20, y: 3, width: 60, height: 22 }) : h("rect", { x: 20, y: 100, width: 60, height: 22 }),
+          oben ? h("rect", { x: 36, y: 3, width: 28, height: 8 }) : h("rect", { x: 36, y: 114, width: 28, height: 8 }),
+          oben ? h("path", { d: "M38 25 A 12 10 0 0 0 62 25" }) : h("path", { d: "M38 100 A 12 10 0 0 1 62 100" }))),
+      mitRaster.map((p, i) => h("div", { key: i, title: (p.nr != null ? p.nr + " " : "") + (p.name || "") + (p.pos ? " · " + p.pos : ""), style: Object.assign({ position: "absolute", transform: "translate(-50%, -50%)", display: "flex", flexDirection: "column", alignItems: "center", width: 64, pointerEvents: "none" }, pos(p)) },
+        h("div", { style: { width: 26, height: 26, borderRadius: 13, background: farbe, color: "#fff", fontFamily: FONT_DISPLAY, fontWeight: 800, fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 1px 3px rgba(0,0,0,.45)", border: "2px solid rgba(255,255,255,.85)" } }, p.nr != null ? p.nr : ""),
+        h("div", { style: { marginTop: 2, fontFamily: FONT_BODY, fontSize: 10, fontWeight: 700, color: "#fff", textShadow: "0 1px 2px rgba(0,0,0,.7)", whiteSpace: "nowrap", maxWidth: 64, overflow: "hidden", textOverflow: "ellipsis" } }, kurz(p.name))))),
+    (team.bank || []).length ? h("div", { style: { marginTop: 6, fontFamily: FONT_BODY, fontSize: 12, color: "var(--t2)" } }, (en ? "Bench: " : "Bank: ") + team.bank.map(p => p.name).join(", ")) : null);
+}
+function TwSpielfeld({ heim, gast, en }) {
+  const h = React.createElement;
+  const [mobil, setMobil] = React.useState(() => typeof window !== "undefined" && window.innerWidth <= 760);
+  React.useEffect(() => { const f = () => setMobil(window.innerWidth <= 760); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);
+  return h("div", { className: "tw-spielfeld-wrap", style: { display: "grid", gridTemplateColumns: mobil ? "1fr" : "1fr 1fr", gap: 14, margin: "8px 0 10px" } },
+    h(TwSpielfeldHaelfte, { team: heim, farbe: "#1e4e79", en: en, oben: false }),
+    h(TwSpielfeldHaelfte, { team: gast, farbe: "#c0392b", en: en, oben: false }));
+}
+function TwXgBalken({ xh, xg, heim, gast, en, kompakt }) {
+  const h = React.createElement; if (xh == null && xg == null) return null;
+  const a = Number(String(xh == null ? 0 : xh).replace(",", ".")) || 0, b = Number(String(xg == null ? 0 : xg).replace(",", ".")) || 0, sum = a + b || 1;
+  return h("div", { className: "tw-xg", style: { fontFamily: FONT_BODY, fontSize: kompakt ? 11.5 : 13, color: "var(--t1)", margin: kompakt ? "2px 0" : "6px 0 2px" } },
+    h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline" } }, h("b", null, a.toFixed(2)), h("span", { style: { color: "var(--t2)", fontSize: kompakt ? 11 : 12 } }, (en ? "Expected goals (xG)" : "Erwartete Tore (xG)") + (heim && gast && !kompakt ? " · " + heim + " – " + gast : "")), h("b", null, b.toFixed(2))),
+    h("div", { style: { display: "flex", gap: 3, marginTop: 3, height: kompakt ? 5 : 7 } }, h("div", { style: { flex: a / sum, borderRadius: 4, background: "#1e4e79", minWidth: a ? 3 : 0 } }), h("div", { style: { flex: b / sum, borderRadius: 4, background: "#c0392b", minWidth: b ? 3 : 0 } })));
+}
+function twXgAusStatistik(stat, sh, sg) {
+  const wert = (team, k) => { const t = (stat || []).find(x => x.team === team); const v = t && (t.werte || []).find(w => w.k === k); return v ? v.v : null; };
+  const a = wert(sh, "expected_goals"), b = wert(sg, "expected_goals");
+  return (a == null && b == null) ? null : { xh: a == null ? null : Number(String(a).replace(",", ".")), xg: b == null ? null : Number(String(b).replace(",", ".")) };
+}
+/* Punkt 26 (07.10.2026): Leistungszeile im Spielerprofil - gemeinsame Bewertungsbasis (spieler_leistung: v2 > v1 > API-Note) */
+const TW_BEREICH_EN = { "Abschluss": "Finishing", "Chancenkreation": "Chance creation", "Ballführung": "Ball carrying", "Ballsicherheit": "Ball security", "Defensive": "Defending", "Schussabwehr": "Shot stopping", "Strafraum": "Box control", "Spielaufbau": "Build-up" };
+function twBereichName(x, en) { const t = String(x || "").trim(); return en ? (TW_BEREICH_EN[t] || t) : t; }
+function TwLeistungZeile({ l }) {
+  const h = React.createElement; if (!l || l.score == null) return null; const en = typeof LANG !== "undefined" && LANG === "en"; const nm = x => twBereichName(x, en);
+  const quelle = l.quelle === "v2" ? (en ? "Sportmonks model v2" : "Sportmonks-Modell v2") : l.quelle === "v1" ? (en ? "TW model v1 (API-Football)" : "TW-Modell v1 (API-Football)") : (en ? "API-Football rating" : "API-Football-Note");
+  const trend = l.trend === "auf" ? "↑" : l.trend === "ab" ? "↓" : l.trend === "gleich" ? "→" : "";
+  const farbe = l.score >= 70 ? "#2e9e5b" : l.score >= 50 ? "#9a7200" : "#d64545";
+  return h("div", { className: "tw-leistung", style: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, margin: "0 0 10px", fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)" } },
+    h("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 800, fontSize: 20, color: "#fff", background: farbe, borderRadius: 8, padding: "1px 10px" } }, Math.round(l.score), trend ? h("span", { style: { fontSize: 14, marginLeft: 4 } }, trend) : null),
+    h("span", null, (en ? "TW Performance Score · " : "TW Performance Score · ") + quelle + (l.spiele ? ` · ${l.spiele} ${en ? "matches" : "Spiele"}${l.minuten ? ", " + l.minuten + " Min." : ""}` : "") + (l.form != null && l.saison != null && l.quelle !== "api" ? ` · ${en ? "form" : "Form"} ${Math.round(l.form)} / ${en ? "season" : "Saison"} ${Math.round(l.saison)}` : "")),
+    (l.staerken || []).length ? h("span", null, h("b", { style: { color: "#2e9e5b" } }, en ? "Strengths: " : "Stärken: "), l.staerken.map(nm).join(", ")) : null,
+    (l.schwaechen || []).length ? h("span", null, h("b", { style: { color: "#d64545" } }, en ? "Weaknesses: " : "Schwächen: "), l.schwaechen.map(nm).join(", ")) : null);
+}
 
 function TransferApp({
   account,
@@ -9013,7 +9306,11 @@ function TransferApp({
   const [vereinName, setVereinName] = useState(null);
   React.useEffect(() => { if (!vereinName) return; twScrollSperre(true); return () => twScrollSperre(false); }, [!!vereinName]);
   const [vereinData, setVereinData] = useState(null);
-  const openVerein = name => {
+  // Punkt 25 (07.10.2026): Datenbank-Umschalter und neue Vereinsseite
+  const [dbTab, setDbTab] = useState("spieler");
+  const [vereinSeite, setVereinSeite] = useState(null);
+  React.useEffect(() => { if (!vereinSeite) return; twScrollSperre(true); return () => twScrollSperre(false); }, [!!vereinSeite]);
+  const openVereinAlt = name => {
     if (!name || name === "\u2014") return;
     setVereinName(name);
     setVereinData(null);
@@ -9068,6 +9365,7 @@ function TransferApp({
       setPlVidLoading(false);
     }).catch(() => setPlVidLoading(false));
   };
+  const openVerein = name => { if (!name || name === "\u2014") return; setVereinSeite({ name: String(name).trim() }); };
   const openPlayer = (pid, pname, pteam) => {
     mkMerkeZuletzt(pid, pname, pteam);
     setPlExtra(null);
@@ -10321,7 +10619,7 @@ function TransferApp({
       marginTop: 3,
       lineHeight: 1.5
     }
-  }, d.grund))))), /*#__PURE__*/React.createElement(ProbetrainingRadar, { news: news, onOpen: n => setMSel(n) })), view === "players" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, d.grund))))), /*#__PURE__*/React.createElement(ProbetrainingRadar, { news: news, onOpen: n => setMSel(n) })), view === "players" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(DbUmschalter, { tab: dbTab, setTab: setDbTab }), dbTab === "vereine" ? /*#__PURE__*/React.createElement(VereineDbVue, { onOpen: x => setVereinSeite({ id: x.id, name: x.name }) }) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       background: "transparent",
       border: "none",
@@ -10441,7 +10739,7 @@ function TransferApp({
   }, t("rank_all_pos")), ["Torwart", "Abwehr", "Mittelfeld", "Sturm"].map(p => /*#__PURE__*/React.createElement("option", {
     key: p,
     value: p
-  }, p)))), /*#__PURE__*/React.createElement(DbVue, { q: plQ, hatFilter: !!(plLg || plLand || plTeam || plPos), items: plItems, loading: plLoading, stats: dbStats, watch: watch.items, onWatchToggle: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); }, onOpen: x => openPlayer(x.pid, x.name, x.team), vergleich: plVergleich, setVergleich: setPlVergleich, filters: { land: plLand, lg: plLg, team: plTeam, pos: plPos }, setFilters: { setPlQ: setPlQ, setPlLand: setPlLand, setPlLg: setPlLg, setPlTeam: setPlTeam, setPlPos: setPlPos } })), view === "watch" && /*#__PURE__*/React.createElement(MerkVue, { watch: watch, watchList: watchList, profiles: profiles, onOpen: openPlayer, onRemove: (t2, w) => t2 === "profil" ? removeProfil(w) : removeWatch(t2, w), onUpdateWatch: updateWatch, onNav: setView, onProfilSheet: () => { setPfEdit(null); setProfilSheet(true); }, onMatchProfil: setMatchProfil, vergleich: plVergleich, setVergleich: setPlVergleich, applySearch: s2 => { const e2 = s2.e || {}; if (s2.art === "feed") { setSport(e2.sport || "alle"); setType(e2.type || "alle"); setCountry(e2.country || ""); setLeague(e2.league || ""); setClub(e2.club || ""); setQuery(e2.q || ""); setView("feed"); } else if (s2.art === "transfers") { setGerApply({ f: e2.f || {}, n: Date.now() }); setView("geruechte"); } else { setPlQ(e2.q || ""); setPlLand(e2.land || ""); setPlLg(e2.lg || ""); setPlTeam(e2.team || ""); setPlPos(e2.pos || ""); setView("players"); } } }), (view === "feed" || view === "watch" || view === "talente" || view === "community" || view === "networking" || view === "moderation") && /*#__PURE__*/React.createElement(React.Fragment, null, view === "community" && /*#__PURE__*/React.createElement("div", { style: { gridColumn: "1 / -1", display: "grid", gap: 14 } },
+  }, p)))), /*#__PURE__*/React.createElement(DbVue, { q: plQ, hatFilter: !!(plLg || plLand || plTeam || plPos), items: plItems, loading: plLoading, stats: dbStats, watch: watch.items, onWatchToggle: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); }, onOpen: x => openPlayer(x.pid, x.name, x.team), vergleich: plVergleich, setVergleich: setPlVergleich, filters: { land: plLand, lg: plLg, team: plTeam, pos: plPos }, setFilters: { setPlQ: setPlQ, setPlLand: setPlLand, setPlLg: setPlLg, setPlTeam: setPlTeam, setPlPos: setPlPos } }))), view === "watch" && /*#__PURE__*/React.createElement(MerkVue, { watch: watch, watchList: watchList, profiles: profiles, onOpen: openPlayer, onRemove: (t2, w) => t2 === "profil" ? removeProfil(w) : removeWatch(t2, w), onUpdateWatch: updateWatch, onNav: setView, onProfilSheet: () => { setPfEdit(null); setProfilSheet(true); }, onMatchProfil: setMatchProfil, vergleich: plVergleich, setVergleich: setPlVergleich, applySearch: s2 => { const e2 = s2.e || {}; if (s2.art === "feed") { setSport(e2.sport || "alle"); setType(e2.type || "alle"); setCountry(e2.country || ""); setLeague(e2.league || ""); setClub(e2.club || ""); setQuery(e2.q || ""); setView("feed"); } else if (s2.art === "transfers") { setGerApply({ f: e2.f || {}, n: Date.now() }); setView("geruechte"); } else { setPlQ(e2.q || ""); setPlLand(e2.land || ""); setPlLg(e2.lg || ""); setPlTeam(e2.team || ""); setPlPos(e2.pos || ""); setView("players"); } } }), (view === "feed" || view === "watch" || view === "talente" || view === "community" || view === "networking" || view === "moderation") && /*#__PURE__*/React.createElement(React.Fragment, null, view === "community" && /*#__PURE__*/React.createElement("div", { style: { gridColumn: "1 / -1", display: "grid", gap: 14 } },
     /*#__PURE__*/React.createElement(CommunitySub, { view: view, setView: setView, admin: istAdmin }),
     /*#__PURE__*/React.createElement("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 30, lineHeight: "38px", margin: "2px 0 0", color: INK } }, LANG === "en" ? "Community \u2013 transfer hints" : "Community \u2013 Transferhinweise"),
     /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 14.5, color: MUTED, margin: "0 0 2px", maxWidth: 760, lineHeight: 1.5 } }, LANG === "en" ? "Share reliable hints from your network. Posts are labelled, reviewed and ranked by relevance within TransferWire." : "Teile belastbare Hinweise aus deinem Netzwerk. Beitr\u00e4ge werden gekennzeichnet, gepr\u00fcft und nach Relevanz in TransferWire eingeordnet."),
@@ -10663,7 +10961,7 @@ function TransferApp({
       fontSize: 12,
       color: MUTED
     }
-  }, "© ", new Date().getFullYear(), " Golden Palm Enterprise · TransferWire"))), vereinName && /*#__PURE__*/React.createElement("div", {
+  }, "© ", new Date().getFullYear(), " Golden Palm Enterprise · TransferWire"))), vereinSeite && /*#__PURE__*/React.createElement(VereinsSeite, { id: vereinSeite.id || null, name: vereinSeite.name || null, authQ: authQ, isPrem: isPrem, onClose: () => setVereinSeite(null), onOpenPlayer: (pid, pname, pteam) => openPlayer(pid, pname, pteam) }), vereinName && /*#__PURE__*/React.createElement("div", {
     onClick: () => setVereinName(null),
     style: { position: "fixed", inset: 0, zIndex: 1360, background: "rgba(10,12,16,.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16, overscrollBehavior: "contain" } }, /*#__PURE__*/React.createElement("div", { onClick: e => e.stopPropagation(), style: { width: "100%", maxWidth: 760, maxHeight: "90vh", overflowY: "auto", overscrollBehavior: "contain", background: "var(--karte)", borderRadius: 18, padding: "20px 22px 26px", boxShadow: "0 30px 90px rgba(0,0,0,.4)" } }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -11497,7 +11795,7 @@ function TransferApp({
         fontWeight: 700,
         color: MUTED,
         textTransform: "uppercase",
-        letterSpacing: 1, marginBottom: 6 } }, (plDetail.form && plDetail.form.length === 1 ? (LANG === "en" ? "Last appearance — TW Performance Score" : "Letzter Einsatz — TW Performance Score") : t("pl_form")), /*#__PURE__*/React.createElement(ScoreInfo, { kind: "performance", size: 13 })), !plDetail.form || plDetail.form.length === 0 ? /*#__PURE__*/React.createElement("div", {
+        letterSpacing: 1, marginBottom: 6 } }, (plDetail.form && plDetail.form.length === 1 ? (LANG === "en" ? "Last appearance — TW Performance Score" : "Letzter Einsatz — TW Performance Score") : t("pl_form")), /*#__PURE__*/React.createElement(ScoreInfo, { kind: "performance", size: 13 })), plDetail.leistung ? /*#__PURE__*/React.createElement(TwLeistungZeile, { l: plDetail.leistung }) : null, !plDetail.form || plDetail.form.length === 0 ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontFamily: FONT_BODY,
         fontSize: 12.5,
