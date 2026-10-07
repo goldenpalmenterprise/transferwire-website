@@ -9428,7 +9428,7 @@ function TransferApp({
       alignItems: "center",
       gap: 16
     }
-  }, /*#__PURE__*/React.createElement(MobilNav, { view: view, setView: setView, news: news, needsBySport: needsBySport, onNavigate: onNavigate, onScout: () => setView("assistent"), items: [["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["spieltag", LANG === "en" ? "Matchday" : "Spieltag"], ["gesucht", "Vereinsbedarf"], ["ranking", "Performance"], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]] }), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(MobilNav, { view: view, setView: setView, news: news, needsBySport: needsBySport, onNavigate: onNavigate, onScout: () => setView("assistent"), items: [["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["spieltag", LANG === "en" ? "Matchday" : "Spieltag"], ["gesucht", LANG === "en" ? "Club seeks" : "Verein sucht"], ["ranking", "Performance"], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]] }), /*#__PURE__*/React.createElement("div", {
     className: "tw-logo",
     style: {
       display: "flex",
@@ -9646,7 +9646,7 @@ function TransferApp({
       flexWrap: "wrap"
     },
     className: "tw-tabs"
-  }, [["_h", LANG === "en" ? "Market" : "Markt"], ["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["spieltag", LANG === "en" ? "Matchday" : "Spieltag"], ["gesucht", "Vereinsbedarf"], ["ranking", "Performance"], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["_h", LANG === "en" ? "My work" : "Meine Arbeit"], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]].map(([k, label]) => {
+  }, [["_h", LANG === "en" ? "Market" : "Markt"], ["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["spieltag", LANG === "en" ? "Matchday" : "Spieltag"], ["gesucht", LANG === "en" ? "Club seeks" : "Verein sucht"], ["ranking", "Performance"], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["_h", LANG === "en" ? "My work" : "Meine Arbeit"], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]].map(([k, label]) => {
     if (k === "_h") return /*#__PURE__*/React.createElement("div", { key: "h-" + label, className: "tw-navhead" }, label);
     const active = view === k || (k === "community" && (view === "networking" || view === "moderation")) || (k === "talente" && (view === "listen" || view === "suche"));
     let badge = 0; try { if (k === "feed") badge = (Array.isArray(news) ? news : []).filter(n => Date.now() - new Date(n.published_at || n.created_at || n.createdAt || 0).getTime() < 864e5).length; else if (k === "gesucht") badge = Array.isArray(needsBySport) ? needsBySport.length : 0; } catch (e) { badge = 0; }
