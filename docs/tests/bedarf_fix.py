@@ -1,5 +1,5 @@
 import sys, base64, subprocess
-PW = "085de3ac26a319138d0586c18009f0d44a4c31764f9502f3"
+PW = __import__("os").environ.get("PGPASSWORD", "")  # Passwort nie im Repository speichern
 def psql(sql):
     return subprocess.run(["docker", "exec", "-i", "-e", "PGPASSWORD=" + PW, "transferwire-postgres-1", "psql", "-U", "n8n", "-d", "n8n", "-At"], input=sql, capture_output=True, text=True)
 r = psql("SELECT n->>'name' || '|' || translate(encode(convert_to(n->'parameters'->>'jsCode', 'UTF8'), 'base64'), E'\\n', '') FROM workflow_entity w JOIN workflow_history v ON v.\"versionId\"=w.\"activeVersionId\", jsonb_array_elements(v.nodes::jsonb) n WHERE w.id='4BjusAxYNt1uvLue' AND n->>'name' IN ('Vereins-Rotation','Anfrage bauen');")
