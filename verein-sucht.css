@@ -10,3 +10,191 @@
 .tw-lage-m{background:var(--gruen-bg);color:var(--gruen-text);border-color:var(--gruen-rand)}
 .tw-lage-zeile{display:flex;flex-wrap:wrap;align-items:center;gap:6px 0;margin:8px 0 0;font-size:13px;line-height:1.45;color:var(--t2)}
 .tw-lage-text{color:var(--t2)}
+/* 09.10.2026 (Auftrag 32): Verein sucht - Standardkarten und Detailansicht (Wunschprofil, Gruende) nach Vorlage. Nur Karten mit .k3n betroffen. */
+.vs-wurzel{--k3n-panel:#232528;--k3n-innen:#2a2c30;--k3n-rand:#303338;--k3n-knopf:#26282c;--k3n-rot-bg:#7a2b28;--k3n-rot-text:#f8d9d3;--k3n-gelb-bg:#6b5418;--k3n-gelb-text:#f9e8bb;--k3n-violett-bg:#433a78;--k3n-violett-text:#e6e0ff;--k3n-ki-bg:#343868;--k3n-ki-text:#e3e2ff}
+html.tw-dark .vs-wurzel{--k3n-panel:#ffffff;--k3n-innen:#f4f5f7;--k3n-rand:#e2e5e9;--k3n-knopf:#ffffff;--k3n-rot-bg:#c4533f;--k3n-rot-text:#ffffff;--k3n-gelb-bg:#b07f0c;--k3n-gelb-text:#ffffff;--k3n-violett-bg:#6d4bc7;--k3n-violett-text:#ffffff;--k3n-ki-bg:#5b58c7;--k3n-ki-text:#ffffff}
+
+/* Standardkarte (geschlossen) */
+.k3.k3n{display:flex;flex-direction:column;border-radius:12px}
+.k3.k3n:hover{border-color:var(--gold-rand)}
+.k3n>.k3-oben{flex:1 0 auto;display:flex;flex-direction:column;padding:0}
+.k3n .k3-kopf{flex:1 0 auto;position:relative;align-items:flex-start;justify-content:space-between;flex-wrap:nowrap;gap:12px;padding:12px 15px 5px}
+.k3n .k3-kopf:after{content:"";position:absolute;left:68px;right:15px;bottom:0;height:1px;background:var(--linie)}
+.k3n .k3-verein{flex:1 1 auto;align-items:flex-start;gap:11px;min-width:0}
+.k3n .k3-logo{width:42px;height:42px;flex:0 0 42px;border-radius:9px;font-size:12px}
+.k3n .k3-verein-text{gap:2px;padding-top:2px;min-width:0}
+.k3n .k3-vname{display:block;max-width:100%;padding-right:16px;font-size:13px;font-weight:600;line-height:1.3;text-align:left}
+.k3n .k3-vname span{display:inline;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:break-word}
+.k3n .k3-vname .vs-ik{display:inline-block;width:14px;height:14px;margin:0 -16px 0 2px;vertical-align:-2px}
+.k3n .k3-vmeta{font-size:12px;line-height:1.35;white-space:normal;overflow:visible}
+.k3n .tw-lage-karte{margin-top:5px}
+.k3n .tw-lage{padding:0 7px;font-size:11px;line-height:17px}
+.k3n .k3-wertk{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:0 0 auto;min-width:0;max-width:60%;padding-top:1px;text-align:right}
+.k3n-wertzeile{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:4px 10px}
+.k3n .k3-wertk .k3-pill{flex:0 0 auto;order:0;height:21px;padding:0 8px;gap:5px;font-size:11.5px}
+.k3n-wertk{font-size:11.5px;color:var(--t2);white-space:nowrap}
+.k3n-wertk b{margin-left:1px;font-size:12.5px;font-weight:700;color:var(--t1);font-variant-numeric:tabular-nums}
+.k3n .k3-wertk small{display:block;flex:none;order:0;font-size:11.5px;line-height:1.35;color:var(--t2);white-space:normal;text-align:right}
+.k3n-infos{position:relative;display:grid;gap:5px;padding:6px 15px 5px}
+.k3n-infos:after{content:"";position:absolute;left:15px;right:15px;bottom:0;height:1px;background:var(--linie)}
+.k3n .k3-titelzeile{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin:0;min-width:0}
+.k3n .k3-titel{font-size:14.5px;font-weight:700;line-height:1.3;letter-spacing:-.01em;white-space:normal;overflow:visible}
+.k3n .k3-code{padding:2px 7px;border-radius:6px;font-size:10.5px}
+.k3n .k3-titelzeile .k3-meta{display:contents}
+.k3n .k3-titelzeile .k3-m{margin-left:6px}
+.k3n .k3-m{gap:6px;font-size:12px;color:var(--t2)}
+.k3n .k3-m .vs-ik{width:15px;height:15px}
+.k3n .k3-fein-hinweis{font-size:12px;white-space:normal}
+.k3n .k3-stich{margin:0;flex-wrap:wrap;row-gap:4px;white-space:normal;overflow:visible}
+.k3n .k3-ptag{height:22px;font-size:12px}
+.k3n .k3-grundlagen{margin:0;flex-wrap:wrap;row-gap:4px;font-size:12px;white-space:normal;overflow:visible}
+.k3n .k3-grundlagen>*{white-space:nowrap}
+.k3n .k3-g{overflow:visible}
+.k3n .k3-fuss{flex-wrap:wrap;gap:8px 10px;padding:5px 12px 7px 15px;border-top:0}
+.k3n .k3-mehr{height:29px;padding:0 6px 0 0;color:var(--gold-text);font-size:13px}
+.k3n .k3-mehr:hover{background:none;text-decoration:underline;text-underline-offset:3px}
+.k3.k3n .k3-mehr span{display:inline}
+.k3.k3n .k3-mehr:after{content:none}
+.k3n .k3-aktionen{gap:8px;margin-left:auto}
+.k3n .k3-fuss .k3-knopf{width:auto;height:29px;padding:0 11px;border-radius:8px;background:var(--k3n-knopf);box-shadow:inset 0 0 0 1px var(--k3n-rand);font-size:12px;font-weight:500}
+.k3n .k3-fuss .k3-knopf span{display:inline}
+.k3n .k3-fuss .k3-knopf:hover{background:var(--hover)}
+.k3n .k3-fuss .k3-knopf .vs-ik{width:15px;height:15px}
+.k3n .k3-fuss .k3-knopf.ist-an{background:var(--violett-bg);box-shadow:inset 0 0 0 1px var(--violett-rand);color:var(--violett)}
+.k3n .k3-fuss .k3-knopf.ist-primaer:not(.ist-gesperrt){background:var(--gold);box-shadow:none;color:var(--gold-schrift);font-weight:600}
+.k3n .k3-fuss .k3-knopf.ist-primaer:not(.ist-gesperrt):hover{opacity:.9}
+.k3n .k3-fuss .k3-knopf.ist-gesperrt{background:transparent;color:var(--t2)}
+.k3n .k3n-kontakt{display:none;gap:8px}
+.k3n.ist-offen .k3n-kontakt{display:flex}
+@container (max-width:480px){
+  .k3n .k3-kopf{flex-wrap:wrap;row-gap:8px;padding:12px 13px 10px}
+  .k3n .k3-kopf:after{left:66px;right:13px}
+  .k3n .k3-wertk{flex:1 1 100%;max-width:none;align-items:flex-start;padding-left:53px;text-align:left}
+  .k3n-wertzeile{justify-content:flex-start}
+  .k3n .k3-wertk small{text-align:left}
+  .k3n-infos{padding:6px 13px 5px}
+  .k3n-infos:after{left:13px;right:13px}
+  .k3n .k3-fuss{padding:6px 10px 8px 13px}
+}
+
+/* Geoeffnete Karte: Kopf nach Vorlage Wunschprofil */
+.k3n>.k3n-kopf{display:none}
+.k3n.ist-offen>.k3-oben{display:none}
+.k3n.ist-offen>.k3n-kopf{display:flex}
+.k3n-kopf{align-items:center;min-width:0;margin:8px 8px 0;padding:14px 16px 14px 14px;border:1px solid var(--k3n-rand);border-radius:12px;background:var(--k3n-panel)}
+.k3n-verein{display:flex;align-items:center;gap:14px;flex:0 1 auto;min-width:180px;max-width:300px;padding-right:20px;border-right:1px solid var(--linie2)}
+.k3n-verein .k3-logo{width:46px;height:46px;flex:0 0 46px;border-radius:10px;font-size:13px}
+.k3n-verein .k3-verein-text{padding-top:0}
+.k3n-verein .k3-vname{font-size:16.5px;line-height:1.25}
+.k3n-verein .k3-vmeta{font-size:13px}
+.k3n-pos{flex:1 1 auto;min-width:0;padding:0 18px}
+.k3n-titelzeile{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.k3n-titel{margin:0;font-size:20px;font-weight:700;line-height:1.25;letter-spacing:-.02em;color:var(--t1)}
+.k3n-titelzeile .k3-code{padding:3px 8px;font-size:12px}
+.k3n-meta.k3-meta{margin-top:7px;gap:4px 16px;font-size:12.5px}
+.k3n-meta .k3-m{font-size:12.5px}
+.k3n-meta .k3-m b{color:var(--t1);font-weight:600}
+.k3n-pos .k3-stich{margin-top:8px}
+.k3n-werte{display:flex;align-items:center;flex:0 0 auto;min-width:0}
+.k3n-stufe{display:flex;flex-direction:column;align-items:center;gap:5px;max-width:165px;padding-right:18px;text-align:center}
+.k3n-stufe small{font-size:11px;line-height:1.3;color:var(--t2)}
+.k3n-badge{display:inline-flex;align-items:center;height:28px;padding:0 13px;border-radius:7px;font-size:13px;font-weight:600;white-space:nowrap}
+.k3n-badge.ist-rot{background:var(--k3n-rot-bg);color:var(--k3n-rot-text)}
+.k3n-badge.ist-gelb{background:var(--k3n-gelb-bg);color:var(--k3n-gelb-text)}
+.k3n-badge.ist-violett{background:var(--k3n-violett-bg);color:var(--k3n-violett-text)}
+.k3n-badge.ist-ki{background:var(--k3n-ki-bg);color:var(--k3n-ki-text)}
+.k3n-wert{display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:118px;padding:2px 18px;border:0;border-left:1px solid var(--linie2);background:none;color:inherit;font:inherit;text-align:left}
+.k3n-wert span{font-size:12.5px;color:var(--t2);white-space:nowrap}
+.k3n-wert b{font-size:22px;font-weight:700;line-height:1.15;letter-spacing:-.02em;color:var(--t1);font-variant-numeric:tabular-nums;white-space:nowrap}
+.k3n-wert:last-child{padding-right:4px}
+button.k3n-wert{cursor:pointer}
+button.k3n-wert b{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--t2)}
+button.k3n-wert:hover b{color:var(--t1)}
+@container (max-width:1000px){
+  .k3n-kopf{flex-wrap:wrap;row-gap:12px}
+  .k3n-verein{flex:1 1 auto;max-width:none;padding-right:12px;border-right:0}
+  .k3n-werte{order:2}
+  .k3n-pos{order:3;flex:1 1 100%;padding:12px 0 0;border-top:1px solid var(--linie2)}
+}
+@container (max-width:600px){
+  .k3n-kopf{margin:6px 6px 0;padding:12px}
+  .k3n-werte{flex:1 1 100%;flex-wrap:wrap;row-gap:10px}
+  .k3n-stufe{flex:1 1 100%;flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 10px;max-width:none;padding:0;text-align:left}
+  .k3n-wert{min-width:0;padding:0 18px 0 0;border-left:0}
+  .k3n-wert+.k3n-wert{padding-left:18px;border-left:1px solid var(--linie2)}
+  .k3n-titel{font-size:18px}
+}
+
+/* Reiter und Inhaltsbereich */
+.k3n .k3-details-innen{display:block;padding:8px 8px 2px;border-top:0}
+.k3n.im-dialog .k3-details-innen{padding:8px 0 2px}
+.k3n-reiter{display:flex;align-items:stretch;gap:4px;margin:0 0 8px;padding:0 10px;border:1px solid var(--k3n-rand);border-radius:12px;background:var(--k3n-panel);overflow-x:auto;scrollbar-width:none}
+.k3n-reiter::-webkit-scrollbar{display:none}
+.k3n-reiter button{position:relative;display:inline-flex;align-items:center;gap:6px;height:42px;padding:0 12px;border:0;background:none;color:var(--t2);font:inherit;font-size:14px;font-weight:500;white-space:nowrap;cursor:pointer}
+.k3n-reiter button:hover{color:var(--t1)}
+.k3n-reiter button.ist-an{color:var(--gold-text);font-weight:600}
+.k3n-reiter button.ist-an:after{content:"";position:absolute;left:6px;right:6px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:var(--gold)}
+.k3n-reiter .k3-zahl{min-width:18px;height:18px;background:var(--linie)}
+.k3n-panel{container-type:inline-size;min-width:0;padding:12px 14px 14px;border:1px solid var(--k3n-rand);border-radius:12px;background:var(--k3n-panel)}
+.k3n-panel>.k3-abschnitt-kopf:first-child,.k3n-panel>.k3-h4:first-child{margin-top:0}
+.k3n-panel .k3-knopf{width:auto;padding:0 13px}
+.k3n-panel .k3-knopf span{display:inline}
+.k3n-unterteil{margin-top:16px;padding-top:14px;border-top:1px solid var(--linie)}
+.k3n-raster{display:grid;grid-template-columns:minmax(0,1.17fr) minmax(0,1fr);gap:8px}
+.k3n-raster>.ist-breit{grid-column:1/-1}
+.k3n-zwei{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:start}
+.k3n-spalte{display:grid;gap:8px;align-content:start;min-width:0}
+.k3n-gruende>.k3-datenstand{margin:10px 8px 6px}
+.k3n-spieler{padding:14px 14px 10px}
+@container (min-width:760px){.k3n-spieler{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}}
+@container (max-width:759px){
+  .k3n-spieler{display:grid;gap:24px}
+  .k3n-raster,.k3n-zwei{grid-template-columns:minmax(0,1fr)}
+  .k3n-raster>.ist-breit{grid-column:auto}
+}
+
+/* Wunschprofil nach Vorlage */
+.k3n-wunsch .k3-h4{margin-bottom:10px}
+.k3n-wunsch .k3-abschnitt-kopf{margin-bottom:10px}
+.k3n-wunsch .k3-profil{grid-template-columns:88px minmax(0,1fr);gap:14px}
+.k3n-wunsch .k3-feldbox{width:88px;border-radius:8px}
+.k3n-wunsch .k3-marker{width:26px;height:26px;line-height:26px;font-size:10px}
+.k3n-wunsch .k3-attr{border:1px solid var(--k3n-rand);border-radius:8px;background:var(--k3n-innen)}
+.k3n-wunsch .k3-attr li{padding:4px 12px;font-size:12px;line-height:1.35}
+.k3n-wunsch .k3-attr li+li{border-top-color:var(--k3n-rand)}
+.k3n-wunsch .k3-merkmale{margin-top:12px;font-size:12.5px}
+.k3n-wunsch .k3-beschreibung{margin-top:10px;font-size:12.5px;line-height:1.5}
+.k3n-wunsch .k3-hinweis{margin-top:8px;font-size:11.5px}
+.k3n-wunsch .k3-sperrblock{margin-top:12px}
+.k3n-wunsch .k3-gruppe{border:1px solid var(--k3n-rand);border-radius:8px;background:var(--k3n-innen)}
+.k3n-wunsch .k3n-belege .k3-gruppe{display:grid;gap:6px;border:0;background:none;overflow:visible}
+.k3n-wunsch .k3n-belege .k3-beleg{border:1px solid var(--k3n-rand);border-radius:8px;background:var(--k3n-innen);overflow:hidden}
+.k3n-wunsch .k3n-belege .k3-beleg+.k3-beleg{border-top:1px solid var(--k3n-rand)}
+.k3n-wunsch .k3-beleg-kopf{gap:10px;padding:7px 10px 7px 12px}
+.k3n-wunsch .k3-beleg-text b{font-size:13px}
+.k3n-wunsch .k3-beleg-text em{font-size:11.5px}
+.k3n-wunsch .k3-skala i.an{background:var(--gold)}
+.k3n-wunsch .k3-fussnote{margin:8px 2px 0;font-size:11.5px}
+.k3n-wunsch .k3-fortschritt{height:8px;margin:2px 0 10px;border-radius:4px}
+.k3n-wunsch .k3-fortschritt i{border-radius:4px;background:var(--gold)}
+.k3n-wunsch .k3-zeile{padding:3px 12px;font-size:12px}
+.k3n-wunsch .k3-zeile+.k3-zeile{border-top-color:var(--k3n-rand)}
+.k3n-wunsch .k3-paar{border-radius:8px}
+.k3n-begruendung{margin-top:10px}
+.k3n-begruendung>b{display:block;font-size:13px;font-weight:600;color:var(--t1)}
+.k3n-begruendung .k3n-radartext{margin:3px 0 0;font-size:12.5px;line-height:1.5}
+.k3n-radartext.ist-zu{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}
+@container (max-width:479px){.k3n-radartext.ist-zu{-webkit-line-clamp:4;line-clamp:4}}
+.k3n .k3n-klappe{display:inline-flex;align-items:center;gap:4px;margin-top:4px;padding:0;border:0;background:none;color:var(--t2);font:inherit;font-size:12px;font-weight:500;cursor:pointer}
+.k3n .k3n-klappe:hover{color:var(--t1)}
+.k3n .k3n-klappe .vs-ik{width:14px;height:14px}
+.k3n-wunsch .k3-verlauf{padding-left:22px}
+.k3n-wunsch .k3-verlauf li{grid-template-columns:56px minmax(0,1fr);padding:5px 0;border-bottom:1px solid var(--linie);font-size:12.5px}
+.k3n-wunsch .k3-verlauf li:last-child{border-bottom:0}
+.k3n-wunsch .k3-verlauf li:before{left:-22px;top:10px}
+.k3n-wunsch .k3-verlauf:before{left:4px}
+
+/* Geoeffnete Karte: Fusszeile, Dialog */
+.k3n.ist-offen .k3-fuss{padding:6px 16px 12px}
+.k3n.im-dialog .k3n-kopf{margin:0}
+.k3n.im-dialog .k3-fuss{padding:10px 0 2px}
