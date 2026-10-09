@@ -198,3 +198,103 @@ button.k3n-wert:hover b{color:var(--t1)}
 .k3n.ist-offen .k3-fuss{padding:6px 16px 12px}
 .k3n.im-dialog .k3n-kopf{margin:0}
 .k3n.im-dialog .k3-fuss{padding:10px 0 2px}
+/* 09.10.2026 spaet (Auftrag 33): Standardkarte "Verein sucht" mit Kopfband nach Vorlage "03 Dezentes Kopfband":
+   Logo | Verein, Land/Liga | Gesucht + Position + Code | Stufe, Kader-Berechnung, Erklaerung.
+   Schrift waechst mit der Kartenbreite bis zur Groesse der Vorlage (Karte rund 1000 px), darunter feste Mindestgroessen.
+   Nur geschlossene Karten (.k3n, Kopfband .k3n-band); geoeffnete Karte und Fenster bleiben unveraendert. */
+.vs-wurzel{--k3b-bg:#1f2530;--k3b-rand:#2b323d;--k3b-t1:#ffffff;--k3b-t2:#9eb1c4;--k3b-t3:#8095aa;--k3b-strich:#38404c;--k3b-code-bg:#2e3540;--k3b-code-t:#ffffff;--k3b-rot-bg:#3a2427;--k3b-rot-t:#ff8c70;--k3b-gelb-bg:#373021;--k3b-gelb-t:#ffc429;--k3b-violett-bg:#2e2b4d;--k3b-violett-t:#cbc2ff;--k3b-ki-bg:#272c48;--k3b-ki-t:#c6c4ff;--k3b-la-bg:#2e2123;--k3b-la-rand:#743a33;--k3b-la-t:#ff9274;--k3b-lt-bg:#30291b;--k3b-lt-rand:#6e5620;--k3b-lt-t:#f6c54d;--k3b-lm-bg:#1a2b22;--k3b-lm-rand:#2f6046;--k3b-lm-t:#5cdc9c}
+html.tw-dark .vs-wurzel{--k3b-bg:#f2f5f9;--k3b-rand:#e2e7ee;--k3b-t1:#0f1720;--k3b-t2:#56677a;--k3b-t3:#6b7b8d;--k3b-strich:#cdd5df;--k3b-code-bg:#e2e7ee;--k3b-code-t:#0f1720;--k3b-rot-bg:#fbe5e0;--k3b-rot-t:#a3372a;--k3b-gelb-bg:#f9eed2;--k3b-gelb-t:#7a5606;--k3b-violett-bg:#ece8ff;--k3b-violett-t:#5a3fb5;--k3b-ki-bg:#eaedfb;--k3b-ki-t:#4845b0;--k3b-la-bg:#fcebe7;--k3b-la-rand:#efbfb4;--k3b-la-t:#a3372a;--k3b-lt-bg:#fbf1d9;--k3b-lt-rand:#e6cf95;--k3b-lt-t:#7a5606;--k3b-lm-bg:#e4f4eb;--k3b-lm-rand:#b4dec6;--k3b-lm-t:#0f6b3f}
+
+/* Kopfband */
+.k3.k3n .k3-kopf.k3n-band{--k3b-pl:clamp(14px,2cqi,20px);--k3b-logo:clamp(44px,6.1cqi,61px);--k3b-gap:clamp(12px,2.3cqi,23px);--k3b-chev:clamp(14px,1.9cqi,19px);--k3b-lage:clamp(22px,2.9cqi,29px);flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:0;position:relative;padding:clamp(11px,1.85cqi,18.5px) clamp(14px,2.2cqi,22px) clamp(11px,1.8cqi,18px) var(--k3b-pl);background:var(--k3b-bg);border-bottom:1px solid var(--k3b-rand)}
+.k3.k3n .k3-kopf.k3n-band:after{content:none}
+.k3.k3n .k3n-band .k3-verein{flex:1 1 0;max-width:max-content;align-items:center;gap:var(--k3b-gap)}
+.k3.k3n .k3n-band .k3-logo{width:var(--k3b-logo);height:var(--k3b-logo);flex:0 0 var(--k3b-logo);border-radius:clamp(8px,1cqi,10px);font-size:clamp(12px,1.6cqi,16px)}
+.k3.k3n .k3n-band .k3-verein-text{gap:clamp(1px,.3cqi,3px);padding:0;min-width:0}
+.k3.k3n .k3n-band .k3-vname{padding-right:calc(var(--k3b-chev) + 2px);color:var(--k3b-t1);font-size:clamp(16px,2.16cqi,21.5px);font-weight:700;line-height:1.25;letter-spacing:-.01em}
+.k3.k3n .k3n-band .k3-vname .vs-ik{width:var(--k3b-chev);height:var(--k3b-chev);margin:0 calc(-1*var(--k3b-chev) - 2px) 0 2px;vertical-align:-.14em;color:var(--k3b-t3)}
+.k3.k3n .k3n-band .k3-vmeta{color:var(--k3b-t2);font-size:clamp(13px,1.76cqi,17.5px);line-height:1.35}
+
+/* Gesucht + Position */
+.k3n-bpos{display:flex;flex-direction:column;justify-content:center;gap:clamp(1px,.3cqi,3px);flex:0 1 auto;min-width:0;margin-left:clamp(14px,2.9cqi,29px);padding:clamp(2px,.35cqi,4px) 0 clamp(2px,.35cqi,4px) clamp(14px,2.6cqi,26px);border-left:1px solid var(--k3b-strich)}
+.k3n-blabel{color:var(--k3b-t2);font-size:clamp(11px,1.44cqi,14.3px);line-height:1.2}
+.k3n-bzeile{display:flex;flex-wrap:wrap;align-items:center;gap:4px clamp(8px,1.8cqi,18px);min-width:0}
+.k3.k3n .k3n-band .k3-titel{margin:0;color:var(--k3b-t1);font-size:clamp(16px,2.16cqi,21.5px);font-weight:700;line-height:1.25;letter-spacing:-.01em;white-space:nowrap;overflow:visible}
+.k3.k3n .k3n-band .k3-code{display:inline-flex;align-items:center;justify-content:center;min-width:clamp(24px,3.2cqi,32px);height:clamp(23px,2.9cqi,29px);padding:0 clamp(6px,.9cqi,9px);border-radius:clamp(5px,.65cqi,7px);background:var(--k3b-code-bg);color:var(--k3b-code-t);font-size:clamp(12px,1.62cqi,16px);font-weight:700;letter-spacing:.02em;line-height:1}
+.k3n-bkopf{display:flex;align-items:center;gap:clamp(6px,.9cqi,9px);min-width:0}
+.k3.k3n .k3n-band .k3-neu{display:inline-flex;align-items:center;height:clamp(17px,2.1cqi,21px);padding:0 clamp(7px,.9cqi,9px);font-size:clamp(11px,1.3cqi,13px);line-height:1}
+.k3.k3n .k3n-band .k3-fein-hinweis{flex:none;max-width:15em;color:var(--k3b-t2);font-size:clamp(12px,1.45cqi,14.5px);line-height:1.3;white-space:normal}
+
+/* Stufe, Kader-Berechnung, Erklaerung */
+.k3.k3n .k3n-band .k3-wertk{display:flex;flex-direction:column;align-items:flex-end;gap:clamp(5px,.9cqi,9px);flex:0 1 auto;min-width:0;max-width:none;margin-left:auto;padding:0 0 0 clamp(14px,2cqi,20px);text-align:right}
+.k3.k3n .k3n-band .k3n-wertzeile{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px clamp(12px,2.3cqi,23px)}
+.k3.k3n .k3n-band .k3-wertk .k3-pill{height:clamp(23px,3.1cqi,31px);padding:0 clamp(9px,1.3cqi,13px);gap:clamp(6px,1.15cqi,11.5px);font-size:clamp(12.5px,1.68cqi,16.7px);font-weight:600}
+.k3.k3n .k3n-band .k3-pill i{width:clamp(7px,1.05cqi,10.5px);height:clamp(7px,1.05cqi,10.5px)}
+.k3.k3n .k3n-band .k3-pill.ist-rot{background:var(--k3b-rot-bg);color:var(--k3b-rot-t)}
+.k3.k3n .k3n-band .k3-pill.ist-gelb{background:var(--k3b-gelb-bg);color:var(--k3b-gelb-t)}
+.k3.k3n .k3n-band .k3-pill.ist-violett{background:var(--k3b-violett-bg);color:var(--k3b-violett-t)}
+.k3.k3n .k3n-band .k3-pill.ist-ki{background:var(--k3b-ki-bg);color:var(--k3b-ki-t)}
+.k3.k3n .k3n-band .k3n-wertk{color:var(--k3b-t2);font-size:clamp(13px,1.78cqi,17.7px);white-space:nowrap}
+.k3.k3n .k3n-band .k3n-wertk b{margin-left:clamp(3px,.6cqi,6px);color:var(--k3b-t1);font-size:clamp(14.5px,2cqi,20px);font-weight:700}
+.k3.k3n .k3n-band .k3-wertk small{color:var(--k3b-t2);font-size:clamp(12.5px,1.7cqi,16.9px);line-height:1.35;text-align:right}
+
+/* Lage-Kennzeichen sitzt wie in der Vorlage auf der Unterkante des Kopfbands */
+.k3.k3n .k3n-band .tw-lage-karte{position:absolute;left:calc(var(--k3b-pl) + var(--k3b-logo) + var(--k3b-gap) - clamp(3px,.5cqi,5px));bottom:0;z-index:1;margin:0;line-height:1;transform:translateY(50%)}
+.k3.k3n .k3n-band .tw-lage{display:inline-flex;align-items:center;height:var(--k3b-lage);margin:0;padding:0 clamp(9px,1.25cqi,12.5px);border-radius:999px;font-size:clamp(12px,1.56cqi,15.6px);font-weight:700;line-height:1}
+.k3.k3n .k3n-band .tw-lage-a{background:var(--k3b-la-bg);border-color:var(--k3b-la-rand);color:var(--k3b-la-t)}
+.k3.k3n .k3n-band .tw-lage-t{background:var(--k3b-lt-bg);border-color:var(--k3b-lt-rand);color:var(--k3b-lt-t)}
+.k3.k3n .k3n-band .tw-lage-m{background:var(--k3b-lm-bg);border-color:var(--k3b-lm-rand);color:var(--k3b-lm-t)}
+
+/* Koerper: gleiche Inhalte, Schrift nach Vorlage */
+.k3.k3n:not(.ist-offen)>.k3-oben{flex:1 0 auto}
+.k3.k3n:not(.ist-offen) .k3n-infos{--k3n-lage-h:clamp(22px,2.9cqi,29px);flex:1 0 auto;align-content:start;gap:clamp(5px,.9cqi,9px);padding:clamp(10px,1.3cqi,13px) clamp(14px,2.2cqi,22px) clamp(9px,1.3cqi,13px) clamp(14px,2cqi,20px)}
+.k3.k3n:not(.ist-offen) .k3n-infos:after{left:clamp(14px,2cqi,20px);right:clamp(14px,2.2cqi,22px)}
+.k3.k3n:not(.ist-offen) .k3n-infos .k3-titelzeile{gap:4px clamp(14px,2.4cqi,24px)}
+.k3.k3n:not(.ist-offen) .k3n-infos .k3-titelzeile .k3-m{margin-left:0}
+.k3.k3n:not(.ist-offen) .k3n-infos .k3-m{gap:clamp(6px,.9cqi,9px);font-size:clamp(13px,1.7cqi,16.9px)}
+.k3.k3n:not(.ist-offen) .k3n-infos .k3-m .vs-ik,.k3.k3n:not(.ist-offen) .k3n-infos .k3-g .vs-ik{width:clamp(15px,2cqi,20px);height:clamp(15px,2cqi,20px)}
+.k3.k3n:not(.ist-offen) .k3n-infos .k3-stich{gap:clamp(6px,1cqi,10px)}
+.k3.k3n:not(.ist-offen) .k3n-infos .k3-mit,.k3.k3n:not(.ist-offen) .k3n-infos .k3-stich-text,.k3.k3n:not(.ist-offen) .k3n-infos .k3-stich.ist-gesperrt{font-size:clamp(13px,1.7cqi,16.9px)}
+.k3.k3n:not(.ist-offen) .k3n-infos .k3-stich.ist-gesperrt{height:auto;min-height:clamp(26px,3.9cqi,39px)}
+.k3.k3n:not(.ist-offen) .k3n-infos .k3-ptag{height:clamp(25px,3.9cqi,39px);padding:0 clamp(10px,1.4cqi,14px) 0 clamp(8px,1.2cqi,12px);gap:clamp(5px,.9cqi,9px);font-size:clamp(13px,1.76cqi,17.5px);font-weight:700}
+.k3.k3n:not(.ist-offen) .k3n-infos .k3-ptag .vs-ik{width:clamp(13px,1.8cqi,18px);height:clamp(13px,1.8cqi,18px)}
+.k3.k3n:not(.ist-offen) .k3n-infos .k3-grundlagen{font-size:clamp(13px,1.68cqi,16.7px)}
+.k3.k3n:not(.ist-offen) .k3n-infos .k3-trenner{margin:0 clamp(10px,1.3cqi,13px)}
+
+/* Fuss der geschlossenen Karte */
+.k3.k3n:not(.ist-offen) .k3-fuss{padding:clamp(5px,.8cqi,8px) clamp(12px,2cqi,20px) clamp(7px,1.1cqi,11px) clamp(14px,2cqi,20px)}
+.k3.k3n:not(.ist-offen) .k3-mehr{height:clamp(30px,4.1cqi,41px);font-size:clamp(13.5px,1.7cqi,16.9px)}
+.k3.k3n:not(.ist-offen) .k3-mehr .vs-ik{width:clamp(16px,1.9cqi,19px);height:clamp(16px,1.9cqi,19px)}
+.k3.k3n:not(.ist-offen) .k3-aktionen{gap:clamp(8px,1.2cqi,12px)}
+.k3.k3n:not(.ist-offen) .k3-fuss .k3-knopf{height:clamp(30px,4.1cqi,41px);padding:0 clamp(11px,1.5cqi,15px);gap:clamp(6px,.9cqi,9px);border-radius:clamp(8px,1cqi,10px);font-size:clamp(12.5px,1.56cqi,15.6px)}
+.k3.k3n:not(.ist-offen) .k3-fuss .k3-knopf .vs-ik{width:clamp(15px,1.9cqi,19px);height:clamp(15px,1.9cqi,19px)}
+
+/* Lage-Kennzeichen wie in der Vorlage auf der Bandkante, Platz darunter */
+.k3.k3n:not(.ist-offen):has(.k3n-band .tw-lage-karte) .k3n-infos{padding-top:calc(var(--k3n-lage-h,22px)/2 + clamp(8px,1.4cqi,14px))}
+/* 560-759 px: Stufe und Kader-Berechnung rechts uebereinander, Erklaerung darunter rechtsbuendig */
+@container (min-width:560px) and (max-width:759px){
+  .k3.k3n .k3n-band .k3-wertk{display:contents}
+  .k3.k3n .k3n-band .k3n-wertzeile{flex-direction:column;align-items:flex-end;gap:4px;margin-left:auto;padding-left:10px}
+  .k3.k3n .k3n-band .k3-wertk small{flex:1 1 100%;margin-top:5px;text-align:right}
+  .k3n-bpos{margin-left:11px;padding-left:11px}
+  .k3n-bzeile{column-gap:7px}
+  .k3.k3n .k3n-band .k3-vmeta{font-size:12.5px}
+}
+/* unter 560 px: Stufe, Kader-Berechnung und Erklaerung als zweite Zeile im Kopfband, Lage-Kennzeichen hinter Land/Liga */
+@container (max-width:559px){
+  .k3.k3n .k3n-band .k3-wertk{flex:1 1 100%;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:5px 14px;margin:clamp(9px,1.5cqi,11px) 0 0;padding:0;text-align:left}
+  .k3.k3n .k3n-band .k3n-wertzeile{justify-content:flex-start}
+  .k3.k3n .k3n-band .k3-wertk small{margin-left:auto;text-align:right}
+  .k3.k3n .k3-kopf.k3n-band:has(.tw-lage-karte){padding-bottom:18px}
+}
+/* Handy */
+@container (max-width:479px){
+  .k3.k3n .k3-kopf.k3n-band{--k3b-pl:13px;--k3b-logo:42px;--k3b-gap:11px;--k3b-chev:14px;--k3b-lage:22px;padding:12px 13px 12px 13px}
+  .k3.k3n .k3n-band .k3-vname,.k3.k3n .k3n-band .k3-titel{font-size:15.5px}
+  .k3.k3n .k3n-band .k3-vmeta{font-size:12.5px}
+  .k3n-bpos{margin-left:12px;padding-left:12px}
+  .k3.k3n:not(.ist-offen) .k3n-infos{--k3n-lage-h:22px;padding:10px 13px}
+  .k3.k3n:not(.ist-offen):has(.k3n-band .tw-lage-karte) .k3n-infos{padding-top:19px}
+  .k3.k3n:not(.ist-offen) .k3n-infos:after{left:13px;right:13px}
+  .k3.k3n:not(.ist-offen) .k3-fuss{padding:6px 10px 8px 13px}
+}
