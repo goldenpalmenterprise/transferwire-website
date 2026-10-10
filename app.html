@@ -330,6 +330,19 @@ html body .tw-sn-upgrade:hover, html.tw-dark body .tw-sn-upgrade:hover, .tw-gold
 .tw-sk { transition: border-color .15s, box-shadow .15s; }
 .tw-sk:hover { border-color: var(--linie2) !important; box-shadow: 0 6px 18px rgba(0,0,0,.10); }
 </style>
+<style id="tw-scout-ttl">
+/* Scouting 10.10.2026: Top 50 Talente nach Land + lesbares Analyse-Fenster */
+.tw-ttl-laender { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.tw-ttl-land:hover, .tw-ttl-knopf:not(:disabled):hover, .tw-talaktion:not(:disabled):hover { border-color: var(--teal) !important; }
+.tw-ttl-zeile { display: grid; grid-template-columns: 46px minmax(0, 2.1fr) 52px minmax(0, 1.1fr) minmax(0, 2fr) 84px 178px; column-gap: 12px; align-items: center; }
+.tw-ttl [role=listitem]:hover { background: var(--zeile-hover); }
+.tw-ttl button:focus-visible, .tw-ttl input:focus-visible, .tw-talpanel button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.tw-ttl input[type=search] { padding-left: 40px !important; }
+.tw-talpanel button:disabled, .tw-ttl button:disabled { opacity: 1 !important; }
+.tw-ttl-leiste.ist-fest > div:first-child { box-shadow: 0 10px 24px rgba(0,0,0,.28) !important; }
+@media (max-width: 760px) { .tw-ttl-laender { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 359px) { .tw-ttl-laender { grid-template-columns: minmax(0, 1fr); } .tw-talfaktor { grid-template-columns: minmax(80px, 1fr) minmax(44px, 1fr) 30px 40px !important; column-gap: 8px !important; font-size: 13px !important; } }
+</style>
 </head>
 <body>
 <div id="tw-lader" aria-hidden="true"><div class="tw-lader-kern"><span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span><span class="sweep"></span><img src="/assets/logo-icon.png?v=gold" alt=""></div><div class="tw-lader-text" id="tw-lader-text">Signal wird gesucht</div><script>try{if(localStorage.getItem("tw_lang")==="en"){document.getElementById("tw-lader-text").textContent="Searching for signals";}}catch(e){}</script></div>
@@ -2383,6 +2396,251 @@ function talFaktoren(r) {
   return { leistung: leistung, potenzial: potenzial, entwicklung: entwicklung, einsatz: einsatz, alter: alter, gegner: gegner, gesamt: Math.round(gesamt * 10) / 10 };
 }
 const talFmt = n => Number(n).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+/* --- Scouting 10.10.2026: Top 50 Talente nach Land. Laenderzuordnung = Nationalitaet des Spielers (nie Land von Verein/Liga). --- */
+const TT_LAND_EXTRA = { "republic of ireland": "ie", "rep. of ireland": "ie", "liberia": "lr", "belarus": "by", "kenya": "ke", "chinese taipei": "tw", "taiwan": "tw", "curacao": "cw", "moldova": "md", "lithuania": "lt", "latvia": "lv", "estonia": "ee", "malta": "mt", "azerbaijan": "az", "qatar": "qa", "united arab emirates": "ae", "libya": "ly", "sudan": "sd", "south sudan": "ss", "mozambique": "mz", "zimbabwe": "zw", "uganda": "ug", "tanzania": "tz", "rwanda": "rw", "burundi": "bi", "equatorial guinea": "gq", "central african republic": "cf", "chad": "td", "niger": "ne", "mauritania": "mr", "madagascar": "mg", "comoros": "km", "ethiopia": "et", "bolivia": "bo", "el salvador": "sv", "guatemala": "gt", "nicaragua": "ni", "cuba": "cu", "iraq": "iq", "jordan": "jo", "syria": "sy", "lebanon": "lb", "palestine": "ps", "oman": "om", "bahrain": "bh", "kuwait": "kw", "india": "in", "thailand": "th", "vietnam": "vn", "indonesia": "id", "malaysia": "my", "philippines": "ph", "korea dpr": "kp", "north korea": "kp", "faroe islands": "fo", "andorra": "ad", "san marino": "sm", "liechtenstein": "li", "gibraltar": "gi", "namibia": "na", "mauritius": "mu", "guadeloupe": "gp", "martinique": "mq", "french guiana": "gf", "tajikistan": "tj", "kyrgyzstan": "kg", "turkmenistan": "tm", "bosnia": "ba", "bosnia-herzegovina": "ba", "the gambia": "gm", "united states of america": "us", "cote d'ivoire": "ci", "turkiye": "tr", "trinidad & tobago": "tt" };
+const TT_NAME_FIX = { "gb-eng": ["England", "England"], "gb-sct": ["Schottland", "Scotland"], "gb-wls": ["Wales", "Wales"], "gb-nir": ["Nordirland", "Northern Ireland"], xk: ["Kosovo", "Kosovo"], us: ["USA", "USA"], ci: ["Elfenbeinküste", "Ivory Coast"], cd: ["DR Kongo", "DR Congo"], cg: ["Kongo", "Congo"], cv: ["Kap Verde", "Cape Verde"], ba: ["Bosnien-Herzegowina", "Bosnia and Herzegovina"], kr: ["Südkorea", "South Korea"], kp: ["Nordkorea", "North Korea"], tw: ["Taiwan", "Taiwan"], cz: ["Tschechien", "Czechia"], tr: ["Türkei", "Türkiye"], ie: ["Irland", "Ireland"], mk: ["Nordmazedonien", "North Macedonia"] };
+const TT_POS_DE = { midfielder: "Mittelfeld", defender: "Abwehr", forward: "Sturm", attacker: "Sturm", goalkeeper: "Torwart" };
+const TT_KURZ_RE = /^\s*([A-Za-z\u00C0-\u024F]{1,2})\.\s*(\S.*)$/;
+let TT_CACHE = null, TT_WAHL = "", TT_NAMEN = {}, TT_DN = {};
+const ttNorm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\u00df/g, "ss").replace(/[^a-z0-9]+/g, " ").trim();
+function ttLandCode(name) {
+  const roh = String(name || "").trim(); if (!roh) return "";
+  const k = roh.toLowerCase().replace(/[\u2018\u2019`\u00b4]/g, "'").replace(/\s+/g, " "), n = k.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const quellen = [typeof LAND_CODE_EN !== "undefined" ? LAND_CODE_EN : {}, TT_LAND_EXTRA];
+  for (const q of quellen) { if (q[k]) return q[k]; if (q[n]) return q[n]; }
+  if (typeof FLAGGEN !== "undefined") for (const de in FLAGGEN) if (de.toLowerCase() === k) return FLAGGEN[de];
+  if (typeof FLAGGEN !== "undefined" && typeof TW_LAND_EN !== "undefined") for (const de in TW_LAND_EN) if (String(TW_LAND_EN[de]).toLowerCase() === k && FLAGGEN[de]) return FLAGGEN[de];
+  return "";
+}
+function ttLandName(code, en, roh) {
+  const sp = en ? "en" : "de", key = sp + "|" + code; if (TT_NAMEN[key]) return TT_NAMEN[key];
+  let x = "";
+  const fix = TT_NAME_FIX[code]; if (fix) x = en ? fix[1] : fix[0];
+  if (!x && typeof FLAGGEN !== "undefined") for (const de in FLAGGEN) if (FLAGGEN[de] === code) { x = en ? (typeof TW_LAND_EN !== "undefined" && TW_LAND_EN[de]) || "" : de; if (x) break; }
+  if (!x && /^[a-z]{2}$/.test(code)) { try { if (!TT_DN[sp]) TT_DN[sp] = new Intl.DisplayNames([sp], { type: "region" }); const d = TT_DN[sp].of(code.toUpperCase()); if (d && d.toUpperCase() !== code.toUpperCase()) x = d; } catch (e) {} }
+  if (!x) x = roh || code.toUpperCase();
+  TT_NAMEN[key] = x; return x;
+}
+function ttFlagge(code, w) {
+  const hh = Math.round(w * 0.7);
+  if (!code || code.indexOf("x-") === 0) return React.createElement("span", { "aria-hidden": "true", style: { width: w, height: hh, borderRadius: 3, background: "var(--karte2)", border: "1px solid var(--linie2)", boxSizing: "border-box", flexShrink: 0, display: "inline-block" } });
+  return React.createElement("img", { src: "https://flagcdn.com/w40/" + code + ".png", srcSet: "https://flagcdn.com/w80/" + code + ".png 2x", width: w, height: hh, alt: "", loading: "lazy", style: { width: w, height: hh, borderRadius: 3, objectFit: "cover", flexShrink: 0, boxShadow: "0 0 0 1px var(--linie2)" } });
+}
+function ttPos(p, en) { const t = String(p || "").trim(); if (!t || /^(unknown|unbekannt)\b/i.test(t) || /^\?/.test(t)) return "\u2013"; if (en) return typeof tkPosText === "function" ? tkPosText(t, true) : t; return TT_POS_DE[t.toLowerCase()] || t; }
+function ttGleicherVerein(a, b) { if (!a || !b || typeof clubKey !== "function") return false; const ka = clubKey(a), kb = clubKey(b); if (!ka || !kb) return false; return ka === kb || (ka.length >= 4 && kb.length >= 4 && (ka.indexOf(kb) >= 0 || kb.indexOf(ka) >= 0)); }
+function ttKopfUnten() { try { const k = document.querySelector("header"); if (!k) return 0; const st = getComputedStyle(k); if (st.position !== "sticky" && st.position !== "fixed") return 0; return Math.max(0, Math.round(k.getBoundingClientRect().bottom)); } catch (e) { return 0; } }
+// PostgREST liefert hoechstens 200 Zeilen je Abfrage (PGRST_DB_MAX_ROWS) - daher seitenweise holen (stabile Reihenfolge noetig)
+async function ttSeiten(basis, parallel) {
+  const seite = o => fetch(basis + "&limit=200&offset=" + o).then(x => { if (!x.ok) throw new Error("db " + x.status); return x.json(); }).then(d => { if (!Array.isArray(d)) throw new Error("db"); return d; });
+  const erste = await Promise.all(Array.from({ length: parallel || 1 }, (_, i) => seite(i * 200)));
+  let alle = [].concat.apply([], erste), o = (parallel || 1) * 200, letzte = erste[erste.length - 1];
+  while (letzte.length === 200 && o < 20000) { letzte = await seite(o); alle = alle.concat(letzte); o += 200; }
+  return alle;
+}
+async function ttLaden() {
+  const sel = "name,age,club,league,country,position,scout_score,goals,assists,talent_key,strengths,minutes,rating,mentions_7d,begruendung";
+  const tp = await ttSeiten("/db/talent_profiles?select=" + sel + "&order=scout_score.desc.nullslast,talent_key.asc", 3);
+  const namen = Array.from(new Set(tp.map(x => String(x.name || "").replace(/["\\]/g, "").trim()).filter(Boolean)));
+  const kurz = Array.from(new Set(tp.map(x => { const m = TT_KURZ_RE.exec(x.name || ""); return m ? m[2].replace(/["\\*%,()]/g, "").trim() : ""; }).filter(s => s.length >= 2)));
+  const holen = u => ttSeiten(u, 1).catch(() => []);
+  const inL = l => encodeURIComponent("in.(" + l.map(n => '"' + n + '"').join(",") + ")");
+  const sp = "name,player_id,photo,nationality,age,team", ord = "&order=player_id.asc";
+  const jobs = [];
+  for (let i = 0; i < namen.length; i += 100) { const l = namen.slice(i, i + 100); jobs.push(holen("/db/players?select=" + sp + "&name=" + inL(l) + ord).then(d => ({ t: "p", d: d }))); jobs.push(holen("/db/players_youth?select=" + sp + "&name=" + inL(l) + ord).then(d => ({ t: "y", d: d }))); }
+  for (let i = 0; i < kurz.length; i += 25) { const o = encodeURIComponent("(" + kurz.slice(i, i + 25).map(s => 'name.ilike."*' + s + '",name.ilike."*' + s + '-*",name.ilike."*' + s + ' *"').join(",") + ")"); jobs.push(holen("/db/players?select=" + sp + "&or=" + o + ord).then(d => ({ t: "p", d: d }))); jobs.push(holen("/db/players_youth?select=" + sp + "&or=" + o + ord).then(d => ({ t: "y", d: d }))); }
+  const res = await Promise.all(jobs); const pl = [], py = [];
+  res.forEach(x => { (x.t === "p" ? pl : py).push.apply(x.t === "p" ? pl : py, x.d); });
+  return { tp: tp, pl: pl, py: py, ts: Date.now() };
+}
+// Talente zusammenfuehren und je Nationalitaet zuordnen: Herkunft "talent" (Datenradar schreibt players.nationality) oder "spieler" (Abgleich ueber Name, Alter, Verein)
+function ttAufbereiten(daten) {
+  const alle = [];
+  (daten.py || []).forEach(r => alle.push(Object.assign({ _q: "y" }, r)));
+  (daten.pl || []).forEach(r => alle.push(Object.assign({ _q: "p" }, r)));
+  const proName = {}; alle.forEach(r => { const k = ttNorm(r.name); if (k) (proName[k] = proName[k] || []).push(r); });
+  const roh = [];
+  (daten.tp || []).forEach(r => {
+    const id = r.talent_key ? String(r.talent_key).split("|")[0] : talSlug(r.name) + "|" + (r.age || "");
+    const z = Object.assign({ id: id }, r); z.club = z.club || "";
+    const m = TT_KURZ_RE.exec(z.name || ""); let kand;
+    if (m) { const ini = ttNorm(m[1]).charAt(0), nach = " " + ttNorm(m[2]) + " ", voll = ttNorm(z.name); kand = alle.filter(x => { const n = ttNorm(x.name); return n.charAt(0) === ini && (n === voll || (" " + n + " ").indexOf(nach) > 0); }); }
+    else kand = (proName[ttNorm(z.name)] || []).slice();
+    const a = Number(z.age) || 0; if (a) kand = kand.filter(x => !x.age || Math.abs(Number(x.age) - a) <= 1);
+    const gleich = kand.filter(x => ttGleicherVerein(x.team, z.club)); if (gleich.length) kand = gleich;
+    const vollNamen = Array.from(new Set(kand.filter(x => !TT_KURZ_RE.test(x.name || "")).map(x => String(x.name).trim())));
+    const nats = Array.from(new Set(kand.map(x => ttLandCode(x.nationality)).filter(Boolean)));
+    const eindeutig = gleich.length > 0 || (nats.length <= 1 && (!m || vollNamen.length <= 1));
+    const pq = eindeutig ? (kand.find(x => x._q === "y" && x.player_id) || kand.find(x => x.player_id)) : null;
+    const fq = kand.find(x => x.photo) || null;
+    if (m && vollNamen.length === 1 && eindeutig) { z.name_db = z.name; z.name = vollNamen[0]; }
+    z._zus = { pid: pq ? pq.player_id : null, photo: eindeutig && fq ? fq.photo : "" };
+    const tc = String(z.country || "").trim(), region = !tc || /^[A-Z]{2}$/.test(tc) || tc === "INT";
+    z.land = ""; z.landQuelle = ""; z.landRoh = "";
+    if (!region) { z.land = ttLandCode(tc) || "x-" + ttNorm(tc).replace(/ /g, "-"); z.landQuelle = "talent"; z.landRoh = tc; }
+    else if (eindeutig && kand.length && nats.length === 1) { z.land = nats[0]; z.landQuelle = "spieler"; }
+    roh.push(z);
+  });
+  // Doppelte Eintraege desselben Spielers (Kurzname, zweite Kennung) zusammenlegen; es bleibt der Eintrag mit der hoeheren Scout-Bewertung
+  const nachSchl = {}, out = [];
+  const schluessel = z => { const s = ["n" + ttNorm(z.name) + "|" + (z.age || "")]; if (z._zus.pid) s.push("p" + z._zus.pid); s.push("i" + z.id); return s; };
+  roh.forEach(z => {
+    const ks = schluessel(z); const alt = ks.map(k => nachSchl[k]).find(Boolean);
+    if (!alt) { out.push(z); ks.forEach(k => { nachSchl[k] = z; }); return; }
+    const besser = (Number(z.scout_score) || 0) > (Number(alt.scout_score) || 0);
+    const behalte = besser ? Object.assign({}, z) : alt, anderer = besser ? alt : z;
+    if (!behalte._zus.pid && anderer._zus.pid) behalte._zus = Object.assign({}, behalte._zus, { pid: anderer._zus.pid });
+    if (!behalte._zus.photo && anderer._zus.photo) behalte._zus = Object.assign({}, behalte._zus, { photo: anderer._zus.photo });
+    if (!behalte.land && anderer.land) { behalte.land = anderer.land; behalte.landQuelle = anderer.landQuelle; behalte.landRoh = anderer.landRoh; }
+    if (TT_KURZ_RE.test(behalte.name || "") && !TT_KURZ_RE.test(anderer.name || "")) { behalte.name_db = behalte.name_db || behalte.name; behalte.name = anderer.name; }
+    if (besser) { const i = out.indexOf(alt); if (i >= 0) out[i] = behalte; }
+    schluessel(alt).concat(ks, schluessel(behalte)).forEach(k => { nachSchl[k] = behalte; });
+  });
+  out.forEach(z => { z.f = talFaktoren(z); z.score = z.f.gesamt; });
+  const proLand = {}; let ohne = 0;
+  out.forEach(z => { if (!z.land) { ohne++; return; } (proLand[z.land] = proLand[z.land] || []).push(z); });
+  Object.keys(proLand).forEach(k => proLand[k].sort((a, b) => b.score - a.score || (Number(b.minutes) || 0) - (Number(a.minutes) || 0) || String(a.name).localeCompare(String(b.name))));
+  return { proLand: proLand, ohne: ohne, gesamt: out.length };
+}
+function TopTalenteLand({ onOpen, onAnalyse }) {
+  const h = React.createElement; const en = LANG === "en";
+  const [daten, setDaten] = React.useState(() => TT_CACHE && Date.now() - TT_CACHE.ts < 10 * 60000 ? TT_CACHE : null);
+  const [fehler, setFehler] = React.useState(false);
+  const [versuch, setVersuch] = React.useState(0);
+  const [land, setLandRoh] = React.useState(TT_WAHL);
+  const [q, setQ] = React.useState("");
+  const [alle, setAlle] = React.useState(false);
+  const [wechsel, setWechsel] = React.useState(false);
+  const [breite, setBreite] = React.useState(null);
+  const wurzel = React.useRef(null), anker = React.useRef(null), platz = React.useRef(null), leiste = React.useRef(null), suche = React.useRef(null), nachWahl = React.useRef(false);
+  React.useEffect(() => {
+    const f = () => { if (wurzel.current) setBreite(Math.round(wurzel.current.getBoundingClientRect().width)); };
+    f(); window.addEventListener("resize", f);
+    let ro = null; try { if (typeof ResizeObserver !== "undefined" && wurzel.current) { ro = new ResizeObserver(f); ro.observe(wurzel.current); } } catch (e) {}
+    return () => { window.removeEventListener("resize", f); if (ro) ro.disconnect(); };
+  }, []);
+  const mobil = breite != null ? breite < 820 : (typeof window !== "undefined" && window.innerWidth <= 760);
+  React.useEffect(() => {
+    if (daten) return; let aktiv = true; setFehler(false);
+    ttLaden().then(d => { if (!aktiv) return; TT_CACHE = d; setDaten(d); }).catch(() => { if (aktiv) setFehler(true); });
+    return () => { aktiv = false; };
+  }, [versuch]);
+  React.useEffect(() => {
+    if (!wechsel) return;
+    const zu = e => { if (leiste.current && !leiste.current.contains(e.target)) setWechsel(false); };
+    const taste = e => { if (e.key === "Escape") setWechsel(false); };
+    document.addEventListener("mousedown", zu); document.addEventListener("touchstart", zu, { passive: true }); document.addEventListener("keydown", taste);
+    const t = setTimeout(() => { try { if (!mobil && suche.current) suche.current.focus({ preventScroll: true }); } catch (e) {} }, 30);
+    return () => { clearTimeout(t); document.removeEventListener("mousedown", zu); document.removeEventListener("touchstart", zu); document.removeEventListener("keydown", taste); };
+  }, [wechsel]);
+  const auf = React.useMemo(() => daten ? ttAufbereiten(daten) : null, [daten]);
+  const istGewaehlt = !!(land && auf);
+  React.useEffect(() => {
+    if (!istGewaehlt) return; let raf = 0;
+    const loesen = (bar, ph) => { ph.style.height = ""; bar.style.position = "relative"; bar.style.top = bar.style.left = bar.style.width = ""; bar.classList.remove("ist-fest"); };
+    const pruefen = () => {
+      raf = 0; const bar = leiste.current, ph = platz.current, sec = wurzel.current; if (!bar || !ph || !sec) return;
+      const oben = ttKopfUnten(), phR = ph.getBoundingClientRect(), secR = sec.getBoundingClientRect(), hh = bar.offsetHeight;
+      if (phR.top < oben && secR.bottom > oben + hh + 48) {
+        const cs = getComputedStyle(sec), li = (parseFloat(cs.borderLeftWidth) || 0) + (parseFloat(cs.paddingLeft) || 0), re = (parseFloat(cs.borderRightWidth) || 0) + (parseFloat(cs.paddingRight) || 0);
+        ph.style.height = hh + "px"; bar.style.position = "fixed"; bar.style.top = oben + "px"; bar.style.left = Math.round(secR.left + li) + "px"; bar.style.width = Math.round(secR.width - li - re) + "px"; bar.classList.add("ist-fest");
+      } else loesen(bar, ph);
+    };
+    const anfordern = () => { if (!raf) raf = requestAnimationFrame(pruefen); };
+    pruefen(); window.addEventListener("scroll", anfordern, { passive: true }); window.addEventListener("resize", anfordern);
+    return () => { if (raf) cancelAnimationFrame(raf); window.removeEventListener("scroll", anfordern); window.removeEventListener("resize", anfordern); if (leiste.current && platz.current) loesen(leiste.current, platz.current); };
+  }, [istGewaehlt, land]);
+  const laender = React.useMemo(() => {
+    if (!auf) return [];
+    const m = {};
+    Object.keys(auf.proLand).forEach(c => { const l = auf.proLand[c]; m[c] = { code: c, n: l.length, name: ttLandName(c, en, l[0].landRoh) }; });
+    const weitere = [];
+    if (typeof FLAGGEN !== "undefined") Object.keys(FLAGGEN).forEach(de => weitere.push(FLAGGEN[de]));
+    if (typeof LAND_CODE_EN !== "undefined") Object.keys(LAND_CODE_EN).forEach(k => weitere.push(LAND_CODE_EN[k]));
+    weitere.forEach(c => { if (c && !m[c]) m[c] = { code: c, n: 0, name: ttLandName(c, en) }; });
+    return Object.keys(m).map(k => m[k]);
+  }, [auf, en]);
+  const setLand = c => { TT_WAHL = c; setLandRoh(c); };
+  const sortiertName = l => l.slice().sort((a, b) => a.name.localeCompare(b.name, en ? "en" : "de"));
+  const mitDaten = laender.filter(l => l.n > 0).sort((a, b) => b.n - a.n || a.name.localeCompare(b.name, en ? "en" : "de"));
+  const qn = ttNorm(q);
+  const treffer = qn ? laender.filter(l => { const a = ttNorm(l.name), b = ttNorm(ttLandName(l.code, !en)); return a.indexOf(qn) >= 0 || b.indexOf(qn) >= 0 || (qn.length === 2 && l.code === qn); }).sort((a, b) => (b.n > 0) - (a.n > 0) || ((ttNorm(b.name).indexOf(qn) === 0) - (ttNorm(a.name).indexOf(qn) === 0)) || a.name.localeCompare(b.name, en ? "en" : "de")) : null;
+  const landObj = land ? (laender.find(l => l.code === land) || { code: land, n: 0, name: ttLandName(land, en) }) : null;
+  const liste = land && auf ? (auf.proLand[land] || []).slice(0, 50) : [];
+  const zaehl = n => n === 0 ? (en ? "no data yet" : "noch keine Daten") : n + (en ? (n === 1 ? " talent" : " talents") : (n === 1 ? " Talent" : " Talente"));
+  React.useEffect(() => {
+    // nach einer Auswahl: steht die Seite schon tiefer in der Liste, die Leiste an ihren Platz bringen (Liste beginnt bei Rang 1); nie weiter nach unten
+    if (!nachWahl.current) return; nachWahl.current = false;
+    try { const a = anker.current; if (!a) return; const ziel = a.getBoundingClientRect().top + (window.pageYOffset || 0) - ttKopfUnten() - 8; if ((window.pageYOffset || 0) > ziel + 2) window.scrollTo({ top: Math.max(0, ziel), behavior: "smooth" }); } catch (e) {}
+  }, [land]);
+  const waehle = c => { nachWahl.current = true; setLand(c); setWechsel(false); setQ(""); setAlle(false); };
+  const landKnopf = l => { const an = l.code === land; return h("button", { key: l.code, type: "button", className: "tw-ttl-land", onClick: () => waehle(l.code), "aria-pressed": an ? "true" : "false", title: l.name, style: { display: "flex", alignItems: "center", gap: 10, minWidth: 0, width: "100%", minHeight: 48, boxSizing: "border-box", padding: "8px 12px", borderRadius: 12, cursor: "pointer", textAlign: "left", fontFamily: FONT_BODY, background: an ? "var(--teal-tint)" : "var(--karte2)", border: "1px solid " + (an ? "var(--teal)" : "var(--linie2)"), color: "var(--t1)" } },
+    ttFlagge(l.code, 26),
+    h("span", { style: { display: "flex", flexDirection: "column", minWidth: 0, flex: 1 } },
+      h("span", { style: { fontSize: 14.5, fontWeight: 700, lineHeight: 1.25, color: "var(--t1)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, l.name),
+      h("span", { style: { fontSize: 12.5, fontWeight: 600, lineHeight: 1.3, color: l.n ? "var(--t2)" : "var(--t3)" } }, zaehl(l.n)))); };
+  const wahl = kompakt => {
+    const zeige = treffer || (alle ? sortiertName(mitDaten) : mitDaten.slice(0, mobil ? 8 : 12));
+    return h("div", { className: "tw-ttl-wahl", style: { display: "flex", flexDirection: "column", gap: 12 } },
+      h("label", { style: { position: "relative", display: "block" } },
+        h("span", { style: { position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: "var(--t2)", display: "inline-flex", pointerEvents: "none" } }, h(Search, { size: 17, strokeWidth: 2.2 })),
+        h("input", { ref: kompakt ? suche : null, type: "search", value: q, onChange: e => setQ(e.target.value), placeholder: en ? "Search country, e.g. Sweden" : "Land suchen, z. B. Schweden", "aria-label": en ? "Search country" : "Land suchen", autoComplete: "off", style: { width: "100%", boxSizing: "border-box", fontFamily: FONT_BODY, fontSize: 16, color: "var(--t1)", background: "var(--karte)", border: "1px solid var(--linie2)", borderRadius: 10, padding: "10px 12px 10px 40px", minHeight: 46 } })),
+      zeige.length ? h("div", { className: "tw-ttl-laender" }, zeige.map(landKnopf)) : h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, color: "var(--t2)", padding: "10px 2px" } }, !treffer ? (en ? "No rated talents available yet." : "Noch keine bewerteten Talente vorhanden.") : en ? "No country found for \u201e" + q + "\u201c." : "Kein Land zu \u201e" + q + "\u201c gefunden."),
+      !treffer && mitDaten.length > (mobil ? 8 : 12) ? h("button", { type: "button", onClick: () => setAlle(a => !a), style: { alignSelf: "flex-start", cursor: "pointer", fontFamily: FONT_BODY, fontSize: 14, fontWeight: 700, color: "var(--teal)", background: "transparent", border: "1px solid var(--linie2)", borderRadius: 999, padding: "8px 16px", minHeight: 40 } }, alle ? (en ? "Show fewer countries" : "Weniger L\u00e4nder anzeigen") : (en ? "Show all " + mitDaten.length + " countries (A\u2013Z)" : "Alle " + mitDaten.length + " L\u00e4nder anzeigen (A\u2013Z)")) : null,
+      !treffer ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.5, color: "var(--t2)" } }, en ? "Countries without rated talents can be found via the search." : "L\u00e4nder ohne bewertete Talente findest du \u00fcber die Suche.") : null);
+  };
+  const knopf = (lab, fn, haupt, titel) => h("button", { type: "button", onClick: fn ? e => { e.stopPropagation(); fn(); } : undefined, disabled: !fn, title: titel || lab, "aria-label": titel || lab, className: "tw-ttl-knopf", style: { cursor: fn ? "pointer" : "not-allowed", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 700, lineHeight: 1.2, padding: mobil ? "8px 10px" : "8px 12px", minHeight: mobil ? 40 : 36, borderRadius: 9, whiteSpace: "nowrap", border: (fn ? "1px solid " : "1px dashed ") + (haupt && fn ? "var(--teal)" : "var(--linie2)"), background: fn ? (haupt ? "var(--teal-tint)" : "var(--karte2)") : "transparent", color: fn ? "var(--t1)" : "var(--t3)" } }, lab);
+  const pill = z => h("button", { type: "button", onClick: e => { e.stopPropagation(); onAnalyse(z); }, title: en ? "Show score factors" : "Score-Faktoren anzeigen", "aria-label": "TW Talent Score " + talFmt(z.score), style: { cursor: "pointer", background: scoreBg(z.score), border: "1px solid " + scoreRand(z.score), color: scoreTxt(z.score), borderRadius: 8, padding: "3px 10px", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 17, lineHeight: 1.15, whiteSpace: "nowrap" } }, talFmt(z.score));
+  const verein = (z, gross) => h("span", { title: (clubName(z.club) || "") + (z.league ? " \u00b7 " + z.league : ""), style: { display: "inline-flex", alignItems: gross ? "center" : "flex-start", gap: 7, minWidth: 0, maxWidth: "100%" } }, h(ClubLogo, { name: z.club, size: gross ? 18 : 16 }),
+    h("span", { style: { display: "flex", flexDirection: "column", minWidth: 0 } },
+      h("span", { style: gross ? { fontWeight: 700, color: "var(--t1)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } : { fontWeight: 700, color: "var(--t1)", lineHeight: 1.3, overflowWrap: "anywhere" } }, clubName(z.club) || "\u2013"),
+      gross && z.league ? h("span", { style: { fontSize: 12.5, color: "var(--t2)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, z.league) : null));
+  const oeffne = z => { const pid = z._zus && z._zus.pid; if (pid) onOpen(pid, z.name, z.club); else onAnalyse(z); };
+  const profilKnopf = z => knopf(en ? "Profile" : "Profil", z._zus && z._zus.pid ? () => onOpen(z._zus.pid, z.name, z.club) : null, false, z._zus && z._zus.pid ? (en ? "Open player profile: " : "Spielerprofil \u00f6ffnen: ") + z.name : (en ? "No database profile linked yet" : "Noch kein Datenbankprofil verkn\u00fcpft"));
+  const analyseKnopf = z => knopf(en ? "Analysis" : "Analyse", () => onAnalyse(z), true, (en ? "Open analysis: " : "Analyse \u00f6ffnen: ") + z.name);
+  const zeileD = (z, i) => h("div", { key: z.id, role: "listitem", className: "tw-ttl-zeile", onClick: () => oeffne(z), style: { cursor: "pointer", borderTop: i ? "1px solid var(--linie)" : "none", padding: "9px 12px", fontFamily: FONT_BODY, fontSize: 14, color: "var(--t2)" } },
+    h("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 18, fontWeight: 700, color: i < 3 ? "var(--teal)" : "var(--t2)", textAlign: "right", fontVariantNumeric: "tabular-nums" } }, "#" + (i + 1)),
+    h("span", { style: { fontWeight: 800, color: "var(--t1)", fontSize: 15, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, title: z.name }, z.name),
+    h("span", { style: { textAlign: "right", fontVariantNumeric: "tabular-nums" } }, z.age || "\u2013"),
+    h("span", { style: { minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, title: ttPos(z.position, en) }, ttPos(z.position, en)),
+    h("span", { style: { minWidth: 0 } }, verein(z, true)),
+    h("span", { style: { textAlign: "right" } }, pill(z)),
+    h("span", { style: { display: "flex", gap: 6, justifyContent: "flex-end" } }, profilKnopf(z), analyseKnopf(z)));
+  const zeileM = (z, i) => h("div", { key: z.id, role: "listitem", className: "tw-ttl-zeile-m", onClick: () => oeffne(z), style: { cursor: "pointer", display: "grid", gridTemplateColumns: "34px minmax(0, 1fr) auto", columnGap: 10, rowGap: 6, alignItems: "center", borderTop: i ? "1px solid var(--linie)" : "none", padding: "12px 4px", fontFamily: FONT_BODY, fontSize: 14, color: "var(--t2)" } },
+    h("span", { style: { gridRow: "1 / span 3", alignSelf: "start", fontFamily: FONT_DISPLAY, fontSize: 18, fontWeight: 700, color: i < 3 ? "var(--teal)" : "var(--t2)", fontVariantNumeric: "tabular-nums", paddingTop: 1 } }, "#" + (i + 1)),
+    h("span", { style: { fontWeight: 800, color: "var(--t1)", fontSize: 15.5, lineHeight: 1.3, minWidth: 0, overflowWrap: "anywhere" } }, z.name),
+    h("span", { style: { justifySelf: "end" } }, pill(z)),
+    h("span", { style: { gridColumn: "2 / span 2", fontSize: 13.5, lineHeight: 1.35 } }, [z.age ? z.age + (en ? " yrs" : " Jahre") : "", ttPos(z.position, en)].filter(x => x && x !== "\u2013").join(" \u00b7 ") || "\u2013"),
+    h("span", { style: { gridColumn: "2 / span 2", display: "flex", alignItems: "center", gap: 8, minWidth: 0, flexWrap: "wrap", justifyContent: "space-between" } }, h("span", { style: { minWidth: 0, flex: "1 1 112px", fontSize: 13.5 } }, verein(z, false)), h("span", { style: { display: "flex", gap: 6, flexShrink: 0 } }, profilKnopf(z), analyseKnopf(z))));
+  const kopfzeile = h("div", { className: "tw-ttl-zeile tw-ttl-kopfzeile", role: "presentation", style: { padding: "9px 12px", background: "var(--karte2)", borderBottom: "1px solid var(--linie)", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, letterSpacing: .6, textTransform: "uppercase", color: "var(--t2)" } },
+    h("span", { style: { textAlign: "right" } }, en ? "Rank" : "Rang"), h("span", null, en ? "Player" : "Spieler"), h("span", { style: { textAlign: "right" } }, en ? "Age" : "Alter"), h("span", null, "Position"), h("span", null, en ? "Club" : "Verein"),
+    h("span", { style: { textAlign: "right", display: "inline-flex", alignItems: "center", justifyContent: "flex-end", gap: 2, whiteSpace: "nowrap" } }, "TW Talent Score", h(ScoreInfo, { kind: "talent", size: 12 })), h("span", { style: { textAlign: "right" } }, en ? "Open" : "\u00d6ffnen"));
+  const leisteUi = landObj ? h("div", { ref: platz, className: "tw-ttl-platz", style: { marginBottom: 12 } }, h("div", { ref: leiste, className: "tw-ttl-leiste", style: { position: "relative", zIndex: 5, background: "var(--karte)", borderRadius: 12 } },
+    h("div", { style: { display: "flex", alignItems: "center", gap: mobil ? 10 : 12, flexWrap: mobil ? "nowrap" : "wrap", padding: "10px 12px", background: "var(--teal-tint)", border: "1.5px solid var(--teal)", borderRadius: 12, boxShadow: "0 6px 18px rgba(0,0,0,.12)" } },
+      ttFlagge(landObj.code, mobil ? 28 : 34),
+      h("div", { style: { display: "flex", flexDirection: "column", minWidth: 0, flex: mobil ? "1 1 0px" : "1 1 160px" } },
+        h("span", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, letterSpacing: .8, textTransform: "uppercase", color: "var(--t2)" } }, en ? "Nationality" : "Nationalit\u00e4t"),
+        h("span", { style: { fontFamily: FONT_DISPLAY, fontSize: mobil ? 22 : 24, fontWeight: 700, lineHeight: 1.1, color: "var(--t1)", overflowWrap: "anywhere" } }, landObj.name),
+        h("span", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "var(--t2)", marginTop: 2 } }, liste.length ? (mobil ? zaehl(liste.length) : en ? "Top " + liste.length + " by TW Talent Score" : "Top " + liste.length + " nach TW Talent Score") : (en ? "No rated talents yet" : "Noch keine bewerteten Talente"))),
+      h("button", { type: "button", onClick: () => { setQ(""); setWechsel(w => !w); }, "aria-expanded": wechsel ? "true" : "false", style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, lineHeight: 1.2, color: "var(--t1)", background: "var(--karte)", border: "1px solid var(--linie2)", borderRadius: 10, padding: mobil ? "10px 11px" : "10px 14px", minHeight: 44, whiteSpace: "nowrap", flexShrink: 0 } }, (en ? "Change country" : "Land wechseln") + " \u25BE")),
+    wechsel ? h("div", { className: "tw-ttl-drop", style: { position: "absolute", left: 0, right: 0, top: "100%", marginTop: 6, background: "var(--karte)", border: "1px solid var(--linie2)", borderRadius: 12, boxShadow: "0 18px 40px rgba(0,0,0,.28)", padding: 12, maxHeight: "min(62vh, 560px)", overflowY: "auto", overscrollBehavior: "contain" } }, wahl(true)) : null)) : null;
+  const leer = landObj ? h("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", gap: 10, textAlign: "center", border: "1px dashed var(--linie2)", borderRadius: 14, padding: "28px 18px", fontFamily: FONT_BODY } },
+    ttFlagge(landObj.code, 40),
+    h("div", { style: { fontSize: 16, fontWeight: 800, color: "var(--t1)", lineHeight: 1.35 } }, en ? "No rated talents with " + landObj.name + " nationality yet." : "F\u00fcr " + landObj.name + " liegen noch keine bewerteten Talente vor."),
+    h("div", { style: { fontSize: 14, color: "var(--t2)", lineHeight: 1.5, maxWidth: 520 } }, en ? "Players appear here as soon as the talent radar rates a player of this nationality. No entries are added artificially." : "Spieler erscheinen hier, sobald der Talent-Radar einen Spieler dieser Nationalit\u00e4t bewertet hat. Es werden keine Eintr\u00e4ge erg\u00e4nzt."),
+    h("button", { type: "button", onClick: () => { setQ(""); setWechsel(true); }, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: "var(--t1)", background: "var(--karte2)", border: "1px solid var(--linie2)", borderRadius: 10, padding: "10px 16px", minHeight: 44 } }, en ? "Choose another country" : "Anderes Land w\u00e4hlen")) : null;
+  const hinweisWenige = landObj && liste.length > 0 && liste.length < 50 ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.5, color: "var(--t2)", margin: "0 2px 10px" } }, en ? liste.length + (liste.length === 1 ? " rated talent" : " rated talents") + " of this nationality available \u2013 only real entries are shown." : liste.length + (liste.length === 1 ? " bewertetes Talent" : " bewertete Talente") + " dieser Nationalit\u00e4t vorhanden \u2013 es werden nur echte Eintr\u00e4ge gezeigt.") : null;
+  const listeUi = landObj ? (liste.length ? h("div", { role: "list", "aria-label": (en ? "Top talents " : "Top-Talente ") + landObj.name, style: { background: "var(--karte)", border: "1px solid var(--linie)", borderRadius: 14, overflow: "hidden" } }, mobil ? null : kopfzeile, liste.map(mobil ? zeileM : zeileD)) : leer) : null;
+  return h("section", { ref: wurzel, className: "tw-ttl", "aria-labelledby": "tw-ttl-titel", style: { gridColumn: "1 / -1", background: "var(--karte)", border: "1.5px solid var(--linie)", borderRadius: 16, padding: mobil ? 14 : 18, marginTop: 14, minWidth: 0 } },
+    h("div", { style: { marginBottom: 12 } },
+      h("h2", { id: "tw-ttl-titel", style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: mobil ? 26 : 28, lineHeight: 1.2, margin: "0 0 6px", color: "var(--t1)" } }, en ? "Top 50 talents by country" : "Top 50 Talente nach Land"),
+      h("p", { style: { fontFamily: FONT_BODY, fontSize: 14.5, lineHeight: 1.55, color: "var(--t2)", margin: 0, maxWidth: 820 } }, en ? "Choose a country to see its best talents, sorted by TW Talent Score." : "W\u00e4hle ein Land und sieh seine besten Talente, sortiert nach TW Talent Score.")),
+    h("div", { className: "tw-ttl-info", style: { display: "flex", gap: 10, alignItems: "flex-start", background: "var(--karte2)", border: "1px solid var(--linie2)", borderRadius: 12, padding: "10px 12px", marginBottom: 14, fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.55, color: "var(--t2)" } },
+      h("span", { "aria-hidden": "true", style: { color: "var(--teal)", fontWeight: 800, flexShrink: 0 } }, "\u24D8"),
+      h("span", null, h("b", { style: { color: "var(--t1)" } }, en ? "Country = the player\u2019s nationality" : "Land = Nationalit\u00e4t des Spielers"), en ? " (from our player data), not the country of his club or league. The current club is shown in every row." : " (laut unseren Spielerdaten), nicht das Land von Verein oder Liga. Der aktuelle Verein steht in jeder Zeile.", auf && auf.ohne ? (en ? " " + auf.ohne + " talents without known nationality are not assigned." : " " + auf.ohne + " Talente ohne bekannte Nationalit\u00e4t sind nicht zugeordnet.") : null)),
+    fehler ? h("div", { style: { display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", fontFamily: FONT_BODY, fontSize: 14, color: "var(--t1)", border: "1px dashed var(--linie2)", borderRadius: 12, padding: "14px 16px" } }, en ? "The talent data could not be loaded." : "Die Talentdaten konnten nicht geladen werden.", h("button", { type: "button", onClick: () => { TT_CACHE = null; setDaten(null); setVersuch(v => v + 1); }, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: "var(--t1)", background: "var(--karte2)", border: "1px solid var(--linie2)", borderRadius: 10, padding: "8px 14px", minHeight: 40 } }, en ? "Try again" : "Erneut versuchen")) :
+    !auf ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, color: "var(--t2)", padding: "14px 4px" } }, en ? "Loading talents \u2026" : "Talente werden geladen \u2026") :
+    h(React.Fragment, null, h("div", { ref: anker, "aria-hidden": "true" }), landObj ? h(React.Fragment, null, leisteUi, hinweisWenige, listeUi) : wahl(false)));
+}
 function TalentScouting({ onWatch, watched, onOpen, onVergleich, vergleich }) {
   const [kat, setKat] = React.useState("top");
   const [land, setLand] = React.useState("alle");
@@ -2445,7 +2703,7 @@ function TalentScouting({ onWatch, watched, onOpen, onVergleich, vergleich }) {
   const h = React.createElement;
   const bewertet = kat === "top" || kat === "unentdeckt";
   const wert = z => bewertet ? "TW Talent Score " + talFmt(z.score) : kat === "tore" ? ((z.goals || 0) + (en ? " goals" : " Tore")) : ((z.assists || 0) + (en ? " assists" : " Vorl."));
-  const zus = z => zusatz[z.name] || {};
+  const zus = z => zusatz[z.name] || z._zus || {};
   const imScout = z => scout.some(s => (zus(z).pid && s.pid === zus(z).pid) || s.key === z.id);
   const scoutToggle = z => { const p = { pid: zus(z).pid || null, key: z.id, name: z.name, team: z.club }; const n = imScout(z) ? scout.filter(s => !((p.pid && s.pid === p.pid) || s.key === z.id)) : [...scout, p]; setScout(n); try { localStorage.setItem("tw_scoutlist", JSON.stringify(n)); } catch (e) {} };
   const exportieren = z => { const f = z.f; const kopf = ["Spieler", "Alter", "Position", "Verein", "Liga", "Minuten", "TW Talent Score", "Leistung", "Potenzial", "Entwicklung", "Einsatzzeit", "Altersfaktor", "Gegnerstaerke", "Staerken"]; const zeile = [z.name, z.age || "", z.position || "", z.club || "", z.league || "", z.minutes || zus(z).minutes || "", z.score != null ? talFmt(z.score) : "", Math.round(f.leistung), Math.round(f.potenzial), Math.round(f.entwicklung), Math.round(f.einsatz), Math.round(f.alter), Math.round(f.gegner), z.strengths || ""]; const csv = [kopf, zeile].map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(";")).join("\r\n"); const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "talent-" + talSlug(z.name) + ".csv"; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); };
@@ -2476,20 +2734,22 @@ function TalentScouting({ onWatch, watched, onOpen, onVergleich, vergleich }) {
   const karten = h("div", { style: { display: "flex", flexDirection: "column", gap: 8 } }, liste.map((z, i) => h("div", { key: z.id, className: "tw-card", onClick: () => zus(z).pid ? onOpen(zus(z).pid, z.name, z.club) : setPanel(z), style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 12, padding: "10px 12px", cursor: "pointer" } },
     h("div", { style: { display: "flex", alignItems: "center", gap: 10 } }, h("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 14, fontWeight: 700, color: MUTED, width: 28, flexShrink: 0 } }, "#" + (i + 1)), foto(z, 34), h("div", { style: { flex: 1, minWidth: 0 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK } }, z.name), h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, [z.age ? z.age + (en ? " yrs" : " J.") : "", z.position, z.club].filter(Boolean).join(" \u00b7 "))), scorePill(z, false)),
     h("div", { style: { display: "flex", gap: 10, marginTop: 6, fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t2)", flexWrap: "wrap" } }, h("span", null, (Number(z.minutes) || Number(zus(z).minutes) || 0) + " Min."), h("span", null, (en ? "Contract " : "Vertrag ") + (zus(z).vertrag ? dbDatum(zus(z).vertrag) : "\u2013")), bewertet ? h("span", null, "Trend ", trend(z)) : null))));
-  const faktor = (lab, v, gew) => h("div", { style: { display: "grid", gridTemplateColumns: "120px 1fr 44px 44px", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 12.5 } }, h("span", { style: { color: INK, fontWeight: 700 } }, lab), h("span", { style: { height: 8, borderRadius: 99, background: "var(--karte2)", overflow: "hidden" } }, h("span", { style: { display: "block", height: "100%", width: Math.max(2, Math.min(100, v)) + "%", background: scoreColor(v), borderRadius: 99 } })), h("span", { style: { textAlign: "right", fontWeight: 800, color: INK } }, Math.round(v)), h("span", { style: { textAlign: "right", color: MUTED, fontSize: 11 } }, gew));
-  const panelUi = panel ? (() => { const z = panel; const f = z.f; const dt = deltaText(z); const pid = zus(z).pid; const aktion = (lab, fn, on, key) => h("button", { key: key, onClick: fn, disabled: fn === null, style: { cursor: fn ? "pointer" : "default", opacity: fn ? 1 : .5, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, padding: "8px 12px", borderRadius: 9, border: "1px solid " + (on ? "var(--gold-rand)" : HAIR), background: on ? "var(--gold-tint)" : "#fff", color: on ? "var(--gold-text)" : INK } }, lab);
-    return ReactDOM.createPortal(h("div", { style: { position: "fixed", inset: 0, zIndex: 1210 } }, h("div", { onClick: () => setPanel(null), style: { position: "absolute", inset: 0, background: "rgba(15,21,32,.35)" } }),
-      h("aside", { className: "tw-talpanel", style: { position: "absolute", top: 0, right: 0, bottom: 0, width: "min(440px, 100vw)", background: "var(--karte)", boxShadow: "-12px 0 40px rgba(15,21,32,.25)", overflowY: "auto", padding: "18px 20px 24px", display: "flex", flexDirection: "column", gap: 14 } },
-        h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.3, textTransform: "uppercase", color: "var(--t3)" } }, "TW Talent Score"), h("button", { onClick: () => setPanel(null), "aria-label": en ? "Close" : "Schlie\u00dfen", style: { width: 34, height: 34, borderRadius: 99, border: "1px solid " + HAIR, background: "var(--karte)", cursor: "pointer", fontSize: 16, fontWeight: 800, color: "var(--t2)" } }, "\u2715")),
-        h("div", { style: { display: "flex", alignItems: "center", gap: 12 } }, foto(z, 56), h("div", { style: { minWidth: 0, flex: 1 } }, h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 22, fontWeight: 700, color: INK, lineHeight: 1.05 } }, z.name), h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, marginTop: 3 } }, [z.age ? z.age + (en ? " yrs" : " Jahre") : "", z.position, z.club].filter(Boolean).join(" \u00b7 "))), z.score != null ? h("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 34, fontWeight: 700, color: scoreColor(z.score), lineHeight: 1 } }, talFmt(z.score)) : null),
-        z.score != null ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, color: dt.c } }, dt.t) : null,
-        h("div", { style: { display: "flex", flexDirection: "column", gap: 8, background: "var(--karte2)", border: "1px solid " + HAIR, borderRadius: 12, padding: "12px 14px" } }, faktor(en ? "Performance" : "Leistung", f.leistung, "25 %"), faktor(en ? "Potential" : "Potenzial", f.potenzial, "30 %"), faktor(en ? "Development" : "Entwicklung", f.entwicklung, "15 %"), faktor(en ? "Playing time" : "Einsatzzeit", f.einsatz, "15 %"), faktor(en ? "Age factor" : "Altersfaktor", f.alter, "10 %"), faktor(en ? "Opposition" : "Gegnerst\u00e4rke", f.gegner, "5 %"), h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED, marginTop: 2 } }, en ? "Weighted total = TW Talent Score. Potential: scout rating; performance: league rating; development: goal involvement per 90 and media momentum; playing time: season minutes; age factor: younger = higher; opposition: league level." : "Gewichtete Summe = TW Talent Score. Potenzial: Scout-Bewertung; Leistung: Liga-Rating; Entwicklung: Torbeteiligung pro 90 Minuten und Medienmomentum; Einsatzzeit: Saisonminuten; Altersfaktor: j\u00fcnger = h\u00f6her; Gegnerst\u00e4rke: Liganiveau.")),
-        z.strengths ? h("div", null, h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--t3)", marginBottom: 6 } }, en ? "Strengths" : "St\u00e4rken"), h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6 } }, String(z.strengths).split(",").map(x => x.trim()).filter(Boolean).slice(0, 6).map((st, i) => h("span", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, color: "var(--gruen-text)", background: "var(--gruen-tint)", borderRadius: 999, padding: "4px 10px" } }, st)))) : null,
-        z.begruendung ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)", lineHeight: 1.5 } }, String(z.begruendung).slice(0, 400)) : null,
-        h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6, marginTop: "auto", paddingTop: 6 } }, aktion(watched && watched(z.name) ? (en ? "\u2713 Watching" : "\u2713 Beobachtet") : (en ? "Watch" : "Beobachten"), () => onWatch(z.name), watched && watched(z.name), "w"), aktion(en ? "Open analysis" : "Analyse \u00f6ffnen", pid ? () => { setPanel(null); onOpen(pid, z.name, z.club); } : null, false, "o"), aktion((vergleich || []).some(v => v.pid === pid) ? (en ? "In comparison" : "Im Vergleich") : (en ? "Compare" : "Vergleichen"), pid ? () => onVergleich({ pid: pid, name: z.name, team: z.club, pos: z.position, age: z.age, photo: zus(z).photo }) : null, (vergleich || []).some(v => v.pid === pid), "v"), aktion(imScout(z) ? (en ? "On scouting list" : "Auf Scouting-Liste") : (en ? "Add to scouting list" : "Zu Scouting-Liste hinzuf\u00fcgen"), () => scoutToggle(z), imScout(z), "s"), aktion(en ? "Export" : "Exportieren", () => exportieren(z), false, "e")),
-        !pid ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, en ? "Full analysis and comparison need a database profile \u2014 this talent is not linked to one yet." : "Volle Analyse und Vergleich brauchen ein Datenbankprofil \u2014 dieses Talent ist noch nicht verkn\u00fcpft.") : null)), document.body); })() : null;
+  const faktor = (lab, v, gew) => h("div", { className: "tw-talfaktor", style: { display: "grid", gridTemplateColumns: "minmax(96px, 128px) minmax(56px, 1fr) 38px 46px", alignItems: "center", columnGap: 10, fontFamily: FONT_BODY, fontSize: 14, lineHeight: 1.3 } }, h("span", { style: { color: "var(--t1)", fontWeight: 700, minWidth: 0, overflowWrap: "anywhere" } }, lab), h("span", { style: { height: 10, borderRadius: 99, background: "var(--linie2)", overflow: "hidden" } }, h("span", { style: { display: "block", height: "100%", width: Math.max(2, Math.min(100, v)) + "%", background: scoreColor(v), borderRadius: 99 } })), h("span", { style: { textAlign: "right", fontWeight: 800, color: "var(--t1)", fontVariantNumeric: "tabular-nums" } }, Math.round(v)), h("span", { style: { textAlign: "right", color: "var(--t2)", fontSize: 12.5, whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" } }, gew));
+  const panelUi = panel ? (() => { const z = panel; const f = z.f; const dt = deltaText(z); const pid = zus(z).pid;
+    const dtFarbe = dt.c === "#0d8a4f" ? "var(--gruen-text)" : dt.c === "#b04a3a" ? "var(--sc-schwach-text)" : "var(--t2)";
+    const aktion = (lab, fn, on, key) => h("button", { key: key, type: "button", onClick: fn || undefined, disabled: fn === null, className: "tw-talaktion", style: { cursor: fn ? "pointer" : "not-allowed", fontFamily: FONT_BODY, fontSize: 14, fontWeight: 700, lineHeight: 1.25, padding: "10px 12px", minHeight: 44, borderRadius: 10, textAlign: "center", whiteSpace: "normal", overflowWrap: "anywhere", border: (fn ? "1px solid " : "1px dashed ") + (on ? "var(--gold-rand)" : "var(--linie2)"), background: on ? "var(--gold-tint)" : fn ? "var(--karte2)" : "transparent", color: on ? "var(--gold-text)" : fn ? "var(--t1)" : "var(--t3)" } }, lab);
+    return ReactDOM.createPortal(h("div", { style: { position: "fixed", inset: 0, zIndex: 1210 } }, h("div", { onClick: () => setPanel(null), style: { position: "absolute", inset: 0, background: "rgba(15,21,32,.45)" } }),
+      h("aside", { className: "tw-talpanel", role: "dialog", "aria-label": "TW Talent Score " + (z.name || ""), style: { position: "absolute", top: 0, right: 0, bottom: 0, width: "min(480px, 100vw)", boxSizing: "border-box", background: "var(--karte)", color: "var(--t1)", boxShadow: "-12px 0 40px rgba(15,21,32,.25)", overflowY: "auto", overscrollBehavior: "contain", padding: "20px clamp(16px, 4.5vw, 24px) calc(28px + env(safe-area-inset-bottom, 0px))", display: "flex", flexDirection: "column", gap: 16, fontFamily: FONT_BODY } },
+        h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase", color: "var(--t2)" } }, "TW Talent Score"), h("button", { type: "button", onClick: () => setPanel(null), "aria-label": en ? "Close" : "Schlie\u00dfen", style: { width: 40, height: 40, flexShrink: 0, borderRadius: 99, border: "1px solid var(--linie2)", background: "var(--karte2)", cursor: "pointer", fontSize: 17, fontWeight: 800, lineHeight: 1, color: "var(--t1)" } }, "\u2715")),
+        h("div", { style: { display: "flex", alignItems: "center", gap: 14 } }, foto(z, 56), h("div", { style: { minWidth: 0, flex: 1 } }, h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 26, fontWeight: 700, color: "var(--t1)", lineHeight: 1.12, overflowWrap: "anywhere" } }, z.name), h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, color: "var(--t2)", lineHeight: 1.45, marginTop: 4, overflowWrap: "anywhere" } }, [z.age ? z.age + (en ? " yrs" : " Jahre") : "", z.position, z.club].filter(Boolean).join(" \u00b7 "))), z.score != null ? h("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 38, fontWeight: 700, color: scoreColor(z.score), lineHeight: 1, flexShrink: 0 } }, talFmt(z.score)) : null),
+        z.score != null ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 700, lineHeight: 1.4, color: dtFarbe } }, dt.t) : null,
+        h("div", { style: { display: "flex", flexDirection: "column", gap: 10, background: "var(--karte2)", border: "1px solid var(--linie2)", borderRadius: 12, padding: "14px 16px" } }, faktor(en ? "Performance" : "Leistung", f.leistung, "25 %"), faktor(en ? "Potential" : "Potenzial", f.potenzial, "30 %"), faktor(en ? "Development" : "Entwicklung", f.entwicklung, "15 %"), faktor(en ? "Playing time" : "Einsatzzeit", f.einsatz, "15 %"), faktor(en ? "Age factor" : "Altersfaktor", f.alter, "10 %"), faktor(en ? "Opposition" : "Gegnerst\u00e4rke", f.gegner, "5 %"), h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.55, color: "var(--t2)", marginTop: 4 } }, en ? "Weighted total = TW Talent Score. Potential: scout rating; performance: league rating; development: goal involvement per 90 and media momentum; playing time: season minutes; age factor: younger = higher; opposition: league level." : "Gewichtete Summe = TW Talent Score. Potenzial: Scout-Bewertung; Leistung: Liga-Rating; Entwicklung: Torbeteiligung pro 90 Minuten und Medienmomentum; Einsatzzeit: Saisonminuten; Altersfaktor: j\u00fcnger = h\u00f6her; Gegnerst\u00e4rke: Liganiveau.")),
+        z.strengths ? h("div", null, h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase", color: "var(--t2)", marginBottom: 8 } }, en ? "Strengths" : "St\u00e4rken"), h("div", { style: { display: "flex", flexWrap: "wrap", gap: 8 } }, String(z.strengths).split(",").map(x => x.trim()).filter(Boolean).slice(0, 6).map((st, i) => h("span", { key: i, style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 700, lineHeight: 1.35, color: "var(--gruen-text)", background: "var(--gruen-tint)", borderRadius: 999, padding: "5px 12px", overflowWrap: "anywhere" } }, st)))) : null,
+        z.begruendung ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 14.5, color: "var(--t1)", lineHeight: 1.6, overflowWrap: "anywhere" } }, String(z.begruendung).slice(0, 400)) : null,
+        h("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8, marginTop: "auto", paddingTop: 8 } }, aktion(watched && watched(z.name) ? (en ? "\u2713 Watching" : "\u2713 Beobachtet") : (en ? "Watch" : "Beobachten"), () => onWatch(z.name), watched && watched(z.name), "w"), aktion(en ? "Open analysis" : "Analyse \u00f6ffnen", pid ? () => { setPanel(null); onOpen(pid, z.name, z.club); } : null, false, "o"), aktion((vergleich || []).some(v => v.pid === pid) ? (en ? "In comparison" : "Im Vergleich") : (en ? "Compare" : "Vergleichen"), pid ? () => onVergleich({ pid: pid, name: z.name, team: z.club, pos: z.position, age: z.age, photo: zus(z).photo }) : null, (vergleich || []).some(v => v.pid === pid), "v"), aktion(imScout(z) ? (en ? "On scouting list" : "Auf Scouting-Liste") : (en ? "Add to scouting list" : "Zu Scouting-Liste hinzuf\u00fcgen"), () => scoutToggle(z), imScout(z), "s"), aktion(en ? "Export" : "Exportieren", () => exportieren(z), false, "e")),
+        !pid ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.5, color: "var(--t2)" } }, en ? "Full analysis and comparison need a database profile \u2014 this talent is not linked to one yet." : "Volle Analyse und Vergleich brauchen ein Datenbankprofil \u2014 dieses Talent ist noch nicht verkn\u00fcpft.") : null)), document.body); })() : null;
   const standText = (() => { if (!stand) return ""; const d = new Date(stand); if (isNaN(d.getTime())) return ""; const j = new Date(); const gleich = d.toDateString() === j.toDateString(); const gestern = new Date(j.getTime() - 86400000).toDateString() === d.toDateString(); const hm = d.toLocaleTimeString(en ? "en-GB" : "de-DE", { hour: "2-digit", minute: "2-digit" }); return en ? "Updated " + (gleich ? "today" : gestern ? "yesterday" : "on " + d.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit" })) + " at " + hm : "Aktualisiert " + (gleich ? "heute" : gestern ? "gestern" : "am " + d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })) + " um " + hm + " Uhr"; })();
-  return React.createElement("div", { style: { gridColumn: "1 / -1", background: "var(--karte)", border: "1.5px solid var(--linie)", borderRadius: 16, padding: 18 } },
+  return React.createElement(React.Fragment, null, React.createElement("div", { style: { gridColumn: "1 / -1", background: "var(--karte)", border: "1.5px solid var(--linie)", borderRadius: 16, padding: 18 } },
     React.createElement("div", { style: { display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 12 } },
       React.createElement("div", { style: { minWidth: 0 } }, React.createElement("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 30, lineHeight: "38px", margin: "0 0 6px", color: INK } }, en ? "Talent rankings" : "Talent-Rankings"), React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 14.5, lineHeight: 1.5, color: MUTED, margin: "0 0 4px", maxWidth: 760 } }, en ? "U17 to U21 players by performance, development and playing time \u2013 rated with the transparent TW Talent Score." : "U17- bis U21-Spieler nach Leistung, Entwicklung und Einsatzzeit \u2013 bewertet mit dem transparenten TW Talent Score."), standText ? React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED } }, standText) : null),
       React.createElement(ScoreLegend, { kind: "talent" })),
@@ -2498,7 +2758,7 @@ function TalentScouting({ onWatch, watched, onOpen, onVergleich, vergleich }) {
     laden ? React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "#8a8a86", padding: "14px 4px" } }, "Lade Rankings \u2026") :
     liste.length === 0 ? React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "#8a8a86", padding: "14px 4px" } }, "Noch keine Eintr\u00e4ge in dieser Kategorie \u2014 die Scout-Agenten f\u00fcllen die Liste t\u00e4glich weiter auf.") :
     React.createElement(React.Fragment, null, liste.length >= 3 && React.createElement("div", { className: "tw-taltop", style: { display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12, marginBottom: 14, alignItems: "stretch" } }, liste.slice(0, 3).map(karte)), mobil ? karten : tabelle),
-    panelUi);
+    panelUi), React.createElement(TopTalenteLand, { onOpen: onOpen, onAnalyse: setPanel }));
 }
 
 
@@ -9033,8 +9293,8 @@ function TwLeistungZeile({ l }) {
       l.score_liga != null ? h("b", null, (en ? "league-adjusted " : "ligabereinigt ") + Math.round(l.score_liga)) : null,
       l.score_liga != null && l.perzentil != null ? " · " : null,
       l.perzentil != null ? (en ? `top ${Math.max(1, 100 - l.perzentil)} % of ${POS_EN[l.pos_gruppe] || "all players"}` : `Top ${Math.max(1, 100 - l.perzentil)} % ${POS_DE[l.pos_gruppe] || "aller Spieler"}`) : null) : null,  // Punkt 162
-    (l.staerken || []).length ? h("span", null, h("b", { style: { color: "#2e9e5b" } }, en ? "Strengths: " : "Stärken: "), l.staerken.map(nm).join(", ")) : null,
-    (l.schwaechen || []).length ? h("span", null, h("b", { style: { color: "#d64545" } }, en ? "Weaknesses: " : "Schwächen: "), l.schwaechen.map(nm).join(", ")) : null);
+    (l.staerken || []).length ? h("span", null, h("b", { style: { color: "var(--gruen-text)" } }, en ? "Strengths: " : "Stärken: "), l.staerken.map(nm).join(", ")) : null,
+    (l.schwaechen || []).length ? h("span", null, h("b", { style: { color: "var(--sc-schwach-text)" } }, en ? "Weaknesses: " : "Schwächen: "), l.schwaechen.map(nm).join(", ")) : null);
 }
 
 /* 28 Auftrag 09.10.2026 (12 Punkte): Ticker-Datum und Tickerzeilen, Spielerbild in den Transferdetails, Vereinslos-Symbol,
@@ -11476,7 +11736,7 @@ function TransferApp({
       /*#__PURE__*/React.createElement("button", { onClick: () => window.open(stripeCheckoutUrl("premium", "monat", 1, ""), "_blank"), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 900, padding: "12px 22px", borderRadius: 10, border: "none", background: "linear-gradient(90deg,#efc25e,#d9963a)", color: "#1c1508", boxShadow: "0 8px 22px rgba(217,150,58,.35)" } }, "Premium freischalten \u2014 99 \u20ac/Monat"))),
   view === "talente" && /*#__PURE__*/React.createElement(ScoutSub, { view: view, setView: setView }), view === "talente" && /*#__PURE__*/React.createElement("div", {
     style: { background: "var(--karte2)", border: "1.5px solid var(--teal)", borderRadius: 14, padding: "12px 18px", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 600, color: "var(--teal)", gridColumn: "1 / -1" }
-  }, "\u24D8  ", t("tal_banner"), " ", React.createElement(ScoreInfo, { kind: "talent", size: 12, label: LANG === "en" ? "View methodology" : "Methodik ansehen" })), view === "talente" && /*#__PURE__*/React.createElement(TalentScouting, { onWatch: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); }, watched: name => (watch.items || []).some(w => w.t === "spieler" && w.w === name), onOpen: openPlayer, onVergleich: p => setPlVergleich(v => v.some(y => y.pid === p.pid) ? v.filter(y => y.pid !== p.pid) : (v.length >= 3 ? v : [...v, p])), vergleich: plVergleich }), view === "feed" && neueZahl > 0 && /*#__PURE__*/React.createElement("button", { onClick: () => { ladeFeed(); window.scrollTo({ top: 0, behavior: "smooth" }); }, style: { display: "block", margin: "0 auto 12px", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 900, cursor: "pointer", padding: "9px 18px", borderRadius: 999, border: "none", background: "var(--gold)", color: "var(--gold-schrift)", boxShadow: "0 8px 20px rgba(200,163,85,.4)" } }, "\u2191 " + neueZahl + " neue " + (neueZahl === 1 ? "Meldung" : "Meldungen")), view === "feed" && /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 10 } }, sportTabs.map(([k, label]) => { const a2 = sport === k; const c2 = k === "alle" ? "var(--dunkel)" : SPORT[k].color; return /*#__PURE__*/React.createElement("button", { key: "sp" + k, onClick: () => { setSport(k); setCountry(""); setLeague(""); setClub(""); setPosFilter(""); }, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 11px", borderRadius: 999, border: "1px solid " + (a2 ? c2 : HAIR), background: a2 ? c2 : "#fff", color: a2 ? "#fff" : "#5b6472" } }, label); }), React.createElement(TwNewsLive, { news: news, filtered: filtered, magazin: muAktivApp(view, type, query, club, league, country, sport), onOpen: it2 => twOeffnen(it2, setMSel), geheZu: setView }), type !== "alle" ? React.createElement("button", { type: "button", onClick: () => setType("alle"), title: LANG === "en" ? "Remove type filter" : "Typfilter entfernen", style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 11px", borderRadius: 999, border: "1px solid var(--gold)", background: "transparent", color: "var(--gold-text)" } }, ((TYPE[type] && (LANG === "en" ? TYPE[type].en : TYPE[type].label)) || type) + " \u2715") : null), /*#__PURE__*/React.createElement("div", null, view === "feed" && cascade && /*#__PURE__*/React.createElement("div", {
+  }, "\u24D8  ", t("tal_banner"), " ", React.createElement(ScoreInfo, { kind: "talent", size: 12, label: LANG === "en" ? "View methodology" : "Methodik ansehen" })), view === "talente" && /*#__PURE__*/React.createElement(TalentScouting, { onWatch: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); }, watched: name => (watch.items || []).some(w => w.t === "spieler" && w.w === name), onOpen: openPlayer, onVergleich: p => setPlVergleich(v => v.some(y => y.pid === p.pid) ? v.filter(y => y.pid !== p.pid) : (v.length >= 3 ? v : [...v, p])), vergleich: plVergleich }), view === "feed" && neueZahl > 0 && /*#__PURE__*/React.createElement("button", { onClick: () => { ladeFeed(); window.scrollTo({ top: 0, behavior: "smooth" }); }, style: { display: "block", margin: "0 auto 12px", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 900, cursor: "pointer", padding: "9px 18px", borderRadius: 999, border: "none", background: "var(--gold)", color: "var(--gold-schrift)", boxShadow: "0 8px 20px rgba(200,163,85,.4)" } }, "\u2191 " + neueZahl + " neue " + (neueZahl === 1 ? "Meldung" : "Meldungen")), view === "feed" && /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 10 } }, sportTabs.map(([k, label]) => { const a2 = sport === k; const c2 = k === "alle" ? "var(--dunkel)" : SPORT[k].color; return /*#__PURE__*/React.createElement("button", { key: "sp" + k, onClick: () => { setSport(k); setCountry(""); setLeague(""); setClub(""); setPosFilter(""); }, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 11px", borderRadius: 999, border: "1px solid " + (a2 ? c2 : HAIR), background: a2 ? c2 : "#fff", color: a2 ? "#fff" : "#5b6472" } }, label); }), React.createElement(TwNewsLive, { news: news, filtered: filtered, magazin: muAktivApp(view, type, query, club, league, country, sport), onOpen: it2 => twOeffnen(it2, setMSel), geheZu: setView }), type !== "alle" ? React.createElement("button", { type: "button", onClick: () => setType("alle"), title: LANG === "en" ? "Remove type filter" : "Typfilter entfernen", style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 11px", borderRadius: 999, border: "1px solid var(--gold)", background: "transparent", color: "var(--gold-text)" } }, ((TYPE[type] && (LANG === "en" ? TYPE[type].en : TYPE[type].label)) || type) + " \u2715") : null), view === "talente" ? null : /*#__PURE__*/React.createElement("div", null, view === "feed" && cascade && /*#__PURE__*/React.createElement("div", {
     style: {
       background: "var(--karte)",
       border: `1px solid ${HAIR}`,
