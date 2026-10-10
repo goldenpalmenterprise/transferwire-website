@@ -9861,7 +9861,7 @@ function VereinsSpieleTab({ verein, authQ, mobil, onOpenPlayer }) {
   const h = React.createElement; const en = LANG === "en";
   const vid = verein && verein.id;
   const [saison, setSaison] = useState(null); const [d, setD] = useState(null); const [lade, setLade] = useState(true); const [fehler, setFehler] = useState(false);
-  const [wb, setWb] = useState(""); const [n, setN] = useState(25); const [analyse, setAnalyse] = useState(null); const [ladeAn, setLadeAn] = useState(null);
+  const [wb, setWb] = useState(""); const [n, setN] = useState(25); const [nk, setNk] = useState(6); const [analyse, setAnalyse] = useState(null); const [ladeAn, setLadeAn] = useState(null);
   const [hinweis, setHinweis] = useState(null); const [leer, setLeer] = useState({});
   useEffect(() => {
     if (!vid) { setLade(false); setFehler(true); return; }
@@ -9871,7 +9871,7 @@ function VereinsSpieleTab({ verein, authQ, mobil, onOpenPlayer }) {
       .catch(() => { if (ok) { setFehler(true); setLade(false); } });
     return () => { ok = false; };
   }, [vid, saison]);
-  useEffect(() => { setWb(""); setN(25); }, [saison]);
+  useEffect(() => { setWb(""); setN(25); setNk(6); }, [saison]);
   const alle = (d && d.spiele) || [];
   const jetzt = Date.now();
   const kommendIst = s => s.status === "live" || ((s.status === "geplant" || s.status === "verlegt") && new Date(s.anstoss).getTime() > jetzt - 3 * 3600e3);
@@ -9939,14 +9939,15 @@ function VereinsSpieleTab({ verein, authQ, mobil, onOpenPlayer }) {
     h("label", { style: { display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, color: "var(--t2)" } }, en ? "Season" : "Saison",
       h("select", { className: "tw40-saison", value: String(saison || (d && d.saison) || ""), onChange: e => setSaison(e.target.value), disabled: lade && !d, style: { fontFamily: FONT_BODY } },
         ((d && d.saisons) || []).map(x => h("option", { key: x.s, value: String(x.s) }, x.label)))),
-    wbs.length > 1 ? h("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } }, ["", ...wbs].map(w => h("button", { key: w || "alle", type: "button", onClick: () => { setWb(w); setN(25); }, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, padding: "5px 11px", borderRadius: 999, border: "1px solid var(--linie)", cursor: "pointer", background: wb === w ? "var(--t1)" : "var(--karte)", color: wb === w ? "var(--karte)" : "var(--t2)" } }, w || (en ? "All competitions" : "Alle Wettbewerbe")))) : null);
+    wbs.length > 1 ? h("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } }, ["", ...wbs].map(w => h("button", { key: w || "alle", type: "button", onClick: () => { setWb(w); setN(25); setNk(6); }, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, padding: "5px 11px", borderRadius: 999, border: "1px solid var(--linie)", cursor: "pointer", background: wb === w ? "var(--t1)" : "var(--karte)", color: wb === w ? "var(--karte)" : "var(--t2)" } }, w || (en ? "All competitions" : "Alle Wettbewerbe")))) : null);
   if (lade && !d) return h("div", null, auswahl, h("div", { className: "tw-lade", style: { padding: "14px 4px" } }, h("span", { className: "tw-spin" }), en ? "Loading matches …" : "Spiele werden geladen …"));
   if (fehler && !d) return kasten(h("div", { style: { padding: "10px 0", fontFamily: FONT_BODY, color: "var(--t2)" } }, en ? "The matches could not be loaded. Please try again later." : "Die Spiele konnten nicht geladen werden. Bitte später erneut versuchen."));
   return h("div", { style: { opacity: lade ? .6 : 1 } },
     h("style", null, TW40_CSS),
     auswahl,
     h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t3)", margin: "4px 0 2px", lineHeight: 1.45 } }, quelleText),
-    kommend.length ? h("div", null, titel((en ? "Upcoming matches" : "Kommende Spiele") + " (" + kommend.length + ")"), kasten(h("div", { className: "tw40-sp-liste" }, kommend.slice(0, 6).map(zeile)))) : null,
+    kommend.length ? h("div", null, titel((en ? "Upcoming matches" : "Kommende Spiele") + " (" + kommend.length + ")"), kasten(h("div", { className: "tw40-sp-liste" }, kommend.slice(0, nk).map(zeile))),
+      kommend.length > nk ? h("div", { style: { textAlign: "center", marginTop: 10 } }, h("button", { type: "button", className: "tw40-knopf", onClick: () => setNk(nk + 25) }, (en ? "Show more upcoming matches (" : "Weitere kommende Spiele anzeigen (") + nk + (en ? " of " : " von ") + kommend.length + ")")) : null) : null,
     titel((en ? "Played matches" : "Gespielte Spiele") + " · " + ((d && d.saison_label) || "") + " (" + gespielt.length + ")"),
     gespielt.length ? kasten(h("div", { className: "tw40-sp-liste" }, gespielt.slice(0, n).map(zeile))) : kasten(h("div", { style: { padding: "10px 0", fontFamily: FONT_BODY, color: "var(--t2)" } }, en ? "No played matches available for this selection." : "Für diese Auswahl liegen keine gespielten Spiele vor.")),
     gespielt.length > n ? h("div", { style: { textAlign: "center", marginTop: 10 } }, h("button", { type: "button", className: "tw40-knopf", onClick: () => setN(n + 25) }, (en ? "Show more matches (" : "Weitere Spiele anzeigen (") + n + (en ? " of " : " von ") + gespielt.length + ")")) : null,
