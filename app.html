@@ -8144,6 +8144,69 @@ function KontakteVue({ isPrem, authQ, openVerein }) {
     !wahl && !land && !liga ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, marginTop: 12 } }, vereine.length ? (vereine.length + (en ? " clubs in the database." : " Vereine in der Datenbank.")) : "\u2026") : null);
 }
 
+// Akquise-Radar (Punkt 11, 10.10.2026): fuer Premium-Konten; die API /api/tw-akquise prueft das Konto selbst (Premium aktiv oder intern)
+const AKQ_CSS = ".tw-akq-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; } .tw-akq-feld { display: flex; flex-direction: column; gap: 4px; font-family: 'Inter', system-ui, sans-serif; font-size: 11px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; color: var(--t2); } .tw-akq-feld input, .tw-akq-feld select { font-family: 'Inter', system-ui, sans-serif; font-size: 13.5px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--t1); background: var(--karte2); border: 1px solid var(--linie); border-radius: 9px; padding: 8px 10px; min-width: 110px; min-height: 38px; box-sizing: border-box; } .tw-akq-feld.breit input { min-width: 230px; } .tw-akq-knoepfe { display: flex; gap: 8px; } .tw-akq-knopf { cursor: pointer; font-family: 'Inter', system-ui, sans-serif; font-size: 13px; font-weight: 800; padding: 9px 16px; min-height: 38px; border-radius: 10px; border: 1px solid var(--linie); background: transparent; color: var(--t1); } .tw-akq-knopf.haupt { border: none; background: var(--gold); color: var(--gold-schrift); } .tw-akq-knopf:disabled { cursor: not-allowed; opacity: .55; } .tw-akq-info { font-family: 'Inter', system-ui, sans-serif; font-size: 13px; color: var(--t2); margin: 4px 2px 10px; } .tw-akq-fehler { color: #c0392b; font-weight: 700; } .tw-akq-tab { overflow-x: auto; -webkit-overflow-scrolling: touch; background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; } .tw-akq-tab table { width: 100%; border-collapse: collapse; font-family: 'Inter', system-ui, sans-serif; font-size: 13px; color: var(--t1); } .tw-akq-tab th { text-align: left; font-size: 11px; font-weight: 800; color: var(--t3); text-transform: uppercase; letter-spacing: .4px; padding: 10px; border-bottom: 1px solid var(--linie); white-space: nowrap; } .tw-akq-tab td { padding: 9px 10px; border-bottom: 1px solid var(--linie); white-space: nowrap; } .tw-akq-tab tr:last-child td { border-bottom: 0; } .tw-akq-tab td.w { white-space: normal; min-width: 110px; max-width: 200px; } .tw-akq-tab .zahl { text-align: right; font-variant-numeric: tabular-nums; } .tw-akq-pill { display: inline-block; border-radius: 999px; padding: 1px 8px; font-size: 11px; font-weight: 700; background: var(--gold-tint); color: var(--gold-text); } .tw-akq-name { cursor: pointer; border: 0; background: none; padding: 0; font-family: inherit; font-size: 13px; font-weight: 700; color: var(--gold-text); text-align: left; } .tw-akq-tm { margin-left: 8px; font-size: 11px; font-weight: 800; color: var(--t3); text-decoration: none; } @media (max-width: 600px) { .tw-akq-form { padding: 12px; } .tw-akq-feld { flex: 1 1 calc(50% - 10px); min-width: 0; } .tw-akq-feld input, .tw-akq-feld select { min-width: 0; width: 100%; } .tw-akq-feld.breit { flex-basis: 100%; } .tw-akq-feld.breit input { min-width: 0; } .tw-akq-knoepfe { flex-basis: 100%; } .tw-akq-knopf { flex: 1; } }";
+function AkquiseVue({ isPrem, account, openPlayer }) {
+  const h = React.createElement; const en = LANG === "en";
+  const [f, setF] = useState({ berater: "explizit", min_alter: "17", max_alter: "25", pos: "", ligen: "", vertrag_bis: "", min_minuten: "300", sort: "score" });
+  const [daten, setDaten] = useState(null); const [lade, setLade] = useState(false); const [fehler, setFehler] = useState("");
+  const setz = (k, v) => setF(x => Object.assign({}, x, { [k]: v }));
+  const suchen = () => {
+    const code = account ? (account.code || account.zugangscode || "") : "", email = account ? (account.email || "") : "";
+    if (!code || !email) { setFehler(en ? "Please sign in first." : "Bitte zuerst anmelden."); return; }
+    const q = new URLSearchParams(); Object.keys(f).forEach(k => { if (String(f[k]).trim() !== "") q.set(k, String(f[k]).trim()); });
+    q.set("code", code); q.set("email", email); q.set("limit", "300");
+    setLade(true); setFehler("");
+    fetch("/api/tw-akquise?" + q.toString(), { cache: "no-store" }).then(r => r.json()).then(d => {
+      setLade(false);
+      if (!d || !d.ok) { setDaten([]); setFehler(d && (d.fehler === "nur-premium" || d.fehler === "nur-intern") ? (en ? "The acquisition radar is part of Premium." : "Das Akquise-Radar gehört zu Premium.") : (en ? "Loading failed." : "Fehler beim Laden.")); return; }
+      setDaten(Array.isArray(d.spieler) ? d.spieler : []);
+    }).catch(() => { setLade(false); setFehler(en ? "Loading failed." : "Fehler beim Laden."); });
+  };
+  useEffect(() => { if (isPrem) suchen(); }, [isPrem]);
+  const POS_EN = { Torwart: "Goalkeeper", Abwehr: "Defence", Mittelfeld: "Midfield", Sturm: "Attack" };
+  const pos = p => en ? (POS_EN[p] || p || "") : (p || "");
+  const berater = b => { if (!b) return en ? "Not stated" : "keine Angabe"; if (en && /^ohne Berater/i.test(b)) return "No agent"; if (en && /^Familienangeh/i.test(b)) return "Family member"; return b; };
+  const mio = v => { const n = Number(v); if (!n) return "–"; const loc = en ? "en-GB" : "de-DE"; return n >= 1e6 ? (Math.round(n / 1e5) / 10).toLocaleString(loc) + (en ? "m €" : " Mio. €") : Math.round(n / 1e3).toLocaleString(loc) + (en ? "k €" : " Tsd. €"); };
+  const dat = s => { const m = String(s || "").match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? m[3] + "." + m[2] + "." + m[1] : "–"; };
+  const csv = () => {
+    const kopf = en ? ["Player", "Club", "League", "Position", "Age", "Nationality", "Agent", "Contract until", "Market value EUR", "TW Score", "Minutes", "Transfermarkt"] : ["Spieler", "Verein", "Liga", "Position", "Alter", "Nation", "Berater", "Vertrag bis", "Marktwert EUR", "TW Score", "Minuten", "Transfermarkt"];
+    const z = (daten || []).map(s => [s.name, s.team, s.league, pos(s.position), s.age, s.nationality, berater(s.berater), s.vertrag_bis || "", s.marktwert_eur || "", s.score ? Math.round(s.score) : "", s.minutes || 0, s.tm_id ? "https://www.transfermarkt.de/-/profil/spieler/" + s.tm_id : ""]);
+    const text = [kopf].concat(z).map(r => r.map(x => '"' + String(x == null ? "" : x).replace(/"/g, '""') + '"').join(";")).join("\n");
+    const b = new Blob([String.fromCharCode(65279) + text], { type: "text/csv;charset=utf-8" }); const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "TransferWire_Akquise-Radar_" + new Date().toISOString().slice(0, 10) + ".csv"; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 5000);
+  };
+  const kopf = h("div", null,
+    h("h1", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 26, margin: "0 0 4px", color: INK } }, en ? "Acquisition radar" : "Akquise-Radar"),
+    h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: MUTED, marginBottom: 12, maxWidth: 900 } }, en ? "Players without an agent, represented by family members or without agent information – from the Transfermarkt profiles, with performance data (TW Performance Score) and contract end." : "Spieler ohne Berater, von Familienangehörigen vertreten oder ohne Berater-Angabe – aus den Transfermarkt-Profilen, mit Leistungsdaten (TW Performance Score) und Vertragsende."));
+  if (!isPrem) return h("div", { className: "tw-akq" }, kopf, h(PremiumLock, null));
+  const feld = (text, el, breit) => h("label", { className: "tw-akq-feld" + (breit ? " breit" : "") }, h("span", null, text), el);
+  const eingabe = (k, typ, extra) => h("input", Object.assign({ type: typ || "text", value: f[k], onChange: e => setz(k, e.target.value), onKeyDown: e => { if (e.key === "Enter") suchen(); } }, extra || {}));
+  const auswahl = (k, opts) => h("select", { value: f[k], onChange: e => setz(k, e.target.value) }, opts.map(([v, t]) => h("option", { key: v, value: v }, t)));
+  const th = (t, zahl) => h("th", { className: zahl ? "zahl" : "" }, t);
+  return h("div", { className: "tw-akq" },
+    h("style", null, AKQ_CSS),
+    kopf,
+    h("div", { className: "tw-akq-form" },
+      feld(en ? "Agent status" : "Berater-Status", auswahl("berater", [["explizit", en ? "No agent + family" : "ohne Berater + Familie"], ["ohne", en ? "No agent only" : "nur ohne Berater"], ["familie", en ? "Family only" : "nur Familie"], ["unbekannt", en ? "Not stated in profile" : "keine Angabe im Profil"], ["alle", en ? "All three" : "alle drei"]])),
+      feld(en ? "Age from" : "Alter von", eingabe("min_alter", "number", { min: 14, max: 40 })),
+      feld(en ? "Age to" : "Alter bis", eingabe("max_alter", "number", { min: 14, max: 40 })),
+      feld("Position", auswahl("pos", [["", en ? "All" : "alle"], ["Torwart", pos("Torwart")], ["Abwehr", pos("Abwehr")], ["Mittelfeld", pos("Mittelfeld")], ["Sturm", pos("Sturm")]])),
+      feld(en ? "Leagues (comma-separated)" : "Ligen (Komma)", eingabe("ligen", "text", { placeholder: en ? "e.g. Bundesliga, 2. Bundesliga" : "z. B. Bundesliga, 2. Bundesliga" }), true),
+      feld(en ? "Contract ends by" : "Vertrag bis spätestens", eingabe("vertrag_bis", "date")),
+      feld(en ? "Min. minutes played" : "Min. Einsatzminuten", eingabe("min_minuten", "number", { min: 0 })),
+      feld(en ? "Sort by" : "Sortierung", auswahl("sort", [["score", "TW Score"], ["wert", en ? "Market value" : "Marktwert"], ["minuten", en ? "Minutes played" : "Einsatzminuten"], ["vertrag", en ? "Contract end" : "Vertragsende"], ["alter", en ? "Age" : "Alter"]])),
+      h("div", { className: "tw-akq-knoepfe" },
+        h("button", { type: "button", className: "tw-akq-knopf haupt", onClick: suchen, disabled: lade }, en ? "Search" : "Suchen"),
+        h("button", { type: "button", className: "tw-akq-knopf", onClick: csv, disabled: !daten || !daten.length }, "CSV"))),
+    h("div", { className: "tw-akq-info" }, lade ? (en ? "Loading …" : "Lädt …") : fehler ? h("span", { className: "tw-akq-fehler" }, fehler) : daten === null ? (en ? "Choose filters and press “Search”." : "Filter wählen und „Suchen“ drücken.") : (daten.length + (en ? (daten.length === 1 ? " player found" : " players found") : " Spieler gefunden") + (daten.length >= 300 ? (en ? " (first 300)" : " (die ersten 300)") : "") + (en ? " · Profiles updated continuously from Transfermarkt." : " · Stand der Profile: laufend aus Transfermarkt."))),
+    h("div", { className: "tw-akq-tab" }, h("table", null,
+      h("thead", null, h("tr", null, th(en ? "Player" : "Spieler"), th(en ? "Club" : "Verein"), th(en ? "League" : "Liga"), th("Pos."), th(en ? "Age" : "Alter", true), th("Nation"), th(en ? "Agent" : "Berater"), th(en ? "Contract until" : "Vertrag bis"), th(en ? "Market value" : "Marktwert", true), th("TW Score", true), th(en ? "Minutes" : "Minuten", true))),
+      h("tbody", null, (daten || []).map(s => h("tr", { key: (s.tm_id || "") + "-" + (s.player_id || "") },
+        h("td", null, s.player_id && openPlayer ? h("button", { type: "button", className: "tw-akq-name", onClick: () => openPlayer(s.player_id, s.name, s.team) }, s.name) : h("b", null, s.name), s.tm_id ? h("a", { className: "tw-akq-tm", href: "https://www.transfermarkt.de/-/profil/spieler/" + encodeURIComponent(s.tm_id), target: "_blank", rel: "noopener", title: "Transfermarkt" }, "TM ↗") : null),
+        h("td", { className: "w" }, s.team), h("td", { className: "w" }, s.league), h("td", null, pos(s.position)), h("td", { className: "zahl" }, s.age || "–"), h("td", null, s.nationality || ""),
+        h("td", null, h("span", { className: "tw-akq-pill" }, berater(s.berater))), h("td", null, dat(s.vertrag_bis)), h("td", { className: "zahl" }, mio(s.marktwert_eur)), h("td", { className: "zahl" }, s.score ? Math.round(s.score) : "–"), h("td", { className: "zahl" }, s.minutes || 0)))))));
+}
+
 function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScout }) {
   const h = React.createElement; const en = LANG === "en";
   const [zu, setZu] = useState(() => { try { return JSON.parse(localStorage.getItem("tw_side_zu") || "{}"); } catch (e) { return {}; } });
@@ -8156,7 +8219,7 @@ function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScou
   const gruppen = [
     { k: "markt", label: en ? "Market" : "Markt", kinder: [["feed", t("tab_feed"), feedBadge], ["geruechte", "Transfers", 0], ["spieltag", en ? "Matchday" : "Spieltag", 0], ["gesucht", VS_NEU ? (LANG === "en" ? "Club seeks" : "Verein sucht") : "Vereinsbedarf", gesuchtBadge], ["ranking", "Performance", 0], ["players", t("players_tab"), 0], ["chancen", t("ch_tab"), 0]] },
     { k: "community", label: "Community", kinder: [["community", en ? "Posts" : "Beitr\u00e4ge", 0], ["networking", en ? "Community contacts" : "Community-Kontakte", 0]] },
-    { k: "workspace", label: "Workspace", kinder: [["watch", t("watch_tab"), 0], ["talente", "Scouting", 0]] }
+    { k: "workspace", label: "Workspace", kinder: [["watch", t("watch_tab"), 0], ["talente", "Scouting", 0], ["akquise", en ? "Acquisition radar" : "Akquise-Radar", 0]] }
   ];
   return h("div", { className: "tw-sn" },
     h("button", { type: "button", className: "tw-sn-ki" + (view === "assistent" ? " aktiv" : ""), onClick: onScout }, h("span", { className: "tw-sn-ikon tw-sn-funke", dangerouslySetInnerHTML: { __html: IK.ki } }), h("span", null, en ? "AI assistant" : "KI-Assistent")),
@@ -10939,7 +11002,7 @@ function TransferApp({
       width: "100%",
       boxSizing: "border-box"
     }
-  }, view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news.filter(n => n.type !== "verletzung" && n.type !== "leistung" && n.type !== "meldung" && !n._ausgeblendet), onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(VereinSuchtVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein }), view === "akquise" && /*#__PURE__*/React.createElement(AkquiseVue, { isPrem: isPrem, account: account, openPlayer: openPlayer }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news.filter(n => n.type !== "verletzung" && n.type !== "leistung" && n.type !== "meldung" && !n._ausgeblendet), onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(VereinSuchtVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       background: "transparent",
       border: "none",
