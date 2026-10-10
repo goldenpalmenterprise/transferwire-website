@@ -2661,9 +2661,9 @@ function TalentScouting({ onWatch, watched, onOpen, onVergleich, vergleich }) {
     if (kat === "tore") url = "/db/players_youth?select=name,age,team,league,goals,assists,minutes&minutes=gt.0&order=goals.desc,assists.desc&limit=50";
     else if (kat === "assists") url = "/db/players_youth?select=name,age,team,league,goals,assists,minutes&minutes=gt.0&order=assists.desc,goals.desc&limit=50";
     else {
-      url = "/db/talent_profiles?select=name,age,club,league,country,position,scout_score,unentdeckt,goals,assists,talent_key,strengths,minutes,rating,mentions_7d,begruendung,updated_at&order=scout_score.desc&limit=50";
+      url = "/db/talent_profiles?select=name,age,club,league,country,position,scout_score,unentdeckt,goals,assists,talent_key,strengths,minutes,rating,mentions_7d,begruendung,updated_at,player_id&order=scout_score.desc&limit=50";
       if (kat === "unentdeckt") url += "&unentdeckt=is.true";
-      if (land !== "alle") url += "&country=eq." + land;
+      if (land !== "alle") url += "&region=eq." + land;
     }
     fetch(url).then(r => r.json()).then(d => { if (aktiv) { setRows(Array.isArray(d) ? d : []); setLaden(false); } }).catch(() => { if (aktiv) { setRows([]); setLaden(false); } });
     return () => { aktiv = false; };
@@ -2703,7 +2703,7 @@ function TalentScouting({ onWatch, watched, onOpen, onVergleich, vergleich }) {
   const h = React.createElement;
   const bewertet = kat === "top" || kat === "unentdeckt";
   const wert = z => bewertet ? "TW Talent Score " + talFmt(z.score) : kat === "tore" ? ((z.goals || 0) + (en ? " goals" : " Tore")) : ((z.assists || 0) + (en ? " assists" : " Vorl."));
-  const zus = z => zusatz[z.name] || z._zus || {};
+  const zus = z => { const a = zusatz[z.name] || z._zus || {}; return a.pid || !z.player_id ? a : Object.assign({}, a, { pid: z.player_id }); };
   const imScout = z => scout.some(s => (zus(z).pid && s.pid === zus(z).pid) || s.key === z.id);
   const scoutToggle = z => { const p = { pid: zus(z).pid || null, key: z.id, name: z.name, team: z.club }; const n = imScout(z) ? scout.filter(s => !((p.pid && s.pid === p.pid) || s.key === z.id)) : [...scout, p]; setScout(n); try { localStorage.setItem("tw_scoutlist", JSON.stringify(n)); } catch (e) {} };
   const exportieren = z => { const f = z.f; const kopf = ["Spieler", "Alter", "Position", "Verein", "Liga", "Minuten", "TW Talent Score", "Leistung", "Potenzial", "Entwicklung", "Einsatzzeit", "Altersfaktor", "Gegnerstaerke", "Staerken"]; const zeile = [z.name, z.age || "", z.position || "", z.club || "", z.league || "", z.minutes || zus(z).minutes || "", z.score != null ? talFmt(z.score) : "", Math.round(f.leistung), Math.round(f.potenzial), Math.round(f.entwicklung), Math.round(f.einsatz), Math.round(f.alter), Math.round(f.gegner), z.strengths || ""]; const csv = [kopf, zeile].map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(";")).join("\r\n"); const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "talent-" + talSlug(z.name) + ".csv"; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); };
