@@ -9461,13 +9461,16 @@ function VereinsSeite({ id, name, authQ, isPrem, onClose, onOpenPlayer }) {
     const eigen = (v && v.name) || name || "";
     const heute = new Date().toISOString().slice(0, 10);
     const QN = { sm: "Sportmonks", tm: "Transfermarkt", af: "API-Football", sportmonks: "Sportmonks", transfermarkt: "Transfermarkt" };
-    const artText = t => { const a = String(t.art || "").toLowerCase(); if (/leihende|end of loan|leih-ende|rückkehr|return/.test(a)) return en ? "End of loan" : "Leihende"; if (/leih|loan/.test(a)) return en ? "Loan" : "Leihe"; if (/frei|free/.test(a)) return en ? "Free transfer" : "Ablösefrei"; if (!a || /^(transfer|wechsel|permanent|kauf)$/.test(a)) return en ? "Transfer" : "Wechsel"; return t.art; };
-    const ablText = t => t.abloese_text || (t.abloese ? vdbEur(t.abloese) : (/leih|loan/i.test(t.art || "") ? (en ? "loan" : "Leihe") : /frei|free/i.test(t.art || "") ? vdbT("ablfrei") : (en ? "not disclosed" : "nicht bekannt")));
+    const artText = t => { const a = String(t.art || "").toLowerCase(); if (a === "vereinslos") return en ? "Without club" : "Vereinslos"; if (a === "karriereende") return en ? "Retired" : "Karriereende"; if (a === "intern") return en ? "Own reserves/youth" : "Eigene II/Jugend"; if (/leihende|end of loan|leih-ende|rückkehr|return/.test(a)) return en ? "End of loan" : "Leihende"; if (/leih|loan/.test(a)) return en ? "Loan" : "Leihe"; if (/frei|free/.test(a)) return en ? "Free transfer" : "Ablösefrei"; if (!a || /^(transfer|wechsel|permanent|kauf)$/.test(a)) return en ? "Transfer" : "Wechsel"; return t.art; };
+    /* Auftrag 43: Transfermarkt-Vereinsseite nennt nur das Wechselfenster (datum_ungenau) */
+    const fenster = d => { const s = String(d || ""); const y = +s.slice(0, 4), m = +s.slice(5, 7); if (!y) return "–"; return m >= 6 ? (en ? "Summer " : "Sommer ") + y : "Winter " + (y - 1) + "/" + String(y).slice(2); };
+    const ablText = t => (/^(vereinslos|karriereende|intern)$/i.test(t.art || "") && !t.abloese && !t.abloese_text) ? "–" : t.abloese_text || (t.abloese ? vdbEur(t.abloese) : (/leih|loan/i.test(t.art || "") ? (en ? "loan" : "Leihe") : /frei|free/i.test(t.art || "") ? vdbT("ablfrei") : (en ? "not disclosed" : "nicht bekannt")));
     const exakt = n => (n && typeof CLUB_LOGOS !== "undefined" && CLUB_LOGOS[n]) || null;
     /* eigener Verein: voller Anzeigename (z. B. "1. FC Nürnberg" statt "Nürnberg") und das Logo aus dem Vereinsprofil */
     const vollEigen = (v && v.anzeige) || null;
-    const zeig = (n, istEigen) => (istEigen && vollEigen) ? vollEigen : (typeof clubName === "function" ? clubName(n) : n);
-    const verein = (n, logo, istEigen) => h("span", { className: "tw-vtr-verein" + (istEigen ? " eigen" : "") }, h(TwTeamLogo, { url: logo || (istEigen && v && v.logo) || exakt(n), name: n, size: 22 }), h("span", { className: "tw-vtr-vname" }, (n || istEigen) ? zeig(n, istEigen) : (en ? "Club unknown" : "Verein unbekannt")));
+    /* Auftrag 43: fremde Vereine mit vollem Namen aus dem Vereinsstamm (nur eindeutige Treffer, sonst Name der Quelle); Uebersetzungen haben Vorrang */
+    const zeig = (n, istEigen, voll) => { if (istEigen && vollEigen) return vollEigen; if (/^karriereende$/i.test(String(n || "").trim())) return en ? "Retired" : "Karriereende"; const cn = typeof clubName === "function" ? clubName(n) : n; return (cn !== n || !voll) ? cn : voll; };
+    const verein = (n, logo, istEigen, voll) => h("span", { className: "tw-vtr-verein" + (istEigen ? " eigen" : "") }, h(TwTeamLogo, { url: logo || (istEigen && v && v.logo) || exakt(n), name: n, size: 22 }), h("span", { className: "tw-vtr-vname" }, (n || istEigen) ? zeig(n, istEigen, voll) : (en ? "Club unknown" : "Verein unbekannt")));
     const karte = (t, rein, i) => { const von = rein ? t.von : (t.von || eigen); const nach = rein ? (t.zu || eigen) : t.zu; const angek = t.datum && String(t.datum).slice(0, 10) > heute;
       return h("div", { key: (t.pid || t.name || "") + "-" + (t.datum || "") + "-" + i, className: "tw-vtr-karte " + (rein ? "rein" : "raus") },
         h("div", { className: "tw-vtr-kopf" },
@@ -9475,9 +9478,10 @@ function VereinsSeite({ id, name, authQ, isPrem, onClose, onOpenPlayer }) {
             : h("span", { className: "tw-vtr-foto", "aria-hidden": true, style: { display: "inline-flex", alignItems: "center", justifyContent: "center", color: "var(--t3)" } }, h("svg", { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" }), h("circle", { cx: 12, cy: 7, r: 4 }))),
           h("div", { className: "tw-vtr-name" }, t.pid ? spielerLink(t.pid, t.name) : (t.name || "–"), h("div", { className: "tw-vtr-meta" }, [t.pos, t.age ? `${t.age} ${en ? "y" : "J."}` : null].filter(Boolean).join(" · ") || " ")),
           h("span", { className: "tw-vtr-art" }, artText(t))),
-        h("div", { className: "tw-vtr-weg", role: "group", "aria-label": (en ? "from " : "von ") + (von || "?") + (en ? " to " : " nach ") + (nach || "?") }, verein(von, t.von_logo, !rein), h("span", { className: "tw-vtr-pfeil", "aria-hidden": true }, "→"), verein(nach, t.zu_logo, rein)),
+        h("div", { className: "tw-vtr-weg", role: "group", "aria-label": (en ? "from " : "von ") + (von || "?") + (en ? " to " : " nach ") + (nach || "?") }, verein(von, t.von_logo, !rein, t.von_voll), h("span", { className: "tw-vtr-pfeil", "aria-hidden": true }, "→"), verein(nach, t.zu_logo, rein, t.zu_voll)),
         h("div", { className: "tw-vtr-fakten" },
-          h("span", null, (en ? "Date: " : "Datum: "), h("b", null, vdbDatum(t.datum) || "–")),
+          t.datum_ungenau ? h("span", { title: en ? "Transfermarkt only states the transfer window" : "Transfermarkt nennt nur das Wechselfenster" }, (en ? "Window: " : "Fenster: "), h("b", null, fenster(t.datum)))
+            : h("span", null, (en ? "Date: " : "Datum: "), h("b", null, vdbDatum(t.datum) || "–")),
           h("span", null, (en ? "Fee: " : "Ablöse: "), h("b", null, ablText(t))),
           h("span", null, "Status: ", h("b", null, angek ? (en ? "announced" : "angekündigt") : (en ? "completed" : "vollzogen"))),
           t.quelle ? h("span", null, (en ? "Source: " : "Quelle: "), h("b", null, QN[String(t.quelle).toLowerCase()] || t.quelle)) : null)); };
@@ -10142,11 +10146,12 @@ function VereinsSpieleTab({ verein, authQ, mobil, onOpenPlayer }) {
   const logoExakt = n => (n && typeof CLUB_LOGOS !== "undefined" && CLUB_LOGOS[n]) || null;
   /* eigener Verein mit vollem Anzeigenamen aus dem Vereinsprofil (einheitlich "1. FC Nürnberg" statt teils "Nürnberg") */
   const vollEigen = (verein && verein.anzeige) || null;
-  const tName = (n, eigen) => (eigen && vollEigen) ? vollEigen : (typeof clubName === "function" ? clubName(n) : n);
+  /* Auftrag 43: Gegner mit vollem Namen ueber die Vereinskennung der Quelle (hv/gv), Uebersetzungen haben Vorrang */
+  const tName = (n, eigen, voll) => { if (eigen && vollEigen) return vollEigen; const cn = typeof clubName === "function" ? clubName(n) : n; return (cn !== n || !voll) ? cn : voll; };
   const begegnung = s => h("span", { className: "tw40-beg" },
-    h("span", { className: "tw40-team" }, h(TwTeamLogo, { url: s.hl || logoExakt(s.heim), name: s.heim, size: 20 }), h("span", { style: { fontWeight: s.ist_heim ? 800 : 600, color: s.ist_heim ? "var(--t1)" : "var(--t2)" } }, tName(s.heim, !!s.ist_heim))),
+    h("span", { className: "tw40-team" }, h(TwTeamLogo, { url: s.hl || logoExakt(s.heim), name: s.heim, size: 20 }), h("span", { style: { fontWeight: s.ist_heim ? 800 : 600, color: s.ist_heim ? "var(--t1)" : "var(--t2)" } }, tName(s.heim, !!s.ist_heim, s.hv))),
     h("span", { style: { color: "var(--t3)" } }, "–"),
-    h("span", { className: "tw40-team" }, h(TwTeamLogo, { url: s.gl || logoExakt(s.gast), name: s.gast, size: 20 }), h("span", { style: { fontWeight: s.ist_heim ? 600 : 800, color: s.ist_heim ? "var(--t2)" : "var(--t1)" } }, tName(s.gast, !s.ist_heim))));
+    h("span", { className: "tw40-team" }, h(TwTeamLogo, { url: s.gl || logoExakt(s.gast), name: s.gast, size: 20 }), h("span", { style: { fontWeight: s.ist_heim ? 600 : 800, color: s.ist_heim ? "var(--t2)" : "var(--t1)" } }, tName(s.gast, !s.ist_heim, s.gv))));
   const oeffne = s => {
     const a = s.analyse; if (!a) return;
     setLadeAn(s.k); setHinweis(null);
