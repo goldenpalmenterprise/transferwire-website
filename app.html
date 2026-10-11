@@ -9781,13 +9781,17 @@ const TW40_CSS = ".tw40-seite{max-width:1100px}.tw40-kopf{display:flex;align-ite
   + ".tw40-sp:last-child{border-bottom:none}.tw40-erg{font-family:" + FONT_DISPLAY + ";font-weight:700;font-size:15px;color:#fff;border-radius:6px;padding:1px 7px;min-width:44px;text-align:center;display:inline-block}"
   + "@media (max-width:760px){.tw40-titel{font-size:23px}.tw40-eintrag{grid-template-columns:auto minmax(0,1fr);align-items:start}.tw40-rang{display:none}.tw40-rechts{grid-column:1 / -1;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;text-align:left}"
   + ".tw40-wahl{grid-template-columns:1fr}.tw40-werte{margin-left:0}.tw40-tab td{padding:7px 6px;font-size:12.5px}.tw40-tab td.m{width:36%}"
-  + ".tw40-balken{grid-template-columns:minmax(0,1fr) 92px minmax(0,1fr);font-size:12px}.tw40-sp{grid-template-columns:minmax(0,1fr) auto;gap:4px 10px}.tw40-sp-wb{grid-column:1 / -1}.tw40-sp-akt{grid-column:1 / -1;justify-self:start}}";
+  + ".tw40-balken{grid-template-columns:minmax(0,1fr) 92px minmax(0,1fr);font-size:12px}.tw40-sp{grid-template-columns:minmax(0,1fr) auto;gap:4px 10px}.tw40-sp-wb{grid-column:1 / -1}.tw40-sp-akt{grid-column:1 / -1;justify-self:start}}"
+  + ".tw40-seg{display:inline-flex;gap:4px;padding:4px;margin:12px 0 10px;border-radius:12px;background:var(--karte2);border:1px solid var(--linie)}"
+  + ".tw40-seg-k{cursor:pointer;font-family:" + FONT_BODY + ";font-size:13.5px;font-weight:800;padding:9px 16px;border-radius:9px;border:none;background:transparent;color:var(--t2);white-space:nowrap}"
+  + ".tw40-seg-k:hover{color:var(--t1)}.tw40-seg-k.an{background:var(--t1);color:var(--karte)}.tw40-seg-k:focus-visible{outline:2px solid var(--gold);outline-offset:2px}"
+  + "@media (max-width:760px){.tw40-seg{display:flex;width:100%;box-sizing:border-box}.tw40-seg-k{flex:1 1 0;min-width:0;padding:10px 6px;font-size:13px;white-space:normal}}";
 
 /* Punkt 81: Spielanalyse als eigene Komponente (gleiche Ansicht im Bereich "Spieltag" und im Vereinsprofil) – Inhalt wird beim Bauen aus dem Spieltag uebernommen */
 /* Gemeinsame Stile (auch im Spieltag): Heimfarbe der Spielanalyse je Farbsatz (dunkel: helles Blaugrau statt fast unsichtbarem Dunkelgrau), Saisonauswahl ohne native Hell-Darstellung */
 (function () { try { if (typeof document !== "undefined" && !document.getElementById("tw40-global-css")) { const st = document.createElement("style"); st.id = "tw40-global-css";
   st.textContent = ":root{--tw-an-heim:#AFC3D9;--tw-an-heim-text:#0f1520;--tw-an-gast-text:#C8A355;--tw-an-chip-text:#151617}html.tw-dark{--tw-an-heim:var(--dunkel);--tw-an-heim-text:#fff;--tw-an-gast-text:#8A6A1F;--tw-an-chip-text:#fff}"
-    + ".tw40-saison{-webkit-appearance:none;appearance:none;background-color:var(--karte);color:var(--t1);border:1px solid var(--linie2);border-radius:9px;padding:7px 30px 7px 10px;font-size:13px;font-weight:700;line-height:1.2;cursor:pointer;background-image:linear-gradient(45deg,transparent 50%,var(--t2) 50%),linear-gradient(135deg,var(--t2) 50%,transparent 50%);background-position:calc(100% - 16px) 52%,calc(100% - 11px) 52%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}"
+    + ".tw40-saison{-webkit-appearance:none;appearance:none;background-color:var(--karte);color:var(--t1);border:1px solid var(--linie2);border-radius:9px;padding:7px 30px 7px 10px;font-size:13px;font-weight:700;line-height:1.2;cursor:pointer;background-image:linear-gradient(45deg,transparent 50%,var(--t1) 50%),linear-gradient(135deg,var(--t1) 50%,transparent 50%) !important;background-position:calc(100% - 17px) 55%,calc(100% - 11px) 55% !important;background-size:6px 6px,6px 6px !important;background-repeat:no-repeat !important}"
     + ".tw40-saison:disabled{opacity:.55;cursor:default}.tw40-saison option{background-color:var(--karte);color:var(--t1)}"
     /* Netzwerk > Beitraege: Hinweisband (Creme #fdf6e3) im dunklen Farbsatz mit dunklem Grund, im hellen unveraendert (vorher Goldschrift auf Creme, 1,8:1) */
     + ":root [style*=\"background: rgb(253, 246, 227)\"]{background:rgba(230,176,74,.1) !important;border-color:rgba(230,176,74,.35) !important}html.tw-dark [style*=\"background: rgb(253, 246, 227)\"]{background:#fdf6e3 !important;border-color:#f2d9a4 !important}"
@@ -9861,7 +9865,7 @@ function VereinsSpieleTab({ verein, authQ, mobil, onOpenPlayer }) {
   const h = React.createElement; const en = LANG === "en";
   const vid = verein && verein.id;
   const [saison, setSaison] = useState(null); const [d, setD] = useState(null); const [lade, setLade] = useState(true); const [fehler, setFehler] = useState(false);
-  const [wb, setWb] = useState(""); const [n, setN] = useState(25); const [nk, setNk] = useState(6); const [analyse, setAnalyse] = useState(null); const [ladeAn, setLadeAn] = useState(null);
+  const [wb, setWb] = useState(""); const [n, setN] = useState(25); const [nk, setNk] = useState(25); const [ansicht, setAnsicht] = useState(null); const [analyse, setAnalyse] = useState(null); const [ladeAn, setLadeAn] = useState(null);
   const [hinweis, setHinweis] = useState(null); const [leer, setLeer] = useState({});
   useEffect(() => {
     if (!vid) { setLade(false); setFehler(true); return; }
@@ -9871,7 +9875,7 @@ function VereinsSpieleTab({ verein, authQ, mobil, onOpenPlayer }) {
       .catch(() => { if (ok) { setFehler(true); setLade(false); } });
     return () => { ok = false; };
   }, [vid, saison]);
-  useEffect(() => { setWb(""); setN(25); setNk(6); }, [saison]);
+  useEffect(() => { setWb(""); setN(25); setNk(25); setAnsicht(null); }, [saison]);
   const alle = (d && d.spiele) || [];
   const jetzt = Date.now();
   const kommendIst = s => s.status === "live" || ((s.status === "geplant" || s.status === "verlegt") && new Date(s.anstoss).getTime() > jetzt - 3 * 3600e3);
@@ -9939,18 +9943,28 @@ function VereinsSpieleTab({ verein, authQ, mobil, onOpenPlayer }) {
     h("label", { style: { display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, color: "var(--t2)" } }, en ? "Season" : "Saison",
       h("select", { className: "tw40-saison", value: String(saison || (d && d.saison) || ""), onChange: e => setSaison(e.target.value), disabled: lade && !d, style: { fontFamily: FONT_BODY } },
         ((d && d.saisons) || []).map(x => h("option", { key: x.s, value: String(x.s) }, x.label)))),
-    wbs.length > 1 ? h("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } }, ["", ...wbs].map(w => h("button", { key: w || "alle", type: "button", onClick: () => { setWb(w); setN(25); setNk(6); }, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, padding: "5px 11px", borderRadius: 999, border: "1px solid var(--linie)", cursor: "pointer", background: wb === w ? "var(--t1)" : "var(--karte)", color: wb === w ? "var(--karte)" : "var(--t2)" } }, w || (en ? "All competitions" : "Alle Wettbewerbe")))) : null);
+    wbs.length > 1 ? h("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } }, ["", ...wbs].map(w => h("button", { key: w || "alle", type: "button", onClick: () => { setWb(w); setN(25); setNk(25); }, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, padding: "5px 11px", borderRadius: 999, border: "1px solid var(--linie)", cursor: "pointer", background: wb === w ? "var(--t1)" : "var(--karte)", color: wb === w ? "var(--karte)" : "var(--t2)" } }, w || (en ? "All competitions" : "Alle Wettbewerbe")))) : null);
   if (lade && !d) return h("div", null, auswahl, h("div", { className: "tw-lade", style: { padding: "14px 4px" } }, h("span", { className: "tw-spin" }), en ? "Loading matches …" : "Spiele werden geladen …"));
   if (fehler && !d) return kasten(h("div", { style: { padding: "10px 0", fontFamily: FONT_BODY, color: "var(--t2)" } }, en ? "The matches could not be loaded. Please try again later." : "Die Spiele konnten nicht geladen werden. Bitte später erneut versuchen."));
   return h("div", { style: { opacity: lade ? .6 : 1 } },
     h("style", null, TW40_CSS),
     auswahl,
     h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t3)", margin: "4px 0 2px", lineHeight: 1.45 } }, quelleText),
-    kommend.length ? h("div", null, titel((en ? "Upcoming matches" : "Kommende Spiele") + " (" + kommend.length + ")"), kasten(h("div", { className: "tw40-sp-liste" }, kommend.slice(0, nk).map(zeile))),
-      kommend.length > nk ? h("div", { style: { textAlign: "center", marginTop: 10 } }, h("button", { type: "button", className: "tw40-knopf", onClick: () => setNk(nk + 25) }, (en ? "Show more upcoming matches (" : "Weitere kommende Spiele anzeigen (") + nk + (en ? " of " : " von ") + kommend.length + ")")) : null) : null,
-    titel((en ? "Played matches" : "Gespielte Spiele") + " · " + ((d && d.saison_label) || "") + " (" + gespielt.length + ")"),
-    gespielt.length ? kasten(h("div", { className: "tw40-sp-liste" }, gespielt.slice(0, n).map(zeile))) : kasten(h("div", { style: { padding: "10px 0", fontFamily: FONT_BODY, color: "var(--t2)" } }, en ? "No played matches available for this selection." : "Für diese Auswahl liegen keine gespielten Spiele vor.")),
-    gespielt.length > n ? h("div", { style: { textAlign: "center", marginTop: 10 } }, h("button", { type: "button", className: "tw40-knopf", onClick: () => setN(n + 25) }, (en ? "Show more matches (" : "Weitere Spiele anzeigen (") + n + (en ? " of " : " von ") + gespielt.length + ")")) : null,
+    (() => {   /* Auftrag 41: klare Auswahl "Gespielte Spiele" (mit Analyse) | "Spielplan"; vorher standen die kommenden Spiele oben, die gespielten weit darunter */
+      const aktiv = ansicht || (gespielt.length || !kommend.length ? "gespielt" : "kommend");
+      const segKnopf = (k, text) => h("button", { key: k, type: "button", className: "tw40-seg-k" + (aktiv === k ? " an" : ""), "aria-pressed": aktiv === k ? "true" : "false", onClick: () => setAnsicht(k) }, text);
+      const leerKasten = t => kasten(h("div", { style: { padding: "10px 0", fontFamily: FONT_BODY, color: "var(--t2)" } }, t));
+      const mehr = (zahl, gesamt, weiter, text) => gesamt > zahl ? h("div", { style: { textAlign: "center", marginTop: 10 } }, h("button", { type: "button", className: "tw40-knopf", onClick: weiter }, text + " (" + zahl + (en ? " of " : " von ") + gesamt + ")")) : null;
+      return h(React.Fragment, null,
+        h("div", { className: "tw40-seg", role: "group", "aria-label": en ? "Choose matches" : "Spiele w\u00e4hlen" },
+          segKnopf("gespielt", (en ? "Played matches" : "Gespielte Spiele") + " (" + gespielt.length + ")"),
+          segKnopf("kommend", (en ? "Fixtures" : "Spielplan") + " (" + kommend.length + ")")),
+        aktiv === "kommend"
+          ? (kommend.length ? h(React.Fragment, null, kasten(h("div", { className: "tw40-sp-liste" }, kommend.slice(0, nk).map(zeile))), mehr(nk, kommend.length, () => setNk(nk + 25), en ? "Show more upcoming matches" : "Weitere kommende Spiele anzeigen"))
+            : leerKasten(en ? "No upcoming matches are scheduled for this selection." : "F\u00fcr diese Auswahl sind keine kommenden Spiele angesetzt."))
+          : (gespielt.length ? h(React.Fragment, null, kasten(h("div", { className: "tw40-sp-liste" }, gespielt.slice(0, n).map(zeile))), mehr(n, gespielt.length, () => setN(n + 25), en ? "Show more matches" : "Weitere Spiele anzeigen"))
+            : leerKasten(en ? "No played matches available for this selection." : "F\u00fcr diese Auswahl liegen keine gespielten Spiele vor.")));
+    })(),
     analyse ? h(TwSpielAnalyse, { s: analyse, onClose: () => setAnalyse(null), openPlayer: (pid, name, team) => { if (onOpenPlayer) onOpenPlayer(pid, name, team); }, z: 1250, mitDatum: true }) : null);
 }
 
@@ -14196,6 +14210,15 @@ function TransferWire() {
   const [account, setAccountState] = useState(() => loadAccount());
   const [page, setPage] = useState(() => { var h = (location.hash || "").replace("#", ""); var a = loadAccount(); if (h === "cancel") return "cancel"; if (h === "abo" || h.indexOf("abo-") === 0) return "subscribe"; if (a) return "app"; if (h === "login") return "login"; if (h === "test") return "register"; return "landing"; });
   const [pubLegal, setPubLegal] = useState(() => { var h = (location.hash || "").replace("#", ""); return (h === "impressum" || h === "datenschutz" || h === "agb") ? h : null; });
+  const twSeiteErst = React.useRef(true);
+  useEffect(() => {   // Punkt 9 (Auftrag 41): nach der Anmeldung bzw. einem Seitenwechsel oben beginnen; am Handy blieb sonst die Scrollposition des Anmeldeformulars erhalten und man landete mitten im Newsfeed (beim ersten Laden/Neuladen bleibt das Verhalten des Browsers unveraendert)
+    if (twSeiteErst.current) { twSeiteErst.current = false; return; }
+    const oben = () => { try { window.scrollTo(0, 0); if (document.scrollingElement) document.scrollingElement.scrollTop = 0; } catch (e) {} };
+    oben();
+    let raf = 0; try { raf = requestAnimationFrame(oben); } catch (e) {}
+    const t1 = setTimeout(oben, 150), t2 = setTimeout(oben, 500);
+    return () => { try { cancelAnimationFrame(raf); } catch (e) {} clearTimeout(t1); clearTimeout(t2); };
+  }, [page]);
   useEffect(() => {
     try {
       if (sessionStorage.getItem("tw_pinged")) return;
