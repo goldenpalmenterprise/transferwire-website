@@ -9476,7 +9476,7 @@ function VereinsSeite({ id, name, authQ, isPrem, onClose, onOpenPlayer }) {
         h("div", { className: "tw-vtr-kopf" },
           t.foto ? h("img", { src: t.foto, alt: "", loading: "lazy", className: "tw-vtr-foto", onError: e => { e.currentTarget.style.visibility = "hidden"; } })
             : h("span", { className: "tw-vtr-foto", "aria-hidden": true, style: { display: "inline-flex", alignItems: "center", justifyContent: "center", color: "var(--t3)" } }, h("svg", { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" }), h("circle", { cx: 12, cy: 7, r: 4 }))),
-          h("div", { className: "tw-vtr-name" }, t.pid ? spielerLink(t.pid, t.name) : (t.name || "–"), h("div", { className: "tw-vtr-meta" }, [t.pos, t.age ? `${t.age} ${en ? "y" : "J."}` : null].filter(Boolean).join(" · ") || " ")),
+          h("div", { className: "tw-vtr-name" }, t.pid ? spielerLink(t.pid, t.name) : (t.name || "–"), h("div", { className: "tw-vtr-meta" }, [(typeof tkPosText === "function" ? tkPosText(t.pos, en) : t.pos), t.age ? `${t.age} ${en ? "y" : "J."}` : null].filter(Boolean).join(" · ") || " ")),
           h("span", { className: "tw-vtr-art" }, artText(t))),
         h("div", { className: "tw-vtr-weg", role: "group", "aria-label": (en ? "from " : "von ") + (von || "?") + (en ? " to " : " nach ") + (nach || "?") }, verein(von, t.von_logo, !rein, t.von_voll), h("span", { className: "tw-vtr-pfeil", "aria-hidden": true }, "→"), verein(nach, t.zu_logo, rein, t.zu_voll)),
         h("div", { className: "tw-vtr-fakten" },
