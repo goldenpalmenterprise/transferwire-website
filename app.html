@@ -3388,6 +3388,7 @@ function TransferPanel({ m, schliessen, onWatch }) {
   const r = Math.max(0, Math.min(5, Number(m.reliability) || 0)); const best = istBestaetigt(m); const sp = tkSpieler(m); const lg = tkLiga(m);
   const [kopiert, setKopiert] = React.useState(false);
   useScrollSperre(true); useTwZurueck(true, schliessen);
+  const tpGleich = twGleicherVerein(m.fromClub || m.from, m.toClub || m.to || m.seek);
   const quellen = (m.sources || []).filter(s => s && (s.name || s.url)); const q1 = quellen[0] || (m.url ? { name: tkQuelle(m), url: m.url } : null);
   const relWort = r ? ((en ? RELIABILITY_EN[r] : RELIABILITY[r]) || "") : "";
   const chip = (text, farbe, bg, punkt) => h("span", { style: { display: "inline-flex", alignItems: "center", gap: 6, fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 700, color: farbe, background: bg, padding: "4px 10px", borderRadius: 999, whiteSpace: "nowrap" } }, punkt ? h("span", { style: { width: 6, height: 6, borderRadius: 99, background: farbe } }) : null, text);
@@ -3411,9 +3412,9 @@ function TransferPanel({ m, schliessen, onWatch }) {
         h("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 12 } }, statusChips),
         h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 30, fontWeight: 700, color: "var(--t1)", lineHeight: 1.1, marginBottom: 12, overflowWrap: "anywhere" } }, dHClean(m)))),
         h("div", { style: { fontFamily: FONT_BODY, fontSize: 14.5, lineHeight: 1.65, color: "var(--t2)", marginBottom: 18 } }, bereinigeText(dS(m), dH(m)) || "\u2013"),
-        h("div", { className: "tw-tp-vereine", style: { display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto minmax(0, 1fr)", alignItems: "center", gap: 12, background: "var(--karte2)", border: "1px solid " + HAIR, borderRadius: 14, padding: "14px 16px", marginBottom: 6 } },
-          h("div", { style: { minWidth: 0 } }, h(TkVerein, { name: m.fromClub || m.from, size: 40, fett: true, leer: vpLeer(m, "von"), titel: vpTitel(m, "von") }), vpZeile(m, "von"), m.type === "vertragslos" && (m.fromClub || m.from) && !VP_VL_RX.test(String(m.fromClub || m.from)) ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t3)", marginTop: 4, paddingLeft: 49 } }, (en ? "Previously: " : "Zuvor: ") + (m.fromClub || m.from)) : null),
-          h("span", { className: "tw-tp-pfeil", style: { color: "var(--gold-text)", display: "inline-flex" } }, tkIcon("arrow", 20)),
+        h("div", { className: "tw-tp-vereine", style: { display: "grid", gridTemplateColumns: tpGleich ? "minmax(0, 1fr)" : "minmax(0, 1fr) auto minmax(0, 1fr)", alignItems: "center", gap: 12, background: "var(--karte2)", border: "1px solid " + HAIR, borderRadius: 14, padding: "14px 16px", marginBottom: 6 } },
+          tpGleich ? null : h("div", { style: { minWidth: 0 } }, h(TkVerein, { name: m.fromClub || m.from, size: 40, fett: true, leer: vpLeer(m, "von"), titel: vpTitel(m, "von") }), vpZeile(m, "von"), m.type === "vertragslos" && (m.fromClub || m.from) && !VP_VL_RX.test(String(m.fromClub || m.from)) ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t3)", marginTop: 4, paddingLeft: 49 } }, (en ? "Previously: " : "Zuvor: ") + (m.fromClub || m.from)) : null),
+          tpGleich ? null : h("span", { className: "tw-tp-pfeil", style: { color: "var(--gold-text)", display: "inline-flex" } }, tkIcon("arrow", 20)),
           h("div", { style: { minWidth: 0 } }, h(TkVerein, { name: m.toClub || m.to || m.seek, size: 40, fett: true, leer: vpLeer(m, "nach"), titel: vpTitel(m, "nach") }), vpZeile(m, "nach"))),
         h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", columnGap: 18, marginBottom: 14 } },
           fakt(en ? "Player" : "Spieler", sp.name || (en ? "Not named" : "Nicht genannt")), fakt("Position", sp.pos || "\u2013"),
@@ -8706,11 +8707,14 @@ function MuSpielerBild({ name, url, commons, gross, mb, it }) {
   return hh("div", { "aria-hidden": "true", style: { position: "absolute", right: "12%", top: "50%", transform: "translateY(-50%)", width: gross ? 132 : 84, height: gross ? 132 : 84, borderRadius: 999, background: "rgba(255,255,255,.12)", border: "2px solid rgba(255,255,255,.45)", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,.7)" } },
     hh("svg", { viewBox: "0 0 24 24", width: gross ? 70 : 46, height: gross ? 70 : 46 }, hh("path", { d: TW_SILHOUETTE, fill: "currentColor" })));
 }
+/* Auftrag 42: gleicher abgebender und aufnehmender Verein = kein Vereinswechsel (Anzeige ohne Pfeil und ohne zweites Logo).
+   Die Pruefung beim Einlesen laeuft ueber die Vereinskennungen; hier liegen nur Namen vor (gleiche Schreibweise nach Normalisierung). */
+function twGleicherVerein(a, b) { const k = s => String(s || "").toLowerCase().normalize("NFD").replace(/\p{M}/gu, "").replace(/[^a-z0-9]+/g, " ").trim(); return !!k(a) && k(a) === k(b); }
 function muLogosFuer(it) {
   const k = muKategorie(it);
   if (k === "leistung" || k === "topleistung") return [it.team].filter(Boolean);
   const von = muVon(it), nach = muNach(it);
-  if (von && nach && ["fix", "leihe", "bericht", "geruecht", "trade"].includes(k)) return [von, nach];
+  if (von && nach && !twGleicherVerein(von, nach) && ["fix", "leihe", "bericht", "geruecht", "trade"].includes(k)) return [von, nach];
   return [nach || it.team || it.club || von].filter(Boolean);
 }
 function MuThumb({ it, name, foto, logos, commons, kat, link, mb, hg }) {
