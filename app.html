@@ -3288,10 +3288,158 @@ function SucheVue({ onOpen }) {
 function ScoutSub({ view, setView }) {
   const h = React.createElement;
   return h("div", { style: { display: "flex", gap: 8, marginBottom: 16, alignItems: "flex-start", alignSelf: "start", flexWrap: "wrap" } },
-    [["talente", LANG === "en" ? "Talent rankings" : "Talent-Rankings"], ["listen", LANG === "en" ? "Scouting lists" : "Scouting-Listen"], ["suche", LANG === "en" ? "Skill search" : "Fähigkeiten-Suche"]].map(([k, lab]) => {
+    [["talente", LANG === "en" ? "Talent rankings" : "Talent-Rankings"], ["listen", LANG === "en" ? "Scouting lists" : "Scouting-Listen"], ["suche", LANG === "en" ? "Skill search" : "Fähigkeiten-Suche"], ["nachwuchs", LANG === "en" ? "Youth leagues & sources" : "Nachwuchsligen & Quellen"]].map(([k, lab]) => {
       const a = view === k;
       return h("button", { key: k, onClick: () => setView(k), style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, cursor: "pointer", padding: "9px 16px", borderRadius: 10, border: "1px solid " + (a ? "#087F8C" : HAIR), background: a ? "#087F8C" : "#fff", color: a ? "#fff" : "var(--t2)" } }, lab);
     }));
+}
+
+/* Auftrag 46 / Punkt 14 (12.10.2026): "Nachwuchsligen & Quellen" - alle Laender, Wettbewerbe, Quellen und Scoutingwege der
+   Nachwuchs-Excel des Inhabers (31 Laender, Deutschland als Referenz, internationale Wege) mit dem Datenstand in TransferWire.
+   Daten: /api/tw-scoutkatalog (Ablauf "TW API: Nachwuchs-Scoutingkatalog"; Tabellen scouting_laender, scouting_hinweise,
+   scouting_wettbewerbe, scouting_quellen). Inhalte des Katalogs auf Deutsch, Bedienung DE/EN. */
+const KATALOG_URL = "/api/tw-scoutkatalog";
+const NK_LAND = { "England": ["gb-eng", "England"], "Schottland": ["gb-sct", "Scotland"], "Spanien": ["es", "Spain"], "Italien": ["it", "Italy"], "Frankreich": ["fr", "France"], "Portugal": ["pt", "Portugal"], "Niederlande": ["nl", "Netherlands"], "Belgien": ["be", "Belgium"], "Österreich": ["at", "Austria"], "Schweiz": ["ch", "Switzerland"], "Dänemark": ["dk", "Denmark"], "Schweden": ["se", "Sweden"], "Norwegen": ["no", "Norway"], "Polen": ["pl", "Poland"], "Tschechien": ["cz", "Czechia"], "Slowakei": ["sk", "Slovakia"], "Ungarn": ["hu", "Hungary"], "Kroatien": ["hr", "Croatia"], "Serbien": ["rs", "Serbia"], "Rumänien": ["ro", "Romania"], "Bulgarien": ["bg", "Bulgaria"], "Türkei": ["tr", "Türkiye"], "Zypern": ["cy", "Cyprus"], "Israel": ["il", "Israel"], "USA": ["us", "USA"], "Brasilien": ["br", "Brazil"], "Argentinien": ["ar", "Argentina"], "Saudi-Arabien": ["sa", "Saudi Arabia"], "Japan": ["jp", "Japan"], "Südkorea": ["kr", "South Korea"], "China": ["cn", "China"], "Deutschland – Referenz": ["de", "Germany – reference"], "Deutschland": ["de", "Germany"], "International": ["", "International"] };
+function nkNorm(s) { return String(s || "").normalize("NFC").trim(); }
+function nkLandName(land, en) { const e = NK_LAND[nkNorm(land)]; return en && e ? e[1] : nkNorm(land); }
+function nkLandKey(land) { const l = nkNorm(land); return l === "Deutschland" ? "Deutschland – Referenz" : l; }
+function nkStatus(s) { s = nkNorm(s); if (s.indexOf("im Bestand") === 0) return "bestand"; if (s === "wird aufgenommen") return "auf"; if (s === "vorbereitet") return "vorb"; if (s === "Zugang fehlt") return "fehlt"; return "erg"; }
+const NK_ST_REIHE = { bestand: 0, auf: 1, vorb: 2, erg: 3, fehlt: 4 };
+const NK_ST = { bestand: ["In TransferWire", "In TransferWire", "#0d8a4f", "rgba(13,138,79,.13)"], auf: ["Wird aufgenommen", "Being added", "#1e6fae", "rgba(30,111,174,.13)"], vorb: ["Nur Spieldaten", "Match data only", "#a26a00", "rgba(200,140,0,.15)"], erg: ["Ergänzung", "Supplement", "#087F8C", "rgba(8,127,140,.13)"], fehlt: ["Noch ohne Daten", "No data yet", "var(--t3)", "rgba(127,127,127,.13)"] };
+const NK_EIG = { "Kern": ["Kern", "Core"], "Selektiv": ["Selektiv", "Selective"], "Ergänzung": ["Ergänzung", "Supplement"] };
+function nkFlagge(land, w) { const e = NK_LAND[nkNorm(land)]; const code = e ? e[0] : ""; if (code && typeof ttFlagge === "function") return ttFlagge(code, w); return React.createElement("span", { "aria-hidden": "true", style: { width: w, height: Math.round(w * 0.7), borderRadius: 3, background: "var(--karte2)", border: "1px solid var(--linie2)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: Math.round(w * 0.45), color: "var(--t3)", flexShrink: 0, boxSizing: "border-box" } }, "◎"); }
+function nkLink(url, text) { const u = String(url || ""); if (!/^https?:\/\//i.test(u)) return null; return React.createElement("a", { href: u, target: "_blank", rel: "noopener noreferrer", style: { color: "var(--teal)", fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap" } }, text + " ↗"); }
+function nkPasst(x, felder, woerter) { if (!woerter.length) return true; const t = nkNorm(felder.map(k => x[k] || "").join(" ")).toLowerCase(); return woerter.every(w => t.indexOf(w) >= 0); }
+
+function NachwuchsKatalog() {
+  const h = React.createElement; const en = LANG === "en";
+  const [daten, setDaten] = React.useState(null); const [fehler, setFehler] = React.useState(false); const [versuch, setVersuch] = React.useState(0);
+  const [modus, setModus] = React.useState("w");
+  const [land, setLand] = React.useState("");
+  const [status, setStatus] = React.useState("");
+  const [eig, setEig] = React.useState("");
+  const [typ, setTyp] = React.useState("");
+  const [q, setQ] = React.useState("");
+  const [hilfe, setHilfe] = React.useState(false);
+  React.useEffect(() => {
+    let aktiv = true; setFehler(false);
+    fetch(KATALOG_URL, { credentials: "omit" }).then(r => r.json()).then(raw => {
+      if (!aktiv) return; const d = normResp(raw);
+      if (d && d.ok && Array.isArray(d.wettbewerbe)) { setDaten(d); try { sendPing("nachwuchskatalog"); } catch (e) {} } else setFehler(true);
+    }).catch(() => { if (aktiv) setFehler(true); });
+    return () => { aktiv = false; };
+  }, [versuch]);
+  const laender = React.useMemo(() => (daten && Array.isArray(daten.laender) ? daten.laender : []).slice().sort((a, b) => (a.nr || 0) - (b.nr || 0)), [daten]);
+  const woerter = React.useMemo(() => nkNorm(q).toLowerCase().split(/\s+/).filter(Boolean), [q]);
+  const wett = React.useMemo(() => {
+    const alle = daten && Array.isArray(daten.wettbewerbe) ? daten.wettbewerbe : [];
+    return alle.filter(x => (!land || nkLandKey(x.land) === land) && (!status || nkStatus(x.status) === status) && (!eig || nkNorm(x.e) === eig) && nkPasst(x, ["w", "land", "ak", "art", "umfang", "teams", "h", "zugang"], woerter));
+  }, [daten, land, status, eig, woerter]);
+  const quellen = React.useMemo(() => {
+    const alle = daten && Array.isArray(daten.quellen) ? daten.quellen : [];
+    return alle.filter(x => (!land || nkLandKey(x.land) === land) && (!typ || nkNorm(x.typ).split(/\s*\/\s*/)[0] === typ) && nkPasst(x, ["q", "land", "typ", "bereich", "info", "zugang", "nutzung", "grenzen"], woerter));
+  }, [daten, land, typ, woerter]);
+  const typen = React.useMemo(() => { const s = {}; ((daten && daten.quellen) || []).forEach(x => { const t = nkNorm(x.typ).split(/\s*\/\s*/)[0]; if (t) s[t] = (s[t] || 0) + 1; }); return Object.keys(s).sort((a, b) => s[b] - s[a] || a.localeCompare(b, "de")).map(t => [t, s[t]]); }, [daten]);
+  const kpi = React.useMemo(() => {
+    const alle = (daten && daten.wettbewerbe) || []; const z = { bestand: 0, auf: 0, vorb: 0, erg: 0, fehlt: 0, spieler: 0 };
+    alle.forEach(x => { z[nkStatus(x.status)]++; if (nkStatus(x.status) === "bestand") z.spieler += Number(x.spieler) || 0; });
+    return z;
+  }, [daten]);
+  const gruppen = React.useMemo(() => {
+    const liste = modus === "w" ? wett : quellen; const m = new Map();
+    liste.forEach(x => { const k = nkLandKey(x.land); if (!m.has(k)) m.set(k, []); m.get(k).push(x); });
+    const reihe = new Map(laender.map(l => [nkNorm(l.land), l.nr || 99]));
+    const out = Array.from(m.entries()).map(([k, xs]) => ({ land: k, info: laender.find(l => nkNorm(l.land) === k) || null, xs }));
+    out.forEach(g => { if (modus === "w") g.xs.sort((a, b) => (NK_ST_REIHE[nkStatus(a.status)] - NK_ST_REIHE[nkStatus(b.status)]) || ((nkNorm(a.e) === "Kern" ? 0 : 1) - (nkNorm(b.e) === "Kern" ? 0 : 1)) || ((a.nr || 0) - (b.nr || 0))); });
+    out.sort((a, b) => (reihe.get(a.land) || 99) - (reihe.get(b.land) || 99) || a.land.localeCompare(b.land, "de"));
+    return out;
+  }, [modus, wett, quellen, laender]);
+  const gesetzt = !!(land || status || eig || typ || q);
+  const zuruecksetzen = () => { setLand(""); setStatus(""); setEig(""); setTyp(""); setQ(""); };
+  const sel = (value, onChange, opts, label) => h("select", { value: value, "aria-label": label, onChange: e => onChange(e.target.value), style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 600, padding: "8px 10px", borderRadius: 10, border: "1px solid " + HAIR, background: "var(--karte)", color: "var(--t1)", maxWidth: "100%" } }, opts.map(([v, l]) => h("option", { key: v, value: v }, l)));
+  const badge = (text, farbe, bg, key, title) => h("span", { key: key, title: title || undefined, style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, letterSpacing: .2, padding: "3px 9px", borderRadius: 999, color: farbe, background: bg, whiteSpace: "nowrap" } }, text);
+  const kachel = (zahl, text, farbe, key) => h("div", { key: key, style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 12, padding: "10px 14px", minWidth: 0 } },
+    h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 24, fontWeight: 700, color: farbe || "var(--t1)", lineHeight: 1.1 } }, zahl),
+    h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t2)", marginTop: 2, lineHeight: 1.35 } }, text));
+  const zeile = (label, text, gedaempft) => text ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, lineHeight: 1.5, color: gedaempft ? "var(--t3)" : "var(--t2)", marginTop: 3 } }, label ? h("b", { style: { color: gedaempft ? "var(--t3)" : "var(--t1)", fontWeight: 700 } }, label + " ") : null, text) : null;
+  const zahlFmt = n => Number(n || 0).toLocaleString(en ? "en-GB" : "de-DE");
+  const spielerZahl = daten && Number(daten.spieler_gesamt) > 0 ? Number(daten.spieler_gesamt) : kpi.spieler;
+  const wettKarte = x => {
+    const st = NK_ST[nkStatus(x.status)]; const ei = NK_EIG[nkNorm(x.e)];
+    return h("div", { key: "w" + x.nr, className: "tw-nk-karte", style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 12, padding: "11px 14px" } },
+      h("div", { style: { display: "flex", alignItems: "flex-start", gap: 8, flexWrap: "wrap" } },
+        h("div", { style: { flex: "1 1 220px", minWidth: 0, fontFamily: FONT_BODY, fontSize: 14.5, fontWeight: 800, color: "var(--t1)", lineHeight: 1.35, overflowWrap: "anywhere" } }, x.w),
+        h("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } },
+          ei ? badge(en ? ei[1] : ei[0], nkNorm(x.e) === "Kern" ? "var(--t1)" : "var(--t2)", nkNorm(x.e) === "Kern" ? "rgba(127,127,127,.18)" : "transparent", "e", nkNorm(x.e) === "Kern" ? (en ? "Core: scout first" : "Kern: zuerst scouten") : nkNorm(x.e) === "Selektiv" ? (en ? "Selective: pick strong teams" : "Selektiv: starke Teams auswählen") : (en ? "Supplement: additional route" : "Ergänzung: zusätzlicher Weg")) : null,
+          badge(en ? st[1] : st[0], st[2], st[3], "s"))),
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)", marginTop: 3, lineHeight: 1.45 } }, [x.ak, x.art, x.umfang].filter(Boolean).join(" · ")),
+      zeile(en ? "Teams:" : "Teams:", x.teams),
+      zeile(en ? "Note:" : "Hinweis:", x.h, true),
+      h("div", { style: { display: "flex", flexWrap: "wrap", gap: "4px 12px", alignItems: "center", marginTop: 6, fontFamily: FONT_BODY, fontSize: 12, color: "var(--t3)" } },
+        h("span", null, (en ? "Data: " : "Daten: ") + (x.zugang || "–")),
+        Number(x.spieler) > 0 ? h("span", { style: { color: "#0d8a4f", fontWeight: 700 } }, zahlFmt(x.spieler) + (en ? " players in TransferWire" : " Spieler in TransferWire")) : null,
+        x.saison ? h("span", null, (en ? "Season: " : "Saison: ") + x.saison) : null,
+        nkLink(x.url, en ? "Official page" : "Offizielle Seite")));
+  };
+  const quelleKarte = x => h("div", { key: "q" + x.qid, className: "tw-nk-karte", style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 12, padding: "11px 14px" } },
+    h("div", { style: { display: "flex", alignItems: "flex-start", gap: 8, flexWrap: "wrap" } },
+      h("div", { style: { flex: "1 1 220px", minWidth: 0, fontFamily: FONT_BODY, fontSize: 14.5, fontWeight: 800, color: "var(--t1)", lineHeight: 1.35, overflowWrap: "anywhere" } }, x.q),
+      h("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } },
+        x.typ ? badge(x.typ, "var(--t2)", "rgba(127,127,127,.13)", "t") : null,
+        x.aktiv ? badge(en ? "In our source register" : "Im Quellenregister", "#0d8a4f", "rgba(13,138,79,.13)", "a", en ? "TransferWire already monitors this source" : "TransferWire wertet diese Quelle bereits aus") : null)),
+    zeile(en ? "Area:" : "Bereich:", x.bereich),
+    zeile(en ? "Information:" : "Informationen:", x.info),
+    zeile(en ? "Access:" : "Zugang:", x.zugang),
+    zeile(en ? "How to use:" : "So nutzen:", x.nutzung),
+    zeile(en ? "Limits:" : "Grenzen:", x.grenzen, true),
+    x.url ? h("div", { style: { marginTop: 6, fontFamily: FONT_BODY, fontSize: 12.5 } }, nkLink(x.url, en ? "Open source" : "Quelle öffnen")) : null);
+  const landKopf = g => {
+    const i = g.info;
+    return h("div", { style: { padding: "4px 2px 8px" } },
+      h("div", { style: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" } },
+        nkFlagge(g.land, 24),
+        h("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 19, fontWeight: 700, color: "var(--t1)", letterSpacing: .2 } }, nkLandName(g.land, en)),
+        i ? h("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t3)" } }, [i.zeilen + (en ? " competitions" : " Wettbewerbe"), i.kern + (en ? " core" : " Kern"), i.quellen + (en ? " sources" : " Quellen")].join(" · ")) : null,
+        i && i.url ? h("span", { style: { fontFamily: FONT_BODY, fontSize: 12 } }, nkLink(i.url, en ? "Federation" : "Verband")) : null),
+      i ? zeile(en ? "Recommended entry:" : "Empfohlener Einstieg:", i.einstieg) : null,
+      i ? zeile(en ? "Academies as starting points:" : "Akademien als Startpunkte:", i.akademien) : null,
+      i ? zeile(en ? "Note:" : "Hinweis:", i.hinweis, true) : null);
+  };
+  const landOptionen = [["", en ? "All countries" : "Alle Länder"]].concat(laender.map(l => [nkNorm(l.land), nkLandName(l.land, en)]).sort((a, b) => a[1].localeCompare(b[1], en ? "en" : "de")));
+  const anzahl = modus === "w" ? wett.length : quellen.length;
+  const gesamt = modus === "w" ? ((daten && daten.wettbewerbe) || []).length : ((daten && daten.quellen) || []).length;
+  return h("div", { className: "tw-nk", style: { display: "flex", flexDirection: "column", gap: 12, minWidth: 0 } },
+    h("div", { style: { background: "var(--karte)", border: "1.5px solid var(--linie)", borderRadius: 16, padding: 18 } },
+      h("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 26, color: "var(--t1)", lineHeight: 1.15 } }, en ? "Youth leagues & sources" : "Nachwuchsligen & Quellen"),
+      h("p", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: "var(--t2)", lineHeight: 1.55, margin: "6px 0 0", maxWidth: 820 } }, en
+        ? "Every youth competition and scouting route from our youth catalogue: 31 target countries, Germany as reference and international routes – with the data status in TransferWire, recommended entry points, academies and direct links to official sources."
+        : "Alle Nachwuchswettbewerbe und Scoutingwege aus unserem Nachwuchskatalog: 31 Zielländer, Deutschland als Referenz und internationale Wege – mit Datenstand in TransferWire, empfohlenem Einstieg, Akademien als Startpunkten und direkten Links zu den offiziellen Quellen."),
+      daten && daten.stand ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t3)", marginTop: 6 } }, (en ? "Catalogue as of " : "Katalog-Stand ") + new Date(daten.stand).toLocaleDateString(en ? "en-GB" : "de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }) + (en ? " · catalogue content in German" : "")) : null,
+      daten ? h("div", { className: "tw-nk-kpi", style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8, marginTop: 12 } },
+        kachel(kpi.bestand, (en ? "competitions in TransferWire" : "Wettbewerbe in TransferWire") + (spielerZahl ? " · " + zahlFmt(spielerZahl) + (en ? " youth players" : " Nachwuchsspieler") : ""), "#0d8a4f", "k1"),
+        kachel(kpi.vorb, en ? "with match data only (fixtures/line-ups)" : "nur mit Spieldaten (Spielplan/Aufstellungen)", "#a26a00", "k2"),
+        kachel(kpi.fehlt, en ? "no data yet – scoutable via the official sources" : "noch ohne Daten – über die offiziellen Quellen scoutbar", null, "k3"),
+        kachel(((daten && daten.quellen) || []).length, en ? "sources & scouting routes" : "Quellen & Scoutingwege", "var(--teal)", "k4")) : null,
+      daten && Array.isArray(daten.hinweise) && daten.hinweise.length ? h("div", { style: { marginTop: 12 } },
+        h("button", { type: "button", onClick: () => setHilfe(!hilfe), "aria-expanded": hilfe, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "var(--teal)", background: "none", border: "none", padding: 0 } }, (en ? "How to work with the catalogue" : "Einordnung & Arbeitsweise") + (hilfe ? " ▴" : " ▾")),
+        hilfe ? h("div", { style: { marginTop: 8, display: "grid", gap: 6 } }, daten.hinweise.map((x, i) => h("div", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12.5, lineHeight: 1.5, color: "var(--t2)" } }, h("b", { style: { color: "var(--t1)" } }, x.thema + ": "), x.text))) : null) : null),
+    !daten && !fehler ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, color: "var(--t2)", padding: "14px 4px" } }, en ? "Loading catalogue …" : "Katalog wird geladen …") : null,
+    fehler ? h("div", { style: { display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", fontFamily: FONT_BODY, fontSize: 14, color: "var(--t1)", border: "1px dashed var(--linie2)", borderRadius: 12, padding: "14px 16px" } },
+      en ? "The catalogue could not be loaded." : "Der Katalog konnte nicht geladen werden.",
+      h("button", { type: "button", onClick: () => { setDaten(null); setVersuch(versuch + 1); }, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "8px 14px", borderRadius: 10, border: "1px solid var(--teal)", background: "var(--karte)", color: "var(--teal)" } }, en ? "Try again" : "Erneut versuchen")) : null,
+    daten ? h("div", { style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, padding: "12px 14px", display: "flex", flexDirection: "column", gap: 10 } },
+      h("div", { role: "group", "aria-label": en ? "View" : "Ansicht", style: { display: "flex", gap: 6, flexWrap: "wrap" } },
+        [["w", en ? "Competitions" : "Wettbewerbe", ((daten && daten.wettbewerbe) || []).length], ["q", en ? "Sources & scouting routes" : "Quellen & Scoutingwege", ((daten && daten.quellen) || []).length]].map(([k, lab, n]) => h("button", { key: k, type: "button", "aria-pressed": modus === k, onClick: () => setModus(k), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "8px 14px", borderRadius: 10, border: "1px solid " + (modus === k ? "#087F8C" : HAIR), background: modus === k ? "#087F8C" : "var(--karte)", color: modus === k ? "#fff" : "var(--t2)" } }, lab + " (" + n + ")"))),
+      h("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" } },
+        h("input", { type: "search", value: q, onChange: e => setQ(e.target.value), placeholder: en ? "Search competition, club, age group …" : "Wettbewerb, Verein, Altersklasse suchen …", "aria-label": en ? "Search" : "Suchen", style: { flex: "1 1 220px", minWidth: 0, fontFamily: FONT_BODY, fontSize: 16, padding: "8px 12px", borderRadius: 10, border: "1px solid " + HAIR, background: "var(--karte)", color: "var(--t1)" } }),
+        sel(land, setLand, landOptionen, en ? "Country" : "Land"),
+        modus === "w" ? sel(status, setStatus, [["", en ? "Any data status" : "Jeder Datenstand"]].concat(["bestand", "auf", "vorb", "erg", "fehlt"].filter(k => k !== "auf" || kpi.auf).map(k => [k, (en ? NK_ST[k][1] : NK_ST[k][0]) + " (" + (kpi[k] || 0) + ")"])), en ? "Data status" : "Datenstand") : null,
+        modus === "w" ? sel(eig, setEig, [["", en ? "Core & selective" : "Kern & Selektiv"], ["Kern", en ? "Core only" : "Nur Kern"], ["Selektiv", en ? "Selective only" : "Nur Selektiv"], ["Ergänzung", en ? "Supplement" : "Ergänzung"]], en ? "Priority" : "Eignung") : null,
+        modus === "q" ? sel(typ, setTyp, [["", en ? "All source types" : "Alle Quellenarten"]].concat(typen.map(([t, n]) => [t, t + " (" + n + ")"])), en ? "Source type" : "Quellenart") : null,
+        gesetzt ? h("button", { type: "button", onClick: zuruecksetzen, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, padding: "8px 12px", borderRadius: 10, border: "1px solid " + HAIR, background: "var(--karte)", color: "var(--t2)" } }, en ? "Reset" : "Zurücksetzen") : null),
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t3)" } }, gesetzt ? anzahl + (en ? " of " : " von ") + gesamt : gesamt + (modus === "w" ? (en ? " competitions" : " Wettbewerbe") : (en ? " sources" : " Quellen")))) : null,
+    daten && !gruppen.length ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: "var(--t2)", padding: "16px 4px" } }, en ? "No entries for this selection." : "Keine Einträge für diese Auswahl.") : null,
+    daten ? gruppen.map(g => h("section", { key: g.land, "aria-label": nkLandName(g.land, en), style: { display: "flex", flexDirection: "column", gap: 8 } }, landKopf(g), g.xs.map(modus === "w" ? wettKarte : quelleKarte))) : null);
 }
 
 function SpielerDrawer({ x, news, schliessen }) {
@@ -8688,7 +8836,7 @@ function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScou
   const [vsZahl, setVsZahl] = useState(() => { try { return Number(window.VS_ZAHL) || 0; } catch (e) { return 0; } });
   React.useEffect(() => { const f = () => setVsZahl(Number(window.VS_ZAHL) || 0); window.addEventListener("vs-zahl", f); if (VS_NEU && !(Number(window.VS_ZAHL) || 0)) { try { const a = JSON.parse(localStorage.getItem("tw_account") || "{}"); const code = a.zugangscode || a.code; if (code && a.email) fetch("/api/verein-sucht?was=liste&gruppe=TW&limit=1&code=" + encodeURIComponent(code) + "&email=" + encodeURIComponent(a.email)).then(r => r.ok ? r.json() : null).then(d => { if (d && d.meta && Array.isArray(d.meta.gruppen)) { const n = d.meta.gruppen.reduce((s, g) => s + (g.konkret != null ? (Number(g.konkret) || 0) : (Number(g.n) || 0)), 0); if (n > 0) { window.VS_ZAHL = n; setVsZahl(n); } } }).catch(() => {}); } catch (e) {} } return () => window.removeEventListener("vs-zahl", f); }, []);
   let feedBadge = 0, gesuchtBadge = 0; try { feedBadge = (Array.isArray(news) ? news : []).filter(n => Date.now() - new Date(n.published_at || n.created_at || n.createdAt || 0).getTime() < 864e5).length; gesuchtBadge = (VS_NEU && vsZahl) ? vsZahl : (Array.isArray(needsBySport) ? needsBySport.length : 0); } catch (e) {}
-  const aktiv = k => view === k || (k === "community" && view === "moderation") || (k === "talente" && (view === "listen" || view === "suche")) || (k === "players" && (view === "spielervergleich" || view === "aehnlich"));
+  const aktiv = k => view === k || (k === "community" && view === "moderation") || (k === "talente" && (view === "listen" || view === "suche" || view === "nachwuchs")) || (k === "players" && (view === "spielervergleich" || view === "aehnlich"));
   const IK = { markt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21V12h6v9"/></svg>', community: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.2L4 21l1.8-5.4A8 8 0 1 1 21 12z"/></svg>', workspace: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 20V10"/></svg>', ki: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18 9.4l-4.2 1.8L12 16l-1.8-4.8L6 9.4l4.2-1.8z"/><path d="M5 18l.7 1.8L7.5 20.5l-1.8.7L5 23l-.7-1.8L2.5 20.5l1.8-.7z"/></svg>', pfeil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>' };
   const gruppen = [
     { k: "markt", label: en ? "Market" : "Markt", kinder: [["feed", t("tab_feed"), feedBadge], ["geruechte", "Transfers", 0], ["spieltag", en ? "Matchday" : "Spieltag", 0], ["gesucht", VS_NEU ? (LANG === "en" ? "Club seeks" : "Verein sucht") : "Vereinsbedarf", gesuchtBadge], ["ranking", "Performance", 0], ["players", t("players_tab"), 0], ["chancen", t("ch_tab"), 0]] },
@@ -12023,7 +12171,7 @@ function TransferApp({
     className: "tw-tabs"
   }, [["_h", LANG === "en" ? "Market" : "Markt"], ["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["spieltag", LANG === "en" ? "Matchday" : "Spieltag"], ["gesucht", LANG === "en" ? "Club seeks" : "Verein sucht"], ["ranking", "Performance"], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["_h", LANG === "en" ? "My work" : "Meine Arbeit"], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]].map(([k, label]) => {
     if (k === "_h") return /*#__PURE__*/React.createElement("div", { key: "h-" + label, className: "tw-navhead" }, label);
-    const active = view === k || (k === "community" && (view === "networking" || view === "moderation")) || (k === "talente" && (view === "listen" || view === "suche"));
+    const active = view === k || (k === "community" && (view === "networking" || view === "moderation")) || (k === "talente" && (view === "listen" || view === "suche" || view === "nachwuchs"));
     let badge = 0; try { if (k === "feed") badge = (Array.isArray(news) ? news : []).filter(n => Date.now() - new Date(n.published_at || n.created_at || n.createdAt || 0).getTime() < 864e5).length; else if (k === "gesucht") badge = Array.isArray(needsBySport) ? needsBySport.length : 0; } catch (e) { badge = 0; }
     const col = k === "talente" ? "var(--teal)" : k === "geruechte" ? "#b3541e" : k === "gesucht" ? TYPE.verein_sucht.color : k === "ranking" ? "#b9860b" : k === "watch" ? "#6b4fd8" : k === "players" ? "#1a6dc0" : k === "chancen" ? "#c2410c" : k === "listen" ? "#087F8C" : "var(--gold)";
     return /*#__PURE__*/React.createElement("button", {
@@ -12166,7 +12314,7 @@ function TransferApp({
   }, t("rank_all_sw")), PERF_TAGS.map(p => /*#__PURE__*/React.createElement("option", {
     key: p,
     value: p
-  }, p)))), /*#__PURE__*/React.createElement(PerfVue, { perf: perf, perfLoading: perfLoading, q: perfQ, lg: perfLg, pos: perfPos, st: perfSt, sw: perfSw, watch: watch.items, onWatchToggle: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); }, onOpen: x => setPerfKarte(x), offen: perfOpen, setOffen: setPerfOpen })), view === "suche" && /*#__PURE__*/React.createElement(ScoutSub, { view: view, setView: setView }), view === "suche" && /*#__PURE__*/React.createElement(SucheVue, { onOpen: (pid, name, team) => openPlayer(pid, name, team) }), view === "listen" && /*#__PURE__*/React.createElement(ScoutSub, { view: view, setView: setView }), view === "listen" && (!listActive ? /*#__PURE__*/React.createElement("div", null, React.createElement(ListenVue, { presets: LIST_PRESETS, myLists: myLists, setMyLists: setMyLists, onOpen: li => ladeListe(li.name, li.params, li.preset ? "" : li.id), onNew: () => setListFormOpen(true), onDelete: delMyList, stand: dbStats && dbStats.stand }), listFormOpen ? /*#__PURE__*/React.createElement("div", {
+  }, p)))), /*#__PURE__*/React.createElement(PerfVue, { perf: perf, perfLoading: perfLoading, q: perfQ, lg: perfLg, pos: perfPos, st: perfSt, sw: perfSw, watch: watch.items, onWatchToggle: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); }, onOpen: x => setPerfKarte(x), offen: perfOpen, setOffen: setPerfOpen })), view === "suche" && /*#__PURE__*/React.createElement(ScoutSub, { view: view, setView: setView }), view === "suche" && /*#__PURE__*/React.createElement(SucheVue, { onOpen: (pid, name, team) => openPlayer(pid, name, team) }), view === "nachwuchs" && React.createElement(ScoutSub, { view: view, setView: setView }), view === "nachwuchs" && React.createElement(NachwuchsKatalog, null), view === "listen" && /*#__PURE__*/React.createElement(ScoutSub, { view: view, setView: setView }), view === "listen" && (!listActive ? /*#__PURE__*/React.createElement("div", null, React.createElement(ListenVue, { presets: LIST_PRESETS, myLists: myLists, setMyLists: setMyLists, onOpen: li => ladeListe(li.name, li.params, li.preset ? "" : li.id), onNew: () => setListFormOpen(true), onDelete: delMyList, stand: dbStats && dbStats.stand }), listFormOpen ? /*#__PURE__*/React.createElement("div", {
     style: {
       background: "var(--karte)",
       border: `1px solid ${HAIR}`,
