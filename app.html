@@ -776,6 +776,14 @@ const API_URL = "/api/transfernews";
 /* ── Konto, Test-Abo & Zahlung ── */
 const AUTH_URL = "/api/tw-account";
 const CODE_URL = "/api/tw-code";
+// Punkt 92 (Auftrag 45): Anmeldedienst tw-auth - Anmeldung mit E-Mail + Passwort, Sitzungsschluessel statt Zugangscode im Browser
+const ANMELDEN_URL = "/api/tw-anmelden";
+const REGISTRIEREN_URL = "/api/tw-registrieren";
+const CHECKOUT_URL = "/api/tw-checkout-start";
+const PASSWORT_URL = "/api/tw-passwort";
+const CODE_ANFORDERN_URL = "/api/tw-code-anfordern";
+const ABMELDEN_URL = "/api/tw-abmelden";
+const SITZUNG_URL = "/api/tw-sitzung";
 const CANCEL_URL = "/api/tw-cancel";
 const WATCH_URL = "/api/tw-watch";
 const PERF_URL = "/api/tw-performance-v2";
@@ -990,7 +998,9 @@ const loadAccount = () => {
 };
 const saveAccount = a => {
   try {
-    store.setItem("tw_account", JSON.stringify(a));
+    const x = Object.assign({}, a);
+    delete x.zugangscode;   // Punkt 92: im Browser nur noch der Sitzungsschluessel (Feld code/sitzung)
+    store.setItem("tw_account", JSON.stringify(x));
   } catch (e) {}
 };
 const clearAccount = () => {
@@ -1006,6 +1016,67 @@ const postJson = (url, payload) => fetch(url, {
   body: JSON.stringify(payload),
   credentials: "omit"
 }).then(r => r.json());
+/* ── Punkt 92: Anmeldung über tw-auth ── */
+const authPost = (url, payload) => fetch(url, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(payload),
+  credentials: "omit",
+  cache: "no-store"
+}).then(r => r.json().catch(() => ({ ok: false, fehler: "server" })));
+const twHatSitzung = a => !!a && String(a.sitzung || a.code || "").indexOf("TWS-") === 0;
+const kontoAusAntwort = (k, alt) => {
+  const p = String(k.plan || "");
+  const sitz = k.sitzung || (alt && (alt.sitzung || alt.code)) || "";
+  return Object.assign({}, alt || {}, {
+    email: k.email || (alt && alt.email) || "",
+    code: sitz,
+    sitzung: sitz,
+    plan: p === "test" ? "test" : (p === "premium" || p === "enterprise") ? "premium" : "abo",
+    start: k.test_start ? (Date.parse(k.test_start) || Date.now()) : ((alt && alt.start) || Date.now()),
+    gueltig_bis: k.gueltig_bis || "",
+    name: k.name || "",
+    rolle: k.rolle || "",
+    status: k.status || "",
+    gueltig: k.gueltig !== false,
+    consent: true
+  });
+};
+const wartendLesen = em => { try { return (JSON.parse(store.getItem("tw_wartend") || "{}") || {})[em] || ""; } catch (e) { return ""; } };
+const wartendSetzen = (em, tok) => { try { const m = JSON.parse(store.getItem("tw_wartend") || "{}") || {}; if (tok) m[em] = tok; else delete m[em]; store.setItem("tw_wartend", JSON.stringify(m)); } catch (e) {} };
+const twPwFehler = (pw, pw2) => (!pw || pw.length < 8) ? t("e_pw_short") : (pw.length > 128) ? t("e_pw_long") : (pw2 !== undefined && pw !== pw2) ? t("e_pw_match") : "";
+function twAuthFehler(d) {
+  const f = d && d.fehler;
+  const rest = d && d.rest ? " " + t("e_rest").replace("{n}", d.rest) : "";
+  if (f === "falsch") return t("e_pw_bad") + rest;
+  if (f === "gesperrt") return t("e_locked").replace("{n}", (d && d.minuten) || 15);
+  if (f === "kein_passwort") return t("e_no_pw");
+  if (f === "passwort_aktiv") return t("e_pw_active");
+  if (f === "abgelaufen") return t("e_expired_acc");
+  if (f === "code_falsch") return t("e_code_bad") + rest;
+  if (f === "passwort_kurz" || f === "passwort") return t("e_pw_short");
+  if (f === "email") return t("e_email");
+  if (f === "name") return t("e_name");
+  if (f === "test_used") return t("e_test_used");
+  if (f === "zu_viele") return t("e_too_many");
+  return t("e_server");
+}
+(function () {   // abgelaufene oder ersetzte Anmeldung: Schnittstellen antworten mit 401 + X-TW-Auth -> Ereignis fuer die App
+  try {
+    const orig = window.fetch.bind(window);
+    window.fetch = function (input, init) {
+      return orig(input, init).then(function (r) {
+        try {
+          if (r && r.status === 401) {
+            const h = r.headers && r.headers.get("X-TW-Auth");
+            if (h === "abgelaufen" || h === "passwort_aktiv") window.dispatchEvent(new CustomEvent("tw-sitzung-weg", { detail: h }));
+          }
+        } catch (e) {}
+        return r;
+      });
+    };
+  } catch (e) {}
+})();
 let LANG = "de";
 /* ── TransferWire EN-Übersetzungsschicht (DE→EN zur Laufzeit) ─────────────────── */
 const EN_MAP = {
@@ -1539,7 +1610,7 @@ const I18N = {
     back: "Zurück",
     back_tw: "Zurück zu TransferWire",
     r_title: "3 Tage gratis testen",
-    r_sub: "Nach der Registrierung hast du sofort vollen Zugriff. Der Test endet nach 3 Tagen automatisch — keine Zahlungsdaten nötig.",
+    r_sub: "Lege E-Mail und Passwort fest — wir schicken dir sofort einen Bestätigungscode, danach hast du vollen Zugriff. Der Test endet nach 3 Tagen automatisch — keine Zahlungsdaten nötig.",
     f_name: "Name",
     f_name_ph: "Vor- und Nachname",
     f_email: "E-Mail",
@@ -1567,7 +1638,7 @@ const I18N = {
     trial_cta: "Jetzt Abo sichern",
     login_btn: "Anmelden",
     login_title: "Anmelden",
-    login_sub: "Melde dich mit deiner E-Mail-Adresse und deinem Zugangscode an. Den Code findest du in deiner Willkommens- bzw. Zugangscode-E-Mail.",
+    login_sub: "Melde dich mit deiner E-Mail-Adresse und deinem Passwort an.",
     menu_notify: "E-Mail-Benachrichtigungen",
     menu_digest: "Morgen-Briefing",
     no_t: "E-Mail-Benachrichtigungen",
@@ -1591,9 +1662,52 @@ const I18N = {
     vd_open: "Vereins-Dossier",
     vd_zahl: "Spieler in der Datenbank", vd_einsatz: "mit Einsatz",
     vd_einsatz: "mit Einsatz",
-    lg_resend: "Zugangscode erneut senden",
+    lg_resend: "Code erneut senden",
     lg_resent: "Wenn ein Konto mit dieser E-Mail existiert, ist der Code unterwegs \u2014 bitte auch den Spam-Ordner pr\u00fcfen.",
     lg_resend_email: "Bitte zuerst oben die E-Mail-Adresse eintragen.",
+    f_pw: "Passwort",
+    f_pw2: "Passwort wiederholen",
+    f_pw_new: "Neues Passwort",
+    pw_hint: "mindestens 8 Zeichen",
+    f_code6: "Code aus der E-Mail",
+    f_code_ph2: "Zugangscode oder 6-stelliger Code",
+    e_pw_empty: "Bitte Passwort eingeben.",
+    e_pw_short: "Das Passwort braucht mindestens 8 Zeichen.",
+    e_pw_long: "Das Passwort darf höchstens 128 Zeichen haben.",
+    e_pw_match: "Die beiden Passwörter stimmen nicht überein.",
+    e_pw_bad: "E-Mail-Adresse oder Passwort falsch.",
+    e_rest: "Noch {n} Versuche bis zur kurzen Sperre.",
+    e_locked: "Zu viele Fehlversuche — bitte in {n} Minuten erneut versuchen.",
+    e_no_pw: "Für dieses Konto ist noch kein Passwort festgelegt. Melde dich einmalig mit deinem Zugangscode an und lege dabei dein Passwort fest.",
+    e_pw_active: "Für dieses Konto ist bereits ein Passwort aktiv — bitte mit E-Mail und Passwort anmelden.",
+    e_expired_acc: "Dieses Konto ist nicht mehr aktiv. Mit einem Abo geht es weiter.",
+    e_too_many: "Zu viele Anfragen — bitte kurz warten und erneut versuchen.",
+    e_code6: "Bitte den 6-stelligen Code aus der E-Mail eingeben.",
+    lg_first: "Erste Anmeldung mit Zugangscode",
+    lg_first_sub: "Nach dem Kauf oder als bisheriger Kunde meldest du dich einmalig mit E-Mail und Zugangscode an und legst dabei dein Passwort fest. Danach genügen E-Mail und Passwort.",
+    lg_forgot: "Passwort vergessen?",
+    lg_forgot_title: "Passwort vergessen",
+    lg_forgot_sub: "Wir schicken dir einen Code per E-Mail. Damit legst du ein neues Passwort fest; alle bisherigen Anmeldungen werden beendet.",
+    lg_forgot_btn: "Code senden",
+    lg_forgot_sent: "Wenn ein Konto mit dieser E-Mail existiert, ist der Code unterwegs (15 Minuten gültig) — bitte auch den Spam-Ordner prüfen.",
+    lg_set_btn: "Neues Passwort speichern",
+    lg_back_pw: "Zur Anmeldung mit Passwort",
+    lg_setpw_info: "Lege jetzt dein Passwort fest — danach meldest du dich nur noch mit E-Mail und Passwort an.",
+    lg_setpw_title: "Passwort festlegen",
+    lg_setpw_sub: "TransferWire-Anmeldung jetzt mit Passwort: Lege einmalig ein Passwort fest. Dein bisheriger Zugangscode allein öffnet danach nichts mehr.",
+    lg_setpw_btn: "Passwort speichern und weiter",
+    lg_setpw_konto: "Konto: ",
+    lg_check: "Anmeldung wird geprüft …",
+    lg_relogin: "Deine Anmeldung ist abgelaufen — bitte melde dich erneut an.",
+    lg_pw_elsewhere: "Für dein Konto wurde inzwischen ein Passwort festgelegt — bitte melde dich mit E-Mail und Passwort an.",
+    r_code_title: "E-Mail bestätigen",
+    r_code_sub: "Wir haben dir einen 6-stelligen Bestätigungscode an {email} geschickt. Gib ihn hier ein — danach bist du drin.",
+    r_code_btn: "Bestätigen und starten",
+    r_code_resend: "Code erneut senden",
+    r_code_resent: "Ein neuer Code ist unterwegs — bitte auch den Spam-Ordner prüfen.",
+    s_pw_note: "Mit diesem Passwort meldest du dich nach der Zahlung an. Die erste Anmeldung bestätigst du einmalig mit dem Zugangscode aus der E-Mail.",
+    s_msg_angemeldet: "Weiter geht es im sicheren Stripe-Fenster. Nach erfolgreicher Zahlung wird dein Konto automatisch freigeschaltet — lade danach einfach die Seite neu. Du meldest dich weiter mit E-Mail und Passwort an.",
+    s_konto_besteht: "Für diese E-Mail gibt es schon ein Konto mit Passwort. Nach der Zahlung meldest du dich wie gewohnt mit E-Mail und Passwort an.",
     share_btn: "Teilen",
     share_copied: "Link kopiert!",
     li_tab: "Listen",
@@ -1751,8 +1865,8 @@ const I18N = {
     s_sofort: "Ich verlange die sofortige Bereitstellung des Dienstes nach Freischaltung und weiß, dass mein Widerrufsrecht damit erlischt.",
     s_pay: "Jetzt zahlungspflichtig abonnieren — 49 €/Monat",
     s_pay_note: "Karte, Apple Pay, Google Pay oder PayPal · sichere Zahlung über Stripe · automatische monatliche Abbuchung · monatlich kündbar",
-    s_msg: "Weiter geht es im sicheren Stripe-Fenster. Nach erfolgreicher Zahlung erhältst du deinen Zugangscode per E-Mail und kannst dich unten mit E-Mail + Code freischalten.",
-    s_code_title: "Zugangscode bereits erhalten?",
+    s_msg: "Weiter geht es im sicheren Stripe-Fenster. Nach erfolgreicher Zahlung erhältst du deinen Zugangscode per E-Mail. Damit meldest du dich einmalig an (unten oder unter „Anmelden“) — danach nur noch mit E-Mail und Passwort.",
+    s_code_title: "Zugangscode erhalten? Erste Anmeldung",
     f_code: "Zugangscode",
     f_code_ph: "z. B. TW-XXXX",
     s_code_btn: "Freischalten",
@@ -1851,7 +1965,7 @@ const I18N = {
     back: "Back",
     back_tw: "Back to TransferWire",
     r_title: "Try 3 days for free",
-    r_sub: "After signing up you get full access immediately. The trial ends automatically after 3 days — no payment details required.",
+    r_sub: "Choose your e-mail and password — we send you a confirmation code right away, then you have full access. The trial ends automatically after 3 days — no payment details required.",
     f_name: "Name",
     f_name_ph: "First and last name",
     f_email: "E-mail",
@@ -1879,7 +1993,7 @@ const I18N = {
     trial_cta: "Get the subscription",
     login_btn: "Log in",
     login_title: "Log in",
-    login_sub: "Sign in with your e-mail address and your access code. You can find the code in your welcome or access-code e-mail.",
+    login_sub: "Sign in with your e-mail address and your password.",
     menu_notify: "E-mail notifications",
     menu_digest: "Morning briefing",
     no_t: "E-mail notifications",
@@ -1903,9 +2017,52 @@ const I18N = {
     vd_open: "Club dossier",
     vd_zahl: "players in the database", vd_einsatz: "with minutes played",
     vd_einsatz: "with minutes",
-    lg_resend: "Resend access code",
+    lg_resend: "Resend code",
     lg_resent: "If an account with this email exists, the code is on its way \u2014 please also check your spam folder.",
     lg_resend_email: "Please enter your email address above first.",
+    f_pw: "Password",
+    f_pw2: "Repeat password",
+    f_pw_new: "New password",
+    pw_hint: "at least 8 characters",
+    f_code6: "Code from the e-mail",
+    f_code_ph2: "Access code or 6-digit code",
+    e_pw_empty: "Please enter your password.",
+    e_pw_short: "The password needs at least 8 characters.",
+    e_pw_long: "The password may have at most 128 characters.",
+    e_pw_match: "The two passwords do not match.",
+    e_pw_bad: "E-mail address or password incorrect.",
+    e_rest: "{n} attempts left before a short lock.",
+    e_locked: "Too many failed attempts — please try again in {n} minutes.",
+    e_no_pw: "No password has been set for this account yet. Sign in once with your access code and set your password.",
+    e_pw_active: "A password is already active for this account — please sign in with e-mail and password.",
+    e_expired_acc: "This account is no longer active. Subscribe to continue.",
+    e_too_many: "Too many requests — please wait a moment and try again.",
+    e_code6: "Please enter the 6-digit code from the e-mail.",
+    lg_first: "First sign-in with access code",
+    lg_first_sub: "After purchase, or as an existing customer, you sign in once with e-mail and access code and set your password. Afterwards e-mail and password are enough.",
+    lg_forgot: "Forgot password?",
+    lg_forgot_title: "Forgot password",
+    lg_forgot_sub: "We send you a code by e-mail. Use it to set a new password; all previous sign-ins are ended.",
+    lg_forgot_btn: "Send code",
+    lg_forgot_sent: "If an account with this e-mail exists, the code is on its way (valid for 15 minutes) — please also check your spam folder.",
+    lg_set_btn: "Save new password",
+    lg_back_pw: "Back to password sign-in",
+    lg_setpw_info: "Set your password now — afterwards you only sign in with e-mail and password.",
+    lg_setpw_title: "Set your password",
+    lg_setpw_sub: "TransferWire now signs you in with a password: set it once. Your previous access code alone will no longer open anything afterwards.",
+    lg_setpw_btn: "Save password and continue",
+    lg_setpw_konto: "Account: ",
+    lg_check: "Checking your sign-in …",
+    lg_relogin: "Your sign-in has expired — please sign in again.",
+    lg_pw_elsewhere: "A password has been set for your account in the meantime — please sign in with e-mail and password.",
+    r_code_title: "Confirm your e-mail",
+    r_code_sub: "We have sent a 6-digit confirmation code to {email}. Enter it here — then you are in.",
+    r_code_btn: "Confirm and start",
+    r_code_resend: "Resend code",
+    r_code_resent: "A new code is on its way — please also check your spam folder.",
+    s_pw_note: "You will use this password to sign in after payment. You confirm the first sign-in once with the access code from the e-mail.",
+    s_msg_angemeldet: "Continue in the secure Stripe window. After successful payment your account is activated automatically — just reload the page afterwards. You keep signing in with e-mail and password.",
+    s_konto_besteht: "There is already an account with a password for this e-mail. After payment you sign in as usual with e-mail and password.",
     share_btn: "Share",
     share_copied: "Link copied!",
     li_tab: "Lists",
@@ -2063,8 +2220,8 @@ const I18N = {
     s_sofort: "I request immediate provision of the service after activation and acknowledge that my right of withdrawal expires once the service has been provided.",
     s_pay: "Subscribe now — €49/month (obligation to pay)",
     s_pay_note: "Card, Apple Pay, Google Pay or PayPal · secure payment via Stripe · automatic monthly billing · cancel monthly",
-    s_msg: "Continue in the secure Stripe window. After successful payment you will receive your access code by e-mail and can activate below with e-mail + code.",
-    s_code_title: "Already received an access code?",
+    s_msg: "Continue in the secure Stripe window. After successful payment you will receive your access code by e-mail. Use it once to sign in (below or under “Log in”) — afterwards you only need your e-mail and password.",
+    s_code_title: "Received your access code? First sign-in",
     f_code: "Access code",
     f_code_ph: "e.g. TW-XXXX",
     s_code_btn: "Activate",
@@ -6421,7 +6578,10 @@ function FInput({
   value,
   onChange,
   type = "text",
-  placeholder = ""
+  placeholder = "",
+  auto,
+  name,
+  onEnter
 }) {
   return /*#__PURE__*/React.createElement("label", {
     style: {
@@ -6441,6 +6601,9 @@ function FInput({
     type: type,
     value: value,
     placeholder: placeholder,
+    autoComplete: auto,
+    name: name,
+    onKeyDown: onEnter ? (e => { if (e.key === "Enter") { e.preventDefault(); onEnter(); } }) : undefined,
     onChange: e => onChange(e.target.value),
     style: {
       width: "100%",
@@ -6455,6 +6618,15 @@ function FInput({
       outline: "none"
     }
   }));
+}
+function TwFehler({ text }) {
+  return text ? React.createElement("div", { role: "alert", style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#c22", marginBottom: 12, lineHeight: 1.5 } }, text) : null;
+}
+function TwHinweis({ text, gruen }) {
+  return text ? React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: gruen ? "#166a3f" : INK, background: gruen ? "#e9f7ef" : "var(--karte2)", border: "1px solid " + (gruen ? "#bfe6cf" : HAIR), borderRadius: 10, padding: "11px 13px", marginBottom: 12, lineHeight: 1.55 } }, text) : null;
+}
+function TwLinkBtn({ onClick, children }) {
+  return React.createElement("button", { type: "button", onClick: onClick, style: { display: "block", width: "100%", marginTop: 12, background: "none", border: "none", cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--gold-text)", textDecoration: "underline" } }, children);
 }
 function FCheck({
   checked,
@@ -6582,7 +6754,7 @@ const PRICING_I18N = {
   de: {
     kicker: "PREISE",
     h2: "W\u00e4hle deinen Zugang",
-    sub: "Monatlich k\u00fcndbar. Zugangscode kommt nach der Zahlung automatisch per E-Mail. Der Test endet von selbst \u2014 ganz ohne Zahlungsdaten.",
+    sub: "Monatlich k\u00fcndbar. Nach der Zahlung best\u00e4tigst du die erste Anmeldung einmalig mit dem Zugangscode aus der E-Mail, danach meldest du dich mit E-Mail und Passwort an. Der Test endet von selbst \u2014 ganz ohne Zahlungsdaten.",
     per: "/Monat",
     days: "3 Tage",
     badge_test: "3 TAGE GRATIS",
@@ -6613,7 +6785,7 @@ const PRICING_I18N = {
   en: {
     kicker: "PRICING",
     h2: "Choose your access",
-    sub: "Cancel monthly. Your access code arrives by email right after payment. The trial ends automatically \u2014 no payment details required.",
+    sub: "Cancel monthly. After payment you confirm your first sign-in once with the access code from the email, then you sign in with email and password. The trial ends automatically \u2014 no payment details required.",
     per: "/month",
     days: "3 days",
     badge_test: "3 DAYS FREE",
@@ -6702,11 +6874,11 @@ const LP2 = {
     faq_kick: "FAQ",
     faq_h2: "H\u00e4ufige Fragen",
     faq: [
-      { q: "Wie funktioniert der 3-Tage-Test?", a: "Einfach mit deiner E-Mail-Adresse registrieren \u2014 ohne Zahlungsdaten. Du bekommst sofort deinen Zugangscode per E-Mail und vollen Standard-Zugriff. Nach drei Tagen endet der Test automatisch; es entsteht keine Verpflichtung." },
+      { q: "Wie funktioniert der 3-Tage-Test?", a: "Einfach mit E-Mail-Adresse und Passwort registrieren \u2014 ohne Zahlungsdaten. Du bekommst sofort einen Best\u00e4tigungscode per E-Mail; nach der Eingabe hast du vollen Standard-Zugriff. Nach drei Tagen endet der Test automatisch; es entsteht keine Verpflichtung." },
       { q: "Was ist der Unterschied zwischen Standard und Premium?", a: "Standard (49\u00a0\u20ac/Monat) enth\u00e4lt die komplette Plattform: Newsfeed, \u201eVerein sucht\u201c, Spieler-Datenbank, Ranking, Listen, Merkliste, Alarme und KI-Scout. Premium (99\u00a0\u20ac/Monat) schaltet zus\u00e4tzlich die Vereins-Kontakte frei \u2014 Sportdirektoren und Gesch\u00e4ftsf\u00fchrer mit Ansprechpartner-Funktion in jedem Dossier." },
       { q: "Kann ich monatlich k\u00fcndigen?", a: "Ja. Beide Abos laufen monatlich und sind jederzeit \u00fcber das Stripe-Kundenportal k\u00fcndbar \u2014 der Link steht auf der Website und in jeder Rechnung. Nach der K\u00fcndigung endet der Zugang zum n\u00e4chsten Abrechnungstermin." },
       { q: "Woher kommen die Daten?", a: "Aus \u00fcber 1.200 \u00f6ffentlichen Quellen, offiziellen Vereinskan\u00e4len und Sportdaten-Partnern, kombiniert mit KI-Aufbereitung. Jede Meldung tr\u00e4gt eine Zuverl\u00e4ssigkeits-Einstufung und einen Quellenlink \u2014 du siehst immer, worauf sich eine Information st\u00fctzt." },
-      { q: "Wie schnell habe ich nach dem Kauf Zugriff?", a: "Sofort: Nach der Zahlung \u00fcber Stripe erzeugt das System automatisch deinen pers\u00f6nlichen Zugangscode und schickt ihn per E-Mail. Einloggen, fertig. Die Rechnung kommt separat von Stripe." }
+      { q: "Wie schnell habe ich nach dem Kauf Zugriff?", a: "Sofort: Nach der Zahlung \u00fcber Stripe erzeugt das System automatisch deinen pers\u00f6nlichen Zugangscode und schickt ihn per E-Mail. Damit best\u00e4tigst du einmalig die erste Anmeldung, danach meldest du dich mit E-Mail und Passwort an. Die Rechnung kommt separat von Stripe." }
     ],
     cta_h2: "Bereit f\u00fcr den vollen \u00dcberblick?",
     cta_sub: "Teste TransferWire 3 Tage kostenlos \u2014 ohne Zahlungsdaten, endet automatisch.",
@@ -6730,11 +6902,11 @@ const LP2 = {
     faq_kick: "FAQ",
     faq_h2: "Frequently asked questions",
     faq: [
-      { q: "How does the 3-day trial work?", a: "Register with your email address \u2014 no payment details. You instantly receive your access code by email plus full Standard access. After three days the trial ends automatically; there is no obligation." },
+      { q: "How does the 3-day trial work?", a: "Register with your email address and a password \u2014 no payment details. You instantly receive a confirmation code by email; once entered you have full Standard access. After three days the trial ends automatically; there is no obligation." },
       { q: "What is the difference between Standard and Premium?", a: "Standard (\u20ac49/month) includes the full platform: news feed, \u201cClub seeks\u201d, player database, ranking, lists, watchlist, alerts and the AI scout. Premium (\u20ac99/month) additionally unlocks club contacts \u2014 sporting directors and CEOs, with a contact button in every dossier." },
       { q: "Can I cancel monthly?", a: "Yes. Both plans run monthly and can be cancelled anytime via the Stripe customer portal \u2014 the link is on the website and in every invoice. After cancelling, access ends at the next billing date." },
       { q: "Where does the data come from?", a: "From 1,200+ public sources, official club channels and sports data partners, combined with AI processing. Every report carries a reliability rating and a source link \u2014 you always see what an item is based on." },
-      { q: "How fast do I get access after purchase?", a: "Instantly: after payment via Stripe the system automatically generates your personal access code and emails it to you. Log in, done. The invoice arrives separately from Stripe." }
+      { q: "How fast do I get access after purchase?", a: "Instantly: after payment via Stripe the system automatically generates your personal access code and emails it to you. You use it once to confirm your first sign-in; afterwards you sign in with email and password. The invoice arrives separately from Stripe." }
     ],
     cta_h2: "Ready for the full picture?",
     cta_sub: "Try TransferWire free for 3 days \u2014 no payment details, ends automatically.",
@@ -7199,57 +7371,99 @@ function RegisterForm({
 }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [pw, setPw] = useState("");
+  const [pw2, setPw2] = useState("");
   const [rolle, setRolle] = useState("agent");
   const [consent, setConsent] = useState(false);
   const [legalOk, setLegalOk] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+  const [schritt, setSchritt] = useState(1);
+  const [code, setCode] = useState("");
+  const [info, setInfo] = useState("");
+  const [brauchtPw, setBrauchtPw] = useState(false);
   const roleTxt = {
     agent: t("role_agent"),
     scout: t("role_scout"),
     club: t("role_club"),
     other: t("role_other")
   };
+  const em = () => email.toLowerCase().trim();
   const submit = () => {
     setErr("");
-    const em = email.toLowerCase().trim();
     if (!name.trim()) return setErr(t("e_name"));
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) return setErr(t("e_email"));
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em())) return setErr(t("e_email"));
+    const f = twPwFehler(pw, pw2);
+    if (f) return setErr(f);
     if (!consent) return setErr(t("e_consent"));
     if (!legalOk) return setErr(t("e_legal"));
     setBusy(true);
     sendPing("trial_start");
-    postJson(AUTH_URL, {
-      email: em,
+    authPost(REGISTRIEREN_URL, {
+      email: em(),
       name: name.trim(),
+      passwort: pw,
       rolle: roleTxt[rolle] || rolle,
       consent_marketing: true,
-      plan: "test",
-      status: "test",
-      test_start: new Date().toISOString()
+      lang: LANG
     }).then(d => {
-      if (d && d.ok) {
-        onDone({
-          email: em,
-          name: name.trim(),
-          rolle: roleTxt[rolle] || rolle,
-          plan: "test",
-          start: Date.now(),
-          consent: true,
-          code: d.code || ""
-        });
-      } else if (d && d.reason === "test_used") {
-        setErr(t("e_test_used"));
-        setBusy(false);
-      } else {
-        setErr(t("e_server"));
-        setBusy(false);
-      }
-    }).catch(() => {
-      setErr(t("e_conn"));
       setBusy(false);
+      if (d && d.ok) {
+        wartendSetzen(em(), d.wartend || "");
+        setSchritt(2);
+        setInfo(t("r_code_sub").replace("{email}", em()));
+        return;
+      }
+      setErr(twAuthFehler(d));
+    }).catch(() => {
+      setBusy(false);
+      setErr(t("e_conn"));
     });
   };
+  const bestaetigen = (mitPw) => {
+    setErr("");
+    if (!/^\d{6}$/.test(code.trim())) return setErr(t("e_code6"));
+    const p = { email: em(), code: code.trim(), wartend: wartendLesen(em()) };
+    if (mitPw || brauchtPw) {
+      const f = twPwFehler(pw, brauchtPw ? pw2 : undefined);
+      if (f) { setBrauchtPw(true); return setErr(f); }
+      p.neues_passwort = pw;
+    }
+    setBusy(true);
+    authPost(ANMELDEN_URL, p).then(d => {
+      setBusy(false);
+      if (d && d.ok && d.konto && d.konto.sitzung) {
+        wartendSetzen(em(), "");
+        onDone(kontoAusAntwort(d.konto));
+        return;
+      }
+      if (d && d.passwort_festlegen) {
+        if (!mitPw && !twPwFehler(pw)) return bestaetigen(true);   // Browser ohne gespeicherten Schluessel: Passwort aus Schritt 1 verwenden
+        setBrauchtPw(true);
+        setInfo(t("lg_setpw_info"));
+        return;
+      }
+      setErr(twAuthFehler(d));
+    }).catch(() => {
+      setBusy(false);
+      setErr(t("e_conn"));
+    });
+  };
+  const nochmal = () => {
+    authPost(CODE_ANFORDERN_URL, { email: em(), zweck: "registrierung", lang: LANG }).catch(() => {});
+    setInfo(t("r_code_resent"));
+  };
+  if (schritt === 2) return /*#__PURE__*/React.createElement(FormShell, {
+    title: t("r_code_title"),
+    sub: "",
+    onBack: () => { setSchritt(1); setErr(""); setInfo(""); setCode(""); }
+  }, React.createElement(TwHinweis, { text: info, gruen: true }),
+    React.createElement(FInput, { label: t("f_code6"), value: code, onChange: setCode, placeholder: "123456", auto: "one-time-code", name: "code", onEnter: () => bestaetigen(false) }),
+    brauchtPw ? React.createElement(FInput, { label: t("f_pw"), value: pw, onChange: setPw, type: "password", placeholder: t("pw_hint"), auto: "new-password", name: "new-password" }) : null,
+    brauchtPw ? React.createElement(FInput, { label: t("f_pw2"), value: pw2, onChange: setPw2, type: "password", auto: "new-password", name: "new-password-2" }) : null,
+    React.createElement(TwFehler, { text: err }),
+    React.createElement(PBtn, { onClick: busy ? undefined : () => bestaetigen(false), full: true }, busy ? t("s_code_busy") : t("r_code_btn")),
+    React.createElement(TwLinkBtn, { onClick: nochmal }, t("r_code_resend")));
   const link = (page, label) => /*#__PURE__*/React.createElement("button", {
     onClick: e => {
       e.preventDefault();
@@ -7273,13 +7487,31 @@ function RegisterForm({
     label: t("f_name"),
     value: name,
     onChange: setName,
-    placeholder: t("f_name_ph")
+    placeholder: t("f_name_ph"),
+    auto: "name"
   }), /*#__PURE__*/React.createElement(FInput, {
     label: t("f_email"),
     value: email,
     onChange: setEmail,
     type: "email",
-    placeholder: "name@mail.com"
+    placeholder: "name@mail.com",
+    auto: "username",
+    name: "email"
+  }), /*#__PURE__*/React.createElement(FInput, {
+    label: t("f_pw"),
+    value: pw,
+    onChange: setPw,
+    type: "password",
+    placeholder: t("pw_hint"),
+    auto: "new-password",
+    name: "new-password"
+  }), /*#__PURE__*/React.createElement(FInput, {
+    label: t("f_pw2"),
+    value: pw2,
+    onChange: setPw2,
+    type: "password",
+    auto: "new-password",
+    name: "new-password-2"
   }), /*#__PURE__*/React.createElement("label", {
     style: {
       display: "block",
@@ -7321,121 +7553,161 @@ function RegisterForm({
   }, t("r_consent"), /*#__PURE__*/React.createElement("strong", null, t("r_consent_b"))), /*#__PURE__*/React.createElement(FCheck, {
     checked: legalOk,
     onChange: setLegalOk
-  }, t("legal_pre"), link("agb", t("terms_link")), t("legal_and"), link("datenschutz", t("privacy_link")), t("legal_post")), err && /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 12.5,
-      color: "#c22",
-      marginBottom: 12
-    }
-  }, err), /*#__PURE__*/React.createElement(PBtn, {
+  }, t("legal_pre"), link("agb", t("terms_link")), t("legal_and"), link("datenschutz", t("privacy_link")), t("legal_post")), React.createElement(TwFehler, { text: err }), /*#__PURE__*/React.createElement(PBtn, {
     onClick: busy ? undefined : submit,
     full: true
   }, busy ? t("r_busy") : t("r_btn")));
 }
 function LoginPage({
   onDone,
-  onBack
+  onBack,
+  presetEmail,
+  notice
 }) {
-  const [email, setEmail] = useState("");
+  const [modus, setModus] = useState("passwort");
+  const [email, setEmail] = useState(presetEmail || "");
+  const [pw, setPw] = useState("");
   const [code, setCode] = useState("");
-  const [resent, setResent] = useState(false);
+  const [neu, setNeu] = useState("");
+  const [neu2, setNeu2] = useState("");
+  const [brauchtPw, setBrauchtPw] = useState(false);
+  const [gesendet, setGesendet] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
-  const submit = () => {
-    setErr("");
-    const em = email.toLowerCase().trim();
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) return setErr(t("e_code_email"));
-    if (!code.trim()) return setErr(t("e_code"));
-    setBusy(true);
-    fetch(CODE_URL + "?code=" + encodeURIComponent(code.trim()) + "&email=" + encodeURIComponent(em), {
-      credentials: "omit",
-      cache: "no-store"
-    }).then(r => r.json()).then(raw => {
-      setBusy(false);
-      const d = normResp(raw);
-      if (d && d.valid) {
-        const start = d.test_start ? Date.parse(d.test_start) || Date.now() : Date.now();
-        onDone({
-          email: em,
-          code: code.trim(),
-          plan: d.plan === "test" ? "test" : (d.plan === "premium" || d.plan === "enterprise") ? "premium" : "abo",
-          start: start,
-          gueltig_bis: d.gueltig_bis || "",
-          name: d.name || "",
-          rolle: d.rolle || "",
-          consent: true
-        });
-      } else setErr(t("e_code_bad"));
-    }).catch(() => {
-      setBusy(false);
-      setErr(t("e_conn"));
-    });
+  const [info, setInfo] = useState(notice || "");
+  const em = () => email.toLowerCase().trim();
+  const mailOk = () => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em());
+  const wechsel = (m, hinweis) => {
+    setModus(m); setErr(""); setInfo(hinweis || ""); setBrauchtPw(false); setNeu(""); setNeu2(""); setGesendet(false); setCode("");
   };
-  return /*#__PURE__*/React.createElement(FormShell, {
-    title: t("login_title"),
-    sub: t("login_sub"),
-    onBack: onBack
-  }, /*#__PURE__*/React.createElement(FInput, {
-    label: t("f_email"),
-    value: email,
-    onChange: setEmail,
-    type: "email",
-    placeholder: "name@mail.com"
-  }), /*#__PURE__*/React.createElement(FInput, {
-    label: t("f_code"),
-    value: code,
-    onChange: setCode,
-    placeholder: t("f_code_ph")
-  }), err && /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 12.5,
-      color: "#c22",
-      marginBottom: 12
+  const fertig = d => {
+    setBusy(false);
+    if (d && d.ok && d.konto && d.konto.sitzung) { wartendSetzen(em(), ""); onDone(kontoAusAntwort(d.konto)); return true; }
+    return false;
+  };
+  const fehler = () => { setBusy(false); setErr(t("e_conn")); };
+  const anmelden = () => {
+    setErr(""); setInfo("");
+    if (!mailOk()) return setErr(t("e_code_email"));
+    if (!pw) return setErr(t("e_pw_empty"));
+    setBusy(true);
+    authPost(ANMELDEN_URL, { email: em(), passwort: pw }).then(d => {
+      if (fertig(d)) return;
+      if (d && d.fehler === "kein_passwort") return wechsel("code", t("e_no_pw"));
+      setErr(twAuthFehler(d));
+    }).catch(fehler);
+  };
+  const mitCode = () => {
+    setErr("");
+    if (!mailOk()) return setErr(t("e_code_email"));
+    if (!code.trim()) return setErr(t("e_code"));
+    const p = { email: em(), code: code.trim(), wartend: wartendLesen(em()) };
+    if (brauchtPw) { const f = twPwFehler(neu, neu2); if (f) return setErr(f); p.neues_passwort = neu; }
+    setBusy(true);
+    authPost(ANMELDEN_URL, p).then(d => {
+      if (fertig(d)) return;
+      if (d && d.passwort_festlegen) { setBrauchtPw(true); setInfo(t("lg_setpw_info")); return; }
+      if (d && d.fehler === "passwort_aktiv") return wechsel("passwort", t("e_pw_active"));
+      setErr(twAuthFehler(d));
+    }).catch(fehler);
+  };
+  const codeSenden = () => {
+    setErr("");
+    if (!mailOk()) return setErr(t("lg_resend_email"));
+    if (modus === "vergessen") {
+      setBusy(true);
+      authPost(CODE_ANFORDERN_URL, { email: em(), zweck: "passwort", lang: LANG }).then(() => { setBusy(false); setGesendet(true); setInfo(t("lg_forgot_sent")); }).catch(fehler);
+      return;
     }
-  }, err), /*#__PURE__*/React.createElement(PBtn, {
-    onClick: busy ? undefined : submit,
-    full: true
-  }, busy ? t("s_code_busy") : t("login_btn")), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      const em = email.toLowerCase().trim();
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) {
-        setErr(t("lg_resend_email"));
-        return;
-      }
-      setErr("");
-      fetch(RESEND_URL + "?email=" + encodeURIComponent(em), {
-        credentials: "omit",
-        cache: "no-store"
-      }).catch(() => {});
-      setResent(true);
-    },
-    style: {
-      display: "block",
-      width: "100%",
-      marginTop: 12,
-      background: "none",
-      border: "none",
-      cursor: "pointer",
-      fontFamily: FONT_BODY,
-      fontSize: 12.5,
-      color: "var(--gold-text)",
-      textDecoration: "underline"
-    }
-  }, t("lg_resend")), resent && /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 12,
-      color: "#4a4a48",
-      lineHeight: 1.55,
-      margin: "8px 0 0",
-      textAlign: "center"
-    }
-  }, t("lg_resent")));
+    authPost(CODE_ANFORDERN_URL, { email: em(), zweck: "registrierung", lang: LANG }).catch(() => {});
+    fetch(RESEND_URL + "?email=" + encodeURIComponent(em()), { credentials: "omit", cache: "no-store" }).catch(() => {});
+    setInfo(t("lg_resent"));
+  };
+  const neuesPasswort = () => {
+    setErr("");
+    if (!mailOk()) return setErr(t("e_code_email"));
+    if (!/^\d{6}$/.test(code.trim())) return setErr(t("e_code6"));
+    const f = twPwFehler(neu, neu2);
+    if (f) return setErr(f);
+    setBusy(true);
+    authPost(PASSWORT_URL, { email: em(), einmalcode: code.trim(), neues_passwort: neu }).then(d => {
+      if (fertig(d)) return;
+      setErr(twAuthFehler(d));
+    }).catch(fehler);
+  };
+  const emailFeld = React.createElement(FInput, { label: t("f_email"), value: email, onChange: setEmail, type: "email", placeholder: "name@mail.com", auto: "username", name: "email" });
+  const neuFelder = onEnter => [
+    React.createElement(FInput, { key: "n1", label: t("f_pw_new"), value: neu, onChange: setNeu, type: "password", placeholder: t("pw_hint"), auto: "new-password", name: "new-password" }),
+    React.createElement(FInput, { key: "n2", label: t("f_pw2"), value: neu2, onChange: setNeu2, type: "password", auto: "new-password", name: "new-password-2", onEnter: onEnter })
+  ];
+  let titel = t("login_title"), sub = t("login_sub"), inhalt;
+  if (modus === "passwort") {
+    inhalt = [emailFeld,
+      React.createElement(FInput, { key: "pw", label: t("f_pw"), value: pw, onChange: setPw, type: "password", auto: "current-password", name: "password", onEnter: anmelden }),
+      React.createElement(TwFehler, { key: "e", text: err }),
+      React.createElement(PBtn, { key: "b", onClick: busy ? undefined : anmelden, full: true }, busy ? t("s_code_busy") : t("login_btn")),
+      React.createElement(TwLinkBtn, { key: "l1", onClick: () => wechsel("vergessen") }, t("lg_forgot")),
+      React.createElement(TwLinkBtn, { key: "l2", onClick: () => wechsel("code") }, t("lg_first"))];
+  } else if (modus === "code") {
+    titel = t("lg_first"); sub = t("lg_first_sub");
+    inhalt = [emailFeld,
+      React.createElement(FInput, { key: "c", label: t("f_code"), value: code, onChange: setCode, placeholder: t("f_code_ph2"), auto: "one-time-code", name: "code", onEnter: brauchtPw ? undefined : mitCode })]
+      .concat(brauchtPw ? neuFelder(mitCode) : [])
+      .concat([
+        React.createElement(TwFehler, { key: "e", text: err }),
+        React.createElement(PBtn, { key: "b", onClick: busy ? undefined : mitCode, full: true }, busy ? t("s_code_busy") : (brauchtPw ? t("lg_setpw_btn") : t("login_btn"))),
+        React.createElement(TwLinkBtn, { key: "l1", onClick: codeSenden }, t("lg_resend")),
+        React.createElement(TwLinkBtn, { key: "l2", onClick: () => wechsel("passwort") }, t("lg_back_pw"))]);
+  } else {
+    titel = t("lg_forgot_title"); sub = t("lg_forgot_sub");
+    inhalt = [emailFeld];
+    if (gesendet) inhalt = inhalt.concat([React.createElement(FInput, { key: "c", label: t("f_code6"), value: code, onChange: setCode, placeholder: "123456", auto: "one-time-code", name: "code" })], neuFelder(neuesPasswort));
+    inhalt = inhalt.concat([
+      React.createElement(TwFehler, { key: "e", text: err }),
+      gesendet
+        ? React.createElement(PBtn, { key: "b", onClick: busy ? undefined : neuesPasswort, full: true }, busy ? t("s_code_busy") : t("lg_set_btn"))
+        : React.createElement(PBtn, { key: "b", onClick: busy ? undefined : codeSenden, full: true }, busy ? t("s_code_busy") : t("lg_forgot_btn")),
+      gesendet ? React.createElement(TwLinkBtn, { key: "l0", onClick: codeSenden }, t("lg_resend")) : null,
+      React.createElement(TwLinkBtn, { key: "l1", onClick: () => wechsel("passwort") }, t("lg_back_pw"))]);
+  }
+  return React.createElement(FormShell, { title: titel, sub: sub, onBack: onBack }, React.createElement(TwHinweis, { text: info }), inhalt);
+}
+function PasswortFestlegenPage({
+  account,
+  onDone,
+  onLogin,
+  onBack
+}) {
+  const [neu, setNeu] = useState("");
+  const [neu2, setNeu2] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const email = (account && account.email) || "";
+  const code = (account && (account.zugangscode || account.code)) || "";
+  const speichern = () => {
+    setErr("");
+    const f = twPwFehler(neu, neu2);
+    if (f) return setErr(f);
+    setBusy(true);
+    authPost(ANMELDEN_URL, { email: email, code: code, neues_passwort: neu }).then(d => {
+      setBusy(false);
+      if (d && d.ok && d.konto && d.konto.sitzung) { onDone(kontoAusAntwort(d.konto, account)); return; }
+      if (d && d.fehler === "passwort_aktiv") return onLogin(email, t("lg_pw_elsewhere"));
+      if (d && d.fehler === "code_falsch") return onLogin(email, t("lg_relogin"));
+      setErr(twAuthFehler(d));
+    }).catch(() => { setBusy(false); setErr(t("e_conn")); });
+  };
+  return React.createElement(FormShell, { title: t("lg_setpw_title"), sub: t("lg_setpw_sub"), onBack: onBack },
+    React.createElement(TwHinweis, { text: t("lg_setpw_konto") + email }),
+    React.createElement("input", { type: "email", value: email, readOnly: true, autoComplete: "username", name: "email", "aria-hidden": "true", tabIndex: -1, style: { position: "absolute", left: -9999, width: 1, height: 1, opacity: 0 } }),
+    React.createElement(FInput, { label: t("f_pw_new"), value: neu, onChange: setNeu, type: "password", placeholder: t("pw_hint"), auto: "new-password", name: "new-password" }),
+    React.createElement(FInput, { label: t("f_pw2"), value: neu2, onChange: setNeu2, type: "password", auto: "new-password", name: "new-password-2", onEnter: speichern }),
+    React.createElement(TwFehler, { text: err }),
+    React.createElement(PBtn, { onClick: busy ? undefined : speichern, full: true }, busy ? t("s_code_busy") : t("lg_setpw_btn")));
 }
 function SubscribePage({
   presetEmail,
+  account,
   onCodeOk,
   onBack,
   onLegal
@@ -7450,6 +7722,14 @@ function SubscribePage({
   const [code, setCode] = useState("");
   const [cErr, setCErr] = useState("");
   const [cBusy, setCBusy] = useState(false);
+  const [pw, setPw] = useState("");
+  const [pw2, setPw2] = useState("");
+  const [hinweis, setHinweis] = useState("");
+  const [cNeu, setCNeu] = useState("");
+  const [cNeu2, setCNeu2] = useState("");
+  const [cBrauchtPw, setCBrauchtPw] = useState(false);
+  const [cInfo, setCInfo] = useState("");
+  const istAngemeldet = em => twHatSitzung(account) && String(account.email || "").toLowerCase() === em;
   const [plan, setPlan] = useState(() => { const h = String(location.hash || ""); return /abo-premium/.test(h) ? "premium" : /abo-enterprise/.test(h) ? "enterprise" : "standard"; });
   const [abrech, setAbrech] = useState(() => /jahr/.test(String(location.hash || "")) ? "jahr" : "monat");
   const [seats, setSeats] = useState(() => { const m = String(location.hash || "").match(/-n(\d+)/); const n = m ? parseInt(m[1], 10) : 5; return Math.min(50, Math.max(5, n || 5)); });
@@ -7481,47 +7761,37 @@ function SubscribePage({
   const payStripe = () => {
     setErr("");
     setMsg("");
+    setHinweis("");
     const em = email.toLowerCase().trim();
     if (!name.trim()) return setErr(t("e_name"));
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) return setErr(t("e_email"));
+    const angemeldet = istAngemeldet(em);
+    if (!angemeldet) { const f = twPwFehler(pw, pw2); if (f) return setErr(f); }
     if (!legalOk || !sofort) return setErr(t("e_both"));
     sendPing("abo_click_" + plan);
-    postJson(AUTH_URL, {
-      email: em,
-      name: name.trim(),
-      rolle: "",
-      consent_marketing: false,
-      plan: plan === "premium" ? "premium_checkout" : plan === "enterprise" ? "enterprise_checkout" : "abo_checkout",
-      status: "checkout_gestartet"
+    const p = { email: em, name: name.trim(), plan: plan === "premium" ? "premium_checkout" : plan === "enterprise" ? "enterprise_checkout" : "abo_checkout" };
+    if (angemeldet) p.code = account.sitzung || account.code; else p.passwort = pw;
+    window.open(stripeCheckoutUrl(plan, abrech, seatsEff, em), "_blank");   // sofort im Klick oeffnen (Popup-Sperre)
+    authPost(CHECKOUT_URL, p).then(d => {
+      if (d && d.wartend) wartendSetzen(em, d.wartend);
+      if (d && d.hinweis === "konto_besteht") setHinweis(t("s_konto_besteht"));
     }).catch(() => {});
-    window.open(stripeCheckoutUrl(plan, abrech, seatsEff, em), "_blank");
-    setMsg(t("s_msg"));
+    setMsg(angemeldet ? t("s_msg_angemeldet") : t("s_msg"));
+    if (!cEmail) setCEmail(em);
   };
   const checkCode = () => {
     setCErr("");
     const em = cEmail.toLowerCase().trim();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) return setCErr(t("e_code_email"));
     if (!code.trim()) return setCErr(t("e_code"));
+    const p = { email: em, code: code.trim(), wartend: wartendLesen(em) };
+    if (cBrauchtPw) { const f = twPwFehler(cNeu, cNeu2); if (f) return setCErr(f); p.neues_passwort = cNeu; }
     setCBusy(true);
-    fetch(CODE_URL + "?code=" + encodeURIComponent(code.trim()) + "&email=" + encodeURIComponent(em), {
-      credentials: "omit",
-      cache: "no-store"
-    }).then(r => r.json()).then(raw => {
+    authPost(ANMELDEN_URL, p).then(d => {
       setCBusy(false);
-      const d = normResp(raw);
-      if (d && d.valid) {
-        const start = d.test_start ? Date.parse(d.test_start) || Date.now() : Date.now();
-        onCodeOk({
-          email: em,
-          plan: d.plan === "test" ? "test" : (d.plan === "premium" || d.plan === "enterprise") ? "premium" : "abo",
-          code: code.trim(),
-          gueltig_bis: d.gueltig_bis || "",
-          start: start,
-          name: d.name || "",
-          rolle: d.rolle || "",
-          consent: true
-        });
-      } else setCErr(t("e_code_bad"));
+      if (d && d.ok && d.konto && d.konto.sitzung) { wartendSetzen(em, ""); onCodeOk(kontoAusAntwort(d.konto)); return; }
+      if (d && d.passwort_festlegen) { setCBrauchtPw(true); setCInfo(t("lg_setpw_info")); return; }
+      setCErr(twAuthFehler(d));
     }).catch(() => {
       setCBusy(false);
       setCErr(t("e_conn"));
@@ -7564,14 +7834,19 @@ function SubscribePage({
     value: email,
     onChange: setEmail,
     type: "email",
-    placeholder: "name@mail.com"
-  }), /*#__PURE__*/React.createElement(FCheck, {
+    placeholder: "name@mail.com",
+    auto: "username",
+    name: "email"
+  }), istAngemeldet(email.toLowerCase().trim()) ? null : React.createElement(React.Fragment, null,
+    React.createElement(FInput, { label: t("f_pw"), value: pw, onChange: setPw, type: "password", placeholder: t("pw_hint"), auto: "new-password", name: "new-password" }),
+    React.createElement(FInput, { label: t("f_pw2"), value: pw2, onChange: setPw2, type: "password", auto: "new-password", name: "new-password-2" }),
+    React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, lineHeight: 1.5, margin: "-4px 0 12px" } }, t("s_pw_note"))), /*#__PURE__*/React.createElement(FCheck, {
     checked: legalOk,
     onChange: setLegalOk
   }, t("legal_pre"), link("agb", t("terms_link")), t("legal_and"), link("datenschutz", t("privacy_link")), t("legal_post")), /*#__PURE__*/React.createElement(FCheck, {
     checked: sofort,
     onChange: setSofort
-  }, t("s_sofort")), err && /*#__PURE__*/React.createElement("div", {
+  }, t("s_sofort")), React.createElement(TwHinweis, { text: hinweis }), err && /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12.5,
@@ -7640,8 +7915,11 @@ function SubscribePage({
     label: t("f_code"),
     value: code,
     onChange: setCode,
-    placeholder: t("f_code_ph")
-  }), cErr && /*#__PURE__*/React.createElement("div", {
+    placeholder: t("f_code_ph"),
+    auto: "one-time-code",
+    name: "code"
+  }), React.createElement(TwHinweis, { text: cInfo }), cBrauchtPw ? React.createElement(FInput, { label: t("f_pw_new"), value: cNeu, onChange: setCNeu, type: "password", placeholder: t("pw_hint"), auto: "new-password", name: "new-password" }) : null,
+  cBrauchtPw ? React.createElement(FInput, { label: t("f_pw2"), value: cNeu2, onChange: setCNeu2, type: "password", auto: "new-password", name: "new-password-2", onEnter: checkCode }) : null, cErr && /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12.5,
@@ -7652,7 +7930,7 @@ function SubscribePage({
     onClick: cBusy ? undefined : checkCode,
     kind: "ghost",
     full: true
-  }, cBusy ? t("s_code_busy") : t("s_code_btn")));
+  }, cBusy ? t("s_code_busy") : (cBrauchtPw ? t("lg_setpw_btn") : t("s_code_btn"))));
 }
 function CancelPage({
   presetEmail,
@@ -14463,7 +14741,7 @@ function TransferWire() {
     };
   }, []);
   const [account, setAccountState] = useState(() => loadAccount());
-  const [page, setPage] = useState(() => { var h = (location.hash || "").replace("#", ""); var a = loadAccount(); if (h === "cancel") return "cancel"; if (h === "abo" || h.indexOf("abo-") === 0) return "subscribe"; if (a) return "app"; if (h === "login") return "login"; if (h === "test") return "register"; return "landing"; });
+  const [page, setPage] = useState(() => { var h = (location.hash || "").replace("#", ""); var a = loadAccount(); if (h === "cancel") return "cancel"; if (h === "abo" || h.indexOf("abo-") === 0) return "subscribe"; if (a) return twHatSitzung(a) ? "app" : "pruefen"; if (h === "login") return "login"; if (h === "test") return "register"; return "landing"; });
   const [pubLegal, setPubLegal] = useState(() => { var h = (location.hash || "").replace("#", ""); return (h === "impressum" || h === "datenschutz" || h === "agb") ? h : null; });
   const twSeiteErst = React.useRef(true);
   useEffect(() => {   // Punkt 9 (Auftrag 41): nach der Anmeldung bzw. einem Seitenwechsel oben beginnen; am Handy blieb sonst die Scrollposition des Anmeldeformulars erhalten und man landete mitten im Newsfeed (beim ersten Laden/Neuladen bleibt das Verhalten des Browsers unveraendert)
@@ -14483,36 +14761,59 @@ function TransferWire() {
       });
     } catch (e) {}
   }, []);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginNotice, setLoginNotice] = useState("");
   const setAccount = a => {
     saveAccount(a);
     setAccountState(a);
   };
+  const zurAnmeldung = (em, hinweis) => {
+    clearAccount();
+    setAccountState(null);
+    setLoginEmail(em || "");
+    setLoginNotice(hinweis || "");
+    setPage("login");
+  };
   const logout = () => {
+    const a = loadAccount();
+    const c = a && (a.sitzung || a.code);
+    if (c && String(c).indexOf("TWS-") === 0) {
+      try { fetch(ABMELDEN_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: c }), keepalive: true, credentials: "omit" }).catch(() => {}); } catch (e) {}
+    }
     clearAccount();
     setAccountState(null);
     setPage("landing");
   };
-  useEffect(() => {
+  useEffect(() => {   // Punkt 92: Anmeldung beim Start pruefen; alte Zugangscodes im Browser einmalig auf Passwort umstellen
     const a = loadAccount();
-    if (a && (a.plan === "abo" || a.plan === "premium") && a.code) {
-      fetch(CODE_URL + "?code=" + encodeURIComponent(a.code) + "&email=" + encodeURIComponent(a.email || ""), {
-        credentials: "omit",
-        cache: "no-store"
-      }).then(r => r.json()).then(dRaw => {
-        const d = normResp(dRaw);
-        if (!d || !d.valid) {
-          setPage("expired");
-        } else if (d.gueltig_bis) {
-          setAccount({
-            ...a,
-            gueltig_bis: d.gueltig_bis
-          });
+    if (!a) return;
+    const c = String(a.sitzung || a.zugangscode || a.code || "");
+    if (!a.email || !c) { zurAnmeldung(a.email || "", ""); return; }
+    authPost(SITZUNG_URL, { code: c, email: a.email }).then(d => {
+      if (c.indexOf("TWS-") === 0) {
+        if (d && d.ok && d.status === "aktiv" && d.konto) {
+          const neu = kontoAusAntwort(Object.assign({}, d.konto, { sitzung: c }), a);
+          setAccount(neu);
+          if (!neu.gueltig) setPage(p => p === "app" ? "expired" : p);
+        } else if (d && d.status === "abgelaufen") {
+          zurAnmeldung(a.email, t("lg_relogin"));
         }
-      }).catch(() => {});
-    }
+        return;
+      }
+      const st = d && d.status;
+      if (st === "passwort_festlegen") setPage("passwort");
+      else zurAnmeldung(a.email, st === "anmelden" ? t("lg_pw_elsewhere") : st === "gesperrt" ? t("e_locked").replace("{n}", 15) : t("lg_relogin"));
+    }).catch(() => {
+      if (c.indexOf("TWS-") !== 0) { setLoginEmail(a.email); setLoginNotice(t("e_conn")); setPage("login"); }
+    });
+  }, []);
+  useEffect(() => {
+    const weg = () => { const a = loadAccount(); if (a) zurAnmeldung(a.email || "", t("lg_relogin")); };
+    window.addEventListener("tw-sitzung-weg", weg);
+    return () => window.removeEventListener("tw-sitzung-weg", weg);
   }, []);
   const testLeft = account && account.plan === "test" ? account.start + TEST_MS - Date.now() : 0;
-  const active = !!account && (account.plan === "test" && testLeft > 0 || account.plan === "abo" || account.plan === "premium");
+  const active = !!account && twHatSitzung(account) && account.gueltig !== false && (account.plan === "test" && testLeft > 0 || account.plan === "abo" || account.plan === "premium");
   let content;
   if (page === "register") content = /*#__PURE__*/React.createElement(RegisterForm, {
     onDone: a => {
@@ -14521,8 +14822,21 @@ function TransferWire() {
     },
     onBack: () => setPage("landing"),
     onLegal: setPubLegal
+  });else if (page === "pruefen") content = /*#__PURE__*/React.createElement(FormShell, {
+    title: t("lg_check"),
+    sub: "",
+    onBack: logout
+  });else if (page === "passwort") content = /*#__PURE__*/React.createElement(PasswortFestlegenPage, {
+    account: account,
+    onDone: a => {
+      setAccount(a);
+      setPage("app");
+    },
+    onLogin: zurAnmeldung,
+    onBack: logout
   });else if (page === "subscribe") content = /*#__PURE__*/React.createElement(SubscribePage, {
     presetEmail: account ? account.email : "",
+    account: account,
     onCodeOk: a => {
       setAccount(a);
       setPage("app");
@@ -14533,11 +14847,19 @@ function TransferWire() {
     presetEmail: account ? account.email : "",
     onBack: () => setPage(account && active ? "app" : "landing")
   });else if (page === "login") content = /*#__PURE__*/React.createElement(LoginPage, {
+    key: "login|" + loginEmail + "|" + loginNotice,
+    presetEmail: loginEmail,
+    notice: loginNotice,
     onDone: a => {
       setAccount(a);
+      setLoginNotice("");
       setPage("app");
     },
     onBack: () => setPage("landing")
+  });else if (page === "app" && account && !twHatSitzung(account)) content = /*#__PURE__*/React.createElement(FormShell, {
+    title: t("lg_check"),
+    sub: "",
+    onBack: logout
   });else if (page === "expired" || page === "app" && account && !active) content = /*#__PURE__*/React.createElement(ExpiredPage, {
     onAbo: () => setPage("subscribe"),
     onLogout: logout
