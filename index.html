@@ -153,15 +153,19 @@
 
   /* ── Funktions-Sektionen (Seite 1) ── */
   .sek{padding:54px 0}
-  .sek .grid{display:grid; grid-template-columns:1fr 1.15fr; gap:56px; align-items:center}
-  .sek.dreh .grid{grid-template-columns:1.15fr 1fr}
+  .sek .grid{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.55fr); gap:48px; align-items:center}
+  .sek.dreh .grid{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}
+  .sek.ohnebild .grid{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); gap:56px}
+  .sek.dreh.ohnebild .grid{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
+  .sek.bahn{max-width:1400px}
+  .sek.bahn.ohnebild{max-width:1120px}
   .sek.dreh .stext{order:2}
   .sek.dreh .sbild{order:1}
-  .stext h3{font-size:clamp(24px,3vw,34px); letter-spacing:-.03em; font-weight:800; margin:10px 0 14px}
-  .stext p{color:var(--muted); font-size:15px; line-height:1.72}
+  .stext h3{font-size:clamp(26px,3.3vw,38px); letter-spacing:-.03em; font-weight:800; margin:10px 0 14px}
+  .stext p{color:var(--muted); font-size:16.5px; line-height:1.7}
   .stext p b{color:#33332f}
   .spunkte{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px}
-  .spunkte span{font-size:11px; font-weight:800; letter-spacing:.2px; background:#EFEEE9; color:#4a4a45; border-radius:0; padding:6px 12px}
+  .spunkte span{font-size:12px; font-weight:800; letter-spacing:.2px; background:#EFEEE9; color:#4a4a45; border-radius:0; padding:7px 13px}
   .shot{border-radius:16px; overflow:hidden; border:1px solid var(--line); background:#fff;
     box-shadow:0 24px 60px rgba(16,16,19,.15)}
   .shot img{width:100%; display:block}
@@ -171,7 +175,7 @@
   .wm{display:block; width:min(360px,70%); margin:0 auto 22px}
   @media (max-width:900px){
     .sek{padding:34px 0}
-    .sek .grid, .sek.dreh .grid{grid-template-columns:1fr; gap:20px}
+    .sek .grid, .sek.dreh .grid, .sek.ohnebild .grid, .sek.dreh.ohnebild .grid{grid-template-columns:1fr; gap:20px}
     .sek.dreh .stext{order:1}
     .sek.dreh .sbild{order:2}
   }
@@ -279,11 +283,15 @@
   .tfeats div{display:flex; gap:8px; line-height:1.4}
   .tfeats div span:last-child{flex:1}
   .tfeats div.fett span:last-child{font-weight:800; color:#fff}
-  .tfeats .plus-k{display:block; margin:0 0 4px; padding-top:0; border-top:0; font-size:9.5px; letter-spacing:.14em; font-weight:700; text-transform:uppercase; color:rgba(255,255,255,.42)}
+  .tfeats .plus-k{display:block; margin:6px 0 2px; padding-top:9px; border-top:1px solid rgba(255,255,255,.08); font-size:9.5px; letter-spacing:.14em; font-weight:700; text-transform:uppercase; color:rgba(255,255,255,.42)}
+  .tfeats .plus-k.gr{color:#4FD287}
   .hak{flex:0 0 11px; width:11px; font-size:0; line-height:0; align-self:flex-start; margin-top:6px; color:rgba(255,255,255,.34)}
   .hak::before{content:""; display:block; width:9px; height:5px; border-left:1.5px solid currentColor; border-bottom:1.5px solid currentColor; transform:rotate(-45deg)}
   .tfeats .aus{color:rgba(255,255,255,.34)}
   .hakx{flex:0 0 11px; width:11px; font-size:10px; line-height:1.5; color:rgba(255,255,255,.28)}
+  .hak.plus{color:var(--gruen)}
+  .hak.plus::before{border-left-width:2px; border-bottom-width:2px}
+  .tfeats div.plus span:last-child{color:#fff; font-weight:600}
   .sicherheit{margin-top:22px; display:flex; align-items:center; justify-content:center; gap:10px; font-size:11.5px; color:rgba(255,255,255,.62); flex-wrap:wrap; text-align:center}
   .sicherheit .sh-tag{font-size:9px; letter-spacing:1.6px; text-transform:uppercase; font-weight:800; color:var(--gold-hell); border:1px solid rgba(221,182,95,.45); padding:4px 8px}
   @media (max-width:980px){ .tiergrid{grid-template-columns:1fr; max-width:460px; margin-left:auto; margin-right:auto} .testleiste{flex-direction:column; align-items:stretch; max-width:460px; margin-left:auto; margin-right:auto} .testleiste .tl-l{flex-direction:column; align-items:flex-start; gap:8px} .testleiste .tcta{width:100%} }
@@ -443,6 +451,10 @@
   body.flugmodus.seite-preise footer{position:relative; opacity:1; pointer-events:auto; background:none; padding:20px 0 34px}
   body.flugmodus .ebene{position:absolute; left:50%; top:47%; width:min(1060px, 92vw);
     transform-style:preserve-3d; will-change:transform, opacity; opacity:0}
+  @media (min-width:901px){
+    body.flugmodus .ebene.sek{width:min(1360px, 94vw); max-width:none}
+    body.flugmodus .ebene.sek.ohnebild{width:min(1060px, 92vw)}
+  }
   .ebene.klickbar{pointer-events:auto}
   body.flugmodus .ebene .glas{background:transparent; border:0; box-shadow:none; backdrop-filter:none; padding:0}
   body.flugmodus .ebene{color:#fff; text-align:center}
@@ -556,8 +568,8 @@
       <h2 class="rv" data-de="Bei TransferWire ist der Markt schon drin:" data-en="TransferWire already covers the market:">Bei TransferWire ist der Markt schon drin:</h2>
       <div class="riesenzahl rv">54<small data-de="Ligen" data-en="leagues">Ligen</small></div>
       <div class="riesenzahl rv">1.074<small>Teams</small></div>
-      <div class="riesenzahl rv">36.839<small data-de="Spieler" data-en="players">Spieler</small></div>
-      <div class="riesenzahl rv">2.337<small data-de="Live-Quellen" data-en="live sources">Live-Quellen</small></div>
+      <div class="riesenzahl rv">36.591<small data-de="Spieler" data-en="players">Spieler</small></div>
+      <div class="riesenzahl rv">2.186<small data-de="Live-Quellen" data-en="live sources">Live-Quellen</small></div>
        <div class="untertext rv" style="margin:18px auto 0;font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;opacity:.75" data-de="Teams je Land" data-en="Teams per country">Teams je Land</div>
        <div class="untertext rv" style="display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:center;max-width:920px;margin:10px auto 0"><span style="white-space:nowrap" data-de="Deutschland <b>150</b>" data-en="Germany <b>150</b>">Deutschland <b>150</b></span><span style="white-space:nowrap" data-de="Spanien <b>50</b>" data-en="Spain <b>50</b>">Spanien <b>50</b></span><span style="white-space:nowrap" data-de="Belgien <b>48</b>" data-en="Belgium <b>48</b>">Belgien <b>48</b></span><span style="white-space:nowrap" data-de="England <b>47</b>" data-en="England <b>47</b>">England <b>47</b></span><span style="white-space:nowrap" data-de="Niederlande <b>47</b>" data-en="Netherlands <b>47</b>">Niederlande <b>47</b></span><span style="white-space:nowrap" data-de="Portugal <b>45</b>" data-en="Portugal <b>45</b>">Portugal <b>45</b></span><span style="white-space:nowrap" data-de="Italien <b>44</b>" data-en="Italy <b>44</b>">Italien <b>44</b></span><span style="white-space:nowrap" data-de="Frankreich <b>42</b>" data-en="France <b>42</b>">Frankreich <b>42</b></span><span style="white-space:nowrap" data-de="Türkei <b>40</b>" data-en="Türkiye <b>40</b>">Türkei <b>40</b></span><span style="white-space:nowrap" data-de="Liga Profesional (Argentinien) <b>38</b>" data-en="Liga Profesional (Argentinien) <b>38</b>">Liga Profesional (Argentinien) <b>38</b></span><span style="white-space:nowrap" data-de="Österreich <b>33</b>" data-en="Austria <b>33</b>">Österreich <b>33</b></span><span style="white-space:nowrap" data-de="USA <b>32</b>" data-en="USA <b>32</b>">USA <b>32</b></span><span style="white-space:nowrap" data-de="Saudi Pro League <b>31</b>" data-en="Saudi Pro League <b>31</b>">Saudi Pro League <b>31</b></span><span style="white-space:nowrap" data-de="Schweden <b>28</b>" data-en="Sweden <b>28</b>">Schweden <b>28</b></span><span style="white-space:nowrap" data-de="Série A (Brasilien) <b>28</b>" data-en="Série A (Brasilien) <b>28</b>">Série A (Brasilien) <b>28</b></span><span style="white-space:nowrap" data-de="China <b>27</b>" data-en="China <b>27</b>">China <b>27</b></span><span style="white-space:nowrap" data-de="Dänemark <b>26</b>" data-en="Denmark <b>26</b>">Dänemark <b>26</b></span><span style="white-space:nowrap" data-de="Superettan (Schweden) <b>24</b>" data-en="Superettan (Schweden) <b>24</b>">Superettan (Schweden) <b>24</b></span><span style="white-space:nowrap" data-de="Norwegen <b>23</b>" data-en="Norway <b>23</b>">Norwegen <b>23</b></span><span style="white-space:nowrap" data-de="Superliga (Rumänien) <b>23</b>" data-en="Superliga (Rumänien) <b>23</b>">Superliga (Rumänien) <b>23</b></span><span style="white-space:nowrap" data-de="J1 League (Japan) <b>21</b>" data-en="J1 League (Japan) <b>21</b>">J1 League (Japan) <b>21</b></span><span style="white-space:nowrap" data-de="Polen <b>20</b>" data-en="Polen <b>20</b>">Polen <b>20</b></span><span style="white-space:nowrap" data-de="Chance Liga (Tschechien) <b>19</b>" data-en="Chance Liga (Tschechien) <b>19</b>">Chance Liga (Tschechien) <b>19</b></span><span style="white-space:nowrap" data-de="1. Liga (Polen) <b>18</b>" data-en="1. Liga (Polen) <b>18</b>">1. Liga (Polen) <b>18</b></span><span style="white-space:nowrap" data-de="K League 1 (Südkorea) <b>17</b>" data-en="K League 1 (Südkorea) <b>17</b>">K League 1 (Südkorea) <b>17</b></span><span style="white-space:nowrap" data-de="Serbien <b>17</b>" data-en="Serbien <b>17</b>">Serbien <b>17</b></span><span style="white-space:nowrap" data-de="Ligat HaAl (Israel) <b>16</b>" data-en="Ligat HaAl (Israel) <b>16</b>">Ligat HaAl (Israel) <b>16</b></span><span style="white-space:nowrap" data-de="NB I (Ungarn) <b>16</b>" data-en="NB I (Ungarn) <b>16</b>">NB I (Ungarn) <b>16</b></span><span style="white-space:nowrap" data-de="Regionalliga Nord (Österreich) <b>15</b>" data-en="Regionalliga Nord (Österreich) <b>15</b>">Regionalliga Nord (Österreich) <b>15</b></span><span style="white-space:nowrap" data-de="1. Division (Zypern) <b>14</b>" data-en="1. Division (Zypern) <b>14</b>">1. Division (Zypern) <b>14</b></span><span style="white-space:nowrap" data-de="Parva Liga (Bulgarien) <b>14</b>" data-en="Parva Liga (Bulgarien) <b>14</b>">Parva Liga (Bulgarien) <b>14</b></span><span style="white-space:nowrap" data-de="Schottland <b>13</b>" data-en="Schottland <b>13</b>">Schottland <b>13</b></span><span style="white-space:nowrap" data-de="Schweiz <b>13</b>" data-en="Switzerland <b>13</b>">Schweiz <b>13</b></span><span style="white-space:nowrap" data-de="Kroatien <b>12</b>" data-en="Kroatien <b>12</b>">Kroatien <b>12</b></span><span style="white-space:nowrap" data-de="Niké Liga (Slowakei) <b>12</b>" data-en="Niké Liga (Slowakei) <b>12</b>">Niké Liga (Slowakei) <b>12</b></span><span style="white-space:nowrap" data-de="Challenge League (Schweiz) <b>10</b>" data-en="Challenge League (Schweiz) <b>10</b>">Challenge League (Schweiz) <b>10</b></span><span style="white-space:nowrap" data-de=" <b>1</b>" data-en=" <b>1</b>"> <b>1</b></span></div>
       <p class="untertext rv"
@@ -578,7 +590,7 @@
         <span class="dot" style="background:#F26D5F"></span><span class="dot" style="background:#F5BE4F"></span><span class="dot" style="background:#5FCB63"></span>
         <span class="url">transferwire.de</span>
       </div>
-      <img src="/assets/start/newsfeed-4cafaaab.webp" width="1100" height="773" fetchpriority="high" decoding="async" alt="TransferWire Newsfeed" style="width:100%; height:auto; display:block">
+      <img src="/assets/start/newsfeed-960-1b0efc75.webp" srcset="/assets/start/newsfeed-960-1b0efc75.webp 960w, /assets/start/newsfeed-1920-50639572.webp 1920w" sizes="(max-width: 1000px) 92vw, 952px" width="1920" height="1290" alt="TransferWire Newsfeed" fetchpriority="high" decoding="async" style="width:100%; height:auto; display:block">
     </div>
   </section>
 
@@ -595,7 +607,7 @@
           <span data-de="TW Scout integriert" data-en="TW Scout built in">TW Scout integriert</span>
         </div>
       </div>
-      <div class="sbild rv-r"><div class="shot"><img src="/assets/start/transfers-bd3d2048.webp" width="1100" height="773" alt="Transfers &amp; Ger&uuml;chte" loading="lazy" decoding="async"></div></div>
+      <div class="sbild rv-r"><div class="shot"><img src="/assets/start/transfers-800-49d1dd9a.webp" srcset="/assets/start/transfers-800-49d1dd9a.webp 800w, /assets/start/transfers-1600-11b9afc3.webp 1600w" sizes="(max-width: 900px) 92vw, 800px" width="1600" height="1062" alt="Transfers &amp; Ger&uuml;chte" loading="lazy" decoding="async"></div></div>
     </div>
   </div></section>
 
@@ -612,7 +624,7 @@
           <span data-de="Alle Positionen" data-en="Every position">Alle Positionen</span>
         </div>
       </div>
-      <div class="sbild rv-l"><div class="shot"><img src="/assets/start/vereinsbedarf-a713294a.webp" width="1100" height="567" alt="Vereinsbedarf &amp; Spieler-Matching" loading="lazy" decoding="async"></div></div>
+      <div class="sbild rv-l"><div class="shot"><img src="/assets/start/vereinsucht-800-c2e9200e.webp" srcset="/assets/start/vereinsucht-800-c2e9200e.webp 800w, /assets/start/vereinsucht-1600-0b0bf343.webp 1600w" sizes="(max-width: 900px) 92vw, 800px" width="1600" height="1062" alt="Verein sucht" loading="lazy" decoding="async"></div></div>
     </div>
   </div></section>
 
@@ -621,20 +633,20 @@
     <div class="grid">
       <div class="stext rv-l">
         <div class="kicker" data-de="SPIELER-DATENBANK" data-en="PLAYER DATABASE">SPIELER-DATENBANK</div>
-        <h3 data-de="36.839 Profile. Alle Ligen, die z&auml;hlen." data-en="36,839 profiles. Every league that matters.">36.839 Profile. Alle Ligen, die z&auml;hlen.</h3>
-        <p data-de="Marktwerte, Vertragsdaten, Minuten, Formkurven und der <b>TW Performance Score</b> &mdash; sortierbar, filterbar, exportierbar. <b>2.989 Vertr&auml;ge</b> laufen innerhalb der n&auml;chsten 12 Monate aus: dein Radar f&uuml;r Chancen." data-en="Market values, contract data, minutes, form curves and the <b>TW Performance Score</b> &mdash; sortable, filterable, exportable. <b>2,989 contracts</b> expire within the next 12 months: your radar for opportunities.">Marktwerte, Vertragsdaten, Minuten, Formkurven und der <b>TW Performance Score</b> &mdash; sortierbar, filterbar, exportierbar. <b>2.989 Vertr&auml;ge</b> laufen innerhalb der n&auml;chsten 12 Monate aus: dein Radar f&uuml;r Chancen.</p>
+        <h3 data-de="36.591 Profile. Alle Ligen, die z&auml;hlen." data-en="36,591 profiles. Every league that matters.">36.591 Profile. Alle Ligen, die z&auml;hlen.</h3>
+        <p data-de="Marktwerte, Vertragsdaten, Minuten, Formkurven und der <b>TW Performance Score</b> &mdash; sortierbar, filterbar, exportierbar. <b>9.751 Vertr&auml;ge</b> laufen innerhalb der n&auml;chsten 12 Monate aus: dein Radar f&uuml;r Chancen." data-en="Market values, contract data, minutes, form curves and the <b>TW Performance Score</b> &mdash; sortable, filterable, exportable. <b>9,751 contracts</b> expire within the next 12 months: your radar for opportunities.">Marktwerte, Vertragsdaten, Minuten, Formkurven und der <b>TW Performance Score</b> &mdash; sortierbar, filterbar, exportierbar. <b>9.751 Vertr&auml;ge</b> laufen innerhalb der n&auml;chsten 12 Monate aus: dein Radar f&uuml;r Chancen.</p>
         <div class="spunkte">
           <span data-de="Marktwerte" data-en="Market values">Marktwerte</span>
           <span data-de="Vertragsradar" data-en="Contract radar">Vertragsradar</span>
           <span data-de="Export" data-en="Export">Export</span>
         </div>
       </div>
-      <div class="sbild rv-r"><div class="shot"><img src="/assets/start/datenbank-2c894474.webp" width="1100" height="773" alt="Spieler-Datenbank" loading="lazy" decoding="async"></div></div>
+      <div class="sbild rv-r"><div class="shot"><img src="/assets/start/datenbank-800-3285f701.webp" srcset="/assets/start/datenbank-800-3285f701.webp 800w, /assets/start/datenbank-1600-f16dcb82.webp 1600w" sizes="(max-width: 900px) 92vw, 800px" width="1600" height="1062" alt="Spieler-Datenbank" loading="lazy" decoding="async"></div></div>
     </div>
   </div></section>
 
   <!-- Funktion 4: Talent-Scouting -->
-  <section class="sek dreh bahn ebene klickbar" data-seite="start" data-z="6"><div class="glas">
+  <section class="sek dreh bahn ebene klickbar ohnebild" data-seite="start" data-z="6"><div class="glas">
     <div class="grid">
       <div class="stext rv-r">
         <div class="kicker" data-de="TALENT-SCOUTING" data-en="TALENT SCOUTING">TALENT-SCOUTING</div>
@@ -666,7 +678,7 @@
           <span data-de="E-Mail bleibt privat" data-en="E-mail stays private">E-Mail bleibt privat</span>
         </div>
       </div>
-      <div class="sbild rv-r"><div class="shot"><img src="/assets/start/netzwerk-34b03b9f.webp" width="1100" height="464" alt="Community &amp; Networking" loading="lazy" decoding="async"></div></div>
+      <div class="sbild rv-r"><div class="shot"><img src="/assets/start/kontakte-800-43f1129e.webp" srcset="/assets/start/kontakte-800-43f1129e.webp 800w, /assets/start/kontakte-1600-1c0e859f.webp 1600w" sizes="(max-width: 900px) 92vw, 800px" width="1600" height="1138" alt="Vereinskontakte" loading="lazy" decoding="async"></div></div>
     </div>
   </div></section>
 
@@ -703,39 +715,60 @@
 
       <div class="tiergrid">
         <!-- STANDARD -->
-        <div class="tier gr" data-tarif="standard">
-          <div class="tname"><span>Standard</span> <span class="tbadge tb-gr" data-de="Beliebt" data-en="Popular">Beliebt</span></div>
+        <div class="tier go" data-tarif="standard">
+          <div class="tname"><span>Standard</span></div>
           <div class="tsub" data-de="Für Berater &amp; Scouts im Tagesgeschäft" data-en="For agents &amp; scouts day to day">Für Berater &amp; Scouts im Tagesgeschäft</div>
-          <div class="twert"><b data-de="Alle Kernfunktionen inklusive" data-en="All core features included">Alle Kernfunktionen inklusive</b><span data-de="2.337 Quellen · 54 Ligen · 36.839 Spieler · KI-Assistent „Scout&#8220;." data-en="2,337 sources · 54 leagues · 36,839 players · AI assistant &#8220;Scout&#8221;.">2.337 Quellen · 54 Ligen · 36.839 Spieler · KI-Assistent „Scout&#8220;.</span></div>
+          <div class="twert"><b data-de="Alle Kernfunktionen inklusive" data-en="All core features included">Alle Kernfunktionen inklusive</b><span data-de="2.186 Quellen · 54 Ligen · 36.591 Spieler · 986 Vereine · KI-Assistent „Scout&#8220;." data-en="2,186 sources · 54 leagues · 36,591 players · 986 clubs · AI assistant &#8220;Scout&#8221;.">2.186 Quellen · 54 Ligen · 36.591 Spieler · 986 Vereine · KI-Assistent „Scout&#8220;.</span></div>
           <div class="tpreis"><span id="p-standard-betrag">49 €</span><span class="einheit" id="p-standard-einheit">pro Monat</span></div>
           <div class="tmeta"><span id="p-standard-alt">oder <b>490 €</b> pro Jahr</span><span class="tsep">·</span><span id="p-standard-tk">monatlich kündbar</span></div>
           <div class="seats"><div class="nutzer"><span class="nz-l" data-de="Nutzer" data-en="Seats">Nutzer</span><span class="nz-fix">1</span></div><div class="nutzer-h" data-de="1 personengebundener Zugang · max. 2 Geräte" data-en="1 personal seat · max. 2 devices">1 personengebundener Zugang · max. 2 Geräte</div></div>
-          <button class="tcta tc-gr" onclick="aboStart('standard')" data-de="Standard wählen" data-en="Choose Standard">Standard wählen</button>
+          <button class="tcta tc-go" onclick="aboStart('standard')" data-de="Standard wählen" data-en="Choose Standard">Standard wählen</button>
           <div class="tfeats">
-            <div><span class="hak">✓</span><span data-de="Newsfeed aus 54 Ligen und 2.337 Quellen" data-en="Newsfeed from 54 leagues and 2,337 sources">Newsfeed aus 54 Ligen und 2.337 Quellen</span></div>
-            <div><span class="hak">✓</span><span data-de="„Verein sucht&#8220; &mdash; wer gerade welche Spieler braucht" data-en="&#8222;Club needs&#8220; &mdash; who is looking for which players">„Verein sucht&#8220; &mdash; wer gerade welche Spieler braucht</span></div>
-            <div><span class="hak">✓</span><span data-de="Spieler-Performances &amp; Rankings" data-en="Player performances &amp; rankings">Spieler-Performances &amp; Rankings</span></div>
-            <div><span class="hak">✓</span><span data-de="Spieler-Datenbank mit 36.839 Spielern" data-en="Player database with 36,839 players">Spieler-Datenbank mit 36.839 Spielern</span></div>
-            <div><span class="hak">✓</span><span data-de="Spielerverträge &amp; Vertragssituationen" data-en="Player contracts &amp; contract situations">Spielerverträge &amp; Vertragssituationen</span></div>
-            <div><span class="hak">✓</span><span data-de="Merkliste, E-Mail-Alerts &amp; Morgen-Briefing" data-en="Watchlist, e-mail alerts &amp; morning briefing">Merkliste, E-Mail-Alerts &amp; Morgen-Briefing</span></div>
-            <div><span class="hak">✓</span><span data-de="Scouting-Funktion mit Talent-Rankings" data-en="Scouting with talent rankings">Scouting-Funktion mit Talent-Rankings</span></div>
+            <div><span class="hak">✓</span><span data-de="Newsfeed aus 54 Ligen und 2.186 Quellen" data-en="Newsfeed from 54 leagues and 2,186 sources">Newsfeed aus 54 Ligen und 2.186 Quellen</span></div>
+            <div><span class="hak">✓</span><span data-de="Transferüberblick: Transfers, Gerüchte &amp; Transferticker" data-en="Transfer overview: transfers, rumours &amp; transfer ticker">Transferüberblick: Transfers, Gerüchte &amp; Transferticker</span></div>
+            <div><span class="hak">✓</span><span data-de="Spieltag-Analysen: Ergebnisse, Livestand &amp; Statistik-Vergleich" data-en="Matchday analyses: results, live scores &amp; stats comparison">Spieltag-Analysen: Ergebnisse, Livestand &amp; Statistik-Vergleich</span></div>
+            <div><span class="hak">✓</span><span data-de="Spielanalysen für Spieler und Vereine" data-en="Match analyses for players and clubs">Spielanalysen für Spieler und Vereine</span></div>
+            <div><span class="hak">✓</span><span data-de="„Verein sucht&#8220; &mdash; wer gerade welche Spieler braucht" data-en="&#8220;Club seeks&#8221; &mdash; who is looking for which players">„Verein sucht&#8220; &mdash; wer gerade welche Spieler braucht</span></div>
+            <div><span class="hak">✓</span><span data-de="Spieler-Performances, Rankings &amp; Team der Woche" data-en="Player performances, rankings &amp; team of the week">Spieler-Performances, Rankings &amp; Team der Woche</span></div>
+            <div><span class="hak">✓</span><span data-de="Spieler- und Vereinsdatenbank mit 36.591 Spielern und 986 Vereinen" data-en="Player and club database with 36,591 players and 986 clubs">Spieler- und Vereinsdatenbank mit 36.591 Spielern und 986 Vereinen</span></div>
+            <div><span class="hak">✓</span><span data-de="Spielerverträge, Vertragsenden &amp; Marktwerte" data-en="Player contracts, expiring deals &amp; market values">Spielerverträge, Vertragsenden &amp; Marktwerte</span></div>
+            <div><span class="hak">✓</span><span data-de="Scouting mit Talent-Rankings, Scouting-Listen &amp; Fähigkeiten-Suche" data-en="Scouting with talent rankings, scouting lists &amp; skills search">Scouting mit Talent-Rankings, Scouting-Listen &amp; Fähigkeiten-Suche</span></div>
             <div><span class="hak">✓</span><span data-de="KI-Assistent „Scout&#8220;" data-en="AI assistant &#8220;Scout&#8221;">KI-Assistent „Scout&#8220;</span></div>
-            <div class="aus"><span class="hakx">✕</span><span data-de="Vereins-Kontakte: nicht enthalten" data-en="Club contacts: not included">Vereins-Kontakte: nicht enthalten</span></div>
+            <div><span class="hak">✓</span><span data-de="Merkliste, E-Mail-Alerts &amp; Morgen-Briefing" data-en="Watchlist, e-mail alerts &amp; morning briefing">Merkliste, E-Mail-Alerts &amp; Morgen-Briefing</span></div>
+            <div><span class="hak">✓</span><span data-de="PDF-Dossiers zu Spielern und Vereinen" data-en="PDF dossiers on players and clubs">PDF-Dossiers zu Spielern und Vereinen</span></div>
+            <div class="plus-k" data-de="Nur in Premium" data-en="Premium only">Nur in Premium</div>
+            <div class="aus"><span class="hakx">✕</span><span data-de="Exklusive Vereinskontakte: Sportdirektoren, Geschäftsführer &amp; Scouting-Leiter" data-en="Exclusive club contacts: sporting directors, CEOs &amp; heads of scouting">Exklusive Vereinskontakte: Sportdirektoren, Geschäftsführer &amp; Scouting-Leiter</span></div>
+            <div class="aus"><span class="hakx">✕</span><span data-de="Community-Zugang: Scouts, Berater &amp; Vereinsmitarbeiter" data-en="Community access: scouts, agents &amp; club staff">Community-Zugang: Scouts, Berater &amp; Vereinsmitarbeiter</span></div>
+            <div class="aus"><span class="hakx">✕</span><span data-de="Akquise-Radar: Spieler ohne Berater finden" data-en="Acquisition radar: find players without an agent">Akquise-Radar: Spieler ohne Berater finden</span></div>
           </div>
         </div>
 
         <!-- PREMIUM -->
-        <div class="tier go" data-tarif="premium">
-          <div class="tname"><span>Premium</span></div>
+        <div class="tier gr" data-tarif="premium">
+          <div class="tname"><span>Premium</span> <span class="tbadge tb-gr" data-de="Beliebt" data-en="Popular">Beliebt</span></div>
           <div class="tsub" data-de="Für Macher mit direktem Draht" data-en="For dealmakers with a direct line">Für Macher mit direktem Draht</div>
-          <div class="twert"><b data-de="Alles aus Standard — plus:" data-en="Everything in Standard — plus:">Alles aus Standard — plus:</b><span data-de="Community mit Scouts, Beratern &amp; Vereinsmitarbeitern. Exklusive Vereinskontakte." data-en="Community with scouts, agents &amp; club staff. Exclusive club contacts.">Community mit Scouts, Beratern &amp; Vereinsmitarbeitern. Exklusive Vereinskontakte.</span></div>
+          <div class="twert"><b data-de="Alles aus Standard — plus:" data-en="Everything in Standard — plus:">Alles aus Standard — plus:</b><span data-de="Exklusive Vereinskontakte, Community mit Scouts, Beratern &amp; Vereinsmitarbeitern und Akquise-Radar." data-en="Exclusive club contacts, a community with scouts, agents &amp; club staff and the acquisition radar.">Exklusive Vereinskontakte, Community mit Scouts, Beratern &amp; Vereinsmitarbeitern und Akquise-Radar.</span></div>
           <div class="tpreis"><span id="p-premium-betrag">99 €</span><span class="einheit" id="p-premium-einheit">pro Monat</span></div>
           <div class="tmeta"><span id="p-premium-alt">oder <b>990 €</b> pro Jahr</span><span class="tsep">·</span><span id="p-premium-tk">monatlich kündbar</span></div>
           <div class="seats"><div class="nutzer"><span class="nz-l" data-de="Nutzer" data-en="Seats">Nutzer</span><span class="nz-fix">1</span></div><div class="nutzer-h" data-de="1 personengebundener Zugang · max. 2 Geräte" data-en="1 personal seat · max. 2 devices">1 personengebundener Zugang · max. 2 Geräte</div></div>
-          <button class="tcta tc-go" onclick="aboStart('premium')" data-de="Premium wählen" data-en="Choose Premium">Premium wählen</button>
+          <button class="tcta tc-gr" onclick="aboStart('premium')" data-de="Premium wählen" data-en="Choose Premium">Premium wählen</button>
           <div class="tfeats">
-            <div><span class="hak">✓</span><span data-de="Community-Zugang: Scouts, Berater &amp; Vereinsmitarbeiter" data-en="Community access: scouts, agents &amp; club staff">Community-Zugang: Scouts, Berater &amp; Vereinsmitarbeiter</span></div>
-            <div><span class="hak">✓</span><span data-de="Zugriff auf exklusive Vereinskontakte" data-en="Access to exclusive club contacts">Zugriff auf exklusive Vereinskontakte</span></div>
+            <div><span class="hak">✓</span><span data-de="Newsfeed aus 54 Ligen und 2.186 Quellen" data-en="Newsfeed from 54 leagues and 2,186 sources">Newsfeed aus 54 Ligen und 2.186 Quellen</span></div>
+            <div><span class="hak">✓</span><span data-de="Transferüberblick: Transfers, Gerüchte &amp; Transferticker" data-en="Transfer overview: transfers, rumours &amp; transfer ticker">Transferüberblick: Transfers, Gerüchte &amp; Transferticker</span></div>
+            <div><span class="hak">✓</span><span data-de="Spieltag-Analysen: Ergebnisse, Livestand &amp; Statistik-Vergleich" data-en="Matchday analyses: results, live scores &amp; stats comparison">Spieltag-Analysen: Ergebnisse, Livestand &amp; Statistik-Vergleich</span></div>
+            <div><span class="hak">✓</span><span data-de="Spielanalysen für Spieler und Vereine" data-en="Match analyses for players and clubs">Spielanalysen für Spieler und Vereine</span></div>
+            <div><span class="hak">✓</span><span data-de="„Verein sucht&#8220; &mdash; wer gerade welche Spieler braucht" data-en="&#8220;Club seeks&#8221; &mdash; who is looking for which players">„Verein sucht&#8220; &mdash; wer gerade welche Spieler braucht</span></div>
+            <div><span class="hak">✓</span><span data-de="Spieler-Performances, Rankings &amp; Team der Woche" data-en="Player performances, rankings &amp; team of the week">Spieler-Performances, Rankings &amp; Team der Woche</span></div>
+            <div><span class="hak">✓</span><span data-de="Spieler- und Vereinsdatenbank mit 36.591 Spielern und 986 Vereinen" data-en="Player and club database with 36,591 players and 986 clubs">Spieler- und Vereinsdatenbank mit 36.591 Spielern und 986 Vereinen</span></div>
+            <div><span class="hak">✓</span><span data-de="Spielerverträge, Vertragsenden &amp; Marktwerte" data-en="Player contracts, expiring deals &amp; market values">Spielerverträge, Vertragsenden &amp; Marktwerte</span></div>
+            <div><span class="hak">✓</span><span data-de="Scouting mit Talent-Rankings, Scouting-Listen &amp; Fähigkeiten-Suche" data-en="Scouting with talent rankings, scouting lists &amp; skills search">Scouting mit Talent-Rankings, Scouting-Listen &amp; Fähigkeiten-Suche</span></div>
+            <div><span class="hak">✓</span><span data-de="KI-Assistent „Scout&#8220;" data-en="AI assistant &#8220;Scout&#8221;">KI-Assistent „Scout&#8220;</span></div>
+            <div><span class="hak">✓</span><span data-de="Merkliste, E-Mail-Alerts &amp; Morgen-Briefing" data-en="Watchlist, e-mail alerts &amp; morning briefing">Merkliste, E-Mail-Alerts &amp; Morgen-Briefing</span></div>
+            <div><span class="hak">✓</span><span data-de="PDF-Dossiers zu Spielern und Vereinen" data-en="PDF dossiers on players and clubs">PDF-Dossiers zu Spielern und Vereinen</span></div>
+            <div class="plus-k gr" data-de="Zusätzlich in Premium" data-en="Extra in Premium">Zusätzlich in Premium</div>
+            <div class="plus"><span class="hak plus">✓</span><span data-de="Exklusive Vereinskontakte: Sportdirektoren, Geschäftsführer &amp; Scouting-Leiter" data-en="Exclusive club contacts: sporting directors, CEOs &amp; heads of scouting">Exklusive Vereinskontakte: Sportdirektoren, Geschäftsführer &amp; Scouting-Leiter</span></div>
+            <div class="plus"><span class="hak plus">✓</span><span data-de="Community-Zugang: Scouts, Berater &amp; Vereinsmitarbeiter" data-en="Community access: scouts, agents &amp; club staff">Community-Zugang: Scouts, Berater &amp; Vereinsmitarbeiter</span></div>
+            <div class="plus"><span class="hak plus">✓</span><span data-de="Akquise-Radar: Spieler ohne Berater finden" data-en="Acquisition radar: find players without an agent">Akquise-Radar: Spieler ohne Berater finden</span></div>
           </div>
         </div>
 
@@ -750,6 +783,7 @@
           <div class="nutzer-h" id="nz-hinweis">5 Nutzer inklusive · weitere Nutzer auf Anfrage</div></div>
           <button class="tcta tc-en" onclick="aboStart('enterprise')" data-de="Enterprise wählen" data-en="Choose Enterprise">Enterprise anfragen</button>
           <div class="tfeats">
+            <div class="fett"><span class="hak">✓</span><span data-de="Alle Funktionen aus Premium enthalten" data-en="All Premium features included">Alle Funktionen aus Premium enthalten</span></div>
             <div><span class="hak">✓</span><span data-de="5 personengebundene Nutzerzugänge inklusive" data-en="5 personal seats included">5 personengebundene Nutzerzugänge inklusive</span></div>
             <div><span class="hak">✓</span><span data-de="Weitere Nutzer auf Anfrage" data-en="More seats on request">Weitere Nutzer auf Anfrage</span></div>
           </div>
@@ -814,7 +848,7 @@
     <div class="funk rv">
       <div class="f-text">
         <div class="kicker" data-de="SPIELER-DATENBANK" data-en="PLAYER DATABASE">SPIELER-DATENBANK</div>
-        <h3 data-de="36.839 Profile. Alle Ligen, die zählen." data-en="36,839 profiles. Every league that matters.">36.839 Profile. Alle Ligen, die zählen.</h3>
+        <h3 data-de="36.591 Profile. Alle Ligen, die zählen." data-en="36,591 profiles. Every league that matters.">36.591 Profile. Alle Ligen, die zählen.</h3>
         <p data-de="TW Performance Score nach jedem Spieltag, Formkurven, Vertragsdaten und Marktwerte — sortierbar, filterbar, exportierbar. Dazu Talent-Rankings und automatischer Vertragsradar." data-en="TW performance score after every matchday, form curves, contract data and market values — sortable, filterable, exportable. Plus talent rankings and an automatic contract radar.">TW Performance Score nach jedem Spieltag, Formkurven, Vertragsdaten und Marktwerte — sortierbar, filterbar, exportierbar. Dazu Talent-Rankings und automatischer Vertragsradar.</p>
       </div>
       <div class="f-vis dunkel">
@@ -847,7 +881,7 @@
     </div>
     <div class="faq rv">
       <details><summary data-de="Wie funktioniert der 3-Tage-Test?" data-en="How does the 3-day trial work?">Wie funktioniert der 3-Tage-Test?</summary><p data-de="Einfach mit deiner E-Mail-Adresse registrieren — ohne Zahlungsdaten. Du bekommst sofort deinen Zugangscode, und der Test endet nach drei Tagen automatisch." data-en="Just register with your e-mail address — no payment details. You get your access code immediately, and the trial ends automatically after three days.">Einfach mit deiner E-Mail-Adresse registrieren — ohne Zahlungsdaten. Du bekommst sofort deinen Zugangscode, und der Test endet nach drei Tagen automatisch.</p></details>
-      <details><summary data-de="Was ist der Unterschied zwischen Standard und Premium?" data-en="What's the difference between Standard and Premium?">Was ist der Unterschied zwischen Standard und Premium?</summary><p data-de="Standard (49 €/Monat) enthält die komplette Plattform: Newsfeed, „Verein sucht&#8220;, Datenbank, Scouting und KI-Scout. Premium (99 €/Monat) schaltet zusätzlich die 750+ Vereins-Kontakte mit Suche frei — Sportdirektoren und Geschäftsführer, direkter Draht." data-en="Standard (€49/month) includes the full platform: newsfeed, club needs, database, scouting and AI scout. Premium (€99/month) additionally unlocks the 750+ club contacts with search — sporting directors and managing directors, direct line.">Standard (49 €/Monat) enthält die komplette Plattform: Newsfeed, „Verein sucht&#8220;, Datenbank, Scouting und KI-Scout. Premium (99 €/Monat) schaltet zusätzlich die 750+ Vereins-Kontakte mit Suche frei — Sportdirektoren und Geschäftsführer, direkter Draht.</p></details>
+      <details><summary data-de="Was ist der Unterschied zwischen Standard und Premium?" data-en="What's the difference between Standard and Premium?">Was ist der Unterschied zwischen Standard und Premium?</summary><p data-de="Standard (49 €/Monat) enthält die komplette Plattform: Newsfeed, „Verein sucht&#8220;, Datenbank, Scouting und KI-Scout. Premium (99 €/Monat) schaltet zusätzlich die exklusiven Vereinskontakte (Sportdirektoren, Geschäftsführer, Scouting-Leiter), die Community und das Akquise-Radar frei." data-en="Standard (€49/month) includes the full platform: newsfeed, club needs, database, scouting and AI scout. Premium (€99/month) additionally unlocks the exclusive club contacts (sporting directors, CEOs, heads of scouting), the community and the acquisition radar.">Standard (49 €/Monat) enthält die komplette Plattform: Newsfeed, „Verein sucht&#8220;, Datenbank, Scouting und KI-Scout. Premium (99 €/Monat) schaltet zusätzlich die 750+ Vereins-Kontakte mit Suche frei — Sportdirektoren und Geschäftsführer, direkter Draht.</p></details>
       <details><summary data-de="Kann ich monatlich kündigen?" data-en="Can I cancel monthly?">Kann ich monatlich kündigen?</summary><p data-de="Ja. Beide Abos laufen monatlich und sind jederzeit über das Kundenportal kündbar." data-en="Yes. Both plans run monthly and can be cancelled any time via the customer portal.">Ja. Beide Abos laufen monatlich und sind jederzeit über das Kundenportal kündbar.</p></details>
       <details><summary data-de="Woher kommen die Daten?" data-en="Where does the data come from?">Woher kommen die Daten?</summary><p data-de="Aus über 1.200 öffentlichen Quellen, offiziellen Vereinskanälen und Sportdaten-Partnern — kombiniert mit Insider-Hinweisen aus unserem Netzwerk. Jede Meldung wird mit einer Verlässlichkeits-Einstufung versehen." data-en="From 1,200+ public sources, official club channels and sports data partners — combined with insider tips from our network. Every report carries a reliability grade.">Aus über 1.200 öffentlichen Quellen, offiziellen Vereinskanälen und Sportdaten-Partnern — kombiniert mit Insider-Hinweisen aus unserem Netzwerk. Jede Meldung wird mit einer Verlässlichkeits-Einstufung versehen.</p></details>
     </div>
