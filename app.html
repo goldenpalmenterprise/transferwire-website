@@ -3267,7 +3267,7 @@ function CommunitySub({ view, setView, admin }) {
 function MeldungsPanel({ m, schliessen, onWatch }) {
   const h = React.createElement; const en = LANG === "en";
   const ty = TYPE[m.type] || TYPE.geruecht;
-  const rel = Number(m.reliability) || 0;
+  const rel = twStufe(m);
   useScrollSperre(true); useTwZurueck(true, schliessen);
   const vn = (x) => (x && typeof clubName === "function" ? clubName(x) : x);
   const verl = m.type === "verletzung";
@@ -3641,8 +3641,23 @@ function istBestaetigt(it) {
   if (st.some(x => x.v === "A1")) return true;
   const hosts = new Set(st.filter(x => x.v === "A1" || x.v === "A2").map(x => x.host)); return hosts.size >= 2;
 }
-function signalScore(it) {
+/* Auftrag 54 (Punkt 262): EINE Statusregel fuer Chip, Einordnung, Infozeile, Signal und Feed. Bestaetigt = Ausgang bestaetigt
+   oder Bestaetigungsregel (offizielle Quelle bzw. zwei unabhaengige A1/A2-Quellen) bei einer Meldung, die kein Geruecht ist (bzw. Belastbarkeit 5).
+   Geplatzte und ueberholte Meldungen sind nie bestaetigt. Die Einordnungsstufe folgt daraus: bestaetigt = 5, sonst hoechstens 4. */
+function twBestaetigt(it) {
+  if (!it) return false;
+  if (it.ausgang === "bestaetigt") return true;
+  if (it.ausgang === "geplatzt" || it.ausgang === "anders") return false;
+  const r = Number(it.reliability) || 0;
+  return istBestaetigt(it) && (r >= 5 || it.type !== "geruecht");
+}
+function twStufe(it) {
   const r = Math.max(0, Math.min(5, Number(it && it.reliability) || 0));
+  if (twBestaetigt(it)) return 5;
+  return Math.min(r, 4);
+}
+function signalScore(it) {
+  const r = twStufe(it);
   const base = [0, 28, 45, 62, 78, 92][r];
   const n = ((it && it.sources) || []).length;
   let sc = base + Math.min(2, Math.max(0, n - 1)) * 4 + (it && it.fee ? 2 : 0);
@@ -3653,11 +3668,11 @@ function signalScore(it) {
 const istOffiziell = it => /offiziell|official|\bbest\u00e4tigt\b|confirmed/i.test(String((it && it.headline) || "") + " " + String((it && it.summary) || "")) || Number(it && it.reliability) >= 5;
 function SignalLine({ item }) {
   const en = LANG === "en";
-  const r = Math.max(0, Math.min(5, Number(item.reliability) || 0));
+  const r = twStufe(item);
   const skala = (en ? RELIABILITY_EN : RELIABILITY).slice(1).join(" \u00b7 ");
   const stufe = besteStufe(item);
-  const bestaetigt = istBestaetigt(item);
-  if (bestaetigt && (r >= 5 || item.type === "fix")) {
+  const bestaetigt = twBestaetigt(item);
+  if (bestaetigt) {
     const off = /offiziell|official/i.test(String(item.headline || "") + " " + String(item.summary || "")) || (stufe && stufe.v === "A1");
     return React.createElement("div", { className: "tw-rel", title: (en ? "Confirmed: official source or two independent A1/A2 sources \u2014 scale: " : "Best\u00e4tigt: offizielle Quelle oder zwei unabh\u00e4ngige A1/A2-Quellen \u2014 Skala: ") + skala, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: "#0d8a4f", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } },
       "\u2713 " + (en ? "Confirmed" : "Best\u00e4tigt") + " \u00b7 " + (off ? (en ? "official statement" : "offizielle Vereinsmeldung") : (en ? "two independent sources" : "zwei unabh\u00e4ngige Quellen")));
@@ -3731,8 +3746,8 @@ function tkInitialen(name) { return String(name || "").split(/\s+/).filter(Boole
 function tkWechseldatum(it) { const m = String((it && it.headline) || "").concat(" ", String((it && it.summary) || "")).match(/\b(\d{2})\.(\d{2})\.(\d{4})\b/); if (!m) return ""; return LANG === "en" ? m[3] + "-" + m[2] + "-" + m[1] : m[1] + "." + m[2] + "." + m[3]; }
 function tkDatum(it) { const en = LANG === "en"; const roh = it.published || it.published_at || it.publishedAtIso || it.created_at || it.createdAt; const d = roh ? new Date(roh) : null; if (d && !isNaN(d.getTime())) return en ? d.toISOString().slice(0, 10) : d.toLocaleDateString("de-DE"); return String(it.publishedAt || ""); }
 function tkAbloese(it) { const en = LANG === "en"; const f = String(it.fee || "").trim(); if (f) return f; if (it.type === "leihe") return en ? "Loan" : "Leihe"; if (it.type === "vertragslos") return en ? "Free transfer" : "ablösefrei"; return en ? "Not disclosed" : "Nicht veröffentlicht"; }
-function tkStatusText(it) { const en = LANG === "en"; const best = istBestaetigt(it); if (it.ausgang === "bestaetigt") return en ? "Confirmed as completed." : "Als vollzogen bestätigt."; if (it.ausgang === "geplatzt") return en ? "Transfer collapsed." : "Wechsel geplatzt."; if (it.ausgang === "anders") return (en ? "Outdated \u2013 moved to " : "\u00dcberholt \u2013 gewechselt zu ") + (it.ausgangZiel || "?") + "."; if (best) return en ? "Officially confirmed." : "Offiziell bestätigt."; if (it.type === "fix") return en ? "Reported as done · not yet officially confirmed." : "Als fix gemeldet · noch nicht offiziell bestätigt."; if (it.type === "geruecht") return en ? "Rumour · not confirmed." : "Gerücht · nicht bestätigt."; return en ? "Not yet marked as completed." : "Noch nicht als vollzogen markiert."; }
-function tkVertrauen(it) { const en = LANG === "en"; const r = Math.max(0, Math.min(5, Number(it.reliability) || 0)); return (en ? "Source trust: " : "Quellenvertrauen: ") + (r >= 4 ? (en ? "high" : "hoch") : r === 3 ? (en ? "medium" : "mittel") : (en ? "low" : "gering")); }
+function tkStatusText(it) { const en = LANG === "en"; const best = twBestaetigt(it); if (it.ausgang === "bestaetigt") return en ? "Confirmed as completed." : "Als vollzogen bestätigt."; if (it.ausgang === "geplatzt") return en ? "Transfer collapsed." : "Wechsel geplatzt."; if (it.ausgang === "anders") return (en ? "Outdated \u2013 moved to " : "\u00dcberholt \u2013 gewechselt zu ") + (it.ausgangZiel || "?") + "."; if (best) return en ? "Officially confirmed." : "Offiziell bestätigt."; if (it.type === "fix") return en ? "Reported as done · not yet officially confirmed." : "Als fix gemeldet · noch nicht offiziell bestätigt."; if (it.type === "geruecht") return en ? "Rumour · not confirmed." : "Gerücht · nicht bestätigt."; return en ? "Not yet marked as completed." : "Noch nicht als vollzogen markiert."; }
+function tkVertrauen(it) { const en = LANG === "en"; const r = twStufe(it); return (en ? "Source trust: " : "Quellenvertrauen: ") + (r >= 4 ? (en ? "high" : "hoch") : r === 3 ? (en ? "medium" : "mittel") : (en ? "low" : "gering")); }
 function tkQuelle(it) { const s = (it.sources || []).find(x => x && (x.name || x.url)); if (s) return s.name && s.name !== "Quelle" ? s.name : twDomain(s.url || ""); return it.source_name || (it.url ? twDomain(it.url) : "TransferWire"); }
 function tkIcon(art, size) { const sz = size || 14; const p = { calendar: "M8 2v3M16 2v3M3 9h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z", coins: "M12 21c4.97 0 9-1.79 9-4V7M3 7v10c0 2.21 4.03 4 9 4M3 7c0 2.21 4.03 4 9 4s9-1.79 9-4-4.03-4-9-4-9 1.79-9 4M3 12c0 2.21 4.03 4 9 4s9-1.79 9-4", info: "M12 16v-4M12 8h.01M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z", arrow: "M5 12h14M13 6l6 6-6 6", link: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71", shield: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z", ext: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" }[art] || ""; return React.createElement("svg", { width: sz, height: sz, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true", style: { flexShrink: 0 } }, React.createElement("path", { d: p })); }
 function tkSegmente(score, n) { const h = React.createElement; const anz = n || 8; const voll = Math.round(Math.max(0, Math.min(100, Number(score) || 0)) / 100 * anz); return h("span", { style: { display: "inline-flex", gap: 3, alignItems: "center" }, "aria-hidden": "true" }, Array.from({ length: anz }, (_, i) => h("span", { key: i, style: { width: 9, height: 7, borderRadius: 2, background: i < voll ? "var(--gold)" : "var(--linie2)" } }))); }
@@ -3741,7 +3756,7 @@ function TkVerein({ name, size, fett, leer, titel }) { const h = React.createEle
 function TransferKarteAlt27({ item, onWatch, onOpen, foto }) {
   const h = React.createElement; const en = LANG === "en"; const it = item;
   const ty = TYPE[it.type] || TYPE.geruecht; const sp = tkSpieler(it); const lg = tkLiga(it);
-  const sc = signalScore(it); const r = Math.max(0, Math.min(5, Number(it.reliability) || 0));
+  const sc = signalScore(it); const r = twStufe(it);
   const sub = [sp.pos, sp.alter ? sp.alter + (en ? " yrs" : " J.") : "", lg.liga, lg.land].filter(Boolean).join(" · ");
   const zeile = (kinder, stil) => h("div", { style: Object.assign({ display: "flex", alignItems: "center", gap: 10, padding: "10px 18px", borderTop: "1px solid " + HAIR }, stil || {}) }, kinder);
   const knopf = (text, onClick, voll) => h("button", { onClick: e => { e.stopPropagation(); onClick && onClick(); }, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "9px 14px", minHeight: 38, borderRadius: 10, border: voll ? "none" : "1px solid " + HAIR, background: voll ? "var(--gold)" : "transparent", color: voll ? "var(--gold-schrift)" : "var(--t1)", display: "inline-flex", alignItems: "center", gap: 7, whiteSpace: "nowrap" } }, text);
@@ -3782,7 +3797,7 @@ function TransferKartenListe({ liste, onWatch, onOpen }) {
 }
 function TransferPanel({ m, schliessen, onWatch }) {
   const h = React.createElement; const en = LANG === "en"; const ty = TYPE[m.type] || TYPE.geruecht;
-  const r = Math.max(0, Math.min(5, Number(m.reliability) || 0)); const best = istBestaetigt(m); const sp = tkSpieler(m); const lg = tkLiga(m);
+  const best = twBestaetigt(m); const r = twStufe(m); const sp = tkSpieler(m); const lg = tkLiga(m);
   const [kopiert, setKopiert] = React.useState(false);
   useScrollSperre(true); useTwZurueck(true, schliessen);
   const tpGleich = !m._verl && twGleicherVerein(m.fromClub || m.from, m.toClub || m.to || m.seek);
@@ -3790,9 +3805,12 @@ function TransferPanel({ m, schliessen, onWatch }) {
   const relWort = r ? ((en ? RELIABILITY_EN[r] : RELIABILITY[r]) || "") : "";
   const chip = (text, farbe, bg, punkt) => h("span", { style: { display: "inline-flex", alignItems: "center", gap: 6, fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 700, color: farbe, background: bg, padding: "4px 10px", borderRadius: 999, whiteSpace: "nowrap" } }, punkt ? h("span", { style: { width: 6, height: 6, borderRadius: 99, background: farbe } }) : null, text);
   const statusChips = [];
-  if (m.ausgang === "bestaetigt" || best) statusChips.push(chip(en ? "Confirmed" : "Bestätigt", "#0d8a4f", "#e2f3ea", true));
+  /* Auftrag 54 (262): Chip, Einordnung und Infozeile folgen derselben Regel (twBestaetigt / twStufe) */
+  if (best) statusChips.push(chip(en ? "Confirmed" : "Bestätigt", "#0d8a4f", "#e2f3ea", true));
+  else if (m.ausgang === "geplatzt") { statusChips.push(h(Badge, { meta: ty, dot: true })); statusChips.push(chip(en ? "Collapsed" : "Geplatzt", "#a12b2b", "#fbe4e4", true)); }
+  else if (m.ausgang === "anders") { statusChips.push(h(Badge, { meta: ty, dot: true })); statusChips.push(chip((en ? "Outdated \u2013 moved to " : "\u00dcberholt \u2013 gewechselt zu ") + (m.ausgangZiel || "?"), "#4b5563", "#eef0f3", true)); }
   else if (m.type === "fix") { statusChips.push(chip(en ? "Reported as done" : "Als fix gemeldet", "#8a5a00", "#faf0d8", true)); statusChips.push(chip(en ? "Officially unconfirmed" : "Offiziell unbestätigt", "var(--t2)", "var(--karte2)")); }
-  else { statusChips.push(h(Badge, { meta: ty, dot: true })); if (m.ausgang === "geplatzt") statusChips.push(chip(en ? "Collapsed" : "Geplatzt", "#a12b2b", "#fbe4e4", true)); else if (m.ausgang === "anders") statusChips.push(chip((en ? "Outdated \u2013 moved to " : "\u00dcberholt \u2013 gewechselt zu ") + (m.ausgangZiel || "?"), "#4b5563", "#eef0f3", true)); else statusChips.push(chip(en ? "Unconfirmed" : "Unbestätigt", "var(--t2)", "var(--karte2)")); }
+  else { statusChips.push(h(Badge, { meta: ty, dot: true })); statusChips.push(chip(en ? "Unconfirmed" : "Unbestätigt", "var(--t2)", "var(--karte2)")); }
   const fakt = (lab, wert) => h("div", { style: { padding: "10px 0", minWidth: 0 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 10, fontWeight: 900, letterSpacing: 1, color: "var(--t3)", textTransform: "uppercase", marginBottom: 4 } }, lab), typeof wert === "string" ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: "var(--t1)", overflowWrap: "anywhere", lineHeight: 1.3 } }, wert || "\u2013") : wert);
   const kopieren = () => { const txt = (q1 && q1.url) || m.url || (window.location.origin + "/app.html"); const fertig = () => { setKopiert(true); setTimeout(() => setKopiert(false), 2000); }; if (navigator.clipboard) navigator.clipboard.writeText(txt).then(fertig).catch(() => {}); else fertig(); };
   const knopf = (kinder, onClick, voll) => h("button", { onClick: onClick, style: { flex: 1, cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, padding: "12px 14px", minHeight: 46, borderRadius: 12, border: voll ? "none" : "1px solid " + HAIR, background: voll ? "var(--gold)" : "var(--karte)", color: voll ? "var(--gold-schrift)" : "var(--t1)", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 } }, kinder);
@@ -3825,7 +3843,7 @@ function TransferPanel({ m, schliessen, onWatch }) {
             relWort ? chip(relWort, relColor(r), "var(--karte2)") : null,
             q1.url ? h("a", { href: q1.url, target: "_blank", rel: "noopener", style: { marginLeft: "auto", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "var(--gold-text)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5, whiteSpace: "nowrap" } }, en ? "Open original article" : "Originalartikel öffnen", tkIcon("ext", 13)) : null) : h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "var(--t3)" } }, en ? "No source link available." : "Kein Quellenlink vorhanden."),
           quellen.length > 1 ? h("div", { style: { marginTop: 10, display: "flex", flexDirection: "column", gap: 6 } }, quellen.slice(1, 6).map((s, i) => h("a", { key: i, href: s.url || "#", target: "_blank", rel: "noopener", style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, color: "var(--t2)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 } }, tkIcon("ext", 12), s.name || twDomain(s.url || "")))) : null,
-          h("div", { style: { display: "flex", alignItems: "center", gap: 9, marginTop: 14, padding: "10px 12px", borderRadius: 10, background: "var(--karte2)", border: "1px solid " + HAIR, fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)" } }, h("span", { style: { color: "var(--t3)", display: "inline-flex" } }, tkIcon("info", 15)), best || m.ausgang === "bestaetigt" ? (en ? "Officially confirmed in the available sources." : "In den vorliegenden Quellen offiziell bestätigt.") : m.ausgang === "geplatzt" ? (en ? "Marked as collapsed." : "Als geplatzt markiert.") : (en ? "No official confirmation in the available sources." : "Keine offizielle Bestätigung in den vorliegenden Quellen.")))),
+          h("div", { style: { display: "flex", alignItems: "center", gap: 9, marginTop: 14, padding: "10px 12px", borderRadius: 10, background: "var(--karte2)", border: "1px solid " + HAIR, fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)" } }, h("span", { style: { color: "var(--t3)", display: "inline-flex" } }, tkIcon("info", 15)), best ? (en ? "Officially confirmed in the available sources." : "In den vorliegenden Quellen offiziell bestätigt.") : m.ausgang === "geplatzt" ? (en ? "Marked as collapsed." : "Als geplatzt markiert.") : m.ausgang === "anders" ? (en ? "Outdated \u2013 the player moved to " : "\u00dcberholt \u2013 der Spieler ist zu ") + (m.ausgangZiel || "?") + (en ? "." : " gewechselt.") : (en ? "No official confirmation in the available sources." : "Keine offizielle Bestätigung in den vorliegenden Quellen.")))),
       h("div", { className: "tw-mv-fusspad", style: { display: "flex", gap: 10, padding: "14px 22px", borderTop: "1px solid " + HAIR, background: "var(--karte)", flex: "none" } },
         knopf([h(IconBookmark, { key: "b", size: 15 }), en ? "Save" : "Merken"], () => { onWatch && onWatch(m); }, true),
         knopf([tkIcon("link", 15), kopiert ? (en ? "Copied" : "Kopiert") : (en ? "Copy link" : "Link kopieren")], kopieren, false))));
@@ -3865,7 +3883,7 @@ function fkFakten(it, kat) {
   else if (kat === "geruecht") f = [zu ? (en ? "Target: " : "Ziel: ") + vn(zu) : (en ? "Target club open" : "Zielverein offen"), it.fee ? it.fee : (en ? "Fee open" : "Ablöse offen"), (Number(it.sourceCount) || 1) + (en ? ((Number(it.sourceCount) || 1) === 1 ? " source" : " sources") : ((Number(it.sourceCount) || 1) === 1 ? " Quelle" : " Quellen"))];
   else if (kat === "vertrag") { const b = fkVertragBis(it); f = [b ? (en ? "until " : "bis ") + b : (en ? "Extension" : "Verlängerung"), fkPosAlter(sp), vn(zu || von)]; }
   else if (kat === "verletzung") f = [(en ? (it.grund_en || twVerlText(it.grund, true) || it.grund_de) : (it.grund_de || twVerlText(it.grund, false))) || (en ? "Injury" : "Verletzung"), it.von ? (en ? "since " : "seit ") + fkDatumDe(it.von) : "", it.bis ? (en ? "until " : "bis ") + fkDatumDe(it.bis) : (en ? "Return open" : "Rückkehr offen")];
-  else if (kat === "trainer") f = [vn(zu || von), istBestaetigt(it) ? (en ? "official" : "offiziell") : (en ? "reported" : "gemeldet"), lg.liga];
+  else if (kat === "trainer") f = [vn(zu || von), twBestaetigt(it) ? (en ? "official" : "offiziell") : (en ? "reported" : "gemeldet"), lg.liga];
   else if (kat === "verein_sucht") f = [typeof seekingClub === "function" ? vn(seekingClub(it) || "") : vn(zu || von), it.position_needed || it.positionNeeded || it.seek || "", lg.liga];
   else f = [vn(von), vn(zu), lg.liga];
   return f.filter(Boolean).slice(0, 3);
@@ -3874,7 +3892,7 @@ function fkIcon(art, size) { const P = { check: "M20 6L9 17l-5-5", frage: "M12 2
 function FkKachel({ k, v }) { const h = React.createElement; return h("div", { style: { padding: "9px 12px", borderRadius: 10, background: "var(--karte)", border: "1px solid " + HAIR, minWidth: 0 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .7, textTransform: "uppercase", color: "var(--t3)" } }, k), h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, color: "var(--t1)", marginTop: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, v || "\u2013")); }
 function FeedDetail({ item, kat, onWatch, onOpen }) {
   const h = React.createElement; const en = LANG === "en"; const it = item; const sp = tkSpieler(it); const lg = tkLiga(it);
-  const sc = signalScore(it); const r = Math.max(0, Math.min(5, Number(it.reliability) || 0)); const best = istBestaetigt(it);
+  const sc = signalScore(it); const best = twBestaetigt(it); const r = twStufe(it);
   const von = it.fromClub || it.from || ""; const zu = it.toClub || it.to || it.seek || ""; const vn = (x) => (typeof clubName === "function" ? clubName(x) : x);
   const text = kurzText(bereinigeText(dS(it), dH(it)), 460);
   const kasten = { padding: "13px 15px", borderRadius: 12, background: "var(--karte)", border: "1px solid " + HAIR };
@@ -3910,7 +3928,7 @@ function FeedKarte(p) { return p && p.item && p.item.type === "leistung" ? React
 function FeedKarteBasis({ item, onWatch, onOpen }) {
   const h = React.createElement; const en = LANG === "en"; const it = item;
   const kat = feedKategorie(it); const ty = TYPE[it.type] || TYPE.geruecht; const meta = kat === "transfer" || kat === "" ? ty : (TYPE[kat] || FEED_KAT_META[kat] || ty);
-  const sp = tkSpieler(it); const lg = tkLiga(it); const sc = signalScore(it); const r = Math.max(0, Math.min(5, Number(it.reliability) || 0)); const best = istBestaetigt(it);
+  const sp = tkSpieler(it); const lg = tkLiga(it); const sc = signalScore(it); const best = twBestaetigt(it); const r = twStufe(it);
   const [offen, setOffen] = React.useState(false);
   const [foto, setFoto] = React.useState(it.photo ? { photo: it.photo } : null);
   const mitFoto = !!sp.name && kat !== "verein_sucht" && kat !== "community" && kat !== "trainer";
@@ -4015,7 +4033,7 @@ function vpQuelle(q) {
 function vpDetail(d) {
   if (!d || LANG !== "en") return d || "";
   return String(d).replace(/^zuletzt /, "last club ").replace(/ bis /g, " until ").replace(/^Wechsel vom /, "transfer on ").replace(/^laut Kaderdaten/, "per squad data").replace(/^seit /, "since ").replace(/^Stand /, "as of ")
-    .replace(/^im Team seit /, "in squad since ").replace(/^im Kader seit /, "in squad since ").replace(/^ausgeliehen seit /, "on loan since ").replace(/^Verein zum Meldungszeitpunkt$/, "club at time of report").replace(/^laut Meldung ohne Vertrag$/, "per report without contract").replace(/^aktueller Verein$/, "current club").replace(/^kein Ziel gefunden$/, "no destination found").replace(/^kein abgebender Verein gefunden$/, "no previous club found");
+    .replace(/^im Team seit /, "in squad since ").replace(/^im Kader seit /, "in squad since ").replace(/^ausgeliehen seit /, "on loan since ").replace(/^Verein zum Meldungszeitpunkt$/, "club at time of report").replace(/^laut Meldung ohne Vertrag$/, "per report without contract").replace(/^aktueller Verein$/, "current club").replace(/^kein Ziel gefunden$/, "no destination found").replace(/^kein abgebender Verein gefunden$/, "no previous club found").replace(/^laut Meldung Vertrag aufgel\u00f6st$/, "per report: contract terminated").replace(/^laut Meldung Karriereende$/, "per report: retired");
 }
 function vpLeer(it, seite) {
   const en = LANG === "en";
@@ -4066,7 +4084,7 @@ const TW_VERL_VERTRAG_RX = /(\bnew (long-term )?(deal|contract)\b|neue[nr]? vert
 const TW_VERL_NEIN_RX = /(\bnicht\b|\bkein|lehnt|abgelehnt|ablehn|verweiger|refuse|reject|turns? down|turned down|won't|will not|no extension|not extend)/i;
 const TW_VERL_LEIHE_RX = /(verlieh|leihe|leihweise|ausgeliehen|on loan|\bloan)/i;
 /* Vertragsmeldung "bleibt beim Verein" (bindet, bleibt, langfristig, Vertrag bis 20xx, Profivertrag) - nicht bei Aufloesung, Abschied, Planung oder Gespraechen */
-const TW_VERL_BLEIB_RX = /(\bbindet\b|\bbleibt\b|langfristig|sichert .{0,30}zukunft|vertrag bis 20\d{2}|contract (until|to) 20\d{2}|profivertrag|jungprofi|profcontract|profvertrag|erste[nrs]? (profi)?vertrag|first (pro|professional) (deal|contract)|\bblijft\b|meerjarig|\bre-signs?\b|\bre-signed\b|signs? (a )?new)/i;
+const TW_VERL_BLEIB_RX = /(\bbindet\b|\bbleibt\b|langfristig|sichert .{0,30}zukunft|vertrag bis 20\d{2}|contract (until|to) 20\d{2}|profi-?vertrag|jungprofi|profcontract|profvertrag|erste[nrs]? (profi-?)?vertrag|first (pro|professional) (deal|contract)|\bblijft\b|meerjarig|\bre-signs?\b|\bre-signed\b|signs? (a )?new)/i;
 const TW_VERL_ENDE_RX = /(aufl(ö|oe)s|aufgel(ö|oe)st|vertragsaufl|rescind|rescisi|ophæv|terminat|entl(ä|ae)ss|entlassen|verl(ä|ae)sst|abschied|karriere|beendet|released|leaves|departure|\bplant\b|\bplans?\b|gespr(ä|ae)ch|fahrplan|angebot|\boffer|\btalks?\b|verhandl|vereinslos|ohne (verein|vertrag|klub)|without (a )?club)/i;
 function twVerlLeer(s) { s = String(s || "").trim(); return !s || VP_LEER_RX.test(s) || VP_VL_RX.test(s); }
 function twIstVerl(it) {
@@ -4867,7 +4885,7 @@ function GerVue({ alle, onWatch, onOpen, updatedAt, watch, onSide, apply }) {
         f.typ === "ticker" ? h(TwTickerAnsicht, { daten: twTicker.daten, laden: twTicker.laden, alle: alle, onOpen: onOpen, beobClubs: beobClubs, filter: f, onWatch: onWatch }) : liste.length ? (gAnsicht === "kompakt"
       ? h("div", { className: "tw-gtable", style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, overflow: "hidden" } },
           h("div", { className: "tw-grow tw-ghead" }, [en ? "Time" : "Zeit", en ? "Type" : "Typ", en ? "Club/Player" : "Verein/Spieler", en ? "Move" : "Bewegung", en ? "League" : "Liga", "Status", en ? "Source" : "Quelle"].map(x => h("span", { key: x }, x))),
-          liste.map(it => { const ty = TYPE[it.type] || TYPE.geruecht; const r = Number(it.reliability) || 0; const srcs = (it.sources || []).filter(s => s && s.url); const isNeed = it.type === "verein_sucht"; const von = feldVon(it), zu = feldZu(it), frei = it.type === "vertragslos"; const bewegung = isNeed ? ((en ? "seeks " : "sucht ") + splitPositions(it.positionNeeded).slice(0, 2).join(", ")).trim() : (von && zu ? von + " \u2192 " + zu : frei && zu ? (en ? "Free agent" : "Vertragslos") + " \u2192 " + zu : zu ? (en ? "Target: " : "Ziel: ") + zu : von ? (frei ? (en ? "free agent, last " : "vertragslos, zuletzt ") : (en ? "from " : "von ")) + von : ""); const wer = isNeed ? (seekingClubSafe(it) || it.seek || "") : (feldSp(it) || feldZu(it) || "");
+          liste.map(it => { const ty = TYPE[it.type] || TYPE.geruecht; const r = twStufe(it); const srcs = (it.sources || []).filter(s => s && s.url); const isNeed = it.type === "verein_sucht"; const von = feldVon(it), zu = feldZu(it), frei = it.type === "vertragslos"; const bewegung = isNeed ? ((en ? "seeks " : "sucht ") + splitPositions(it.positionNeeded).slice(0, 2).join(", ")).trim() : (von && zu ? von + " \u2192 " + zu : frei && zu ? (en ? "Free agent" : "Vertragslos") + " \u2192 " + zu : zu ? (en ? "Target: " : "Ziel: ") + zu : von ? (frei ? (en ? "free agent, last " : "vertragslos, zuletzt ") : (en ? "from " : "von ")) + von : ""); const wer = isNeed ? (seekingClubSafe(it) || it.seek || "") : (feldSp(it) || feldZu(it) || "");
             return h("div", { key: it.id, className: "tw-grow", onClick: () => { if (typeof onOpen === "function") onOpen(it); else if (it.url) window.open(it.url, "_blank"); }, title: it.headline },
               h("span", { style: { color: "var(--t3)" } }, zeitAnzeige(it)),
               h("span", { style: { display: "inline-flex", alignItems: "center", gap: 5, fontWeight: 800, color: ty.color, fontSize: 11 } }, h("span", { style: { width: 7, height: 7, borderRadius: 99, background: ty.color, flexShrink: 0 } }), en ? (ty.en || ty.label) : ty.label),
@@ -5387,7 +5405,8 @@ function RouteLine({ item, color }) { if (item && !item._verl && item.fromClub &
   return null;
 }
 function kurzText(text, max) { const t = String(text || "").replace(/\s+/g, " ").trim(); max = max || 280; if (t.length <= max) return t; const teil = t.slice(0, max); const ende = Math.max(teil.lastIndexOf(". "), teil.lastIndexOf("! "), teil.lastIndexOf("? ")); if (ende >= 60) return teil.slice(0, ende + 1); const wort = teil.lastIndexOf(" "); return teil.slice(0, wort > 40 ? wort : max).replace(/[,;:\u00b7-]\s*$/, "") + " \u2026"; }
-function istTrainer(it) { return !!it && (it.type === "trainer" || /^Trainerwechsel:/i.test(String(it.headline || "")) || /Trainerregister/.test(String(it.sourceName || "") + String(it.summary || ""))); }
+/* Auftrag 54 (Punkt 264): Trainer, Co-Trainer und Trainerstab auch ueber die Position erkennen - Trainer-Kategorie statt Spielertransfer */
+function istTrainer(it) { return !!it && (it.type === "trainer" || /^Trainerwechsel:/i.test(String(it.headline || "")) || /Trainerregister/.test(String(it.sourceName || "") + String(it.summary || "")) || /(^tr$|trainer|coach|manager|trainerstab|betreuer|entrenador|allenatore|entra[i\u00ee]neur|treinador|\btrener|edz[o\u0151]|staff)/i.test(String((it.player && typeof it.player === "object" && it.player.position) || it.position || "").trim())); }
 function signalQuelle(it) { const m = String((it && it.summary) || "").match(/\[Signal(?:e)?:\s*([^\]]+)\]/); return m ? m[1].trim() : ""; }
 function bereinigeText(text, headline) { let t = String(text || "").replace(/\s+/g, " ").trim(); t = t.replace(/\s*Strukturierte Marktdaten \u00fcber die TransferWire-Datenpartnerschaft\.\s*/g, " ").replace(/\s*\[Signal(?:e)?:[^\]]*\]\s*/g, " ").replace(/\s*Erfahrungsgem\u00e4\u00df entsteht auf dieser Position Handlungsbedarf[^.]*\.\s*/g, " ").replace(/^Vertragslage:\s*/i, "").replace(/\((\d{4})-(\d{2})\)/g, "($2/$1)").replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g, "$3.$2.$1").replace(/\s+/g, " ").trim(); t = t.replace(/\s*Ein Trainerwechsel ist erfahrungsgem\u00e4\u00df[^.]*\./g, "").replace(/\s*Quelle: [^.]+\.\s*/g, " ").replace(/\s+/g, " ").trim(); const m = t.match(/^(.+?) ist neuer Cheftrainer von (.+?)(?: und folgt auf (.+?))?(?: \(im Amt seit (\d{4}-\d{2}-\d{2})\))?\.\s*/); if (m) { const d = m[4] ? m[4].slice(8, 10) + "." + m[4].slice(5, 7) + "." + m[4].slice(0, 4) : ""; const teile = []; if (m[3]) teile.push((LANG === "en" ? "Successor of " : "Nachfolger von ") + m[3]); if (d) teile.push((LANG === "en" ? "in charge since " : "im Amt seit ") + d); t = (teile.join(" \u00b7 ") + " " + t.slice(m[0].length)).trim(); } return t; }
 function dHClean(it) { return String(dH(it) || "").replace(/^Trainerwechsel:\s*/i, ""); }
@@ -6563,7 +6582,7 @@ function NeedCard({
       padding: "3px 10px",
       borderRadius: 999
     }
-  }, item.fee), ((String(item.summary || "").indexOf("KI-Prognose") >= 0) || /Prognose/.test(String(item.source_name || item.source || "")) || ((item.sources || []).some(x => /Prognose/.test(String(x && x.name || ""))))) && /*#__PURE__*/React.createElement("span", { title: LANG === "en" ? "AI forecast by the TransferWire prediction agent \u2014 not a confirmed report" : "KI-Prognose des TransferWire Prognose-Agenten \u2014 keine best\u00e4tigte Meldung", style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .6, textTransform: "uppercase", padding: "3px 9px", borderRadius: 999, background: "#EEF0FF", color: "#3B44B8", border: "1px solid #C9CEFF" } }, LANG === "en" ? "AI forecast" : "KI-Prognose"), /*#__PURE__*/React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 6 } }, /*#__PURE__*/React.createElement(Reliability, { value: item.reliability, size: 11 }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, "· " + (LANG === "en" ? "reliability " : "Verlässlichkeit ") + (Number(item.reliability) || 0) + "/5"), (Number(item.sourceCount) || 0) > 1 ? /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, " \u00b7 " + item.sourceCount + (LANG === "en" ? " sources confirm" : " Quellen best\u00e4tigen")) : null, item.ausgang ? /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: item.ausgang === "bestaetigt" ? "var(--gruen-text)" : "var(--sc-schwach-text)" } }, " \u00b7 " + (item.ausgang === "bestaetigt" ? (LANG === "en" ? "\u2713 confirmed" : "\u2713 best\u00e4tigt") : (LANG === "en" ? "\u2717 collapsed" : "\u2717 geplatzt"))) : null), (item.sources || []).slice(0, 2).map((s, i) => /*#__PURE__*/React.createElement("a", {
+  }, item.fee), ((String(item.summary || "").indexOf("KI-Prognose") >= 0) || /Prognose/.test(String(item.source_name || item.source || "")) || ((item.sources || []).some(x => /Prognose/.test(String(x && x.name || ""))))) && /*#__PURE__*/React.createElement("span", { title: LANG === "en" ? "AI forecast by the TransferWire prediction agent \u2014 not a confirmed report" : "KI-Prognose des TransferWire Prognose-Agenten \u2014 keine best\u00e4tigte Meldung", style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .6, textTransform: "uppercase", padding: "3px 9px", borderRadius: 999, background: "#EEF0FF", color: "#3B44B8", border: "1px solid #C9CEFF" } }, LANG === "en" ? "AI forecast" : "KI-Prognose"), /*#__PURE__*/React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 6 } }, /*#__PURE__*/React.createElement(Reliability, { value: twStufe(item), size: 11 }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, "· " + (LANG === "en" ? "reliability " : "Verlässlichkeit ") + twStufe(item) + "/5"), (Number(item.sourceCount) || 0) > 1 ? /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, " \u00b7 " + item.sourceCount + (LANG === "en" ? " sources confirm" : " Quellen best\u00e4tigen")) : null, item.ausgang ? /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: item.ausgang === "bestaetigt" ? "var(--gruen-text)" : "var(--sc-schwach-text)" } }, " \u00b7 " + (item.ausgang === "bestaetigt" ? (LANG === "en" ? "\u2713 confirmed" : "\u2713 best\u00e4tigt") : (LANG === "en" ? "\u2717 collapsed" : "\u2717 geplatzt"))) : null), (item.sources || []).slice(0, 2).map((s, i) => /*#__PURE__*/React.createElement("a", {
     key: i,
     href: s.url,
     onClick: e => { e.preventDefault(); e.stopPropagation(); if (s.url) window.open(s.url, "_blank"); },
