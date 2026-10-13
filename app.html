@@ -1125,9 +1125,25 @@ function twAuthFehler(d) {
   return t("e_server");
 }
 (function () {   // abgelaufene oder ersetzte Anmeldung: Schnittstellen antworten mit 401 + X-TW-Auth -> Ereignis fuer die App
+  // Punkt 246 (Auftrag 50, 13.10.2026): Anfragen an die eigenen Schnittstellen (/api/, /db/) tragen die Anmeldung im Kopf X-TW-Sitzung
   try {
     const orig = window.fetch.bind(window);
+    const eigen = function (u) {
+      try { const x = new URL(u, location.href); return x.origin === location.origin && (x.pathname.indexOf("/api/") === 0 || x.pathname.indexOf("/db/") === 0); } catch (e) { return false; }
+    };
     window.fetch = function (input, init) {
+      try {
+        const u = typeof input === "string" ? input : (typeof URL !== "undefined" && input instanceof URL ? input.href : "");
+        if (u && eigen(u)) {
+          const a = loadAccount() || {};
+          const s = String(a.sitzung || a.code || a.zugangscode || "");
+          if (s && s.length <= 200 && encodeURIComponent(s) === s) {
+            const k = new Headers((init && init.headers) || {});
+            if (!k.has("X-TW-Sitzung")) k.set("X-TW-Sitzung", s);
+            init = Object.assign({}, init || {}, { headers: k });
+          }
+        }
+      } catch (e) {}
       return orig(input, init).then(function (r) {
         try {
           if (r && r.status === 401) {
@@ -3911,6 +3927,7 @@ function FeedKarteBasis({ item, onWatch, onOpen }) {
     offen ? h("div", { onClick: (e) => e.stopPropagation(), style: { padding: "0 16px 16px", cursor: "default" } }, h(FeedDetail, { item: it, kat: kat, onWatch: onWatch, onOpen: onOpen })) : null);
 }
 
+/* 226 (Auftrag 50): Vereinspruefung mit keepalive - laeuft beim Neuladen/Verlassen der Seite zu Ende (WebKit meldete abgebrochene Anfragen als Fehler). */
 /* 22 Vereinsprüfung Transferkarten (05.10.2026): fehlende, unbekannte oder ungesicherte Vereinsangaben werden im Hintergrund geprüft (POST /api/tw-vereinspruefung) und in die vorhandenen Felder übernommen. */
 const VP = { erg: {}, warte: {}, gesendet: {}, timer: null, queue: [], neu: null, letzte: [], nachlauf: null };
 const VP_LEER_RX = /^(|[-?\u2014\u2013]+|unbekannt|unknown|n\/?a|tbd|tbc|tba|offen|open|k\.? ?a\.?|keine angabe)$/i;
@@ -3940,7 +3957,7 @@ function vpSenden() {
   VP.timer = null; const ids = VP.queue.splice(0, 60); if (!ids.length) return;
   const jetzt = Date.now(); ids.forEach((id) => { VP.gesendet[id] = jetzt; });
   if (typeof VP.neu === "function") VP.neu();
-  fetch("/api/tw-vereinspruefung", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids: ids }) })
+  fetch("/api/tw-vereinspruefung", { method: "POST", keepalive: true, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids: ids }) })
     .then((r) => (r.ok ? r.json() : null))
     .then((d) => { const e = d && d.ergebnisse; if (e && typeof e === "object") Object.keys(e).forEach((k) => { if (e[k] && !e[k].fehler) VP.erg[k] = e[k]; }); })
     .catch(() => { })
