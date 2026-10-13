@@ -305,6 +305,8 @@ html.tw-dark .tw-sn-upgrade { color: #096B3C !important; border-color: #096B3C !
 /* 124 Nachtrag: weitere hart codierte Farben je Thema */
 :root [style*="color: rgb(138, 90, 0)"] { color: #E6B04A !important; }
 :root [style*="color: rgb(176, 74, 58)"] { color: #F07A66 !important; }
+/* 250 (Auftrag 49): Faehigkeits-Pille bis 35 im dunklen Thema roetlich-transparent statt hellrosa (Kontrast 2,33 -> 5,3:1) */
+:root:not(.tw-dark) [style*="rgb(251, 233, 231)"] { background: rgba(176, 74, 58, 0.16) !important; }
 :root [style*="color: rgb(180, 35, 24)"] { color: #ff8a80 !important; }
 html.tw-dark [style*="color: rgb(180, 35, 24)"] { color: #B42318 !important; }
 :root [style*="rgb(253, 232, 230)"][style*="color"], :root [style*="rgb(253, 232, 230)"] [style*="color"] { color: #B42318 !important; }
