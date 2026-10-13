@@ -3785,7 +3785,7 @@ function TransferPanel({ m, schliessen, onWatch }) {
   const r = Math.max(0, Math.min(5, Number(m.reliability) || 0)); const best = istBestaetigt(m); const sp = tkSpieler(m); const lg = tkLiga(m);
   const [kopiert, setKopiert] = React.useState(false);
   useScrollSperre(true); useTwZurueck(true, schliessen);
-  const tpGleich = twGleicherVerein(m.fromClub || m.from, m.toClub || m.to || m.seek);
+  const tpGleich = !m._verl && twGleicherVerein(m.fromClub || m.from, m.toClub || m.to || m.seek);
   const quellen = (m.sources || []).filter(s => s && (s.name || s.url)); const q1 = quellen[0] || (m.url ? { name: tkQuelle(m), url: m.url } : null);
   const relWort = r ? ((en ? RELIABILITY_EN[r] : RELIABILITY[r]) || "") : "";
   const chip = (text, farbe, bg, punkt) => h("span", { style: { display: "inline-flex", alignItems: "center", gap: 6, fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 700, color: farbe, background: bg, padding: "4px 10px", borderRadius: 999, whiteSpace: "nowrap" } }, punkt ? h("span", { style: { width: 6, height: 6, borderRadius: 99, background: farbe } }) : null, text);
@@ -3942,7 +3942,9 @@ function FeedKarteBasis({ item, onWatch, onOpen }) {
 
 /* 226 (Auftrag 50): Vereinspruefung mit keepalive - laeuft beim Neuladen/Verlassen der Seite zu Ende (WebKit meldete abgebrochene Anfragen als Fehler). */
 /* 22 Vereinsprüfung Transferkarten (05.10.2026): fehlende, unbekannte oder ungesicherte Vereinsangaben werden im Hintergrund geprüft (POST /api/tw-vereinspruefung) und in die vorhandenen Felder übernommen. */
-const VP = { erg: {}, warte: {}, gesendet: {}, timer: null, queue: [], neu: null, letzte: [], nachlauf: null };
+const VP = { erg: {}, warte: {}, gesendet: {}, timer: null, queue: [], neu: null, letzte: [], nachlauf: null, hoerer: new Set() };
+/* Auftrag 53: neue Pruefergebnisse auch an weitere Listen melden (Spielerprofil-News) */
+function vpMelden() { if (typeof VP.neu === "function") VP.neu(); VP.hoerer.forEach((f) => { try { f(); } catch (e) { } }); }
 const VP_LEER_RX = /^(|[-?\u2014\u2013]+|unbekannt|unknown|n\/?a|tbd|tbc|tba|offen|open|k\.? ?a\.?|keine angabe)$/i;
 const VP_VL_RX = /(vereinslos|free agents?|without (a )?club|ohne verein|clubless|vertragslos|sans club|svincolat|senza squadra|sin equipo|libre)/i;
 const VP_TYPEN = { fix: 1, leihe: 1, trade: 1, geruecht: 1, vertragslos: 1, vertrag: 1, vertrag_verlaengert: 1 };
@@ -3952,9 +3954,9 @@ function vpBraucht(it) {
   const o = vpOrig(it); const v = String(o.fromClub || o.from || "").trim(); const n = String(o.toClub || o.to || "").trim();
   return VP_LEER_RX.test(v) || VP_VL_RX.test(v) || VP_LEER_RX.test(n) || VP_VL_RX.test(n);
 }
-function vpAnfordern(liste) {
+function vpAnfordern(liste, nurDazu) {
   try {
-    if (Array.isArray(liste) && liste.length) VP.letzte = liste;
+    if (!nurDazu && Array.isArray(liste) && liste.length) VP.letzte = liste;
     const jetzt = Date.now();
     (liste || []).forEach((it) => {
       if (!vpBraucht(it)) return; const id = String(it.id); const r = VP.erg[id]; const zuletzt = VP.gesendet[id] || 0;
@@ -3969,12 +3971,12 @@ function vpAnfordern(liste) {
 function vpSenden() {
   VP.timer = null; const ids = VP.queue.splice(0, 60); if (!ids.length) return;
   const jetzt = Date.now(); ids.forEach((id) => { VP.gesendet[id] = jetzt; });
-  if (typeof VP.neu === "function") VP.neu();
+  vpMelden();
   fetch("/api/tw-vereinspruefung", { method: "POST", keepalive: true, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids: ids }) })
     .then((r) => (r.ok ? r.json() : null))
     .then((d) => { const e = d && d.ergebnisse; if (e && typeof e === "object") Object.keys(e).forEach((k) => { if (e[k] && !e[k].fehler) VP.erg[k] = e[k]; }); })
     .catch(() => { })
-    .then(() => { ids.forEach((id) => { delete VP.warte[id]; }); if (typeof VP.neu === "function") VP.neu(); if (VP.queue.length && !VP.timer) VP.timer = setTimeout(vpSenden, 200); });
+    .then(() => { ids.forEach((id) => { delete VP.warte[id]; }); vpMelden(); if (VP.queue.length && !VP.timer) VP.timer = setTimeout(vpSenden, 200); });
 }
 function vpAnwenden(it) {
   if (!it || !it.id) return it;
@@ -4008,12 +4010,12 @@ function vpAnwenden(it) {
 }
 function vpQuelle(q) {
   if (LANG !== "en") return q || "";
-  return ({ "Sportmonks-Transferregister": "Sportmonks transfer register", "Transfermarkt-Profil": "Transfermarkt profile", "Transfermarkt-Profil (Leihe)": "Transfermarkt profile (loan)", "Vereinshistorie": "club history", "Datenbank-Stand": "database", "Datenbank: letzter Verein": "database: previous club", "Datenbank (Kader)": "database (squad)", "Datenbank (Transfermarkt)": "database (Transfermarkt)", "KI-Pr\u00fcfung": "AI check", "Meldung": "report" })[q] || q || "";
+  return ({ "Sportmonks-Transferregister": "Sportmonks transfer register", "Transfermarkt-Profil": "Transfermarkt profile", "Transfermarkt-Profil (Leihe)": "Transfermarkt profile (loan)", "Vereinshistorie": "club history", "Datenbank-Stand": "database", "Datenbank: letzter Verein": "database: previous club", "Datenbank (Kader)": "database (squad)", "Datenbank (Transfermarkt)": "database (Transfermarkt)", "KI-Pr\u00fcfung": "AI check", "Meldung": "report", "Vertragsverlängerung": "contract extension", "Recherche": "research", "Transferregister": "transfer register" })[q] || q || "";
 }
 function vpDetail(d) {
   if (!d || LANG !== "en") return d || "";
   return String(d).replace(/^zuletzt /, "last club ").replace(/ bis /g, " until ").replace(/^Wechsel vom /, "transfer on ").replace(/^laut Kaderdaten/, "per squad data").replace(/^seit /, "since ").replace(/^Stand /, "as of ")
-    .replace(/^im Team seit /, "in squad since ").replace(/^im Kader seit /, "in squad since ").replace(/^ausgeliehen seit /, "on loan since ").replace(/^Verein zum Meldungszeitpunkt$/, "club at time of report").replace(/^laut Meldung ohne Vertrag$/, "per report without contract");
+    .replace(/^im Team seit /, "in squad since ").replace(/^im Kader seit /, "in squad since ").replace(/^ausgeliehen seit /, "on loan since ").replace(/^Verein zum Meldungszeitpunkt$/, "club at time of report").replace(/^laut Meldung ohne Vertrag$/, "per report without contract").replace(/^aktueller Verein$/, "current club").replace(/^kein Ziel gefunden$/, "no destination found").replace(/^kein abgebender Verein gefunden$/, "no previous club found");
 }
 function vpLeer(it, seite) {
   const en = LANG === "en";
@@ -4024,6 +4026,8 @@ function vpLeer(it, seite) {
 }
 function vpTitel(it, seite) {
   const x = it && it._vp && it._vp[seite];
+  /* Auftrag 53: Recherche ohne Ergebnis sichtbar machen - Ziel bzw. abgebender Verein (die Meldung erscheint erst nach dieser Pruefung) */
+  if (x && x.status === "unbekannt" && x.quelle === "Recherche") { const en0 = LANG === "en"; const am0 = String(it._vp.geprueft_am || ""); const z0 = am0 ? (en0 ? am0.replace("T", " ") : am0.slice(8, 10) + "." + am0.slice(5, 7) + "." + am0.slice(0, 4) + ", " + am0.slice(11, 16)) : ""; return (seite === "von" ? (en0 ? "Researched: previous club not found" : "Recherchiert: abgebender Verein nicht gefunden") : (en0 ? "Researched: no destination found" : "Recherchiert: kein Ziel gefunden")) + (z0 ? " · " + z0 : ""); }
   if (!x || !/^(ergaenzt|bestaetigt|vereinslos|ki)$/.test(x.status || "") || x.quelle === "Meldung") return undefined;
   const en = LANG === "en"; const am = String(it._vp.geprueft_am || "");
   const zeit = am ? (en ? am.replace("T", " ") : am.slice(8, 10) + "." + am.slice(5, 7) + "." + am.slice(0, 4) + ", " + am.slice(11, 16)) : "";
@@ -4038,7 +4042,7 @@ function vpZeile(m, seite) {
 const KORR = { map: null, laedt: false };
 function korrLaden() {
   if (KORR.map || KORR.laedt) return; KORR.laedt = true;
-  fetch("/api/tw-korrekturen").then((r) => (r.ok ? r.json() : null)).then((d) => { KORR.map = (d && d.korrekturen) || {}; if (typeof VP.neu === "function") VP.neu(); }).catch(() => { KORR.laedt = false; });
+  fetch("/api/tw-korrekturen").then((r) => (r.ok ? r.json() : null)).then((d) => { KORR.map = (d && d.korrekturen) || {}; vpMelden(); }).catch(() => { KORR.laedt = false; });
 }
 function korrAnwenden(it) {
   const k = KORR.map && it && KORR.map[String(it.id)]; if (!k) return it;
@@ -4052,7 +4056,42 @@ function twAufbereiten(x) {
   if (!x || typeof x !== "object") return x;
   const roh = x._roh || x; const k = korrAnwenden(roh); const y = Object.assign({}, k); y._roh = roh;
   delete y._vpOrig; delete y._vp; delete y._vpWarte;
-  return vpAnwenden(y);
+  return twVerlAnwenden(vpAnwenden(y));
+}
+/* Auftrag 53 (13.10.2026): Vertragsverlaengerung = kein Vereinswechsel. Die fehlende Seite bekommt den aktuellen Verein
+   (er kommt von dort und bleibt dort) - Karten, Details, Newsfeed und Spielerprofil zeigen fuer eine Verlaengerung nie "Verein unbekannt".
+   Gleiche Regeln wie tw_ist_verlaengerung in der Datenbank. */
+const TW_VERL_RX = /(verl(ä|ae)nger|\bextends?\b|\bextended\b|\bextension\b|\brenews?\b|\brenewal\b)/i;
+const TW_VERL_VERTRAG_RX = /(\bnew (long-term )?(deal|contract)\b|neue[nr]? vertrag)/i;
+const TW_VERL_NEIN_RX = /(\bnicht\b|\bkein|lehnt|abgelehnt|ablehn|verweiger|refuse|reject|turns? down|turned down|won't|will not|no extension|not extend)/i;
+const TW_VERL_LEIHE_RX = /(verlieh|leihe|leihweise|ausgeliehen|on loan|\bloan)/i;
+/* Vertragsmeldung "bleibt beim Verein" (bindet, bleibt, langfristig, Vertrag bis 20xx, Profivertrag) - nicht bei Aufloesung, Abschied, Planung oder Gespraechen */
+const TW_VERL_BLEIB_RX = /(\bbindet\b|\bbleibt\b|langfristig|sichert .{0,30}zukunft|vertrag bis 20\d{2}|contract (until|to) 20\d{2}|profivertrag|jungprofi|profcontract|profvertrag|erste[nrs]? (profi)?vertrag|first (pro|professional) (deal|contract)|\bblijft\b|meerjarig|\bre-signs?\b|\bre-signed\b|signs? (a )?new)/i;
+const TW_VERL_ENDE_RX = /(aufl(ö|oe)s|aufgel(ö|oe)st|vertragsaufl|rescind|rescisi|ophæv|terminat|entl(ä|ae)ss|entlassen|verl(ä|ae)sst|abschied|karriere|beendet|released|leaves|departure|\bplant\b|\bplans?\b|gespr(ä|ae)ch|fahrplan|angebot|\boffer|\btalks?\b|verhandl|vereinslos|ohne (verein|vertrag|klub)|without (a )?club)/i;
+function twVerlLeer(s) { s = String(s || "").trim(); return !s || VP_LEER_RX.test(s) || VP_VL_RX.test(s); }
+function twIstVerl(it) {
+  if (!it) return false; const ty = String(it.type || "").toLowerCase();
+  if (ty !== "vertrag_verlaengert" && ty !== "vertrag" && ty !== "fix" && ty !== "geruecht") return false;
+  const t = String(it.headline || "") + " " + String(it.headline_en || "");
+  if (TW_VERL_LEIHE_RX.test(t) || TW_VERL_NEIN_RX.test(t)) return false;
+  if (ty === "vertrag_verlaengert") return true;
+  const verl = TW_VERL_RX.test(t), vtr = ty === "vertrag" && TW_VERL_VERTRAG_RX.test(t);
+  const bleib = ty === "vertrag" && TW_VERL_BLEIB_RX.test(t) && !TW_VERL_ENDE_RX.test(t);
+  if (!(verl || vtr || bleib)) return false;
+  const v = it.fromClub || it.from, n = it.toClub || it.to;
+  if ((ty === "fix" || ty === "geruecht" || !(verl || vtr)) && !twVerlLeer(v) && !twVerlLeer(n) && !twGleicherVerein(v, n)) return false;
+  return true;
+}
+function twVerlAnwenden(y) {
+  if (!y || !twIstVerl(y)) return y;
+  const v = String(y.fromClub || y.from || "").trim(), n = String(y.toClub || y.to || "").trim();
+  const neu = Object.assign({}, y, { _verl: 1 });
+  if (!twVerlLeer(n) && (twVerlLeer(v) || ((y.type === "vertrag" || y.type === "vertrag_verlaengert") && !twGleicherVerein(v, n)))) { neu.fromClub = n; neu.from = n; }
+  else if (twVerlLeer(n) && !twVerlLeer(v)) { neu.toClub = v; neu.to = v; }
+  /* nur ausdrueckliche Verlaengerungen werden als "Verlaengert" gefuehrt; "bleibt beim Verein" (z. B. Profivertrag) behaelt den Typ Vertrag */
+  const tt = String(y.headline || "") + " " + String(y.headline_en || "");
+  if (y.type !== "vertrag_verlaengert" && !(y._korr && y._korr.aktion === "typ") && TYPE.vertrag_verlaengert && !(y.type === "vertrag" && !TW_VERL_RX.test(tt) && !TW_VERL_VERTRAG_RX.test(tt))) { neu._typOrig = y.type; neu.type = "vertrag_verlaengert"; }
+  return neu;
 }
 function twOeffnen(it2, setMSel) {
   if (it2 && it2.type === "leistung" && it2.pid && typeof window.twPerfOeffnen === "function") { window.twPerfOeffnen(it2); return; }
@@ -5332,7 +5371,7 @@ function Badge({
     }
   }), LANG === "en" ? meta.en || meta.label : meta.label);
 }
-function RouteLine({ item, color }) { if (item && item.fromClub && item.toClub && String(item.fromClub).trim().toLowerCase() === String(item.toClub).trim().toLowerCase()) item = Object.assign({}, item, { fromClub: "" });
+function RouteLine({ item, color }) { if (item && !item._verl && item.fromClub && item.toClub && String(item.fromClub).trim().toLowerCase() === String(item.toClub).trim().toLowerCase()) item = Object.assign({}, item, { fromClub: "" });
   const en = LANG === "en";
   const von = String(item.fromClub || "").trim();
   const zu = String(item.toClub || "").trim();
@@ -11051,7 +11090,11 @@ function SpielerNewsListe({ pid, name, onWatch }) {
     fetch("/api/tw-spieler-news?pid=" + encodeURIComponent(pid), { credentials: "omit", cache: "no-store" }).then(r => r.ok ? r.json() : null).then(x => { const y = x && Array.isArray(x.items) ? x : { items: [], fehler: true }; TW_SN[pid] = { d: y, t: Date.now() }; if (ok) setD(y); }).catch(() => { if (ok) setD({ items: [], fehler: true }); });
     return () => { ok = false; }; }, [pid]);
   React.useEffect(() => { if (!sel) return; const k = e => { if (e.key === "Escape") setSel(null); }; document.addEventListener("keydown", k); return () => document.removeEventListener("keydown", k); }, [sel]);
-  const items = React.useMemo(() => ((d && d.items) || []).map(it => typeof normItem === "function" ? Object.assign(normItem(it), { pid: it.pid || pid }) : it).sort((a, b) => muTs(b) - muTs(a)), [d]);
+  /* Auftrag 53: Profil-News wie der Newsfeed aufbereiten (Korrekturen, Vereinspruefung, Verlaengerungen); neue Pruefergebnisse zeichnen neu */
+  const [vpTakt, setVpTakt] = React.useState(0);
+  React.useEffect(() => { const f = () => setVpTakt((x) => x + 1); VP.hoerer.add(f); korrLaden(); return () => { VP.hoerer.delete(f); }; }, []);
+  const items = React.useMemo(() => ((d && d.items) || []).map(it => typeof normItem === "function" ? Object.assign(normItem(it), { pid: it.pid || pid }) : it).map(twAufbereiten).sort((a, b) => muTs(b) - muTs(a)), [d, vpTakt]);
+  React.useEffect(() => { if (items.length) vpAnfordern(items, true); }, [d]);
   const seit = d && d.seit ? twDatumKurz(String(d.seit).slice(0, 10)) : "";
   return h("div", { className: "tw-spn" },
     h("div", { className: "tw-spn-kopf" }, h("span", null, en ? "News from the last 30 days" : "News der letzten 30 Tage"), h("span", { className: "tw-spn-zahl" }, d ? items.length + (en ? (items.length === 1 ? " report" : " reports") : (items.length === 1 ? " Meldung" : " Meldungen")) + (seit ? (en ? " · since " : " · seit ") + seit : "") : "")),
