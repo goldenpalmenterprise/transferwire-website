@@ -3,6 +3,33 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<style>html.tw-handy85{-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation}</style>
+<script>/* Auftrag 47 (Punkt 93, Freigabe 12.10.): Handyansicht 85 % (Variante 2). Auf Handys im Hochformat wird die Layoutbreite auf
+   Bildschirmbreite / 0,85 gesetzt (390 px -> 459 px), dadurch erscheinen Schrift, Abstaende, Symbole und Karten gleichmaessig auf 85 %.
+   Querformat, Tablets (kurze Seite ab 600 px) und Desktop bleiben unveraendert. Eine Seite mit maximum-scale (App) bleibt ohne Zoom. */
+(function(){try{
+  var m=document.querySelector('meta[name="viewport"]'); if(!m) return;
+  var basis=m.getAttribute("content")||"", F=0.85, ohneZoom=/maximum-scale/.test(basis), wurzel=document.documentElement;
+  function hoch(){
+    try{ if(screen.orientation&&screen.orientation.type) return screen.orientation.type.indexOf("portrait")===0; }catch(e){}
+    if(typeof window.orientation==="number") return Math.abs(window.orientation)!==90;
+    return (screen.height||0)>=(screen.width||0);
+  }
+  function setzen(){
+    var kurz=Math.min(screen.width||0,screen.height||0);
+    var touch=(navigator.maxTouchPoints||0)>0||("ontouchstart" in window);
+    var an=touch&&kurz>=280&&kurz<600&&hoch(), inhalt=basis;
+    if(an){
+      var b=Math.round(kurz/F), s=Math.floor(kurz/b*1e6)/1e6;
+      inhalt="width="+b+", initial-scale="+s+(ohneZoom?", minimum-scale="+s+", maximum-scale="+s:"")+", viewport-fit=cover";
+    }
+    if(m.getAttribute("content")!==inhalt) m.setAttribute("content",inhalt);
+    if(an) wurzel.classList.add("tw-handy85"); else wurzel.classList.remove("tw-handy85");
+  }
+  setzen();
+  window.addEventListener("orientationchange",function(){setzen();setTimeout(setzen,250);});
+  try{ if(screen.orientation&&screen.orientation.addEventListener) screen.orientation.addEventListener("change",setzen); }catch(e){}
+}catch(e){}})();</script>
 <title>TransferWire — Transfer news & club needs</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -6234,7 +6261,7 @@ function MobilNav({ view, setView, items, news, needsBySport, onNavigate, onScou
       h("div", { onClick: () => setOffen(false), style: { position: "absolute", inset: 0, background: "rgba(15,21,32,.5)" } }),
       h("nav", { className: "tw-mobnav", style: { position: "absolute", top: 0, left: 0, bottom: 0, width: "min(320px, 86vw)", background: "var(--karte)", boxShadow: "12px 0 40px rgba(15,21,32,.3)", display: "flex", flexDirection: "column", overflowY: "auto" } },
         h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderBottom: "1px solid " + HAIR } }, h("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 20, letterSpacing: 1, color: INK } }, "TRANSFER", React.createElement("span", { className: "tw-wire-gold", style: { color: "#DDB65F" } }, "WIRE")), h("button", { onClick: () => setOffen(false), "aria-label": en ? "Close" : "Schlie\u00dfen", style: { width: 36, height: 36, borderRadius: 99, border: "1px solid " + HAIR, background: "var(--karte)", cursor: "pointer", fontSize: 16, fontWeight: 800, color: "var(--t2)" } }, "\u2715")),
-        h("div", { className: "tw-mobnav-inhalt", style: { flex: 1, display: "flex", flexDirection: "column", minHeight: 0 } }, h(SeitenleisteNeu, { view: view, setView: k => { setView(k); setOffen(false); try { window.scrollTo({ top: 0 }); } catch (e) {} }, news: news, needsBySport: needsBySport, onNavigate: onNavigate, onScout: () => { setOffen(false); if (onScout) onScout(); } })))), document.body) : null);
+        h("div", { className: "tw-mobnav-inhalt", style: { flex: 1, display: "flex", flexDirection: "column", minHeight: 0 } }, h(SeitenleisteNeu, { view: view, setView: k => { setView(k); setOffen(false); try { window.scrollTo({ top: 0 }); } catch (e) {} }, news: news, needsBySport: needsBySport, onNavigate: p => { setOffen(false); onNavigate(p); }, onScout: () => { setOffen(false); if (onScout) onScout(); } })))), document.body) : null);
 }
 function VereinGeprueft({ pid }) {
   const h = React.createElement; const en = LANG === "en";
@@ -6613,7 +6640,7 @@ function AgbContent() {
     style: {
       margin: 0
     }
-  }, "Die Zahlung erfolgt per Karte, Apple Pay, Google Pay oder PayPal über den Zahlungsdienstleister Stripe. Nach erfolgreicher Zahlung wird der Zugang automatisch freigeschaltet; der persönliche Zugangscode wird per E-Mail übermittelt und ist zusammen mit der E-Mail-Adresse für die Anmeldung erforderlich.")), /*#__PURE__*/React.createElement(LegalSection, {
+  }, "Die Zahlung erfolgt per Karte, Apple Pay, Google Pay oder PayPal über den Zahlungsdienstleister Stripe. Nach erfolgreicher Zahlung wird der Zugang automatisch freigeschaltet; der persönliche Zugangscode wird per E-Mail übermittelt; er dient der ersten Anmeldung, danach erfolgt die Anmeldung mit E-Mail-Adresse und Passwort.")), /*#__PURE__*/React.createElement(LegalSection, {
     title: "6. Widerrufsrecht"
   }, /*#__PURE__*/React.createElement("p", {
     style: {
@@ -6638,7 +6665,7 @@ function AgbContent() {
       color: MUTED,
       margin: 0
     }
-  }, "Stand: August 2026"));
+  }, "Stand: Oktober 2026"));
 }
 const LEGAL_TITLES = {
   impressum: "Impressum",
@@ -11118,7 +11145,7 @@ function twLaenderListe(vereine, en) {
 
 function TransferApp({
   account,
-  onNavigate,
+  onNavigate: onNavigateSeite,
   onLogout
 }) {
   const isPrem = !!account && account.plan === "premium";
@@ -11681,6 +11708,7 @@ function TransferApp({
       .catch(() => setWr({ an: vorher, speichert: false, fehler: "speichern" }));
   };
   const [legal, setLegal] = useState(null); // null | "impressum" | "datenschutz"
+  const onNavigate = p => (p === "impressum" || p === "datenschutz" || p === "agb") ? setLegal(p) : onNavigateSeite(p); // Auftrag 47: Rechtstexte als Ebene ueber der App (vorher ueber die Startseite zurueck in die App)
   const [showSettings, setShowSettings] = useState(false);
   React.useEffect(() => { if (!showSettings) return; twScrollSperre(true); return () => twScrollSperre(false); }, [!!showSettings]);
   const [news, setNews] = useState(NEWS.filter(i => i.sport === "fussball"));
