@@ -75,7 +75,7 @@
 .tw-main select, .tw-main input:not([type="checkbox"]):not([type="radio"]), .tw-main textarea { min-height:44px !important; border-radius:10px !important; border:1px solid var(--linie) !important; background:var(--karte); }
 .tw-main textarea { min-height:96px !important; }
 .tw-main > div > h2, .tw-main > section > h2, .tw-main > div > div > h2:first-child { font-size:30px !important; line-height:38px !important; margin:0 0 6px !important; }
-.tw-main > div > h2 + p, .tw-main > section > h2 + p, .tw-main > div > h2 + div { font-size:14.5px !important; line-height:1.5 !important; color:#667085 !important; margin:0 0 22px !important; }
+.tw-main > div > h2 + p, .tw-main > section > h2 + p, .tw-main > div > h2 + div { font-size:14.5px !important; line-height:1.5 !important; color:var(--t2) !important; margin:0 0 22px !important; }
 .tw-tile { border:1px solid var(--linie) !important; border-radius:14px !important; }
 .tw-tile:hover { border-color:var(--linie2) !important; box-shadow:0 8px 24px rgba(15,23,42,.06) !important; }
   .tw-card { transition: box-shadow .18s ease, transform .18s ease, border-color .18s ease; }
@@ -252,7 +252,7 @@ div[style*="z-index: 1100"] > div { border-color: var(--linie2) !important; }
 /* Hierarchie & Lesbarkeit */
 .tw-main table tbody tr:nth-child(even) > td { background: var(--zebra); }
 .tw-main th { color: var(--t3) !important; }
-select:disabled, input:disabled, textarea:disabled { color: var(--aus) !important; opacity: 1 !important; }
+select:disabled, input:disabled, textarea:disabled { color: var(--t3) !important; -webkit-text-fill-color: var(--t3) !important; opacity: 1 !important; }
 button:disabled { opacity: .5 !important; }
 .tw-main select:disabled { background: var(--karte2) !important; border-color: var(--linie) !important; }
 .tw-main span[style*="background: rgb(34, 197, 94)"], .tw-main div[style*="background: rgb(34, 197, 94)"][style*="border-radius"] { background: var(--sc-hi-bg) !important; border: 1px solid var(--sc-hi-rand) !important; color: var(--sc-hi-text) !important; }
@@ -331,6 +331,19 @@ html.tw-dark .tw-pm-tip { --sc-hi-text: #4ADE8A; --sc-gut-text: #7EE2A8; --sc-mi
 [style*="rgb(253, 243, 218)"][style*="color"], [style*="rgb(253, 243, 218)"] [style*="color"], [style*="rgb(250, 240, 216)"][style*="color"], [style*="rgb(250, 240, 216)"] [style*="color"] { color: #7A4F00 !important; }
 [style*="rgb(228, 244, 235)"][style*="color"], [style*="rgb(228, 244, 235)"] [style*="color"], [style*="rgb(226, 243, 234)"][style*="color"], [style*="rgb(226, 243, 234)"] [style*="color"], [style*="rgb(232, 247, 238)"][style*="color"], [style*="rgb(232, 247, 238)"] [style*="color"] { color: #0B6E3F !important; }
 :root:not(.tw-dark) [style*="color: rgb(102, 112, 133)"] { color: #9AA3B2 !important; }
+/* 52 (Auftrag 52, 13.10.2026): Platzhalter je Thema lesbar (vorher Browser-Grau 3,2-3,6:1), Zuverlaessigkeitsfarben im hellen Thema */
+::placeholder { color: var(--t3); opacity: 1; }
+html.tw-dark [style*="color: rgb(95, 165, 21)"] { color: #3F7A0F !important; }
+html.tw-dark [style*="color: rgb(207, 122, 26)"] { color: #9E520A !important; }
+/* 52: Ersatzspieler-Chip der Elf des Spieltags liegt in beiden Themen auf dunkler Kachel -> helle Score-Schrift */
+.tw-joker { --sc-hi-text: #4ADE8A; --sc-gut-text: #7EE2A8; --sc-mittel-text: #F2C14E; --sc-schwach-text: #F5A090; }
+/* 52: Verein sucht (verein-sucht.css) - die Grundregel ".vs-app button, .vs-app input {color: inherit}" ueberstimmte Klassenfarben (Goldknopf hell auf Gold, weisse Felder mit heller Schrift) */
+.vs-app .sm-gruen { color: var(--gold-schrift); font-weight: 800; }
+.vs-app .sm-eingabe, .vs-app .sm-tag { background: var(--karte); color: var(--t1); border-color: var(--linie2); }
+.vs-app .sm-tag.ist-an { background: var(--gold); border-color: var(--gold); color: var(--gold-schrift); }
+.vs-app .sm-tags.ist-schwach .sm-tag.ist-an { background: #c4533f; border-color: #c4533f; color: #fff; }
+.vs-app .sm-eingabe::placeholder { color: var(--t3); opacity: 1; }
+body .k3-marker, body .vs-useite b[data-zahl]:after { color: var(--seite); }
 </style>
 <!-- tw-build: 2026-08-28-br suchemobil3 -->
 </style>
@@ -1698,7 +1711,7 @@ const I18N = {
     role_scout: "Scout",
     role_club: "Verein",
     role_other: "Sonstiges",
-    r_consent: "Ich willige ein, dass mir TransferWire (Golden Palm Enterprise) Werbe-E-Mails zu Produkt-Updates und Angeboten sendet. Die Einwilligung kann ich jederzeit per E-Mail an info@transferwire.de widerrufen. ",
+    r_consent: "Ich willige ein, dass mir TransferWire (RATH ENTERPRISES) Werbe-E-Mails zu Produkt-Updates und Angeboten sendet. Die Einwilligung kann ich jederzeit per E-Mail an info@transferwire.de widerrufen. ",
     r_consent_b: "Diese Einwilligung ist Voraussetzung für den kostenlosen Test.",
     legal_pre: "Ich habe die ",
     legal_and: " und die ",
@@ -2053,7 +2066,7 @@ const I18N = {
     role_scout: "Scout",
     role_club: "Club",
     role_other: "Other",
-    r_consent: "I agree that TransferWire (Golden Palm Enterprise) may send me marketing e-mails about product updates and offers. I can revoke this consent at any time by e-mailing info@transferwire.de. ",
+    r_consent: "I agree that TransferWire (RATH ENTERPRISES) may send me marketing e-mails about product updates and offers. I can revoke this consent at any time by e-mailing info@transferwire.de. ",
     r_consent_b: "This consent is required for the free trial.",
     legal_pre: "I have read and accept the ",
     legal_and: " and the ",
@@ -3021,7 +3034,7 @@ function FeedSuche({ q, setQ, club, setClub, alle, watch, geheZu, fs, setFs, inl
       React.createElement("span", { style: { flex: 1 } }),
       gesp.length ? lab(en ? "Saved" : "Gespeichert") : null,
       gesp.map((e2, i2) => pill(false, () => wende(e2), "g-" + i2, [React.createElement("span", { key: "n", style: { overflow: "hidden", textOverflow: "ellipsis" } }, "\u25CE " + e2.n), React.createElement("span", { key: "x", onClick: ev => { ev.stopPropagation(); loesche(i2); }, title: en ? "Delete" : "L\u00f6schen", style: { color: "var(--t3)", fontSize: 11, marginLeft: 2 } }, "\u2715")], en ? "Apply saved filter" : "Gespeicherten Filter anwenden")),
-      React.createElement("button", { onClick: speichere, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 900, color: "#0f1520", background: "var(--karte2)", border: "1px solid " + HAIR, borderRadius: 8, cursor: "pointer", padding: "6px 10px", whiteSpace: "nowrap" } }, "+ " + (en ? "Save current filter" : "Aktuellen Filter speichern")));
+      React.createElement("button", { onClick: speichere, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 900, color: "var(--t1)", background: "var(--karte2)", border: "1px solid " + HAIR, borderRadius: 8, cursor: "pointer", padding: "6px 10px", whiteSpace: "nowrap" } }, "+ " + (en ? "Save current filter" : "Aktuellen Filter speichern")));
   }
   return React.createElement("div", { style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, position: "sticky", top: 64, padding: "14px 16px" } },
     React.createElement("div", { style: { fontFamily: FONT_BODY, fontWeight: 800, fontSize: 14.5, marginBottom: 10 } }, "Meistdiskutierte Vereine"),
@@ -3037,7 +3050,7 @@ function FeedSuche({ q, setQ, club, setClub, alle, watch, geheZu, fs, setFs, inl
       gesp.map((e2, i2) => React.createElement("div", { key: i2, style: { display: "flex", alignItems: "center", gap: 6, padding: "3px 0" } },
         React.createElement("button", { onClick: () => wende(e2), style: { flex: 1, textAlign: "left", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, color: "var(--t1)", background: "none", border: "none", cursor: "pointer", padding: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, "\u25CE " + e2.n),
         React.createElement("button", { onClick: () => loesche(i2), style: { border: "none", background: "none", cursor: "pointer", color: "var(--t3)", fontSize: 11, padding: 0 } }, "\u2715"))),
-      React.createElement("button", { onClick: speichere, style: { marginTop: 6, fontFamily: FONT_BODY, fontSize: 12, fontWeight: 900, color: "#0f1520", background: "var(--karte2)", border: "1px solid " + HAIR, borderRadius: 8, cursor: "pointer", padding: "7px 11px" } }, "+ Aktuellen Filter speichern")));
+      React.createElement("button", { onClick: speichere, style: { marginTop: 6, fontFamily: FONT_BODY, fontSize: 12, fontWeight: 900, color: "var(--t1)", background: "var(--karte2)", border: "1px solid " + HAIR, borderRadius: 8, cursor: "pointer", padding: "7px 11px" } }, "+ Aktuellen Filter speichern")));
 }
 function ScoutMenu({ view, setView }) {
   const aktiv = view === "talente" || view === "listen" || view === "ranking" || view === "suche";
@@ -3092,7 +3105,7 @@ function KiSuchePanel({ schliessen, msgs, busy, treffer, frage, setFrage, senden
           React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10, fontWeight: 900, letterSpacing: .8, textTransform: "uppercase", padding: "2px 8px", borderRadius: 99, background: m2.type === "fix" ? "#149a59" : "#b45309", color: "#fff" } }, m2.type === "fix" ? "Fix" : (en ? "Rumour" : "Ger\u00fccht")),
           m2.reliability != null && React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, (en ? "Reliability " : "Verl\u00e4sslichkeit ") + m2.reliability + "/5")),
         React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: INK, lineHeight: 1.45, marginBottom: 2 } }, m2.headline),
-        m2.source_url && React.createElement("a", { href: m2.source_url, target: "_blank", rel: "noreferrer", style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "#1e5d8f", textDecoration: "none", fontWeight: 700 } }, (m2.source_name || (en ? "Source" : "Quelle")) + " \u2197")))),
+        m2.source_url && React.createElement("a", { href: m2.source_url, target: "_blank", rel: "noreferrer", style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--blau-text)", textDecoration: "none", fontWeight: 700 } }, (m2.source_name || (en ? "Source" : "Quelle")) + " \u2197")))),
       sek(en ? "Market signals" : "Marktsignale", (treffer.signale || []).map((g, i) => React.createElement("div", { key: "g" + i, style: { border: "1px solid #cfe3f5", background: "#eef6fd", borderRadius: 11, padding: "9px 12px", marginBottom: 6, fontFamily: FONT_BODY, fontSize: 12.5, color: "#1e5d8f", lineHeight: 1.45 } }, g.signal_text, g.quelle ? " (" + g.quelle + ")" : "")))),
     React.createElement("div", { style: { display: "flex", gap: 8, marginTop: 10, position: "sticky", bottom: 0, background: "var(--karte)", paddingTop: 6 } },
       React.createElement("input", { value: frage, onChange: e => setFrage(e.target.value), onKeyDown: e => { if (e.key === "Enter" && frage.trim()) senden(); }, placeholder: en ? "Follow-up question \u2026" : "R\u00fcckfrage stellen \u2026", style: { flex: 1, fontFamily: FONT_BODY, fontSize: 16, padding: "11px 13px", borderRadius: 11, border: "1.5px solid " + HAIR, outline: "none", boxSizing: "border-box", minWidth: 0 } }),
@@ -3130,7 +3143,7 @@ function CmtyChip({ status }) {
   return React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .4, padding: "3px 10px", borderRadius: 999, background: s[1], color: s[2], whiteSpace: "nowrap" } }, s[0]);
 }
 function AntwortButton({ onClick, eigener }) {
-  return React.createElement("button", { onClick: eigener ? undefined : onClick, disabled: !!eigener, title: eigener ? "Dein eigener Beitrag \u2014 Kontaktanfragen anderer Mitglieder erreichen dich per E-Mail" : "Kontakt zum Autor aufnehmen (per E-Mail \u00fcber TransferWire, deine Adresse wird als Antwortadresse \u00fcbermittelt)", style: { cursor: eigener ? "default" : "pointer", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, padding: "5px 12px", borderRadius: 999, border: "1px solid " + (eigener ? HAIR : "var(--dunkel)"), background: eigener ? "#f4f6f9" : "var(--dunkel)", color: eigener ? "#9aa3b0" : "#fff", whiteSpace: "nowrap" } }, "\u2709 Kontakt aufnehmen");
+  return React.createElement("button", { onClick: eigener ? undefined : onClick, disabled: !!eigener, title: eigener ? "Dein eigener Beitrag \u2014 Kontaktanfragen anderer Mitglieder erreichen dich per E-Mail" : "Kontakt zum Autor aufnehmen (per E-Mail \u00fcber TransferWire, deine Adresse wird als Antwortadresse \u00fcbermittelt)", style: { cursor: eigener ? "default" : "pointer", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, padding: "5px 12px", borderRadius: 999, border: "1px solid " + (eigener ? HAIR : "var(--dunkel)"), background: eigener ? "var(--karte2)" : "var(--dunkel)", color: eigener ? "var(--t3)" : "#fff", whiteSpace: "nowrap" } }, "\u2709 Kontakt aufnehmen");
 }
 const IconShare = ({ size }) => React.createElement("svg", { width: size || 15, height: size || 15, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("circle", { cx: 18, cy: 5, r: 3 }), React.createElement("circle", { cx: 6, cy: 12, r: 3 }), React.createElement("circle", { cx: 18, cy: 19, r: 3 }), React.createElement("line", { x1: 8.59, y1: 13.51, x2: 15.42, y2: 17.49 }), React.createElement("line", { x1: 15.41, y1: 6.51, x2: 8.59, y2: 10.49 }));
 const IconBookmark = ({ size, filled }) => React.createElement("svg", { width: size || 15, height: size || 15, viewBox: "0 0 24 24", fill: filled ? "currentColor" : "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("path", { d: "M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" }));
@@ -3240,7 +3253,7 @@ function UebersetzenButton({ zustand, onClick }) {
 }
 const cmtyBodyText = (p, ue, zeige) => (zeige[p.id] && ue[p.id] && ue[p.id].text) ? ue[p.id].text : p.body;
 function MeldeButton({ onClick, gemeldet }) {
-  return React.createElement("button", { onClick: onClick, disabled: !!gemeldet, title: gemeldet ? "Du hast diesen Beitrag gemeldet" : "Beitrag melden", style: { cursor: gemeldet ? "default" : "pointer", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, padding: "5px 10px", borderRadius: 999, border: "1px solid " + HAIR, background: "var(--karte)", color: gemeldet ? "#9aa3b0" : "#5b6472", whiteSpace: "nowrap" } }, gemeldet ? "Gemeldet" : "Melden");
+  return React.createElement("button", { onClick: onClick, disabled: !!gemeldet, title: gemeldet ? "Du hast diesen Beitrag gemeldet" : "Beitrag melden", style: { cursor: gemeldet ? "default" : "pointer", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, padding: "5px 10px", borderRadius: 999, border: "1px solid " + HAIR, background: "var(--karte)", color: gemeldet ? "var(--t3)" : "var(--t2)", whiteSpace: "nowrap" } }, gemeldet ? "Gemeldet" : "Melden");
 }
 const ADMIN_BTN = col => ({ cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, padding: "7px 14px", borderRadius: 999, border: "1px solid " + col, background: "var(--karte)", color: col });
 function CommunitySub({ view, setView, admin }) {
@@ -3306,11 +3319,11 @@ function VergleichUI({ spieler, entf, leeren, offen, setOffen }) {
       h("div", { onClick: () => setOffen(false), style: { position: "absolute", inset: 0, background: "rgba(15,21,32,.5)", backdropFilter: "blur(2px)" } }),
       h("div", { style: { position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: "min(760px, 94vw)", maxHeight: "84vh", overflowY: "auto", background: "var(--karte)", borderRadius: 18, boxShadow: "0 30px 80px rgba(15,21,32,.35)", padding: "22px 24px" } },
         h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 } },
-          h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 24, fontWeight: 700, color: "#15181C" } }, "Spieler-Vergleich"),
+          h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 24, fontWeight: 700, color: "var(--t1)" } }, "Spieler-Vergleich"),
           h("button", { onClick: () => setOffen(false), style: { width: 32, height: 32, borderRadius: 99, border: "1px solid " + HAIR, background: "var(--karte)", cursor: "pointer", fontWeight: 800 } }, "\u2715")),
         h("div", { style: { display: "grid", gridTemplateColumns: "110px repeat(" + spieler.length + ", 1fr)", fontFamily: FONT_BODY, fontSize: 13 } },
           h("div", null),
-          spieler.map(x => h("div", { key: "k" + x.pid, style: { padding: "8px 10px", fontFamily: FONT_DISPLAY, fontSize: 17, fontWeight: 700, color: "#0f1520", borderBottom: "2px solid #0f1520" } }, x.name)),
+          spieler.map(x => h("div", { key: "k" + x.pid, style: { padding: "8px 10px", fontFamily: FONT_DISPLAY, fontSize: 17, fontWeight: 700, color: "var(--t1)", borderBottom: "2px solid var(--t1)" } }, x.name)),
           zeilen.map(([lab, fn], ri) => [h("div", { key: "l" + ri, style: { padding: "8px 10px", color: "var(--t3)", fontWeight: 800, fontSize: 11, textTransform: "uppercase", letterSpacing: .6, borderBottom: "1px solid " + HAIR } }, lab), ...spieler.map(x => h("div", { key: lab + x.pid, style: { padding: "8px 10px", fontWeight: 700, color: "var(--t1)", borderBottom: "1px solid " + HAIR } }, fn(x)))])))));
 }
 
@@ -3347,9 +3360,9 @@ function SucheVue({ onOpen }) {
         sel(ageMax, setAgeMax, ALTER), sel(fuss, setFuss, FUSS),
         sel(liga, setLiga, [["", en ? "All leagues" : "Alle Ligen"]].concat(LIGEN_ALLE.map(l => [l, l]))),
         sel(minScore, setMinScore, [["", en ? "Any TW score" : "Jeder TW-Score"], ["60", "TW-Score \u2265 60"], ["70", "TW-Score \u2265 70"], ["80", "TW-Score \u2265 80"]]),
-        h("button", { type: "button", onClick: suchen, disabled: busy, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, padding: "8px 14px", borderRadius: 10, border: "1px solid #087F8C", background: "var(--karte)", color: "#087F8C" } }, en ? "Apply filters" : "Filter anwenden"),
+        h("button", { type: "button", onClick: suchen, disabled: busy, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, padding: "8px 14px", borderRadius: 10, border: "1px solid var(--teal)", background: "var(--karte)", color: "var(--teal)" } }, en ? "Apply filters" : "Filter anwenden"),
         gesetzt ? h("button", { type: "button", onClick: () => { setQ(""); setPos([]); setTags([]); setAgeMax(""); setFuss(""); setLiga(""); setMinScore(""); setItems(null); setInfo(null); setErr(""); }, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, padding: "8px 12px", borderRadius: 10, border: "1px solid " + HAIR, background: "var(--karte)", color: "var(--t2)" } }, en ? "Reset" : "Zur\u00fccksetzen") : null)),
-    err ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#c22", marginBottom: 10 } }, err) : null,
+    err ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--sc-schwach-text)", marginBottom: 10 } }, err) : null,
     info && info.filter ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, marginBottom: 10 } }, (en ? "Understood as: " : "Verstanden als: ") + ([(info.filter.positions || []).join("/"), (info.filter.tags || []).join(", "), info.filter.age_max ? "U" + info.filter.age_max : "", info.filter.foot ? (en ? "foot " : "Fu\u00df ") + info.filter.foot : "", info.filter.league || ""].filter(Boolean).join(" \u00b7 ") || (en ? "all players" : "alle Spieler")) + (info.filter.text && !info.ki_used ? (en ? " (keyword mode)" : " (Stichwort-Modus)") : "") + " \u00b7 " + (info.count || 0) + (en ? " hits" : " Treffer")) : null,
     items === null ? null : items.length === 0 ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: MUTED, padding: "18px 0" } }, en ? "No players match \u2014 loosen the filters a little." : "Keine Treffer \u2014 Filter etwas lockern.") :
     h("div", { style: { display: "flex", flexDirection: "column", gap: 8 } }, items.map((x, xi) => h("div", { key: x.pid || ("j" + xi), onClick: x.pid ? () => onOpen(x.pid, x.name, x.team) : undefined, title: x.pid ? "" : (en ? "Youth entry \u2014 no full profile yet" : "Jugend-Eintrag \u2014 noch kein Vollprofil"), style: { cursor: x.pid ? "pointer" : "default", background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 12, padding: "11px 14px", display: "flex", gap: 12, alignItems: "center" } },
@@ -3384,7 +3397,7 @@ function nkLandName(land, en) { const e = NK_LAND[nkNorm(land)]; return en && e 
 function nkLandKey(land) { const l = nkNorm(land); return l === "Deutschland" ? "Deutschland – Referenz" : l; }
 function nkStatus(s) { s = nkNorm(s); if (s.indexOf("im Bestand") === 0) return "bestand"; if (s === "wird aufgenommen") return "auf"; if (s === "vorbereitet") return "vorb"; if (s === "Zugang fehlt") return "fehlt"; return "erg"; }
 const NK_ST_REIHE = { bestand: 0, auf: 1, vorb: 2, erg: 3, fehlt: 4 };
-const NK_ST = { bestand: ["In TransferWire", "In TransferWire", "#0d8a4f", "rgba(13,138,79,.13)"], auf: ["Wird aufgenommen", "Being added", "#1e6fae", "rgba(30,111,174,.13)"], vorb: ["Nur Spieldaten", "Match data only", "#a26a00", "rgba(200,140,0,.15)"], erg: ["Ergänzung", "Supplement", "#087F8C", "rgba(8,127,140,.13)"], fehlt: ["Noch ohne Daten", "No data yet", "var(--t3)", "rgba(127,127,127,.13)"] };
+const NK_ST = { bestand: ["In TransferWire", "In TransferWire", "#0d8a4f", "rgba(13,138,79,.13)"], auf: ["Wird aufgenommen", "Being added", "var(--blau-text)", "rgba(30,111,174,.13)"], vorb: ["Nur Spieldaten", "Match data only", "var(--sc-mittel-text)", "rgba(200,140,0,.15)"], erg: ["Ergänzung", "Supplement", "var(--teal)", "var(--teal-tint)"], fehlt: ["Noch ohne Daten", "No data yet", "var(--t3)", "rgba(127,127,127,.13)"] };
 const NK_EIG = { "Kern": ["Kern", "Core"], "Selektiv": ["Selektiv", "Selective"], "Ergänzung": ["Ergänzung", "Supplement"] };
 function nkFlagge(land, w) { const e = NK_LAND[nkNorm(land)]; const code = e ? e[0] : ""; if (code && typeof ttFlagge === "function") return ttFlagge(code, w); return React.createElement("span", { "aria-hidden": "true", style: { width: w, height: Math.round(w * 0.7), borderRadius: 3, background: "var(--karte2)", border: "1px solid var(--linie2)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: Math.round(w * 0.45), color: "var(--t3)", flexShrink: 0, boxSizing: "border-box" } }, "◎"); }
 function nkLink(url, text) { const u = String(url || ""); if (!/^https?:\/\//i.test(u)) return null; return React.createElement("a", { href: u, target: "_blank", rel: "noopener noreferrer", style: { color: "var(--teal)", fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap" } }, text + " ↗"); }
@@ -3496,7 +3509,7 @@ function NachwuchsKatalog() {
       daten && daten.stand ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t3)", marginTop: 6 } }, (en ? "Catalogue as of " : "Katalog-Stand ") + new Date(daten.stand).toLocaleDateString(en ? "en-GB" : "de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }) + (en ? " · catalogue content in German" : "")) : null,
       daten ? h("div", { className: "tw-nk-kpi", style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8, marginTop: 12 } },
         kachel(kpi.bestand, (en ? "competitions in TransferWire" : "Wettbewerbe in TransferWire") + (spielerZahl ? " · " + zahlFmt(spielerZahl) + (en ? " youth players" : " Nachwuchsspieler") : ""), "#0d8a4f", "k1"),
-        kachel(kpi.vorb, en ? "with match data only (fixtures/line-ups)" : "nur mit Spieldaten (Spielplan/Aufstellungen)", "#a26a00", "k2"),
+        kachel(kpi.vorb, en ? "with match data only (fixtures/line-ups)" : "nur mit Spieldaten (Spielplan/Aufstellungen)", "var(--sc-mittel-text)", "k2"),
         kachel(kpi.fehlt, en ? "no data yet – scoutable via the official sources" : "noch ohne Daten – über die offiziellen Quellen scoutbar", null, "k3"),
         kachel(((daten && daten.quellen) || []).length, en ? "sources & scouting routes" : "Quellen & Scoutingwege", "var(--teal)", "k4")) : null,
       daten && Array.isArray(daten.hinweise) && daten.hinweise.length ? h("div", { style: { marginTop: 12 } },
@@ -4749,7 +4762,7 @@ function GerVue({ alle, onWatch, onOpen, updatedAt, watch, onSide, apply }) {
   const selStyle = { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 700, padding: "0 30px 0 12px", height: 40, borderRadius: 10, border: "1.5px solid " + HAIR, background: "var(--karte)", color: "var(--t2)", cursor: "pointer", appearance: "none", WebkitAppearance: "none", backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M1 1l4 4 4-4' fill='none' stroke='%23667085' stroke-width='1.6'/></svg>\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 11px center" };
   const sel = (wert, setzer, optionen, platzhalter, extra) => h("select", { value: wert, onChange: e => setzer(e.target.value), style: Object.assign({}, selStyle, extra || {}) },
     h("option", { value: "" }, platzhalter), optionen.map(o => Array.isArray(o) ? h("option", { key: o[0], value: o[0] }, o[1]) : h("option", { key: o, value: o }, o)));
-  const typChip = (k, label, n) => { const akt = f.typ === k; const col = k && TYPE[k] ? TYPE[k].color : "var(--dunkel)"; return h("button", { key: k || "alle", type: "button", "aria-pressed": akt ? "true" : "false", onClick: () => { setFeld("typ", akt ? "" : k); setLimit(60); }, style: { display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, cursor: "pointer", padding: "7px 12px", minHeight: 36, borderRadius: 999, border: "1.5px solid " + (akt ? col : HAIR), background: akt ? col : "#fff", color: akt ? "#fff" : "var(--t2)", boxShadow: akt ? "0 0 0 2px var(--seite), 0 0 0 3.5px var(--gold)" : "none", whiteSpace: "nowrap" } }, akt ? h("span", { "aria-hidden": true, style: { fontWeight: 900 } }, "\u2713") : (k ? h("span", { style: { width: 7, height: 7, borderRadius: 99, background: col, flexShrink: 0 } }) : null), label, " ", h("span", { style: { fontWeight: 600, opacity: .75 } }, n)); };
+  const typChip = (k, label, n) => { const akt = f.typ === k; const col = k && TYPE[k] ? TYPE[k].color : "var(--dunkel)"; return h("button", { key: k || "alle", type: "button", "aria-pressed": akt ? "true" : "false", onClick: () => { setFeld("typ", akt ? "" : k); setLimit(60); }, style: { display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, cursor: "pointer", padding: "7px 12px", minHeight: 36, borderRadius: 999, border: "1.5px solid " + (akt ? col : HAIR), background: akt ? col : "#fff", color: akt ? "#fff" : "var(--t2)", boxShadow: akt ? "0 0 0 2px var(--seite), 0 0 0 3.5px var(--gold)" : "none", whiteSpace: "nowrap" } }, akt ? h("span", { "aria-hidden": true, style: { fontWeight: 900 } }, "\u2713") : (k ? h("span", { style: { width: 7, height: 7, borderRadius: 99, background: col, flexShrink: 0 } }) : null), label, " ", h("span", { style: { fontWeight: 600, opacity: .9 } }, n)); };
   const check = (k, label) => h("label", { key: k, style: { display: "inline-flex", alignItems: "center", gap: 6, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 600, color: "var(--t2)", cursor: "pointer", whiteSpace: "nowrap" } }, h("input", { type: "checkbox", checked: !!f[k], onChange: e => setFeld(k, e.target.checked), style: { width: 15, height: 15, margin: 0, accentColor: "var(--dunkel)" } }), label);
   const labelStyle = { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .6, textTransform: "uppercase", color: MUTED, marginBottom: 4 };
   const zeitAnzeige = it => it.publishedAt && /vor|ago|eben|now/.test(it.publishedAt) && !en ? it.publishedAt.replace(/\b(Min|Std|Tg)\b(?!\.)/g, "$1.") : twRelTime(it.published || it.publishedAt);
@@ -4765,7 +4778,7 @@ function GerVue({ alle, onWatch, onOpen, updatedAt, watch, onSide, apply }) {
       h("div", { style: { marginTop: 7, display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" } },
         kiIds ? h("button", { onClick: () => setKiIds(null), style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "5px 11px", borderRadius: 999, border: "none", background: "var(--scout-knopf)", color: "#fff" } }, (en ? "Scout hits (" : "Scout-Treffer (") + gesamt + ") \u2715 " + (en ? "show all" : "alle zeigen")) : null,
         (kiVor.length ? kiVor.map(v => [v, v]) : vorschlaege).map(([lab, q]) => h("button", { key: lab, onClick: () => { setKiFrage(q); frage(q); }, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, cursor: "pointer", padding: "5px 11px", borderRadius: 999, border: "1px solid #d9d2f7", background: "var(--karte)", color: "var(--scout-text)" } }, lab))),
-      kiAntwort ? h("div", { style: { marginTop: 10, fontFamily: FONT_BODY, fontSize: 14, lineHeight: 1.55, color: "#33322f", background: "var(--karte)", border: "1px solid #d9d2f7", borderRadius: 10, padding: "10px 12px" } }, kiAntwort) : null),
+      kiAntwort ? h("div", { style: { marginTop: 10, fontFamily: FONT_BODY, fontSize: 14, lineHeight: 1.55, color: "var(--t1)", background: "var(--karte)", border: "1px solid var(--scout-rand)", borderRadius: 10, padding: "10px 12px" } }, kiAntwort) : null),
     h("div", { className: "tw-gfilter-row", style: { display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 10 } },
       sel(f.land, v => { setF(p => Object.assign({}, p, { land: v, liga: "" })); }, LAND_LIGEN.map(x => [x.de, en ? (x.en || x.de) : x.de]), en ? "All countries" : "Alle L\u00e4nder"),
       sel(f.liga, v => setFeld("liga", v), ligen, en ? "All leagues" : "Alle Ligen"),
@@ -4775,7 +4788,7 @@ function GerVue({ alle, onWatch, onOpen, updatedAt, watch, onSide, apply }) {
       h("button", { onClick: () => setWeitere(w => !w), style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, cursor: "pointer", height: 40, padding: "0 14px", borderRadius: 10, border: "1.5px solid " + (weitere || aktivFilter ? "var(--dunkel)" : HAIR), background: weitere ? "var(--dunkel)" : "#fff", color: weitere ? "#fff" : "var(--t1)", whiteSpace: "nowrap" } }, (en ? "More filters" : "Weitere Filter") + (aktivFilter ? " (" + aktivFilter + ")" : "") + (weitere ? " \u25B4" : " \u25BE")),
       aktivFilter ? h("button", { onClick: () => { setF(Object.assign({}, GER_LEER, { typ: f.typ })); setLimit(60); }, style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, cursor: "pointer", height: 40, padding: "0 10px", borderRadius: 10, border: "none", background: "none", color: MUTED } }, en ? "Reset" : "Zur\u00fccksetzen") : null),
     h("div", { className: "tw-gfilter-mobile", style: { display: "none", gap: 8, alignItems: "center", marginBottom: 10 } },
-      h("button", { onClick: () => setSheet(true), style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, cursor: "pointer", height: 40, padding: "0 14px", borderRadius: 10, border: "1.5px solid " + (aktivFilter ? "var(--dunkel)" : HAIR), background: "var(--karte)", color: "#0f1520", whiteSpace: "nowrap" } }, (en ? "Filters" : "Filter") + (aktivFilter ? " (" + aktivFilter + ")" : "") + " \u25BE"),
+      h("button", { onClick: () => setSheet(true), style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, cursor: "pointer", height: 40, padding: "0 14px", borderRadius: 10, border: "1.5px solid " + (aktivFilter ? "var(--dunkel)" : HAIR), background: "var(--karte)", color: "var(--t1)", whiteSpace: "nowrap" } }, (en ? "Filters" : "Filter") + (aktivFilter ? " (" + aktivFilter + ")" : "") + " \u25BE"),
       aktivFilter ? h("button", { onClick: () => { setF(Object.assign({}, GER_LEER, { typ: f.typ })); setLimit(60); }, style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, cursor: "pointer", height: 40, padding: "0 10px", borderRadius: 10, border: "none", background: "none", color: MUTED } }, en ? "Reset" : "Zur\u00fccksetzen") : null),
     weitere ? h("div", { className: "tw-card", style: { padding: "14px 16px", marginBottom: 12, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 14 } },
       h("div", null, h("div", { style: labelStyle }, en ? "Source trust" : "Quellenvertrauen"), sel(f.qv, v => setFeld("qv", v), [["3", en ? "medium or higher" : "mindestens mittel"], ["4", en ? "high only" : "nur hoch"], ["5", en ? "confirmed only" : "nur best\u00e4tigt"]], en ? "All" : "Alle", { width: "100%" })),
@@ -4811,7 +4824,7 @@ function GerVue({ alle, onWatch, onOpen, updatedAt, watch, onSide, apply }) {
       f.typ === "ticker" ? null : h("div", { style: { display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" } },
         h("span", { style: { display: "inline-flex", alignItems: "center", gap: 6, fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED } }, en ? "Sort:" : "Sortierung:", h("select", { value: sort, onChange: e => setSort(e.target.value), disabled: !!kiIds, style: Object.assign({}, selStyle, { height: 34, fontSize: 12.5, padding: "0 26px 0 10px", backgroundPosition: "right 9px center" }) }, h("option", { value: "neu" }, en ? "Newest first" : "Neueste zuerst"), h("option", { value: "signal" }, en ? "Strongest signal" : "St\u00e4rkstes Signal"), h("option", { value: "rel" }, en ? "Reliability" : "Belastbarkeit"))),
         h("div", { style: { display: "inline-flex", border: "1px solid " + HAIR, borderRadius: 9, overflow: "hidden" } }, [["karten", en ? "Cards" : "Karten"], ["kompakt", en ? "Compact" : "Kompakt"]].map(([k, lab]) => h("button", { key: k, onClick: () => setGAnsicht(k), style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "7px 12px", border: "none", background: gAnsicht === k ? "var(--dunkel)" : "#fff", color: gAnsicht === k ? "#fff" : "var(--t2)" } }, lab))),
-        h("button", { onClick: sucheSpeichern, title: en ? "Save current filters as a search" : "Aktuelle Filter als Suche speichern", style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "7px 12px", borderRadius: 9, border: "1px solid " + HAIR, background: "var(--karte)", color: "#0f1520", whiteSpace: "nowrap" } }, "\u2606 " + (en ? "Save search" : "Suche speichern")))),
+        h("button", { onClick: sucheSpeichern, title: en ? "Save current filters as a search" : "Aktuelle Filter als Suche speichern", style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "7px 12px", borderRadius: 9, border: "1px solid " + HAIR, background: "var(--karte)", color: "var(--t1)", whiteSpace: "nowrap" } }, "\u2606 " + (en ? "Save search" : "Suche speichern")))),
         f.typ === "ticker" ? h(TwTickerAnsicht, { daten: twTicker.daten, laden: twTicker.laden, alle: alle, onOpen: onOpen, beobClubs: beobClubs, filter: f, onWatch: onWatch }) : liste.length ? (gAnsicht === "kompakt"
       ? h("div", { className: "tw-gtable", style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, overflow: "hidden" } },
           h("div", { className: "tw-grow tw-ghead" }, [en ? "Time" : "Zeit", en ? "Type" : "Typ", en ? "Club/Player" : "Verein/Spieler", en ? "Move" : "Bewegung", en ? "League" : "Liga", "Status", en ? "Source" : "Quelle"].map(x => h("span", { key: x }, x))),
@@ -4820,13 +4833,13 @@ function GerVue({ alle, onWatch, onOpen, updatedAt, watch, onSide, apply }) {
               h("span", { style: { color: "var(--t3)" } }, zeitAnzeige(it)),
               h("span", { style: { display: "inline-flex", alignItems: "center", gap: 5, fontWeight: 800, color: ty.color, fontSize: 11 } }, h("span", { style: { width: 7, height: 7, borderRadius: 99, background: ty.color, flexShrink: 0 } }), en ? (ty.en || ty.label) : ty.label),
               h("span", { style: { fontWeight: 700, color: INK } }, wer),
-              h("span", { style: { color: "#5b6472" } }, bewegung),
-              h("span", { style: { color: "#5b6472" } }, it.league || ""),
+              h("span", { style: { color: "var(--t2)" } }, bewegung),
+              h("span", { style: { color: "var(--t2)" } }, it.league || ""),
               h("span", { style: { fontWeight: 700, color: relColor(r) } }, r >= 5 ? "\u2713 " + (en ? "Confirmed" : "Best\u00e4tigt") : (en ? "Signal " : "Signalst\u00e4rke ") + signalScore(it) + "/100"),
               srcs.length ? h("a", { href: srcs[0].url, onClick: e => { e.preventDefault(); e.stopPropagation(); window.open(srcs[0].url, "_blank"); }, style: { color: INK, fontWeight: 600, textDecoration: "none" } }, twDomain(srcs[0].url)) : h("span", { style: { color: "var(--t3)" } }, "TW")); }))
       : h(TransferKartenListe, { liste: liste, onWatch: onWatch, onOpen: onOpen }))
       : h(EmptyState, { icon: "", title: en ? "No reports for this selection" : "Keine Meldungen f\u00fcr diese Auswahl", text: en ? "Loosen a filter or ask TW Scout above." : "Filter lockern oder TW Scout oben fragen.", action: aktivFilter || f.typ ? (en ? "Reset filters" : "Filter zur\u00fccksetzen") : null, onAction: () => { setF(Object.assign({}, GER_LEER)); setKiIds(null); } }),
-    gesamt > liste.length ? h("div", { style: { textAlign: "center", marginTop: 14 } }, h("button", { onClick: () => setLimit(l => l + 60), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 22px", borderRadius: 999, border: "1px solid var(--dunkel)", background: "var(--karte)", color: "#0f1520" } }, (en ? "Load more (" : "Mehr laden (") + liste.length + (en ? " of " : " von ") + gesamt + ")")) : null);
+    gesamt > liste.length ? h("div", { style: { textAlign: "center", marginTop: 14 } }, h("button", { onClick: () => setLimit(l => l + 60), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 22px", borderRadius: 999, border: "1px solid var(--dunkel)", background: "var(--karte)", color: "var(--t1)" } }, (en ? "Load more (" : "Mehr laden (") + liste.length + (en ? " of " : " von ") + gesamt + ")")) : null);
 }
 
 function GerAside({ s, onApply }) {
@@ -5409,7 +5422,7 @@ function NewsCard({
     /*#__PURE__*/React.createElement(SignalLine, { item: item }),
     /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 7, flexWrap: "wrap" } },
       /*#__PURE__*/React.createElement(SourceLine, { sources: item.sources, fallback: signalQuelle(item) || item.sourceName || item.source_name || item.source }),
-      typeof onOpen === "function" ? /*#__PURE__*/React.createElement("button", { onClick: e => { e.stopPropagation(); onOpen(item); }, style: { cursor: "pointer", background: "none", border: "none", padding: 0, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "#0f1520", whiteSpace: "nowrap" } }, "Details \u2192") : (item.url ? /*#__PURE__*/React.createElement("a", { href: item.url, target: "_blank", rel: "noopener", onClick: e => e.stopPropagation(), style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "#0f1520", textDecoration: "none", whiteSpace: "nowrap" } }, (LANG === "en" ? "Source" : "Quelle") + " \u2192") : null))));
+      typeof onOpen === "function" ? /*#__PURE__*/React.createElement("button", { onClick: e => { e.stopPropagation(); onOpen(item); }, style: { cursor: "pointer", background: "none", border: "none", padding: 0, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "var(--t1)", whiteSpace: "nowrap" } }, "Details \u2192") : (item.url ? /*#__PURE__*/React.createElement("a", { href: item.url, target: "_blank", rel: "noopener", onClick: e => e.stopPropagation(), style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "var(--t1)", textDecoration: "none", whiteSpace: "nowrap" } }, (LANG === "en" ? "Source" : "Quelle") + " \u2192") : null))));
 }
 
 const BEDARF_KADER_RE = /abgang|abg\u00e4nge|abgaenge|verl\u00e4sst|verlaesst|verlassen|verletz|ausfall|ausf\u00e4llt|ersatz|nachfolger|l\u00fccke|luecke|verkauft|abgegeben|wechselt zu|kreuzband|leihe endet|zur\u00fcckgekehrt/i;
@@ -5611,7 +5624,7 @@ function PerfPitch({ elf, portrait, onOpen }) {
       elf ? marker : h("div", { style: { position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_BODY, fontSize: 13, color: "rgba(255,255,255,.8)", textAlign: "center", padding: 20 } }, en ? "Team of the matchday appears once eleven rated players are available." : "Die Elf des Spieltags erscheint, sobald elf bewertete Spieler vorliegen.")),
     elf && elf.joker ? h("div", { style: { marginTop: 10, display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 12, color: "rgba(255,255,255,.8)", flexWrap: "wrap" } },
       h("span", { style: { fontSize: 10, fontWeight: 900, letterSpacing: 1.4, textTransform: "uppercase", color: "rgba(255,255,255,.6)" } }, t("totw_sub12")),
-      h("button", { onClick: () => onOpen && onOpen(elf.joker), style: { cursor: "pointer", background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.18)", color: "#fff", borderRadius: 999, padding: "4px 10px 4px 5px", display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700 } },
+      h("button", { className: "tw-joker", onClick: () => onOpen && onOpen(elf.joker), style: { cursor: "pointer", background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.18)", color: "#fff", borderRadius: 999, padding: "4px 10px 4px 5px", display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700 } },
         h("span", { style: { width: 22, height: 22, borderRadius: 99, background: scoreBg(elf.joker.score), border: "1px solid " + scoreRand(elf.joker.score), color: scoreTxt(elf.joker.score), display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontSize: 11, fontWeight: 700 } }, Math.round(elf.joker.score || 0)), elf.joker.name, h("span", { style: { color: "rgba(255,255,255,.6)", fontWeight: 500 } }, elf.joker.team))) : null);
 }
 function SpieltagKarte({ x, onOpen, watched, onWatchToggle, gewaehlt, zurueck }) {
@@ -5653,9 +5666,9 @@ function PerfTabelle({ rows, portrait, watch, onWatchToggle, onOpen, offen, setO
   const istWatched = name => (watch || []).some(w => w.t === "spieler" && w.w === name);
   const datum = d => d ? String(d).slice(8, 10) + "." + String(d).slice(5, 7) + "." : "";
   const details = x => h("div", { style: { gridColumn: "1 / -1", borderTop: "1px solid " + HAIR, padding: "10px 12px 12px", background: "var(--karte2)" } },
-    x.st ? h("div", { style: { marginBottom: 8 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: "#149a59", textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 } }, t("rank_st")), String(x.st).split(/;|\n/).map((z, i) => h("div", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#2a3140", lineHeight: 1.5 } }, "\u2022 " + z.trim()))) : null,
-    x.sw ? h("div", { style: { marginBottom: 8 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: "#b04a3a", textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 } }, t("rank_sw")), String(x.sw).split(/;|\n/).map((z, i) => h("div", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#2a3140", lineHeight: 1.5 } }, "\u2022 " + z.trim()))) : null,
-    x.dev ? h("div", { style: { marginBottom: 8 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: MUTED, textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 } }, t("rank_dev")), h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#2a3140", lineHeight: 1.5, fontStyle: "italic" } }, x.dev)) : null,
+    x.st ? h("div", { style: { marginBottom: 8 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: "#149a59", textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 } }, t("rank_st")), String(x.st).split(/;|\n/).map((z, i) => h("div", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t1)", lineHeight: 1.5 } }, "\u2022 " + z.trim()))) : null,
+    x.sw ? h("div", { style: { marginBottom: 8 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: "#b04a3a", textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 } }, t("rank_sw")), String(x.sw).split(/;|\n/).map((z, i) => h("div", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t1)", lineHeight: 1.5 } }, "\u2022 " + z.trim()))) : null,
+    x.dev ? h("div", { style: { marginBottom: 8 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: MUTED, textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 } }, t("rank_dev")), h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t1)", lineHeight: 1.5, fontStyle: "italic" } }, x.dev)) : null,
     h("div", { style: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", fontFamily: FONT_BODY, fontSize: 12, color: MUTED } }, perfKeyValues(x).join(" \u00b7 "), x.api ? h("span", null, "\u00b7 " + t("rank_api") + " " + x.api) : null, h("button", { onClick: e => { e.stopPropagation(); onOpen && onOpen(x); }, style: { marginLeft: "auto", cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, padding: "6px 12px", borderRadius: 8, border: "1px solid " + HAIR, background: "var(--karte)", color: INK } }, en ? "Open analysis \u2192" : "Analyse \u00f6ffnen \u2192")));
   const watchBtn = x => h("button", { onClick: e => { e.stopPropagation(); onWatchToggle && onWatchToggle(x.name); }, title: istWatched(x.name) ? (en ? "Remove from watchlist" : "Von der Merkliste entfernen") : (en ? "Add to watchlist" : "Auf die Merkliste"), style: { cursor: "pointer", background: "none", border: "none", padding: 2, color: istWatched(x.name) ? "var(--gold-text)" : "#9aa0a6", display: "inline-flex", flexShrink: 0 } }, h(IconBookmark, { size: 14, filled: istWatched(x.name) }));
   const pill = x => h("span", { style: { display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 44, height: 30, borderRadius: 9, background: scoreBg(x.score), border: "1px solid " + scoreRand(x.score), color: scoreTxt(x.score), fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 17 } }, Math.round(x.score || 0));
@@ -6071,7 +6084,7 @@ function MerkSpielerZeile({ item, news, onOpen, onRemove, onAlert, onVergleich, 
   if (mobil) return h("div", { className: "tw-card", style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 12, padding: "10px 12px" } },
     h("div", { style: { display: "flex", alignItems: "center", gap: 10 } }, foto, h("div", { style: { flex: 1, minWidth: 0 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK } }, item.w), h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, d && d.ok ? [d.team, d.pos].filter(Boolean).join(" \u00b7 ") : (d === null ? "\u2026" : (en ? "not in database" : "nicht in der Datenbank")))), scoreZelle),
     h("div", { style: { display: "flex", gap: 10, flexWrap: "wrap", marginTop: 6, fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t2)" } }, h("span", null, (en ? "Reports: " : "Meldungen: "), meldungen), h("span", null, (en ? "Contract: " : "Vertrag: ") + ende), h("span", null, (en ? "Updated: " : "Stand: ") + stand)),
-    note ? h("div", { style: { marginTop: 6, fontFamily: FONT_BODY, fontSize: 12, color: "#5b6472", fontStyle: "italic" } }, "\u270E " + note) : null,
+    note ? h("div", { style: { marginTop: 6, fontFamily: FONT_BODY, fontSize: 12, color: "var(--t2)", fontStyle: "italic" } }, "\u270E " + note) : null,
     h("div", { style: { marginTop: 8 } }, aktionen));
   return h("div", { className: "tw-mkrow" },
     h("div", { className: "tw-mkgrid" },
@@ -6080,7 +6093,7 @@ function MerkSpielerZeile({ item, news, onOpen, onRemove, onAlert, onVergleich, 
       scoreZelle, meldungen,
       h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)" } }, ende),
       h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED } }, stand)),
-    h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginTop: 6 } }, note ? h("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "#5b6472", fontStyle: "italic" } }, "\u270E " + note) : h("span"), aktionen));
+    h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginTop: 6 } }, note ? h("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t2)", fontStyle: "italic" } }, "\u270E " + note) : h("span"), aktionen));
 }
 function MerkVue({ watch, watchList, profiles, onOpen, onRemove, onUpdateWatch, onNav, onProfilSheet, onMatchProfil, vergleich, setVergleich, applySearch }) {
   const h = React.createElement; const en = LANG === "en";
@@ -6283,7 +6296,7 @@ function CommunityVue({ posts, suche, onSubmit, busy, msg, account, onMelden, on
     return h("div", { key: p.id, className: "tw-card tw-cmkarte", style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8 } },
       h("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1, textTransform: "uppercase", color: "var(--teal)" } }, (en ? "Community hint" : "Community-Hinweis") + " \u00b7 " + st.lab), h("span", { style: { marginLeft: "auto", fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, zeit(p.created_at))),
       h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 18, fontWeight: 700, color: INK, lineHeight: 1.2 } }, x.headline),
-      h("div", { className: "tw-cm-text", style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.55, color: "#2a3140", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" } }, ueZeige && ueZeige[p.id] && ue && ue[p.id] && ue[p.id].text ? ue[p.id].text : x.text),
+      h("div", { className: "tw-cm-text", style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.55, color: "var(--t1)", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" } }, ueZeige && ueZeige[p.id] && ue && ue[p.id] && ue[p.id].text ? ue[p.id].text : x.text),
       (x.verein || x.position || x.zeitraum) ? h("div", { style: { display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)" } }, x.verein ? [h(ClubLogo, { key: "l", name: x.verein, size: 16 }), h("b", { key: "v" }, x.verein)] : null, x.position ? h("span", { key: "p" }, " \u00b7 " + x.position) : null, x.zeitraum ? h("span", { key: "z" }, " \u00b7 " + x.zeitraum) : null) : null,
       h("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", fontFamily: FONT_BODY, fontSize: 12, color: MUTED } }, h("span", null, n ? n + (en ? (n === 1 ? " similar report" : " similar reports") : (n === 1 ? " \u00e4hnliche Meldung" : " \u00e4hnliche Meldungen")) : (en ? "no similar reports yet" : "noch keine \u00e4hnlichen Meldungen")), h("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .4, padding: "3px 10px", borderRadius: 999, background: st.bg, color: st.fg } }, (en ? "Review status: " : "Pr\u00fcfstatus: ") + st.lab), p.status === "gemeldet" ? h("span", { style: { fontSize: 11 } }, en ? "\u00b7 reported, under review" : "\u00b7 gemeldet, in Pr\u00fcfung") : null),
       h("div", { style: { display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" } }, knopf(gesp ? (en ? "Saved" : "Gespeichert") : (en ? "Save" : "Speichern"), () => speichernToggle(p.id), gesp, false, "s"), knopf(en ? "Add to" : "Erg\u00e4nzen", () => ergaenzen(x), false, false, "e"), !p.own ? knopf(p.gemeldet_von_mir ? (en ? "Reported" : "Gemeldet") : (en ? "Report" : "Melden"), () => onMelden(p.id), false, true, "m") : null, onUebersetzen ? h("span", { style: { marginLeft: "auto" } }, h(UebersetzenButton, { zustand: ueLaedt && ueLaedt[p.id] ? "laedt" : (ueZeige && ueZeige[p.id] && ue && ue[p.id] ? "en" : "de"), onClick: () => onUebersetzen(p.id) })) : null)); };
@@ -6328,7 +6341,7 @@ function VereinGeprueft({ pid }) {
   return h("div", { style: { marginTop: 4 } },
     info && info.team_updated_at ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "#149a59", fontWeight: 700 } }, "\u2713 " + (en ? "Club verified on " : "Verein gepr\u00fcft am ") + fmtDate(info.team_updated_at) + (q ? " \u00b7 " + (en ? "source: " : "Quelle: ") + q : "")) : null,
     info && (info.foot || info.tm_joined) ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, marginTop: 2 } }, [info.foot ? (en ? "Foot: " : "Fu\u00df: ") + (({ rechts: en ? "right" : "rechts", links: en ? "left" : "links", "beidf\u00fc\u00dfig": en ? "both feet" : "beidf\u00fc\u00dfig" })[info.foot] || info.foot) : "", info.tm_joined ? (en ? "At club since " : "Im Verein seit ") + fmtDate(info.tm_joined) : ""].filter(Boolean).join(" \u00b7 ")) : null,
-    info && info.tm_team && info.team && info.tm_team !== info.team ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "#b45309", fontWeight: 700, marginTop: 2 } }, (en ? "Transfermarkt squad lists: " : "TM-Kader f\u00fchrt: ") + info.tm_team + (info.tm_updated_at ? " (" + (en ? "as of " : "Stand ") + fmtDate(info.tm_updated_at) + ")" : "")) : null,
+    info && info.tm_team && info.team && info.tm_team !== info.team ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--sc-mittel-text)", fontWeight: 700, marginTop: 2 } }, (en ? "Transfermarkt squad lists: " : "TM-Kader f\u00fchrt: ") + info.tm_team + (info.tm_updated_at ? " (" + (en ? "as of " : "Stand ") + fmtDate(info.tm_updated_at) + ")" : "")) : null,
     hist.length ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, marginTop: 3, lineHeight: 1.5 } }, hist.map((x, i) => h("div", { key: i }, fmtDate(x.created_at) + " \u00b7 " + feld(x.feld) + ": " + (x.alt || "\u2013") + " \u2192 " + (x.neu || "\u2013") + (x.quelle ? " (" + x.quelle + ")" : "")))) : null);
 }
 const PT_RX = /probetraining|testspieler|trainingsgast|gastspieler|vereinslos|vertragslos|free agent|svincolato|agente libre|sans club|transfervrij|probetrainer/i;
@@ -6343,7 +6356,7 @@ function ProbetrainingRadar({ news, onOpen }) {
     h("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 10 } }, liste.map((n, i) => h("div", { key: n.id || i, onClick: () => onOpen && onOpen(n), style: { cursor: "pointer", background: "var(--karte)", border: "1px solid " + HAIR, borderLeft: "3px solid #0e7490", borderRadius: 12, padding: "11px 14px" } },
       h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .6, textTransform: "uppercase", color: "var(--teal)", marginBottom: 4 } }, [n.league, n.published ? fmtDate(n.published) : (n.publishedAt || "")].filter(Boolean).join(" \u00b7 ")),
       h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 15.5, fontWeight: 700, color: INK, lineHeight: 1.2 } }, n.headline),
-      h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#4a4a48", marginTop: 4, lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" } }, n.summary),
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)", marginTop: 4, lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" } }, n.summary),
       h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, marginTop: 6 } }, [n.toClub || n.fromClub, (n.sources && n.sources[0] && n.sources[0].name) || n.sourceName || ""].filter(Boolean).join(" \u00b7 "))))));
 }
 function bedarfStruktur(text) { const t = String(text || "").replace(/\s+/g, " ").replace(/\s*\u00b7\s*/g, " \u00b7 ").trim(); if (!t) return { fakten: [], empfehlung: "" };
@@ -6448,7 +6461,7 @@ function NeedCard({
       fontFamily: FONT_BODY,
       fontSize: 11.5,
       fontWeight: 600,
-      color: isHl(c) ? v.color : "#5a5a57",
+      color: isHl(c) ? v.color : "var(--t2)",
       background: isHl(c) ? v.soft : PAGE,
       border: `1px solid ${isHl(c) ? v.color : HAIR}`,
       borderRadius: 999,
@@ -6511,7 +6524,7 @@ function NeedCard({
       padding: "3px 10px",
       borderRadius: 999
     }
-  }, item.fee), ((String(item.summary || "").indexOf("KI-Prognose") >= 0) || /Prognose/.test(String(item.source_name || item.source || "")) || ((item.sources || []).some(x => /Prognose/.test(String(x && x.name || ""))))) && /*#__PURE__*/React.createElement("span", { title: LANG === "en" ? "AI forecast by the TransferWire prediction agent \u2014 not a confirmed report" : "KI-Prognose des TransferWire Prognose-Agenten \u2014 keine best\u00e4tigte Meldung", style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .6, textTransform: "uppercase", padding: "3px 9px", borderRadius: 999, background: "#EEF0FF", color: "#3B44B8", border: "1px solid #C9CEFF" } }, LANG === "en" ? "AI forecast" : "KI-Prognose"), /*#__PURE__*/React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 6 } }, /*#__PURE__*/React.createElement(Reliability, { value: item.reliability, size: 11 }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, "· " + (LANG === "en" ? "reliability " : "Verlässlichkeit ") + (Number(item.reliability) || 0) + "/5"), (Number(item.sourceCount) || 0) > 1 ? /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, " \u00b7 " + item.sourceCount + (LANG === "en" ? " sources confirm" : " Quellen best\u00e4tigen")) : null, item.ausgang ? /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: item.ausgang === "bestaetigt" ? "#1f7a3e" : "#a12b2b" } }, " \u00b7 " + (item.ausgang === "bestaetigt" ? (LANG === "en" ? "\u2713 confirmed" : "\u2713 best\u00e4tigt") : (LANG === "en" ? "\u2717 collapsed" : "\u2717 geplatzt"))) : null), (item.sources || []).slice(0, 2).map((s, i) => /*#__PURE__*/React.createElement("a", {
+  }, item.fee), ((String(item.summary || "").indexOf("KI-Prognose") >= 0) || /Prognose/.test(String(item.source_name || item.source || "")) || ((item.sources || []).some(x => /Prognose/.test(String(x && x.name || ""))))) && /*#__PURE__*/React.createElement("span", { title: LANG === "en" ? "AI forecast by the TransferWire prediction agent \u2014 not a confirmed report" : "KI-Prognose des TransferWire Prognose-Agenten \u2014 keine best\u00e4tigte Meldung", style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: .6, textTransform: "uppercase", padding: "3px 9px", borderRadius: 999, background: "#EEF0FF", color: "#3B44B8", border: "1px solid #C9CEFF" } }, LANG === "en" ? "AI forecast" : "KI-Prognose"), /*#__PURE__*/React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 6 } }, /*#__PURE__*/React.createElement(Reliability, { value: item.reliability, size: 11 }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, "· " + (LANG === "en" ? "reliability " : "Verlässlichkeit ") + (Number(item.reliability) || 0) + "/5"), (Number(item.sourceCount) || 0) > 1 ? /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, " \u00b7 " + item.sourceCount + (LANG === "en" ? " sources confirm" : " Quellen best\u00e4tigen")) : null, item.ausgang ? /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: item.ausgang === "bestaetigt" ? "var(--gruen-text)" : "var(--sc-schwach-text)" } }, " \u00b7 " + (item.ausgang === "bestaetigt" ? (LANG === "en" ? "\u2713 confirmed" : "\u2713 best\u00e4tigt") : (LANG === "en" ? "\u2717 collapsed" : "\u2717 geplatzt"))) : null), (item.sources || []).slice(0, 2).map((s, i) => /*#__PURE__*/React.createElement("a", {
     key: i,
     href: s.url,
     onClick: e => { e.preventDefault(); e.stopPropagation(); if (s.url) window.open(s.url, "_blank"); },
@@ -6556,7 +6569,7 @@ function LegalSection({
       fontFamily: FONT_BODY,
       fontSize: 13.5,
       lineHeight: 1.65,
-      color: "#3f3f3c"
+      color: "var(--t2)"
     }
   }, children));
 }
@@ -6576,7 +6589,7 @@ function ImpressumContent() {
       fontWeight: 700,
       color: INK
     }
-  }, "TransferWire"), /*#__PURE__*/React.createElement("div", null, "Golden Palm Enterprise"), /*#__PURE__*/React.createElement("div", null, "Kaiserpassage 6"), /*#__PURE__*/React.createElement("div", null, "72764 Reutlingen"), /*#__PURE__*/React.createElement("div", null, "Deutschland"))), /*#__PURE__*/React.createElement(LegalSection, {
+  }, "TransferWire"), /*#__PURE__*/React.createElement("div", null, "RATH ENTERPRISES"), /*#__PURE__*/React.createElement("div", null, "Kaiserpassage 6"), /*#__PURE__*/React.createElement("div", null, "72764 Reutlingen"), /*#__PURE__*/React.createElement("div", null, "Deutschland"))), /*#__PURE__*/React.createElement(LegalSection, {
     title: "Kontakt"
   }, /*#__PURE__*/React.createElement("p", {
     style: {
@@ -6593,7 +6606,7 @@ function ImpressumContent() {
     style: {
       margin: 0
     }
-  }, "Golden Palm Enterprise, Kaiserpassage 6, 72764 Reutlingen")), /*#__PURE__*/React.createElement(LegalSection, {
+  }, "RATH ENTERPRISES, Kaiserpassage 6, 72764 Reutlingen")), /*#__PURE__*/React.createElement(LegalSection, {
     title: "Verbraucherstreitbeilegung"
   }, /*#__PURE__*/React.createElement("p", {
     style: {
@@ -6618,7 +6631,7 @@ function DatenschutzContent() {
     style: {
       marginBottom: 0
     }
-  }, /*#__PURE__*/React.createElement("strong", null, "TransferWire"), " · Golden Palm Enterprise, Kaiserpassage 6, 72764 Reutlingen, Deutschland", /*#__PURE__*/React.createElement("br", null), "E-Mail: ", /*#__PURE__*/React.createElement("a", {
+  }, /*#__PURE__*/React.createElement("strong", null, "TransferWire"), " · RATH ENTERPRISES, Kaiserpassage 6, 72764 Reutlingen, Deutschland", /*#__PURE__*/React.createElement("br", null), "E-Mail: ", /*#__PURE__*/React.createElement("a", {
     href: "mailto:info@transferwire.de",
     style: {
       color: INK
@@ -6669,7 +6682,7 @@ function AgbContent() {
     style: {
       margin: 0
     }
-  }, "Diese AGB gelten für die Nutzung der Plattform TransferWire, betrieben von Golden Palm Enterprise, Kaiserpassage 6, 72764 Reutlingen (nachfolgend „Anbieter\").")), /*#__PURE__*/React.createElement(LegalSection, {
+  }, "Diese AGB gelten für die Nutzung der Plattform TransferWire, betrieben von RATH ENTERPRISES, Kaiserpassage 6, 72764 Reutlingen (nachfolgend „Anbieter\").")), /*#__PURE__*/React.createElement(LegalSection, {
     title: "2. Leistung"
   }, /*#__PURE__*/React.createElement("p", {
     style: {
@@ -6699,7 +6712,7 @@ function AgbContent() {
     style: {
       margin: 0
     }
-  }, "Verbrauchern steht ein 14-tägiges Widerrufsrecht zu. Verlangt der Nutzer im Bestellprozess ausdrücklich die sofortige Bereitstellung des digitalen Dienstes und bestätigt seine Kenntnis, dass das Widerrufsrecht damit erlischt, erlischt das Widerrufsrecht mit Beginn der Vertragsausführung. Der Widerruf ist zu richten an: Golden Palm Enterprise, Kaiserpassage 6, 72764 Reutlingen, E-Mail: info@transferwire.de.")), /*#__PURE__*/React.createElement(LegalSection, {
+  }, "Verbrauchern steht ein 14-tägiges Widerrufsrecht zu. Verlangt der Nutzer im Bestellprozess ausdrücklich die sofortige Bereitstellung des digitalen Dienstes und bestätigt seine Kenntnis, dass das Widerrufsrecht damit erlischt, erlischt das Widerrufsrecht mit Beginn der Vertragsausführung. Der Widerruf ist zu richten an: RATH ENTERPRISES, Kaiserpassage 6, 72764 Reutlingen, E-Mail: info@transferwire.de.")), /*#__PURE__*/React.createElement(LegalSection, {
     title: "7. Verfügbarkeit und Haftung"
   }, /*#__PURE__*/React.createElement("p", {
     style: {
@@ -6799,7 +6812,7 @@ function LegalView({
 /* ── Landing, Registrierung, Abo, Kündigung, Einstellungen ───────────────── */
 const DARK = "#0c0d0f";
 const DARK2 = "#131417";
-const ORANGE = "#e8792b";
+const ORANGE = "#bd5412";
 const LGREEN = "#C8A355";
 function FInput({
   label,
@@ -6848,7 +6861,7 @@ function FInput({
   }));
 }
 function TwFehler({ text }) {
-  return text ? React.createElement("div", { role: "alert", style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#c22", marginBottom: 12, lineHeight: 1.5 } }, text) : null;
+  return text ? React.createElement("div", { role: "alert", style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--sc-schwach-text)", marginBottom: 12, lineHeight: 1.5 } }, text) : null;
 }
 function TwHinweis({ text, gruen }) {
   return text ? React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: gruen ? "#166a3f" : INK, background: gruen ? "#e9f7ef" : "var(--karte2)", border: "1px solid " + (gruen ? "#bfe6cf" : HAIR), borderRadius: 10, padding: "11px 13px", marginBottom: 12, lineHeight: 1.55 } }, text) : null;
@@ -6881,7 +6894,7 @@ function FCheck({
       fontFamily: FONT_BODY,
       fontSize: 12.5,
       lineHeight: 1.55,
-      color: "#4a4a48"
+      color: "var(--t2)"
     }
   }, children));
 }
@@ -7150,7 +7163,7 @@ function FeatCard({ f }) {
   }, "PREMIUM") : null, React.createElement("div", { style: { fontSize: 24, marginBottom: 8 } }, f.i), React.createElement("div", {
     style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 16.5, textTransform: "uppercase", letterSpacing: .4, marginBottom: 6 }
   }, f.t), React.createElement("p", {
-    style: { fontFamily: FONT_BODY, fontSize: 12.5, lineHeight: 1.6, color: "#4a4a48", margin: 0 }
+    style: { fontFamily: FONT_BODY, fontSize: 12.5, lineHeight: 1.6, color: "var(--t2)", margin: 0 }
   }, f.d));
 }
 function FaqItem({ q, a }) {
@@ -7159,7 +7172,7 @@ function FaqItem({ q, a }) {
   }, React.createElement("summary", {
     style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, listStyle: "none" }
   }, q), React.createElement("p", {
-    style: { fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.65, color: "#4a4a48", margin: "10px 0 2px" }
+    style: { fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.65, color: "var(--t2)", margin: "10px 0 2px" }
   }, a));
 }
 function PremiumLock({ small }) {
@@ -7470,7 +7483,7 @@ function LandingPage({
       fontFamily: FONT_BODY,
       fontSize: 14.5,
       lineHeight: 1.65,
-      color: "#4a4a48",
+      color: "var(--t2)",
       maxWidth: 640,
       margin: "0 0 26px"
     }
@@ -7491,7 +7504,7 @@ function LandingPage({
   }, LP2[LANG].f_kick), /*#__PURE__*/React.createElement("h2", {
     style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: "clamp(26px, 4vw, 40px)", margin: "0 0 10px", textTransform: "uppercase" }
   }, LP2[LANG].f_h2), /*#__PURE__*/React.createElement("p", {
-    style: { fontFamily: FONT_BODY, fontSize: 14, lineHeight: 1.65, color: "#4a4a48", maxWidth: 640, margin: "0 0 28px" }
+    style: { fontFamily: FONT_BODY, fontSize: 14, lineHeight: 1.65, color: "var(--t2)", maxWidth: 640, margin: "0 0 28px" }
   }, LP2[LANG].f_sub), /*#__PURE__*/React.createElement("div", {
     style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 14 }
   }, LP2[LANG].feats.map((f, i) => /*#__PURE__*/React.createElement(FeatCard, { key: i, f: f }))))), /*#__PURE__*/React.createElement("section", {
@@ -7538,7 +7551,7 @@ function LandingPage({
       fontSize: 12,
       color: MUTED
     }
-  }, "© ", new Date().getFullYear(), " Golden Palm Enterprise · TransferWire"), /*#__PURE__*/React.createElement("span", {
+  }, "© ", new Date().getFullYear(), " RATH ENTERPRISES · TransferWire"), /*#__PURE__*/React.createElement("span", {
     style: {
       flex: 1
     }
@@ -8078,7 +8091,7 @@ function SubscribePage({
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12.5,
-      color: "#c22",
+      color: "var(--sc-schwach-text)",
       marginBottom: 12
     }
   }, err), msg ? /*#__PURE__*/React.createElement("div", {
@@ -8151,7 +8164,7 @@ function SubscribePage({
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12.5,
-      color: "#c22",
+      color: "var(--sc-schwach-text)",
       marginBottom: 12
     }
   }, cErr), /*#__PURE__*/React.createElement(PBtn, {
@@ -8210,7 +8223,7 @@ function CancelPage({
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12.5,
-      color: "#4a4a48",
+      color: "var(--t2)",
       lineHeight: 1.55,
       margin: "0 0 12px"
     }
@@ -8268,7 +8281,7 @@ function CancelPage({
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12.5,
-      color: "#c22",
+      color: "var(--sc-schwach-text)",
       marginBottom: 12
     }
   }, err), msg ? /*#__PURE__*/React.createElement("div", {
@@ -8323,7 +8336,7 @@ function ExpiredPage({
     style: {
       fontFamily: FONT_BODY,
       fontSize: 13.5,
-      color: "#4a4a48",
+      color: "var(--t2)",
       lineHeight: 1.6,
       margin: "0 0 18px"
     }
@@ -8748,7 +8761,7 @@ function SpieltagVue({ openPlayer, openVerein }) {
   // Datumsleiste: Pfeil, 3 Tage, Pfeil, Kalender
   const tageLeiste = h("div", { style: { display: "flex", alignItems: "center", gap: 6, marginBottom: 10, flexWrap: "wrap" } },
     knopf("\u2190", false, () => { setDatum(tagPlus(datum, -1)); setLiga(""); }, { title: en ? "Previous day" : "Vortag" }),
-    [-1, 0, 1].map(o => { const iso = tagPlus(datum, o); const n = zaehl(iso); return h(React.Fragment, { key: iso }, knopf([label(iso), n ? h("span", { style: { marginLeft: 6, fontSize: 10.5, opacity: .75 } }, n) : null], o === 0, () => { setDatum(iso); setLiga(""); }, { style: { minWidth: 118, textAlign: "center" } })); }),
+    [-1, 0, 1].map(o => { const iso = tagPlus(datum, o); const n = zaehl(iso); return h(React.Fragment, { key: iso }, knopf([label(iso), n ? h("span", { style: { marginLeft: 6, fontSize: 10.5, opacity: .9 } }, n) : null], o === 0, () => { setDatum(iso); setLiga(""); }, { style: { minWidth: 118, textAlign: "center" } })); }),
     knopf("\u2192", false, () => { setDatum(tagPlus(datum, 1)); setLiga(""); }, { title: en ? "Next day" : "Folgetag" }),
     h("span", { style: { flex: 1 } }),
     knopf("" + (en ? "Calendar" : "Kalender"), kalOffen, () => { setKalOffen(!kalOffen); setKalMonat(datum.slice(0, 7)); setKalTag(datum); }));
@@ -8790,7 +8803,7 @@ function AssistentVue({ account, openPlayer }) {
   const oeffne = id => { setChatId(id); setMsgs([]); setFehler(""); if (!id) return; post({ modus: "verlauf", chat_id: id }).then(d => { if (d && d.ok) setMsgs((d.nachrichten || []).map(m => ({ rolle: m.rolle, inhalt: m.inhalt, quellen: m.quellen || [], ki: m.ki }))); }).catch(() => {}); };
   const senden = (text, modus, name) => { const t = (text || "").trim(); if (!t && !name) return; if (busy) return; setFehler(""); const anzeige = modus === "analyse" ? ((en ? "Player analysis: " : "Spieler-Analyse: ") + name + (t ? " \u2013 " + t : "")) : t; setMsgs(m => m.concat([{ rolle: "user", inhalt: anzeige }])); setBusy(true); setFrage(""); post({ modus: modus || "chat", frage: t, spieler: name || "", chat_id: chatId || "" }).then(d => { setBusy(false); if (!d || !d.ok) { const f = d && d.fehler; setFehler(f === "limit" ? (en ? "Daily limit reached (" + d.limit + " questions)." : "Tageslimit erreicht (" + d.limit + " Fragen).") : f === "auth" ? (en ? "Please sign in." : "Bitte anmelden.") : (en ? "No answer received." : "Keine Antwort erhalten.")); return; } if (!chatId) setChatId(d.chat_id); setMsgs(m => m.concat([{ rolle: "assistant", inhalt: d.antwort, quellen: d.quellen || [], ki: d.ki }])); ladeListe(); }).catch(() => { setBusy(false); setFehler(en ? "Connection problem." : "Verbindungsproblem."); }); };
   const md = text => { const zeilen = String(text || "").split(/\n/); const out = []; let liste = null; const inline = s => { const teile = []; let rest = s; let i = 0; while (rest.length) { const m = rest.match(/\*\*(.+?)\*\*/); if (!m) { teile.push(rest); break; } if (m.index > 0) teile.push(rest.slice(0, m.index)); teile.push(h("strong", { key: "b" + (i++) }, m[1])); rest = rest.slice(m.index + m[0].length); } return teile; }; zeilen.forEach((z, i) => { const l = z.match(/^\s*[-\u2022*]\s+(.*)$/); if (l) { if (!liste) { liste = []; out.push(h("ul", { key: "ul" + i, style: { margin: "4px 0 6px", paddingLeft: 18 } }, liste)); } liste.push(h("li", { key: "li" + i, style: { marginBottom: 2 } }, inline(l[1]))); return; } liste = null; if (!z.trim()) return; out.push(h("p", { key: "p" + i, style: { margin: "0 0 8px" } }, inline(z.replace(/^#+\s*/, "")))); }); return out; };
-  const blase = (m, i) => h("div", { key: i, style: { display: "flex", justifyContent: m.rolle === "user" ? "flex-end" : "flex-start", marginBottom: 12 } }, m.rolle !== "user" ? h("div", { style: { width: 30, height: 30, borderRadius: 9, background: "var(--gold)", color: "var(--gold-schrift)", display: "grid", placeItems: "center", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 12, marginRight: 10, flexShrink: 0 } }, "TW") : null, h("div", { style: { maxWidth: "78%", background: m.rolle === "user" ? "var(--karte2)" : CARD, border: "1px solid " + HAIR, borderRadius: 14, padding: "11px 14px", fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.55, color: INK } }, md(m.inhalt), m.quellen && m.quellen.length ? h("div", { style: { marginTop: 6, fontSize: 11.5, color: MUTED } }, (en ? "Sources: " : "Quellen: "), m.quellen.slice(0, 5).map((q, k) => h("a", { key: k, href: q.url, target: "_blank", rel: "noopener", style: { color: "#5ec8e6", marginRight: 8 } }, (q.titel || q.url).slice(0, 50)))) : null, m.rolle !== "user" && m.ki === false ? h("div", { style: { marginTop: 6, fontSize: 11, color: "#c9a227" } }, en ? "Data only \u2013 AI part currently unavailable" : "Nur Daten \u2013 KI-Teil gerade nicht verf\u00fcgbar") : null));
+  const blase = (m, i) => h("div", { key: i, style: { display: "flex", justifyContent: m.rolle === "user" ? "flex-end" : "flex-start", marginBottom: 12 } }, m.rolle !== "user" ? h("div", { style: { width: 30, height: 30, borderRadius: 9, background: "var(--gold)", color: "var(--gold-schrift)", display: "grid", placeItems: "center", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 12, marginRight: 10, flexShrink: 0 } }, "TW") : null, h("div", { style: { maxWidth: "78%", background: m.rolle === "user" ? "var(--karte2)" : CARD, border: "1px solid " + HAIR, borderRadius: 14, padding: "11px 14px", fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.55, color: INK } }, md(m.inhalt), m.quellen && m.quellen.length ? h("div", { style: { marginTop: 6, fontSize: 11.5, color: MUTED } }, (en ? "Sources: " : "Quellen: "), m.quellen.slice(0, 5).map((q, k) => h("a", { key: k, href: q.url, target: "_blank", rel: "noopener", style: { color: "var(--teal)", marginRight: 8 } }, (q.titel || q.url).slice(0, 50)))) : null, m.rolle !== "user" && m.ki === false ? h("div", { style: { marginTop: 6, fontSize: 11, color: "#c9a227" } }, en ? "Data only \u2013 AI part currently unavailable" : "Nur Daten \u2013 KI-Teil gerade nicht verf\u00fcgbar") : null));
   const vorschlaege = [en ? "Which strikers under 23 have expiring contracts?" : "Welche St\u00fcrmer unter 23 haben auslaufende Vertr\u00e4ge?", en ? "What is the current form of Harry Kane?" : "Wie ist die aktuelle Form von Harry Kane?", en ? "What does Bayern need this winter?" : "Was braucht Bayern M\u00fcnchen im Winter?", en ? "Summarise yesterday's matchday" : "Fasse den gestrigen Spieltag zusammen"];
   return h("div", { className: "tw-assist", style: { display: "grid", gridTemplateColumns: "250px 1fr", gap: 16, minHeight: "calc(100vh - 140px)" } },
     h("div", { style: { background: CARD, border: "1px solid " + HAIR, borderRadius: 14, padding: 10, display: "flex", flexDirection: "column", minHeight: 0 } },
@@ -8799,7 +8812,7 @@ function AssistentVue({ account, openPlayer }) {
       h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: MUTED, padding: "14px 8px 6px" } }, "Chats"),
       h("div", { style: { overflowY: "auto", flex: 1 } }, chats.length ? chats.map(c => h("button", { key: c.chat_id, type: "button", onClick: () => oeffne(c.chat_id), style: { display: "block", width: "100%", textAlign: "left", cursor: "pointer", background: c.chat_id === chatId ? "var(--karte2)" : "transparent", border: "none", borderRadius: 9, padding: "8px 10px", fontFamily: FONT_BODY, fontSize: 13, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, (c.modus === "analyse" ? "" : "") + (c.titel || "Chat"))) : h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, fontStyle: "italic", padding: "4px 10px" } }, en ? "No chats yet" : "Noch keine Chats"))),
     h("div", { style: { display: "flex", flexDirection: "column", minHeight: 0 } },
-      h("div", { style: { flex: 1, overflowY: "auto", padding: "8px 6px 16px" } }, !msgs.length && !busy ? h("div", { style: { maxWidth: 640, margin: "60px auto 0", textAlign: "center" } }, h("div", { style: { width: 48, height: 48, borderRadius: 14, background: "var(--gold)", color: "var(--gold-schrift)", display: "grid", placeItems: "center", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 18, margin: "0 auto 14px" } }, "TW"), h("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 22, color: INK, marginBottom: 6 } }, en ? "I am your TransferWire assistant." : "Ich bin dein TransferWire-Assistent."), h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: MUTED, marginBottom: 18 } }, en ? "Ask about players, clubs, form, contracts, needs or matchdays \u2013 I answer from the TransferWire database and research the web when something is missing." : "Frag nach Spielern, Vereinen, Form, Vertr\u00e4gen, Bedarfen oder Spieltagen \u2013 ich antworte aus der TransferWire-Datenbank und recherchiere im Web, wenn etwas fehlt."), h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center" } }, vorschlaege.map(v => h("button", { key: v, type: "button", onClick: () => senden(v), style: { cursor: "pointer", background: CARD, border: "1px solid " + HAIR, borderRadius: 999, padding: "7px 12px", fontFamily: FONT_BODY, fontSize: 12.5, color: INK } }, v)))) : msgs.map(blase), busy ? h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), en ? "Thinking \u2026" : "Denke nach \u2026") : null, fehler ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#e07b6a" } }, fehler) : null, h("div", { ref: ende })),
+      h("div", { style: { flex: 1, overflowY: "auto", padding: "8px 6px 16px" } }, !msgs.length && !busy ? h("div", { style: { maxWidth: 640, margin: "60px auto 0", textAlign: "center" } }, h("div", { style: { width: 48, height: 48, borderRadius: 14, background: "var(--gold)", color: "var(--gold-schrift)", display: "grid", placeItems: "center", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 18, margin: "0 auto 14px" } }, "TW"), h("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 22, color: INK, marginBottom: 6 } }, en ? "I am your TransferWire assistant." : "Ich bin dein TransferWire-Assistent."), h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: MUTED, marginBottom: 18 } }, en ? "Ask about players, clubs, form, contracts, needs or matchdays \u2013 I answer from the TransferWire database and research the web when something is missing." : "Frag nach Spielern, Vereinen, Form, Vertr\u00e4gen, Bedarfen oder Spieltagen \u2013 ich antworte aus der TransferWire-Datenbank und recherchiere im Web, wenn etwas fehlt."), h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center" } }, vorschlaege.map(v => h("button", { key: v, type: "button", onClick: () => senden(v), style: { cursor: "pointer", background: CARD, border: "1px solid " + HAIR, borderRadius: 999, padding: "7px 12px", fontFamily: FONT_BODY, fontSize: 12.5, color: INK } }, v)))) : msgs.map(blase), busy ? h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), en ? "Thinking \u2026" : "Denke nach \u2026") : null, fehler ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--sc-schwach-text)" } }, fehler) : null, h("div", { ref: ende })),
       h("div", { style: { background: CARD, border: "1px solid " + HAIR, borderRadius: 14, padding: 10 } },
         analyse ? h("div", { style: { display: "flex", gap: 8, marginBottom: 8, alignItems: "center" } }, h("input", { value: spieler, onChange: e => setSpieler(e.target.value), placeholder: en ? "Player name for the analysis \u2026" : "Spielername f\u00fcr die Analyse \u2026", onKeyDown: e => { if (e.key === "Enter" && spieler.trim()) { senden(frage, "analyse", spieler.trim()); setAnalyse(false); setSpieler(""); } }, style: { flex: 1, fontFamily: FONT_BODY, fontSize: 14, padding: "10px 12px", borderRadius: 10, border: "1px solid " + HAIR, background: "var(--karte2)", color: INK, outline: "none" } }), h("button", { type: "button", disabled: !spieler.trim() || busy, onClick: () => { senden(frage, "analyse", spieler.trim()); setAnalyse(false); setSpieler(""); }, style: { cursor: "pointer", background: "var(--gold)", color: "var(--gold-schrift)", border: "none", borderRadius: 10, padding: "10px 14px", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, opacity: !spieler.trim() || busy ? .5 : 1 } }, en ? "Analyse" : "Analysieren"), h("button", { type: "button", onClick: () => setAnalyse(false), style: { cursor: "pointer", background: "none", border: "none", color: MUTED, fontFamily: FONT_BODY, fontSize: 12.5 } }, "\u2715")) : null,
         h("div", { style: { display: "flex", gap: 8, alignItems: "flex-end" } }, h("textarea", { ref: eingabe, value: frage, onChange: e => setFrage(e.target.value), rows: 2, placeholder: analyse ? (en ? "Optional: a specific question about the player" : "Optional: konkrete Frage zum Spieler") : (en ? "Ask a question \u2026 (Enter sends, Shift+Enter new line)" : "Frage stellen \u2026 (Enter sendet, Umschalt+Enter neue Zeile)"), onKeyDown: e => { if (e.key === "Enter" && !e.shiftKey && !analyse) { e.preventDefault(); senden(frage); } }, style: { flex: 1, resize: "none", fontFamily: FONT_BODY, fontSize: 14, padding: "10px 12px", borderRadius: 10, border: "1px solid " + HAIR, background: "var(--karte2)", color: INK, outline: "none" } }), !analyse ? h("button", { type: "button", disabled: !frage.trim() || busy, onClick: () => senden(frage), style: { cursor: "pointer", background: "var(--gold)", color: "var(--gold-schrift)", border: "none", borderRadius: 10, padding: "11px 16px", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, opacity: !frage.trim() || busy ? .5 : 1 } }, en ? "Send" : "Senden") : null),
@@ -8820,7 +8833,7 @@ function KontakteVue({ isPrem, authQ, openVerein }) {
   const waehle = v => { setWahl(v); setQ(v.t); setOffen(false); setKont(null); setLiga(v.l); setLand(landVon(v.l)); if (!isPrem) return; setLade(true); fetch(MARKT_URL + "?bereich=kontakte&q=" + encodeURIComponent(v.t) + (authQ || ""), { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(raw => { const d = (typeof normResp === "function") ? normResp(raw) : raw; const items = (d && Array.isArray(d.items) ? d.items : []).filter(c => norm(c.verein) === norm(v.t)); setKont(items); setLade(false); }).catch(() => { setKont([]); setLade(false); }); };
   const zurueck = () => { if (wahl) { setWahl(null); setQ(""); setKont(null); return; } if (liga) { setLiga(""); return; } if (land) { setLand(""); return; } };
   const stufe = wahl ? 3 : liga ? 2 : land ? 1 : 0;
-  const feld = { fontFamily: FONT_BODY, fontSize: 12.5, color: "#4a4a48" };
+  const feld = { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)" };
   const knopf = (inhalt, aktiv, onClick, extra) => h("button", { type: "button", onClick, style: Object.assign({ cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, padding: "8px 13px", borderRadius: 999, border: "1px solid " + (aktiv ? "var(--dunkel)" : HAIR), background: aktiv ? "var(--dunkel)" : CARD, color: aktiv ? "#fff" : INK, whiteSpace: "nowrap" }, extra || {}) }, inhalt);
   const kontaktKarte = c => h("div", { style: { background: PAGE, borderRadius: 10, padding: "10px 12px" } },
     h("div", { style: Object.assign({}, feld, { fontWeight: 800, color: "var(--teal)", fontSize: 11.5, textTransform: "uppercase", letterSpacing: .4 }) }, c.funktion || (en ? "Contact" : "Kontakt")),
@@ -9781,11 +9794,11 @@ function vdbT(k) { const l = (typeof LANG !== "undefined" && LANG === "en") ? VD
 function vdbEur(n) { n = Number(n) || 0; if (!n) return "–"; const en = typeof LANG !== "undefined" && LANG === "en"; if (n >= 1e6) { const v = n / 1e6; const s = (v >= 100 ? Math.round(v) : Math.round(v * 10) / 10).toString(); return (en ? s : s.replace(".", ",")) + " " + vdbT("mio"); } const k = Math.round(n / 1e3); return (en ? k : String(k).replace(".", ",")) + " " + vdbT("tsd"); }
 function vdbDatum(d) { if (!d) return ""; const s = String(d).slice(0, 10); const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/); if (!m) return s; return (typeof LANG !== "undefined" && LANG === "en") ? `${m[3]}/${m[2]}/${m[1]}` : `${m[3]}.${m[2]}.${m[1]}`; }
 function vdbMonat(d) { if (!d) return "–"; const s = String(d).slice(0, 7); const m = s.match(/^(\d{4})-(\d{2})$/); return m ? `${m[2]}/${m[1]}` : s; }
-const VDB_AMPEL = { rot: "#d64545", gelb: "#e0a800", gruen: "#2e9e5b" };
+const VDB_AMPEL = { rot: "#c43b3b", gelb: "#e0a800", gruen: "#23864b" };
 function vdbLogo(x, size) { const h = React.createElement; const url = (x && x.logo) || (typeof clubLogoUrl === "function" ? clubLogoUrl(x && x.name) : null); size = size || 36;
   return url ? h("img", { src: url, alt: "", loading: "lazy", style: { width: size, height: size, objectFit: "contain", borderRadius: 8, background: "var(--karte2)", flex: "none" }, onError: e => { e.currentTarget.style.visibility = "hidden"; } })
     : h("div", { style: { width: size, height: size, borderRadius: 8, background: "var(--karte2)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: Math.round(size * 0.42), color: "var(--t3)", flex: "none" } }, String((x && x.name) || "?").replace(/^(FC|SC|SV|TSV|VfB|VfL|1\.|Borussia|Eintracht|Real|AC|AS|US|CD|CF|RC) /i, "").slice(0, 2).toUpperCase()); }
-function vdbChip(text, farbe, hintergrund) { return React.createElement("span", { style: { display: "inline-block", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 999, color: farbe || "var(--t2)", background: hintergrund || "var(--karte2)", border: `1px solid ${farbe ? farbe + "33" : "var(--linie)"}`, whiteSpace: "nowrap" } }, text); }
+function vdbChip(text, farbe, hintergrund) { return React.createElement("span", { style: { display: "inline-block", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 999, color: farbe || "var(--t2)", background: hintergrund || "var(--karte2)", border: `1px solid ${farbe && farbe.charAt(0) === "#" ? farbe + "33" : "var(--linie)"}`, whiteSpace: "nowrap" } }, text); }
 const vdbSel = { fontFamily: FONT_BODY, fontSize: 13, padding: "10px 10px", border: "1px solid var(--linie)", borderRadius: 9, background: "var(--karte)", color: "var(--t1)" };
 
 function DbUmschalter({ tab, setTab }) {
@@ -9848,8 +9861,8 @@ function VereineDbVue({ onOpen }) {
     return out;
   }, [items, q, land, liga, lage, bedarf, reserve, sort]);
   const landName = l => (typeof LAND_LIGEN !== "undefined" && en) ? ((LAND_LIGEN.find(x => x.de === l) || {}).en || l) : l;
-  const bedarfChips = x => { const c = []; if (Number(x.rot) > 0) c.push(vdbChip(`${x.rot} ${en ? "red" : "rot"}`, VDB_AMPEL.rot, "rgba(214,69,69,.1)")); if (Number(x.gelb) > 0) c.push(vdbChip(`${x.gelb} ${en ? "amber" : "gelb"}`, "#9a7200", "rgba(224,168,0,.14)")); if (!c.length && x.bedarf) c.push(vdbChip(en ? "no acute need" : "kein akuter Bedarf", "var(--gruen-text)", "var(--gruen-tint)")); return c; };
-  const lageChips = x => { const c = []; if (x.abstieg) c.push(vdbChip(vdbT("abstieg"), VDB_AMPEL.rot, "rgba(214,69,69,.1)")); if (x.titel) c.push(vdbChip(vdbT("titel_r"), "var(--gruen-text)", "var(--gruen-tint)")); if (x.druck) c.push(vdbChip(vdbT("druck"), "#9a7200", "rgba(224,168,0,.14)")); if (x.reserve) c.push(vdbChip(vdbT("zweite"))); return c; };
+  const bedarfChips = x => { const c = []; if (Number(x.rot) > 0) c.push(vdbChip(`${x.rot} ${en ? "red" : "rot"}`, "var(--sc-schwach-text)", "rgba(214,69,69,.1)")); if (Number(x.gelb) > 0) c.push(vdbChip(`${x.gelb} ${en ? "amber" : "gelb"}`, "var(--sc-mittel-text)", "rgba(224,168,0,.14)")); if (!c.length && x.bedarf) c.push(vdbChip(en ? "no acute need" : "kein akuter Bedarf", "var(--gruen-text)", "var(--gruen-tint)")); return c; };
+  const lageChips = x => { const c = []; if (x.abstieg) c.push(vdbChip(vdbT("abstieg"), "var(--sc-schwach-text)", "rgba(214,69,69,.1)")); if (x.titel) c.push(vdbChip(vdbT("titel_r"), "var(--gruen-text)", "var(--gruen-tint)")); if (x.druck) c.push(vdbChip(vdbT("druck"), "var(--sc-mittel-text)", "rgba(224,168,0,.14)")); if (x.reserve) c.push(vdbChip(vdbT("zweite"))); return c; };
   const karte = x => h("button", { key: x.id, type: "button", onClick: () => onOpen(x), style: { textAlign: "left", cursor: "pointer", background: "var(--karte)", border: "1px solid var(--linie)", borderRadius: 14, padding: 14, display: "flex", gap: 12, alignItems: "flex-start", color: "var(--t1)", width: "100%" } },
     vdbLogo(x, 44),
     h("div", { style: { minWidth: 0, flex: 1 } },
@@ -9904,7 +9917,7 @@ function VereinsSeite({ id, name, authQ, isPrem, onClose, onOpenPlayer }) {
   const kasten = (kinder, extra) => h("div", { style: Object.assign({ background: "var(--karte)", border: "1px solid var(--linie)", borderRadius: 12, padding: "12px 14px", fontFamily: FONT_BODY, fontSize: 13, color: "var(--t1)", lineHeight: 1.5 }, extra || {}) }, kinder);
   const spielerLink = (pid, text, team) => h("button", { type: "button", onClick: () => pid && onOpenPlayer && onOpenPlayer(pid, text, team || (v && v.name)), style: { background: "none", border: "none", padding: 0, cursor: pid ? "pointer" : "default", fontFamily: FONT_BODY, fontSize: "inherit", fontWeight: 700, color: pid ? "var(--blau-text)" : "var(--t1)", textAlign: "left" } }, text);
   const tabs = [["ueb", vdbT("tab_ueb")], ["kader", `${vdbT("tab_kader")}${d && d.ok ? ` (${(d.kader || []).length})` : ""}`], ["spiele", vdbT("tab_spiele")], ["transfers", vdbT("tab_transfers")], ["news", vdbT("tab_news")], ["kontakte", `${vdbT("tab_kontakte")}${d && d.ok && d.kontakte_zahl ? ` (${d.kontakte_zahl})` : ""}`]];
-  const ergebnisChip = s => { if (s.th == null) return null; const eig = s.ist_heim ? s.th : s.tg, geg = s.ist_heim ? s.tg : s.th; const f = eig > geg ? VDB_AMPEL.gruen : eig < geg ? VDB_AMPEL.rot : "#9a7200"; return h("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 15, color: "#fff", background: f, borderRadius: 6, padding: "1px 7px", minWidth: 38, textAlign: "center", display: "inline-block" } }, `${s.th}:${s.tg}`); };
+  const ergebnisChip = s => { if (s.th == null) return null; const eig = s.ist_heim ? s.th : s.tg, geg = s.ist_heim ? s.tg : s.th; const f = eig > geg ? VDB_AMPEL.gruen : eig < geg ? VDB_AMPEL.rot : "#8a6500"; return h("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 15, color: "#fff", background: f, borderRadius: 6, padding: "1px 7px", minWidth: 38, textAlign: "center", display: "inline-block" } }, `${s.th}:${s.tg}`); };
   const xgBalken = s => { if (s.xh == null && s.xg == null) return null; const a = Number(s.xh) || 0, b = Number(s.xg) || 0, sum = a + b || 1; return h("div", { title: `${vdbT("xg")} ${a.toFixed(2)} : ${b.toFixed(2)}`, style: { display: "flex", alignItems: "center", gap: 6, fontFamily: FONT_BODY, fontSize: 11, color: "var(--t2)", minWidth: 150 } }, h("span", null, a.toFixed(2)), h("div", { style: { flex: 1, height: 6, borderRadius: 3, background: "var(--karte2)", overflow: "hidden", display: "flex" } }, h("div", { style: { width: `${Math.round(a / sum * 100)}%`, background: "var(--teal)" } }), h("div", { style: { flex: 1, background: "var(--linie2)" } })), h("span", null, b.toFixed(2)), h("span", { style: { fontWeight: 700 } }, vdbT("xg"))); };
   const hatAufst = s => s.aufst && typeof twHatRaster === "function" && (twHatRaster((s.aufst.heim || {}).startelf) || twHatRaster((s.aufst.gast || {}).startelf));
   const spielZeile = s => h("div", { key: s.id, style: { borderBottom: "1px solid var(--linie)" } }, h("div", { style: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, padding: "8px 0", fontFamily: FONT_BODY, fontSize: 13 } },
@@ -9916,8 +9929,8 @@ function VereinsSeite({ id, name, authQ, isPrem, onClose, onOpenPlayer }) {
     const alle = (d.kader || []).filter(k => (alleSp || !k.status) && (!grp || k.grp === grp));
     const grpName = g => ({ TW: en ? "Goalkeepers" : "Torhüter", ABW: en ? "Defence" : "Abwehr", MF: en ? "Midfield" : "Mittelfeld", ST: en ? "Attack" : "Sturm" })[g] || (en ? "Other" : "Sonstige");
     const statusText = k => { const t = []; if (k.verletzt) t.push(`${vdbT("verletzt")}${k.verletzt_bis ? " " + vdbT("bis") + " " + vdbDatum(k.verletzt_bis) : ""}`); if (k.leihe) t.push(`${vdbT("leihe")} ${k.leihe}`); if (k.abgang != null && k.abgang >= 35) t.push(`${vdbT("abgang")} ${k.abgang} %`); if (k.status) t.push(vdbT(k.status === "nicht_im_tm_kader" ? "st_tm" : k.status === "nicht_im_sm_kader" ? "st_sm" : k.status === "laut_tm_woanders" ? "st_woanders" : k.status)); return t; };
-    const chips = k => statusText(k).map((t, i) => vdbChip(t, /verletzt|injured/.test(t) ? VDB_AMPEL.rot : /Abgang|departure/.test(t) ? "var(--blau-text)" : "var(--t2)", /verletzt|injured/.test(t) ? "rgba(214,69,69,.1)" : "var(--karte2)"));
-    const formChip = k => k.form != null ? h("span", { title: `${vdbT("k_form")} (${k.form_spiele || 0})`, style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 14, color: "#fff", background: k.form >= 70 ? VDB_AMPEL.gruen : k.form >= 50 ? "#9a7200" : VDB_AMPEL.rot, borderRadius: 6, padding: "1px 6px" } }, Math.round(k.form)) : h("span", { style: { color: "var(--t3)" } }, "–");
+    const chips = k => statusText(k).map((t, i) => vdbChip(t, /verletzt|injured/.test(t) ? "var(--sc-schwach-text)" : /Abgang|departure/.test(t) ? "var(--blau-text)" : "var(--t2)", /verletzt|injured/.test(t) ? "rgba(214,69,69,.1)" : "var(--karte2)"));
+    const formChip = k => k.form != null ? h("span", { title: `${vdbT("k_form")} (${k.form_spiele || 0})`, style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 14, color: "#fff", background: k.form >= 70 ? VDB_AMPEL.gruen : k.form >= 50 ? "#8a6500" : VDB_AMPEL.rot, borderRadius: 6, padding: "1px 6px" } }, Math.round(k.form)) : h("span", { style: { color: "var(--t3)" } }, "–");
     const filter = h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", margin: "6px 0 12px", fontFamily: FONT_BODY, fontSize: 13 } },
       ["", "TW", "ABW", "MF", "ST"].map(g => h("button", { key: g || "alle", type: "button", onClick: () => setGrp(g), style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, padding: "5px 11px", borderRadius: 999, border: "1px solid var(--linie)", cursor: "pointer", background: grp === g ? "var(--t1)" : "var(--karte)", color: grp === g ? "var(--karte)" : "var(--t2)" } }, g ? grpName(g) : vdbT("alle_pos"))),
       h("label", { style: { marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 6, color: "var(--t2)", cursor: "pointer" } }, h("input", { type: "checkbox", checked: alleSp, onChange: e => setAlleSp(e.target.checked) }), vdbT("alle_spieler")));
@@ -9941,23 +9954,23 @@ function VereinsSeite({ id, name, authQ, isPrem, onClose, onOpenPlayer }) {
     const ampel = (d.ampel || []).filter(a => ["TW", "ABW", "MF", "ST"].indexOf(a.position) >= 0);
     return h("div", { style: { display: "grid", gridTemplateColumns: mobil ? "1fr" : "1fr 1fr", gap: 14 } },
       h("div", null,
-        H(vdbT("lage_h"), { marginTop: 0 }), kasten(l ? h("div", null, h("div", { style: { fontWeight: 700 } }, `${vdbT("platz")} ${l.rang || "–"}${l.teams ? "/" + l.teams : ""} · ${l.punkte != null ? l.punkte + " " + vdbT("pkt") : ""}${l.spiele != null ? ` (${l.spiele} ${en ? "matches" : "Spiele"})` : ""}`), h("div", { style: { color: "var(--t2)" } }, en ? (l.lage_en || l.lage_de) : (l.lage_de || l.lage_en)), h("div", { style: { display: "flex", gap: 5, flexWrap: "wrap", marginTop: 6 } }, l.abstiegskampf ? vdbChip(vdbT("abstieg"), VDB_AMPEL.rot, "rgba(214,69,69,.1)") : null, l.titelrennen ? vdbChip(vdbT("titel_r"), "var(--gruen-text)", "var(--gruen-tint)") : null, l.trainerdruck ? vdbChip(vdbT("druck"), "#9a7200", "rgba(224,168,0,.14)") : null, l.form ? vdbChip(`${en ? "Form" : "Form"} ${l.form}`) : null)) : h("span", { style: { color: "var(--t2)" } }, "–")),
+        H(vdbT("lage_h"), { marginTop: 0 }), kasten(l ? h("div", null, h("div", { style: { fontWeight: 700 } }, `${vdbT("platz")} ${l.rang || "–"}${l.teams ? "/" + l.teams : ""} · ${l.punkte != null ? l.punkte + " " + vdbT("pkt") : ""}${l.spiele != null ? ` (${l.spiele} ${en ? "matches" : "Spiele"})` : ""}`), h("div", { style: { color: "var(--t2)" } }, en ? (l.lage_en || l.lage_de) : (l.lage_de || l.lage_en)), h("div", { style: { display: "flex", gap: 5, flexWrap: "wrap", marginTop: 6 } }, l.abstiegskampf ? vdbChip(vdbT("abstieg"), "var(--sc-schwach-text)", "rgba(214,69,69,.1)") : null, l.titelrennen ? vdbChip(vdbT("titel_r"), "var(--gruen-text)", "var(--gruen-tint)") : null, l.trainerdruck ? vdbChip(vdbT("druck"), "var(--sc-mittel-text)", "rgba(224,168,0,.14)") : null, l.form ? vdbChip(`${en ? "Form" : "Form"} ${l.form}`) : null)) : h("span", { style: { color: "var(--t2)" } }, "–")),
         aus.length ? h("div", null, H(vdbT("tabelle_h")), kasten(h("table", { style: { borderCollapse: "collapse", width: "100%" } }, h("tbody", null, aus.map(r => h("tr", { key: r.rang, style: { fontWeight: r.ist ? 800 : 400, background: r.ist ? "var(--karte2)" : "transparent" } }, h("td", { style: { padding: "4px 6px", width: 28, color: "var(--t3)" } }, r.rang), h("td", { style: { padding: "4px 6px" } }, typeof clubName === "function" ? clubName(r.team) : r.team), h("td", { style: { padding: "4px 6px", textAlign: "right", color: "var(--t2)" } }, r.sp), h("td", { style: { padding: "4px 6px", textAlign: "right", color: "var(--t2)" } }, r.diff > 0 ? "+" + r.diff : r.diff), h("td", { style: { padding: "4px 6px", textAlign: "right" } }, r.pkt))))), { padding: "6px 8px" })) : null,
         H(vdbT("trainer_h")), kasten(d.trainer && (d.trainer.name || (v && v.trainer)) ? h("div", null, h("div", { style: { fontWeight: 700 } }, d.trainer.name || v.trainer, d.trainer.nat ? h("span", { style: { fontWeight: 400, color: "var(--t2)" } }, ` · ${d.trainer.nat}${d.trainer.alter ? ", " + d.trainer.alter : ""}`) : null), d.trainer.seit ? h("div", { style: { color: "var(--t2)" } }, `${vdbT("seit")} ${vdbDatum(d.trainer.seit)}`) : null, d.trainer.wechsel ? h("div", { style: { color: "var(--t2)" } }, `${vdbT("wechsel")}: ${d.trainer.wechsel.alt || "?"} → ${d.trainer.wechsel.neu || "?"} (${vdbDatum(d.trainer.wechsel.seit)})`) : null) : h("span", { style: { color: "var(--t2)" } }, "–")),
-        f && f.spiele ? h("div", null, H(vdbT("form_h")), kasten(h("div", null, h("div", { style: { display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 6 } }, (f.letzte || []).slice(0, 8).reverse().map((s, i) => h("span", { key: i, title: `${vdbDatum(s.datum)} ${s.heim ? "vs" : "@"} ${s.gegner} ${s.tore}:${s.gegentore}${s.xg != null ? " · xG " + s.xg : ""}`, style: { width: 26, height: 26, borderRadius: 6, display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontFamily: FONT_DISPLAY, fontWeight: 700, background: s.tore > s.gegentore ? VDB_AMPEL.gruen : s.tore < s.gegentore ? VDB_AMPEL.rot : "#9a7200" } }, s.tore > s.gegentore ? (en ? "W" : "S") : s.tore < s.gegentore ? (en ? "L" : "N") : (en ? "D" : "U")))), h("div", { style: { color: "var(--t2)" } }, `${f.spiele} ${en ? "matches" : "Spiele"}: ${f.tore}:${f.gegentore} ${en ? "goals" : "Tore"}${f.bb != null ? ` · ${en ? "possession" : "Ballbesitz"} ${f.bb} %` : ""}${f.schuesse != null ? ` · ${f.schuesse} ${en ? "shots/match" : "Schüsse/Spiel"}` : ""}${f.xg != null ? ` · ${vdbT("xg")} ${f.xg}/${en ? "match" : "Spiel"}` : ""}`))) ) : null),
+        f && f.spiele ? h("div", null, H(vdbT("form_h")), kasten(h("div", null, h("div", { style: { display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 6 } }, (f.letzte || []).slice(0, 8).reverse().map((s, i) => h("span", { key: i, title: `${vdbDatum(s.datum)} ${s.heim ? "vs" : "@"} ${s.gegner} ${s.tore}:${s.gegentore}${s.xg != null ? " · xG " + s.xg : ""}`, style: { width: 26, height: 26, borderRadius: 6, display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontFamily: FONT_DISPLAY, fontWeight: 700, background: s.tore > s.gegentore ? VDB_AMPEL.gruen : s.tore < s.gegentore ? VDB_AMPEL.rot : "#8a6500" } }, s.tore > s.gegentore ? (en ? "W" : "S") : s.tore < s.gegentore ? (en ? "L" : "N") : (en ? "D" : "U")))), h("div", { style: { color: "var(--t2)" } }, `${f.spiele} ${en ? "matches" : "Spiele"}: ${f.tore}:${f.gegentore} ${en ? "goals" : "Tore"}${f.bb != null ? ` · ${en ? "possession" : "Ballbesitz"} ${f.bb} %` : ""}${f.schuesse != null ? ` · ${f.schuesse} ${en ? "shots/match" : "Schüsse/Spiel"}` : ""}${f.xg != null ? ` · ${vdbT("xg")} ${f.xg}/${en ? "match" : "Spiel"}` : ""}`))) ) : null),
       h("div", null,
-        H(vdbT("ampel_h"), { marginTop: 0 }), kasten(ampel.length ? ampel.map(a => h("div", { key: a.position, style: { padding: "6px 0", borderBottom: "1px solid var(--linie)" } }, h("div", { style: { display: "flex", alignItems: "center", gap: 8 } }, h("span", { style: { width: 10, height: 10, borderRadius: 5, background: VDB_AMPEL[a.ampel] || "var(--t3)", display: "inline-block" } }), h("span", { style: { fontWeight: 800, minWidth: 36 } }, a.position), h("span", { style: { color: "var(--t2)" } }, `${a.score} ${en ? "pts" : "Punkte"}`), a.modell != null ? h("span", { title: en ? `Own model (${a.modell_art === "logit" ? "trained" : "preliminary version"}): estimated probability of a signing in this position within the next 150 days` : `Eigenes Modell (${a.modell_art === "logit" ? "trainiert" : "Vorabversion"}): geschätzte Wahrscheinlichkeit, dass der Verein auf dieser Position in den nächsten 150 Tagen einen Zugang holt`, style: { marginLeft: "auto", fontSize: 12, fontWeight: 700, color: Number(a.modell) >= 55 ? VDB_AMPEL.rot : Number(a.modell) >= 35 ? "#9a7200" : "var(--t3)", whiteSpace: "nowrap" } }, `${en ? "Model" : "Modell"} ${a.modell} %`) : null), (a.gruende || []).slice(0, 3).map((g, i) => h("div", { key: i, style: { color: "var(--t2)", fontSize: 12, paddingLeft: 18 } }, "• " + g)))) : h("span", { style: { color: "var(--t2)" } }, "–")),
+        H(vdbT("ampel_h"), { marginTop: 0 }), kasten(ampel.length ? ampel.map(a => h("div", { key: a.position, style: { padding: "6px 0", borderBottom: "1px solid var(--linie)" } }, h("div", { style: { display: "flex", alignItems: "center", gap: 8 } }, h("span", { style: { width: 10, height: 10, borderRadius: 5, background: VDB_AMPEL[a.ampel] || "var(--t3)", display: "inline-block" } }), h("span", { style: { fontWeight: 800, minWidth: 36 } }, a.position), h("span", { style: { color: "var(--t2)" } }, `${a.score} ${en ? "pts" : "Punkte"}`), a.modell != null ? h("span", { title: en ? `Own model (${a.modell_art === "logit" ? "trained" : "preliminary version"}): estimated probability of a signing in this position within the next 150 days` : `Eigenes Modell (${a.modell_art === "logit" ? "trainiert" : "Vorabversion"}): geschätzte Wahrscheinlichkeit, dass der Verein auf dieser Position in den nächsten 150 Tagen einen Zugang holt`, style: { marginLeft: "auto", fontSize: 12, fontWeight: 700, color: Number(a.modell) >= 55 ? "var(--sc-schwach-text)" : Number(a.modell) >= 35 ? "var(--sc-mittel-text)" : "var(--t3)", whiteSpace: "nowrap" } }, `${en ? "Model" : "Modell"} ${a.modell} %`) : null), (a.gruende || []).slice(0, 3).map((g, i) => h("div", { key: i, style: { color: "var(--t2)", fontSize: 12, paddingLeft: 18 } }, "• " + g)))) : h("span", { style: { color: "var(--t2)" } }, "–")),
         (d.budget || d.budget_gesperrt) ? H(en ? "Budget (estimate)" : "Budget (Schätzung)") : null,  // Punkt 126 (08.10.2026)
         d.budget ? kasten(h("div", { title: en ? d.budget.hinweis_en : d.budget.hinweis },
             h("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 4 } },
-              h("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 800, fontSize: 18, color: "#fff", background: d.budget.finanzkraft >= 60 ? "#2e9e5b" : d.budget.finanzkraft >= 40 ? "#9a7200" : "#d64545", borderRadius: 8, padding: "1px 10px" } }, d.budget.finanzkraft),
+              h("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 800, fontSize: 18, color: "#fff", background: d.budget.finanzkraft >= 60 ? "#23864b" : d.budget.finanzkraft >= 40 ? "#8a6500" : "#c43b3b", borderRadius: 8, padding: "1px 10px" } }, d.budget.finanzkraft),
               h("span", null, (en ? "Financial strength " : "Finanzkraft ") + (en ? d.budget.stufe_en : d.budget.stufe))),
             h("div", { style: { color: "var(--t2)", fontSize: 12.5 } }, `${en ? "Transfer budget" : "Transferbudget"} ≈ ${Number(d.budget.von) === Number(d.budget.bis) ? vdbEur(d.budget.von) : vdbEur(d.budget.von) + " – " + vdbEur(d.budget.bis)}`),
             h("div", { style: { color: "var(--t2)", fontSize: 12.5 } }, `${en ? "Current window" : "Laufendes Fenster"}: ${en ? "spent" : "Ausgaben"} ${vdbEur(d.budget.ausgaben)} · ${en ? "received" : "Einnahmen"} ${vdbEur(d.budget.erloese)} · ${en ? "net" : "Saldo"} ${(Number(d.budget.saldo) >= 0 ? "+" : "−") + vdbEur(Math.abs(Number(d.budget.saldo) || 0))}`),
             h("div", { style: { color: "var(--t2)", fontSize: 12.5 } }, `${en ? "Est. wages per year" : "Gehälter je Jahr geschätzt"} ${vdbEur(d.budget.gehalt)} · ${en ? "est. revenue per year" : "Einnahmen je Jahr geschätzt"} ${vdbEur(d.budget.einnahmen)}`),
             h("div", { style: { color: "var(--t3)", fontSize: 11.5, marginTop: 3 } }, en ? d.budget.hinweis_en : d.budget.hinweis)))
           : d.budget_gesperrt ? kasten(h("span", { style: { color: "var(--t2)" } }, en ? "Premium: estimated transfer budget, financial strength and transfer balance." : "Premium: geschätztes Transferbudget, Finanzkraft und Transferbilanz.")) : null,
-        H(vdbT("abg_h")), kasten((d.abgaenge || []).length ? (d.abgaenge || []).map(k => h("div", { key: k.pid, style: { padding: "5px 0", borderBottom: "1px solid var(--linie)" } }, h("div", { style: { display: "flex", alignItems: "center", gap: 8 } }, spielerLink(k.pid, k.name), h("span", { style: { color: "var(--t2)", fontSize: 12 } }, `${k.pos || k.grp || ""}${k.age ? ", " + k.age : ""}`), h("span", { style: { marginLeft: "auto", fontFamily: FONT_DISPLAY, fontWeight: 700, color: k.p >= 60 ? VDB_AMPEL.rot : k.p >= 45 ? "#9a7200" : "var(--t2)" } }, `${k.p} %`), k.stamm ? vdbChip(vdbT("stamm"), "var(--blau-text)", "rgba(30,78,121,.1)") : null), h("div", { style: { color: "var(--t2)", fontSize: 12 } }, k.text))) : h("span", { style: { color: "var(--t2)" } }, "–")),
+        H(vdbT("abg_h")), kasten((d.abgaenge || []).length ? (d.abgaenge || []).map(k => h("div", { key: k.pid, style: { padding: "5px 0", borderBottom: "1px solid var(--linie)" } }, h("div", { style: { display: "flex", alignItems: "center", gap: 8 } }, spielerLink(k.pid, k.name), h("span", { style: { color: "var(--t2)", fontSize: 12 } }, `${k.pos || k.grp || ""}${k.age ? ", " + k.age : ""}`), h("span", { style: { marginLeft: "auto", fontFamily: FONT_DISPLAY, fontWeight: 700, color: k.p >= 60 ? "var(--sc-schwach-text)" : k.p >= 45 ? "var(--sc-mittel-text)" : "var(--t2)" } }, `${k.p} %`), k.stamm ? vdbChip(vdbT("stamm"), "var(--blau-text)", "rgba(30,78,121,.1)") : null), h("div", { style: { color: "var(--t2)", fontSize: 12 } }, k.text))) : h("span", { style: { color: "var(--t2)" } }, "–")),
         (d.sucht || []).length ? h("div", null, H(vdbT("sucht_h")), kasten((d.sucht || []).map((s, i) => h("div", { key: i, style: { padding: "5px 0", borderBottom: "1px solid var(--linie)" } }, h("div", { style: { fontWeight: 700 } }, en ? (s.titel_en || s.titel) : s.titel), h("div", { style: { color: "var(--t2)", fontSize: 12 } }, [s.position, s.staerken, s.quelle, vdbDatum(s.datum)].filter(Boolean).join(" · ")))))) : null,
         H(vdbT("ger_h")), kasten((d.geruechte || []).length ? (d.geruechte || []).map((g, i) => h("div", { key: i, style: { padding: "5px 0", borderBottom: "1px solid var(--linie)" } }, h("div", { style: { display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" } }, vdbChip(g.richtung === "zugang" ? (en ? "in" : "Zugang") : (en ? "out" : "Abgang"), g.richtung === "zugang" ? "var(--gruen-text)" : "var(--blau-text)", g.richtung === "zugang" ? "var(--gruen-tint)" : "rgba(30,78,121,.1)"), h("span", { style: { fontWeight: 700 } }, g.spieler || "–"), h("span", { style: { color: "var(--t2)", fontSize: 12 } }, g.richtung === "zugang" ? `← ${g.von || "?"}` : `→ ${g.zu || "?"}`)), h("div", { style: { color: "var(--t2)", fontSize: 12 } }, g.url ? h("a", { href: g.url, target: "_blank", rel: "noopener", style: { color: "var(--t2)" } }, en ? (g.titel_en || g.titel) : g.titel) : (en ? (g.titel_en || g.titel) : g.titel), ` · ${g.quelle || ""} · ${vdbDatum(g.datum)}`))) : h("span", { style: { color: "var(--t2)" } }, vdbT("keine_ger")))));
   };
@@ -10105,7 +10118,7 @@ function TwLeistungZeile({ l }) {
   const angeglichen = l.quelle !== "v2" && l.score_roh != null && Math.round(l.score_roh) !== Math.round(l.score);  // Punkt 162 (08.10.2026)
   const POS_DE = { Torwart: "der Torhüter", Abwehr: "der Abwehrspieler", Mittelfeld: "der Mittelfeldspieler", Sturm: "der Stürmer" }, POS_EN = { Torwart: "goalkeepers", Abwehr: "defenders", Mittelfeld: "midfielders", Sturm: "forwards" };
   const trend = l.trend === "auf" ? "↑" : l.trend === "ab" ? "↓" : l.trend === "gleich" ? "→" : "";
-  const farbe = l.score >= 70 ? "#2e9e5b" : l.score >= 50 ? "#9a7200" : "#d64545";
+  const farbe = l.score >= 70 ? "#23864b" : l.score >= 50 ? "#8a6500" : "#c43b3b";
   return h("div", { className: "tw-leistung", style: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, margin: "0 0 10px", fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)" } },
     h("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 800, fontSize: 20, color: "#fff", background: farbe, borderRadius: 8, padding: "1px 10px" } }, Math.round(l.score), trend ? h("span", { style: { fontSize: 14, marginLeft: 4 } }, trend) : null),
     h("span", null, (en ? "TW Performance Score · " : "TW Performance Score · ") + quelle + (angeglichen ? (en ? " (aligned to the v2 scale)" : " (an die v2-Skala angeglichen)") : "") + (l.spiele ? ` · ${l.spiele} ${en ? "matches" : "Spiele"}${l.minuten ? ", " + l.minuten + " Min." : ""}` : "") + (l.form != null && l.saison != null && l.quelle !== "api" ? ` · ${en ? "form" : "Form"} ${Math.round(l.form)} / ${en ? "season" : "Saison"} ${Math.round(l.saison)}` : "")),
@@ -10646,7 +10659,7 @@ function VereinsSpieleTab({ verein, authQ, mobil, onOpenPlayer }) {
       return h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, color: s.status === "live" ? "#149a59" : "var(--t2)" } }, st);
     }
     const eig = s.ist_heim ? s.th : s.tg, geg = s.ist_heim ? s.tg : s.th;
-    const f = s.status !== "beendet" ? "#149a59" : eig > geg ? VDB_AMPEL.gruen : eig < geg ? VDB_AMPEL.rot : "#9a7200";
+    const f = s.status !== "beendet" ? "#149a59" : eig > geg ? VDB_AMPEL.gruen : eig < geg ? VDB_AMPEL.rot : "#8a6500";
     return h("span", { className: "tw40-erg", style: { background: f }, title: s.status === "beendet" ? (eig > geg ? (en ? "Win" : "Sieg") : eig < geg ? (en ? "Defeat" : "Niederlage") : (en ? "Draw" : "Unentschieden")) : "live" }, s.th + ":" + s.tg);
   };
   const logoExakt = n => (n && typeof CLUB_LOGOS !== "undefined" && CLUB_LOGOS[n]) || null;
@@ -12073,7 +12086,7 @@ function TransferApp({
       fontSize: 24,
       letterSpacing: 1
     }
-  }, "TRANSFER", React.createElement("span", { className: "tw-wire-gold", style: { color: "#DDB65F" } }, "WIRE"))), /*#__PURE__*/React.createElement("div", { className: "tw-gsuche-box", style: { display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 150, maxWidth: 560, margin: "0 12px", background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.14)", borderRadius: 10, padding: "7px 12px" } }, /*#__PURE__*/React.createElement(Search, { size: 15, strokeWidth: 2, color: "rgba(255,255,255,.6)" }), /*#__PURE__*/React.createElement("input", { value: kiFrage, onChange: e => setKiFrage(e.target.value), onKeyDown: e => { if (gsVor && gsVor.length && (e.key === "ArrowDown" || e.key === "ArrowUp")) { e.preventDefault(); setGsIdx(i => e.key === "ArrowDown" ? Math.min(gsVor.length - 1, i + 1) : Math.max(-1, i - 1)); return; } if (e.key === "Escape") { setGsVor(null); setGsIdx(-1); return; } if (e.key === "Enter") { if (gsVor && gsIdx >= 0 && gsVor[gsIdx]) { e.preventDefault(); gsOeffnen(gsVor[gsIdx]); return; } if (kiFrage.trim()) { setGsVor(null); sendeKi(); } } }, onBlur: () => setTimeout(() => { setGsVor(null); setGsIdx(-1); }, 160), onFocus: () => { if (window.innerWidth <= 700) setKiOffen(true); }, placeholder: LANG === "en" ? "Player, club or ask the scout" : "Spieler, Verein oder Frage an den Scout", id: "tw-gsuche", autoComplete: "off", style: { border: "none", outline: "none", background: "transparent", fontSize: 13.5, color: "#fff", width: "100%", fontFamily: FONT_BODY } }), /*#__PURE__*/React.createElement("span", { className: "tw-kbd", style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, color: "rgba(255,255,255,.45)", border: "1px solid rgba(255,255,255,.18)", borderRadius: 5, padding: "2px 6px", letterSpacing: .5 } }, "\u2318K"), kiFrage && /*#__PURE__*/React.createElement("button", { onClick: () => setKiFrage(""), style: { border: "none", background: "none", cursor: "pointer", color: "rgba(255,255,255,.6)", display: "flex", padding: 0 } }, /*#__PURE__*/React.createElement(X, { size: 14 }))), gsVor && gsVor.length ? /*#__PURE__*/React.createElement(GsVorschlaege, { liste: gsVor, idx: gsIdx, waehlen: gsOeffnen, setIdx: setGsIdx, offen: kiOffen }) : null, kiOffen && /*#__PURE__*/React.createElement(KiSuchePanel, { schliessen: () => setKiOffen(false), msgs: kiMsgs, busy: kiBusy, treffer: kiTreffer, frage: kiFrage, setFrage: setKiFrage, senden: sendeKi }), /*#__PURE__*/React.createElement("div", { className: "tw-livetime",
+  }, "TRANSFER", React.createElement("span", { className: "tw-wire-gold", style: { color: "#DDB65F" } }, "WIRE"))), /*#__PURE__*/React.createElement("div", { className: "tw-gsuche-box", style: { display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 150, maxWidth: 560, margin: "0 12px", background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.14)", borderRadius: 10, padding: "7px 12px" } }, /*#__PURE__*/React.createElement(Search, { size: 15, strokeWidth: 2, color: "rgba(255,255,255,.6)" }), /*#__PURE__*/React.createElement("input", { value: kiFrage, onChange: e => setKiFrage(e.target.value), onKeyDown: e => { if (gsVor && gsVor.length && (e.key === "ArrowDown" || e.key === "ArrowUp")) { e.preventDefault(); setGsIdx(i => e.key === "ArrowDown" ? Math.min(gsVor.length - 1, i + 1) : Math.max(-1, i - 1)); return; } if (e.key === "Escape") { setGsVor(null); setGsIdx(-1); return; } if (e.key === "Enter") { if (gsVor && gsIdx >= 0 && gsVor[gsIdx]) { e.preventDefault(); gsOeffnen(gsVor[gsIdx]); return; } if (kiFrage.trim()) { setGsVor(null); sendeKi(); } } }, onBlur: () => setTimeout(() => { setGsVor(null); setGsIdx(-1); }, 160), onFocus: () => { if (window.innerWidth <= 700) setKiOffen(true); }, placeholder: LANG === "en" ? "Player, club or ask the scout" : "Spieler, Verein oder Frage an den Scout", id: "tw-gsuche", autoComplete: "off", style: { border: "none", outline: "none", background: "transparent", fontSize: 13.5, color: "#fff", width: "100%", fontFamily: FONT_BODY } }), /*#__PURE__*/React.createElement("span", { className: "tw-kbd", style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, color: "rgba(255,255,255,.62)", border: "1px solid rgba(255,255,255,.18)", borderRadius: 5, padding: "2px 6px", letterSpacing: .5 } }, "\u2318K"), kiFrage && /*#__PURE__*/React.createElement("button", { onClick: () => setKiFrage(""), style: { border: "none", background: "none", cursor: "pointer", color: "rgba(255,255,255,.6)", display: "flex", padding: 0 } }, /*#__PURE__*/React.createElement(X, { size: 14 }))), gsVor && gsVor.length ? /*#__PURE__*/React.createElement(GsVorschlaege, { liste: gsVor, idx: gsIdx, waehlen: gsOeffnen, setIdx: setGsIdx, offen: kiOffen }) : null, kiOffen && /*#__PURE__*/React.createElement(KiSuchePanel, { schliessen: () => setKiOffen(false), msgs: kiMsgs, busy: kiBusy, treffer: kiTreffer, frage: kiFrage, setFrage: setKiFrage, senden: sendeKi }), /*#__PURE__*/React.createElement("div", { className: "tw-livetime",
     style: {
       display: "flex",
       alignItems: "center",
@@ -12215,7 +12228,7 @@ function TransferApp({
       width: "100%",
       alignItems: "center",
       gap: 10,
-      background: "var(--karte2)", border: "none", cursor: "pointer", padding: "13px 15px", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 700, color: "#e07b6a",
+      background: "var(--karte2)", border: "none", cursor: "pointer", padding: "13px 15px", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 700, color: "var(--sc-schwach-text)",
       textAlign: "left",
       borderTop: `1px solid ${HAIR}`
     }
@@ -12669,7 +12682,7 @@ function TransferApp({
       fontFamily: FONT_BODY,
       fontSize: 12.5,
       fontWeight: 700,
-      color: "#087F8C",
+      color: "var(--teal)",
       padding: "0 0 10px"
     }
   }, t("li_back")), /*#__PURE__*/React.createElement("div", {
@@ -12863,7 +12876,7 @@ function TransferApp({
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12,
-      color: "#4a4a48",
+      color: "var(--t2)",
       marginTop: 3,
       lineHeight: 1.5
     }
@@ -12913,7 +12926,7 @@ function TransferApp({
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12,
-      color: "#4a4a48",
+      color: "var(--t2)",
       marginTop: 3,
       lineHeight: 1.5
     }
@@ -13058,7 +13071,7 @@ function TransferApp({
           /*#__PURE__*/React.createElement("b", { style: { fontFamily: FONT_BODY, fontSize: 13, color: INK } }, "#" + p.id + " \u00b7 " + (p.author_name || "Mitglied")),
           /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, (p.author_email || "") + " \u00b7 " + fmtDate(p.created_at)),
           /*#__PURE__*/React.createElement("div", { style: { marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" } }, /*#__PURE__*/React.createElement(CmtyChip, { status: p.status }), Number(p.meldungen) > 0 && /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, padding: "3px 9px", borderRadius: 999, background: "#fdf3da", color: "#8a5a00" } }, "" + p.meldungen))),
-        /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "#2a3140", whiteSpace: "pre-wrap", marginBottom: 8 } }, p.body),
+        /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "var(--t1)", whiteSpace: "pre-wrap", marginBottom: 8 } }, p.body),
         /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, lineHeight: 1.6, borderTop: "1px solid " + HAIR, paddingTop: 8 } },
           p.agent_headline && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, "KI: "), p.agent_headline, p.agent_type ? " (" + p.agent_type + ")" : ""),
           p.agent_note && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, "Begr\u00fcndung: "), p.agent_note),
@@ -13089,7 +13102,7 @@ function TransferApp({
             /*#__PURE__*/React.createElement("b", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: INK } }, p.author_name || "Mitglied"),
             /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, (p.author_rolle || "Mitglied") + " \u00b7 " + fmtDate(p.created_at))),
           /*#__PURE__*/React.createElement("div", { style: { marginLeft: "auto", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" } }, /*#__PURE__*/React.createElement(UebersetzenButton, { zustand: cUeLaedt[p.id] ? "laedt" : (cUeZeige[p.id] && cUe[p.id] ? "en" : "de"), onClick: () => uebersetzePost(p.id) }), p.own ? /*#__PURE__*/React.createElement(CmtyChip, { status: p.status }) : /*#__PURE__*/React.createElement(MeldeButton, { gemeldet: p.gemeldet_von_mir, onClick: () => meldePost(p.id, "networking") }), /*#__PURE__*/React.createElement(AntwortButton, { eigener: !!p.own, onClick: () => antwortSenden(p.id) }))),
-        /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "#2a3140", whiteSpace: "pre-wrap" } }, cmtyBodyText(p, cUe, cUeZeige), cUeZeige[p.id] && cUe[p.id] && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED, marginTop: 6 } }, "\u00dcbersetzt" + (cUe[p.id].lang ? " aus " + cUe[p.id].lang.toUpperCase() : ""))))),
+        /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "var(--t1)", whiteSpace: "pre-wrap" } }, cmtyBodyText(p, cUe, cUeZeige), cUeZeige[p.id] && cUe[p.id] && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED, marginTop: 6 } }, "\u00dcbersetzt" + (cUe[p.id].lang ? " aus " + cUe[p.id].lang.toUpperCase() : ""))))),
       cNetPosts.length === 0 && /*#__PURE__*/React.createElement(EmptyState, { icon: "", title: "Noch keine Anfragen", text: "Starte das Netzwerk \u2014 stelle eine Frage oder ver\u00f6ffentliche ein Angebot." }), cNetPosts.length > 0 && cmtyFilter(cNetPosts, cNetSuche).length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Keine Treffer f\u00fcr \u201e" + cNetSuche + "\u201c.")) :
     /*#__PURE__*/React.createElement("div", { className: "tw-card", style: Object.assign({}, CARD_BOX, { padding: "34px 24px", textAlign: "center", maxWidth: 560 }) },
       /*#__PURE__*/React.createElement("div", { style: { width: 52, height: 52, borderRadius: 99, background: "var(--dunkel)", color: "#e3b34e", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 12 } }, ""),
@@ -13098,7 +13111,7 @@ function TransferApp({
       /*#__PURE__*/React.createElement("button", { onClick: () => window.open(stripeCheckoutUrl("premium", "monat", 1, ""), "_blank"), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 900, padding: "12px 22px", borderRadius: 10, border: "none", background: "linear-gradient(90deg,#efc25e,#d9963a)", color: "#1c1508", boxShadow: "0 8px 22px rgba(217,150,58,.35)" } }, "Premium freischalten \u2014 99 \u20ac/Monat"))),
   view === "talente" && /*#__PURE__*/React.createElement(ScoutSub, { view: view, setView: setView }), view === "talente" && /*#__PURE__*/React.createElement("div", {
     style: { background: "var(--karte2)", border: "1.5px solid var(--teal)", borderRadius: 14, padding: "12px 18px", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 600, color: "var(--teal)", gridColumn: "1 / -1" }
-  }, "\u24D8  ", t("tal_banner"), " ", React.createElement(ScoreInfo, { kind: "talent", size: 12, label: LANG === "en" ? "View methodology" : "Methodik ansehen" })), view === "talente" && /*#__PURE__*/React.createElement(TalentScouting, { onWatch: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); }, watched: name => (watch.items || []).some(w => w.t === "spieler" && w.w === name), onOpen: openPlayer, onVergleich: p => setPlVergleich(v => v.some(y => y.pid === p.pid) ? v.filter(y => y.pid !== p.pid) : (v.length >= 3 ? v : [...v, p])), vergleich: plVergleich }), view === "feed" && neueZahl > 0 && /*#__PURE__*/React.createElement("button", { onClick: () => { ladeFeed(); window.scrollTo({ top: 0, behavior: "smooth" }); }, style: { display: "block", margin: "0 auto 12px", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 900, cursor: "pointer", padding: "9px 18px", borderRadius: 999, border: "none", background: "var(--gold)", color: "var(--gold-schrift)", boxShadow: "0 8px 20px rgba(200,163,85,.4)" } }, "\u2191 " + neueZahl + " neue " + (neueZahl === 1 ? "Meldung" : "Meldungen")), view === "feed" && /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 10 } }, sportTabs.map(([k, label]) => { const a2 = sport === k; const c2 = k === "alle" ? "var(--dunkel)" : SPORT[k].color; return /*#__PURE__*/React.createElement("button", { key: "sp" + k, onClick: () => { setSport(k); setCountry(""); setLeague(""); setClub(""); setPosFilter(""); }, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 11px", borderRadius: 999, border: "1px solid " + (a2 ? c2 : HAIR), background: a2 ? c2 : "#fff", color: a2 ? "#fff" : "#5b6472" } }, label); }), React.createElement(TwNewsLive, { news: news, filtered: filtered, magazin: muAktivApp(view, type, query, club, league, country, sport), onOpen: it2 => twOeffnen(it2, setMSel), geheZu: setView }), type !== "alle" ? React.createElement("button", { type: "button", onClick: () => setType("alle"), title: LANG === "en" ? "Remove type filter" : "Typfilter entfernen", style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 11px", borderRadius: 999, border: "1px solid var(--gold)", background: "transparent", color: "var(--gold-text)" } }, ((TYPE[type] && (LANG === "en" ? TYPE[type].en : TYPE[type].label)) || type) + " \u2715") : null), view === "talente" ? null : /*#__PURE__*/React.createElement("div", null, view === "feed" && cascade && /*#__PURE__*/React.createElement("div", {
+  }, "\u24D8  ", t("tal_banner"), " ", React.createElement(ScoreInfo, { kind: "talent", size: 12, label: LANG === "en" ? "View methodology" : "Methodik ansehen" })), view === "talente" && /*#__PURE__*/React.createElement(TalentScouting, { onWatch: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); }, watched: name => (watch.items || []).some(w => w.t === "spieler" && w.w === name), onOpen: openPlayer, onVergleich: p => setPlVergleich(v => v.some(y => y.pid === p.pid) ? v.filter(y => y.pid !== p.pid) : (v.length >= 3 ? v : [...v, p])), vergleich: plVergleich }), view === "feed" && neueZahl > 0 && /*#__PURE__*/React.createElement("button", { onClick: () => { ladeFeed(); window.scrollTo({ top: 0, behavior: "smooth" }); }, style: { display: "block", margin: "0 auto 12px", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 900, cursor: "pointer", padding: "9px 18px", borderRadius: 999, border: "none", background: "var(--gold)", color: "var(--gold-schrift)", boxShadow: "0 8px 20px rgba(200,163,85,.4)" } }, "\u2191 " + neueZahl + " neue " + (neueZahl === 1 ? "Meldung" : "Meldungen")), view === "feed" && /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 10 } }, sportTabs.map(([k, label]) => { const a2 = sport === k; const c2 = k === "alle" ? "var(--dunkel)" : SPORT[k].color; return /*#__PURE__*/React.createElement("button", { key: "sp" + k, onClick: () => { setSport(k); setCountry(""); setLeague(""); setClub(""); setPosFilter(""); }, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 11px", borderRadius: 999, border: "1px solid " + (a2 ? c2 : HAIR), background: a2 ? c2 : "var(--karte)", color: a2 ? "#fff" : "var(--t2)" } }, label); }), React.createElement(TwNewsLive, { news: news, filtered: filtered, magazin: muAktivApp(view, type, query, club, league, country, sport), onOpen: it2 => twOeffnen(it2, setMSel), geheZu: setView }), type !== "alle" ? React.createElement("button", { type: "button", onClick: () => setType("alle"), title: LANG === "en" ? "Remove type filter" : "Typfilter entfernen", style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 11px", borderRadius: 999, border: "1px solid var(--gold)", background: "transparent", color: "var(--gold-text)" } }, ((TYPE[type] && (LANG === "en" ? TYPE[type].en : TYPE[type].label)) || type) + " \u2715") : null), view === "talente" ? null : /*#__PURE__*/React.createElement("div", null, view === "feed" && cascade && /*#__PURE__*/React.createElement("div", {
     style: {
       background: "var(--karte)",
       border: `1px solid ${HAIR}`,
@@ -13237,7 +13250,7 @@ function TransferApp({
       fontSize: 14,
       gridColumn: "1 / -1"
     }
-  }, "Keine Meldungen für diese Auswahl. Filter zurücksetzen und erneut versuchen.") : (() => { const muAn = muAktivApp(view, type, query, club, league, country, sport); const listeAlle = (view === "watch" ? watchList : (muAn ? muOhneAufmacher(filtered) : filtered)); const liste = listeAlle.slice(0, muAn && feedLimit === FEED_SEITE ? Math.min(12, FEED_SEITE) : feedLimit); let seen = 0; try { seen = Number(localStorage.getItem("tw_seen") || 0); } catch (e) {} const heute = new Date(); heute.setHours(0, 0, 0, 0); const gesternTs = heute.getTime() - 86400000; const gruppe = it => { const d = new Date(it.published || it.publishedAt || 0); if (isNaN(d.getTime())) return ""; const ts = d.getTime(); if (ts >= heute.getTime()) return "Heute"; if (ts >= gesternTs) return "Gestern"; return "Fr\u00fcher"; }; const aus = []; let letzte = null; let neuMarke = false; liste.forEach(it => { const g = gruppe(it); if (g && g !== letzte) { aus.push(/*#__PURE__*/React.createElement("div", { key: "g" + g, style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 900, letterSpacing: 1.6, color: "var(--t3)", margin: "8px 2px 0", textTransform: "uppercase", gridColumn: "1 / -1" } }, g)); letzte = g; } const ts = new Date(it.published || it.publishedAt || 0).getTime(); if (!neuMarke && seen && !isNaN(ts) && ts > 0 && ts <= seen) { aus.push(/*#__PURE__*/React.createElement("div", { key: "seenline", style: { display: "flex", alignItems: "center", gap: 10, margin: "2px 0", gridColumn: "1 / -1" } }, /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, color: "var(--gold-text)" } }, "NEU SEIT DEINEM LETZTEN BESUCH \u2191"), /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }))); neuMarke = true; } aus.push(/*#__PURE__*/React.createElement(view === "feed" ? TickerKarte : FeedKarte, { onWatch: it2 => setAddSheet(it2), onOpen: it2 => twOeffnen(it2, setMSel), key: it.id, item: it })); }); if (listeAlle.length > liste.length) aus.push(/*#__PURE__*/React.createElement("div", { key: "mehr", style: { display: "flex", justifyContent: "center", padding: "8px 0 4px", gridColumn: "1 / -1" } }, /*#__PURE__*/React.createElement("button", { onClick: () => setFeedLimit(l => l + FEED_SEITE), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 22px", borderRadius: 999, border: "1px solid var(--dunkel)", background: "var(--karte)", color: "#0f1520", boxShadow: "0 1px 2px rgba(15,21,32,.05)" } }, "Mehr laden (" + liste.length + " von " + listeAlle.length + ")"))); if (muAn) aus.push(React.createElement(MuUnten, { key: "mu-unten", liste: filtered, onOpen: it2 => twOeffnen(it2, setMSel), geheZu: setView })); return aus; })())), /*#__PURE__*/React.createElement("aside", null, view === "watch" ? React.createElement(MerkAside, { watch: watch, onAlertDialog: () => setWatchDlg(true), onOpen: openPlayer }) : view !== "feed" && view !== "talente" && view !== "community" && view !== "networking" && view !== "moderation" && React.createElement(FeedSuche, { q: query, setQ: setQuery, club: club, setClub: setClub, alle: news, watch: watchList, geheZu: setView, fs: { sport: sport, type: type, country: country, league: league }, setFs: { setSport: setSport, setType: setType, setCountry: setCountry, setLeague: setLeague } }))), perfKarte && /*#__PURE__*/React.createElement(PerfKarte, { x: perfKarte, onClose: () => setPerfKarte(null), onProfil: p => { setPerfZurueck(p); setPerfKarte(null); openPlayer(p.pid, p.name, p.team); }, watched: (watch.items || []).some(w => w.t === "spieler" && w.w === (perfKarte.name || "")), onWatchToggle: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); } }), plSel && /*#__PURE__*/React.createElement(SpielerDrawer, { x: plSel, news: news, schliessen: () => setPlSel(null) }), mSel && /*#__PURE__*/React.createElement(istTransferTyp(mSel) ? TransferPanel : MeldungsPanel, { m: mSel, schliessen: () => setMSel(null), onWatch: it => { setAddSheet(it); setMSel(null); } }), plVergleich.length > 0 && /*#__PURE__*/React.createElement(VergleichUI, { spieler: plVergleich, entf: pid => setPlVergleich(v => v.filter(y => y.pid !== pid)), leeren: () => { setPlVergleich([]); setPlVglOffen(false); }, offen: plVglOffen, setOffen: setPlVglOffen })), /*#__PURE__*/React.createElement("footer", {
+  }, "Keine Meldungen für diese Auswahl. Filter zurücksetzen und erneut versuchen.") : (() => { const muAn = muAktivApp(view, type, query, club, league, country, sport); const listeAlle = (view === "watch" ? watchList : (muAn ? muOhneAufmacher(filtered) : filtered)); const liste = listeAlle.slice(0, muAn && feedLimit === FEED_SEITE ? Math.min(12, FEED_SEITE) : feedLimit); let seen = 0; try { seen = Number(localStorage.getItem("tw_seen") || 0); } catch (e) {} const heute = new Date(); heute.setHours(0, 0, 0, 0); const gesternTs = heute.getTime() - 86400000; const gruppe = it => { const d = new Date(it.published || it.publishedAt || 0); if (isNaN(d.getTime())) return ""; const ts = d.getTime(); if (ts >= heute.getTime()) return "Heute"; if (ts >= gesternTs) return "Gestern"; return "Fr\u00fcher"; }; const aus = []; let letzte = null; let neuMarke = false; liste.forEach(it => { const g = gruppe(it); if (g && g !== letzte) { aus.push(/*#__PURE__*/React.createElement("div", { key: "g" + g, style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 900, letterSpacing: 1.6, color: "var(--t3)", margin: "8px 2px 0", textTransform: "uppercase", gridColumn: "1 / -1" } }, g)); letzte = g; } const ts = new Date(it.published || it.publishedAt || 0).getTime(); if (!neuMarke && seen && !isNaN(ts) && ts > 0 && ts <= seen) { aus.push(/*#__PURE__*/React.createElement("div", { key: "seenline", style: { display: "flex", alignItems: "center", gap: 10, margin: "2px 0", gridColumn: "1 / -1" } }, /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, color: "var(--gold-text)" } }, "NEU SEIT DEINEM LETZTEN BESUCH \u2191"), /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }))); neuMarke = true; } aus.push(/*#__PURE__*/React.createElement(view === "feed" ? TickerKarte : FeedKarte, { onWatch: it2 => setAddSheet(it2), onOpen: it2 => twOeffnen(it2, setMSel), key: it.id, item: it })); }); if (listeAlle.length > liste.length) aus.push(/*#__PURE__*/React.createElement("div", { key: "mehr", style: { display: "flex", justifyContent: "center", padding: "8px 0 4px", gridColumn: "1 / -1" } }, /*#__PURE__*/React.createElement("button", { onClick: () => setFeedLimit(l => l + FEED_SEITE), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 22px", borderRadius: 999, border: "1px solid var(--dunkel)", background: "var(--karte)", color: "var(--t1)", boxShadow: "0 1px 2px rgba(15,21,32,.05)" } }, "Mehr laden (" + liste.length + " von " + listeAlle.length + ")"))); if (muAn) aus.push(React.createElement(MuUnten, { key: "mu-unten", liste: filtered, onOpen: it2 => twOeffnen(it2, setMSel), geheZu: setView })); return aus; })())), /*#__PURE__*/React.createElement("aside", null, view === "watch" ? React.createElement(MerkAside, { watch: watch, onAlertDialog: () => setWatchDlg(true), onOpen: openPlayer }) : view !== "feed" && view !== "talente" && view !== "community" && view !== "networking" && view !== "moderation" && React.createElement(FeedSuche, { q: query, setQ: setQuery, club: club, setClub: setClub, alle: news, watch: watchList, geheZu: setView, fs: { sport: sport, type: type, country: country, league: league }, setFs: { setSport: setSport, setType: setType, setCountry: setCountry, setLeague: setLeague } }))), perfKarte && /*#__PURE__*/React.createElement(PerfKarte, { x: perfKarte, onClose: () => setPerfKarte(null), onProfil: p => { setPerfZurueck(p); setPerfKarte(null); openPlayer(p.pid, p.name, p.team); }, watched: (watch.items || []).some(w => w.t === "spieler" && w.w === (perfKarte.name || "")), onWatchToggle: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); } }), plSel && /*#__PURE__*/React.createElement(SpielerDrawer, { x: plSel, news: news, schliessen: () => setPlSel(null) }), mSel && /*#__PURE__*/React.createElement(istTransferTyp(mSel) ? TransferPanel : MeldungsPanel, { m: mSel, schliessen: () => setMSel(null), onWatch: it => { setAddSheet(it); setMSel(null); } }), plVergleich.length > 0 && /*#__PURE__*/React.createElement(VergleichUI, { spieler: plVergleich, entf: pid => setPlVergleich(v => v.filter(y => y.pid !== pid)), leeren: () => { setPlVergleich([]); setPlVglOffen(false); }, offen: plVglOffen, setOffen: setPlVglOffen })), /*#__PURE__*/React.createElement("footer", {
     style: {
       borderTop: `1px solid ${HAIR}`,
       background: "var(--karte)",
@@ -13259,7 +13272,7 @@ function TransferApp({
       fontSize: 12,
       color: MUTED
     }
-  }, "© ", new Date().getFullYear(), " Golden Palm Enterprise · TransferWire"))), vereinSeite && /*#__PURE__*/React.createElement(VereinsSeite, { id: vereinSeite.id || null, name: vereinSeite.name || null, authQ: authQ, isPrem: isPrem, onClose: () => setVereinSeite(null), onOpenPlayer: (pid, pname, pteam) => openPlayer(pid, pname, pteam) }), vereinName && /*#__PURE__*/React.createElement("div", {
+  }, "© ", new Date().getFullYear(), " RATH ENTERPRISES · TransferWire"))), vereinSeite && /*#__PURE__*/React.createElement(VereinsSeite, { id: vereinSeite.id || null, name: vereinSeite.name || null, authQ: authQ, isPrem: isPrem, onClose: () => setVereinSeite(null), onOpenPlayer: (pid, pname, pteam) => openPlayer(pid, pname, pteam) }), vereinName && /*#__PURE__*/React.createElement("div", {
     onClick: () => setVereinName(null),
     style: { position: "fixed", inset: 0, zIndex: 1360, background: "rgba(10,12,16,.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16, overscrollBehavior: "contain" } }, /*#__PURE__*/React.createElement("div", { onClick: e => e.stopPropagation(), style: { width: "100%", maxWidth: 760, maxHeight: "90vh", overflowY: "auto", overscrollBehavior: "contain", background: "var(--karte)", borderRadius: 18, padding: "20px 22px 26px", boxShadow: "0 30px 90px rgba(0,0,0,.4)" } }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -13305,7 +13318,7 @@ function TransferApp({
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12.5,
-      color: "#4a4a48",
+      color: "var(--t2)",
       lineHeight: 1.6
     }
   }, t("vd_none")) : /*#__PURE__*/React.createElement(React.Fragment, null, vereinData.druck && vereinData.druck.length > 0 && /*#__PURE__*/React.createElement("div", {
@@ -13331,7 +13344,7 @@ function TransferApp({
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12,
-      color: "#4a4a48",
+      color: "var(--t2)",
       lineHeight: 1.5
     }
   }, d.grund))), !isPrem && /*#__PURE__*/React.createElement(PremiumLock, {
@@ -13362,7 +13375,7 @@ function TransferApp({
       padding: "8px 11px",
       fontFamily: FONT_BODY,
       fontSize: 12.5,
-      color: "#4a4a48"
+      color: "var(--t2)"
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
@@ -13389,7 +13402,7 @@ function TransferApp({
   }, /*#__PURE__*/React.createElement("div", {
     style: { display: "flex", alignItems: "center", gap: 8 }
   }, /*#__PURE__*/React.createElement("span", {
-    style: { width: 10, height: 10, borderRadius: 5, flex: "0 0 10px", display: "inline-block", background: a.ampel === "rot" ? "#d64545" : a.ampel === "gelb" ? "#e0a800" : "#2e9e5b" }
+    style: { width: 10, height: 10, borderRadius: 5, flex: "0 0 10px", display: "inline-block", background: a.ampel === "rot" ? "#c43b3b" : a.ampel === "gelb" ? "#e0a800" : "#23864b" }
   }), /*#__PURE__*/React.createElement("strong", null, ({ TW: "Torwart", ABW: "Abwehr", MF: "Mittelfeld", ST: "Sturm", IV: "Innenverteidigung", AV: "Außenverteidigung", ZM: "Zentrales Mittelfeld", FL: "Flügel" })[a.position] || a.position), /*#__PURE__*/React.createElement("span", {
     style: { fontSize: 11, color: MUTED }
   }, (a.score || 0) + " / 100")), (a.gruende || []).slice(0, 3).map((g, j) => /*#__PURE__*/React.createElement("div", {
@@ -13450,9 +13463,9 @@ function TransferApp({
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12.5,
-      color: "#4a4a48"
+      color: "var(--t2)"
     }
-  }, "• ", /*#__PURE__*/React.createElement("strong", null, v.name), ": ", v.note || v.bis)))), vereinData.trainer && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: "var(--blau-text)", textTransform: "uppercase", letterSpacing: 1, margin: "4px 0 6px" } }, LANG === "en" ? "Coach & form" : "Trainer & Form"), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#4a4a48", marginBottom: 12, lineHeight: 1.55 } }, /*#__PURE__*/React.createElement("div", null, "\u2022 ", /*#__PURE__*/React.createElement("strong", null, vereinData.trainer.name || "\u2013"), vereinData.trainer.seit ? (LANG === "en" ? " \u00b7 in charge since " : " \u00b7 im Amt seit ") + vereinData.trainer.seit : "", vereinData.trainer.wechsel ? (LANG === "en" ? " \u00b7 change detected " : " \u00b7 Trainerwechsel ") + vereinData.trainer.wechsel : ""), vereinData.form && vereinData.form.spiele > 0 ? /*#__PURE__*/React.createElement("div", null, "\u2022 ", (LANG === "en" ? "Last " : "Letzte ") + vereinData.form.spiele + (LANG === "en" ? " matches: " : " Spiele: ") + vereinData.form.tore + ":" + vereinData.form.gegentore + (LANG === "en" ? " goals, possession " : " Tore, Ballbesitz ") + (vereinData.form.ballbesitz != null ? vereinData.form.ballbesitz + " %" : "\u2013") + ", " + (vereinData.form.schuesse != null ? vereinData.form.schuesse : "\u2013") + (LANG === "en" ? " shots/match" : " Sch\u00fcsse/Spiel")) : null, vereinData.form && vereinData.form.letzte && vereinData.form.letzte.length ? /*#__PURE__*/React.createElement("div", { style: { color: MUTED, fontSize: 12 } }, vereinData.form.letzte.slice(0, 5).map(x => (x.heim ? "vs " : "@ ") + x.gegner + " " + x.ergebnis).join(" \u00b7 ")) : null)), vereinData.fitness && vereinData.fitness.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, "• ", /*#__PURE__*/React.createElement("strong", null, v.name), ": ", v.note || v.bis)))), vereinData.trainer && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: "var(--blau-text)", textTransform: "uppercase", letterSpacing: 1, margin: "4px 0 6px" } }, LANG === "en" ? "Coach & form" : "Trainer & Form"), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)", marginBottom: 12, lineHeight: 1.55 } }, /*#__PURE__*/React.createElement("div", null, "\u2022 ", /*#__PURE__*/React.createElement("strong", null, vereinData.trainer.name || "\u2013"), vereinData.trainer.seit ? (LANG === "en" ? " \u00b7 in charge since " : " \u00b7 im Amt seit ") + vereinData.trainer.seit : "", vereinData.trainer.wechsel ? (LANG === "en" ? " \u00b7 change detected " : " \u00b7 Trainerwechsel ") + vereinData.trainer.wechsel : ""), vereinData.form && vereinData.form.spiele > 0 ? /*#__PURE__*/React.createElement("div", null, "\u2022 ", (LANG === "en" ? "Last " : "Letzte ") + vereinData.form.spiele + (LANG === "en" ? " matches: " : " Spiele: ") + vereinData.form.tore + ":" + vereinData.form.gegentore + (LANG === "en" ? " goals, possession " : " Tore, Ballbesitz ") + (vereinData.form.ballbesitz != null ? vereinData.form.ballbesitz + " %" : "\u2013") + ", " + (vereinData.form.schuesse != null ? vereinData.form.schuesse : "\u2013") + (LANG === "en" ? " shots/match" : " Sch\u00fcsse/Spiel")) : null, vereinData.form && vereinData.form.letzte && vereinData.form.letzte.length ? /*#__PURE__*/React.createElement("div", { style: { color: MUTED, fontSize: 12 } }, vereinData.form.letzte.slice(0, 5).map(x => (x.heim ? "vs " : "@ ") + x.gegner + " " + x.ergebnis).join(" \u00b7 ")) : null)), vereinData.fitness && vereinData.fitness.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 11,
@@ -13474,7 +13487,7 @@ function TransferApp({
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12,
-      color: "#4a4a48",
+      color: "var(--t2)",
       lineHeight: 1.5
     }
   }, "• ", /*#__PURE__*/React.createElement("strong", null, v.name), ": ", v.note)))), vereinData.kader && vereinData.kader.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
@@ -13565,7 +13578,7 @@ function TransferApp({
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12,
-      color: "#4a4a48",
+      color: "var(--t2)",
       lineHeight: 1.45
     }
   }, "• ", n2.headline, " ", /*#__PURE__*/React.createElement("span", {
@@ -13684,7 +13697,7 @@ function TransferApp({
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12.5,
-      color: "#4a4a48",
+      color: "var(--t2)",
       lineHeight: 1.6,
       marginBottom: 12
     }
@@ -13822,7 +13835,7 @@ function TransferApp({
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12.5,
-      color: "#4a4a48",
+      color: "var(--t2)",
       lineHeight: 1.6
     }
   }, t("kt_sheet_none")) : /*#__PURE__*/React.createElement("div", {
@@ -13842,7 +13855,7 @@ function TransferApp({
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12.5,
-      color: "#4a4a48"
+      color: "var(--t2)"
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
@@ -14063,7 +14076,7 @@ function TransferApp({
         gap: 10,
         fontFamily: FONT_BODY,
         fontSize: 12.5,
-        color: "#4a4a48",
+        color: "var(--t2)",
         marginBottom: 14
       }
     }, /*#__PURE__*/React.createElement("span", null, d.apps, LANG === "en" ? " games" : " Spiele"), /*#__PURE__*/React.createElement("span", null, d.min, " Min."), d.rating > 0 && /*#__PURE__*/React.createElement("span", null, (LANG === "en" ? "Rating " : "Note "), d.rating), /*#__PURE__*/React.createElement("span", null, d.goals, (LANG === "en" ? " goals / " : " Tore / "), d.assists, " Assists"), d.pass_acc > 0 && /*#__PURE__*/React.createElement("span", null, (LANG === "en" ? "Pass accuracy " : "Passquote "), Math.round(Number(d.pass_acc)), " %"), d.duels_pct > 0 && /*#__PURE__*/React.createElement("span", null, (LANG === "en" ? "Duels won " : "Zweikämpfe "), Math.round(Number(d.duels_pct)), " %"), /*#__PURE__*/React.createElement("span", null, d.yellow, (LANG === "en" ? " yellow / " : " Gelb / "), d.red, (LANG === "en" ? " red" : " Rot"))), /*#__PURE__*/React.createElement("div", {
@@ -14077,7 +14090,7 @@ function TransferApp({
       style: {
         fontFamily: FONT_BODY,
         fontSize: 12.5,
-        color: "#4a4a48",
+        color: "var(--t2)",
         marginBottom: 14,
         lineHeight: 1.55
       }
@@ -14167,7 +14180,7 @@ function TransferApp({
       style: {
         fontFamily: FONT_BODY,
         fontSize: 12,
-        color: "#4a4a48"
+        color: "var(--t2)"
       }
     }, t("px_robust_sub"), ": ", plExtra.faelle24, " ", t("px_faelle"), " · ", plExtra.tage24, " ", t("px_tage"), plExtra.muskel24 ? ` · ${plExtra.muskel24}× ${t("px_muskel")}` : "")), /*#__PURE__*/React.createElement("div", {
       style: {
@@ -14183,7 +14196,7 @@ function TransferApp({
       style: {
         fontFamily: FONT_BODY,
         fontSize: 12.5,
-        color: "#4a4a48",
+        color: "var(--t2)",
         marginBottom: 14
       }
     }, t("px_hist_none")) : /*#__PURE__*/React.createElement("div", {
@@ -14198,7 +14211,7 @@ function TransferApp({
       style: {
         fontFamily: FONT_BODY,
         fontSize: 12,
-        color: "#4a4a48"
+        color: "var(--t2)"
       }
     }, "• ", verletzungDe(h.typ) || (LANG === "en" ? "Absence" : "Ausfall"), " ", /*#__PURE__*/React.createElement("span", {
       style: {
@@ -14258,7 +14271,7 @@ function TransferApp({
       style: {
         fontFamily: FONT_BODY,
         fontSize: 12.5,
-        color: "#4a4a48",
+        color: "var(--t2)",
         marginBottom: 8
       }
     }, plVidLoading ? t("px_vid_loading") : t("px_vid_none")), !plVidLoading && /*#__PURE__*/React.createElement("div", {
@@ -14326,7 +14339,7 @@ function TransferApp({
     style: {
       fontFamily: FONT_BODY,
       fontSize: 13,
-      color: "#4a4a48",
+      color: "var(--t2)",
       lineHeight: 1.6,
       margin: "0 0 12px"
     }
@@ -14467,7 +14480,7 @@ function TransferApp({
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12.5,
-      color: "#4a4a48",
+      color: "var(--t2)",
       lineHeight: 1.5,
       margin: "0 0 12px"
     }
@@ -14601,8 +14614,8 @@ function TransferApp({
         padding: "5px 10px",
         borderRadius: 8,
         border: `1.5px solid ${on ? "var(--gold)" : HAIR}`,
-        background: on ? "var(--gold-tint)" : "#fff",
-        color: on ? "var(--gold-text)" : "#4a4a48"
+        background: on ? "var(--gold-tint)" : "var(--karte)",
+        color: on ? "var(--gold-text)" : "var(--t2)"
       }
     }, tag);
   })), /*#__PURE__*/React.createElement("button", {
@@ -14749,7 +14762,7 @@ function TransferApp({
     style: {
       fontFamily: FONT_BODY,
       fontSize: 13,
-      color: "#4a4a48",
+      color: "var(--t2)",
       lineHeight: 1.55,
       margin: "0 0 12px"
     }
@@ -14786,7 +14799,7 @@ function TransferApp({
       gap: 8,
       fontFamily: FONT_BODY,
       fontSize: 12.5,
-      color: "#4a4a48",
+      color: "var(--t2)",
       marginBottom: 14,
       cursor: "pointer"
     }
@@ -14905,7 +14918,7 @@ class TwBoundary extends React.Component {
         style: {
           fontFamily: FONT_BODY,
           fontSize: 13,
-          color: "#4a4a48",
+          color: "var(--t2)",
           lineHeight: 1.55,
           margin: "0 0 14px"
         }
