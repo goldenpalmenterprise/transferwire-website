@@ -3,32 +3,66 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-<style>html.tw-handy85{-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation}</style>
-<script>/* Auftrag 47 (Punkt 93, Freigabe 12.10.): Handyansicht 85 % (Variante 2). Auf Handys im Hochformat wird die Layoutbreite auf
-   Bildschirmbreite / 0,85 gesetzt (390 px -> 459 px), dadurch erscheinen Schrift, Abstaende, Symbole und Karten gleichmaessig auf 85 %.
-   Querformat, Tablets (kurze Seite ab 600 px) und Desktop bleiben unveraendert. Eine Seite mit maximum-scale (App) bleibt ohne Zoom. */
+<style>html.tw-handy85{-webkit-text-size-adjust:100%;text-size-adjust:100%}html.tw-handy85,html.tw-handy85 body,html.tw-handy85 #root{touch-action:pan-y pinch-zoom}html.tw-handy85.tw-zoom,html.tw-handy85.tw-zoom body,html.tw-handy85.tw-zoom #root{touch-action:manipulation}</style>
+<script>/* Auftrag 47 (Punkt 93, Freigabe 12.10.) + Auftrag 48 (13.10.): Handyansicht 85 % (Variante 2). Auf Handys im Hochformat wird die
+   Layoutbreite auf Geraetebreite / 0,85 gesetzt (390 px -> 459 px), dadurch erscheinen Schrift, Abstaende, Symbole und Karten gleichmaessig
+   auf 85 %. Auftrag 48: Die Geraetebreite misst der Browser selbst (device-width); screen.width weicht auf manchen iPhones davon ab (z. B. bei
+   vergroesserter Anzeige) - die Seite war dann breiter als der Bildschirm und liess sich seitlich verschieben. Ausserdem laesst sich die ganze
+   Seite am Handy nicht mehr seitlich ziehen (touch-action pan-y), solange nicht hineingezoomt ist; Leisten mit eigenem Scrollen bleiben wischbar.
+   Querformat, Tablets (kurze Seite ab 600 px) und Desktop bleiben unveraendert. Eine Seite mit maximum-scale (App) bleibt ohne Zoom.
+   Pruefanzeige fuer das Geraet: Adresse mit ?twdiag=1 aufrufen. */
 (function(){try{
   var m=document.querySelector('meta[name="viewport"]'); if(!m) return;
   var basis=m.getAttribute("content")||"", F=0.85, ohneZoom=/maximum-scale/.test(basis), wurzel=document.documentElement;
+  var mass=0, gemessen=0, verlaesslich=false, letzterInhalt="", letzteLage="";
   function hoch(){
     try{ if(screen.orientation&&screen.orientation.type) return screen.orientation.type.indexOf("portrait")===0; }catch(e){}
     if(typeof window.orientation==="number") return Math.abs(window.orientation)!==90;
     return (screen.height||0)>=(screen.width||0);
   }
+  function lage(){
+    try{ if(screen.orientation&&screen.orientation.type) return screen.orientation.type; }catch(e){}
+    return String(typeof window.orientation==="number"?window.orientation:"");
+  }
+  function geraetebreite(kurz){
+    if(m.getAttribute("content")!==basis) m.setAttribute("content",basis);
+    var w=wurzel.clientWidth||0;
+    gemessen=w; verlaesslich=(w>=280&&w<700);
+    return verlaesslich?w:kurz;
+  }
+  function zoomen(){
+    var vv=window.visualViewport;
+    var z=!!(vv&&mass&&wurzel.classList.contains("tw-handy85")&&vv.scale>mass*1.04);
+    if(z) wurzel.classList.add("tw-zoom"); else wurzel.classList.remove("tw-zoom");
+  }
   function setzen(){
     var kurz=Math.min(screen.width||0,screen.height||0);
     var touch=(navigator.maxTouchPoints||0)>0||("ontouchstart" in window);
     var an=touch&&kurz>=280&&kurz<600&&hoch(), inhalt=basis;
+    if(an&&verlaesslich&&letzterInhalt&&m.getAttribute("content")===letzterInhalt&&lage()===letzteLage){ zoomen(); return; }
+    mass=0;
     if(an){
-      var b=Math.round(kurz/F), s=Math.floor(kurz/b*1e6)/1e6;
+      var kw=geraetebreite(kurz), b=Math.round(kw/F), s=Math.floor(kw/b*1e6)/1e6;
       inhalt="width="+b+", initial-scale="+s+(ohneZoom?", minimum-scale="+s+", maximum-scale="+s:"")+", viewport-fit=cover";
+      mass=s;
     }
     if(m.getAttribute("content")!==inhalt) m.setAttribute("content",inhalt);
+    letzterInhalt=an?inhalt:""; letzteLage=lage();
     if(an) wurzel.classList.add("tw-handy85"); else wurzel.classList.remove("tw-handy85");
+    zoomen();
   }
   setzen();
   window.addEventListener("orientationchange",function(){setzen();setTimeout(setzen,250);});
   try{ if(screen.orientation&&screen.orientation.addEventListener) screen.orientation.addEventListener("change",setzen); }catch(e){}
+  try{ if(window.visualViewport) window.visualViewport.addEventListener("resize",zoomen); }catch(e){}
+  if(/[?&#]twdiag=1/.test(location.href)){
+    var box=null, zeigen=function(){ try{
+      var vv=window.visualViewport||{};
+      if(!box){ box=document.createElement("div"); box.id="tw-diag"; box.style.cssText="position:fixed;left:6px;bottom:6px;z-index:2147483647;background:rgba(0,0,0,.85);color:#9ef0b0;font:11px/1.4 ui-monospace,Menlo,monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre"; document.body.appendChild(box); }
+      box.textContent="screen "+screen.width+"x"+screen.height+" dpr "+(window.devicePixelRatio||1)+"\ndevice-width "+gemessen+"\n"+m.getAttribute("content")+"\nlayout "+wurzel.clientWidth+" doc "+wurzel.scrollWidth+"\nvv "+Math.round((vv.width||0)*10)/10+" x "+Math.round((vv.scale||0)*1e4)/1e4+" links "+Math.round((vv.offsetLeft||0)*10)/10+" scrollX "+Math.round(window.scrollX||0)+"\nzoom "+wurzel.classList.contains("tw-zoom")+" "+((navigator.userAgent.match(/OS [0-9_]+/)||[""])[0]);
+    }catch(e){} };
+    window.addEventListener("load",function(){ zeigen(); setInterval(zeigen,800); });
+  }
 }catch(e){}})();</script>
 <title>TransferWire — Transfer news & club needs</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
