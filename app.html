@@ -9053,17 +9053,7 @@ function gesucheBlock(passende, onKontakt) { if (!passende || !passende.length) 
 const LAND_CODE_EN = { denmark: 'dk', germany: 'de', france: 'fr', england: 'gb-eng', spain: 'es', italy: 'it', netherlands: 'nl', portugal: 'pt', belgium: 'be', austria: 'at', switzerland: 'ch', turkey: 'tr', 'türkiye': 'tr', scotland: 'gb-sct', wales: 'gb-wls', ireland: 'ie', 'northern ireland': 'gb-nir', norway: 'no', sweden: 'se', poland: 'pl', serbia: 'rs', croatia: 'hr', usa: 'us', 'united states': 'us', china: 'cn', 'china pr': 'cn', brazil: 'br', argentina: 'ar', japan: 'jp', nigeria: 'ng', ghana: 'gh', senegal: 'sn', 'ivory coast': 'ci', "côte d'ivoire": 'ci', morocco: 'ma', cameroon: 'cm', mali: 'ml', colombia: 'co', uruguay: 'uy', mexico: 'mx', canada: 'ca', australia: 'au', 'south korea': 'kr', 'korea republic': 'kr', greece: 'gr', 'czech republic': 'cz', czechia: 'cz', slovakia: 'sk', hungary: 'hu', romania: 'ro', ukraine: 'ua', russia: 'ru', 'bosnia and herzegovina': 'ba', slovenia: 'si', albania: 'al', kosovo: 'xk', 'north macedonia': 'mk', georgia: 'ge', iceland: 'is', finland: 'fi', israel: 'il', algeria: 'dz', tunisia: 'tn', egypt: 'eg', panama: 'pa', 'sierra leone': 'sl', guinea: 'gn', 'congo dr': 'cd', 'dr congo': 'cd', congo: 'cg', ecuador: 'ec', chile: 'cl', peru: 'pe', paraguay: 'py', venezuela: 've', jamaica: 'jm', iran: 'ir', 'saudi arabia': 'sa', montenegro: 'me', bulgaria: 'bg', cyprus: 'cy', luxembourg: 'lu', angola: 'ao', 'burkina faso': 'bf', gabon: 'ga', togo: 'tg', benin: 'bj', zambia: 'zm', 'south africa': 'za', 'cape verde': 'cv', 'guinea-bissau': 'gw', gambia: 'gm', 'new zealand': 'nz', 'costa rica': 'cr', honduras: 'hn', 'dominican republic': 'do', haiti: 'ht', 'trinidad and tobago': 'tt', suriname: 'sr', armenia: 'am', kazakhstan: 'kz', uzbekistan: 'uz' };
 function landFlagge(name, size) { const code = LAND_CODE_EN[String(name || '').trim().toLowerCase()]; if (!code) return null; const w = size || 18; return React.createElement('img', { src: 'https://flagcdn.com/w40/' + code + '.png', srcSet: 'https://flagcdn.com/w80/' + code + '.png 2x', width: w, height: Math.round(w * 0.68), alt: '', loading: 'lazy', style: { borderRadius: 2, objectFit: 'cover', marginRight: 6, verticalAlign: '-2px' } }); }
 function fmtTag(v) { const t = String(v || '').trim(); const m = t.match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? m[3] + '.' + m[2] + '.' + m[1] : t; }
-/* Auftrag 71 (19.10.2026): Beraterhistorie im Spielerprofil - Stationen chronologisch mit Zeitraum, Genauigkeit, Belegstatus, Quellen und offenen Luecken */
-const TW_BH_TXT = {
-  status: { offen: ["noch nicht recherchiert", "not yet researched"], teilweise: ["teilweise recherchiert", "partially researched"], vorlaeufig_abgeschlossen: ["vorläufig abgeschlossen", "provisionally complete"], keine_angaben: ["keine belastbaren Angaben gefunden", "no reliable information found"] },
-  beleg: { bestaetigt: ["bestätigt", "confirmed"], berichtet: ["berichtet", "reported"], widerspruechlich: ["widersprüchlich", "conflicting"], unbekannt: ["unbekannt", "unknown"] },
-  art: { sportlich: ["sportliche Beratung", "sports representation"], marketing: ["Marketing", "marketing"], familie: ["Familie", "family"], kein_berater: ["ohne Berater", "no agent"], unklar: ["Art nicht belegt", "type not evidenced"], transfer_einzeln: ["Einzelvermittlung", "one-off transfer"] },
-  typ: { tm_profil: ["Transfermarkt-Profil", "Transfermarkt profile"], tm_profil_archiv: ["Transfermarkt-Profil (Webarchiv)", "Transfermarkt profile (Wayback Machine)"], tm_agentur: ["Transfermarkt-Agenturseite", "Transfermarkt agency page"], tm_agentur_archiv: ["Transfermarkt-Agenturseite (Webarchiv)", "Transfermarkt agency page (Wayback Machine)"], agentur_web: ["Webseite der Agentur", "agency website"], agentur_web_archiv: ["Webseite der Agentur (Webarchiv)", "agency website (Wayback Machine)"], medien: ["Medienbericht", "media report"], social: ["Social Media", "social media"], verband: ["Verbandsunterlage", "association record"] },
-  ereignis: { beraterwechsel: ["Beraterwechsel", "Change of agent"], agenturwechsel_gleicher_berater: ["Agenturwechsel (gleicher Berater)", "Agency change (same agent)"], neue_vertretung: ["Neue Vertretung", "New representation"], trennung: ["Trennung", "Separation"], umbenennung: ["Umbenennung der Agentur", "Agency renamed"] },
-  schritt: { aktuell: ["Transfermarkt aktuell", "Transfermarkt (current)"], archiv_tm: ["Webarchiv", "Wayback Machine"], medien: ["Medien und Social Media", "media and social media"], agentur: ["Agenturseiten", "agency websites"], verband: ["Verbandsunterlagen", "association records"], identitaet: ["Identität", "identity"] },
-  sstatus: { erledigt: ["geprüft", "checked"], ergebnislos: ["geprüft, nichts gefunden", "checked, nothing found"], nicht_anwendbar: ["entfällt", "not applicable"], technisch: ["Quelle nicht erreichbar, neuer Versuch geplant", "source unreachable, retry scheduled"], offen: ["ausstehend", "pending"], laeuft: ["läuft", "running"], warten: ["ausstehend", "pending"] }
-};
-function twBhL(gruppe, k) { const en = LANG === "en"; const x = (TW_BH_TXT[gruppe] || {})[k]; return x ? x[en ? 1 : 0] : (k || ""); }
+/* Auftrag 71 (19.10.2026, Vorgabe Boss 06:09): Beraterhistorie im Spielerprofil als schlichter Zeitstrahl - Berater/Agentur mit Zeitraum, ohne Quellen */
 function twBhDatum(iso, genau) {
   const m = String(iso || "").match(/^(\d{4})-(\d{2})-(\d{2})/); if (!m) return "";
   if (genau === "jahr") return m[1]; if (genau === "monat") return m[2] + "/" + m[1];
@@ -9082,93 +9072,43 @@ function twBhZeitraum(st) {
   const en = LANG === "en"; const b = twBhPunkt(st.beginn, "beginn");
   let e;
   if (st.laufend === "ja") e = en ? "today" : "heute";
-  else if (st.laufend === "unbekannt" && !(st.ende && (st.ende.datum || st.ende.frueh))) e = (en ? "unknown" : "unbekannt") + (st.zuletzt ? (en ? " (last evidenced " : " (zuletzt belegt ") + twBhDatum(st.zuletzt, "tag") + ")" : "");
+  else if (st.laufend === "unbekannt" && !(st.ende && (st.ende.datum || st.ende.frueh))) e = en ? "unknown" : "unbekannt";
   else e = twBhPunkt(st.ende, "ende");
   return b + " – " + e;
 }
-function twBhEn(t) {
-  if (LANG !== "en" || !t) return t || "";
-  const R = [[/^Zeitraum laut Transfermarkt-Angaben \(Abrufe und Webarchiv\) – nicht das Vertragsdatum$/, "Period based on Transfermarkt data (checks and Wayback Machine) – not the contract date"],
-    [/^jüngere Transfermarkt-Seite ohne Beraterangabe$/, "more recent Transfermarkt page without agent information"], [/^Zuordnung von der Agentur bei Transfermarkt verifiziert$/, "assignment verified by the agency on Transfermarkt"],
-    [/^Marketingvertretung parallel zur sportlichen Beratung$/, "marketing representation parallel to sports representation"],
-    [/^Vermittlung bei einer einzelnen Registrierung \(Transfer\/Vertrag\) – kein Nachweis eines dauerhaften Mandats$/, "intermediary for a single registration (transfer/contract) – no evidence of a lasting mandate"],
-    [/^gleichzeitig führt Transfermarkt (.*)$/, "at the same time Transfermarkt lists $1"], [/^gleichzeitig nennt eine andere Quelle (.*)$/, "at the same time another source names $1"], [/^gleichzeitig genannt: (.*)$/, "also named at the same time: $1"],
-    [/^Quelle meldet das Ende \((.*)\), Transfermarkt führt die Agentur danach weiter$/, "a source reports the end ($1), Transfermarkt still lists the agency afterwards"],
-    [/^genannter Beginn (.*) weicht deutlich vom Transfermarkt-Verlauf ab$/, "stated start $1 differs clearly from the Transfermarkt history"], [/^Beginn laut Mitteilung (.*), Transfermarkt-Angabe erst später angepasst$/, "start per announcement $1, Transfermarkt updated later"],
-    [/^Wechsel der Transfermarkt-Angabe zwischen den Abrufen\/Aufnahmen$/, "change of the Transfermarkt entry between checks/captures"], [/^laut Meldung bzw\. offizieller Mitteilung$/, "according to a report or official announcement"],
-    [/^gleicher Transfermarkt-Agentureintrag unter neuem Namen \(Umbenennung oder Übernahme\)$/, "same Transfermarkt agency entry under a new name (renaming or takeover)"],
-    [/^Transfermarkt-Profil nennt als Spielerberater: (.*?)( \(Angabe der Agentur bei Transfermarkt verifiziert\))?$/, (m, a, v) => "Transfermarkt profile lists as agent: " + a + (v ? " (verified by the agency on Transfermarkt)" : "")],
-    [/^Archivierte Transfermarkt-Seite nennt als Spielerberater: (.*)$/, "Archived Transfermarkt page lists as agent: $1"], [/^(Archivierte Transfermarkt-Seite|Transfermarkt-Profil): Spielerberater „Familienangehörige“$/, (m, a) => (a === "Transfermarkt-Profil" ? "Transfermarkt profile" : "Archived Transfermarkt page") + ": agent “family member”"],
-    [/^(Archivierte Transfermarkt-Seite|Transfermarkt-Profil): „ohne Berater“$/, (m, a) => (a === "Transfermarkt-Profil" ? "Transfermarkt profile" : "Archived Transfermarkt page") + ": “no agent”"],
-    [/^Transfermarkt-Agenturseite von (.*) führt den Spieler$/, "Transfermarkt agency page of $1 lists the player"], [/^(Archivierte )?Webseite der Agentur (.*) nennt den Spieler( \(Marketing\))?$/, (m, a, n, mk) => (a ? "Archived agency website of " : "Agency website of ") + n + " names the player" + (mk ? " (marketing)" : "")],
-    [/^FA-Liste: (.*) vertrat (.*) bei „(.*)“ – (.*)$/, "FA list: $1 represented $2 in “$3” – $4"],
-    [/^noch nicht geprüft: (.*)$/, (m, x) => "not yet checked: " + twBhEnQuelle(x)], [/^Quelle vorübergehend nicht erreichbar: (.*) \(neuer Versuch geplant\)$/, (m, x) => "source temporarily unreachable: " + twBhEnQuelle(x) + " (retry scheduled)"],
-    [/^kein aktueller Transfermarkt-Abruf$/, "no current Transfermarkt check"], [/^keine belegte aktuelle Zuordnung$/, "no evidenced current agent"],
-    [/^Beginn der aktuellen Vertretung \((.*)\) nicht belegt(, belegt spätestens seit (.*))?$/, (m, n, x, d) => "start of the current representation (" + twBhName(n) + ") not evidenced" + (d ? ", evidenced since at least " + d : "")],
-    [/^zuständige Beraterperson nicht belegt$/, "responsible individual agent not evidenced"], [/^keine Angaben vor (.*)$/, "no information before $1"], [/^Lücke ohne Angaben zwischen (.*) und (.*)$/, "gap without information between $1 and $2"]];
-  return String(t).split("; ").map(s => { for (const [re, w] of R) { if (re.test(s)) return s.replace(re, w); } return s; }).join("; ");
-}
-function twBhEnQuelle(x) { const M = { "aktuelles Transfermarkt-Profil": "current Transfermarkt profile", "Webarchiv (Transfermarkt)": "Wayback Machine (Transfermarkt)", "Medien und Social Media": "media and social media", "offizielle Agenturseiten": "official agency websites", "Verbandsunterlagen": "association records", "eindeutige Identifizierung": "unique identification" }; return M[x] || x; }
-function twBhPille(text, ton) {
-  const F = { gruen: ["#0B7A45", "#e2f3ea"], blau: ["#0e6175", "#dff1f6"], rot: ["#a61b1b", "#fde8e8"], orange: ["#8a3110", "#fdf0dc"], grau: ["#3d4552", "#eceef2"] }; const f = F[ton] || F.grau;
-  return React.createElement("span", { style: { display: "inline-block", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: f[0], background: f[1], borderRadius: 99, padding: "2px 8px", whiteSpace: "nowrap" } }, text);
-}
-function twBhLink(u) { return /^https?:\/\//i.test(String(u || "")) ? String(u) : ""; }
-function TwBeraterHistorie({ bh, kompakt }) {
+function TwBeraterHistorie({ bh }) {
   const h = React.createElement; const en = LANG === "en"; const [alle, setAlle] = useState(false);
-  const titel = h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 } }, en ? "Agent history" : "Beraterhistorie");
   if (!bh) return null;
-  const stationen = Array.isArray(bh.stationen) ? bh.stationen : []; const ereignisse = Array.isArray(bh.ereignisse) ? bh.ereignisse : [];
-  const vermittlungen = Array.isArray(bh.vermittlungen) ? bh.vermittlungen : []; const luecken = Array.isArray(bh.luecken) ? bh.luecken : [];
-  const tonStatus = { offen: "grau", teilweise: "orange", vorlaeufig_abgeschlossen: "gruen", keine_angaben: "grau" }[bh.status] || "grau";
-  const tonBeleg = { bestaetigt: "gruen", berichtet: "blau", widerspruechlich: "rot", unbekannt: "orange" };
-  const kopf = h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap", padding: "10px 12px", borderBottom: "1px solid var(--linie)" } },
-    h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED } }, (en ? "Research status: " : "Recherchestand: "), twBhPille(twBhL("status", bh.status || "offen"), tonStatus)),
-    bh.stand ? h("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED } }, (en ? "as of " : "Stand ") + twBhDatum(bh.stand, "tag")) : null);
-  const station = (st, i) => {
-    const quellen = Array.isArray(st.quellen) ? st.quellen : [];
-    const eingegrenzt = (st.beginn && st.beginn.genau === "zeitraum") || (st.ende && st.ende.genau === "zeitraum");
-    return h("div", { key: "s" + i, style: { padding: "10px 12px", borderTop: i ? "1px solid var(--linie)" : "none" } },
-      h("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" } },
-        h("span", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, overflowWrap: "anywhere" } }, twBhName(st.agentur) || (en ? "unknown" : "unbekannt")),
-        st.laufend === "ja" ? twBhPille(en ? "current" : "aktuell", "gruen") : null,
-        twBhPille(twBhL("beleg", st.status || "unbekannt"), tonBeleg[st.status] || "grau"),
-        eingegrenzt ? twBhPille(en ? "time range narrowed" : "zeitlich eingegrenzt", "orange") : null,
-        st.parallel ? twBhPille(en ? "parallel" : "parallel", "grau") : null),
-      h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, marginTop: 3, overflowWrap: "anywhere" } },
-        [twBhZeitraum(st), twBhL("art", st.art), st.person ? (en ? "agent: " : "Berater: ") + st.person : "", (Array.isArray(st.agentur_frueher) && st.agentur_frueher.length) ? (en ? "formerly: " : "früher: ") + st.agentur_frueher.join(", ") : ""].filter(Boolean).join(" · ")),
-      st.hinweis && !kompakt ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, marginTop: 3, fontStyle: "italic", overflowWrap: "anywhere" } }, twBhEn(st.hinweis)) : null,
-      (!kompakt && quellen.length) ? h("details", { style: { marginTop: 6 } },
-        h("summary", { style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, color: INK } }, (en ? "Sources (" : "Quellen (") + (st.quellen_n || quellen.length) + (st.unabhaengig_n ? (en ? ", independent: " : ", unabhängig: ") + st.unabhaengig_n : "") + ")"),
-        quellen.map((q, k) => { const u = twBhLink(q.url), a = twBhLink(q.archiv_url); const daten = [q.veroeffentlicht ? (en ? "published " : "veröffentlicht ") + twBhDatum(q.veroeffentlicht, "tag") : "", q.archiviert ? (en ? "archived " : "archiviert ") + twBhDatum(q.archiviert, "tag") : "", q.abgerufen ? (en ? "retrieved " : "abgerufen ") + twBhDatum(q.abgerufen, "tag") : ""].filter(Boolean).join(" · ");
-          return h("div", { key: "q" + k, style: { padding: "6px 0 0 10px", borderLeft: "2px solid var(--linie)", marginTop: 6, fontFamily: FONT_BODY, fontSize: 12, color: MUTED, overflowWrap: "anywhere" } },
-            h("div", null, h("b", { style: { color: INK } }, twBhL("typ", q.typ) || q.name), q.name && q.typ !== "tm_profil" && q.typ !== "tm_profil_archiv" ? " · " + q.name : "", daten ? " · " + daten : "", q.ki ? (en ? " · evaluated by AI, quote checked" : " · KI-ausgewertet, Zitat geprüft") : ""),
-            q.aussage ? h("div", null, en && q.ki && q.zitat ? "" : twBhEn(q.aussage)) : null,
-            q.zitat ? h("div", { style: { fontStyle: "italic" } }, "„" + q.zitat + "“") : null,
-            (u || a) ? h("div", null, u ? h("a", { href: u, target: "_blank", rel: "noopener noreferrer nofollow", style: { color: INK, fontWeight: 700 } }, en ? "Open source" : "Quelle öffnen") : null, u && a ? " · " : null, a ? h("a", { href: a, target: "_blank", rel: "noopener noreferrer nofollow", style: { color: INK, fontWeight: 700 } }, en ? "Archived copy" : "Archivkopie") : null) : null); })) : null);
-  };
-  const leer = h("div", { style: { padding: "10px 12px", fontFamily: FONT_BODY, fontSize: 13, color: MUTED } },
-    bh.status === "keine_angaben" ? (en ? "No reliable information about this player's agents was found in the sources checked so far. This does not mean that he has no agent." : "In den bisher geprüften Quellen wurden keine belastbaren Angaben zu Beratern dieses Spielers gefunden. Das bedeutet nicht, dass er keinen Berater hat.")
-      : (en ? "No evidenced agent information yet – research is ongoing." : "Noch keine belegten Beraterangaben – die Recherche läuft."));
-  const aktuelle = stationen.filter(s => s.laufend === "ja"); const fruehere = stationen.filter(s => s.laufend !== "ja");
-  if (kompakt) {
-    return h("div", { style: { marginTop: 10 } }, titel, h("div", { style: { border: "1px solid var(--linie)", borderRadius: 10, overflow: "hidden" } }, kopf,
-      stationen.length ? (aktuelle.length ? aktuelle : stationen.slice(0, 1)).map(station) : leer,
-      (fruehere.length && aktuelle.length) ? h("div", { style: { padding: "8px 12px", borderTop: "1px solid var(--linie)", fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED } },
-        (en ? "Earlier: " : "Früher: ") + fruehere.slice(0, 3).map(s => twBhName(s.agentur)).join(", ") + (fruehere.length > 3 ? " …" : "") + (en ? " – details and sources in the full profile" : " – Details und Quellen im vollständigen Profil")) : null));
+  const stationen = (Array.isArray(bh.stationen) ? bh.stationen : []).filter(s => s && s.art !== "transfer_einzeln");
+  const ART = { familie: ["Familie", "family"], kein_berater: ["ohne Berater", "no agent"], marketing: ["Marketing", "marketing"] };
+  const pille = (text, farbe, grund) => h("span", { style: { display: "inline-block", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: farbe, background: grund, borderRadius: 99, padding: "2px 8px", whiteSpace: "nowrap" } }, text);
+  const titel = h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 } }, en ? "Agent history" : "Beraterhistorie");
+  if (!stationen.length) {
+    return h("div", { style: { marginBottom: 12 } }, titel, h("div", { style: { border: "1px solid var(--linie)", borderRadius: 10, padding: "10px 12px", fontFamily: FONT_BODY, fontSize: 13, color: MUTED } },
+      bh.status === "keine_angaben" ? (en ? "No reliable information about this player's agents yet." : "Bisher keine belastbaren Angaben zu Beratern dieses Spielers.") : (en ? "No agent information yet – research is ongoing." : "Noch keine Beraterangaben – die Recherche läuft.")));
   }
-  const sichtbar = alle ? stationen : stationen.slice(0, 4);
-  const schritte = bh.schritte || {};
-  return h("div", { style: { marginBottom: 12 } }, titel, h("div", { style: { border: "1px solid var(--linie)", borderRadius: 10, overflow: "hidden" } }, kopf,
-    stationen.length ? h("div", null, sichtbar.map(station), stationen.length > 4 ? h("button", { type: "button", onClick: () => setAlle(!alle), style: { display: "block", width: "100%", padding: "8px 12px", border: "none", borderTop: "1px solid var(--linie)", background: "var(--karte2)", color: INK, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, cursor: "pointer" } }, alle ? (en ? "Show fewer" : "Weniger anzeigen") : (en ? "Show all " : "Alle ") + stationen.length + (en ? " entries" : " Einträge anzeigen")) : null) : leer,
-    ereignisse.length ? h("div", { style: { padding: "10px 12px", borderTop: "1px solid var(--linie)" } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 } }, en ? "Changes" : "Wechsel"),
-      ereignisse.slice(0, 8).map((w, i) => h("div", { key: "w" + i, style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, padding: "3px 0", overflowWrap: "anywhere" } }, h("b", { style: { color: INK } }, twBhL("ereignis", w.art)), ": " + (w.von ? twBhName(w.von) + " → " : "") + twBhName(w.zu || "") + " · " + twBhPunkt({ datum: w.datum, genau: w.genau, frueh: w.frueh, spaet: w.spaet }, "beginn") + " · ", twBhPille(twBhL("beleg", w.status || "unbekannt"), tonBeleg[w.status] || "grau")))) : null,
-    vermittlungen.length ? h("div", { style: { padding: "10px 12px", borderTop: "1px solid var(--linie)" } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 } }, en ? "One-off intermediary activity (no lasting mandate)" : "Einzelvermittlungen (kein dauerhaftes Mandat)"),
-      vermittlungen.slice(0, 6).map((v, i) => { const u = twBhLink((v.quellen && v.quellen[0] && v.quellen[0].url) || ""); return h("div", { key: "v" + i, style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, padding: "3px 0", overflowWrap: "anywhere" } }, h("b", { style: { color: INK } }, twBhName(v.agentur || v.person || "")), " · " + twBhPunkt({ datum: v.datum, genau: v.genau, frueh: v.frueh, spaet: v.spaet }, "beginn") + (v.quellen && v.quellen[0] && v.quellen[0].aussage ? " · " + twBhEn(v.quellen[0].aussage) : ""), u ? h("span", null, " · ", h("a", { href: u, target: "_blank", rel: "noopener noreferrer nofollow", style: { color: INK, fontWeight: 700 } }, en ? "source" : "Quelle")) : null); })) : null,
-    h("div", { style: { padding: "10px 12px", borderTop: "1px solid var(--linie)", fontFamily: FONT_BODY, fontSize: 12, color: MUTED } },
-      h("div", { style: { marginBottom: 4 } }, h("b", { style: { color: INK } }, en ? "Sources checked: " : "Geprüfte Quellen: "), ["aktuell", "archiv_tm", "medien", "agentur", "verband"].map(k => twBhL("schritt", k) + " – " + twBhL("sstatus", schritte[k] || "offen")).join(" · ")),
-      luecken.length ? h("div", { style: { marginBottom: 4 } }, h("b", { style: { color: INK } }, en ? "Open gaps: " : "Offene Lücken: "), luecken.map(twBhEn).join(" · ")) : null,
-      h("div", null, en ? "The agent history is updated continuously and may be incomplete. Periods are based on evidenced information only; missing information does not mean there was no agent." : "Die Beraterhistorie wird laufend ergänzt und kann unvollständig sein. Zeiträume beruhen nur auf belegten Angaben; fehlende Angaben bedeuten nicht, dass es keinen Berater gab."))));
+  const sichtbar = alle ? stationen : stationen.slice(0, 6);
+  const punkt = (st, i) => {
+    const akt = st.laufend === "ja"; const letzter = i === sichtbar.length - 1;
+    const art = ART[st.art] ? ART[st.art][en ? 1 : 0] : "";
+    return h("div", { key: "z" + i, style: { display: "flex", gap: 12 } },
+      h("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", width: 14, flex: "0 0 14px" } },
+        h("span", { style: { width: 12, height: 12, borderRadius: 99, marginTop: 4, background: akt ? "#0B7A45" : "var(--karte)", border: "2px solid " + (akt ? "#0B7A45" : MUTED), boxSizing: "border-box" } }),
+        letzter ? null : h("span", { style: { flex: 1, width: 2, background: "var(--linie)", marginTop: 2 } })),
+      h("div", { style: { paddingBottom: letzter ? 0 : 14, minWidth: 0 } },
+        h("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" } },
+          h("span", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, overflowWrap: "anywhere" } }, twBhName(st.agentur) || (en ? "unknown" : "unbekannt")),
+          akt ? pille(en ? "current" : "aktuell", "#0B7A45", "#e2f3ea") : null,
+          st.status === "widerspruechlich" ? pille(en ? "uncertain" : "unsicher", "#8a3110", "#fdf0dc") : null),
+        h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, marginTop: 2, overflowWrap: "anywhere" } },
+          [twBhZeitraum(st), art, st.person ? (en ? "agent: " : "Berater: ") + st.person : ""].filter(Boolean).join(" · "))));
+  };
+  return h("div", { style: { marginBottom: 12 } }, titel,
+    h("div", { style: { border: "1px solid var(--linie)", borderRadius: 10, padding: "12px 12px 10px" } },
+      sichtbar.map(punkt),
+      stationen.length > 6 ? h("button", { type: "button", onClick: () => setAlle(!alle), style: { marginTop: 8, padding: "6px 10px", border: "1px solid var(--linie)", borderRadius: 8, background: "var(--karte2)", color: INK, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, cursor: "pointer" } },
+        alle ? (en ? "Show fewer" : "Weniger anzeigen") : (en ? "Show all " + stationen.length : "Alle " + stationen.length + " anzeigen")) : null,
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, marginTop: 8 } }, en ? "May be incomplete – updated continuously." : "Kann unvollständig sein – wird laufend ergänzt.")));
 }
 function SpielerdatenTabelle({ d, pid, profil }) { const h = React.createElement; const en = LANG === 'en'; const [info, setInfo] = useState(null); useEffect(() => { if (!pid) return; let ok = true; fetch('/db/players?player_id=eq.' + encodeURIComponent(pid) + '&select=name,birth_date,age,height,weight,nationality,position,foot,team,league,tm_joined,tm_contract_until,contract_until,tm_value_text', { credentials: 'omit', cache: 'no-store' }).then(r => r.json()).then(rows => { if (ok && Array.isArray(rows) && rows[0]) setInfo(rows[0]); }).catch(() => {}); return () => { ok = false; }; }, [pid]);
   const x = Object.assign({}, d || {}, info || {}); const geb = x.birth_date ? fmtTag(x.birth_date) : ''; const alter = x.age ? ' (' + x.age + ')' : '';
