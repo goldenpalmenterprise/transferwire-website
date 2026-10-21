@@ -865,7 +865,7 @@ const WATCH_URL = "/api/tw-watch";
 const PERF_URL = "/api/tw-performance-v2";
 const PERF_URL_V1 = "/api/tw-performance";
 const SPIELER_URL = "/api/tw-spieler";
-const LAND_LIGEN = [{ de: "Deutschland", en: "Germany", ligen: ["Bundesliga", "2. Bundesliga", "3. Liga", "Regionalliga Nord", "Regionalliga Bayern", "Regionalliga Nordost", "Regionalliga S\u00fcdwest", "Regionalliga West"] }, { de: "England", en: "England", ligen: ["Premier League", "Championship"] }, { de: "Spanien", en: "Spain", ligen: ["LaLiga", "LaLiga 2", "La Liga", "La Liga 2"] }, { de: "Italien", en: "Italy", ligen: ["Serie A", "Serie B"] }, { de: "Frankreich", en: "France", ligen: ["Ligue 1", "Ligue 2"] }, { de: "Niederlande", en: "Netherlands", ligen: ["Eredivisie", "Eerste Divisie"] }, { de: "Portugal", en: "Portugal", ligen: ["Liga Portugal", "Liga Portugal 2", "Primeira Liga"] }, { de: "Belgien", en: "Belgium", ligen: ["Jupiler Pro League", "Challenger Pro League", "Pro League"] }, { de: "\u00d6sterreich", en: "Austria", ligen: ["Bundesliga (\u00d6sterreich)", "2. Liga (\u00d6sterreich)"] }, { de: "Schweiz", en: "Switzerland", ligen: ["Super League (Schweiz)"] }, { de: "T\u00fcrkei", en: "T\u00fcrkiye", ligen: ["S\u00fcper Lig", "1. Lig (T\u00fcrkei)"] }, { de: "Schottland", en: "Scotland", ligen: ["Scottish Premiership", "Premiership"] }, { de: "D\u00e4nemark", en: "Denmark", ligen: ["Superligaen", "1. Division (D\u00e4nemark)", "Superliga"] }, { de: "Norwegen", en: "Norway", ligen: ["Eliteserien"] }, { de: "Schweden", en: "Sweden", ligen: ["Allsvenskan"] }, { de: "Polen", en: "Poland", ligen: ["Ekstraklasa"] }, { de: "Serbien", en: "Serbia", ligen: ["Super Liga (Serbien)"] }, { de: "Kroatien", en: "Croatia", ligen: ["HNL (Kroatien)"] }, { de: "USA", en: "USA", ligen: ["MLS"] }, { de: "China", en: "China", ligen: ["Chinese Super League"] }];
+const LAND_LIGEN = [{ de: "Deutschland", en: "Germany", ligen: ["Bundesliga", "2. Bundesliga", "3. Liga", "Regionalliga Nord", "Regionalliga Bayern", "Regionalliga Nordost", "Regionalliga S\u00fcdwest", "Regionalliga West"] }, { de: "England", en: "England", ligen: ["Premier League", "Championship"] }, { de: "Spanien", en: "Spain", ligen: ["LaLiga", "LaLiga 2", "La Liga", "La Liga 2"] }, { de: "Italien", en: "Italy", ligen: ["Serie A", "Serie B"] }, { de: "Frankreich", en: "France", ligen: ["Ligue 1", "Ligue 2"] }, { de: "Niederlande", en: "Netherlands", ligen: ["Eredivisie", "Eerste Divisie"] }, { de: "Portugal", en: "Portugal", ligen: ["Liga Portugal", "Liga Portugal 2", "Primeira Liga"] }, { de: "Belgien", en: "Belgium", ligen: ["Jupiler Pro League", "Challenger Pro League", "Pro League"] }, { de: "\u00d6sterreich", en: "Austria", ligen: ["Bundesliga (\u00d6sterreich)", "2. Liga (\u00d6sterreich)"] }, { de: "Schweiz", en: "Switzerland", ligen: ["Super League (Schweiz)"] }, { de: "T\u00fcrkei", en: "Turkey", ligen: ["S\u00fcper Lig", "1. Lig (T\u00fcrkei)"] }, { de: "Schottland", en: "Scotland", ligen: ["Scottish Premiership", "Premiership"] }, { de: "D\u00e4nemark", en: "Denmark", ligen: ["Superligaen", "1. Division (D\u00e4nemark)", "Superliga"] }, { de: "Norwegen", en: "Norway", ligen: ["Eliteserien"] }, { de: "Schweden", en: "Sweden", ligen: ["Allsvenskan"] }, { de: "Polen", en: "Poland", ligen: ["Ekstraklasa"] }, { de: "Serbien", en: "Serbia", ligen: ["Super Liga (Serbien)"] }, { de: "Kroatien", en: "Croatia", ligen: ["HNL (Kroatien)"] }, { de: "USA", en: "USA", ligen: ["MLS"] }, { de: "China", en: "China", ligen: ["Chinese Super League"] }];
 const PING_URL = "/api/tw-ping";
 const MARKT_URL = "/api/tw-markt";
 const EXTRA_URL = "/api/tw-extra";
@@ -1234,7 +1234,7 @@ const EN_MAP = {
 "Zehner": "Attacking midfielder",
 "Fl\u00fcgel": "Winger",
 "St\u00fcrmer": "Striker",
-"Trainer": "Coach",
+"Trainer": "Head coach",
 "Mittelst\u00fcrmer": "Centre-forward",
 "Fl\u00fcgelspieler": "Winger",
 "Au\u00dfenst\u00fcrmer": "Wide forward",
@@ -1393,7 +1393,7 @@ const EN_WORDS = [
   ["laut Medienberichten", "according to media reports"], ["laut Medien", "according to media"], ["Profikader m\u00f6glich", "first-team squad possible"], ["Millionen Euro", "million euros"], ["plus Boni", "plus bonuses"], ["bei Aufstieg", "on promotion"],
   ["Mittelst\u00fcrmer", "centre-forward"], ["Au\u00dfenst\u00fcrmer", "wide forward"], ["Fl\u00fcgelspieler", "winger"], ["St\u00fcrmer", "striker"], ["Torh\u00fcter", "goalkeeper"], ["Torwart", "goalkeeper"],
   ["Innenverteidiger", "centre-back"], ["Linksverteidiger", "left-back"], ["Rechtsverteidiger", "right-back"], ["Au\u00dfenverteidiger", "full-back"], ["Mittelfeldspieler", "midfielder"], ["Mittelfeld", "midfield"],
-  ["Sechser", "defensive midfielder"], ["Achter", "central midfielder"], ["Zehner", "attacking midfielder"], ["Spielmacher", "playmaker"], ["Fl\u00fcgel", "winger"], ["Verteidiger", "defender"], ["Sportdirektor", "sporting director"], ["Trainer", "coach"], ["Sturm/Fl\u00fcgel", "Forward/Winger"], ["Sturm", "Forward"], ["Abwehr", "Defence"],
+  ["Sechser", "defensive midfielder"], ["Achter", "central midfielder"], ["Zehner", "attacking midfielder"], ["Spielmacher", "playmaker"], ["Fl\u00fcgel", "winger"], ["Verteidiger", "defender"], ["Sportdirektor", "sporting director"], ["Trainer", "head coach"], ["Sturm/Fl\u00fcgel", "Forward/Winger"], ["Sturm", "Forward"], ["Abwehr", "Defence"],
   ["ausl\u00e4ndischer", "foreign"], ["Kaufpflicht", "obligation to buy"], ["Kaufoption", "option to buy"], ["abl\u00f6sefrei", "free transfer"], ["Abl\u00f6se", "fee"], ["Vereinsmeldung", "club statement"], ["Medienberichten", "media reports"],
   ["Jahrgang", "born"], ["Nachwuchs", "youth"], ["Jugend", "youth"], ["angeblich", "reportedly"], ["gemeldet", "reported"], ["Bericht", "report"], ["Leihe", "loan"], ["laut", "according to"], ["rund", "around"], ["\u00fcber", "over"], ["bis zu", "up to"], ["m\u00f6glich", "possible"],
   ["Spanien", "Spain"], ["Slowakei", "Slovakia"], ["\u00d6sterreich", "Austria"], ["Schweiz", "Switzerland"], ["Deutschland", "Germany"], ["Frankreich", "France"], ["Italien", "Italy"], ["Belgien", "Belgium"], ["Niederlande", "Netherlands"], ["T\u00fcrkei", "Turkey"], ["D\u00e4nemark", "Denmark"]
@@ -1594,14 +1594,14 @@ window.twDossierPdf = async function (x, vorhanden) {
     "Espanyol Barcelona": "Espanyol", "FC Villarreal": "Villarreal", "FC Girona": "Girona", "FC Getafe": "Getafe", "Olympique Lyon": "Lyon", "Olympique Marseille": "Marseille", "OGC Nizza": "Nice",
     "Racing Straßburg": "Strasbourg", "Stade Rennes": "Rennes", "FC Nantes": "Nantes", "OSC Lille": "Lille", "Stade Brest": "Brest", "Benfica Lissabon": "Benfica", "Sporting Lissabon": "Sporting CP",
     "Sporting Braga": "Braga", "Galatasaray Istanbul": "Galatasaray", "Fenerbahce Istanbul": "Fenerbahçe", "Besiktas Istanbul": "Beşiktaş", "Roter Stern Belgrad": "Red Star Belgrade",
-    "Partizan Belgrad": "Partizan", "Dynamo Kiew": "Dynamo Kyiv", "Schachtar Donezk": "Shakhtar Donetsk", "Spartak Moskau": "Spartak Moscow", "ZSKA Moskau": "CSKA Moscow",
+    "Partizan Belgrad": "Partizan Belgrade", "Dynamo Kiew": "Dynamo Kyiv", "Schachtar Donezk": "Shakhtar Donetsk", "Spartak Moskau": "Spartak Moscow", "ZSKA Moskau": "CSKA Moscow",
     "Lokomotive Moskau": "Lokomotiv Moscow", "Dynamo Moskau": "Dynamo Moscow", "Zenit St. Petersburg": "Zenit Saint Petersburg", "Celtic Glasgow": "Celtic", "Glasgow Rangers": "Rangers",
     "Ajax Amsterdam": "Ajax", "PSV Eindhoven": "PSV", "Feyenoord Rotterdam": "Feyenoord", "FC Brügge": "Club Brugge", "Royal Antwerpen": "Royal Antwerp", "Standard Lüttich": "Standard Liège",
     "RSC Anderlecht": "Anderlecht", "Olympiakos Piräus": "Olympiacos", "Panathinaikos Athen": "Panathinaikos", "AEK Athen": "AEK Athens", "PAOK Saloniki": "PAOK", "Slavia Prag": "Slavia Prague",
     "Sparta Prag": "Sparta Prague", "Viktoria Pilsen": "Viktoria Plzeň", "Legia Warschau": "Legia Warsaw", "Lech Posen": "Lech Poznań", "Ferencváros Budapest": "Ferencváros", "FC Kopenhagen": "FC Copenhagen",
-    "Bröndby IF": "Brøndby", "BSC Young Boys": "Young Boys", "Grasshoppers Zürich": "Grasshopper", "Rapid Wien": "Rapid Vienna", "Austria Wien": "Austria Vienna", "Lewski Sofia": "Levski Sofia", "unbekannt": "unknown club" };
+    "Bröndby IF": "Brøndby IF", "BSC Young Boys": "Young Boys", "Grasshoppers Zürich": "Grasshopper", "Rapid Wien": "Rapid Vienna", "Austria Wien": "Austria Vienna", "Lewski Sofia": "Levski Sofia", "Bayer 04 Leverkusen": "Bayer Leverkusen", "FC Barcelona": "Barcelona", "Real Sociedad San Sebastián": "Real Sociedad", "FC Arsenal": "Arsenal", "FC Chelsea": "Chelsea", "FC Liverpool": "Liverpool", "FC Everton": "Everton", "FC Fulham": "Fulham", "FC Brentford": "Brentford", "FC Southampton": "Southampton", "Grasshopper Zürich": "Grasshoppers", "Al-Hilal": "Al Hilal", "Al-Nassr": "Al Nassr", "Al-Ittihad": "Al Ittihad", "unbekannt": "unknown club" };
   const LAND = { "Südkorea": "South Korea", "Serbien": "Serbia", "Slowakei": "Slovakia", "Argentinien": "Argentina", "Bulgarien": "Bulgaria", "Österreich": "Austria", "Tschechien": "Czechia", "Rumänien": "Romania",
-    "Polen": "Poland", "Kroatien": "Croatia", "Ungarn": "Hungary", "Griechenland": "Greece", "Türkei": "Türkiye", "Dänemark": "Denmark", "Schweden": "Sweden", "Norwegen": "Norway", "Schweiz": "Switzerland",
+    "Polen": "Poland", "Kroatien": "Croatia", "Ungarn": "Hungary", "Griechenland": "Greece", "Türkei": "Turkey", "Dänemark": "Denmark", "Schweden": "Sweden", "Norwegen": "Norway", "Schweiz": "Switzerland",
     "Belgien": "Belgium", "Niederlande": "Netherlands", "Spanien": "Spain", "Italien": "Italy", "Frankreich": "France", "Deutschland": "Germany", "Brasilien": "Brazil", "Mexiko": "Mexico", "Japan": "Japan",
     "China": "China", "Saudi-Arabien": "Saudi Arabia", "Zypern": "Cyprus", "Schottland": "Scotland", "Russland": "Russia", "Ukraine": "Ukraine", "Slowenien": "Slovenia", "Bosnien": "Bosnia", "Israel": "Israel",
     "Kasachstan": "Kazakhstan", "Aserbaidschan": "Azerbaijan", "Katar": "Qatar", "Ägypten": "Egypt", "Marokko": "Morocco", "Kolumbien": "Colombia", "Chile": "Chile", "Uruguay": "Uruguay", "Ecuador": "Ecuador", "Peru": "Peru" };
@@ -2657,7 +2657,7 @@ function talFaktoren(r) {
 const talFmt = n => Number(n).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 /* --- Scouting 10.10.2026: Top 50 Talente nach Land. Laenderzuordnung = Nationalitaet des Spielers (nie Land von Verein/Liga). --- */
 const TT_LAND_EXTRA = { "republic of ireland": "ie", "rep. of ireland": "ie", "liberia": "lr", "belarus": "by", "kenya": "ke", "chinese taipei": "tw", "taiwan": "tw", "curacao": "cw", "moldova": "md", "lithuania": "lt", "latvia": "lv", "estonia": "ee", "malta": "mt", "azerbaijan": "az", "qatar": "qa", "united arab emirates": "ae", "libya": "ly", "sudan": "sd", "south sudan": "ss", "mozambique": "mz", "zimbabwe": "zw", "uganda": "ug", "tanzania": "tz", "rwanda": "rw", "burundi": "bi", "equatorial guinea": "gq", "central african republic": "cf", "chad": "td", "niger": "ne", "mauritania": "mr", "madagascar": "mg", "comoros": "km", "ethiopia": "et", "bolivia": "bo", "el salvador": "sv", "guatemala": "gt", "nicaragua": "ni", "cuba": "cu", "iraq": "iq", "jordan": "jo", "syria": "sy", "lebanon": "lb", "palestine": "ps", "oman": "om", "bahrain": "bh", "kuwait": "kw", "india": "in", "thailand": "th", "vietnam": "vn", "indonesia": "id", "malaysia": "my", "philippines": "ph", "korea dpr": "kp", "north korea": "kp", "faroe islands": "fo", "andorra": "ad", "san marino": "sm", "liechtenstein": "li", "gibraltar": "gi", "namibia": "na", "mauritius": "mu", "guadeloupe": "gp", "martinique": "mq", "french guiana": "gf", "tajikistan": "tj", "kyrgyzstan": "kg", "turkmenistan": "tm", "bosnia": "ba", "bosnia-herzegovina": "ba", "the gambia": "gm", "united states of america": "us", "cote d'ivoire": "ci", "turkiye": "tr", "trinidad & tobago": "tt" };
-const TT_NAME_FIX = { "gb-eng": ["England", "England"], "gb-sct": ["Schottland", "Scotland"], "gb-wls": ["Wales", "Wales"], "gb-nir": ["Nordirland", "Northern Ireland"], xk: ["Kosovo", "Kosovo"], us: ["USA", "USA"], ci: ["Elfenbeinküste", "Ivory Coast"], cd: ["DR Kongo", "DR Congo"], cg: ["Kongo", "Congo"], cv: ["Kap Verde", "Cape Verde"], ba: ["Bosnien-Herzegowina", "Bosnia and Herzegovina"], kr: ["Südkorea", "South Korea"], kp: ["Nordkorea", "North Korea"], tw: ["Taiwan", "Taiwan"], cz: ["Tschechien", "Czechia"], tr: ["Türkei", "Türkiye"], ie: ["Irland", "Ireland"], mk: ["Nordmazedonien", "North Macedonia"] };
+const TT_NAME_FIX = { "gb-eng": ["England", "England"], "gb-sct": ["Schottland", "Scotland"], "gb-wls": ["Wales", "Wales"], "gb-nir": ["Nordirland", "Northern Ireland"], xk: ["Kosovo", "Kosovo"], us: ["USA", "USA"], ci: ["Elfenbeinküste", "Ivory Coast"], cd: ["DR Kongo", "DR Congo"], cg: ["Kongo", "Congo"], cv: ["Kap Verde", "Cape Verde"], ba: ["Bosnien-Herzegowina", "Bosnia and Herzegovina"], kr: ["Südkorea", "South Korea"], kp: ["Nordkorea", "North Korea"], tw: ["Taiwan", "Taiwan"], cz: ["Tschechien", "Czechia"], tr: ["Türkei", "Turkey"], ie: ["Irland", "Ireland"], mk: ["Nordmazedonien", "North Macedonia"] };
 const TT_POS_DE = { midfielder: "Mittelfeld", defender: "Abwehr", forward: "Sturm", attacker: "Sturm", goalkeeper: "Torwart" };
 const TT_KURZ_RE = /^\s*([A-Za-z\u00C0-\u024F]{1,2})\.\s*(\S.*)$/;
 let TT_CACHE = null, TT_WAHL = "", TT_NAMEN = {}, TT_DN = {};
@@ -3401,7 +3401,7 @@ function ScoutSub({ view, setView }) {
    Daten: /api/tw-scoutkatalog (Ablauf "TW API: Nachwuchs-Scoutingkatalog"; Tabellen scouting_laender, scouting_hinweise,
    scouting_wettbewerbe, scouting_quellen). Inhalte des Katalogs auf Deutsch, Bedienung DE/EN. */
 const KATALOG_URL = "/api/tw-scoutkatalog";
-const NK_LAND = { "England": ["gb-eng", "England"], "Schottland": ["gb-sct", "Scotland"], "Spanien": ["es", "Spain"], "Italien": ["it", "Italy"], "Frankreich": ["fr", "France"], "Portugal": ["pt", "Portugal"], "Niederlande": ["nl", "Netherlands"], "Belgien": ["be", "Belgium"], "Österreich": ["at", "Austria"], "Schweiz": ["ch", "Switzerland"], "Dänemark": ["dk", "Denmark"], "Schweden": ["se", "Sweden"], "Norwegen": ["no", "Norway"], "Polen": ["pl", "Poland"], "Tschechien": ["cz", "Czechia"], "Slowakei": ["sk", "Slovakia"], "Ungarn": ["hu", "Hungary"], "Kroatien": ["hr", "Croatia"], "Serbien": ["rs", "Serbia"], "Rumänien": ["ro", "Romania"], "Bulgarien": ["bg", "Bulgaria"], "Türkei": ["tr", "Türkiye"], "Zypern": ["cy", "Cyprus"], "Israel": ["il", "Israel"], "USA": ["us", "USA"], "Brasilien": ["br", "Brazil"], "Argentinien": ["ar", "Argentina"], "Saudi-Arabien": ["sa", "Saudi Arabia"], "Japan": ["jp", "Japan"], "Südkorea": ["kr", "South Korea"], "China": ["cn", "China"], "Deutschland – Referenz": ["de", "Germany – reference"], "Deutschland": ["de", "Germany"], "International": ["", "International"] };
+const NK_LAND = { "England": ["gb-eng", "England"], "Schottland": ["gb-sct", "Scotland"], "Spanien": ["es", "Spain"], "Italien": ["it", "Italy"], "Frankreich": ["fr", "France"], "Portugal": ["pt", "Portugal"], "Niederlande": ["nl", "Netherlands"], "Belgien": ["be", "Belgium"], "Österreich": ["at", "Austria"], "Schweiz": ["ch", "Switzerland"], "Dänemark": ["dk", "Denmark"], "Schweden": ["se", "Sweden"], "Norwegen": ["no", "Norway"], "Polen": ["pl", "Poland"], "Tschechien": ["cz", "Czechia"], "Slowakei": ["sk", "Slovakia"], "Ungarn": ["hu", "Hungary"], "Kroatien": ["hr", "Croatia"], "Serbien": ["rs", "Serbia"], "Rumänien": ["ro", "Romania"], "Bulgarien": ["bg", "Bulgaria"], "Türkei": ["tr", "Turkey"], "Zypern": ["cy", "Cyprus"], "Israel": ["il", "Israel"], "USA": ["us", "USA"], "Brasilien": ["br", "Brazil"], "Argentinien": ["ar", "Argentina"], "Saudi-Arabien": ["sa", "Saudi Arabia"], "Japan": ["jp", "Japan"], "Südkorea": ["kr", "South Korea"], "China": ["cn", "China"], "Deutschland – Referenz": ["de", "Germany – reference"], "Deutschland": ["de", "Germany"], "International": ["", "International"] };
 function nkNorm(s) { return String(s || "").normalize("NFC").trim(); }
 function nkLandName(land, en) { const e = NK_LAND[nkNorm(land)]; return en && e ? e[1] : nkNorm(land); }
 function nkLandKey(land) { const l = nkNorm(land); return l === "Deutschland" ? "Deutschland – Referenz" : l; }
@@ -3620,30 +3620,18 @@ const twRelTime = iso => {
   if (diff < 1440) return en ? Math.round(diff / 60) + " h ago" : "vor " + Math.round(diff / 60) + " Std.";
   return en ? Math.round(diff / 1440) + " d ago" : "vor " + Math.round(diff / 1440) + " Tg.";
 };
-// Vertrauensregister der Quellen (A1..D + Trefferquote), gespiegelt aus der Quellentabelle (/db/quellen_vertrauen)
-const TW_QV = { host: {}, name: {}, geladen: false, hoerer: [] };
+// Punkt 304 (21.10.2026): Die Stufen der Quellen (A1..D) kommen je Meldung vom Server (Feld qv: s = Stufe je erkannter Quelle, b = Zuschlag aus der
+// Trefferquote der besten Quelle). Die Tabelle quellen_vertrauen ist im Browser nicht mehr abrufbar; gleiche Regeln wie vorher, nur serverseitig gerechnet.
+const TW_QV = { host: {}, name: {}, geladen: true, hoerer: [] };
 const qvHost = u => { try { return new URL(String(u)).hostname.replace(/^www\./, "").toLowerCase(); } catch (e) { return ""; } };
-function ladeQuellenVertrauen() {
-  if (TW_QV.geladen || TW_QV.laedt) return; TW_QV.laedt = true;
-  const seite = off => fetch("/db/quellen_vertrauen?select=quelle_name,host,vertrauen,trefferquote&offset=" + off + "&limit=200", { credentials: "omit", cache: "no-store" }).then(r => r.json()).catch(() => []);
-  Promise.all([0, 200, 400, 600, 800].map(seite)).then(seiten => {
-    const rang = { A1: 1, A2: 2, B: 3, C: 4, D: 5 };
-    for (const rows of seiten) { if (!Array.isArray(rows)) continue; for (const q of rows) { const v = String(q.vertrauen || "").toUpperCase(); if (!rang[v]) continue; const eintrag = { v: v, q: q.trefferquote == null ? null : Number(q.trefferquote) };
-      const h = String(q.host || ""); if (h && !/news\.google|^(x\.com|twitter\.com|t\.me|facebook\.com|weibo\.com|youtube\.com|instagram\.com|bsky\.app)$/.test(h)) { const base = h.split(".").slice(-2).join("."); for (const k of [h, base]) { if (!TW_QV.host[k] || rang[TW_QV.host[k].v] > rang[v]) TW_QV.host[k] = eintrag; } }
-      const n = String(q.quelle_name || "").toLowerCase().replace(/\s*\((rss|x)\)\s*$/, "").trim(); if (n && n.length >= 4 && !/^(gn |google news|journalist:)/.test(n)) { if (!TW_QV.name[n] || rang[TW_QV.name[n].v] > rang[v]) TW_QV.name[n] = eintrag; } } }
-    TW_QV.geladen = true; TW_QV.hoerer.forEach(f => { try { f(); } catch (e) {} });
-  });
-}
+function ladeQuellenVertrauen() { }
 const QV_RANG = { A1: 1, A2: 2, B: 3, C: 4, D: 5 };
 const QV_LABEL = { A1: ["offizielle Quelle", "official source"], A2: ["Qualit\u00e4tsmedium", "quality outlet"], B: ["Fachmedium", "specialist outlet"], C: ["Aggregator/Boulevard", "aggregator/tabloid"], D: ["Social/anonym", "social/anonymous"] };
 function quellenStufen(it) {
-  const out = []; const srcs = (it && it.sources) || [];
-  const finde = (url, name) => { const h = qvHost(url); if (h && TW_QV.host[h]) return TW_QV.host[h]; const base = h ? h.split(".").slice(-2).join(".") : ""; if (base && TW_QV.host[base]) return TW_QV.host[base]; const nm = String(name || "").toLowerCase().replace(/\s*\((rss|x)\)\s*$/, "").trim(); if (nm.length >= 4) { if (TW_QV.name[nm]) return TW_QV.name[nm]; let best = null; for (const k of Object.keys(TW_QV.name)) { if (k.length < 5) continue; if (nm.indexOf(k) >= 0 || k.indexOf(nm) >= 0) { const e = TW_QV.name[k]; if (!best || QV_RANG[e.v] < QV_RANG[best.v]) best = e; } } return best; } return null; };
-  for (const sq of srcs) { const e = finde(sq && sq.url, sq && sq.name); if (e) out.push(Object.assign({ host: qvHost(sq && sq.url) || String((sq && sq.name) || "") }, e)); }
-  if (!out.length && it && (it.sourceName || it.source_name)) { const e = finde("", it.sourceName || it.source_name); if (e) out.push(Object.assign({ host: it.sourceName || it.source_name }, e)); }
-  return out;
+  const q = it && it.qv; if (!q || !Array.isArray(q.s)) return [];
+  return q.s.filter(x => x && QV_RANG[x.v]).map(x => ({ host: String(x.h || ""), v: x.v, q: null }));
 }
-const besteStufe = it => { const st = quellenStufen(it); if (!st.length) return null; return st.reduce((a, b) => QV_RANG[b.v] < QV_RANG[a.v] ? b : a); };
+const besteStufe = it => { const st = quellenStufen(it); if (!st.length) return null; const b = st.reduce((a, b) => QV_RANG[b.v] < QV_RANG[a.v] ? b : a); return Object.assign({}, b, { bonus: (it.qv && it.qv.b != null && !isNaN(it.qv.b)) ? Number(it.qv.b) : null }); };
 // Best\u00e4tigungsregel (Punkt 2): fix gilt nur als best\u00e4tigt mit offizieller Quelle (A1/API-Register, reliability 5) oder zwei unabh\u00e4ngigen A1/A2-Quellen
 function istBestaetigt(it) {
   if (!it) return false; const r = Number(it.reliability) || 0; const st = quellenStufen(it);
@@ -3672,7 +3660,7 @@ function signalScore(it) {
   const n = ((it && it.sources) || []).length;
   let sc = base + Math.min(2, Math.max(0, n - 1)) * 4 + (it && it.fee ? 2 : 0);
   const b = besteStufe(it);
-  if (b) { sc += ({ A1: 6, A2: 3, B: 0, C: -6, D: -12 })[b.v] || 0; if (b.q != null && !isNaN(b.q)) sc += Math.max(-5, Math.min(5, Math.round((b.q - 0.2) * 20))); }
+  if (b) { sc += ({ A1: 6, A2: 3, B: 0, C: -6, D: -12 })[b.v] || 0; if (b.bonus != null) sc += b.bonus; }
   return Math.max(5, Math.min(99, sc));
 }
 const istOffiziell = it => /offiziell|official|\bbest\u00e4tigt\b|confirmed/i.test(String((it && it.headline) || "") + " " + String((it && it.summary) || "")) || Number(it && it.reliability) >= 5;
@@ -4973,6 +4961,7 @@ function GerAside({ s, onApply }) {
 
 const NEWS = [{
   id: "n1",
+  qv: {"s": [{"h": "Marca", "v": "A2"}], "b": null},
   sport: "fussball",
   league: "La Liga",
   type: "geruecht",
@@ -4998,6 +4987,7 @@ const NEWS = [{
   publishedAt: "vor 22 Min"
 }, {
   id: "n2",
+  qv: {"s": [{"h": "kicker", "v": "A2"}], "b": null},
   sport: "fussball",
   league: "Bundesliga",
   type: "fix",
@@ -5023,6 +5013,7 @@ const NEWS = [{
   publishedAt: "vor 1 Std"
 }, {
   id: "n3",
+  qv: {"s": [{"h": "The Athletic", "v": "A2"}], "b": null},
   sport: "fussball",
   league: "Premier League",
   type: "geruecht",
@@ -5045,6 +5036,7 @@ const NEWS = [{
   publishedAt: "vor 2 Std"
 }, {
   id: "n4",
+  qv: {"s": [{"h": "Gazzetta", "v": "B"}], "b": -1},
   sport: "fussball",
   league: "Serie A",
   type: "verein_sucht",
@@ -5064,6 +5056,7 @@ const NEWS = [{
   publishedAt: "vor 3 Std"
 }, {
   id: "n11",
+  qv: {"s": [{"h": "L'\u00c9quipe", "v": "A2"}], "b": null},
   sport: "fussball",
   league: "Ligue 1",
   type: "leihe",
@@ -5086,6 +5079,7 @@ const NEWS = [{
   publishedAt: "vor 1 Std"
 }, {
   id: "n12",
+  qv: {"s": [{"h": "kicker", "v": "A2"}], "b": null},
   sport: "fussball",
   league: "Bundesliga",
   type: "vertrag",
@@ -5108,6 +5102,7 @@ const NEWS = [{
   publishedAt: "vor 6 Std"
 }, {
   id: "n13",
+  qv: {"s": [{"h": "kicker", "v": "A2"}], "b": null},
   sport: "fussball",
   league: "Bundesliga",
   type: "verein_sucht",
@@ -5144,6 +5139,7 @@ const NEWS = [{
   publishedAt: "vor 3 Std"
 }, {
   id: "n15",
+  qv: {"s": [{"h": "The Athletic", "v": "A2"}], "b": null},
   sport: "fussball",
   league: "Premier League",
   type: "verein_sucht",
@@ -5162,6 +5158,7 @@ const NEWS = [{
   publishedAt: "vor 4 Std"
 }, {
   id: "n16",
+  qv: {"s": [{"h": "Gazzetta", "v": "B"}], "b": -1},
   sport: "fussball",
   league: "Serie A",
   type: "verein_sucht",
@@ -5180,6 +5177,7 @@ const NEWS = [{
   publishedAt: "vor 5 Std"
 }, {
   id: "n17",
+  qv: {"s": [{"h": "Marca", "v": "A2"}], "b": null},
   sport: "fussball",
   league: "La Liga",
   type: "verein_sucht",
@@ -5198,6 +5196,7 @@ const NEWS = [{
   publishedAt: "vor 6 Std"
 }, {
   id: "n18",
+  qv: {"s": [{"h": "L'\u00c9quipe", "v": "A2"}], "b": null},
   sport: "fussball",
   league: "Ligue 1",
   type: "verein_sucht",
@@ -9820,7 +9819,7 @@ function tkArt(a, en) { const x = TK_ART[a] || TK_ART.wechsel; return en ? x[1] 
 /* Positionsangaben von Transfermarkt (deutsch) auf die Positionsfilter der Seite abbilden */
 const TK_POS_EXTRA = { tw: /torwart|torh/i, iv: /innenverteidiger|^verteidiger$|abwehr|centre|center|defender/i, av: /(linker|rechter) verteidiger|(links|rechts)verteidiger|au(ß|ss)enverteidiger|full|wing-?back/i, mf: /mittelfeld|sechser|achter|zehner|midfield/i, fl: /(links|rechts)au(ß|ss)en|fl(ü|u)gel|wing/i, st: /st(ü|u)rm|spitze|striker|forward|^angriff$/i };
 /* Punkt 154 (08.10.2026): deutsche Transfermarkt-Positionen im englischen Ticker */
-const TK_POS_EN = { "torwart": "Goalkeeper", "innenverteidiger": "Centre-back", "linker verteidiger": "Left-back", "rechter verteidiger": "Right-back", "linksverteidiger": "Left-back", "rechtsverteidiger": "Right-back", "au\u00dfenverteidiger": "Full-back", "aussenverteidiger": "Full-back", "abwehr": "Defender", "verteidiger": "Defender", "defensives mittelfeld": "Defensive midfield", "zentrales mittelfeld": "Central midfield", "offensives mittelfeld": "Attacking midfield", "linkes mittelfeld": "Left midfield", "rechtes mittelfeld": "Right midfield", "mittelfeld": "Midfielder", "linksau\u00dfen": "Left winger", "linksaussen": "Left winger", "rechtsau\u00dfen": "Right winger", "rechtsaussen": "Right winger", "fl\u00fcgel": "Winger", "h\u00e4ngende spitze": "Second striker", "haengende spitze": "Second striker", "mittelst\u00fcrmer": "Centre-forward", "mittelstuermer": "Centre-forward", "st\u00fcrmer": "Striker", "stuermer": "Striker", "sturm": "Forward", "angriff": "Forward", "trainer": "Coach", "cheftrainer": "Head coach", "co-trainer": "Assistant coach", "torwarttrainer": "Goalkeeping coach", "sportdirektor": "Sporting director" };
+const TK_POS_EN = { "torwart": "Goalkeeper", "innenverteidiger": "Centre-back", "linker verteidiger": "Left-back", "rechter verteidiger": "Right-back", "linksverteidiger": "Left-back", "rechtsverteidiger": "Right-back", "au\u00dfenverteidiger": "Full-back", "aussenverteidiger": "Full-back", "abwehr": "Defender", "verteidiger": "Defender", "defensives mittelfeld": "Defensive midfield", "zentrales mittelfeld": "Central midfield", "offensives mittelfeld": "Attacking midfield", "linkes mittelfeld": "Left midfield", "rechtes mittelfeld": "Right midfield", "mittelfeld": "Midfielder", "linksau\u00dfen": "Left winger", "linksaussen": "Left winger", "rechtsau\u00dfen": "Right winger", "rechtsaussen": "Right winger", "fl\u00fcgel": "Winger", "h\u00e4ngende spitze": "Second striker", "haengende spitze": "Second striker", "mittelst\u00fcrmer": "Centre-forward", "mittelstuermer": "Centre-forward", "st\u00fcrmer": "Striker", "stuermer": "Striker", "sturm": "Forward", "angriff": "Forward", "trainer": "Head coach", "cheftrainer": "Head coach", "co-trainer": "Assistant coach", "torwarttrainer": "Goalkeeping coach", "sportdirektor": "Sporting director" };
 function tkPosText(pos, en) { const t = String(pos || "").trim(); if (!en || !t) return t; const k = t.toLowerCase(); if (TK_POS_EN[k]) return TK_POS_EN[k]; return t.split(/\s*[\/,]\s*/).map(x => TK_POS_EN[x.toLowerCase()] || x).join(" / "); }
 function tkPosMatch(pos, k) {
   if (!k) return true; const t = String(pos || ""); if (!t) return false;
@@ -9942,9 +9941,9 @@ const VDB_TXT = {
   en: { spieler: "Player database", vereine: "Club database", titel: "Club database", sub: "All clubs on file with league, table position, coach, squad, needs and likely departures. Click a club to open its page with the full squad.",
     suche: "Search club, league, country or coach …", land: "All countries", liga: "All leagues", lage: "Situation", lage_alle: "Any situation", abstieg: "Relegation battle", titel_r: "Title race", druck: "Coach under pressure", bedarf: "Needs", bedarf_alle: "Any need", rot: "Urgent (red)", gelb: "Elevated (amber)", kein: "No acute need",
     reserve: "Show reserve teams", sort: "Sort", s_name: "Name", s_rang: "Table position", s_wert: "Squad value", s_kader: "Squad size", s_alter: "Average age", s_bedarf: "Need", s_abg: "Departures", karten: "Cards", tabelle: "Table",
-    treffer: "clubs", laden: "Loading clubs …", keine: "No clubs match this selection.", platz: "Pos.", pkt: "pts", kader: "Squad", wert: "Value", alter: "Avg. age", trainer: "Coach", abg: "Departures", bedarf_k: "Need", offen: "Open club page",
+    treffer: "clubs", laden: "Loading clubs …", keine: "No clubs match this selection.", platz: "Pos.", pkt: "pts", kader: "Squad", wert: "Value", alter: "Avg. age", trainer: "Head coach", abg: "Departures", bedarf_k: "Need", offen: "Open club page",
     tab_ueb: "Overview", tab_kader: "Squad", tab_spiele: "Matches", tab_transfers: "Transfers", tab_news: "News", tab_kontakte: "Contacts", schliessen: "Close", lade_seite: "Loading club page …", fehler: "Club not found.",
-    lage_h: "Table situation", form_h: "Form (recent matches)", tabelle_h: "Table", ampel_h: "Needs by position (club seeks)", abg_h: "Likely departures", sucht_h: "Reported needs", ger_h: "Transfer rumours", trainer_h: "Coach", seit: "since", wechsel: "coach change", alle_pos: "All", nur_kader: "Current squad only", alle_spieler: "All players on file",
+    lage_h: "Table situation", form_h: "Form (recent matches)", tabelle_h: "Table", ampel_h: "Needs by position (club seeks)", abg_h: "Likely departures", sucht_h: "Reported needs", ger_h: "Transfer rumours", trainer_h: "Head coach", seit: "since", wechsel: "coach change", alle_pos: "All", nur_kader: "Current squad only", alle_spieler: "All players on file",
     k_nr: "No.", k_name: "Player", k_pos: "Position", k_alter: "Age", k_nat: "Nat.", k_vertrag: "Contract", k_mw: "Market value", k_eins: "Apps", k_min: "Minutes", k_tore: "Goals", k_vorl: "Assists", k_form: "Form", k_status: "Status", verletzt: "injured", leihe: "on loan from", abgang: "departure", stamm: "regular starter", bis: "until",
     st_tm: "not in TM squad", st_sm: "not in SM squad", st_woanders: "elsewhere per TM", keine_spieler: "No players on file.", spiele_keine: "No matches on file.", kommend: "Upcoming", gespielt: "Recent matches", prognose: "Forecast", aufst: "Line-up", xg: "xG",
     zugaenge: "Arrivals", abgaenge: "Departures", keine_tr: "No transfers recorded this season.", ablfrei: "free transfer", keine_news: "No news in the last 30 days.", keine_ger: "No current rumours.", kontakte_locked: "Contacts are reserved for premium members.", kontakte_zahl: "contacts on file", keine_kontakte: "No contacts on file.", quelle: "Source", mio: "M €", tsd: "K €", wahrscheinlichkeit: "probability", heim: "H", ausw: "A", stand: "As of", zweite: "Reserve team", alias: "Also known as" }
@@ -9967,7 +9966,7 @@ function DbUmschalter({ tab, setTab }) {
 }
 
 /* Punkt 15 (08.10.2026): Spaltenwahl und gespeicherte Ansichten der Vereinsdatenbank (localStorage tw_vdbcols, tw_vdbviews); Merkliste uebergibt Ansichten ueber VDB_PENDING/DB_PENDING */
-const VDB_COLS = [["land", "Land", "Country"], ["liga", "Liga", "League"], ["platz", "Platz", "Position"], ["pkt", "Punkte", "Points"], ["kader", "Kader", "Squad"], ["wert", "Kaderwert", "Squad value"], ["alter", "\u00d8 Alter", "Avg. age"], ["trainer", "Trainer", "Coach"], ["bedarf", "Bedarf / Lage", "Need / situation"], ["abg", "Abg\u00e4nge", "Departures"]];
+const VDB_COLS = [["land", "Land", "Country"], ["liga", "Liga", "League"], ["platz", "Platz", "Position"], ["pkt", "Punkte", "Points"], ["kader", "Kader", "Squad"], ["wert", "Kaderwert", "Squad value"], ["alter", "\u00d8 Alter", "Avg. age"], ["trainer", "Trainer", "Head coach"], ["bedarf", "Bedarf / Lage", "Need / situation"], ["abg", "Abg\u00e4nge", "Departures"]];
 let VDB_PENDING = null; let DB_PENDING = null;
 function VereineDbVue({ onOpen }) {
   const h = React.createElement; const en = typeof LANG !== "undefined" && LANG === "en";
@@ -10594,7 +10593,7 @@ function twNlAuswahl(liste, spiele, ausschluss, en) {
     else if (c.k === "geruecht" || c.k === "bericht") { label = c.k === "bericht" ? (en ? "Transfer report" : "Transferbericht") : (en ? "Rumour" : "Gerücht"); text = nach && name ? (en ? name + " linked with " + clubName(nach) : name + ": " + clubName(nach) + " im Gespräch") : muTitel(it); logo = nach; }
     else if (c.k === "leistung" || c.k === "topleistung") { label = en ? "Top performance" : "Top-Leistung"; text = muTitel(it); portrait = true; }
     else if (c.k === "verletzung") { label = en ? "Injury" : "Verletzung"; const g = en ? (it.grund_en || twVerlText(it.grund, true)) : (it.grund_de || twVerlText(it.grund, false)); text = name && g ? (en ? name + " out: " + g : name + " fällt aus: " + g) : muTitel(it); portrait = true; }
-    else if (c.k === "trainer") { label = en ? "Coach" : "Trainer"; const tn = (it.player && typeof it.player === "object" && it.player.name) || ""; const tc = twNlClub(it.toClub || it.to_club || ""); const hd = String(it.headline || ""); const m = / übernimmt /.exec(hd); text = en && (!it.headline_en || it.headline_en === hd) ? (tn && tc ? tn + " takes charge at " + clubName(tc) : (m ? hd.slice(0, m.index) + " takes charge at " + hd.slice(m.index + m[0].length) : muTitel(it))) : muTitel(it); logo = tc || it.team || nach || twNlClub(muVon(it)); }
+    else if (c.k === "trainer") { label = en ? "Head coach" : "Trainer"; const tn = (it.player && typeof it.player === "object" && it.player.name) || ""; const tc = twNlClub(it.toClub || it.to_club || ""); const hd = String(it.headline || ""); const m = / übernimmt /.exec(hd); text = en && (!it.headline_en || it.headline_en === hd) ? (tn && tc ? tn + " takes charge at " + clubName(tc) : (m ? hd.slice(0, m.index) + " takes charge at " + hd.slice(m.index + m[0].length) : muTitel(it))) : muTitel(it); logo = tc || it.team || nach || twNlClub(muVon(it)); }
     else if (c.k === "vertrag_verlaengert") { label = en ? "Contract" : "Vertrag"; text = muTitel(it); portrait = true; logo = it.team || nach; }
     else { label = en ? "Comeback" : "Rückkehr"; text = muTitel(it); portrait = true; }
     return { key: "m" + it.id, kat: c.k, label, text, logo, portrait: portrait && name ? { pid: it.pid, name, verein: it.team || nach || "", verein2: twNlClub(muVon(it)), url: it.photo } : null, it };
@@ -11226,7 +11225,7 @@ function SpielerNewsListe({ pid, name, onWatch }) {
 }
 
 /* --- Punkt 4: Länder unter Vereinskontakte vollständig (Zuordnung Liga -> Land, Flaggen, englische Namen) --- */
-const TW_LAND_EN = { Deutschland: "Germany", England: "England", Spanien: "Spain", Italien: "Italy", Frankreich: "France", Niederlande: "Netherlands", Portugal: "Portugal", Belgien: "Belgium", "Österreich": "Austria", Schweiz: "Switzerland", "Türkei": "Türkiye", Schottland: "Scotland", "Dänemark": "Denmark", Norwegen: "Norway", Schweden: "Sweden", Polen: "Poland", Serbien: "Serbia", Kroatien: "Croatia", USA: "USA", China: "China", Griechenland: "Greece", Russland: "Russia", Ukraine: "Ukraine", Tschechien: "Czechia", Japan: "Japan", Brasilien: "Brazil", Argentinien: "Argentina", Mexiko: "Mexico", Zypern: "Cyprus", "Südkorea": "South Korea", Israel: "Israel", Ungarn: "Hungary", Slowakei: "Slovakia", Bulgarien: "Bulgaria", "Saudi-Arabien": "Saudi Arabia", "Rumänien": "Romania", Finnland: "Finland", Island: "Iceland", Irland: "Ireland", Wales: "Wales", Nordirland: "Northern Ireland", Slowenien: "Slovenia", "Bosnien-Herzegowina": "Bosnia and Herzegovina", Albanien: "Albania", Kosovo: "Kosovo", Nordmazedonien: "North Macedonia", Georgien: "Georgia", Kasachstan: "Kazakhstan", Aserbaidschan: "Azerbaijan", Belarus: "Belarus", Moldau: "Moldova", Montenegro: "Montenegro", Litauen: "Lithuania", Lettland: "Latvia", Estland: "Estonia", Luxemburg: "Luxembourg", Malta: "Malta", Australien: "Australia", Katar: "Qatar", "Vereinigte Arabische Emirate": "United Arab Emirates", "Ägypten": "Egypt", Marokko: "Morocco", "Südafrika": "South Africa", Kanada: "Canada", Chile: "Chile", Kolumbien: "Colombia", Uruguay: "Uruguay", Paraguay: "Paraguay", Peru: "Peru", Ecuador: "Ecuador", Indien: "India", Thailand: "Thailand", Indonesien: "Indonesia", Iran: "Iran", Sonstige: "Other" };
+const TW_LAND_EN = { Deutschland: "Germany", England: "England", Spanien: "Spain", Italien: "Italy", Frankreich: "France", Niederlande: "Netherlands", Portugal: "Portugal", Belgien: "Belgium", "Österreich": "Austria", Schweiz: "Switzerland", "Türkei": "Turkey", Schottland: "Scotland", "Dänemark": "Denmark", Norwegen: "Norway", Schweden: "Sweden", Polen: "Poland", Serbien: "Serbia", Kroatien: "Croatia", USA: "USA", China: "China", Griechenland: "Greece", Russland: "Russia", Ukraine: "Ukraine", Tschechien: "Czechia", Japan: "Japan", Brasilien: "Brazil", Argentinien: "Argentina", Mexiko: "Mexico", Zypern: "Cyprus", "Südkorea": "South Korea", Israel: "Israel", Ungarn: "Hungary", Slowakei: "Slovakia", Bulgarien: "Bulgaria", "Saudi-Arabien": "Saudi Arabia", "Rumänien": "Romania", Finnland: "Finland", Island: "Iceland", Irland: "Ireland", Wales: "Wales", Nordirland: "Northern Ireland", Slowenien: "Slovenia", "Bosnien-Herzegowina": "Bosnia and Herzegovina", Albanien: "Albania", Kosovo: "Kosovo", Nordmazedonien: "North Macedonia", Georgien: "Georgia", Kasachstan: "Kazakhstan", Aserbaidschan: "Azerbaijan", Belarus: "Belarus", Moldau: "Moldova", Montenegro: "Montenegro", Litauen: "Lithuania", Lettland: "Latvia", Estland: "Estonia", Luxemburg: "Luxembourg", Malta: "Malta", Australien: "Australia", Katar: "Qatar", "Vereinigte Arabische Emirate": "United Arab Emirates", "Ägypten": "Egypt", Marokko: "Morocco", "Südafrika": "South Africa", Kanada: "Canada", Chile: "Chile", Kolumbien: "Colombia", Uruguay: "Uruguay", Paraguay: "Paraguay", Peru: "Peru", Ecuador: "Ecuador", Indien: "India", Thailand: "Thailand", Indonesien: "Indonesia", Iran: "Iran", Sonstige: "Other" };
 const TW_FLAGGEN_PLUS = { Zypern: "cy", "Südkorea": "kr", Israel: "il", Ungarn: "hu", Slowakei: "sk", Bulgarien: "bg", "Saudi-Arabien": "sa", "Rumänien": "ro", Finnland: "fi", Island: "is", Irland: "ie", Wales: "gb-wls", Nordirland: "gb-nir", Slowenien: "si", "Bosnien-Herzegowina": "ba", Albanien: "al", Kosovo: "xk", Nordmazedonien: "mk", Georgien: "ge", Kasachstan: "kz", Aserbaidschan: "az", Belarus: "by", Moldau: "md", Montenegro: "me", Litauen: "lt", Lettland: "lv", Estland: "ee", Luxemburg: "lu", Malta: "mt", Australien: "au", Katar: "qa", "Vereinigte Arabische Emirate": "ae", "Ägypten": "eg", Marokko: "ma", "Südafrika": "za", Kanada: "ca", Chile: "cl", Kolumbien: "co", Uruguay: "uy", Paraguay: "py", Peru: "pe", Ecuador: "ec", Indien: "in", Thailand: "th", Indonesien: "id", Iran: "ir" };
 try { Object.keys(TW_FLAGGEN_PLUS).forEach(k => { if (!FLAGGEN[k]) FLAGGEN[k] = TW_FLAGGEN_PLUS[k]; }); } catch (e) { }
 function twLandVonLiga(lg) { const l = String(lg || "").trim(); if (!l) return ""; const x = LAND_LIGEN.find(z => z.ligen.indexOf(l) >= 0); if (x) return x.de; if (LIGA_LAND[l]) return LIGA_LAND[l]; const m = /\(([^)]+)\)\s*$/.exec(l); return m ? m[1].trim() : ""; }
