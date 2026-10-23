@@ -1022,29 +1022,31 @@ function sendPing(e, extra) {
 }
 const PERF_TAGS = ["Abschluss", "Chancenverwertung", "Chancenkreation", "Passspiel", "Ballsicherheit", "Spielaufbau", "Zweikampf", "Defensive Stabilität", "Stellungsspiel", "Tempo/Dribbling", "Pressing/Balleroberung", "Kopfball/Luftduelle", "Standards", "Strafraumpräsenz", "Paraden/Reflexe", "Disziplin", "Konzentration", "Effizienz"];
 function scoreBand(s) { return s >= 85 ? "hi" : s >= 70 ? "gut" : s >= 55 ? "mittel" : "schwach"; } function scoreBg(s) { return "var(--sc-" + scoreBand(s) + "-bg)"; } function scoreRand(s) { return "var(--sc-" + scoreBand(s) + "-rand)"; } function scoreTxt(s) { return "var(--sc-" + scoreBand(s) + "-text)"; } function scoreColor(s) { return scoreTxt(s); }
-const STRIPE_LINK = "https://buy.stripe.com/cNieVd6mObouaUZ9XMgIo03"; // Stripe: TransferWire Standard 49 EUR/Monat (alter 60er-Link abgeloest)
-const STRIPE_LINK_YEAR = ""; // Stripe: TransferWire Jahres-Abo 490/990 EUR/Jahr — Link eintragen, sobald in Stripe angelegt; Buttons erscheinen dann automatisch
+const STRIPE_LINK = ""; // 23.10.2026: Tarifmodell Free/Pro/Enterprise - die alten Standard-/Premium-Links (49/99/349 EUR) gelten nicht mehr
+const STRIPE_LINK_YEAR = "";
 const STRIPE_PORTAL = "https://billing.stripe.com/p/login/cNi14n6mO2RY3sxfi6gIo00"; // Stripe-Kundenportal (Kündigung/Zahlungsmethoden)
-const STRIPE_LINK_STANDARD = "https://buy.stripe.com/cNieVd6mObouaUZ9XMgIo03"; // Stripe: TransferWire Standard 49 EUR/Monat
-const STRIPE_LINK_PREMIUM = "https://buy.stripe.com/dRm7sL6mOgIO6EJgmagIo02";
-const STRIPE_LINK_STANDARD_YEAR = "https://buy.stripe.com/cNi5kD4eG3W2gfj4DsgIo04"; // 490 EUR/Jahr (verifiziert 06.09.2026)
-const STRIPE_LINK_PREMIUM_YEAR = "https://buy.stripe.com/bJe6oHcLc9gm1kp1rggIo08"; // 990 EUR/Jahr
-const STRIPE_LINK_ENTERPRISE = "https://buy.stripe.com/dRmaEXh1s8ci8MR8TIgIo0a"; // 349 EUR/Monat, 5 Nutzer (Festpreis)
-const STRIPE_LINK_ENTERPRISE_YEAR = "https://buy.stripe.com/7sY7sLdPg8ciaUZb1QgIo09"; // 3490 EUR/Jahr, 5 Nutzer (Festpreis)
-const ENTERPRISE_SEATS_ADJUSTABLE = false; // auf true, sobald die Enterprise-Links ein Staffelmodell mit anpassbarer Menge haben
+// Neue Payment-Links (legt der Boss in Stripe an). Leer = Bezahlknopf meldet "wird eingerichtet".
+const STRIPE_LINK_PRO = "";              // Pro 49 EUR/Monat
+const STRIPE_LINK_PRO_YEAR = "";         // Pro 490 EUR/Jahr
+const STRIPE_LINK_ENTERPRISE = "";       // Enterprise 169 EUR/Monat fuer 5 Nutzer + 20 EUR/Monat je weiterem Nutzer
+const STRIPE_LINK_ENTERPRISE_YEAR = "";  // Enterprise 1.690 EUR/Jahr fuer 5 Nutzer + 200 EUR/Jahr je weiterem Nutzer
+const ENTERPRISE_SEATS_ADJUSTABLE = true;
+const TW_TARIF = { pro: { m: 49, j: 490 }, ent: { m: 169, j: 1690, inkl: 5, extraM: 20, extraJ: 200, max: 50 } };
+function twEntNutzer(seats) { return Math.min(TW_TARIF.ent.max, Math.max(TW_TARIF.ent.inkl, Number(seats) || TW_TARIF.ent.inkl)); }
+function twEntPreis(seats, jahr) { const n = twEntNutzer(seats); return (jahr ? TW_TARIF.ent.j : TW_TARIF.ent.m) + (n - TW_TARIF.ent.inkl) * (jahr ? TW_TARIF.ent.extraJ : TW_TARIF.ent.extraM); }
 function stripeCheckoutUrl(plan, abrech, seats, email) {
   var jahr = abrech === "jahr";
-  var link = plan === "enterprise" ? (jahr ? STRIPE_LINK_ENTERPRISE_YEAR : STRIPE_LINK_ENTERPRISE)
-           : plan === "premium" ? (jahr ? STRIPE_LINK_PREMIUM_YEAR : STRIPE_LINK_PREMIUM)
-           : (jahr ? STRIPE_LINK_STANDARD_YEAR : STRIPE_LINK_STANDARD);
-  var n = plan === "enterprise" ? (ENTERPRISE_SEATS_ADJUSTABLE ? Math.min(50, Math.max(5, Number(seats) || 5)) : 5) : 1;
-  var ref = (plan === "premium" ? "premium" : plan === "enterprise" ? "enterprise" : "standard") + "-n" + n + "-" + (jahr ? "jahr" : "monat");
+  var ent = plan === "enterprise";
+  var link = ent ? (jahr ? STRIPE_LINK_ENTERPRISE_YEAR : STRIPE_LINK_ENTERPRISE) : (jahr ? STRIPE_LINK_PRO_YEAR : STRIPE_LINK_PRO);
+  if (!link) return "";
+  var n = ent ? twEntNutzer(seats) : 1;
+  var ref = (ent ? "enterprise" : "pro") + "-n" + n + "-" + (jahr ? "jahr" : "monat");
   var q = "client_reference_id=" + ref + (email ? "&prefilled_email=" + encodeURIComponent(email) : "");
   return link + (link.indexOf("?") >= 0 ? "&" : "?") + q;
-} // Stripe: TransferWire Premium 99 EUR/Monat
-const PRICE_STANDARD = "49";
-const PRICE_PREMIUM = "99";
-const isPremiumPlan = p => p === "premium";
+}
+const PRICE_STANDARD = "0";
+const PRICE_PREMIUM = "49";
+const isPremiumPlan = p => p === "premium" || p === "pro" || p === "enterprise";
 const TEST_MS = 3 * 24 * 60 * 60 * 1000;
 const store = (() => {
   try {
@@ -1108,7 +1110,7 @@ const kontoAusAntwort = (k, alt) => {
     email: k.email || (alt && alt.email) || "",
     code: sitz,
     sitzung: sitz,
-    plan: p === "test" ? "test" : (p === "premium" || p === "enterprise") ? "premium" : "abo",
+    plan: (p === "premium" || p === "pro" || p === "enterprise") ? "premium" : "free", plan_roh: p,
     start: k.test_start ? (Date.parse(k.test_start) || Date.now()) : ((alt && alt.start) || Date.now()),
     gueltig_bis: k.gueltig_bis || "",
     name: k.name || "",
@@ -1303,10 +1305,10 @@ const EN_MAP = {
 "Hinweise durchsuchen: Spieler, Verein, Position, Stichwort \u2026": "Search tips: player, club, position, keyword \u2026",
 "z. B. \u201eAus dem Umfeld von \u2026 h\u00f6re ich, dass \u2026\u201c \u2014 je konkreter (Verein, Position, Zeitraum), desto n\u00fctzlicher.": "e.g. \u201cFrom the circle around \u2026 I hear that \u2026\u201d \u2014 the more specific (club, position, timeframe), the more useful.",
 "Networking": "Networking",
-"Kontakte finden, Deals anschieben: Suche Zug\u00e4nge zu Vereinen, biete Spieler an oder hol dir Hilfe aus dem Netzwerk \u2014 exklusiv f\u00fcr Premium-Mitglieder.": "Find contacts, push deals: look for access to clubs, offer players or get help from the network \u2014 exclusively for Premium members.",
-"Nur im Premium-Abo": "Premium plan only",
+"Kontakte finden, Deals anschieben: Suche Zug\u00e4nge zu Vereinen, biete Spieler an oder hol dir Hilfe aus dem Netzwerk \u2014 exklusiv f\u00fcr Pro-Mitglieder.": "Find contacts, push deals: look for access to clubs, offer players or get help from the network \u2014 exclusively for Pro members.",
+"Nur mit Pro": "Pro only",
 "Networking verbindet dich direkt mit Vermittlern, Scouts und Vereinsmitarbeitern \u2014 Fragen und Angebote posten, Kontakte kn\u00fcpfen, Deals anschieben.": "Networking connects you directly with agents, scouts and club staff \u2014 post questions and offers, make contacts, push deals.",
-"Premium freischalten \u2014 99 \u20ac/Monat": "Unlock Premium \u2014 \u20ac99/month",
+"Pro freischalten \u2014 49 \u20ac/Monat": "Unlock Pro \u2014 \u20ac49/month",
 "Frage / Angebot": "Question / offer",
 "Anfrage ver\u00f6ffentlichen": "Publish request",
 "Anfragen durchsuchen: Position, Verein, Land, Stichwort \u2026": "Search requests: position, club, country, keyword \u2026",
@@ -1542,7 +1544,7 @@ window.twDossierPdf = async function (x, vorhanden) {
     meldung(L("Dossier heruntergeladen", "Dossier downloaded"));
     return { ok: true, datei, groesse: blob.size };
   } catch (e) {
-    meldung(String(e && e.message) === "premium" ? L("Das PDF-Dossier gehört zu Premium", "The PDF dossier is a Premium feature") : L("Dossier konnte nicht erstellt werden", "Could not create the dossier"));
+    meldung(String(e && e.message) === "premium" ? L("Das PDF-Dossier ist gerade nicht verfügbar – bitte neu anmelden", "The PDF dossier is not available right now – please sign in again") : L("Dossier konnte nicht erstellt werden", "Could not create the dossier"));
     return { ok: false, fehler: String(e && e.message) };
   }
 };
@@ -1691,7 +1693,7 @@ const I18N = {
     l_trial: "3-Tage-Test",
     l_trial_txt: "Voller Zugriff auf Feed und „Verein sucht“ für 3 Tage. Endet automatisch — keine Zahlungsdaten, keine Kündigung nötig.",
     l_trial_btn: "Jetzt gratis testen",
-    yr_btn: "Jahres-Abo — 490 €/Jahr (Standard) · 990 €/Jahr (Premium) · 2 Monate geschenkt",
+    yr_btn: "Jahres-Abo — Pro 490 €/Jahr · 2 Monate geschenkt",
     tour_skip: "Überspringen",
     tour_next: "Weiter",
     tour_go: "Los geht’s!",
@@ -1711,8 +1713,8 @@ const I18N = {
     ticker_fallback: "TransferWire — tagesaktuelle Transfermeldungen aus Europa, USA und China",
     back: "Zurück",
     back_tw: "Zurück zu TransferWire",
-    r_title: "3 Tage gratis testen",
-    r_sub: "Lege E-Mail und Passwort fest — wir schicken dir sofort einen Bestätigungscode, danach hast du vollen Zugriff. Der Test endet nach 3 Tagen automatisch — keine Zahlungsdaten nötig.",
+    r_title: "Kostenlos registrieren",
+    r_sub: "Lege E-Mail und Passwort fest — wir schicken dir sofort einen Bestätigungscode. Danach nutzt du TransferWire Free dauerhaft kostenlos — keine Zahlungsdaten nötig. Pro kannst du jederzeit dazubuchen.",
     f_name: "Name",
     f_name_ph: "Vor- und Nachname",
     f_email: "E-Mail",
@@ -1722,7 +1724,7 @@ const I18N = {
     role_club: "Verein",
     role_other: "Sonstiges",
     r_consent: "Ich willige ein, dass mir TransferWire (RATH ENTERPRISES) Werbe-E-Mails zu Produkt-Updates und Angeboten sendet. Die Einwilligung kann ich jederzeit per E-Mail an info@transferwire.de widerrufen. ",
-    r_consent_b: "Diese Einwilligung ist Voraussetzung für den kostenlosen Test.",
+    r_consent_b: "Diese Einwilligung ist Voraussetzung für das kostenlose Konto.",
     legal_pre: "Ich habe die ",
     legal_and: " und die ",
     legal_post: " gelesen und akzeptiere sie.",
@@ -1730,13 +1732,13 @@ const I18N = {
     privacy_link: "Datenschutzerklärung",
     e_name: "Bitte Namen angeben.",
     e_email: "Bitte gültige E-Mail-Adresse angeben.",
-    e_consent: "Für den Gratis-Test ist die Einwilligung in Werbe-E-Mails erforderlich.",
+    e_consent: "Für das kostenlose Konto ist die Einwilligung in Werbe-E-Mails erforderlich.",
     e_legal: "Bitte AGB und Datenschutzerklärung bestätigen.",
     e_both: "Bitte beide Bestätigungen setzen.",
     e_server: "Serverfehler — bitte erneut versuchen.",
     e_conn: "Verbindung fehlgeschlagen — bitte erneut versuchen.",
-    e_test_used: "Für diese E-Mail-Adresse wurde der Gratis-Test bereits genutzt. Sichere dir jetzt das Abo für vollen Zugriff.",
-    trial_left: "Gratis-Test endet in",
+    e_test_used: "Für diese E-Mail-Adresse gibt es bereits ein Konto. Melde dich einfach an.",
+    trial_left: "Free",
     trial_cta: "Jetzt Abo sichern",
     login_btn: "Anmelden",
     login_title: "Anmelden",
@@ -1959,14 +1961,14 @@ const I18N = {
     set_digest: "Morgen-Briefing per E-Mail",
     set_watch_count: "Beobachtungen",
     set_watch_hint: "Verwalten über den Tab „Merkliste“.",
-    r_btn: "Test jetzt starten",
-    r_busy: "Wird gestartet …",
-    s_title: "TransferWire Abo",
-    s_sub: "Standard 49 € · Premium 99 € · Enterprise 349 € pro Monat · monatlich kündbar über die Website. Zahlung per Karte, Apple Pay, Google Pay oder PayPal — sicher über Stripe.",
+    r_btn: "Kostenloses Konto anlegen",
+    r_busy: "Wird angelegt …",
+    s_title: "TransferWire Pro & Enterprise",
+    s_sub: "Free bleibt kostenlos. Pro 49 € pro Monat oder 490 € pro Jahr · Enterprise 169 € pro Monat oder 1.690 € pro Jahr für 5 Nutzer, jeder weitere +20 € pro Monat. Zahlung per Karte, Apple Pay, Google Pay oder PayPal — sicher über Stripe.",
     s_section: "Konto anlegen & Abo abschließen",
     s_sofort: "Ich verlange die sofortige Bereitstellung des Dienstes nach Freischaltung und weiß, dass mein Widerrufsrecht damit erlischt.",
     s_pay: "Jetzt zahlungspflichtig abonnieren — 49 €/Monat",
-    s_pay_note: "Karte, Apple Pay, Google Pay oder PayPal · sichere Zahlung über Stripe · automatische monatliche Abbuchung · monatlich kündbar",
+    s_pay_note: "Karte, Apple Pay, Google Pay oder PayPal · sichere Zahlung über Stripe · Monatsabo monatlich kündbar, Jahresabo zum Ende der Laufzeit",
     s_msg: "Weiter geht es im sicheren Stripe-Fenster. Nach erfolgreicher Zahlung erhältst du deinen Zugangscode per E-Mail. Damit meldest du dich einmalig an (unten oder unter „Anmelden“) — danach nur noch mit E-Mail und Passwort.",
     s_code_title: "Zugangscode erhalten? Erste Anmeldung",
     f_code: "Zugangscode",
@@ -1988,9 +1990,9 @@ const I18N = {
     c_btn: "Jetzt kündigen",
     c_busy: "Wird gesendet …",
     e_c_email: "Bitte die E-Mail-Adresse deines Kontos angeben.",
-    x_title: "Dein Testzeitraum ist abgelaufen",
-    x_txt: "Sichere dir mit dem TransferWire-Abo unbegrenzten Zugriff auf alle Meldungen und die „Verein sucht“-Ansicht — 49 € pro Monat, jederzeit über die Website kündbar.",
-    x_btn: "Abo abschließen — ab 49 €/Monat",
+    x_title: "Dein Zugang ist nicht aktiv",
+    x_txt: "Bitte melde dich neu an. Free ist dauerhaft kostenlos; mit Pro (49 € pro Monat) schaltest du zusätzlich Verein sucht, Vereinskontakte, Netzwerk & Community, Workspace, Scouting und Akquise-Radar frei.",
+    x_btn: "Pro ansehen — 49 €/Monat",
     logout: "Abmelden",
     st_title: "Einstellungen",
     st_account: "Account",
@@ -1998,8 +2000,8 @@ const I18N = {
     st_name: "Name",
     st_role: "Rolle",
     st_plan: "Plan",
-    st_plan_test: "Testzugang (3 Tage)",
-    st_plan_abo: "TransferWire Standard — 49 €/Monat",
+    st_plan_test: "Free (kostenlos)",
+    st_plan_abo: "TransferWire Free — kostenlos",
     st_abos: "Abos",
     st_test_a: "Dein kostenloser Test läuft bis ",
     st_test_b: " und endet automatisch. Sichere dir jetzt unbegrenzten Zugriff.",
@@ -2046,7 +2048,7 @@ const I18N = {
     l_trial: "3-day trial",
     l_trial_txt: "Full access to the feed and the “Club seeks” view for 3 days. Ends automatically — no payment details, no cancellation needed.",
     l_trial_btn: "Start free trial",
-    yr_btn: "Annual plan — €490/year (Standard) · €990/year (Premium) · 2 months free",
+    yr_btn: "Annual plan — Pro €490/year · 2 months free",
     tour_skip: "Skip",
     tour_next: "Next",
     tour_go: "Let’s go!",
@@ -2066,8 +2068,8 @@ const I18N = {
     ticker_fallback: "TransferWire — daily transfer news from Europe, the USA and China",
     back: "Back",
     back_tw: "Back to TransferWire",
-    r_title: "Try 3 days for free",
-    r_sub: "Choose your e-mail and password — we send you a confirmation code right away, then you have full access. The trial ends automatically after 3 days — no payment details required.",
+    r_title: "Sign up for free",
+    r_sub: "Choose your e-mail and password — we send you a confirmation code right away. Then you use TransferWire Free for free, forever — no payment details required. You can add Pro any time.",
     f_name: "Name",
     f_name_ph: "First and last name",
     f_email: "E-mail",
@@ -2077,7 +2079,7 @@ const I18N = {
     role_club: "Club",
     role_other: "Other",
     r_consent: "I agree that TransferWire (RATH ENTERPRISES) may send me marketing e-mails about product updates and offers. I can revoke this consent at any time by e-mailing info@transferwire.de. ",
-    r_consent_b: "This consent is required for the free trial.",
+    r_consent_b: "This consent is required for the free account.",
     legal_pre: "I have read and accept the ",
     legal_and: " and the ",
     legal_post: ".",
@@ -2085,13 +2087,13 @@ const I18N = {
     privacy_link: "Privacy Policy",
     e_name: "Please enter your name.",
     e_email: "Please enter a valid e-mail address.",
-    e_consent: "The free trial requires consent to marketing e-mails.",
+    e_consent: "The free account requires consent to marketing e-mails.",
     e_legal: "Please confirm the Terms and Privacy Policy.",
     e_both: "Please tick both confirmations.",
     e_server: "Server error — please try again.",
     e_conn: "Connection failed — please try again.",
-    e_test_used: "The free trial has already been used for this e-mail address. Subscribe for full access.",
-    trial_left: "Free trial ends in",
+    e_test_used: "There is already an account for this e-mail address. Just log in.",
+    trial_left: "Free",
     trial_cta: "Get the subscription",
     login_btn: "Log in",
     login_title: "Log in",
@@ -2314,14 +2316,14 @@ const I18N = {
     set_digest: "Morning briefing by e-mail",
     set_watch_count: "watches",
     set_watch_hint: "Manage them in the \"Watchlist\" tab.",
-    r_btn: "Start trial now",
-    r_busy: "Starting …",
+    r_btn: "Create free account",
+    r_busy: "Creating …",
     s_title: "TransferWire subscription",
-    s_sub: "Standard €49 · Premium €99 · Enterprise €349 per month · cancel monthly via the website. Payment by card, Apple Pay, Google Pay or PayPal — secure via Stripe.",
+    s_sub: "Free stays free. Pro €49 per month or €490 per year · Enterprise €169 per month or €1,690 per year for 5 seats, each additional +€20 per month. Payment by card, Apple Pay, Google Pay or PayPal — secure via Stripe.",
     s_section: "Create account & subscribe",
     s_sofort: "I request immediate provision of the service after activation and acknowledge that my right of withdrawal expires once the service has been provided.",
     s_pay: "Subscribe now — €49/month (obligation to pay)",
-    s_pay_note: "Card, Apple Pay, Google Pay or PayPal · secure payment via Stripe · automatic monthly billing · cancel monthly",
+    s_pay_note: "Card, Apple Pay, Google Pay or PayPal · secure payment via Stripe · monthly plans cancel monthly, yearly plans at the end of the term",
     s_msg: "Continue in the secure Stripe window. After successful payment you will receive your access code by e-mail. Use it once to sign in (below or under “Log in”) — afterwards you only need your e-mail and password.",
     s_code_title: "Received your access code? First sign-in",
     f_code: "Access code",
@@ -2343,9 +2345,9 @@ const I18N = {
     c_btn: "Cancel now",
     c_busy: "Sending …",
     e_c_email: "Please enter the e-mail address of your account.",
-    x_title: "Your trial has ended",
-    x_txt: "Get unlimited access to all news and the “Club seeks” view with the TransferWire subscription — €49 per month, cancel anytime via the website.",
-    x_btn: "Subscribe — from €49/month",
+    x_title: "Your access is not active",
+    x_txt: "Please sign in again. Free is free forever; with Pro (€49 per month) you also unlock Club seeks, club contacts, network & community, workspace, scouting and the acquisition radar.",
+    x_btn: "See Pro — €49/month",
     logout: "Log out",
     st_title: "Settings",
     st_account: "Account",
@@ -2353,8 +2355,8 @@ const I18N = {
     st_name: "Name",
     st_role: "Role",
     st_plan: "Plan",
-    st_plan_test: "Trial access (3 days)",
-    st_plan_abo: "TransferWire Standard — €49/month",
+    st_plan_test: "Free (no charge)",
+    st_plan_abo: "TransferWire Free — no charge",
     st_abos: "Subscription",
     st_test_a: "Your free trial runs until ",
     st_test_b: " and ends automatically. Get unlimited access now.",
@@ -4464,7 +4466,11 @@ function TwChipLeiste({ aktiv, children }) {
   document.head.appendChild(st);
 })();
 function twIstPremium() { try { const a = (typeof loadAccount === "function" ? loadAccount() : JSON.parse(localStorage.getItem("tw_account") || "null")) || {}; return isPremiumPlan(a.plan); } catch (e) { return false; } }
-function twPremiumHinweis() {
+function twZuPro(abrech) {   // 23.10.2026: zur Pro-Buchung (Abo-Seite der App)
+  try { history.replaceState(null, "", location.pathname + location.search + "#abo-pro-" + (abrech === "jahr" ? "jahr" : "monat")); } catch (e) { }
+  if (typeof window.__twSeite === "function") window.__twSeite("subscribe"); else { try { location.reload(); } catch (e) { } }
+}
+function twPremiumHinweis(text) {
   const en = LANG === "en";
   try {
     const alt = document.getElementById("tw-premium-hinweis"); if (alt) alt.remove();
@@ -4473,27 +4479,29 @@ function twPremiumHinweis() {
     const box = document.createElement("div"); box.setAttribute("role", "alertdialog"); box.setAttribute("aria-modal", "true");
     box.style.cssText = "background:var(--karte);color:var(--t1);border:1px solid var(--linie);border-radius:16px;max-width:390px;width:100%;padding:22px 22px 18px;box-shadow:0 24px 70px rgba(0,0,0,.45);font-family:Inter,system-ui,sans-serif;text-align:center";
     const knopf = "cursor:pointer;min-height:42px;padding:0 16px;border-radius:10px;font:800 13px Inter,system-ui,sans-serif;";
+    const esc = (x) => String(x == null ? "" : x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const inhalt = text || (en ? "This feature is part of Pro: Club seeks, club contacts, network & community, workspace (watchlist, tracking, alerts), scouting and the acquisition radar \u2014 \u20ac49 per month or \u20ac490 per year." : "Diese Funktion geh\u00f6rt zu Pro: Verein sucht, Vereinskontakte, Netzwerk & Community, Workspace (Merkliste, Beobachten, Alerts), Scouting und Akquise-Radar \u2014 49\u00a0\u20ac im Monat oder 490\u00a0\u20ac im Jahr.");
     box.innerHTML = '<div style="width:48px;height:48px;border-radius:99px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;background:var(--karte2);border:1px solid var(--linie);color:var(--t1)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg></div>'
-      + '<div style="font-weight:800;font-size:17px;margin-bottom:6px">' + (en ? "Only available with Premium" : "Nur im Premium-Abo verf\u00fcgbar") + '</div>'
-      + '<div style="font-size:13.5px;line-height:1.55;color:var(--t2);margin-bottom:16px">' + (en ? "PDF exports (player dossier, performance report, match analysis) are included in the Premium plan." : "PDF-Exporte (Spielerdossier, Performance-Bericht, Spielanalyse) sind im Premium-Abo enthalten.") + '</div>'
-      + '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button type="button" data-a="zu" style="' + knopf + 'border:1px solid var(--linie);background:var(--karte);color:var(--t1)">' + (en ? "OK" : "Verstanden") + '</button><button type="button" data-a="abo" style="' + knopf + 'border:1px solid #B8913F;background-color:#C8A355;background-image:linear-gradient(135deg,#EFD489 0%,#C8A355 48%,#A9822F 100%);color:#1A1306">' + (en ? "Upgrade to Premium" : "Zum Premium-Abo") + '</button></div>';
+      + '<div style="font-weight:800;font-size:17px;margin-bottom:6px">' + (en ? "Only available with Pro" : "Nur mit Pro verf\u00fcgbar") + '</div>'
+      + '<div style="font-size:13.5px;line-height:1.55;color:var(--t2);margin-bottom:16px">' + esc(inhalt) + '</div>'
+      + '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button type="button" data-a="zu" style="' + knopf + 'border:1px solid var(--linie);background:var(--karte);color:var(--t1)">' + (en ? "OK" : "Verstanden") + '</button><button type="button" data-a="abo" style="' + knopf + 'border:1px solid #B8913F;background-color:#C8A355;background-image:linear-gradient(135deg,#EFD489 0%,#C8A355 48%,#A9822F 100%);color:#1A1306">' + (en ? "Get Pro" : "Pro ansehen") + '</button></div>';
     w.appendChild(box); document.body.appendChild(w);
     const k = (e) => { if (e.key === "Escape") { e.stopImmediatePropagation(); e.stopPropagation(); zu(); } };
     const zu = () => { try { document.removeEventListener("keydown", k, true); w.remove(); } catch (e) { } };
     document.addEventListener("keydown", k, true);
     w.addEventListener("click", (e) => { if (e.target === w) zu(); });
     box.querySelector('[data-a="zu"]').addEventListener("click", zu);
-    box.querySelector('[data-a="abo"]').addEventListener("click", () => { zu(); const b = document.querySelector(".tw-sn-upgrade"); if (b) b.click(); else { try { location.hash = "abo"; location.reload(); } catch (e) { } } });
+    box.querySelector('[data-a="abo"]').addEventListener("click", () => { zu(); twZuPro("monat"); });
     setTimeout(() => { try { box.querySelector('[data-a="zu"]').focus(); } catch (e) { } }, 30);
-  } catch (e) { try { window.alert(en ? "Only available with Premium." : "Nur im Premium-Abo verf\u00fcgbar."); } catch (e2) { } }
+  } catch (e) { try { window.alert(en ? "Only available with Pro." : "Nur mit Pro verf\u00fcgbar."); } catch (e2) { } }
 }
 function PdfKnopf({ onClick, laeuft, label, primaer, kompakt, titel }) {
-  const h = React.createElement; const en = LANG === "en"; const prem = twIstPremium(); const voll = prem && primaer;
+  const h = React.createElement; const en = LANG === "en"; const prem = true; /* 23.10.2026: PDF-Dossiers sind in Free enthalten */ const voll = prem && primaer;
   const sz = kompakt ? 13 : 14;
   const icon = prem
     ? h("svg", { width: sz, height: sz, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" }, h("path", { d: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" }), h("path", { d: "M14 2v6h6" }), h("path", { d: "M12 18v-6M9 15l3 3 3-3" }))
     : h("svg", { width: sz, height: sz, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" }, h("rect", { x: 4, y: 11, width: 16, height: 10, rx: 2 }), h("path", { d: "M8 11V7a4 4 0 0 1 8 0v4" }));
-  const hinweis = en ? "Premium plan only" : "Nur im Premium-Abo verf\u00fcgbar";
+  const hinweis = en ? "Pro plan only" : "Nur mit Pro verf\u00fcgbar";
   return h("button", { type: "button", className: "tw-pdf-knopf" + (prem ? "" : " gesperrt"), onClick: (e) => { e.stopPropagation(); if (!prem) { twPremiumHinweis(); return; } if (!laeuft && typeof onClick === "function") onClick(); }, title: prem ? (titel || label) : hinweis, "aria-label": prem ? label : label + " \u2013 " + hinweis,
     style: { cursor: "pointer", minHeight: kompakt ? 36 : 40, display: "inline-flex", alignItems: "center", gap: 7, padding: kompakt ? "0 11px" : "0 14px", borderRadius: 10, border: voll ? "none" : "1px solid " + HAIR, background: voll ? "var(--gold)" : "var(--karte)", color: voll ? "var(--gold-schrift)" : "var(--t1)", fontFamily: FONT_BODY, fontSize: kompakt ? 12.5 : 13, fontWeight: 800, whiteSpace: "nowrap", opacity: laeuft ? .75 : 1, flexShrink: 0 } },
     icon, laeuft ? (en ? "Creating PDF \u2026" : "PDF wird erstellt \u2026") : label);
@@ -4748,7 +4756,7 @@ window.twPerformancePdf = async function (x, det, spiele) {
     if (!r.ok || (r.headers.get("content-type") || "").indexOf("application/pdf") < 0) { let f = ""; try { f = ((await r.json()) || {}).fehler || ""; } catch (e) { } throw new Error(f || ("HTTP " + r.status)); }
     const blob = await r.blob(); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = datei; a.rel = "noopener"; a.style.display = "none"; document.body.appendChild(a); a.click(); setTimeout(() => { try { URL.revokeObjectURL(url); a.remove(); } catch (e) { } }, 10000);
     meldung(L("Performance-PDF heruntergeladen", "Performance PDF downloaded"));
-  } catch (e) { meldung(String(e && e.message) === "premium" ? L("Der PDF-Export gehört zu Premium", "PDF export is a Premium feature") : L("PDF konnte nicht erstellt werden", "Could not create the PDF")); }
+  } catch (e) { meldung(String(e && e.message) === "premium" ? L("Der PDF-Export ist gerade nicht verfügbar – bitte neu anmelden", "PDF export is not available right now – please sign in again") : L("PDF konnte nicht erstellt werden", "Could not create the PDF")); }
 };
 
 function GerVue({ alle, onWatch, onOpen, updatedAt, watch, onSide, apply }) {
@@ -6790,18 +6798,18 @@ function AgbContent() {
       margin: 0
     }
   }, "TransferWire stellt tagesaktuell aufbereitete Fußball-Transfermeldungen und Vereinsbedarfe als Online-Dienst bereit. Die Inhalte werden redaktionell aus öffentlich zugänglichen Quellen zusammengefasst; eine Gewähr für Vollständigkeit und Richtigkeit wird nicht übernommen.")), /*#__PURE__*/React.createElement(LegalSection, {
-    title: "3. Kostenloser Testzugang"
+    title: "3. Kostenloser Zugang (Free)"
   }, /*#__PURE__*/React.createElement("p", {
     style: {
       margin: 0
     }
-  }, "Nach Registrierung erhält der Nutzer einen kostenlosen Testzugang für 3 Tage. Der Testzugang endet automatisch; er wandelt sich nicht in ein kostenpflichtiges Abo um, Zahlungsdaten sind nicht erforderlich.")), /*#__PURE__*/React.createElement(LegalSection, {
+  }, "Nach Registrierung erhält der Nutzer einen dauerhaft kostenlosen Zugang (Free) mit den in der Tarifübersicht als Free gekennzeichneten Funktionen. Der Free-Zugang wandelt sich nicht in ein kostenpflichtiges Abo um, Zahlungsdaten sind nicht erforderlich.")), /*#__PURE__*/React.createElement(LegalSection, {
     title: "4. Abo, Preis und Laufzeit"
   }, /*#__PURE__*/React.createElement("p", {
     style: {
       margin: 0
     }
-  }, "Das Standard-Abo kostet 49 € pro Monat, das Premium-Abo 99 € pro Monat, jeweils inkl. gesetzlicher Umsatzsteuer, soweit anfallend. Die Laufzeit beträgt einen Monat und verlängert sich jeweils um einen weiteren Monat, wenn nicht zum Ende des laufenden Abrechnungsmonats gekündigt wird. Die Kündigung ist jederzeit über den Bereich „Verträge hier kündigen\" auf dieser Website oder per E-Mail an info@transferwire.de möglich.")), /*#__PURE__*/React.createElement(LegalSection, {
+  }, "Das Pro-Abo kostet 49 € pro Monat oder 490 € pro Jahr. Das Enterprise-Abo kostet 169 € pro Monat oder 1.690 € pro Jahr für fünf Nutzer; jeder weitere Nutzer kostet 20 € pro Monat bzw. 200 € pro Jahr. Alle Preise inkl. gesetzlicher Umsatzsteuer, soweit anfallend. Monatsabos haben eine Laufzeit von einem Monat und verlängern sich jeweils um einen weiteren Monat, wenn nicht zum Ende des laufenden Abrechnungsmonats gekündigt wird. Jahresabos haben eine Laufzeit von zwölf Monaten und sind zum Ende der Laufzeit kündbar. Die Kündigung ist jederzeit über den Bereich „Verträge hier kündigen\" auf dieser Website oder per E-Mail an info@transferwire.de möglich.")), /*#__PURE__*/React.createElement(LegalSection, {
     title: "5. Zahlung und Freischaltung"
   }, /*#__PURE__*/React.createElement("p", {
     style: {
@@ -7113,11 +7121,11 @@ const PRICING_I18N = {
     f_watch: "Merkliste, E-Mail-Alerts & Morgen-Briefing",
     f_ki: "KI-Scout-Chat (30 Fragen/Tag)",
     f_kontakte: "Vereins-Kontakte: Sportdirektoren & Gesch\u00e4ftsf\u00fchrer",
-    lock_hint: "Nur in Premium",
-    lock_title: "Premium-Funktion",
-    lock_body: "Vereins-Kontakte \u2014 Sportdirektoren und Gesch\u00e4ftsf\u00fchrer mit direktem Draht \u2014 sind dem Premium-Zugang vorbehalten.",
-    lock_btn: "Premium freischalten \u2014 99 \u20ac/Monat",
-    lock_up: "Bestehendes Standard-Abo? Nach dem Premium-Kauf einfach das alte Abo im Kundenportal beenden \u2014 oder kurz per Mail melden, wir stellen um.",
+    lock_hint: "Nur in Pro",
+    lock_title: "Pro-Funktion",
+    lock_body: "Vereinskontakte \u2014 Sportdirektoren, Gesch\u00e4ftsf\u00fchrer und Scouting-Leiter mit direktem Draht \u2014 geh\u00f6ren zu Pro.",
+    lock_btn: "Pro freischalten \u2014 49 \u20ac/Monat",
+    lock_up: "Pro enth\u00e4lt alles aus Free plus Verein sucht, Vereinskontakte, Netzwerk & Community, Workspace, Scouting und Akquise-Radar \u2014 auch j\u00e4hrlich f\u00fcr 490 \u20ac.",
     t_btn: "Jetzt gratis testen",
     s_btn: "Standard w\u00e4hlen",
     p_btn: "Premium w\u00e4hlen",
@@ -7144,11 +7152,11 @@ const PRICING_I18N = {
     f_watch: "Watchlist, email alerts & morning briefing",
     f_ki: "AI scout chat (30 questions/day)",
     f_kontakte: "Club contacts: sporting directors & CEOs",
-    lock_hint: "Premium only",
-    lock_title: "Premium feature",
-    lock_body: "Club contacts \u2014 sporting directors and CEOs with a direct line \u2014 are reserved for Premium access.",
-    lock_btn: "Unlock Premium \u2014 \u20ac99/month",
-    lock_up: "Already on Standard? After purchasing Premium, simply end your old plan in the customer portal \u2014 or drop us a line and we\u2019ll switch you over.",
+    lock_hint: "Pro only",
+    lock_title: "Pro feature",
+    lock_body: "Club contacts \u2014 sporting directors, CEOs and heads of scouting with a direct line \u2014 are part of Pro.",
+    lock_btn: "Unlock Pro \u2014 \u20ac49/month",
+    lock_up: "Pro includes everything in Free plus Club seeks, club contacts, network & community, workspace, scouting and the acquisition radar \u2014 also yearly for \u20ac490.",
     t_btn: "Start free trial",
     s_btn: "Choose Standard",
     p_btn: "Choose Premium",
@@ -7285,7 +7293,7 @@ function PremiumLock({ small }) {
   }, "" + L.lock_title.toUpperCase()), React.createElement("div", {
     style: { fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.6, color: "var(--t2)", marginBottom: 12 }
   }, L.lock_body), React.createElement("button", {
-    onClick: () => window.open(stripeCheckoutUrl("premium", "monat", 1, ""), "_blank"),
+    onClick: () => twZuPro("monat"),
     style: { cursor: "pointer", background: LGREEN, color: "#1A1306", border: "none", borderRadius: 9, padding: "11px 18px", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800 }
   }, L.lock_btn), React.createElement("div", {
     style: { fontFamily: FONT_BODY, fontSize: 11, lineHeight: 1.5, color: MUTED, marginTop: 10 }
@@ -8072,29 +8080,34 @@ function SubscribePage({
   const [cBrauchtPw, setCBrauchtPw] = useState(false);
   const [cInfo, setCInfo] = useState("");
   const istAngemeldet = em => twHatSitzung(account) && String(account.email || "").toLowerCase() === em;
-  const [plan, setPlan] = useState(() => { const h = String(location.hash || ""); return /abo-premium/.test(h) ? "premium" : /abo-enterprise/.test(h) ? "enterprise" : "standard"; });
+  const [plan, setPlan] = useState(() => { const h = String(location.hash || ""); return /abo-enterprise/.test(h) ? "enterprise" : "pro"; });
   const [abrech, setAbrech] = useState(() => /jahr/.test(String(location.hash || "")) ? "jahr" : "monat");
-  const [seats, setSeats] = useState(() => { const m = String(location.hash || "").match(/-n(\d+)/); const n = m ? parseInt(m[1], 10) : 5; return Math.min(50, Math.max(5, n || 5)); });
+  const [seats, setSeats] = useState(() => { const m = String(location.hash || "").match(/-n(\d+)/); return twEntNutzer(m ? parseInt(m[1], 10) : 5); });
   const en = LANG === "en";
   const jahr = abrech === "jahr";
-  const seatsEff = ENTERPRISE_SEATS_ADJUSTABLE ? seats : 5;
-  const preisVon = (p) => p === "enterprise" ? (jahr ? 3490 + (seatsEff - 5) * 490 : 349 + (seatsEff - 5) * 49) : p === "premium" ? (jahr ? 990 : 99) : (jahr ? 490 : 49);
-  const eurFmt = (n) => n.toLocaleString(en ? "en-GB" : "de-DE") + " \u20ac";
+  const seatsEff = twEntNutzer(seats);
+  const preisVon = (p) => p === "enterprise" ? twEntPreis(seatsEff, jahr) : (jahr ? TW_TARIF.pro.j : TW_TARIF.pro.m);
+  const eurFmt = (n) => Number(n).toLocaleString(en ? "en-GB" : "de-DE", { minimumFractionDigits: (Math.round(n * 100) % 100) ? 2 : 0, maximumFractionDigits: 2 }) + " \u20ac";
   const intervalTxt = en ? (jahr ? "per year" : "per month") : (jahr ? "pro Jahr" : "pro Monat");
+  const extraTxt = jahr ? (en ? "+\u20ac200 per year per extra seat" : "+200 \u20ac pro Jahr je weiterem Nutzer") : (en ? "+\u20ac20 per month per extra seat" : "+20 \u20ac pro Monat je weiterem Nutzer");
   const PLAENE = [
-    { id: "standard", name: "Standard", preis: eurFmt(preisVon("standard")), sub: intervalTxt, hint: en ? "News feed, player database, AI scout" : "Newsfeed, Spieler-Datenbank, KI-Scout" },
-    { id: "premium", name: "Premium", preis: eurFmt(preisVon("premium")), sub: intervalTxt, hint: en ? "Everything in Standard + club contacts & community" : "Alles aus Standard + Vereins-Kontakte & Community" },
-    { id: "enterprise", name: "Enterprise", preis: eurFmt(preisVon("enterprise")), sub: intervalTxt + " \u00b7 " + seatsEff + (en ? " seats" : " Nutzer"), hint: ENTERPRISE_SEATS_ADJUSTABLE ? (en ? "Everything in Premium for the whole team, +49 \u20ac per extra seat" : "Alles aus Premium f\u00fcrs Team, +49 \u20ac je weiterer Nutzer") : (en ? "Everything in Premium for the whole team \u2014 5 seats included, more on request" : "Alles aus Premium f\u00fcrs Team \u2014 5 Nutzer inklusive, weitere auf Anfrage") }
+    { id: "pro", name: "Pro", preis: eurFmt(preisVon("pro")), sub: intervalTxt, hint: en ? "Everything in Free + Club seeks, club contacts, network & community, workspace, scouting, acquisition radar \u00b7 1 seat, max. 2 devices" : "Alles aus Free + Verein sucht, Vereinskontakte, Netzwerk & Community, Workspace, Scouting, Akquise-Radar \u00b7 1 Nutzer, max. 2 Ger\u00e4te" },
+    { id: "enterprise", name: "Enterprise", preis: eurFmt(preisVon("enterprise")), sub: intervalTxt + " \u00b7 " + seatsEff + (en ? " seats" : " Nutzer"), hint: en ? "All Pro features for the whole team \u00b7 5 seats included, " + extraTxt : "Alle Pro-Funktionen f\u00fcrs ganze Team \u00b7 5 Nutzer inklusive, " + extraTxt }
   ];
   const abrechBtn = (a, label) => React.createElement("button", { key: a, type: "button", onClick: () => setAbrech(a), "aria-pressed": abrech === a, style: { cursor: "pointer", padding: "8px 14px", borderRadius: 0, border: "1.5px solid " + (abrech === a ? "var(--gold)" : HAIR), background: abrech === a ? "var(--gold-tint)" : "#fff", color: INK, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700 } }, label);
-  const abrechWahl = React.createElement("div", { style: { display: "flex", gap: 6, marginBottom: 10 } }, abrechBtn("monat", en ? "Monthly" : "Monatlich"), abrechBtn("jahr", en ? "Yearly \u00b7 2 months free" : "J\u00e4hrlich \u00b7 2 Monate geschenkt"));
-  const seatBtn = (d, label) => React.createElement("button", { type: "button", onClick: () => setSeats(Math.min(50, Math.max(5, seats + d))), disabled: d < 0 ? seats <= 5 : seats >= 50, style: { width: 30, height: 30, cursor: "pointer", border: "1.5px solid " + HAIR, background: "var(--karte2)", color: INK, fontFamily: FONT_BODY, fontSize: 15, fontWeight: 700, borderRadius: 0 } }, label);
-  const seatsRow = plan !== "enterprise" ? null : ENTERPRISE_SEATS_ADJUSTABLE
-    ? React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", border: "1.5px solid " + HAIR, padding: "8px 10px", marginBottom: 14, fontFamily: FONT_BODY } },
-        React.createElement("span", { style: { fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", fontWeight: 800, color: INK } }, en ? "Seats" : "Nutzer"),
-        React.createElement("span", { style: { display: "flex", alignItems: "center", gap: 8 } }, seatBtn(-1, "\u2212"), React.createElement("b", { style: { minWidth: 22, textAlign: "center" } }, seats), seatBtn(1, "+")))
-    : React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, marginBottom: 14 } }, en ? "5 personal seats included \u00b7 more seats on request via info@transferwire.de" : "5 personengebundene Nutzerzug\u00e4nge inklusive \u00b7 weitere Nutzer auf Anfrage \u00fcber info@transferwire.de");
-  const planGrid = React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8, marginBottom: 16 } }, PLAENE.map(p => React.createElement("button", { key: p.id, type: "button", onClick: () => setPlan(p.id), "aria-pressed": plan === p.id, style: { cursor: "pointer", textAlign: "left", padding: "10px 10px", borderRadius: 0, border: "2px solid " + (plan === p.id ? "var(--gold)" : HAIR), background: plan === p.id ? "var(--gold-tint)" : "var(--karte2)", fontFamily: FONT_BODY } },
+  const abrechWahl = React.createElement("div", { style: { display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap" } }, abrechBtn("monat", en ? "Monthly" : "Monatlich"), abrechBtn("jahr", en ? "Yearly \u00b7 2 months free" : "J\u00e4hrlich \u00b7 2 Monate geschenkt"));
+  const seatBtn = (d, label) => React.createElement("button", { type: "button", "aria-label": d < 0 ? (en ? "fewer seats" : "weniger Nutzer") : (en ? "more seats" : "mehr Nutzer"), onClick: () => setSeats(twEntNutzer(seats + d)), disabled: d < 0 ? seats <= TW_TARIF.ent.inkl : seats >= TW_TARIF.ent.max, style: { width: 34, height: 34, cursor: "pointer", border: "1.5px solid " + HAIR, background: "var(--karte2)", color: INK, fontFamily: FONT_BODY, fontSize: 16, fontWeight: 800, borderRadius: 0 } }, label);
+  const jeNutzer = preisVon("enterprise") / seatsEff;
+  const seatsRow = plan !== "enterprise" ? React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, marginBottom: 14 } }, en ? "1 personal seat \u00b7 max. 2 devices \u00b7 Free stays free \u2014 Pro adds the Pro features." : "1 personengebundener Zugang \u00b7 max. 2 Ger\u00e4te \u00b7 Free bleibt kostenlos \u2014 Pro schaltet die Pro-Funktionen frei.")
+    : React.createElement("div", { style: { border: "1.5px solid " + HAIR, padding: "10px 12px", marginBottom: 14, fontFamily: FONT_BODY } },
+        React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 } },
+          React.createElement("span", { style: { fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", fontWeight: 800, color: INK } }, en ? "Seats" : "Nutzer"),
+          React.createElement("span", { style: { display: "flex", alignItems: "center", gap: 8 } }, seatBtn(-1, "\u2212"), React.createElement("b", { "aria-live": "polite", style: { minWidth: 26, textAlign: "center", fontSize: 16 } }, seatsEff), seatBtn(1, "+"))),
+        React.createElement("div", { style: { fontSize: 12, color: MUTED, marginTop: 8, lineHeight: 1.5 } },
+          (en ? "5 seats included \u00b7 " : "5 Nutzer inklusive \u00b7 ") + extraTxt + (seatsEff > 5 ? (en ? " \u00b7 " + (seatsEff - 5) + " extra selected" : " \u00b7 " + (seatsEff - 5) + " zus\u00e4tzlich gew\u00e4hlt") : "")),
+        React.createElement("div", { style: { fontSize: 13, color: INK, marginTop: 6, fontWeight: 700 } },
+          (en ? "Total: " : "Gesamt: ") + eurFmt(preisVon("enterprise")) + " " + intervalTxt + " \u00b7 " + eurFmt(jeNutzer) + (en ? " per seat with " + seatsEff + " seats" : " je Nutzer bei " + seatsEff + " Nutzern")));
+  const planGrid = React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 8, marginBottom: 16 } }, PLAENE.map(p => React.createElement("button", { key: p.id, type: "button", onClick: () => setPlan(p.id), "aria-pressed": plan === p.id, style: { cursor: "pointer", textAlign: "left", padding: "10px 10px", borderRadius: 0, border: "2px solid " + (plan === p.id ? "var(--gold)" : HAIR), background: plan === p.id ? "var(--gold-tint)" : "var(--karte2)", fontFamily: FONT_BODY } },
     React.createElement("div", { style: { fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", fontWeight: 800, color: INK } }, p.name),
     React.createElement("div", { style: { fontSize: 18, fontWeight: 800, color: INK, marginTop: 4 } }, p.preis, React.createElement("span", { style: { fontSize: 11, fontWeight: 600, color: MUTED, marginLeft: 4 } }, p.sub)),
     React.createElement("div", { style: { fontSize: 11, color: MUTED, marginTop: 4, lineHeight: 1.35 } }, p.hint))));
@@ -8111,9 +8124,11 @@ function SubscribePage({
     if (!angemeldet) { const f = twPwFehler(pw, pw2); if (f) return setErr(f); }
     if (!legalOk || !sofort) return setErr(t("e_both"));
     sendPing("abo_click_" + plan);
-    const p = { email: em, name: name.trim(), plan: plan === "premium" ? "premium_checkout" : plan === "enterprise" ? "enterprise_checkout" : "abo_checkout" };
+    const p = { email: em, name: name.trim(), plan: plan === "enterprise" ? "enterprise_checkout" : "premium_checkout" };
     if (angemeldet) p.code = account.sitzung || account.code; else p.passwort = pw;
-    window.open(stripeCheckoutUrl(plan, abrech, seatsEff, em), "_blank");   // sofort im Klick oeffnen (Popup-Sperre)
+    const ziel = stripeCheckoutUrl(plan, abrech, seatsEff, em);
+    if (!ziel) return setErr(en ? "Payment for the new plans is being set up right now. Please try again shortly or write to info@transferwire.de." : "Die Bezahlung f\u00fcr die neuen Tarife wird gerade eingerichtet. Bitte versuche es in K\u00fcrze erneut oder schreib an info@transferwire.de.");
+    window.open(ziel, "_blank");   // sofort im Klick oeffnen (Popup-Sperre)
     authPost(CHECKOUT_URL, p).then(d => {
       if (d && d.wartend) wartendSetzen(em, d.wartend);
       if (d && d.hinweis === "konto_besteht") setHinweis(t("s_konto_besteht"));
@@ -8485,6 +8500,7 @@ function SettingsOverlay({
 }) {
   const isTest = account.plan === "test";
   const ends = isTest ? account.start + TEST_MS : null;
+  const istPro = isPremiumPlan(account.plan); const istEnt = account.plan_roh === "enterprise";
   const Row = ({
     k,
     v
@@ -8588,7 +8604,7 @@ function SettingsOverlay({
   }) : null, account.rolle ? /*#__PURE__*/React.createElement(Row, {
     k: t("st_role"),
     v: account.rolle
-  }) : null, /*#__PURE__*/React.createElement(Row, { k: t("st_plan"), v: isTest ? t("st_plan_test") : (account.plan === "premium" ? "Premium" : account.plan === "abo" ? "Standard" : t("st_plan_abo")) }), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginTop: 12, flexWrap: "wrap" } }, /*#__PURE__*/React.createElement("button", { type: "button", onClick: onSubscribe, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, color: "#1A1306", backgroundColor: "#C8A355", backgroundImage: "linear-gradient(135deg, #EFD489 0%, #C8A355 48%, #A9822F 100%)", border: "1px solid #B8913F", borderRadius: 9, padding: "10px 14px" }, className: "tw-gold-knopf" }, account.plan === "premium" ? (LANG === "en" ? "Enterprise \u2013 request" : "Enterprise anfragen") : account.plan === "abo" ? (LANG === "en" ? "Upgrade to Premium" : "Auf Premium upgraden") : (LANG === "en" ? "Upgrade plan" : "Plan upgraden")), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED } }, account.plan === "premium" ? (LANG === "en" ? "Teams, seats and API on request." : "Teams, Sitze und API auf Anfrage.") : account.plan === "abo" ? (LANG === "en" ? "Premium adds club contacts and community contacts." : "Premium bringt Vereins-Kontakte und Community-Kontakte.") : (LANG === "en" ? "Compare Standard and Premium." : "Standard und Premium vergleichen.")))), /*#__PURE__*/React.createElement("div", {
+  }) : null, /*#__PURE__*/React.createElement(Row, { k: t("st_plan"), v: istEnt ? "Enterprise" : istPro ? "Pro" : t("st_plan_test") }), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginTop: 12, flexWrap: "wrap" } }, /*#__PURE__*/React.createElement("button", { type: "button", onClick: onSubscribe, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, color: "#1A1306", backgroundColor: "#C8A355", backgroundImage: "linear-gradient(135deg, #EFD489 0%, #C8A355 48%, #A9822F 100%)", border: "1px solid #B8913F", borderRadius: 9, padding: "10px 14px" }, className: "tw-gold-knopf" }, istPro ? (LANG === "en" ? "Plans & seats" : "Tarif & Nutzer") : (LANG === "en" ? "Upgrade to Pro" : "Auf Pro upgraden")), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED } }, istPro ? (LANG === "en" ? "Enterprise: all Pro features for the whole team, 5 seats included." : "Enterprise: alle Pro-Funktionen f\u00fcrs ganze Team, 5 Nutzer inklusive.") : (LANG === "en" ? "Pro adds Club seeks, club contacts, network, workspace, scouting and the acquisition radar." : "Pro bringt Verein sucht, Vereinskontakte, Netzwerk, Workspace, Scouting und Akquise-Radar.")))), /*#__PURE__*/React.createElement("div", {
     style: {
       background: CARD,
       border: `1px solid ${HAIR}`,
@@ -8604,7 +8620,7 @@ function SettingsOverlay({
       color: INK,
       marginBottom: 8
     }
-  }, t("st_abos")), isTest ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
+  }, t("st_abos")), !istPro ? React.createElement(React.Fragment, null, React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, lineHeight: 1.55, margin: "0 0 12px" } }, LANG === "en" ? "You are using Free \u2014 free of charge, no subscription. Pro (\u20ac49/month or \u20ac490/year) adds Club seeks, club contacts, network & community, workspace, scouting and the acquisition radar." : "Du nutzt Free \u2014 kostenlos, ohne Abo. Pro (49\u00a0\u20ac/Monat oder 490\u00a0\u20ac/Jahr) bringt Verein sucht, Vereinskontakte, Netzwerk & Community, Workspace, Scouting und Akquise-Radar."), React.createElement(PBtn, { onClick: onSubscribe, kind: "green", full: true }, LANG === "en" ? "Upgrade to Pro" : "Auf Pro upgraden")) : isTest ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12.5,
@@ -8662,7 +8678,7 @@ function SettingsOverlay({
       letterSpacing: 1,
       marginBottom: 8
     }
-  }, t("set_notif")), /*#__PURE__*/React.createElement("label", {
+  }, t("set_notif"), istPro ? "" : " \u00b7 Pro"), /*#__PURE__*/React.createElement("label", {
     style: {
       display: "flex",
       alignItems: "center",
@@ -8808,6 +8824,7 @@ function TrialBanner({
   }, t("trial_cta")));
 }
 const SIDE_ICONS = {
+  marktwert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 3 7-8"/><path d="M15 7h4v4"/><path d="M3 21h18"/></svg>',
   spieltag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="12" cy="15.5" r="2.2"/></svg>',
   kontakte: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.6-1.6 1.7-2.4 3-2.4s2.4.8 3 2.4M14 9h4M14 13h4"/></svg>',
   feed: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
@@ -8975,7 +8992,7 @@ function AkquiseVue({ isPrem, account, openPlayer }) {
     setLade(true); setFehler("");
     fetch("/api/tw-akquise?" + q.toString(), { cache: "no-store" }).then(r => r.json()).then(d => {
       setLade(false);
-      if (!d || !d.ok) { setDaten([]); setFehler(d && (d.fehler === "nur-premium" || d.fehler === "nur-intern") ? (en ? "The acquisition radar is part of Premium." : "Das Akquise-Radar gehört zu Premium.") : (en ? "Loading failed." : "Fehler beim Laden.")); return; }
+      if (!d || !d.ok) { setDaten([]); setFehler(d && (d.fehler === "nur-premium" || d.fehler === "nur-intern") ? (en ? "The acquisition radar is part of Pro." : "Das Akquise-Radar gehört zu Pro.") : (en ? "Loading failed." : "Fehler beim Laden.")); return; }
       setDaten(Array.isArray(d.spieler) ? d.spieler : []);
     }).catch(() => { setLade(false); setFehler(en ? "Loading failed." : "Fehler beim Laden."); });
   };
@@ -9024,7 +9041,7 @@ function AkquiseVue({ isPrem, account, openPlayer }) {
 }
 
 function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScout }) {
-  const h = React.createElement; const en = LANG === "en";
+  const h = React.createElement; const en = LANG === "en"; const prem = twIstPremium(); const proMarke = (k) => (!prem && TW_PRO_VIEWS.indexOf(k) >= 0) ? h("span", { className: "tw-sn-pro", title: en ? "Pro feature" : "Pro-Funktion" }, "PRO") : null;
   const [zu, setZu] = useState(() => { try { return JSON.parse(localStorage.getItem("tw_side_zu") || "{}"); } catch (e) { return {}; } });
   const klappe = k => setZu(z => { const n = Object.assign({}, z, { [k]: !z[k] }); try { localStorage.setItem("tw_side_zu", JSON.stringify(n)); } catch (e) {} return n; });
   const [vsZahl, setVsZahl] = useState(() => { try { return Number(window.VS_ZAHL) || 0; } catch (e) { return 0; } });
@@ -9033,7 +9050,7 @@ function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScou
   const aktiv = k => view === k || (k === "community" && view === "moderation") || (k === "talente" && (view === "listen" || view === "suche" || view === "nachwuchs")) || (k === "players" && (view === "spielervergleich" || view === "aehnlich"));
   const IK = { markt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21V12h6v9"/></svg>', community: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.2L4 21l1.8-5.4A8 8 0 1 1 21 12z"/></svg>', workspace: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 20V10"/></svg>', ki: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18 9.4l-4.2 1.8L12 16l-1.8-4.8L6 9.4l4.2-1.8z"/><path d="M5 18l.7 1.8L7.5 20.5l-1.8.7L5 23l-.7-1.8L2.5 20.5l1.8-.7z"/></svg>', pfeil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>' };
   const gruppen = [
-    { k: "markt", label: en ? "Market" : "Markt", kinder: [["feed", t("tab_feed"), feedBadge], ["geruechte", "Transfers", 0], ["spieltag", en ? "Matchday" : "Spieltag", 0], ["gesucht", VS_NEU ? (LANG === "en" ? "Club seeks" : "Verein sucht") : "Vereinsbedarf", gesuchtBadge], ["ranking", "Performance", 0], ["players", t("players_tab"), 0], ["chancen", t("ch_tab"), 0]] },
+    { k: "markt", label: en ? "Market" : "Markt", kinder: [["feed", t("tab_feed"), feedBadge], ["geruechte", "Transfers", 0], ["spieltag", en ? "Matchday" : "Spieltag", 0], ["gesucht", VS_NEU ? (LANG === "en" ? "Club seeks" : "Verein sucht") : "Vereinsbedarf", gesuchtBadge], ["ranking", "Performance", 0], ["players", t("players_tab"), 0], ["marktwert", en ? "Market value" : "Marktwert", 0], ["chancen", t("ch_tab"), 0]] },
     { k: "community", label: en ? "Network" : "Netzwerk", kinder: [["community", en ? "Posts" : "Beitr\u00e4ge", 0], ["networking", en ? "Community contacts" : "Community-Kontakte", 0]] },
     { k: "workspace", label: "Workspace", kinder: [["watch", t("watch_tab"), 0], ["talente", "Scouting", 0], ["akquise", en ? "Acquisition radar" : "Akquise-Radar", 0]] }
   ];
@@ -9041,12 +9058,12 @@ function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScou
     h("button", { type: "button", className: "tw-sn-ki" + (view === "assistent" ? " aktiv" : ""), onClick: onScout }, h("span", { className: "tw-sn-ikon tw-sn-funke", dangerouslySetInnerHTML: { __html: IK.ki } }), h("span", null, en ? "AI assistant" : "KI-Assistent")),
     h("div", { className: "tw-sn-trenner" }),
     h("nav", { className: "tw-sn-menue" },
-      h("button", { type: "button", className: "tw-sn-punkt" + (aktiv("kontakte") ? " aktiv" : ""), onClick: () => setView("kontakte") }, h("span", { className: "tw-sn-ikon", dangerouslySetInnerHTML: { __html: SIDE_ICONS.kontakte || "" } }), h("span", null, en ? "Contacts" : "Kontakte")),
+      h("button", { type: "button", className: "tw-sn-punkt" + (aktiv("kontakte") ? " aktiv" : ""), onClick: () => setView("kontakte") }, h("span", { className: "tw-sn-ikon", dangerouslySetInnerHTML: { __html: SIDE_ICONS.kontakte || "" } }), h("span", null, en ? "Contacts" : "Kontakte"), proMarke("kontakte")),
       gruppen.map(g => h("div", { key: g.k, className: "tw-sn-gruppe" + (zu[g.k] ? " zu" : "") },
-        h("button", { type: "button", className: "tw-sn-kopf", onClick: () => klappe(g.k), "aria-expanded": !zu[g.k] }, h("span", { className: "tw-sn-ikon", dangerouslySetInnerHTML: { __html: IK[g.k] } }), h("span", null, g.label), h("span", { className: "tw-sn-pfeil", dangerouslySetInnerHTML: { __html: IK.pfeil } })),
-        h("div", { className: "tw-sn-kinder" }, g.kinder.map(([k, label, badge]) => h("button", { key: k, type: "button", className: "tw-sn-unter" + (aktiv(k) ? " aktiv" : ""), onClick: () => setView(k) }, h("span", null, label), badge > 0 ? h("span", { className: "tw-sn-badge" }, k === "gesucht" ? badge : (badge > 999 ? "999+" : badge)) : null)))))),
+        h("button", { type: "button", className: "tw-sn-kopf", onClick: () => klappe(g.k), "aria-expanded": !zu[g.k] }, h("span", { className: "tw-sn-ikon", dangerouslySetInnerHTML: { __html: IK[g.k] } }), h("span", null, g.label), (!prem && (g.k === "community" || g.k === "workspace")) ? h("span", { className: "tw-sn-pro" }, "PRO") : null, h("span", { className: "tw-sn-pfeil", dangerouslySetInnerHTML: { __html: IK.pfeil } })),
+        h("div", { className: "tw-sn-kinder" }, g.kinder.map(([k, label, badge]) => h("button", { key: k, type: "button", className: "tw-sn-unter" + (aktiv(k) ? " aktiv" : ""), onClick: () => setView(k) }, h("span", null, label), proMarke(k) || (badge > 0 ? h("span", { className: "tw-sn-badge" }, k === "gesucht" ? badge : (badge > 999 ? "999+" : badge)) : null))))))),
     h("div", { className: "tw-sn-unten" },
-      h("button", { type: "button", className: "tw-sn-upgrade", onClick: () => onNavigate("subscribe") }, en ? "Upgrade plan" : "Upgrade Plan"),
+      h("button", { type: "button", className: "tw-sn-upgrade", onClick: () => { if (!prem) { try { history.replaceState(null, "", location.pathname + location.search + "#abo-pro-monat"); } catch (e) {} } onNavigate("subscribe"); } }, prem ? (en ? "Plan & seats" : "Tarif & Nutzer") : (en ? "Upgrade to Pro" : "Auf Pro upgraden")),
       h("div", { className: "tw-sn-fuss" }, h("button", { type: "button", onClick: () => onNavigate("impressum") }, en ? "Imprint" : "Impressum"), h("button", { type: "button", onClick: () => onNavigate("datenschutz") }, en ? "Privacy" : "Datenschutz"), h("button", { type: "button", onClick: () => onNavigate("agb") }, en ? "Terms" : "AGB"))));
 }
 
@@ -9750,9 +9767,9 @@ function muCommZeit(t) { const d = new Date(t); if (isNaN(d.getTime())) return "
 function muCommText(p, en) { return String((en && p.body_en) || p.body || ""); }
 function muCommTitel(p, en) { const t = String(p.agent_headline || "").trim() || muCommText(p, en).replace(/\s+/g, " ").trim(); return t.length > 110 ? t.slice(0, 107) + "\u2026" : t; }
 function MuCommunity({ geheZu }) {
-  const hh = React.createElement; const en = muEn();
+  const hh = React.createElement; const en = muEn(); const prem = twIstPremium();   // 23.10.2026: Community gehoert zu Pro
   const [d, setD] = React.useState(null); const [offen, setOffen] = React.useState(null);
-  React.useEffect(() => { let a = true; const k = muKonto();
+  React.useEffect(() => { let a = true; const k = muKonto(); if (!prem) { setD({ posts: [], ok: false }); return () => { a = false; }; }
     fetch("/api/tw-community?kind=community&email=" + encodeURIComponent(k.email || "") + "&code=" + encodeURIComponent(k.code || k.zugangscode || "")).then(r => r.json()).then(x => { if (!a) return;
       x = x && x.items && !Array.isArray(x.items) ? x.items : x; const arr = Array.isArray(x) ? x : (x && (x.posts || x.items || x.liste || x.rows || x.data)) || [];
       setD({ posts: Array.isArray(arr) ? arr : [], ok: !(x && x.ok === false) }); }).catch(() => { if (a) setD({ posts: [], ok: false }); });
@@ -9760,6 +9777,9 @@ function MuCommunity({ geheZu }) {
   React.useEffect(() => { if (!offen) return; const esc = (e) => { if (e.key === "Escape") setOffen(null); }; window.addEventListener("keydown", esc); twScrollSperre(true);
     return () => { window.removeEventListener("keydown", esc); twScrollSperre(false); }; }, [offen]);
   const knopf = hh("button", { type: "button", onClick: () => geheZu && geheZu("community"), style: { cursor: "pointer", padding: "8px 16px", borderRadius: 8, border: "none", background: "var(--gold)", color: "var(--gold-schrift)", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800 } }, en ? "Open community" : "Zur Community");
+  if (!prem) return hh("div", { className: "mu-comm-leer", style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", padding: "14px 16px", borderRadius: 10, background: "var(--karte)", border: "1px solid " + HAIR } },
+    hh("span", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: "var(--t2)" } }, en ? "Community & network — exchange with scouts, agents and club staff — are part of Pro." : "Community & Netzwerk – der Austausch mit Scouts, Beratern und Vereinsmitarbeitern – gehören zu Pro."),
+    hh("button", { type: "button", onClick: () => twZuPro(), style: { cursor: "pointer", padding: "8px 16px", borderRadius: 8, border: "none", background: "var(--gold)", color: "var(--gold-schrift)", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800 } }, en ? "View Pro" : "Pro ansehen"));
   if (!d) return hh("div", { style: { padding: 14, fontFamily: FONT_BODY, fontSize: 13, color: "var(--t3)" } }, en ? "Loading \u2026" : "Wird geladen \u2026");
   const posts = d.posts.filter(p => p && MU_COMM_OK.includes(p.status)).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))).slice(0, 4);
   if (!posts.length) return hh("div", { className: "mu-comm-leer", style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", padding: "14px 16px", borderRadius: 10, background: "var(--karte)", border: "1px solid " + HAIR } },
@@ -9937,7 +9957,7 @@ const VDB_TXT = {
     lage_h: "Tabellenlage", form_h: "Form (letzte Spiele)", tabelle_h: "Tabelle", ampel_h: "Bedarf nach Position (Verein sucht)", abg_h: "Voraussichtliche Abgänge", sucht_h: "Gemeldeter Bedarf", ger_h: "Wechselgerüchte", trainer_h: "Trainer", seit: "seit", wechsel: "Trainerwechsel", alle_pos: "Alle", nur_kader: "Nur aktueller Kader", alle_spieler: "Alle erfassten Spieler",
     k_nr: "Nr.", k_name: "Spieler", k_pos: "Position", k_alter: "Alter", k_nat: "Nation", k_vertrag: "Vertrag bis", k_mw: "Marktwert", k_eins: "Einsätze", k_min: "Minuten", k_tore: "Tore", k_vorl: "Vorl.", k_form: "Form", k_status: "Status", verletzt: "verletzt", leihe: "Leihe von", abgang: "Abgang", stamm: "Stammspieler", bis: "bis",
     st_tm: "nicht im TM-Kader", st_sm: "nicht im SM-Kader", st_woanders: "laut TM woanders", keine_spieler: "Keine Spieler erfasst.", spiele_keine: "Keine Spiele erfasst.", kommend: "Kommende Spiele", gespielt: "Letzte Spiele", prognose: "Prognose", aufst: "Aufstellung", xg: "xG",
-    zugaenge: "Zugänge", abgaenge: "Abgänge", keine_tr: "Keine Transfers in dieser Saison erfasst.", ablfrei: "ablösefrei", keine_news: "Keine Meldungen der letzten 30 Tage.", keine_ger: "Keine aktuellen Gerüchte.", kontakte_locked: "Kontakte sind Premium-Mitgliedern vorbehalten.", kontakte_zahl: "hinterlegte Kontakte", keine_kontakte: "Keine Kontakte hinterlegt.", quelle: "Quelle", mio: "Mio. €", tsd: "Tsd. €", wahrscheinlichkeit: "Wahrscheinlichkeit", heim: "H", ausw: "A", stand: "Stand", zweite: "Zweite Mannschaft", alias: "Auch bekannt als" },
+    zugaenge: "Zugänge", abgaenge: "Abgänge", keine_tr: "Keine Transfers in dieser Saison erfasst.", ablfrei: "ablösefrei", keine_news: "Keine Meldungen der letzten 30 Tage.", keine_ger: "Keine aktuellen Gerüchte.", kontakte_locked: "Kontakte gehören zu Pro.", kontakte_zahl: "hinterlegte Kontakte", keine_kontakte: "Keine Kontakte hinterlegt.", quelle: "Quelle", mio: "Mio. €", tsd: "Tsd. €", wahrscheinlichkeit: "Wahrscheinlichkeit", heim: "H", ausw: "A", stand: "Stand", zweite: "Zweite Mannschaft", alias: "Auch bekannt als" },
   en: { spieler: "Player database", vereine: "Club database", titel: "Club database", sub: "All clubs on file with league, table position, coach, squad, needs and likely departures. Click a club to open its page with the full squad.",
     suche: "Search club, league, country or coach …", land: "All countries", liga: "All leagues", lage: "Situation", lage_alle: "Any situation", abstieg: "Relegation battle", titel_r: "Title race", druck: "Coach under pressure", bedarf: "Needs", bedarf_alle: "Any need", rot: "Urgent (red)", gelb: "Elevated (amber)", kein: "No acute need",
     reserve: "Show reserve teams", sort: "Sort", s_name: "Name", s_rang: "Table position", s_wert: "Squad value", s_kader: "Squad size", s_alter: "Average age", s_bedarf: "Need", s_abg: "Departures", karten: "Cards", tabelle: "Table",
@@ -10127,7 +10147,7 @@ function VereinsSeite({ id, name, authQ, isPrem, onClose, onOpenPlayer }) {
             h("div", { style: { color: "var(--t2)", fontSize: 12.5 } }, `${en ? "Current window" : "Laufendes Fenster"}: ${en ? "spent" : "Ausgaben"} ${vdbEur(d.budget.ausgaben)} · ${en ? "received" : "Einnahmen"} ${vdbEur(d.budget.erloese)} · ${en ? "net" : "Saldo"} ${(Number(d.budget.saldo) >= 0 ? "+" : "−") + vdbEur(Math.abs(Number(d.budget.saldo) || 0))}`),
             h("div", { style: { color: "var(--t2)", fontSize: 12.5 } }, `${en ? "Est. wages per year" : "Gehälter je Jahr geschätzt"} ${vdbEur(d.budget.gehalt)} · ${en ? "est. revenue per year" : "Einnahmen je Jahr geschätzt"} ${vdbEur(d.budget.einnahmen)}`),
             h("div", { style: { color: "var(--t3)", fontSize: 11.5, marginTop: 3 } }, en ? d.budget.hinweis_en : d.budget.hinweis)))
-          : d.budget_gesperrt ? kasten(h("span", { style: { color: "var(--t2)" } }, en ? "Premium: estimated transfer budget, financial strength and transfer balance." : "Premium: geschätztes Transferbudget, Finanzkraft und Transferbilanz.")) : null,
+          : d.budget_gesperrt ? kasten(h("span", { style: { color: "var(--t2)" } }, en ? "Pro: estimated transfer budget, financial strength and transfer balance." : "Pro: geschätztes Transferbudget, Finanzkraft und Transferbilanz.")) : null,
         H(vdbT("abg_h")), kasten((d.abgaenge || []).length ? (d.abgaenge || []).map(k => h("div", { key: k.pid, style: { padding: "5px 0", borderBottom: "1px solid var(--linie)" } }, h("div", { style: { display: "flex", alignItems: "center", gap: 8 } }, spielerLink(k.pid, k.name), h("span", { style: { color: "var(--t2)", fontSize: 12 } }, `${k.pos || k.grp || ""}${k.age ? ", " + k.age : ""}`), h("span", { style: { marginLeft: "auto", fontFamily: FONT_DISPLAY, fontWeight: 700, color: k.p >= 60 ? "var(--sc-schwach-text)" : k.p >= 45 ? "var(--sc-mittel-text)" : "var(--t2)" } }, `${k.p} %`), k.stamm ? vdbChip(vdbT("stamm"), "var(--blau-text)", "rgba(30,78,121,.1)") : null), h("div", { style: { color: "var(--t2)", fontSize: 12 } }, k.text))) : h("span", { style: { color: "var(--t2)" } }, "–")),
         (d.sucht || []).length ? h("div", null, H(vdbT("sucht_h")), kasten((d.sucht || []).map((s, i) => h("div", { key: i, style: { padding: "5px 0", borderBottom: "1px solid var(--linie)" } }, h("div", { style: { fontWeight: 700 } }, en ? (s.titel_en || s.titel) : s.titel), h("div", { style: { color: "var(--t2)", fontSize: 12 } }, [s.position, s.staerken, s.quelle, vdbDatum(s.datum)].filter(Boolean).join(" · ")))))) : null,
         H(vdbT("ger_h")), kasten((d.geruechte || []).length ? (d.geruechte || []).map((g, i) => h("div", { key: i, style: { padding: "5px 0", borderBottom: "1px solid var(--linie)" } }, h("div", { style: { display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" } }, vdbChip(g.richtung === "zugang" ? (en ? "in" : "Zugang") : (en ? "out" : "Abgang"), g.richtung === "zugang" ? "var(--gruen-text)" : "var(--blau-text)", g.richtung === "zugang" ? "var(--gruen-tint)" : "rgba(30,78,121,.1)"), h("span", { style: { fontWeight: 700 } }, g.spieler || "–"), h("span", { style: { color: "var(--t2)", fontSize: 12 } }, g.richtung === "zugang" ? `← ${g.von || "?"}` : `→ ${g.zu || "?"}`)), h("div", { style: { color: "var(--t2)", fontSize: 12 } }, g.url ? h("a", { href: g.url, target: "_blank", rel: "noopener", style: { color: "var(--t2)" } }, en ? (g.titel_en || g.titel) : g.titel) : (en ? (g.titel_en || g.titel) : g.titel), ` · ${g.quelle || ""} · ${vdbDatum(g.datum)}`))) : h("span", { style: { color: "var(--t2)" } }, vdbT("keine_ger")))));
@@ -11371,6 +11391,134 @@ function twLaenderListe(vereine, en) {
   ].join("\n"); document.head.appendChild(st);
 })();
 
+/* ── Tarifmodell Free / Pro / Enterprise (23.10.2026) ──────────────────────────
+   Pro-Bereiche: Verein sucht, Vereinskontakte, Netzwerk/Community, Workspace (Merkliste), Scouting, Akquise-Radar.
+   Free: alle uebrigen Bereiche inkl. Marktwert, KI-Assistent "Scout" und PDF-Dossiers. */
+const TW_PRO_VIEWS = ["gesucht", "kontakte", "community", "networking", "watch", "talente", "listen", "suche", "nachwuchs", "akquise"];
+const TW_PRO_INFO = {
+  gesucht: { de: ["Verein sucht", "Wer gerade welche Spieler braucht: Bedarf je Verein und Position, Club-Fit und Portfolio."], en: ["Club seeks", "Who needs which players right now: demand per club and position, club fit and portfolio."] },
+  kontakte: { de: ["Vereinskontakte", "Exklusive Kontakte zu über 750 Sportdirektoren, Geschäftsführern und Scouting-Leitern."], en: ["Club contacts", "Exclusive contacts to more than 750 sporting directors, CEOs and heads of scouting."] },
+  community: { de: ["Netzwerk & Community", "Austausch mit Scouts, Beratern und Vereinsmitarbeitern: Gesuche, Angebote, Insider-Hinweise und TW-Vermittlung."], en: ["Network & community", "Exchange with scouts, agents and club staff: requests, offers, insider tips and TW mediation."] },
+  watch: { de: ["Workspace", "Merkliste, Beobachten und Alerts — mit E-Mail-Alerts und Morgen-Briefing."], en: ["Workspace", "Watchlist, tracking and alerts — with e-mail alerts and a morning briefing."] },
+  talente: { de: ["Scouting", "Talent-Rankings, Scouting-Listen und Fähigkeiten-Suche."], en: ["Scouting", "Talent rankings, scouting lists and skills search."] },
+  akquise: { de: ["Akquise-Radar", "Spieler ohne Berater finden."], en: ["Acquisition radar", "Find players without an agent."] }
+};
+TW_PRO_INFO.networking = TW_PRO_INFO.community; TW_PRO_INFO.listen = TW_PRO_INFO.talente; TW_PRO_INFO.suche = TW_PRO_INFO.talente; TW_PRO_INFO.nachwuchs = TW_PRO_INFO.talente;
+(function () {
+  try {
+    if (document.getElementById("tw-tarif-stil")) return;
+    const st = document.createElement("style"); st.id = "tw-tarif-stil";
+    st.textContent = [
+      ".tw-sn-pro{margin-left:auto;flex:0 0 auto;font:800 9px/1 Inter,system-ui,sans-serif;letter-spacing:.08em;padding:3px 6px;border:1px solid rgba(221,182,95,.5);color:var(--gold-text,#DDB65F);background:rgba(221,182,95,.12);border-radius:3px}",
+      ".tw-sn-kopf .tw-sn-pro{margin-left:auto;margin-right:6px}",
+      ".tw-pro-seite{max-width:760px;margin:24px auto 40px;padding:0 4px}",
+      ".tw-pro-karte{background:var(--karte);border:1px solid var(--linie);border-radius:16px;padding:28px 24px;text-align:center}",
+      ".tw-pro-kick{display:inline-block;font:800 10px Inter,system-ui,sans-serif;letter-spacing:.16em;color:var(--gold-text,#DDB65F);border:1px solid rgba(221,182,95,.5);padding:4px 9px;margin-bottom:12px}",
+      ".tw-pro-liste{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px 16px;text-align:left;margin:18px 0 20px}",
+      ".tw-pro-liste div{display:flex;gap:8px;font-size:13px;line-height:1.45;color:var(--t2)}",
+      ".tw-pro-liste b{color:var(--t1)}",
+      ".tw-pro-knoepfe{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}",
+      ".tw-pro-knoepfe button{cursor:pointer;min-height:44px;padding:0 18px;font:800 13.5px Inter,system-ui,sans-serif;border-radius:10px}",
+      ".tw-mw{max-width:1180px;margin:0 auto;padding:6px 0 30px}",
+      ".tw-mw-filter{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 12px;align-items:center}",
+      ".tw-mw-filter select,.tw-mw-filter input[type=search]{font:600 13px Inter,system-ui,sans-serif;min-height:38px;padding:0 10px;border:1px solid var(--linie);background:var(--karte);color:var(--t1);border-radius:9px;max-width:100%}",
+      ".tw-mw-filter input[type=search]{min-width:200px;flex:1 1 200px}",
+      ".tw-mw-filter label{display:flex;align-items:center;gap:6px;font:600 12.5px Inter,system-ui,sans-serif;color:var(--t2);cursor:pointer}",
+      ".tw-mw-zeile{display:grid;grid-template-columns:34px minmax(0,2.2fr) minmax(0,1.6fr) 210px 118px;gap:12px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--linie);cursor:pointer;background:var(--karte)}",
+      ".tw-mw-zeile:hover{background:var(--karte2)}",
+      ".tw-mw-kopf{cursor:default;background:transparent;font:800 10.5px Inter,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}",
+      ".tw-mw-kopf:hover{background:transparent}",
+      ".tw-mw-rang{font:800 13px Inter,system-ui,sans-serif;color:var(--t3);text-align:right}",
+      ".tw-mw-sp{display:flex;align-items:center;gap:10px;min-width:0}",
+      ".tw-mw-sp img{width:34px;height:34px;border-radius:99px;object-fit:cover;background:var(--karte2);flex:0 0 auto}",
+      ".tw-mw-name{font:800 13.5px Inter,system-ui,sans-serif;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
+      ".tw-mw-klein{font:500 11.5px Inter,system-ui,sans-serif;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
+      ".tw-mw-wert{font:800 15px Inter,system-ui,sans-serif;color:var(--t1);text-align:right;white-space:nowrap}",
+      ".tw-mw-statusz{text-align:right}",
+      ".tw-mw-status{font:800 9.5px Inter,system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:4px;white-space:nowrap}",
+      ".tw-mw-status.ind{color:#1f9d55;border:1px solid rgba(31,157,85,.45);background:rgba(31,157,85,.1)}",
+      ".tw-mw-status.ein{color:var(--t2);border:1px solid var(--linie);background:var(--karte2)}",
+      "@media (max-width:720px){.tw-mw-zeile{grid-template-columns:26px minmax(0,1fr) minmax(96px,auto);gap:8px}.tw-mw-verein,.tw-mw-kopf .tw-mw-verein,.tw-mw-statusz{display:none}.tw-mw-filter select{flex:1 1 45%}}"
+    ].join("\n");
+    document.head.appendChild(st);
+  } catch (e) { }
+})();
+function ProSperreVue({ ziel }) {
+  const h = React.createElement; const en = LANG === "en"; const L = en ? "en" : "de";
+  const info = (TW_PRO_INFO[ziel] || TW_PRO_INFO.gesucht)[L];
+  const alle = ["gesucht", "kontakte", "community", "watch", "talente", "akquise"].map(k => TW_PRO_INFO[k][L]);
+  return h("div", { className: "tw-pro-seite" }, h("div", { className: "tw-pro-karte" },
+    h("div", { className: "tw-pro-kick" }, "PRO"),
+    h("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 28, textTransform: "uppercase", letterSpacing: .4, margin: "0 0 8px", color: INK } }, info[0]),
+    h("p", { style: { fontFamily: FONT_BODY, fontSize: 14.5, lineHeight: 1.6, color: "var(--t2)", margin: "0 auto", maxWidth: 560 } }, info[1] + " " + (en ? "This area is part of Pro." : "Dieser Bereich gehört zu Pro.")),
+    h("div", { className: "tw-pro-liste" }, alle.map((x, i) => h("div", { key: i }, h("span", { style: { color: "var(--gold-text,#DDB65F)", fontWeight: 800 } }, "✓"), h("span", null, h("b", null, x[0]), " — ", x[1])))),
+    h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "var(--t2)", marginBottom: 14 } }, en ? "Pro: €49 per month or €490 per year · everything in Free included" : "Pro: 49 € im Monat oder 490 € im Jahr · alles aus Free inklusive"),
+    h("div", { className: "tw-pro-knoepfe" },
+      h("button", { type: "button", onClick: () => twZuPro("monat"), style: { border: "1px solid #B8913F", backgroundColor: "#C8A355", backgroundImage: "linear-gradient(135deg,#EFD489 0%,#C8A355 48%,#A9822F 100%)", color: "#1A1306" } }, en ? "Choose Pro — €49/month" : "Pro wählen — 49 €/Monat"),
+      h("button", { type: "button", onClick: () => twZuPro("jahr"), style: { border: "1px solid var(--linie)", background: "var(--karte)", color: "var(--t1)" } }, en ? "Yearly — €490" : "Jährlich — 490 €"))));
+}
+function twMwText(eur) {
+  const en = LANG === "en"; const n = Number(eur) || 0;
+  if (!n) return "–";
+  if (n >= 1e6) { const m = n / 1e6; const t = (m >= 10 ? Math.round(m) : Math.round(m * 10) / 10).toLocaleString(en ? "en-GB" : "de-DE"); return en ? "€" + t + "m" : t + " Mio. €"; }
+  const k = Math.round(n / 1000).toLocaleString(en ? "en-GB" : "de-DE"); return en ? "€" + k + "k" : k + " Tsd. €";
+}
+function MarktwertVue({ openPlayer }) {
+  const h = React.createElement; const en = LANG === "en";
+  const [liga, setLiga] = useState(""); const [pos, setPos] = useState(""); const [alter, setAlter] = useState(""); const [nurInd, setNurInd] = useState(false);
+  const [q, setQ] = useState(""); const [qAktiv, setQAktiv] = useState("");
+  const [zeilen, setZeilen] = useState(null); const [gesamt, setGesamt] = useState(null); const [seite, setSeite] = useState(0); const [mehrDa, setMehrDa] = useState(false); const [laedt, setLaedt] = useState(false); const [fehler, setFehler] = useState(""); const [stand, setStand] = useState("");
+  const SEITE = 50;
+  useEffect(() => { const t = setTimeout(() => setQAktiv(q.trim()), 350); return () => clearTimeout(t); }, [q]);
+  useEffect(() => { setSeite(0); }, [liga, pos, alter, nurInd, qAktiv]);
+  useEffect(() => {
+    let aktiv = true; setLaedt(true); setFehler("");
+    const sel = "player_id,name,team,league,position,age,photo,tm_value_eur,tm_value_text,mw_status,mw_von,mw_bis,mw_stand";
+    let url = "/db/players?select=" + sel + "&tm_value_eur=not.is.null&order=tm_value_eur.desc,player_id.asc&limit=" + SEITE + "&offset=" + (seite * SEITE);
+    if (liga) url += "&league=eq." + encodeURIComponent(liga);
+    if (pos) url += "&position=eq." + encodeURIComponent(pos);
+    if (alter === "u21") url += "&age=lte.21"; else if (alter === "u23") url += "&age=lte.23"; else if (alter === "24-29") url += "&age=gte.24&age=lte.29"; else if (alter === "30") url += "&age=gte.30";
+    if (nurInd) url += "&mw_status=eq.indikativ";
+    if (qAktiv) url += "&name=ilike." + encodeURIComponent("*" + qAktiv.replace(/[*,()"]/g, " ").trim() + "*");
+    fetch(url, { credentials: "omit", cache: "no-store", headers: seite === 0 ? { Prefer: "count=exact" } : {} })
+      .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); if (seite === 0) { const m = /\/(\d+)/.exec(r.headers.get("content-range") || ""); setGesamt(m ? Number(m[1]) : null); } return r.json(); })
+      .then(d => { if (!aktiv) return; const liste = Array.isArray(d) ? d : []; setZeilen(alt => seite === 0 ? liste : (alt || []).concat(liste)); setMehrDa(liste.length === SEITE); const s0 = liste.find(x => x.mw_stand); if (s0 && !stand) setStand(String(s0.mw_stand).slice(0, 10)); setLaedt(false); })
+      .catch(() => { if (!aktiv) return; setFehler(en ? "Market values could not be loaded." : "Marktwerte konnten nicht geladen werden."); setLaedt(false); });
+    return () => { aktiv = false; };
+  }, [liga, pos, alter, nurInd, qAktiv, seite]);
+  const ligen = Object.keys(typeof LIGA_LAND === "object" && LIGA_LAND ? LIGA_LAND : {}).filter(l => l !== "La Liga").sort((a, b) => (String(LIGA_LAND[a]).localeCompare(String(LIGA_LAND[b]), "de") || a.localeCompare(b, "de")));
+  const POS = [["", en ? "All positions" : "Alle Positionen"], ["Torwart", en ? "Goalkeeper" : "Torwart"], ["Abwehr", en ? "Defence" : "Abwehr"], ["Mittelfeld", en ? "Midfield" : "Mittelfeld"], ["Sturm", en ? "Attack" : "Sturm"]];
+  const ALTER = [["", en ? "All ages" : "Alle Altersklassen"], ["u21", en ? "21 and younger" : "21 und jünger"], ["u23", en ? "23 and younger" : "23 und jünger"], ["24-29", "24–29"], ["30", en ? "30 and older" : "30 und älter"]];
+  const posTxt = (p) => { const f = POS.find(x => x[0] === p); return f && p ? f[1] : (p || ""); };
+  const kopf = h("div", null,
+    h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, letterSpacing: 1.6, color: "var(--gold-text,#DDB65F)", textTransform: "uppercase" } }, en ? "Market value" : "Marktwert"),
+    h("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 26, margin: "2px 0 4px", textTransform: "uppercase", letterSpacing: .4, color: INK } }, en ? "TW market values" : "TW-Marktwerte"),
+    h("p", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, margin: 0, maxWidth: 860, lineHeight: 1.6 } }, en
+      ? "Our own market values from the TransferWire model: calculated from comparable transfers, performance, playing time, age, contract length and availability. The values are indicative estimates with a range; “limited” means fewer comparable data points and a wider range." + (stand ? " As of " + stand + "." : "")
+      : "Eigene Marktwerte aus dem TransferWire-Modell: berechnet aus Vergleichstransfers, Leistung, Einsatzzeit, Alter, Vertragslaufzeit und Verfügbarkeit. Die Werte sind indikative Schätzungen mit Spanne; „eingeschränkt“ heißt: weniger Vergleichsdaten, breitere Spanne." + (stand ? " Stand: " + stand.split("-").reverse().join(".") + "." : "")));
+  const auswahl = (wert, setz, optionen, label) => h("select", { value: wert, onChange: e => setz(e.target.value), "aria-label": label }, optionen.map(([v, t]) => h("option", { key: v || "_", value: v }, t)));
+  const ligaAuswahl = h("select", { value: liga, onChange: e => setLiga(e.target.value), "aria-label": en ? "League" : "Liga" }, h("option", { value: "" }, en ? "All leagues" : "Alle Ligen"), ligen.map(l => h("option", { key: l, value: l }, l + " · " + LIGA_LAND[l])));
+  const filter = h("div", { className: "tw-mw-filter" },
+    h("input", { type: "search", value: q, placeholder: en ? "Search player …" : "Spieler suchen …", onChange: e => setQ(e.target.value), "aria-label": en ? "Search player" : "Spieler suchen" }),
+    ligaAuswahl, auswahl(pos, setPos, POS, "Position"), auswahl(alter, setAlter, ALTER, en ? "Age" : "Alter"),
+    h("label", null, h("input", { type: "checkbox", checked: nurInd, onChange: e => setNurInd(e.target.checked) }), en ? "indicative only" : "nur indikative Werte"),
+    gesamt != null ? h("span", { style: { marginLeft: "auto", fontFamily: FONT_BODY, fontSize: 12, color: MUTED } }, gesamt.toLocaleString(en ? "en-GB" : "de-DE") + (en ? " players with a market value" : " Spieler mit Marktwert")) : null);
+  const kopfZeile = h("div", { className: "tw-mw-zeile tw-mw-kopf" }, h("span", { style: { textAlign: "right" } }, "#"), h("span", null, en ? "Player" : "Spieler"), h("span", { className: "tw-mw-verein" }, en ? "Club · league" : "Verein · Liga"), h("span", { style: { textAlign: "right" } }, en ? "TW market value" : "TW-Marktwert"), h("span", { className: "tw-mw-statusz" }, "Status"));
+  const zeile = (x, i) => h("div", { key: x.player_id, className: "tw-mw-zeile", role: "button", tabIndex: 0, onClick: () => openPlayer && openPlayer(x.player_id, x.name, x.team), onKeyDown: e => { if (e.key === "Enter" && openPlayer) openPlayer(x.player_id, x.name, x.team); } },
+    h("span", { className: "tw-mw-rang" }, i + 1),
+    h("span", { className: "tw-mw-sp" }, x.photo ? h("img", { src: x.photo, alt: "", loading: "lazy", onError: e => { e.target.style.visibility = "hidden"; } }) : h("span", { style: { width: 34 } }),
+      h("span", { style: { minWidth: 0 } }, h("div", { className: "tw-mw-name" }, x.name), h("div", { className: "tw-mw-klein" }, [posTxt(x.position), x.age ? (x.age + (en ? " yrs" : " J.")) : ""].filter(Boolean).join(" · ")))),
+    h("span", { className: "tw-mw-verein", style: { minWidth: 0 } }, h("div", { className: "tw-mw-name", style: { fontWeight: 700 } }, x.team || "–"), h("div", { className: "tw-mw-klein" }, x.league || "")),
+    h("span", null, h("div", { className: "tw-mw-wert" }, en ? twMwText(x.tm_value_eur) : (x.tm_value_text || twMwText(x.tm_value_eur))), (x.mw_von && x.mw_bis) ? h("div", { className: "tw-mw-klein", style: { textAlign: "right" } }, (en ? "Range " : "Spanne ") + twMwText(x.mw_von) + " – " + twMwText(x.mw_bis)) : null),
+    h("span", { className: "tw-mw-statusz" }, h("span", { className: "tw-mw-status " + (x.mw_status === "indikativ" ? "ind" : "ein") }, x.mw_status === "indikativ" ? (en ? "indicative" : "indikativ") : (en ? "limited" : "eingeschränkt"))));
+  return h("div", { className: "tw-mw" }, kopf, filter,
+    fehler ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "var(--sc-schwach-text)", padding: "12px 0" } }, fehler) : null,
+    zeilen === null ? h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), en ? "Loading market values …" : "Marktwerte werden geladen …")
+      : zeilen.length === 0 ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "14px 0" } }, en ? "No players match these filters." : "Keine Spieler zu diesen Filtern.")
+      : h("div", { style: { border: "1px solid var(--linie)", borderRadius: 12, overflow: "hidden" } }, kopfZeile, zeilen.map(zeile)),
+    (zeilen && mehrDa) ? h("div", { style: { textAlign: "center", marginTop: 14 } }, h("button", { type: "button", disabled: laedt, onClick: () => setSeite(seite + 1), style: { cursor: "pointer", minHeight: 42, padding: "0 18px", border: "1px solid var(--linie)", background: "var(--karte)", color: "var(--t1)", borderRadius: 10, fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800 } }, laedt ? (en ? "Loading …" : "Lädt …") : (en ? "Show 50 more" : "Weitere 50 anzeigen"))) : null);
+}
+
 function TransferApp({
   account,
   onNavigate: onNavigateSeite,
@@ -11384,7 +11532,7 @@ function TransferApp({
   const [country, setCountry] = useState("");
   const [league, setLeague] = useState("");
   const [club, setClub] = useState("");
-  const [view, setView] = useState(() => ((location.hash || "") === "#transfers-ticker" ? "geruechte" : "feed")); useEffect(() => { try { if (view !== "geruechte" && location.hash === "#transfers-ticker") history.replaceState(null, "", location.pathname + location.search); } catch (e) {} }, [view]);
+  const [view, setViewRoh] = useState(() => ((location.hash || "") === "#transfers-ticker" ? "geruechte" : "feed")); const [proZiel, setProZiel] = useState(null); const setView = (v) => { if (!isPrem && TW_PRO_VIEWS.indexOf(v) >= 0) { setProZiel(v); setViewRoh("pro"); return; } setProZiel(null); setViewRoh(v); }; useEffect(() => { try { if (view !== "geruechte" && location.hash === "#transfers-ticker") history.replaceState(null, "", location.pathname + location.search); } catch (e) {} }, [view]);
   const FEED_SEITE = 60;
   const [feedLimit, setFeedLimit] = useState(FEED_SEITE);
   const [plSel, setPlSel] = useState(null);
@@ -11416,7 +11564,7 @@ function TransferApp({
   useEffect(() => { const t0 = setTimeout(() => { try { localStorage.setItem("tw_seen", String(Date.now())); } catch (e) {} }, 6000); return () => clearTimeout(t0); }, []);
   const [posFilter, setPosFilter] = useState("");
   const [watch, setWatch] = useState(loadWatch());
-  const [addSheet, setAddSheet] = useState(null);
+  const [addSheet, setAddSheetRoh] = useState(null); const setAddSheet = (x) => { if (x && !isPrem) { twPremiumHinweis(); return; } setAddSheetRoh(x); };
   const [watchDlg, setWatchDlg] = useState(false);
   const [matchProfil, setMatchProfil] = useState(null);
   const [profilSheet, setProfilSheet] = useState(false);
@@ -11864,12 +12012,14 @@ function TransferApp({
     removeWatch("profil", raw);
   };
   const updateWatch = next => {
+    if (!isPrem) { twPremiumHinweis(); return; }   // 23.10.2026: Workspace (Merkliste, Alerts) gehoert zu Pro
     setWatch(next);
     saveWatch(next);
     syncWatch(account, next);
   };
   const addWatch = (typ, wert) => {
     if (!wert) return;
+    if (!isPrem) { twPremiumHinweis(); return; }
     if ((watch.items || []).some(x => x.t === typ && x.w === wert)) return;
     const next = Object.assign({}, watch, {
       items: [...(watch.items || []), {
@@ -11996,7 +12146,7 @@ function TransferApp({
     if (nachricht === null) return;
     if (nachricht.trim().length < 3) { window.alert("Bitte eine kurze Nachricht eingeben."); return; }
     fetch("/api/tw-community-contact", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.assign(cAuthBody(), { post_id: postId, nachricht: nachricht.trim() })) }).then(r => r.json()).then(d => {
-      window.alert(d && d.ok ? "\u2713 Kontaktanfrage zugestellt \u2014 der Autor kann dir direkt per E-Mail antworten." : d && d.grund === "eigener" ? "Das ist dein eigener Beitrag." : d && d.grund === "premium" ? "Nur im Premium-Abo m\u00f6glich." : "Kontaktanfrage fehlgeschlagen.");
+      window.alert(d && d.ok ? "\u2713 Kontaktanfrage zugestellt \u2014 der Autor kann dir direkt per E-Mail antworten." : d && d.grund === "eigener" ? "Das ist dein eigener Beitrag." : d && d.grund === "premium" ? "Nur mit Pro m\u00f6glich." : "Kontaktanfrage fehlgeschlagen.");
     }).catch(() => window.alert("Verbindung fehlgeschlagen."));
   };
   const meldePost = (id, kind) => {
@@ -12211,7 +12361,7 @@ function TransferApp({
       alignItems: "center",
       gap: 16
     }
-  }, /*#__PURE__*/React.createElement(MobilNav, { view: view, setView: setView, news: news, needsBySport: needsBySport, onNavigate: onNavigate, onScout: () => setView("assistent"), items: [["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["spieltag", LANG === "en" ? "Matchday" : "Spieltag"], ["gesucht", LANG === "en" ? "Club seeks" : "Verein sucht"], ["ranking", "Performance"], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]] }), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(MobilNav, { view: view, setView: setView, news: news, needsBySport: needsBySport, onNavigate: onNavigate, onScout: () => setView("assistent"), items: [["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["spieltag", LANG === "en" ? "Matchday" : "Spieltag"], ["gesucht", LANG === "en" ? "Club seeks" : "Verein sucht"], ["ranking", "Performance"], ["players", t("players_tab")], ["marktwert", LANG === "en" ? "Market value" : "Marktwert"], ["chancen", t("ch_tab")], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]] }), /*#__PURE__*/React.createElement("div", {
     className: "tw-logo",
     style: {
       display: "flex",
@@ -12271,7 +12421,7 @@ function TransferApp({
     style: {
       position: "relative"
     }
-  }, /*#__PURE__*/React.createElement("button", { type: "button", onClick: () => { setGlockeOffen(!glockeOffen); setMenuOpen(false); }, "aria-label": "Benachrichtigungen", title: LANG === "en" ? "Notifications" : "Benachrichtigungen", style: { position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.16)", borderRadius: 9, padding: "10px 11px", marginRight: 8, color: "var(--t1)" } }, /*#__PURE__*/React.createElement("span", { style: { width: 20, height: 20, display: "inline-flex" }, dangerouslySetInnerHTML: { __html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>' } }), ((watch && (watch.alerts || watch.digest)) || wr.an === true) ? /*#__PURE__*/React.createElement("span", { style: { position: "absolute", top: 7, right: 8, width: 8, height: 8, borderRadius: 99, background: "var(--gold)", border: "2px solid var(--seite)" } }) : null), glockeOffen && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", { onClick: () => setGlockeOffen(false), style: { position: "fixed", inset: 0, zIndex: 1100 } }), /*#__PURE__*/React.createElement("div", { style: { position: "absolute", right: 52, top: "calc(100% + 8px)", zIndex: 1110, background: CARD, border: `1px solid ${HAIR}`, borderRadius: 12, boxShadow: "0 14px 38px rgba(0,0,0,.45)", minWidth: 300, padding: "12px 14px" } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, color: MUTED, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 } }, t("set_notif")), /*#__PURE__*/React.createElement("label", { style: { display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 13, color: INK, marginBottom: 8, cursor: "pointer" } }, /*#__PURE__*/React.createElement("input", { type: "checkbox", checked: !!(watch && watch.alerts), onChange: e => updateWatch(Object.assign({}, watch, { alerts: e.target.checked, asked: true })) }), /*#__PURE__*/React.createElement("span", null, t("set_alerts"))), /*#__PURE__*/React.createElement("label", { style: { display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 13, color: INK, marginBottom: 10, cursor: "pointer" } }, /*#__PURE__*/React.createElement("input", { type: "checkbox", checked: !!(watch && watch.digest), onChange: e => updateWatch(Object.assign({}, watch, { digest: e.target.checked, asked: true })) }), /*#__PURE__*/React.createElement("span", null, t("set_digest"))), React.createElement(TwWochenreportSchalter, { wr: wr, onChange: setWochenreport, angemeldet: !!(account && account.email) }), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, (watch && watch.alertEmail) || (account && account.email) || ""), /*#__PURE__*/React.createElement("button", { type: "button", onClick: () => { setGlockeOffen(false); setShowSettings(true); }, style: { marginTop: 10, cursor: "pointer", background: "none", border: "none", padding: 0, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "var(--gold-text)" } }, LANG === "en" ? "All settings \u2192" : "Alle Einstellungen \u2192"))), /*#__PURE__*/React.createElement("button", { onClick: () => { setMenuOpen(!menuOpen); setGlockeOffen(false); }, "aria-label": "Men\u00fc", title: LANG === "en" ? "Settings" : "Einstellungen", style: { display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.16)", borderRadius: 9, padding: "10px 11px", color: "var(--t1)" } }, /*#__PURE__*/React.createElement("span", { style: { width: 20, height: 20, display: "inline-flex" }, dangerouslySetInnerHTML: { __html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>' } })), menuOpen && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("button", { type: "button", onClick: () => { setGlockeOffen(!glockeOffen); setMenuOpen(false); }, "aria-label": "Benachrichtigungen", title: LANG === "en" ? "Notifications" : "Benachrichtigungen", style: { position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.16)", borderRadius: 9, padding: "10px 11px", marginRight: 8, color: "var(--t1)" } }, /*#__PURE__*/React.createElement("span", { style: { width: 20, height: 20, display: "inline-flex" }, dangerouslySetInnerHTML: { __html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>' } }), ((watch && (watch.alerts || watch.digest)) || wr.an === true) ? /*#__PURE__*/React.createElement("span", { style: { position: "absolute", top: 7, right: 8, width: 8, height: 8, borderRadius: 99, background: "var(--gold)", border: "2px solid var(--seite)" } }) : null), glockeOffen && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", { onClick: () => setGlockeOffen(false), style: { position: "fixed", inset: 0, zIndex: 1100 } }), /*#__PURE__*/React.createElement("div", { style: { position: "absolute", right: 52, top: "calc(100% + 8px)", zIndex: 1110, background: CARD, border: `1px solid ${HAIR}`, borderRadius: 12, boxShadow: "0 14px 38px rgba(0,0,0,.45)", minWidth: 300, padding: "12px 14px" } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, color: MUTED, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 } }, t("set_notif"), isPrem ? "" : " \u00b7 Pro"), /*#__PURE__*/React.createElement("label", { style: { display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 13, color: INK, marginBottom: 8, cursor: "pointer" } }, /*#__PURE__*/React.createElement("input", { type: "checkbox", checked: !!(watch && watch.alerts), onChange: e => updateWatch(Object.assign({}, watch, { alerts: e.target.checked, asked: true })) }), /*#__PURE__*/React.createElement("span", null, t("set_alerts"))), /*#__PURE__*/React.createElement("label", { style: { display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 13, color: INK, marginBottom: 10, cursor: "pointer" } }, /*#__PURE__*/React.createElement("input", { type: "checkbox", checked: !!(watch && watch.digest), onChange: e => updateWatch(Object.assign({}, watch, { digest: e.target.checked, asked: true })) }), /*#__PURE__*/React.createElement("span", null, t("set_digest"))), (isPrem ? React.createElement(TwWochenreportSchalter, { wr: wr, onChange: setWochenreport, angemeldet: !!(account && account.email) }) : React.createElement("button", { type: "button", className: "tw-glocke-pro", onClick: () => { setGlockeOffen(false); twZuPro(); }, style: { display: "block", width: "100%", textAlign: "left", cursor: "pointer", borderTop: "1px solid " + HAIR, borderLeft: "none", borderRight: "none", borderBottom: "none", background: "none", padding: "10px 0 0", marginBottom: 10, fontFamily: FONT_BODY, fontSize: 12.5, lineHeight: 1.5, color: "var(--t2)" } }, LANG === "en" ? "E-mail alerts, morning briefing and the weekly report are part of Pro. " : "E-Mail-Alerts, Morgen-Briefing und der wöchentliche Report gehören zu Pro. ", React.createElement("b", { style: { color: "var(--gold-text)" } }, LANG === "en" ? "View Pro \u2192" : "Pro ansehen \u2192"))), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, (watch && watch.alertEmail) || (account && account.email) || ""), /*#__PURE__*/React.createElement("button", { type: "button", onClick: () => { setGlockeOffen(false); setShowSettings(true); }, style: { marginTop: 10, cursor: "pointer", background: "none", border: "none", padding: 0, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "var(--gold-text)" } }, LANG === "en" ? "All settings \u2192" : "Alle Einstellungen \u2192"))), /*#__PURE__*/React.createElement("button", { onClick: () => { setMenuOpen(!menuOpen); setGlockeOffen(false); }, "aria-label": "Men\u00fc", title: LANG === "en" ? "Settings" : "Einstellungen", style: { display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.16)", borderRadius: 9, padding: "10px 11px", color: "var(--t1)" } }, /*#__PURE__*/React.createElement("span", { style: { width: 20, height: 20, display: "inline-flex" }, dangerouslySetInnerHTML: { __html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>' } })), menuOpen && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     onClick: () => setMenuOpen(false),
     style: {
       position: "fixed",
@@ -12403,7 +12553,7 @@ function TransferApp({
       top: 0,
       zIndex: 5
     }
-  }, /*#__PURE__*/React.createElement(SeitenleisteNeu, { view: view, setView: setView, news: news, needsBySport: needsBySport, onNavigate: onNavigate, onScout: () => setView("assistent") }), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(SeitenleisteNeu, { view: view === "pro" ? (proZiel || view) : view, setView: setView, news: news, needsBySport: needsBySport, onNavigate: onNavigate, onScout: () => setView("assistent") }), /*#__PURE__*/React.createElement("div", {
     className: "tw-tabwrap",
     style: {
       maxWidth: 1440,
@@ -12425,7 +12575,7 @@ function TransferApp({
       flexWrap: "wrap"
     },
     className: "tw-tabs"
-  }, [["_h", LANG === "en" ? "Market" : "Markt"], ["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["spieltag", LANG === "en" ? "Matchday" : "Spieltag"], ["gesucht", LANG === "en" ? "Club seeks" : "Verein sucht"], ["ranking", "Performance"], ["players", t("players_tab")], ["chancen", t("ch_tab")], ["_h", LANG === "en" ? "My work" : "Meine Arbeit"], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]].map(([k, label]) => {
+  }, [["_h", LANG === "en" ? "Market" : "Markt"], ["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["spieltag", LANG === "en" ? "Matchday" : "Spieltag"], ["gesucht", LANG === "en" ? "Club seeks" : "Verein sucht"], ["ranking", "Performance"], ["players", t("players_tab")], ["marktwert", LANG === "en" ? "Market value" : "Marktwert"], ["chancen", t("ch_tab")], ["_h", LANG === "en" ? "My work" : "Meine Arbeit"], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]].map(([k, label]) => {
     if (k === "_h") return /*#__PURE__*/React.createElement("div", { key: "h-" + label, className: "tw-navhead" }, label);
     const active = view === k || (k === "community" && (view === "networking" || view === "moderation")) || (k === "talente" && (view === "listen" || view === "suche" || view === "nachwuchs"));
     let badge = 0; try { if (k === "feed") badge = (Array.isArray(news) ? news : []).filter(n => Date.now() - new Date(n.published_at || n.created_at || n.createdAt || 0).getTime() < 864e5).length; else if (k === "gesucht") badge = Array.isArray(needsBySport) ? needsBySport.length : 0; } catch (e) { badge = 0; }
@@ -12457,7 +12607,7 @@ function TransferApp({
       width: "100%",
       boxSizing: "border-box"
     }
-  }, view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein }), view === "akquise" && /*#__PURE__*/React.createElement(AkquiseVue, { isPrem: isPrem, account: account, openPlayer: openPlayer }), view === "aehnlich" && aehnlichStart && React.createElement(AehnlicheSpielerSeite, { key: "ae-" + aehnlichStart.pid, ausgang: aehnlichStart, onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "spielervergleich" && React.createElement(SpielerVergleichSeite, { key: "vgl-" + (vglStart || []).map(x => x.pid).join("-"), start: vglStart || [], onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news.filter(n => n.type !== "verletzung" && n.type !== "leistung" && n.type !== "meldung" && !n._ausgeblendet), onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(VereinSuchtVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, view === "pro" && React.createElement(ProSperreVue, { ziel: proZiel }), view === "marktwert" && React.createElement(MarktwertVue, { openPlayer: openPlayer }), view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein }), view === "akquise" && /*#__PURE__*/React.createElement(AkquiseVue, { isPrem: isPrem, account: account, openPlayer: openPlayer }), view === "aehnlich" && aehnlichStart && React.createElement(AehnlicheSpielerSeite, { key: "ae-" + aehnlichStart.pid, ausgang: aehnlichStart, onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "spielervergleich" && React.createElement(SpielerVergleichSeite, { key: "vgl-" + (vglStart || []).map(x => x.pid).join("-"), start: vglStart || [], onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news.filter(n => n.type !== "verletzung" && n.type !== "leistung" && n.type !== "meldung" && !n._ausgeblendet), onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(VereinSuchtVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       background: "transparent",
       border: "none",
@@ -13248,9 +13398,9 @@ function TransferApp({
   view === "networking" && /*#__PURE__*/React.createElement("div", { style: { gridColumn: "1 / -1", display: "grid", gap: 14 } },
     /*#__PURE__*/React.createElement(CommunitySub, { view: view, setView: setView, admin: istAdmin }),
     /*#__PURE__*/React.createElement("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 24, margin: "2px 0 0", textTransform: "uppercase", letterSpacing: .4, color: INK } }, "Networking"),
-    /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, margin: "0 0 2px", maxWidth: 720 } }, "Kontakte finden, Deals anschieben: Suche Zug\u00e4nge zu Vereinen, biete Spieler an oder hol dir Hilfe aus dem Netzwerk \u2014 exklusiv f\u00fcr Premium-Mitglieder."),
+    /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, margin: "0 0 2px", maxWidth: 720 } }, "Kontakte finden, Deals anschieben: Suche Zug\u00e4nge zu Vereinen, biete Spieler an oder hol dir Hilfe aus dem Netzwerk \u2014 exklusiv f\u00fcr Pro-Mitglieder."),
     account && account.plan === "premium" ? /*#__PURE__*/React.createElement(React.Fragment, null,
-      /*#__PURE__*/React.createElement("div", { style: { border: "1px solid #cfe3f5", background: "#eef6fd", borderRadius: 11, padding: "10px 14px", fontFamily: FONT_BODY, fontSize: 12.5, color: "#1e5d8f", fontWeight: 600 } }, "\u24D8 Anfragen sehen nur Premium-Mitglieder. Kontakt l\u00e4uft \u00fcber TW-Vermittlung \u2014 deine E-Mail wird erst sichtbar, wenn du selbst antwortest."), /*#__PURE__*/React.createElement(CmtySuche, { wert: cNetSuche, setWert: setCNetSuche, gesamt: cNetPosts.length, treffer: cmtyFilter(cNetPosts, cNetSuche).length, placeholder: "Anfragen durchsuchen: Position, Verein, Land, Stichwort \u2026" }),
+      /*#__PURE__*/React.createElement("div", { style: { border: "1px solid #cfe3f5", background: "#eef6fd", borderRadius: 11, padding: "10px 14px", fontFamily: FONT_BODY, fontSize: 12.5, color: "#1e5d8f", fontWeight: 600 } }, "\u24D8 Anfragen sehen nur Pro-Mitglieder. Kontakt l\u00e4uft \u00fcber TW-Vermittlung \u2014 deine E-Mail wird erst sichtbar, wenn du selbst antwortest."), /*#__PURE__*/React.createElement(CmtySuche, { wert: cNetSuche, setWert: setCNetSuche, gesamt: cNetPosts.length, treffer: cmtyFilter(cNetPosts, cNetSuche).length, placeholder: "Anfragen durchsuchen: Position, Verein, Land, Stichwort \u2026" }),
       /*#__PURE__*/React.createElement("div", { className: "tw-card", style: Object.assign({}, CARD_BOX, { padding: 16 }) },
         /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, letterSpacing: .6, textTransform: "uppercase", color: MUTED, marginBottom: 8 } }, "Frage / Angebot"),
         /*#__PURE__*/React.createElement("textarea", { value: cNetText, onChange: e => setCNetText(e.target.value), maxLength: 1200, placeholder: "z. B. \u201eSuche direkten Kontakt in die sportliche Leitung von \u2026 f\u00fcr einen St\u00fcrmer (U21, abl\u00f6sefrei). Wer kann vermitteln?\u201c", style: { width: "100%", minHeight: 96, resize: "vertical", border: "1px solid " + HAIR, borderRadius: 9, padding: "10px 12px", fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.55, color: INK, boxSizing: "border-box" } }),
@@ -13268,9 +13418,9 @@ function TransferApp({
       cNetPosts.length === 0 && /*#__PURE__*/React.createElement(EmptyState, { icon: "", title: "Noch keine Anfragen", text: "Starte das Netzwerk \u2014 stelle eine Frage oder ver\u00f6ffentliche ein Angebot." }), cNetPosts.length > 0 && cmtyFilter(cNetPosts, cNetSuche).length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Keine Treffer f\u00fcr \u201e" + cNetSuche + "\u201c.")) :
     /*#__PURE__*/React.createElement("div", { className: "tw-card", style: Object.assign({}, CARD_BOX, { padding: "34px 24px", textAlign: "center", maxWidth: 560 }) },
       /*#__PURE__*/React.createElement("div", { style: { width: 52, height: 52, borderRadius: 99, background: "var(--dunkel)", color: "#e3b34e", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 12 } }, ""),
-      /*#__PURE__*/React.createElement("h3", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 19, margin: "0 0 6px", textTransform: "uppercase", color: INK } }, "Nur im Premium-Abo"),
+      /*#__PURE__*/React.createElement("h3", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 19, margin: "0 0 6px", textTransform: "uppercase", color: INK } }, "Nur mit Pro"),
       /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, lineHeight: 1.6, margin: "0 0 16px" } }, "Networking verbindet dich direkt mit Vermittlern, Scouts und Vereinsmitarbeitern \u2014 Fragen und Angebote posten, Kontakte kn\u00fcpfen, Deals anschieben."),
-      /*#__PURE__*/React.createElement("button", { onClick: () => window.open(stripeCheckoutUrl("premium", "monat", 1, ""), "_blank"), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 900, padding: "12px 22px", borderRadius: 10, border: "none", background: "linear-gradient(90deg,#efc25e,#d9963a)", color: "#1c1508", boxShadow: "0 8px 22px rgba(217,150,58,.35)" } }, "Premium freischalten \u2014 99 \u20ac/Monat"))),
+      /*#__PURE__*/React.createElement("button", { onClick: () => twZuPro("monat"), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 900, padding: "12px 22px", borderRadius: 10, border: "none", background: "linear-gradient(90deg,#efc25e,#d9963a)", color: "#1c1508", boxShadow: "0 8px 22px rgba(217,150,58,.35)" } }, "Pro freischalten \u2014 49 \u20ac/Monat"))),
   view === "talente" && /*#__PURE__*/React.createElement(ScoutSub, { view: view, setView: setView }), view === "talente" && /*#__PURE__*/React.createElement("div", {
     style: { background: "var(--karte2)", border: "1.5px solid var(--teal)", borderRadius: 14, padding: "12px 18px", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 600, color: "var(--teal)", gridColumn: "1 / -1" }
   }, "\u24D8  ", t("tal_banner"), " ", React.createElement(ScoreInfo, { kind: "talent", size: 12, label: LANG === "en" ? "View methodology" : "Methodik ansehen" })), view === "talente" && /*#__PURE__*/React.createElement(TalentScouting, { onWatch: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); }, watched: name => (watch.items || []).some(w => w.t === "spieler" && w.w === name), onOpen: openPlayer, onVergleich: p => setPlVergleich(v => v.some(y => y.pid === p.pid) ? v.filter(y => y.pid !== p.pid) : (v.length >= 3 ? v : [...v, p])), vergleich: plVergleich }), view === "feed" && neueZahl > 0 && /*#__PURE__*/React.createElement("button", { onClick: () => { ladeFeed(); window.scrollTo({ top: 0, behavior: "smooth" }); }, style: { display: "block", margin: "0 auto 12px", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 900, cursor: "pointer", padding: "9px 18px", borderRadius: 999, border: "none", background: "var(--gold)", color: "var(--gold-schrift)", boxShadow: "0 8px 20px rgba(200,163,85,.4)" } }, "\u2191 " + neueZahl + " neue " + (neueZahl === 1 ? "Meldung" : "Meldungen")), view === "feed" && /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 10 } }, sportTabs.map(([k, label]) => { const a2 = sport === k; const c2 = k === "alle" ? "var(--dunkel)" : SPORT[k].color; return /*#__PURE__*/React.createElement("button", { key: "sp" + k, onClick: () => { setSport(k); setCountry(""); setLeague(""); setClub(""); setPosFilter(""); }, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 11px", borderRadius: 999, border: "1px solid " + (a2 ? c2 : HAIR), background: a2 ? c2 : "var(--karte)", color: a2 ? "#fff" : "var(--t2)" } }, label); }), React.createElement(TwNewsLive, { news: news, filtered: filtered, magazin: muAktivApp(view, type, query, club, league, country, sport), onOpen: it2 => twOeffnen(it2, setMSel), geheZu: setView }), type !== "alle" ? React.createElement("button", { type: "button", onClick: () => setType("alle"), title: LANG === "en" ? "Remove type filter" : "Typfilter entfernen", style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, cursor: "pointer", padding: "6px 11px", borderRadius: 999, border: "1px solid var(--gold)", background: "transparent", color: "var(--gold-text)" } }, ((TYPE[type] && (LANG === "en" ? TYPE[type].en : TYPE[type].label)) || type) + " \u2715") : null), view === "talente" ? null : /*#__PURE__*/React.createElement("div", null, view === "feed" && cascade && /*#__PURE__*/React.createElement("div", {
@@ -15146,6 +15296,7 @@ function TransferWire() {
   }, []);
   const [account, setAccountState] = useState(() => loadAccount());
   const [page, setPage] = useState(() => { var h = (location.hash || "").replace("#", ""); var a = loadAccount(); if (h === "cancel") return "cancel"; if (h === "abo" || h.indexOf("abo-") === 0) return "subscribe"; if (a) return twHatSitzung(a) ? "app" : "pruefen"; if (h === "login") return "login"; if (h === "test") return "register"; return "landing"; });
+  useEffect(() => { window.__twSeite = (p) => setPage(p); return () => { window.__twSeite = null; }; }, []);
   const [pubLegal, setPubLegal] = useState(() => { var h = (location.hash || "").replace("#", ""); return (h === "impressum" || h === "datenschutz" || h === "agb") ? h : null; });
   const twSeiteErst = React.useRef(true);
   useEffect(() => {   // Punkt 9 (Auftrag 41): nach der Anmeldung bzw. einem Seitenwechsel oben beginnen; am Handy blieb sonst die Scrollposition des Anmeldeformulars erhalten und man landete mitten im Newsfeed (beim ersten Laden/Neuladen bleibt das Verhalten des Browsers unveraendert)
@@ -15217,7 +15368,7 @@ function TransferWire() {
     return () => window.removeEventListener("tw-sitzung-weg", weg);
   }, []);
   const testLeft = account && account.plan === "test" ? account.start + TEST_MS - Date.now() : 0;
-  const active = !!account && twHatSitzung(account) && account.gueltig !== false && (account.plan === "test" && testLeft > 0 || account.plan === "abo" || account.plan === "premium");
+  const active = !!account && twHatSitzung(account) && account.gueltig !== false;   // 23.10.2026: Free ist dauerhaft (kein Testablauf mehr)
   let content;
   if (page === "register") content = /*#__PURE__*/React.createElement(RegisterForm, {
     onDone: a => {
