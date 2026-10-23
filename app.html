@@ -1157,6 +1157,10 @@ function twAuthFehler(d) {
             if (!k.has("X-TW-Sitzung")) k.set("X-TW-Sitzung", s);
             init = Object.assign({}, init || {}, { headers: k });
           }
+          // 23.10.2026 (Tarifmodell): Scouting-Schnittstellen pruefen den Tarif - Anmeldung als code/email mitgeben
+          if (typeof input === "string" && s && a.email && /\/api\/(tw-listen|tw-scoutsuche|tw-scoutkatalog)(\?|$)/.test(u) && !/[?&]code=/.test(u)) {
+            input = u + (u.indexOf("?") >= 0 ? "&" : "?") + "code=" + encodeURIComponent(s) + "&email=" + encodeURIComponent(a.email);
+          }
         }
       } catch (e) {}
       return orig(input, init).then(function (r) {
@@ -1169,6 +1173,15 @@ function twAuthFehler(d) {
         return r;
       });
     };
+  } catch (e) {}
+})();
+(function () {   // 23.10.2026: Einladungslink fuer Enterprise-Teams (#team=TWT-...) merken und aus der Adresse entfernen
+  try {
+    const m = /(?:^#|&)team=([A-Za-z0-9-]{8,40})/.exec(location.hash || "");
+    if (m) {
+      try { localStorage.setItem("tw_team_einladung", m[1].toUpperCase()); } catch (e) {}
+      try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+    }
   } catch (e) {}
 })();
 let LANG = "de";
@@ -5913,7 +5926,7 @@ function DbVue({ q, hatFilter, items, loading, stats, watch, onWatchToggle, onOp
   useEffect(() => { const f = () => setMobil(window.innerWidth <= 760); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);
   useEffect(() => {
     let aktiv = true;
-    fetch(LISTEN_URL + "?sort=score&limit=200&min_minutes=270", { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(raw => {
+    fetch(LISTEN_URL + "?ansicht=datenbank&sort=score&limit=200&min_minutes=270", { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(raw => {
       const d = normResp(raw); const it = d && Array.isArray(d.items) ? d.items : [];
       const basis = it.map(x => ({ pid: x.pid, name: x.name, team: x.team, league: x.league, pos: x.pos, age: x.age, photo: x.photo, min: x.min, goals: x.goals, assists: x.assists, score: x.score, src: x.src || "tw", sp: x.sp, mw: "", mwEur: 0, vertrag: null, fit: "" }));
       if (!aktiv) return; setEmpf(basis);
@@ -8489,6 +8502,139 @@ function ExpiredPage({
     }
   }, t("logout"))));
 }
+/* 23.10.2026: Enterprise-Teamzugaenge - Schnittstelle /api/tw-team (Ablauf "TW API: Enterprise-Team"), Pruefung und Aktionen in n8n.tw_team_api */
+const TEAM_URL = "/api/tw-team";
+const TEAM_LINK = "https://transferwire.de/app.html#team=";
+function twTeamPost(aktion, wert) {
+  const a = loadAccount() || {};
+  return authPost(TEAM_URL, { code: String(a.sitzung || a.code || ""), email: a.email || "", aktion: aktion, wert: wert == null ? "" : String(wert) });
+}
+function twTeamEinladung(neu) {
+  try { if (neu === undefined) return localStorage.getItem("tw_team_einladung") || ""; if (neu) localStorage.setItem("tw_team_einladung", neu); else localStorage.removeItem("tw_team_einladung"); } catch (e) {}
+  return "";
+}
+function twTeamFehler(f, en) {
+  const T = {
+    code_unbekannt: ["Dieser Team-Code ist nicht gültig.", "This team code is not valid."],
+    code_vergeben: ["Dieser Team-Code wurde bereits eingelöst.", "This team code has already been redeemed."],
+    eigener_code: ["Das ist ein Code deines eigenen Teams — gib ihn an ein Teammitglied weiter.", "This code belongs to your own team — pass it on to a team member."],
+    schon_im_team: ["Du bist bereits Mitglied eines Teams.", "You are already a member of a team."],
+    eigenes_abo: ["Du hast bereits ein eigenes Pro- oder Enterprise-Abo. Kündige es zuerst, wenn du dem Team beitreten möchtest.", "You already have your own Pro or Enterprise subscription. Cancel it first if you want to join the team."],
+    team_inaktiv: ["Das Enterprise-Abo dieses Teams ist gerade nicht aktiv.", "The Enterprise subscription of this team is not active right now."],
+    anmeldung: ["Bitte melde dich erneut an.", "Please sign in again."],
+    nur_inhaber: ["Das kann nur der Inhaber des Teams.", "Only the team owner can do this."],
+    konto: ["Dein Konto ist gerade nicht aktiv.", "Your account is not active right now."]
+  };
+  const x = T[f] || ["Das hat nicht geklappt — bitte versuche es gleich noch einmal.", "That did not work — please try again in a moment."];
+  return en ? x[1] : x[0];
+}
+const TEAM_FEST = ["code_unbekannt", "code_vergeben", "eigener_code", "schon_im_team", "eigenes_abo"];
+function twTeamDatum(d) { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(d || "")); return m ? m[3] + "." + m[2] + "." + m[1] : ""; }
+function TeamKarte({ account, info }) {
+  const h = React.createElement; const en = LANG === "en";
+  const [d, setD] = React.useState(null);
+  const [code, setCode] = React.useState(() => twTeamEinladung());
+  const [busy, setBusy] = React.useState(false);
+  const [msg, setMsg] = React.useState("");
+  const [frage, setFrage] = React.useState("");
+  const [kopiert, setKopiert] = React.useState("");
+  React.useEffect(() => { if (info) setD(info); }, [info]);   // Team-Daten laedt SettingsOverlay (auch fuer die Abo-Karte)
+  if (!d || !d.ok) return null;
+  if (!d.rolle && !d.kann_einloesen) return null;
+  const titel = (x) => h("div", { style: { fontFamily: FONT_BODY, fontWeight: 700, fontSize: 13.5, color: INK, marginBottom: 8 } }, x);
+  const absatz = (x) => h("p", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, lineHeight: 1.55, margin: "0 0 10px" } }, x);
+  const klein = (x, onClick, wichtig) => h("button", { type: "button", onClick: onClick, disabled: busy, style: { cursor: busy ? "default" : "pointer", background: wichtig ? "var(--gold)" : "transparent", color: wichtig ? "var(--gold-schrift)" : INK, border: wichtig ? "none" : `1px solid ${HAIR}`, borderRadius: 8, padding: "5px 10px", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, whiteSpace: "nowrap" } }, x);
+  const meldung = msg ? h("div", { role: "status", style: { fontFamily: FONT_BODY, fontSize: 12.5, color: INK, background: "var(--karte2)", borderRadius: 8, padding: "8px 10px", margin: "8px 0 0" } }, msg) : null;
+  const ausfuehren = (aktion, wert, nachher) => {
+    setBusy(true); setMsg(""); setFrage("");
+    twTeamPost(aktion, wert).then(x => {
+      setBusy(false);
+      if (x && x.ok) { if (nachher) nachher(x); else setD(x); }
+      else setMsg(twTeamFehler(x && x.fehler, en));
+    }).catch(() => { setBusy(false); setMsg(twTeamFehler("", en)); });
+  };
+  const neuLaden = () => { setMsg(en ? "Done — the app is reloading …" : "Erledigt — die App lädt neu …"); setTimeout(() => { try { location.reload(); } catch (e) {} }, 1200); };
+  const box = (...kinder) => h("div", { className: "tw-team-karte", style: { background: CARD, border: `1px solid ${HAIR}`, borderRadius: 12, padding: "14px 16px", marginBottom: 16 } }, ...kinder);
+  if (d.rolle === "inhaber") {
+    const liste = Array.isArray(d.zugaenge) ? d.zugaenge : [];
+    const n = Number(d.nutzer) || 5;
+    const kopieren = (z) => {
+      const link = TEAM_LINK + z.code;
+      const fertig = () => { setKopiert(String(z.id)); setTimeout(() => setKopiert(""), 2500); };
+      const ersatz = () => { try { const t = document.createElement("textarea"); t.value = link; t.setAttribute("readonly", ""); t.style.position = "fixed"; t.style.opacity = "0"; document.body.appendChild(t); t.select(); const ok = document.execCommand("copy"); t.remove(); if (ok) fertig(); else setMsg((en ? "Invitation link: " : "Einladungslink: ") + link); } catch (e) { setMsg((en ? "Invitation link: " : "Einladungslink: ") + link); } };
+      try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(link).then(fertig, ersatz); else ersatz(); } catch (e) { ersatz(); }
+    };
+    return box(
+      titel(en ? "Your team" : "Dein Team"),
+      absatz(en ? (n + " seats in your Enterprise subscription: your own access and " + (n - 1) + " team seats (" + d.frei + " still free). Each team code is for exactly one person — your colleague signs up for free and redeems the code, or simply opens the invitation link.")
+                : (n + " Nutzer in deinem Enterprise-Abo: dein eigener Zugang und " + (n - 1) + " Team-Zugänge (" + d.frei + " noch frei). Jeder Team-Code gilt für genau eine Person — dein Kollege registriert sich kostenlos und löst den Code ein oder öffnet einfach den Einladungslink.")),
+      h("div", { style: { display: "flex", flexDirection: "column", gap: 6 } }, liste.map((z, i) => h("div", { key: z.id, className: "tw-team-zeile", style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", padding: "7px 0", borderTop: i ? `1px solid ${HAIR}` : "none" } },
+        h("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 700, color: MUTED, minWidth: 64 } }, (en ? "Seat " : "Zugang ") + (i + 2)),
+        z.offen
+          ? h(React.Fragment, null,
+              h("code", { style: { fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: 12.5, color: INK, background: "var(--karte2)", borderRadius: 6, padding: "2px 6px" } }, z.code),
+              h("span", { style: { display: "flex", gap: 6, marginLeft: "auto" } },
+                klein(kopiert === String(z.id) ? (en ? "Copied" : "Kopiert") : (en ? "Copy link" : "Link kopieren"), () => kopieren(z)),
+                frage === "e" + z.id ? klein(en ? "Really renew?" : "Wirklich erneuern?", () => ausfuehren("erneuern", z.id), true) : klein(en ? "Renew" : "Erneuern", () => setFrage("e" + z.id))))
+          : h(React.Fragment, null,
+              h("span", { style: { fontFamily: FONT_BODY, fontSize: 13, color: INK, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis" } }, z.mitglied),
+              z.seit ? h("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, (en ? "since " : "seit ") + twTeamDatum(z.seit)) : null,
+              h("span", { style: { display: "flex", gap: 6, marginLeft: "auto" } },
+                frage === "x" + z.id ? klein(en ? "Really remove?" : "Wirklich entziehen?", () => ausfuehren("entziehen", z.id), true) : klein(en ? "Remove access" : "Zugang entziehen", () => setFrage("x" + z.id))))))),
+      h("p", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, lineHeight: 1.5, margin: "10px 0 0" } }, en ? "Renewing makes the old code invalid (e.g. if it was passed on by mistake). Removing access turns the colleague's account into Free and frees the seat with a new code." : "Erneuern macht den alten Code ungültig (z. B. wenn er versehentlich weitergegeben wurde). Zugang entziehen macht das Konto des Kollegen zu Free und gibt den Platz mit einem neuen Code frei."),
+      meldung
+    );
+  }
+  if (d.rolle === "mitglied") {
+    return box(
+      titel(en ? "Your team" : "Dein Team"),
+      absatz(en ? ("You use TransferWire Enterprise in the team of " + (d.inhaber_name || d.inhaber) + (d.seit ? " (since " + twTeamDatum(d.seit) + ")" : "") + ". All Pro features are unlocked.")
+                : ("Du nutzt TransferWire Enterprise im Team von " + (d.inhaber_name || d.inhaber) + (d.seit ? " (seit " + twTeamDatum(d.seit) + ")" : "") + ". Alle Pro-Funktionen sind freigeschaltet.")),
+      frage === "verlassen" ? klein(en ? "Really leave the team?" : "Team wirklich verlassen?", () => ausfuehren("verlassen", "", neuLaden), true) : klein(en ? "Leave team" : "Team verlassen", () => setFrage("verlassen")),
+      meldung
+    );
+  }
+  return box(
+    titel(en ? "Redeem team code" : "Team-Code einlösen"),
+    absatz(en ? "Did your agency or club give you a team code for TransferWire Enterprise? Redeem it here — all Pro features are unlocked right away." : "Du hast von deiner Agentur oder deinem Verein einen Team-Code für TransferWire Enterprise bekommen? Hier einlösen — danach sind alle Pro-Funktionen sofort freigeschaltet."),
+    h("div", { style: { display: "flex", gap: 8, flexWrap: "wrap" } },
+      h("input", { type: "text", value: code, placeholder: "TWT-XXXX-XXXX-XXXX-XXXX", "aria-label": en ? "Team code" : "Team-Code", autoComplete: "off", spellCheck: false, onChange: e => setCode(e.target.value), style: { flex: "1 1 200px", minWidth: 0, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: 13, color: INK, background: PAGE, border: `1px solid ${HAIR}`, borderRadius: 8, padding: "9px 10px" } }),
+      h(PBtn, { kind: "green", onClick: () => { if (!busy && code.trim()) ausfuehren("einloesen", code.trim(), () => { twTeamEinladung(null); neuLaden(); }); } }, busy ? "…" : (en ? "Redeem" : "Einlösen"))),
+    meldung
+  );
+}
+function TeamEinladung({ account }) {
+  const h = React.createElement; const en = LANG === "en";
+  const [code] = React.useState(() => twTeamEinladung());
+  const [zu, setZu] = React.useState(false);
+  const [busy, setBusy] = React.useState(false);
+  const [msg, setMsg] = React.useState("");
+  const [fertig, setFertig] = React.useState(false);
+  if (!code || zu || !account) return null;
+  const istBezahlt = account.plan === "premium";
+  const schliessen = (vergessen) => { if (vergessen) twTeamEinladung(null); setZu(true); };
+  const einloesen = () => {
+    setBusy(true); setMsg("");
+    twTeamPost("einloesen", code).then(x => {
+      setBusy(false);
+      if (x && x.ok) { twTeamEinladung(null); setFertig(true); setTimeout(() => { try { location.reload(); } catch (e) {} }, 1400); }
+      else { setMsg(twTeamFehler(x && x.fehler, en)); if (x && TEAM_FEST.indexOf(x.fehler) >= 0) twTeamEinladung(null); }
+    }).catch(() => { setBusy(false); setMsg(twTeamFehler("", en)); });
+  };
+  const text = fertig ? (en ? "Unlocked — all Pro features are now available. The app is reloading …" : "Freigeschaltet — alle Pro-Funktionen stehen dir jetzt zur Verfügung. Die App lädt neu …")
+    : istBezahlt ? (en ? "This invitation link is for an Enterprise team. Your account already has Pro or Enterprise, so there is nothing to redeem." : "Dieser Einladungslink gehört zu einem Enterprise-Team. Dein Konto hat bereits Pro oder Enterprise — einlösen ist nicht nötig.")
+    : (en ? ("You have been invited to use TransferWire Enterprise in a team. One click unlocks all Pro features for your account " + (account.email || "") + ".") : ("Du wurdest eingeladen, TransferWire Enterprise im Team zu nutzen. Mit einem Klick werden alle Pro-Funktionen für dein Konto " + (account.email || "") + " freigeschaltet."));
+  return h("div", { className: "tw-team-einladung", role: "dialog", "aria-modal": "true", style: { position: "fixed", inset: 0, zIndex: 1200, background: "rgba(15,15,17,.5)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }, onClick: () => { if (!busy && !fertig) schliessen(istBezahlt); } },
+    h("div", { onClick: e => e.stopPropagation(), style: { maxWidth: 440, width: "100%", background: PAGE, borderRadius: 16, padding: "22px 22px 20px", boxShadow: "0 10px 40px rgba(0,0,0,.25)" } },
+      h("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 22, color: INK, textTransform: "uppercase", marginBottom: 10 } }, en ? "Team invitation" : "Team-Einladung"),
+      h("p", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: INK, lineHeight: 1.6, margin: "0 0 14px" } }, text),
+      msg ? h("div", { role: "status", style: { fontFamily: FONT_BODY, fontSize: 12.5, color: INK, background: "var(--karte2)", borderRadius: 8, padding: "8px 10px", margin: "0 0 12px" } }, msg) : null,
+      fertig ? null : h("div", { style: { display: "flex", gap: 8, flexWrap: "wrap" } },
+        istBezahlt ? h(PBtn, { kind: "green", full: true, onClick: () => schliessen(true) }, "OK")
+          : h(React.Fragment, null,
+              h(PBtn, { kind: "green", onClick: () => { if (!busy) einloesen(); } }, busy ? "…" : (en ? "Unlock access" : "Zugang freischalten")),
+              h("button", { type: "button", onClick: () => schliessen(false), style: { cursor: "pointer", background: "transparent", color: INK, border: `1px solid ${HAIR}`, borderRadius: 10, padding: "12px 20px", fontFamily: FONT_BODY, fontSize: 14, fontWeight: 700 } }, en ? "Later" : "Sp\u00e4ter")))));
+}
 function SettingsOverlay({
   account,
   onClose,
@@ -8501,6 +8647,9 @@ function SettingsOverlay({
   const isTest = account.plan === "test";
   const ends = isTest ? account.start + TEST_MS : null;
   const istPro = isPremiumPlan(account.plan); const istEnt = account.plan_roh === "enterprise";
+  const [teamInfo, setTeamInfo] = React.useState(null);   // 23.10.2026: Enterprise-Team
+  React.useEffect(() => { let a = true; twTeamPost("info").then(x => { if (a) setTeamInfo(x && x.ok ? x : { ok: false }); }).catch(() => { if (a) setTeamInfo({ ok: false }); }); return () => { a = false; }; }, []);
+  const teamMitglied = !!(teamInfo && teamInfo.rolle === "mitglied");
   const Row = ({
     k,
     v
@@ -8620,7 +8769,7 @@ function SettingsOverlay({
       color: INK,
       marginBottom: 8
     }
-  }, t("st_abos")), !istPro ? React.createElement(React.Fragment, null, React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, lineHeight: 1.55, margin: "0 0 12px" } }, LANG === "en" ? "You are using Free \u2014 free of charge, no subscription. Pro (\u20ac49/month or \u20ac490/year) adds Club seeks, club contacts, network & community, workspace, scouting and the acquisition radar." : "Du nutzt Free \u2014 kostenlos, ohne Abo. Pro (49\u00a0\u20ac/Monat oder 490\u00a0\u20ac/Jahr) bringt Verein sucht, Vereinskontakte, Netzwerk & Community, Workspace, Scouting und Akquise-Radar."), React.createElement(PBtn, { onClick: onSubscribe, kind: "green", full: true }, LANG === "en" ? "Upgrade to Pro" : "Auf Pro upgraden")) : isTest ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
+  }, t("st_abos")), teamMitglied ? React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, lineHeight: 1.55, margin: 0 } }, LANG === "en" ? "Your access runs through your team's Enterprise subscription. Billing and cancellation are handled by the team owner." : "Dein Zugang l\u00e4uft \u00fcber das Enterprise-Abo deines Teams. Abrechnung und K\u00fcndigung \u00fcbernimmt der Inhaber des Teams.") : !istPro ? React.createElement(React.Fragment, null, React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, lineHeight: 1.55, margin: "0 0 12px" } }, LANG === "en" ? "You are using Free \u2014 free of charge, no subscription. Pro (\u20ac49/month or \u20ac490/year) adds Club seeks, club contacts, network & community, workspace, scouting and the acquisition radar." : "Du nutzt Free \u2014 kostenlos, ohne Abo. Pro (49\u00a0\u20ac/Monat oder 490\u00a0\u20ac/Jahr) bringt Verein sucht, Vereinskontakte, Netzwerk & Community, Workspace, Scouting und Akquise-Radar."), React.createElement(PBtn, { onClick: onSubscribe, kind: "green", full: true }, LANG === "en" ? "Upgrade to Pro" : "Auf Pro upgraden")) : isTest ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12.5,
@@ -8662,7 +8811,7 @@ function SettingsOverlay({
     onClick: onCancel,
     kind: "ghost",
     full: true
-  }, t("st_form_cancel")))), /*#__PURE__*/React.createElement("div", {
+  }, t("st_form_cancel")))), React.createElement(TeamKarte, { account: account, info: teamInfo }), /*#__PURE__*/React.createElement("div", {
     style: {
       borderTop: `1px solid ${HAIR}`,
       margin: "14px 0 12px",
@@ -9637,7 +9786,7 @@ function MuSpieleTabellen() {
 }
 function MuTalente() {
   const hh = React.createElement; const en = muEn(); const [d, setD] = React.useState(null);
-  React.useEffect(() => { let a = true; fetch("/api/tw-listen").then(r => r.json()).then(x => { if (a) setD(x); }).catch(() => { if (a) setD({ items: [] }); }); return () => { a = false; }; }, []);
+  React.useEffect(() => { let a = true; fetch("/api/tw-listen?ansicht=vorschau").then(r => r.json()).then(x => { if (a) setD(x); }).catch(() => { if (a) setD({ items: [] }); }); return () => { a = false; }; }, []);
   const alle = ((d && d.items) || []).filter(x => !x.age || x.age <= 21).sort((a, b) => (Number(b.score) || 0) - (Number(a.score) || 0));
   const top = alle.filter(x => x.score != null && (x.min > 0 || x.goals || x.assists)).slice(0, 2); const topIds = new Set(top.map(x => x.pid));
   const liste = alle.filter(x => !topIds.has(x.pid)).slice(0, 8);
@@ -15418,7 +15567,7 @@ function TransferWire() {
   });else if (page === "expired" || page === "app" && account && !active) content = /*#__PURE__*/React.createElement(ExpiredPage, {
     onAbo: () => setPage("subscribe"),
     onLogout: logout
-  });else if (page === "app" && account && active) content = /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(TrialBanner, {
+  });else if (page === "app" && account && active) content = /*#__PURE__*/React.createElement(React.Fragment, null, React.createElement(TeamEinladung, { account: account }), /*#__PURE__*/React.createElement(TrialBanner, {
     account: account,
     onSubscribe: () => setPage("subscribe")
   }), /*#__PURE__*/React.createElement(TransferApp, {
