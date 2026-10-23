@@ -1024,7 +1024,9 @@ const PERF_TAGS = ["Abschluss", "Chancenverwertung", "Chancenkreation", "Passspi
 function scoreBand(s) { return s >= 85 ? "hi" : s >= 70 ? "gut" : s >= 55 ? "mittel" : "schwach"; } function scoreBg(s) { return "var(--sc-" + scoreBand(s) + "-bg)"; } function scoreRand(s) { return "var(--sc-" + scoreBand(s) + "-rand)"; } function scoreTxt(s) { return "var(--sc-" + scoreBand(s) + "-text)"; } function scoreColor(s) { return scoreTxt(s); }
 const STRIPE_LINK = ""; // 23.10.2026: Tarifmodell Free/Pro/Enterprise - die alten Standard-/Premium-Links (49/99/349 EUR) gelten nicht mehr
 const STRIPE_LINK_YEAR = "";
-const STRIPE_PORTAL = "https://billing.stripe.com/p/login/cNi14n6mO2RY3sxfi6gIo00"; // Stripe-Kundenportal (Kündigung/Zahlungsmethoden)
+const STRIPE_PORTAL = "https://billing.stripe.com/p/login/cNi14n6mO2RY3sxfi6gIo00"; // Stripe-Kundenportal (Tarif, Nutzerzahl, Zahlungsmethode, Kündigung)
+// Punkt 351 (23.10.2026): Wer schon ein Abo hat, aendert Tarif und Nutzerzahl hier - ein zweiter Bezahllink wuerde ein zweites Abo anlegen
+function twPortalUrl(email) { return STRIPE_PORTAL ? STRIPE_PORTAL + (STRIPE_PORTAL.indexOf("?") >= 0 ? "&" : "?") + (email ? "prefilled_email=" + encodeURIComponent(String(email)) : "") : ""; }
 // Neue Payment-Links (legt der Boss in Stripe an). Leer = Bezahlknopf meldet "wird eingerichtet".
 const STRIPE_LINK_PRO = "";              // Pro 49 EUR/Monat
 const STRIPE_LINK_PRO_YEAR = "";         // Pro 490 EUR/Jahr
@@ -2019,9 +2021,10 @@ const I18N = {
     st_test_a: "Dein kostenloser Test läuft bis ",
     st_test_b: " und endet automatisch. Sichere dir jetzt unbegrenzten Zugriff.",
     st_abo_a: "Dein Abo ist aktiv",
-    st_abo_paid: " (bezahlt bis ",
+    st_abo_paid: " (aktueller Abrechnungszeitraum bis ",
     st_abo_b: ". Die Kündigung ist jederzeit zum Ende des Abrechnungsmonats möglich.",
-    st_portal_note: "Für Zahlungen über Stripe (Karte, Apple Pay, Google Pay, PayPal). Stoppt die Abbuchung automatisch zum Ende des Abrechnungszeitraums.",
+    st_portal_note: "Im Stripe-Kundenportal wechselst du den Tarif, änderst die Nutzerzahl (Enterprise) oder die Zahlungsmethode und kündigst. Eine Kündigung stoppt die Abbuchung zum Ende des Abrechnungszeitraums.",
+    st_portal_btn: "Abo verwalten (Tarif, Nutzer, Zahlung, Kündigung)",
     st_form_cancel: "Alternativ per Formular kündigen"
   },
   en: {
@@ -2374,9 +2377,10 @@ const I18N = {
     st_test_a: "Your free trial runs until ",
     st_test_b: " and ends automatically. Get unlimited access now.",
     st_abo_a: "Your subscription is active",
-    st_abo_paid: " (paid until ",
+    st_abo_paid: " (current billing period until ",
     st_abo_b: ". You can cancel at any time, effective at the end of the billing month.",
-    st_portal_note: "For payments via Stripe (card, Apple Pay, Google Pay, PayPal). Stops billing automatically at the end of the period.",
+    st_portal_note: "In the Stripe customer portal you change your plan, the number of seats (Enterprise) or your payment method, and cancel. Cancelling stops billing at the end of the billing period.",
+    st_portal_btn: "Manage subscription (plan, seats, payment, cancellation)",
     st_form_cancel: "Alternatively cancel via form"
   }
 };
@@ -8092,6 +8096,15 @@ function SubscribePage({
   const [cNeu2, setCNeu2] = useState("");
   const [cBrauchtPw, setCBrauchtPw] = useState(false);
   const [cInfo, setCInfo] = useState("");
+  // Punkt 351 (23.10.2026): bestehende Abo-Inhaber gehen ins Kundenportal statt zu einem zweiten Bezahllink
+  const hatBezahltesKonto = !!(account && twHatSitzung(account) && isPremiumPlan(String(account.plan || "")) && String(account.status || "aktiv") === "aktiv");
+  const [aboTeam, setAboTeam] = useState(null);
+  React.useEffect(() => {
+    if (!hatBezahltesKonto) return;
+    let a = true;
+    twTeamPost("info").then(x => { if (a) setAboTeam(x && x.ok ? x : { ok: false }); }).catch(() => { if (a) setAboTeam({ ok: false }); });
+    return () => { a = false; };
+  }, [hatBezahltesKonto]);
   const istAngemeldet = em => twHatSitzung(account) && String(account.email || "").toLowerCase() === em;
   const [plan, setPlan] = useState(() => { const h = String(location.hash || ""); return /abo-enterprise/.test(h) ? "enterprise" : "pro"; });
   const [abrech, setAbrech] = useState(() => /jahr/.test(String(location.hash || "")) ? "jahr" : "monat");
@@ -8119,13 +8132,33 @@ function SubscribePage({
         React.createElement("div", { style: { fontSize: 12, color: MUTED, marginTop: 8, lineHeight: 1.5 } },
           (en ? "5 seats included \u00b7 " : "5 Nutzer inklusive \u00b7 ") + extraTxt + (seatsEff > 5 ? (en ? " \u00b7 " + (seatsEff - 5) + " extra selected" : " \u00b7 " + (seatsEff - 5) + " zus\u00e4tzlich gew\u00e4hlt") : "")),
         React.createElement("div", { style: { fontSize: 13, color: INK, marginTop: 6, fontWeight: 700 } },
-          (en ? "Total: " : "Gesamt: ") + eurFmt(preisVon("enterprise")) + " " + intervalTxt + " \u00b7 " + eurFmt(jeNutzer) + (en ? " per seat with " + seatsEff + " seats" : " je Nutzer bei " + seatsEff + " Nutzern")));
+          (en ? "Total: " : "Gesamt: ") + eurFmt(preisVon("enterprise")) + " " + intervalTxt + " \u00b7 " + eurFmt(jeNutzer) + (en ? " per seat with " + seatsEff + " seats" : " je Nutzer bei " + seatsEff + " Nutzern")),
+        React.createElement("div", { style: { fontSize: 11.5, color: MUTED, marginTop: 6, lineHeight: 1.45 } },
+          en ? "On the Stripe page, set the same number under \u201cQuantity\u201d (pre-set to 5) \u2014 the number chosen there is billed and unlocked. You can change it later in the customer portal."
+             : "Auf der Stripe-Seite stellst du dieselbe Zahl unter \u201eMenge\u201c ein (vorbelegt 5) \u2014 abgerechnet und freigeschaltet wird die dort gew\u00e4hlte Nutzerzahl. Sp\u00e4ter \u00e4nderst du sie im Kundenportal."));
   const planGrid = React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 8, marginBottom: 16 } }, PLAENE.map(p => React.createElement("button", { key: p.id, type: "button", onClick: () => setPlan(p.id), "aria-pressed": plan === p.id, style: { cursor: "pointer", textAlign: "left", padding: "10px 10px", borderRadius: 0, border: "2px solid " + (plan === p.id ? "var(--gold)" : HAIR), background: plan === p.id ? "var(--gold-tint)" : "var(--karte2)", fontFamily: FONT_BODY } },
     React.createElement("div", { style: { fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", fontWeight: 800, color: INK } }, p.name),
     React.createElement("div", { style: { fontSize: 18, fontWeight: 800, color: INK, marginTop: 4 } }, p.preis, React.createElement("span", { style: { fontSize: 11, fontWeight: 600, color: MUTED, marginLeft: 4 } }, p.sub)),
     React.createElement("div", { style: { fontSize: 11, color: MUTED, marginTop: 4, lineHeight: 1.35 } }, p.hint))));
   const planWahl = React.createElement(React.Fragment, null, abrechWahl, planGrid, seatsRow);
   const planLabel = (en ? "Subscribe now \u2014 " : "Jetzt zahlungspflichtig abonnieren \u2014 ") + eurFmt(preisVon(plan)) + (en ? (jahr ? "/year" : "/month") : (jahr ? "/Jahr" : "/Monat")) + (plan === "enterprise" ? " \u00b7 " + seatsEff + (en ? " seats" : " Nutzer") : "") + (en ? " (obligation to pay)" : "");
+  if (hatBezahltesKonto) {
+    const ent = String(account.plan_roh || "") === "enterprise";
+    const geladen = !ent || aboTeam !== null;
+    const mitglied = !!(aboTeam && aboTeam.rolle === "mitglied");
+    const inhaberName = mitglied ? String(aboTeam.inhaber_name || aboTeam.inhaber || "") : "";
+    return React.createElement(FormShell, { title: t("s_title"), sub: t("s_sub"), onBack: onBack },
+      React.createElement("div", { className: "tw-abo-portal", style: { border: "1.5px solid " + HAIR, padding: "14px 14px", fontFamily: FONT_BODY } },
+        React.createElement("div", { style: { fontSize: 14, fontWeight: 800, color: INK, marginBottom: 6 } },
+          !geladen ? "\u2026" : mitglied ? (en ? "Your access runs through your team" : "Dein Zugang l\u00e4uft \u00fcber dein Team")
+                   : (en ? "You already have a subscription" : "Du hast bereits ein Abo") + " (" + (ent ? "Enterprise" : "Pro") + ")"),
+        !geladen ? null : React.createElement("p", { style: { fontSize: 12.5, color: MUTED, lineHeight: 1.55, margin: "0 0 12px" } },
+          mitglied ? (en ? "Your Enterprise access is provided by " + inhaberName + ". The plan and the number of seats are managed by the team owner."
+                         : "Deinen Enterprise-Zugang stellt " + inhaberName + " bereit. Tarif und Nutzerzahl verwaltet der Inhaber des Teams.")
+                   : (en ? "Change your plan, add or remove seats (Enterprise), update your payment method or cancel \u2014 all in the Stripe customer portal. Your existing subscription is adjusted there, so no second subscription is created. New team codes arrive by e-mail."
+                         : "Tarif wechseln, Nutzer hinzuf\u00fcgen oder entfernen (Enterprise), Zahlungsmethode \u00e4ndern oder k\u00fcndigen \u2014 alles im Stripe-Kundenportal. Dort wird dein bestehendes Abo angepasst, es entsteht kein zweites Abo. Neue Team-Codes kommen per Mail.")),
+        (!geladen || mitglied || !STRIPE_PORTAL) ? null : React.createElement(PBtn, { onClick: () => { window.open(twPortalUrl(account.email), "_blank"); }, kind: "green", full: true }, en ? "Open customer portal" : "Zum Kundenportal")));
+  }
   const payStripe = () => {
     setErr("");
     setMsg("");
@@ -8581,6 +8614,9 @@ function TeamKarte({ account, info }) {
               z.seit ? h("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, (en ? "since " : "seit ") + twTeamDatum(z.seit)) : null,
               h("span", { style: { display: "flex", gap: 6, marginLeft: "auto" } },
                 frage === "x" + z.id ? klein(en ? "Really remove?" : "Wirklich entziehen?", () => ausfuehren("entziehen", z.id), true) : klein(en ? "Remove access" : "Zugang entziehen", () => setFrage("x" + z.id))))))),
+      STRIPE_PORTAL ? h("div", { style: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginTop: 12 } },
+        klein(en ? "Change number of seats" : "Nutzerzahl ändern", () => { try { window.open(twPortalUrl(account && account.email), "_blank"); } catch (e) {} }, true),
+        h("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, lineHeight: 1.45, flex: "1 1 200px" } }, en ? "In the Stripe customer portal. New team codes arrive by e-mail and appear here." : "Im Stripe-Kundenportal. Neue Team-Codes kommen per Mail und erscheinen hier.")) : null,
       h("p", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, lineHeight: 1.5, margin: "10px 0 0" } }, en ? "Renewing makes the old code invalid (e.g. if it was passed on by mistake). Removing access turns the colleague's account into Free and frees the seat with a new code." : "Erneuern macht den alten Code ungültig (z. B. wenn er versehentlich weitergegeben wurde). Zugang entziehen macht das Konto des Kollegen zu Free und gibt den Platz mit einem neuen Code frei."),
       meldung
     );
@@ -8795,11 +8831,11 @@ function SettingsOverlay({
     }
   }, /*#__PURE__*/React.createElement(PBtn, {
     onClick: () => {
-      window.open(STRIPE_PORTAL, "_blank");
+      window.open(twPortalUrl(account.email), "_blank");
     },
     kind: "green",
     full: true
-  }, t("c_stripe_btn")), /*#__PURE__*/React.createElement("div", {
+  }, t("st_portal_btn")), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 11.5,
