@@ -199,6 +199,7 @@ header:has(+ .tw-tabbar) { background: var(--seite) !important; border-bottom: 1
 .tw-sn-gruppe.zu .tw-sn-kinder { display: none; }
 .tw-sn-unter { padding: 8px 10px 8px 42px; font-weight: 500; font-size: 13.5px; color: var(--t2); }
 .tw-sn-unter:hover { background: var(--hover); color: var(--t1); }
+.tw-sn-zusatz { border-top: 1px solid var(--linie); padding-top: 8px; margin-bottom: 8px; }
 .tw-sn-unter.aktiv { background: var(--aktiv); color: var(--t1); font-weight: 600; }
 .tw-sn-badge { margin-left: auto; font-size: 11px; font-weight: 800; color: var(--gold-text) !important; background: var(--gold-tint); border-radius: 999px; padding: 2px 8px; }
 .tw-sn-unten { padding-top: 10px; border-top: 1px solid var(--linie); }
@@ -1119,6 +1120,7 @@ const kontoAusAntwort = (k, alt) => {
     rolle: k.rolle || "",
     status: k.status || "",
     gueltig: k.gueltig !== false,
+    module: Array.isArray(k.module) ? k.module.filter(u => typeof u === "string" && u.indexOf("/api/") === 0 && u.indexOf("..") < 0).slice(0, 5) : [],   // Punkt 356: Zusatzseiten je Konto
     consent: true
   });
 };
@@ -1140,6 +1142,35 @@ function twAuthFehler(d) {
   if (f === "test_used") return t("e_test_used");
   if (f === "zu_viele") return t("e_too_many");
   return t("e_server");
+}
+/* ── Zusatzseiten (Punkt 356, 24.10.2026): Seiten, die der Anmeldedienst einzelnen Konten nachlaedt (Feld "module" der Konto-Antwort).
+   Die App kennt nur diesen Haken: Modul laden, Knopf in der Seitenleiste, Rahmen fuer die Seite. Was die Seite ist, bestimmt das Modul. ── */
+const TW_ZUSATZ = {
+  seiten: [], module: {}, geladen: {}, konto: "",
+  melden(seite, url) {
+    if (!seite || !seite.id || typeof seite.mount !== "function") return;
+    if (url) this.module[url] = seite;
+    this.seiten = this.seiten.filter(x => x.id !== seite.id).concat([seite]);
+    try { window.dispatchEvent(new CustomEvent("tw-zusatz")); } catch (e) {}
+  },
+  finde(id) { for (const x of this.seiten) if (x.id === id) return x; return null; },
+  leeren() { if (!this.seiten.length) return; this.seiten = []; try { window.dispatchEvent(new CustomEvent("tw-zusatz")); } catch (e) {} }
+};
+window.TW_ZUSATZ = TW_ZUSATZ;
+function twZusatzKonto(konto) {
+  const email = String((konto && konto.email) || "").toLowerCase();
+  const liste = (konto && Array.isArray(konto.module) ? konto.module : []).filter(u => typeof u === "string" && u.indexOf("/api/") === 0 && u.indexOf("..") < 0).slice(0, 5);
+  if (!email || email !== TW_ZUSATZ.konto) { TW_ZUSATZ.leeren(); TW_ZUSATZ.konto = email; }
+  if (!email || !twHatSitzung(konto)) return;
+  liste.forEach(url => {
+    if (TW_ZUSATZ.module[url]) { TW_ZUSATZ.melden(TW_ZUSATZ.module[url], url); return; }
+    if (TW_ZUSATZ.geladen[url]) return;
+    TW_ZUSATZ.geladen[url] = true;
+    fetch(url, { cache: "no-store", credentials: "omit" }).then(r => r.ok ? r.text() : "").then(code => {
+      if (!code) { delete TW_ZUSATZ.geladen[url]; return; }
+      const sk = document.createElement("script"); sk.text = code; document.head.appendChild(sk);
+    }).catch(() => { delete TW_ZUSATZ.geladen[url]; });
+  });
 }
 (function () {   // abgelaufene oder ersetzte Anmeldung: Schnittstellen antworten mit 401 + X-TW-Auth -> Ereignis fuer die App
   // Punkt 246 (Auftrag 50, 13.10.2026): Anfragen an die eigenen Schnittstellen (/api/, /db/) tragen die Anmeldung im Kopf X-TW-Sitzung
@@ -9225,11 +9256,24 @@ function AkquiseVue({ isPrem, account, openPlayer }) {
         h("td", null, h("span", { className: "tw-akq-pill" }, berater(s.berater))), h("td", null, dat(s.vertrag_bis)), h("td", { className: "zahl" }, mio(s.marktwert_eur)), h("td", { className: "zahl" }, s.score ? Math.round(s.score) : "–"), h("td", { className: "zahl" }, s.minutes || 0)))))));
 }
 
+/* Punkt 356: Rahmen einer nachgeladenen Zusatzseite - das Modul zeichnet in den Behälter und raeumt beim Verlassen auf */
+function TwZusatzSeite({ seite, account, setView }) {
+  const ref = React.useRef(null);
+  React.useEffect(() => {
+    const el = ref.current; if (!el || !seite) return undefined;
+    let ende = null;
+    try { ende = seite.mount(el, { account: account, setView: setView, React: React, ReactDOM: ReactDOM }); } catch (e) { el.textContent = LANG === "en" ? "This page could not be loaded." : "Die Seite konnte nicht geladen werden."; }
+    return () => { try { if (typeof ende === "function") ende(); } catch (e) {} };
+  }, [seite]);
+  return React.createElement("div", { ref: ref, className: "tw-zusatz", style: { gridColumn: "1 / -1", width: "100%", minWidth: 0 } });
+}
 function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScout }) {
   const h = React.createElement; const en = LANG === "en"; const prem = twIstPremium(); const proMarke = (k) => (!prem && TW_PRO_VIEWS.indexOf(k) >= 0) ? h("span", { className: "tw-sn-pro", title: en ? "Pro feature" : "Pro-Funktion" }, "PRO") : null;
   const [zu, setZu] = useState(() => { try { return JSON.parse(localStorage.getItem("tw_side_zu") || "{}"); } catch (e) { return {}; } });
   const klappe = k => setZu(z => { const n = Object.assign({}, z, { [k]: !z[k] }); try { localStorage.setItem("tw_side_zu", JSON.stringify(n)); } catch (e) {} return n; });
   const [vsZahl, setVsZahl] = useState(() => { try { return Number(window.VS_ZAHL) || 0; } catch (e) { return 0; } });
+  const [zusatz, setZusatz] = useState(() => TW_ZUSATZ.seiten.slice());   // Punkt 356: nachgeladene Zusatzseiten
+  React.useEffect(() => { const f = () => setZusatz(TW_ZUSATZ.seiten.slice()); window.addEventListener("tw-zusatz", f); return () => window.removeEventListener("tw-zusatz", f); }, []);
   React.useEffect(() => { const f = () => setVsZahl(Number(window.VS_ZAHL) || 0); window.addEventListener("vs-zahl", f); if (VS_NEU && !(Number(window.VS_ZAHL) || 0)) { try { const a = JSON.parse(localStorage.getItem("tw_account") || "{}"); const code = a.zugangscode || a.code; if (code && a.email) fetch("/api/verein-sucht?was=liste&gruppe=TW&limit=1&code=" + encodeURIComponent(code) + "&email=" + encodeURIComponent(a.email)).then(r => r.ok ? r.json() : null).then(d => { if (d && d.meta && Array.isArray(d.meta.gruppen)) { const n = d.meta.gruppen.reduce((s, g) => s + (g.konkret != null ? (Number(g.konkret) || 0) : (Number(g.n) || 0)), 0); if (n > 0) { window.VS_ZAHL = n; setVsZahl(n); } } }).catch(() => {}); } catch (e) {} } return () => window.removeEventListener("vs-zahl", f); }, []);
   let feedBadge = 0, gesuchtBadge = 0; try { feedBadge = (Array.isArray(news) ? news : []).filter(n => Date.now() - new Date(n.published_at || n.created_at || n.createdAt || 0).getTime() < 864e5).length; gesuchtBadge = (VS_NEU && vsZahl) ? vsZahl : (Array.isArray(needsBySport) ? needsBySport.length : 0); } catch (e) {}
   const aktiv = k => view === k || (k === "community" && view === "moderation") || (k === "talente" && (view === "listen" || view === "suche" || view === "nachwuchs")) || (k === "players" && (view === "spielervergleich" || view === "aehnlich"));
@@ -9248,6 +9292,7 @@ function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScou
         h("button", { type: "button", className: "tw-sn-kopf", onClick: () => klappe(g.k), "aria-expanded": !zu[g.k] }, h("span", { className: "tw-sn-ikon", dangerouslySetInnerHTML: { __html: IK[g.k] } }), h("span", null, g.label), (!prem && (g.k === "community" || g.k === "workspace")) ? h("span", { className: "tw-sn-pro" }, "PRO") : null, h("span", { className: "tw-sn-pfeil", dangerouslySetInnerHTML: { __html: IK.pfeil } })),
         h("div", { className: "tw-sn-kinder" }, g.kinder.map(([k, label, badge]) => h("button", { key: k, type: "button", className: "tw-sn-unter" + (aktiv(k) ? " aktiv" : ""), onClick: () => setView(k) }, h("span", null, label), proMarke(k) || (badge > 0 ? h("span", { className: "tw-sn-badge" }, k === "gesucht" ? badge : (badge > 999 ? "999+" : badge)) : null))))))),
     h("div", { className: "tw-sn-unten" },
+      zusatz.length ? h("div", { className: "tw-sn-zusatz" }, zusatz.map(z => h("button", { key: "zusatz-" + z.id, type: "button", className: "tw-sn-punkt" + (view === z.id ? " aktiv" : ""), onClick: () => setView(z.id) }, h("span", { className: "tw-sn-ikon", dangerouslySetInnerHTML: { __html: z.ikon || "" } }), h("span", null, z.label)))) : null,
       h("button", { type: "button", className: "tw-sn-upgrade", onClick: () => { if (!prem) { try { history.replaceState(null, "", location.pathname + location.search + "#abo-pro-monat"); } catch (e) {} } onNavigate("subscribe"); } }, prem ? (en ? "Plan & seats" : "Tarif & Nutzer") : (en ? "Upgrade to Pro" : "Auf Pro upgraden")),
       h("div", { className: "tw-sn-fuss" }, h("button", { type: "button", onClick: () => onNavigate("impressum") }, en ? "Imprint" : "Impressum"), h("button", { type: "button", onClick: () => onNavigate("datenschutz") }, en ? "Privacy" : "Datenschutz"), h("button", { type: "button", onClick: () => onNavigate("agb") }, en ? "Terms" : "AGB"))));
 }
@@ -12792,7 +12837,7 @@ function TransferApp({
       width: "100%",
       boxSizing: "border-box"
     }
-  }, view === "pro" && React.createElement(ProSperreVue, { ziel: proZiel }), view === "marktwert" && React.createElement(MarktwertVue, { openPlayer: openPlayer }), view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein }), view === "akquise" && /*#__PURE__*/React.createElement(AkquiseVue, { isPrem: isPrem, account: account, openPlayer: openPlayer }), view === "aehnlich" && aehnlichStart && React.createElement(AehnlicheSpielerSeite, { key: "ae-" + aehnlichStart.pid, ausgang: aehnlichStart, onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "spielervergleich" && React.createElement(SpielerVergleichSeite, { key: "vgl-" + (vglStart || []).map(x => x.pid).join("-"), start: vglStart || [], onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news.filter(n => n.type !== "verletzung" && n.type !== "leistung" && n.type !== "meldung" && !n._ausgeblendet), onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(VereinSuchtVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, TW_ZUSATZ.finde(view) ? React.createElement(TwZusatzSeite, { key: "zusatz-" + view, seite: TW_ZUSATZ.finde(view), account: account, setView: setView }) : null, view === "pro" && React.createElement(ProSperreVue, { ziel: proZiel }), view === "marktwert" && React.createElement(MarktwertVue, { openPlayer: openPlayer }), view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein }), view === "akquise" && /*#__PURE__*/React.createElement(AkquiseVue, { isPrem: isPrem, account: account, openPlayer: openPlayer }), view === "aehnlich" && aehnlichStart && React.createElement(AehnlicheSpielerSeite, { key: "ae-" + aehnlichStart.pid, ausgang: aehnlichStart, onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "spielervergleich" && React.createElement(SpielerVergleichSeite, { key: "vgl-" + (vglStart || []).map(x => x.pid).join("-"), start: vglStart || [], onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news.filter(n => n.type !== "verletzung" && n.type !== "leistung" && n.type !== "meldung" && !n._ausgeblendet), onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(VereinSuchtVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       background: "transparent",
       border: "none",
@@ -15507,6 +15552,7 @@ function TransferWire() {
     saveAccount(a);
     setAccountState(a);
   };
+  useEffect(() => { try { twZusatzKonto(account); } catch (e) {} }, [account && account.email, account && JSON.stringify(account.module || [])]);   // Punkt 356
   const zurAnmeldung = (em, hinweis) => {
     clearAccount();
     setAccountState(null);
