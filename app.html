@@ -9279,7 +9279,7 @@ function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScou
   const aktiv = k => view === k || (k === "community" && view === "moderation") || (k === "talente" && (view === "listen" || view === "suche" || view === "nachwuchs")) || (k === "players" && (view === "spielervergleich" || view === "aehnlich"));
   const IK = { markt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21V12h6v9"/></svg>', community: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.2L4 21l1.8-5.4A8 8 0 1 1 21 12z"/></svg>', workspace: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 20V10"/></svg>', ki: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18 9.4l-4.2 1.8L12 16l-1.8-4.8L6 9.4l4.2-1.8z"/><path d="M5 18l.7 1.8L7.5 20.5l-1.8.7L5 23l-.7-1.8L2.5 20.5l1.8-.7z"/></svg>', pfeil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>' };
   const gruppen = [
-    { k: "markt", label: en ? "Market" : "Markt", kinder: [["feed", t("tab_feed"), feedBadge], ["geruechte", "Transfers", 0], ["spieltag", en ? "Matchday" : "Spieltag", 0], ["gesucht", VS_NEU ? (LANG === "en" ? "Club seeks" : "Verein sucht") : "Vereinsbedarf", gesuchtBadge], ["ranking", "Performance", 0], ["players", t("players_tab"), 0], ["marktwert", en ? "Market value" : "Marktwert", 0], ["chancen", t("ch_tab"), 0]] },
+    { k: "markt", label: en ? "Market" : "Markt", kinder: [["feed", t("tab_feed"), feedBadge], ["geruechte", "Transfers", 0], ["spieltag", en ? "Matchday" : "Spieltag", 0], ["ranking", "Performance", 0], ["players", t("players_tab"), 0], ["chancen", t("ch_tab"), 0]] },   // A86 (28.10.2026): "Verein sucht" und "Marktwert" sind eigene Punkte bei "Kontakte"
     { k: "community", label: en ? "Network" : "Netzwerk", kinder: [["community", en ? "Posts" : "Beitr\u00e4ge", 0], ["networking", en ? "Community contacts" : "Community-Kontakte", 0]] },
     { k: "workspace", label: "Workspace", kinder: [["watch", t("watch_tab"), 0], ["talente", "Scouting", 0], ["akquise", en ? "Acquisition radar" : "Akquise-Radar", 0]] }
   ];
@@ -9288,6 +9288,8 @@ function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScou
     h("div", { className: "tw-sn-trenner" }),
     h("nav", { className: "tw-sn-menue" },
       h("button", { type: "button", className: "tw-sn-punkt" + (aktiv("kontakte") ? " aktiv" : ""), onClick: () => setView("kontakte") }, h("span", { className: "tw-sn-ikon", dangerouslySetInnerHTML: { __html: SIDE_ICONS.kontakte || "" } }), h("span", null, en ? "Contacts" : "Kontakte"), proMarke("kontakte")),
+      h("button", { type: "button", className: "tw-sn-punkt" + (aktiv("gesucht") ? " aktiv" : ""), onClick: () => setView("gesucht") }, h("span", { className: "tw-sn-ikon", dangerouslySetInnerHTML: { __html: SIDE_ICONS.gesucht || "" } }), h("span", null, VS_NEU ? (en ? "Club seeks" : "Verein sucht") : "Vereinsbedarf"), proMarke("gesucht") || (gesuchtBadge > 0 ? h("span", { className: "tw-sn-badge" }, gesuchtBadge) : null)),
+      h("button", { type: "button", className: "tw-sn-punkt" + (aktiv("marktwert") ? " aktiv" : ""), onClick: () => setView("marktwert") }, h("span", { className: "tw-sn-ikon", dangerouslySetInnerHTML: { __html: SIDE_ICONS.marktwert || "" } }), h("span", null, en ? "Market value" : "Marktwert"), proMarke("marktwert")),
       gruppen.map(g => h("div", { key: g.k, className: "tw-sn-gruppe" + (zu[g.k] ? " zu" : "") },
         h("button", { type: "button", className: "tw-sn-kopf", onClick: () => klappe(g.k), "aria-expanded": !zu[g.k] }, h("span", { className: "tw-sn-ikon", dangerouslySetInnerHTML: { __html: IK[g.k] } }), h("span", null, g.label), (!prem && (g.k === "community" || g.k === "workspace")) ? h("span", { className: "tw-sn-pro" }, "PRO") : null, h("span", { className: "tw-sn-pfeil", dangerouslySetInnerHTML: { __html: IK.pfeil } })),
         h("div", { className: "tw-sn-kinder" }, g.kinder.map(([k, label, badge]) => h("button", { key: k, type: "button", className: "tw-sn-unter" + (aktiv(k) ? " aktiv" : ""), onClick: () => setView(k) }, h("span", null, label), proMarke(k) || (badge > 0 ? h("span", { className: "tw-sn-badge" }, k === "gesucht" ? badge : (badge > 999 ? "999+" : badge)) : null))))))),
@@ -11668,6 +11670,38 @@ TW_PRO_INFO.networking = TW_PRO_INFO.community; TW_PRO_INFO.listen = TW_PRO_INFO
       ".tw-mw-status{font:800 9.5px Inter,system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:4px;white-space:nowrap}",
       ".tw-mw-status.ind{color:#1f9d55;border:1px solid rgba(31,157,85,.45);background:rgba(31,157,85,.1)}",
       ".tw-mw-status.ein{color:var(--t2);border:1px solid var(--linie);background:var(--karte2)}",
+      ".tw-mwd{margin-top:14px}",
+      ".tw-mwd-zurueck{cursor:pointer;border:1px solid var(--linie);background:var(--karte);color:var(--t2);border-radius:999px;padding:7px 14px;font:800 12.5px Inter,system-ui,sans-serif;margin-bottom:12px}",
+      ".tw-mwd-zurueck:hover{color:var(--t1);background:var(--karte2)}",
+      ".tw-mwd-profil{display:flex;align-items:center;gap:16px;padding:16px 18px;border:1px solid var(--linie);border-radius:14px;background:var(--karte);flex-wrap:wrap}",
+      ".tw-mwd-foto{width:76px;height:76px;border-radius:99px;object-fit:cover;background:var(--karte2);flex:0 0 auto}",
+      ".tw-mwd-name{font:700 24px 'Barlow Condensed',Inter,system-ui,sans-serif;color:var(--t1);letter-spacing:.2px;line-height:1.1;text-transform:uppercase}",
+      ".tw-mwd-verein{display:flex;align-items:center;gap:7px;margin-top:5px;font:700 13.5px Inter,system-ui,sans-serif;color:var(--t1);flex-wrap:wrap}",
+      ".tw-mwd-grau{color:var(--t3);font-weight:500}",
+      ".tw-mwd-fakten{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:7px;font:500 12.5px Inter,system-ui,sans-serif;color:var(--t2)}",
+      ".tw-mwd-profilknopf{cursor:pointer;min-height:44px;padding:0 18px;border-radius:10px;border:1px solid #B8913F;background-color:#C8A355;background-image:linear-gradient(135deg,#EFD489 0%,#C8A355 48%,#A9822F 100%);color:#1A1306;font:800 13.5px Inter,system-ui,sans-serif;white-space:nowrap;box-shadow:0 6px 16px rgba(200,163,85,.28)}",
+      ".tw-mwd-block{margin-top:14px;padding:16px 18px;border:1px solid var(--linie);border-radius:14px;background:var(--karte)}",
+      ".tw-mwd-titel{font:800 11px Inter,system-ui,sans-serif;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold-text,#DDB65F)}",
+      ".tw-mwd-wertzeile{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:6px}",
+      ".tw-mwd-wert{font:700 34px 'Barlow Condensed',Inter,system-ui,sans-serif;color:var(--t1);line-height:1.05}",
+      ".tw-mwd-pille{font:800 11px Inter,system-ui,sans-serif;letter-spacing:.04em;padding:4px 9px;border-radius:999px;border:1px solid var(--linie);background:var(--karte2);color:var(--t2)}",
+      ".tw-mwd-klein{font:500 12px Inter,system-ui,sans-serif;color:var(--t3);margin-top:4px}",
+      ".tw-mwd-text{font:400 13px Inter,system-ui,sans-serif;color:var(--t2);line-height:1.6;margin:8px 0 0;max-width:860px}",
+      ".tw-mwd-vergleich{display:grid;grid-template-columns:minmax(0,1fr) 44px minmax(0,1fr);gap:12px;align-items:stretch;margin-top:12px}",
+      ".tw-mwd-vs{align-self:center;text-align:center;font:800 13px Inter,system-ui,sans-serif;color:var(--t3)}",
+      ".tw-mwd-karte{border:1px solid var(--linie);border-radius:12px;padding:14px 16px;background:var(--karte2);min-width:0}",
+      ".tw-mwd-karte.ziel{border-color:rgba(200,163,85,.55);background:var(--karte)}",
+      ".tw-mwd-kartenkopf{font:800 10.5px Inter,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:8px}",
+      ".tw-mwd-land{display:flex;align-items:center;gap:8px;font:700 14px Inter,system-ui,sans-serif;color:var(--t1);flex-wrap:wrap}",
+      ".tw-mwd-liga{font:500 13px Inter,system-ui,sans-serif;color:var(--t2);margin-top:2px}",
+      ".tw-mwd-karte-wert{font:700 30px 'Barlow Condensed',Inter,system-ui,sans-serif;color:var(--t1);line-height:1.05;margin-top:10px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}",
+      ".tw-mwd-karte-wert.leer{color:var(--t3);font-size:22px}",
+      ".tw-mwd-diff{font:800 12px Inter,system-ui,sans-serif;color:var(--t2);padding:3px 8px;border-radius:999px;border:1px solid var(--linie);background:var(--karte2)}",
+      ".tw-mwd-auswahl{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}",
+      ".tw-mwd-auswahl label{display:flex;flex-direction:column;gap:4px;font:700 10.5px Inter,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);min-width:0}",
+      ".tw-mwd-auswahl select{font:600 13px Inter,system-ui,sans-serif;min-height:38px;padding:0 10px;border:1px solid var(--linie);background:var(--karte);color:var(--t1);border-radius:9px;max-width:100%;min-width:0}",
+      ".tw-mwd-hinweis{margin-top:8px;font:500 12px Inter,system-ui,sans-serif;color:var(--t2);padding:7px 10px;border-radius:8px;background:var(--karte2);border:1px solid var(--linie)}",
+      "@media (max-width:720px){.tw-mwd-vergleich{grid-template-columns:1fr}.tw-mwd-vs{padding:2px 0}.tw-mwd-profil{gap:12px}.tw-mwd-profilknopf{width:100%}.tw-mwd-name{font-size:21px}.tw-mwd-wert{font-size:30px}.tw-mwd-auswahl{grid-template-columns:1fr}}",
       "@media (max-width:720px){.tw-mw-zeile{grid-template-columns:26px minmax(0,1fr) minmax(96px,auto);gap:8px}.tw-mw-verein,.tw-mw-kopf .tw-mw-verein,.tw-mw-statusz{display:none}.tw-mw-filter select{flex:1 1 45%}}"
     ].join("\n");
     document.head.appendChild(st);
@@ -11693,26 +11727,122 @@ function twMwText(eur) {
   if (n >= 1e6) { const m = n / 1e6; const t = (m >= 10 ? Math.round(m) : Math.round(m * 10) / 10).toLocaleString(en ? "en-GB" : "de-DE"); return en ? "€" + t + "m" : t + " Mio. €"; }
   const k = Math.round(n / 1000).toLocaleString(en ? "en-GB" : "de-DE"); return en ? "€" + k + "k" : k + " Tsd. €";
 }
+function twMwLand(liga, land) {
+  // Landesname fuer die Anzeige: deutsch aus LIGA_LAND (Liga -> Land), sonst der englische Name aus mw.liga
+  const en = LANG === "en";
+  if (!en && typeof LIGA_LAND === "object" && LIGA_LAND && LIGA_LAND[liga]) return LIGA_LAND[liga];
+  const DE = { Germany: "Deutschland", England: "England", Spain: "Spanien", Italy: "Italien", France: "Frankreich", Netherlands: "Niederlande", Portugal: "Portugal", Belgium: "Belgien", Austria: "Österreich", Switzerland: "Schweiz", Turkey: "Türkei", Scotland: "Schottland", Norway: "Norwegen", Sweden: "Schweden", Denmark: "Dänemark", Poland: "Polen", "Czech-Republic": "Tschechien", Hungary: "Ungarn", Romania: "Rumänien", Bulgaria: "Bulgarien", Croatia: "Kroatien", Serbia: "Serbien", Slovakia: "Slowakei", Cyprus: "Zypern", Israel: "Israel", Japan: "Japan", "South-Korea": "Südkorea", China: "China", USA: "USA", Brazil: "Brasilien", Argentina: "Argentinien", "Saudi-Arabia": "Saudi-Arabien" };
+  return (en ? String(land || "").replace(/-/g, " ") : (DE[land] || String(land || "").replace(/-/g, " "))) || "";
+}
+function twMwFlagge(landCode, size) {
+  const c = String(landCode || "").toLowerCase(); if (!c) return null;
+  const code = c === "eng" ? "gb-eng" : c === "sco" ? "gb-sct" : c === "wal" ? "gb-wls" : c.length === 2 ? c : "";
+  if (!code) return null; const w = size || 18;
+  return React.createElement("img", { src: "https://flagcdn.com/w40/" + code + ".png", srcSet: "https://flagcdn.com/w80/" + code + ".png 2x", width: w, height: Math.round(w * 0.68), alt: "", loading: "lazy", style: { borderRadius: 2, objectFit: "cover", verticalAlign: "-2px" } });
+}
+function MarktwertDetail({ sp, zurueck, openPlayer }) {
+  // A86 (28.10.2026): Detailansicht im Marktwertbereich - Profilkopf, Weltmarktwert, Leistungsmarktwert, Vergleich aktuelle Liga / Zielmarkt (Formel 1)
+  const h = React.createElement; const en = LANG === "en";
+  const [ligen, setLigen] = useState(null); const [fehler, setFehler] = useState("");
+  const [zielLand, setZielLand] = useState(""); const [zielLiga, setZielLiga] = useState("");
+  useEffect(() => {
+    let aktiv = true; setLigen(null); setFehler(""); setZielLand(""); setZielLiga("");
+    fetch("/db/mw_web_liga?player_id=eq." + encodeURIComponent(sp.player_id) + "&select=liga,land,land_code,liga_typ,ist_heimat,kaufpreis_eur,marktwert_danach_eur,hinweis_art,stand&order=kaufpreis_eur.desc.nullslast,liga.asc", { credentials: "omit", cache: "no-store" })
+      .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+      .then(d => { if (!aktiv) return; const l = Array.isArray(d) ? d : []; setLigen(l);
+        const heim = l.find(x => x.ist_heimat); const erste = l.find(x => !x.ist_heimat && x.kaufpreis_eur);
+        const start = erste || l.find(x => !x.ist_heimat) || null;
+        if (start) { setZielLand(start.land_code || start.land || ""); setZielLiga(start.liga); } else if (heim) { setZielLand(heim.land_code || heim.land || ""); setZielLiga(heim.liga); } })
+      .catch(() => { if (!aktiv) return; setFehler(en ? "League comparison could not be loaded." : "Der Ligavergleich konnte nicht geladen werden."); setLigen([]); });
+    return () => { aktiv = false; };
+  }, [sp.player_id]);
+  const heim = (ligen || []).find(x => x.ist_heimat) || null;
+  const laender = []; (ligen || []).forEach(x => { const k = x.land_code || x.land || ""; if (!laender.some(y => y.k === k)) laender.push({ k: k, name: twMwLand(x.liga, x.land), code: x.land_code }); });
+  laender.sort((a, b) => a.name.localeCompare(b.name, en ? "en" : "de"));
+  const ligenImLand = (ligen || []).filter(x => (x.land_code || x.land || "") === zielLand).sort((a, b) => a.liga.localeCompare(b.liga, "de"));
+  const ziel = (ligen || []).find(x => x.liga === zielLiga) || null;
+  const waehleLand = k => { setZielLand(k); const erste = (ligen || []).filter(x => (x.land_code || x.land || "") === k).sort((a, b) => (Number(b.kaufpreis_eur) || 0) - (Number(a.kaufpreis_eur) || 0))[0]; setZielLiga(erste ? erste.liga : ""); };
+  const hinweisText = a => a === "kein_kaeuferkreis" ? (en ? "No realistic buyer market in this league (wage level)." : "In dieser Liga gibt es keinen realistischen Käuferkreis (Gehaltsniveau).") : a === "gedeckelt" ? (en ? "Capped at the league's record fee." : "Gedeckelt an der Rekordablöse der Liga.") : a === "untergrenze" ? (en ? "Floor: league with the same price level." : "Untergrenze: gleich teure Liga.") : "";
+  const statusTxt = sp.status === "indikativ" ? (en ? "indicative" : "indikativ") : (en ? "limited" : "eingeschränkt");
+  const klasseTxt = { K1: en ? "World class" : "Weltklasse", K2: en ? "Top class" : "Spitzenklasse", K3: en ? "Top-league regular" : "Stamm Top-Liga", K4: en ? "Average" : "Durchschnitt", K5: en ? "Depth" : "Breite" }[sp.klasse] || sp.klasse || "";
+  const stand = sp.stand ? String(sp.stand).slice(0, 10).split("-").reverse().join(".") : "";
+  const vertrag = sp.contract_until ? fmtTag(String(sp.contract_until).slice(0, 10)) : "";
+  const fakt = [sp.position, sp.age ? sp.age + (en ? " yrs" : " J.") : "", sp.height ? masz(sp.height, "cm") : "", sp.foot ? (en ? (sp.foot === "links" ? "left foot" : sp.foot === "rechts" ? "right foot" : sp.foot) : (sp.foot + "füßig").replace("linksfüßig", "Linksfuß").replace("rechtsfüßig", "Rechtsfuß").replace("beidefüßig", "beidfüßig")) : "", vertrag ? (en ? "Contract until " : "Vertrag bis ") + vertrag : ""].filter(Boolean);
+  const diff = (a, b) => { const x = Number(a) || 0, y = Number(b) || 0; if (!x || !y) return null; const p = Math.round((y / x - 1) * 100); return (p > 0 ? "+" : "") + p + " %"; };
+  const kopf = h("div", { className: "tw-mwd-kopf" },
+    h("button", { type: "button", className: "tw-mwd-zurueck", onClick: zurueck }, "← " + (en ? "Back to ranking" : "Zurück zur Rangliste")),
+    h("div", { className: "tw-mwd-profil" },
+      sp.photo ? h("img", { className: "tw-mwd-foto", src: sp.photo, alt: "", onError: e => { e.target.style.visibility = "hidden"; } }) : h("div", { className: "tw-mwd-foto" }),
+      h("div", { style: { minWidth: 0, flex: 1 } },
+        h("div", { className: "tw-mwd-name" }, sp.name),
+        h("div", { className: "tw-mwd-verein" }, h(ClubLogo, { name: sp.team, size: 22 }), h("span", null, sp.team || "–"), (sp.league || sp.liga) ? h("span", { className: "tw-mwd-grau" }, " · " + (sp.league || sp.liga) + (twMwLand(sp.league || sp.liga, sp.land) ? " (" + twMwLand(sp.league || sp.liga, sp.land) + ")" : "")) : null),
+        h("div", { className: "tw-mwd-fakten" }, sp.nationality ? h("span", null, landFlagge(sp.nationality, 16), sp.nationality) : null, fakt.map((f, i) => h("span", { key: i }, f)))),
+      h("button", { type: "button", className: "tw-mwd-profilknopf", onClick: () => openPlayer && openPlayer(sp.player_id, sp.name, sp.team) }, en ? "Open player profile" : "Zum Spielerprofil")));
+  const block1 = h("section", { className: "tw-mwd-block" },
+    h("div", { className: "tw-mwd-titel" }, en ? "World market value" : "Weltmarktwert"),
+    h("div", { className: "tw-mwd-wertzeile" }, h("div", { className: "tw-mwd-wert" }, twMwText(sp.weltmarkt_eur)), h("span", { className: "tw-mw-status " + (sp.status === "indikativ" ? "ind" : "ein") }, statusTxt)),
+    (sp.spanne_von && sp.spanne_bis) ? h("div", { className: "tw-mwd-klein" }, (en ? "Range " : "Spanne ") + twMwText(sp.spanne_von) + " – " + twMwText(sp.spanne_bis)) : null,
+    h("p", { className: "tw-mwd-text" }, en
+      ? "The value of the player in his current league with buyers from every league (TransferWire model Formel 3: performance, remuneration, comparable transfers and the player’s own transfer fee, assessed by our market-value reviewer)." + (stand ? " As of " + stand + "." : "")
+      : "Der Wert des Spielers in seiner aktuellen Liga mit Käufern aus jeder Liga (TransferWire-Modell, Formel 3: Leistung, Vergütung, Vergleichstransfers und eigene Ablöse, eingeordnet durch unseren Marktwert-Bewerter)." + (stand ? " Stand " + stand + "." : "")));
+  const block2 = h("section", { className: "tw-mwd-block" },
+    h("div", { className: "tw-mwd-titel" }, en ? "Performance market value" : "Leistungsmarktwert"),
+    h("div", { className: "tw-mwd-wertzeile" }, h("div", { className: "tw-mwd-wert" }, twMwText(sp.leistungsmarktwert_eur)), (sp.pkt || sp.klasse) ? h("span", { className: "tw-mwd-pille" }, [sp.pkt ? (en ? "Score " : "Punkte ") + String(sp.pkt).replace(".", en ? "." : ",") : "", klasseTxt].filter(Boolean).join(" · ")) : null),
+    h("p", { className: "tw-mwd-text" }, en
+      ? "This value rates the player’s performance alone – level, experience, playing time, condition, injury pattern and potential – on a world scale. It deliberately ignores the country and league he plays in, his contract, wages and the transfer market, so it stays comparable across all leagues."
+      : "Dieser Wert bewertet ausschließlich die spielerische Leistung – Niveau, Erfahrung, Einsatz, Verfassung, Verletzungsmuster und Potenzial – auf einer Weltskala. Land und Liga, in der er spielt, sowie Vertrag, Gehalt und Transfermarkt bleiben bewusst außen vor; so ist der Wert über alle Ligen hinweg vergleichbar."));
+  const aktuellKarte = h("div", { className: "tw-mwd-karte" },
+    h("div", { className: "tw-mwd-kartenkopf" }, en ? "Current market" : "Aktueller Markt"),
+    h("div", { className: "tw-mwd-land" }, twMwFlagge(heim ? heim.land_code : sp.land_code, 20), h("span", null, heim ? twMwLand(heim.liga, heim.land) : twMwLand(sp.liga, sp.land))),
+    h("div", { className: "tw-mwd-liga" }, heim ? heim.liga : (sp.liga || sp.league || "–")),
+    h("div", { className: "tw-mwd-karte-wert" }, twMwText(heim && heim.kaufpreis_eur ? heim.kaufpreis_eur : sp.weltmarkt_eur)),
+    h("div", { className: "tw-mwd-klein" }, en ? "Market value in his current league" : "Marktwert in seiner aktuellen Liga"));
+  const zielKarte = h("div", { className: "tw-mwd-karte ziel" },
+    h("div", { className: "tw-mwd-kartenkopf" }, en ? "Selected target market" : "Ausgewählter Zielmarkt"),
+    h("div", { className: "tw-mwd-auswahl" },
+      h("label", null, h("span", null, en ? "Country" : "Land"), h("select", { value: zielLand, onChange: e => waehleLand(e.target.value), "aria-label": en ? "Country" : "Land" }, laender.map(l => h("option", { key: l.k, value: l.k }, l.name)))),
+      h("label", null, h("span", null, en ? "League" : "Liga"), h("select", { value: zielLiga, onChange: e => setZielLiga(e.target.value), "aria-label": en ? "League" : "Liga" }, ligenImLand.map(l => h("option", { key: l.liga, value: l.liga }, l.liga))))),
+    ziel ? h(React.Fragment, null,
+      h("div", { className: "tw-mwd-land" }, twMwFlagge(ziel.land_code, 20), h("span", null, twMwLand(ziel.liga, ziel.land)), h("span", { className: "tw-mwd-grau" }, " · " + ziel.liga)),
+      ziel.ist_heimat ? h("div", { className: "tw-mwd-klein" }, en ? "This is his current league." : "Das ist seine aktuelle Liga.") : null,
+      ziel.marktwert_danach_eur ? h(React.Fragment, null,
+        h("div", { className: "tw-mwd-karte-wert" }, twMwText(ziel.marktwert_danach_eur), diff(heim ? heim.kaufpreis_eur : sp.weltmarkt_eur, ziel.marktwert_danach_eur) ? h("span", { className: "tw-mwd-diff" }, diff(heim ? heim.kaufpreis_eur : sp.weltmarkt_eur, ziel.marktwert_danach_eur)) : null),
+        h("div", { className: "tw-mwd-klein" }, en ? "Market value in this league (Formel 1: country and league factored in)" : "Marktwert in dieser Liga (Formel 1, mit Land und Liga gerechnet)"),
+        ziel.kaufpreis_eur && !ziel.ist_heimat ? h("div", { className: "tw-mwd-klein", style: { marginTop: 4 } }, (en ? "Purchase price today for a club from this league: " : "Kaufpreis heute für einen Verein aus dieser Liga: ") + twMwText(ziel.kaufpreis_eur)) : null)
+        : h("div", { className: "tw-mwd-karte-wert leer" }, en ? "no value" : "kein Wert"),
+      hinweisText(ziel.hinweis_art) ? h("div", { className: "tw-mwd-hinweis" }, hinweisText(ziel.hinweis_art)) : null)
+      : h("div", { className: "tw-mwd-klein" }, en ? "Choose a country and a league." : "Land und Liga auswählen."));
+  const block3 = h("section", { className: "tw-mwd-block" },
+    h("div", { className: "tw-mwd-titel" }, en ? "Current league vs. target market" : "Aktuelle Liga im Vergleich zum Zielmarkt"),
+    h("p", { className: "tw-mwd-text" }, en ? "Left: his current league and value. Right: pick any country and league – Formel 1 of the TransferWire model recalculates his market value for that market so you can compare both directly." : "Links die aktuelle Liga mit ihrem Wert, rechts ein frei wählbarer Zielmarkt: Formel 1 des TransferWire-Modells rechnet den Marktwert für Land und Liga um, so lässt sich beides direkt vergleichen."),
+    fehler ? h("div", { className: "tw-mwd-klein", style: { color: "var(--sc-schwach-text)" } }, fehler) : null,
+    ligen === null ? h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), en ? "Loading league comparison …" : "Ligavergleich wird geladen …")
+      : ligen.length === 0 ? h("div", { className: "tw-mwd-klein" }, en ? "No league values calculated for this player yet." : "Für diesen Spieler liegen noch keine Ligawerte vor.")
+      : h("div", { className: "tw-mwd-vergleich" }, aktuellKarte, h("div", { className: "tw-mwd-vs" }, "vs."), zielKarte));
+  return h("div", { className: "tw-mwd" }, kopf, block1, block2, block3);
+}
 function MarktwertVue({ openPlayer }) {
+  // A86 (28.10.2026): Suche + Rangliste (Anpfiff 1.0 Weltmarktwert) + Detailansicht; Aufbau der Seite sonst wie bisher
   const h = React.createElement; const en = LANG === "en";
   const [liga, setLiga] = useState(""); const [pos, setPos] = useState(""); const [alter, setAlter] = useState(""); const [nurInd, setNurInd] = useState(false);
   const [q, setQ] = useState(""); const [qAktiv, setQAktiv] = useState("");
   const [zeilen, setZeilen] = useState(null); const [gesamt, setGesamt] = useState(null); const [seite, setSeite] = useState(0); const [mehrDa, setMehrDa] = useState(false); const [laedt, setLaedt] = useState(false); const [fehler, setFehler] = useState(""); const [stand, setStand] = useState("");
+  const [sel, setSel] = useState(null);
   const SEITE = 50;
   useEffect(() => { const t = setTimeout(() => setQAktiv(q.trim()), 350); return () => clearTimeout(t); }, [q]);
   useEffect(() => { setSeite(0); }, [liga, pos, alter, nurInd, qAktiv]);
   useEffect(() => {
     let aktiv = true; setLaedt(true); setFehler("");
-    const sel = "player_id,name,team,league,position,age,photo,tm_value_eur,tm_value_text,mw_status,mw_von,mw_bis,mw_stand";
-    let url = "/db/players?select=" + sel + "&tm_value_eur=not.is.null&order=tm_value_eur.desc,player_id.asc&limit=" + SEITE + "&offset=" + (seite * SEITE);
+    const sel = "player_id,name,team,league,liga,land,land_code,position,age,photo,nationality,height,foot,contract_until,weltmarkt_eur,leistungsmarktwert_eur,spanne_von,spanne_bis,klasse,pkt,status,stand";
+    let url = "/db/mw_web_spieler?select=" + sel + "&order=weltmarkt_eur.desc.nullslast,player_id.asc&limit=" + SEITE + "&offset=" + (seite * SEITE);
     if (liga) url += "&league=eq." + encodeURIComponent(liga);
     if (pos) url += "&position=eq." + encodeURIComponent(pos);
     if (alter === "u21") url += "&age=lte.21"; else if (alter === "u23") url += "&age=lte.23"; else if (alter === "24-29") url += "&age=gte.24&age=lte.29"; else if (alter === "30") url += "&age=gte.30";
-    if (nurInd) url += "&mw_status=eq.indikativ";
-    if (qAktiv) url += "&name=ilike." + encodeURIComponent("*" + qAktiv.replace(/[*,()"]/g, " ").trim() + "*");
+    if (nurInd) url += "&status=eq.indikativ";
+    if (qAktiv) { const s = qAktiv.replace(/[*,()"]/g, " ").trim(); const n = s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""); url += "&or=(name.ilike." + encodeURIComponent("*" + s + "*") + ",search_name.ilike." + encodeURIComponent("*" + n + "*") + ")"; }
     fetch(url, { credentials: "omit", cache: "no-store", headers: seite === 0 ? { Prefer: "count=exact" } : {} })
       .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); if (seite === 0) { const m = /\/(\d+)/.exec(r.headers.get("content-range") || ""); setGesamt(m ? Number(m[1]) : null); } return r.json(); })
-      .then(d => { if (!aktiv) return; const liste = Array.isArray(d) ? d : []; setZeilen(alt => seite === 0 ? liste : (alt || []).concat(liste)); setMehrDa(liste.length === SEITE); const s0 = liste.find(x => x.mw_stand); if (s0 && !stand) setStand(String(s0.mw_stand).slice(0, 10)); setLaedt(false); })
+      .then(d => { if (!aktiv) return; const liste = Array.isArray(d) ? d : []; setZeilen(alt => seite === 0 ? liste : (alt || []).concat(liste)); setMehrDa(liste.length === SEITE); const s0 = liste.find(x => x.stand); if (s0 && !stand) setStand(String(s0.stand).slice(0, 10)); setLaedt(false); })
       .catch(() => { if (!aktiv) return; setFehler(en ? "Market values could not be loaded." : "Marktwerte konnten nicht geladen werden."); setLaedt(false); });
     return () => { aktiv = false; };
   }, [liga, pos, alter, nurInd, qAktiv, seite]);
@@ -11720,12 +11850,13 @@ function MarktwertVue({ openPlayer }) {
   const POS = [["", en ? "All positions" : "Alle Positionen"], ["Torwart", en ? "Goalkeeper" : "Torwart"], ["Abwehr", en ? "Defence" : "Abwehr"], ["Mittelfeld", en ? "Midfield" : "Mittelfeld"], ["Sturm", en ? "Attack" : "Sturm"]];
   const ALTER = [["", en ? "All ages" : "Alle Altersklassen"], ["u21", en ? "21 and younger" : "21 und jünger"], ["u23", en ? "23 and younger" : "23 und jünger"], ["24-29", "24–29"], ["30", en ? "30 and older" : "30 und älter"]];
   const posTxt = (p) => { const f = POS.find(x => x[0] === p); return f && p ? f[1] : (p || ""); };
+  const waehle = x => { setSel(x); try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) {} };
   const kopf = h("div", null,
     h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, letterSpacing: 1.6, color: "var(--gold-text,#DDB65F)", textTransform: "uppercase" } }, en ? "Market value" : "Marktwert"),
     h("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 26, margin: "2px 0 4px", textTransform: "uppercase", letterSpacing: .4, color: INK } }, en ? "TW market values" : "TW-Marktwerte"),
     h("p", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, margin: 0, maxWidth: 860, lineHeight: 1.6 } }, en
-      ? "Our own market values from the TransferWire model: calculated from comparable transfers, performance, playing time, age, contract length and availability. The values are indicative estimates with a range; “limited” means fewer comparable data points and a wider range." + (stand ? " As of " + stand + "." : "")
-      : "Eigene Marktwerte aus dem TransferWire-Modell: berechnet aus Vergleichstransfers, Leistung, Einsatzzeit, Alter, Vertragslaufzeit und Verfügbarkeit. Die Werte sind indikative Schätzungen mit Spanne; „eingeschränkt“ heißt: weniger Vergleichsdaten, breitere Spanne." + (stand ? " Stand: " + stand.split("-").reverse().join(".") + "." : "")));
+      ? "Our own market values from the TransferWire model: the world market value (current league, buyers from every league), the pure performance market value and – per player – the value in any other country and league. Search for a player or browse the most valuable players; click a player for the details. The values are indicative estimates with a range; “limited” means fewer comparable data points." + (stand ? " As of " + stand.split("-").reverse().join(".") + "." : "")
+      : "Eigene Marktwerte aus dem TransferWire-Modell: der Weltmarktwert (aktuelle Liga, Käufer aus jeder Liga), der reine Leistungsmarktwert und – je Spieler – der Wert in jedem anderen Land und jeder anderen Liga. Spieler suchen oder die teuersten Spieler durchsehen; ein Klick auf den Spieler öffnet die Details. Die Werte sind indikative Schätzungen mit Spanne; „eingeschränkt“ heißt: weniger Vergleichsdaten." + (stand ? " Stand: " + stand.split("-").reverse().join(".") + "." : "")));
   const auswahl = (wert, setz, optionen, label) => h("select", { value: wert, onChange: e => setz(e.target.value), "aria-label": label }, optionen.map(([v, t]) => h("option", { key: v || "_", value: v }, t)));
   const ligaAuswahl = h("select", { value: liga, onChange: e => setLiga(e.target.value), "aria-label": en ? "League" : "Liga" }, h("option", { value: "" }, en ? "All leagues" : "Alle Ligen"), ligen.map(l => h("option", { key: l, value: l }, l + " · " + LIGA_LAND[l])));
   const filter = h("div", { className: "tw-mw-filter" },
@@ -11733,22 +11864,23 @@ function MarktwertVue({ openPlayer }) {
     ligaAuswahl, auswahl(pos, setPos, POS, "Position"), auswahl(alter, setAlter, ALTER, en ? "Age" : "Alter"),
     h("label", null, h("input", { type: "checkbox", checked: nurInd, onChange: e => setNurInd(e.target.checked) }), en ? "indicative only" : "nur indikative Werte"),
     gesamt != null ? h("span", { style: { marginLeft: "auto", fontFamily: FONT_BODY, fontSize: 12, color: MUTED } }, gesamt.toLocaleString(en ? "en-GB" : "de-DE") + (en ? " players with a market value" : " Spieler mit Marktwert")) : null);
-  const kopfZeile = h("div", { className: "tw-mw-zeile tw-mw-kopf" }, h("span", { style: { textAlign: "right" } }, "#"), h("span", null, en ? "Player" : "Spieler"), h("span", { className: "tw-mw-verein" }, en ? "Club · league" : "Verein · Liga"), h("span", { style: { textAlign: "right" } }, en ? "TW market value" : "TW-Marktwert"), h("span", { className: "tw-mw-statusz" }, "Status"));
-  const zeile = (x, i) => h("div", { key: x.player_id, className: "tw-mw-zeile", role: "button", tabIndex: 0, onClick: () => openPlayer && openPlayer(x.player_id, x.name, x.team), onKeyDown: e => { if (e.key === "Enter" && openPlayer) openPlayer(x.player_id, x.name, x.team); } },
+  const listenTitel = h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "var(--t2)", margin: "2px 0 8px" } }, qAktiv ? (en ? "Search results" : "Suchergebnisse") : (en ? "Most valuable players – Top " + SEITE + " by world market value" : "Die teuersten Spieler – Top " + SEITE + " nach Weltmarktwert"));
+  const kopfZeile = h("div", { className: "tw-mw-zeile tw-mw-kopf" }, h("span", { style: { textAlign: "right" } }, "#"), h("span", null, en ? "Player" : "Spieler"), h("span", { className: "tw-mw-verein" }, en ? "Club · league" : "Verein · Liga"), h("span", { style: { textAlign: "right" } }, en ? "World market value" : "Weltmarktwert"), h("span", { className: "tw-mw-statusz" }, "Status"));
+  const zeile = (x, i) => h("div", { key: x.player_id, className: "tw-mw-zeile", role: "button", tabIndex: 0, onClick: () => waehle(x), onKeyDown: e => { if (e.key === "Enter") waehle(x); } },
     h("span", { className: "tw-mw-rang" }, i + 1),
     h("span", { className: "tw-mw-sp" }, x.photo ? h("img", { src: x.photo, alt: "", loading: "lazy", onError: e => { e.target.style.visibility = "hidden"; } }) : h("span", { style: { width: 34 } }),
       h("span", { style: { minWidth: 0 } }, h("div", { className: "tw-mw-name" }, x.name), h("div", { className: "tw-mw-klein" }, [posTxt(x.position), x.age ? (x.age + (en ? " yrs" : " J.")) : ""].filter(Boolean).join(" · ")))),
-    h("span", { className: "tw-mw-verein", style: { minWidth: 0 } }, h("div", { className: "tw-mw-name", style: { fontWeight: 700 } }, x.team || "–"), h("div", { className: "tw-mw-klein" }, x.league || "")),
-    h("span", null, h("div", { className: "tw-mw-wert" }, en ? twMwText(x.tm_value_eur) : (x.tm_value_text || twMwText(x.tm_value_eur))), (x.mw_von && x.mw_bis) ? h("div", { className: "tw-mw-klein", style: { textAlign: "right" } }, (en ? "Range " : "Spanne ") + twMwText(x.mw_von) + " – " + twMwText(x.mw_bis)) : null),
-    h("span", { className: "tw-mw-statusz" }, h("span", { className: "tw-mw-status " + (x.mw_status === "indikativ" ? "ind" : "ein") }, x.mw_status === "indikativ" ? (en ? "indicative" : "indikativ") : (en ? "limited" : "eingeschränkt"))));
-  return h("div", { className: "tw-mw" }, kopf, filter,
+    h("span", { className: "tw-mw-verein", style: { minWidth: 0 } }, h("div", { className: "tw-mw-name", style: { fontWeight: 700 } }, x.team || "–"), h("div", { className: "tw-mw-klein" }, x.league || x.liga || "")),
+    h("span", null, h("div", { className: "tw-mw-wert" }, twMwText(x.weltmarkt_eur)), h("div", { className: "tw-mw-klein", style: { textAlign: "right" } }, (en ? "Performance " : "Leistung ") + twMwText(x.leistungsmarktwert_eur))),
+    h("span", { className: "tw-mw-statusz" }, h("span", { className: "tw-mw-status " + (x.status === "indikativ" ? "ind" : "ein") }, x.status === "indikativ" ? (en ? "indicative" : "indikativ") : (en ? "limited" : "eingeschränkt"))));
+  if (sel) return h("div", { className: "tw-mw" }, kopf, h(MarktwertDetail, { sp: sel, zurueck: () => setSel(null), openPlayer: openPlayer }));
+  return h("div", { className: "tw-mw" }, kopf, filter, listenTitel,
     fehler ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: "var(--sc-schwach-text)", padding: "12px 0" } }, fehler) : null,
     zeilen === null ? h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), en ? "Loading market values …" : "Marktwerte werden geladen …")
-      : zeilen.length === 0 ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "14px 0" } }, en ? "No players match these filters." : "Keine Spieler zu diesen Filtern.")
+      : zeilen.length === 0 ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "14px 0" } }, qAktiv ? (en ? "No player with a market value matches this search." : "Kein Spieler mit Marktwert zu dieser Suche.") : (en ? "No players match these filters." : "Keine Spieler zu diesen Filtern."))
       : h("div", { style: { border: "1px solid var(--linie)", borderRadius: 12, overflow: "hidden" } }, kopfZeile, zeilen.map(zeile)),
     (zeilen && mehrDa) ? h("div", { style: { textAlign: "center", marginTop: 14 } }, h("button", { type: "button", disabled: laedt, onClick: () => setSeite(seite + 1), style: { cursor: "pointer", minHeight: 42, padding: "0 18px", border: "1px solid var(--linie)", background: "var(--karte)", color: "var(--t1)", borderRadius: 10, fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800 } }, laedt ? (en ? "Loading …" : "Lädt …") : (en ? "Show 50 more" : "Weitere 50 anzeigen"))) : null);
 }
-
 function TransferApp({
   account,
   onNavigate: onNavigateSeite,
