@@ -420,6 +420,335 @@ html body .tw-sn-upgrade:hover, html.tw-dark body .tw-sn-upgrade:hover, .tw-gold
 @media (max-width: 760px) { .tw-ttl-laender { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 359px) { .tw-ttl-laender { grid-template-columns: minmax(0, 1fr); } .tw-talfaktor { grid-template-columns: minmax(80px, 1fr) minmax(44px, 1fr) 30px 40px !important; column-gap: 8px !important; font-size: 13px !important; } }
 </style>
+<!-- A87 (29.10.2026): Bewegung + Goldmarkierung, Zusatz ohne React-Aenderung -->
+<style id="tw-bewegung-css">
+/* A87 (29.10.2026): Bewegung + Goldmarkierung — reiner Zusatz, keine bestehende Regel geändert.
+   1) Gleitende Goldmarkierung in der Seitenleiste (Hintergrund wie bisher --aktiv, dazu Goldrand und Goldbalken) */
+.tw-sn-menue { position: relative; }
+.tw-sn-gleiter { position: absolute; left: 0; right: 0; top: 0; height: 38px; border-radius: 9px; background: var(--aktiv); box-shadow: inset 0 0 0 1px var(--gold-rand); pointer-events: none; opacity: 0; z-index: 0; transition: transform .45s cubic-bezier(.22,.61,.36,1), height .45s cubic-bezier(.22,.61,.36,1), opacity .2s ease; }
+.tw-sn-gleiter.ohne-uebergang { transition: none; }
+.tw-sn-gleiter::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; border-radius: 0 3px 3px 0; background: var(--gold); }
+.tw-sn-menue.hat-gleiter .tw-sn-punkt.aktiv, .tw-sn-menue.hat-gleiter .tw-sn-unter.aktiv { background: transparent; }
+.tw-sn-menue > .tw-sn-punkt, .tw-sn-menue > .tw-sn-gruppe { position: relative; z-index: 1; }
+.tw-sn-gruppe.zu.tw-schliesst .tw-sn-kinder { display: flex; overflow: hidden; }
+@media (prefers-reduced-motion: reduce) { .tw-sn-gleiter { transition: none; } }
+/* 2) Verein sucht: Auswahl-Zustände in Gold statt Violett (Untertabs, Positionsknöpfe, Filter, Merken/Beobachten);
+      Bedeutungsfarben (Medienberichte, gemeldet) bleiben violett */
+html body .vs-wurzel .vs-useite.ist-aktiv { background: var(--gold-bg); color: var(--gold-text); box-shadow: inset 0 -3px 0 var(--gold); }
+html body .vs-wurzel .vs-useite.ist-aktiv:before, html body .vs-wurzel .vs-useite.ist-aktiv:after { color: var(--gold-text); }
+html body .vs-wurzel .vs-useite b[data-zahl]:after { background: var(--gold); color: var(--gold-schrift); }
+html body .vs-wurzel .vs-posknopf.ist-aktiv { border-color: var(--gold-rand); background: var(--gold-bg); box-shadow: inset 0 -3px 0 var(--gold); }
+html body .vs-wurzel .vs-posknopf.ist-fein.ist-aktiv { box-shadow: none; border-color: var(--gold); }
+html body .vs-wurzel .vs-posknopf.ist-fein.ist-aktiv em { color: var(--gold-schrift); background: var(--gold); border-color: var(--gold); }
+html body .vs-wurzel .vs-posmenu button.ist-an { background: var(--gold-bg); color: var(--gold-text); }
+html body .vs-wurzel .vs-posmenu button.ist-an em { color: var(--gold-schrift); background: var(--gold); border-color: var(--gold); }
+html body .vs-wurzel .vs-filterknopf.ist-an, html body .vs-wurzel .vs-chip.ist-aktiv, html body .vs-wurzel .vs-knopf.ist-an, html body .vs-wurzel .vs-listenzeile.ist-aktiv, html body .vs-wurzel .vs-wahlchip { background: var(--gold-bg); border-color: var(--gold-rand); }
+html body .vs-wurzel .vs-chipwahl button.ist-an { background: var(--gold-bg); border-color: var(--gold-rand); color: var(--t1); }
+html body .vs-wurzel .vs-vorschlag.ist-gewaehlt { background: var(--gold-bg); }
+html body .vs-wurzel .vs-vorschlag .vs-haken { color: var(--gold-text); }
+html body .vs-wurzel .vs-filterpunkt, html body .vs-wurzel .vs-dots i.an { background: var(--gold); }
+html body .vs-wurzel .vs-tab.ist-aktiv { border-bottom-color: var(--gold); }
+html body .vs-wurzel .vs-modus.ist-aktiv small { background: var(--gold-bg); color: var(--gold-text); }
+html body .vs-wurzel .vs-zone.ist-aktiv { outline-color: var(--gold); }
+html body .vs-wurzel .vs-check input, html body .vs-wurzel .vs-schalter input { accent-color: var(--gold); }
+html body .vs-wurzel .vs-app :focus-visible { outline-color: var(--gold); }
+html body .vs-wurzel .k3-knopf.ist-an, html body .vs-wurzel .k3n .k3-fuss .k3-knopf.ist-an { background: var(--gold-bg); color: var(--gold-text); box-shadow: inset 0 0 0 1px var(--gold-rand); }
+html body .vs-wurzel .sm-typwahl .sm-rahmen.ist-an { border-color: var(--gold); color: var(--gold-text); background: var(--gold-bg); }
+/* 3) Marktwert-Seite: Marktwerte in Gold (Liste, Detail, Ländervergleich); Weltmarktwert-Block mit goldenem Rahmen */
+html body .tw-mw .tw-mw-wert { color: var(--gold-text); }
+html body .tw-mw .tw-mwd-wert, html body .tw-mw .tw-mwd-karte-wert { color: var(--gold-text); }
+html body .tw-mw .tw-mwd-karte-wert.leer { color: var(--t3); }
+html body .tw-mw .tw-mwd-block.tw-mwd-gold { border-color: var(--gold-rand); background: var(--gold-tint); }
+</style>
+<script id="tw-bewegung">
+/* A87 (29.10.2026): Bewegung + Goldmarkierung fuer die App — reiner Zusatz ohne Eingriff in den React-Code.
+   Beobachtet das DOM (MutationObserver) und ergaenzt: gleitende Goldmarkierung in der Seitenleiste, Einblenden
+   beim Oeffnen eines Bereichs, hochzaehlende Kennzahlen, weiches Auf-/Zuklappen der Menuegruppen, Einblenden
+   von Dialogen und Schichten. Bei "Bewegung reduzieren" bleibt nur die (ruhige) Markierung. */
+(function () {
+  "use strict";
+  if (window.__twBewegung) return;
+  window.__twBewegung = true;
+  var ruhe = false;
+  try { ruhe = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); } catch (e) {}
+  var kannAnim = !ruhe && typeof Element !== "undefined" && typeof Element.prototype.animate === "function";
+  var EASE = "cubic-bezier(.22,.61,.36,1)";
+  var fertig = new WeakSet();          // bereits eingeblendete Knoten
+  var gezaehlt = new WeakSet();        // bereits hochgezaehlte Knoten
+  var vsStand = new WeakMap();         // Verein sucht: zuletzt gesehene Karten/Kennzahlen je Wurzel
+  var LISTE = "tbody, .tw-feedlist, .tw-glist, .mu-t3, .mu-l3, .mu-g2, .mu-top, .mu-st, .tw-sk-raster, .tw-pos-grid, .k3-liste, .tw-mwd-vergleich, .tw-mw > div[style*=\"overflow: hidden\"]";
+
+  function $(s, el) { return (el || document).querySelector(s); }
+  function $$(s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); }
+  function kinderVon(el) { return Array.prototype.slice.call(el.children).filter(function (k) { return k.nodeType === 1 && !k.matches("style, script, template"); }); }
+  function sichtbar(el) { return !!(el && el.offsetParent !== null); }
+
+  /* ===================== 1) Gleitende Goldmarkierung ===================== */
+  function markierungEinrichten(menue) {
+    if (!menue || menue.__twGleiter) return;
+    var g = document.createElement("div");
+    g.className = "tw-sn-gleiter ohne-uebergang";
+    g.setAttribute("aria-hidden", "true");
+    menue.appendChild(g);
+    menue.__twGleiter = g;
+    markierungSetzen(menue, true);
+  }
+  function markierungSetzen(menue, sofort) {
+    var g = menue.__twGleiter;
+    if (!g || !g.isConnected) { menue.__twGleiter = null; return markierungEinrichten(menue); }
+    var akt = menue.querySelector(".tw-sn-punkt.aktiv, .tw-sn-unter.aktiv");
+    if (!akt || !sichtbar(akt) || akt.closest(".tw-sn-gruppe.tw-schliesst")) { g.style.opacity = "0"; menue.classList.remove("hat-gleiter"); return; }
+    var mr = menue.getBoundingClientRect(), ar = akt.getBoundingClientRect();
+    var y = Math.round((ar.top - mr.top + menue.scrollTop) * 100) / 100, h = Math.round(ar.height * 100) / 100;
+    if (!h) return;
+    var neu = g.style.opacity !== "1";
+    var hart = sofort || neu || ruhe;
+    if (hart) g.classList.add("ohne-uebergang");
+    g.style.transform = "translateY(" + y + "px)";
+    g.style.height = h + "px";
+    if (hart) { void g.offsetHeight; g.classList.remove("ohne-uebergang"); }
+    g.style.opacity = "1";
+    menue.classList.add("hat-gleiter");
+  }
+  var markierungGeplant = false, markierungHart = false;
+  function markierungenAktualisieren(sofort) {
+    markierungHart = markierungHart || !!sofort;
+    if (markierungGeplant) return;
+    markierungGeplant = true;
+    requestAnimationFrame(function () {
+      var hart = markierungHart; markierungGeplant = false; markierungHart = false;
+      $$(".tw-sn-menue").forEach(function (m) { if (!m.__twGleiter) markierungEinrichten(m); else markierungSetzen(m, hart); });
+    });
+  }
+  /* Menuegruppe: weiches Auf- und Zuklappen (React schaltet nur die Klasse "zu") */
+  function gruppeAnimieren(gr) {
+    var kinder = gr.querySelector(".tw-sn-kinder"); if (!kinder) return;
+    var zu = gr.classList.contains("zu");
+    if (!kannAnim) { markierungenAktualisieren(true); return; }
+    if (kinder.__twAnim) { try { kinder.__twAnim.cancel(); } catch (e) {} kinder.__twAnim = null; }
+    if (zu) {
+      gr.classList.add("tw-schliesst");
+      var h0 = kinder.offsetHeight;
+      var a = kinder.animate([{ height: h0 + "px", opacity: 1 }, { height: "0px", opacity: 0 }], { duration: 240, easing: "ease-in-out" });
+      kinder.__twAnim = a;
+      var ende = function () { kinder.__twAnim = null; gr.classList.remove("tw-schliesst"); markierungenAktualisieren(true); };
+      a.onfinish = ende; a.oncancel = ende;
+      markierungenAktualisieren(false);
+    } else {
+      var h1 = kinder.offsetHeight;
+      kinder.style.overflow = "hidden";
+      var b = kinder.animate([{ height: "0px", opacity: 0 }, { height: h1 + "px", opacity: 1 }], { duration: 300, easing: EASE });
+      kinder.__twAnim = b;
+      var ende2 = function () { kinder.__twAnim = null; kinder.style.overflow = ""; markierungenAktualisieren(true); };
+      b.onfinish = ende2; b.oncancel = ende2;
+      markierungenAktualisieren(true);
+    }
+  }
+  function seitenleisteEinblenden(sn) {
+    if (!kannAnim || fertig.has(sn)) return;
+    fertig.add(sn);
+    $$(".tw-sn-ki, .tw-sn-punkt, .tw-sn-kopf, .tw-sn-unter, .tw-sn-upgrade", sn).slice(0, 20).forEach(function (el, i) {
+      try { el.animate([{ opacity: 0, transform: "translateX(-8px)" }, { opacity: 1, transform: "none" }], { duration: 380, delay: i * 22, easing: EASE, fill: "backwards" }); } catch (e) {}
+    });
+  }
+
+  /* ===================== 2) Einblenden beim Oeffnen ===================== */
+  function einblenden(el, verzoegerung, nurOpazitaet) {
+    if (!kannAnim || !el || el.nodeType !== 1 || fertig.has(el)) return;
+    fertig.add(el);
+    var st = el.getAttribute("style") || "";
+    if (/transform:|will-change:/.test(st) || el.matches("tr, td, th")) nurOpazitaet = true;   // eigene Transformationen nicht ueberschreiben
+    var ab = nurOpazitaet ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }];
+    try { el.animate(ab, { duration: nurOpazitaet ? 360 : 460, delay: verzoegerung || 0, easing: EASE, fill: "backwards" }); } catch (e) {}
+  }
+  function istListe(el) {
+    if (!el || el.nodeType !== 1 || el.classList.contains("tw-main") || el.closest(".tw-nl")) return false;
+    if (el.children.length < 2) return false;
+    if (el.matches(LISTE)) return true;
+    var st = el.getAttribute("style");
+    return !!(st && /display:\s*grid/.test(st));
+  }
+  function ersteListe(wurzel) {
+    var kandidaten = $$(LISTE + ', [style*="display: grid"]', wurzel);
+    for (var i = 0; i < kandidaten.length; i++) if (istListe(kandidaten[i])) return kandidaten[i];
+    return null;
+  }
+  function listeEinblenden(liste, start) {
+    var zeilen = liste.tagName === "TBODY";
+    kinderVon(liste).filter(function (k) { return !fertig.has(k); }).slice(0, 14).forEach(function (k, i) { einblenden(k, (start || 0) + i * 40, zeilen); });
+  }
+  function bereichEinblenden(main) {
+    /* Ganzer Bereich neu (Seitenwechsel): Bloecke gestaffelt, erste Liste darin zusaetzlich */
+    var wurzeln = kinderVon(main).filter(function (k) { return !fertig.has(k); });
+    var bloecke = [];
+    wurzeln.forEach(function (w) {
+      if (wurzeln.length <= 2 && !istListe(w) && kinderVon(w).length >= 2) { fertig.add(w); bloecke = bloecke.concat(kinderVon(w).filter(function (k) { return !fertig.has(k); })); }
+      else bloecke.push(w);
+    });
+    var listeDabei = false;
+    bloecke.slice(0, 16).forEach(function (b, i) { if (istListe(b)) { listeDabei = true; fertig.add(b); listeEinblenden(b, i * 45); } else einblenden(b, i * 45); });
+    if (!listeDabei) { var liste = ersteListe(main); if (liste) listeEinblenden(liste, 120); }
+  }
+  function tippt(bereich) {
+    var a = document.activeElement;
+    return !!(a && bereich && bereich.contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));
+  }
+  function neueKnoten(knoten) {
+    var main = $("main.tw-main"); if (!main || !kannAnim) return;
+    var ganz = false, reste = [];
+    knoten.forEach(function (n) {
+      if (n === main || n.contains(main) || n.parentElement === main) { ganz = true; return; }
+      if (!main.contains(n) || n.closest(".tw-nl") || n.closest(".vs-wurzel")) return;
+      reste.push(n);
+    });
+    if (ganz) { bereichEinblenden(main); return; }
+    if (tippt(main)) return;                      // beim Tippen/Filtern keine Bewegung
+    /* Nachgeladene Inhalte: Listen gestaffelt, einzelne Bloecke weich */
+    var nachEltern = new Map();
+    reste.forEach(function (n) { if (fertig.has(n)) return; var p = n.parentElement; if (!p) return; if (!nachEltern.has(p)) nachEltern.set(p, []); nachEltern.get(p).push(n); });
+    nachEltern.forEach(function (ns, p) {
+      if (istListe(p)) { ns.slice(0, 14).forEach(function (n, i) { einblenden(n, i * 40, p.tagName === "TBODY"); }); return; }
+      ns.slice(0, 6).forEach(function (n) {
+        if (n.matches("span, b, i, em, small, strong, a, svg, path, img, button, input, label, option, br, td, th, tr, li")) return;
+        einblenden(n, 0);
+        var l = istListe(n) ? n : ersteListe(n);
+        if (l) listeEinblenden(l, 80);
+      });
+    });
+  }
+  /* Verein sucht (eigenes Modul, rendert bei jeder Aktion komplett neu): Karten nur einblenden, wenn sich die Auswahl aendert */
+  function vereinSucht(wurzel) {
+    if (!kannAnim) return;
+    if (!fertig.has(wurzel)) { fertig.add(wurzel); kinderVon(wurzel).forEach(function (k, i) { einblenden(k, i * 60); }); }
+    var alt = vsStand.get(wurzel) || {};
+    var app = $(".vs-app", wurzel);
+    if (app && !alt.app) kinderVon(app).slice(0, 8).forEach(function (k, i) { einblenden(k, 80 + i * 60); });
+    var karten = $$("article.k3", wurzel);
+    var kennung = karten.map(function (k) { return k.id; }).join("|");
+    if (kennung && kennung !== alt.karten && !tippt(wurzel)) karten.slice(0, 14).forEach(function (k, i) { einblenden(k, i * 50); });
+    var kz = $(".vs-kennzahlen", wurzel);
+    var kzText = kz ? kz.textContent : "";
+    if (kz && kzText !== alt.kennzahlen) $$("b", kz).forEach(hochzaehlen);
+    vsStand.set(wurzel, { app: !!app || alt.app, karten: kennung || alt.karten, kennzahlen: kzText || alt.kennzahlen });
+  }
+
+  /* ===================== 3) Hochzaehlende Kennzahlen ===================== */
+  function hochzaehlen(el) {
+    if (!kannAnim || !el || el.nodeType !== 1 || gezaehlt.has(el) || el.children.length) return;
+    var original = el.textContent;
+    var m = /^(\s*)(\d{1,3}(?:[.\s]\d{3})+|\d+)([\s\S]*)$/.exec(original);
+    if (!m) return;
+    var ziel = parseInt(m[2].replace(/[.\s]/g, ""), 10);
+    if (!(ziel > 0) || ziel > 99999999) return;
+    gezaehlt.add(el);
+    var gruppiert = /[.\s]\d{3}/.test(m[2]);
+    var vor = m[1], nach = m[3];
+    var t0 = null, letzt = original, dauer = 900;
+    var fmt = function (n) { return gruppiert ? n.toLocaleString("de-DE") : String(n); };
+    function schritt(t) {
+      if (!el.isConnected) return;
+      if (el.textContent !== letzt && el.textContent !== original) return;   // React hat den Text inzwischen geaendert
+      if (t0 === null) t0 = t;
+      var p = Math.min(1, (t - t0) / dauer), e = 1 - Math.pow(1 - p, 3);
+      if (p >= 1) { if (el.textContent === letzt) el.textContent = original; return; }
+      letzt = vor + fmt(Math.round(ziel * e)) + nach;
+      el.textContent = letzt;
+      requestAnimationFrame(schritt);
+    }
+    requestAnimationFrame(schritt);
+  }
+  var KPI = 'div[style*="align-items: baseline"][style*="padding: 10px 14px"] > span:first-child';
+  function kennzahlenSuchen(wurzel) {
+    if (!kannAnim || !wurzel || wurzel.nodeType !== 1) return;
+    $$(KPI, wurzel).forEach(hochzaehlen);                                   // KPI-Kacheln (Datenbank u. a.)
+    $$(".tw-sn-badge", wurzel).forEach(hochzaehlen);                        // Badges der Seitenleiste
+    $$(".tw-mw-filter > span", wurzel).forEach(hochzaehlen);                // "n Spieler mit Marktwert"
+    $$("span", wurzel).forEach(function (s) { if (!s.children.length && /^\d[\d.]*\s+(Ergebnisse|results)$/.test(s.textContent.trim())) hochzaehlen(s); });
+    if (wurzel.matches(KPI + ", .tw-sn-badge, .tw-mw-filter > span")) hochzaehlen(wurzel);
+  }
+  /* Marktwert-Detail: Weltmarktwert-Block bekommt den Goldrahmen */
+  function marktwertGold(wurzel) {
+    if (!wurzel || wurzel.nodeType !== 1) return;
+    var bloecke = $$(".tw-mwd-block", wurzel); if (wurzel.matches(".tw-mwd-block")) bloecke.push(wurzel);
+    bloecke.forEach(function (b) { var t = b.querySelector(".tw-mwd-titel"); if (t && /^(Weltmarktwert|World market value)/.test(t.textContent.trim()) && !b.classList.contains("tw-mwd-gold")) b.classList.add("tw-mwd-gold"); });
+  }
+
+  /* ===================== 4) Dialoge und Schichten ===================== */
+  function istSchicht(n) {
+    if (n.getAttribute("role") === "dialog" || n.classList.contains("mu-modal") || n.classList.contains("tw-ki-panel")) return true;
+    var st = n.getAttribute("style") || "";
+    return /position:\s*fixed/.test(st) && /inset:\s*0|top:\s*0px/.test(st);
+  }
+  function kasten(box, art) {
+    if (!box || box.nodeType !== 1 || fertig.has(box)) return;
+    fertig.add(box);
+    var st = box.getAttribute("style") || "";
+    if (/transform:/.test(st)) { try { box.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: EASE }); } catch (e) {} return; }   // zentrierte Dialoge: Transformation nicht anfassen
+    var vonLinks = art === "links" || box.classList.contains("tw-mobnav") || (/left:\s*0px/.test(st) && /bottom:\s*0px/.test(st) && !/right:\s*0px/.test(st));
+    var vonRechts = !vonLinks && /right:\s*0px/.test(st) && /bottom:\s*0px/.test(st);
+    var start = vonLinks ? "translateX(-24px)" : vonRechts ? "translateX(24px)" : "translateY(14px)";
+    try { box.animate([{ opacity: 0, transform: start }, { opacity: 1, transform: "none" }], { duration: 320, easing: EASE }); } catch (e) {}
+  }
+  function schichtEinblenden(n) {
+    if (!kannAnim || fertig.has(n) || n.matches("header, .tw-tabbar, main, .tw-main, .tw-nl")) return;
+    var st = n.getAttribute("style") || "";
+    var eigeneBox = n.getAttribute("role") === "dialog" || n.classList.contains("tw-ki-panel");
+    if (eigeneBox && !/inset:\s*0/.test(st)) { kasten(n); return; }                      // der Knoten ist selbst der Dialog
+    fertig.add(n);
+    try { n.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180, easing: "ease-out" }); } catch (e) {}
+    var box = n.querySelector(".tw-mobnav, aside, .mu-modal-box, [role='dialog']") || n.firstElementChild;
+    if (box && box !== n) kasten(box);
+  }
+
+  /* ===================== Beobachter ===================== */
+  function verarbeiten(knoten) {
+    var main = $("main.tw-main");
+    var vsWurzeln = [];
+    var menues = false;
+    knoten.forEach(function (n) {
+      if (n.matches(".tw-sn-menue") || n.querySelector(".tw-sn-menue")) menues = true;
+      var sn = n.matches(".tw-sn") ? n : n.querySelector(".tw-sn"); if (sn) seitenleisteEinblenden(sn);
+      $$(".tw-sn-gruppe", n).concat(n.matches(".tw-sn-gruppe") ? [n] : []).forEach(function (g) { if (!g.__twZuBekannt) { g.__twZu = g.classList.contains("zu"); g.__twZuBekannt = true; } });
+      if (istSchicht(n)) schichtEinblenden(n);
+      var vs = n.closest(".vs-wurzel");
+      if (vs) { var top = vs; while (top.parentElement && top.parentElement.closest(".vs-wurzel")) top = top.parentElement.closest(".vs-wurzel"); if (vsWurzeln.indexOf(top) < 0) vsWurzeln.push(top); }
+    });
+    if (menues) markierungenAktualisieren(true);
+    neueKnoten(knoten);
+    vsWurzeln.forEach(vereinSucht);
+    knoten.forEach(function (n) { kennzahlenSuchen(n); if (main && (main.contains(n) || n.contains(main))) marktwertGold(n); });
+  }
+  var beobachter = new MutationObserver(function (eintraege) {
+    var neu = [], klassen = [];
+    for (var i = 0; i < eintraege.length; i++) {
+      var r = eintraege[i];
+      if (r.type === "childList") { for (var j = 0; j < r.addedNodes.length; j++) { var n = r.addedNodes[j]; if (n.nodeType === 1 && n.isConnected) neu.push(n); } }
+      else if (r.type === "attributes" && r.target.nodeType === 1) klassen.push(r.target);
+    }
+    if (neu.length) { try { verarbeiten(neu); } catch (e) {} }      // sofort, vor dem naechsten Bild: nichts blitzt unanimiert auf
+    if (klassen.length) {
+      var menue = false;
+      klassen.forEach(function (t) {
+        if (t.matches(".tw-sn-gruppe")) { var zu = t.classList.contains("zu"); if (t.__twZuBekannt && t.__twZu !== zu) { t.__twZu = zu; gruppeAnimieren(t); } else { t.__twZu = zu; t.__twZuBekannt = true; } menue = true; }
+        else if (t.matches(".tw-sn-punkt, .tw-sn-unter, .tw-sn-ki, .tw-sn-kinder")) menue = true;
+        else if (t.matches(".tw-mwd-block")) marktwertGold(t);
+      });
+      if (menue) markierungenAktualisieren(false);
+    }
+  });
+  function start() {
+    beobachter.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+    $$(".tw-sn-gruppe").forEach(function (g) { g.__twZu = g.classList.contains("zu"); g.__twZuBekannt = true; });
+    markierungenAktualisieren(true);
+    var main = $("main.tw-main"); if (main) { kennzahlenSuchen(main); marktwertGold(main); }
+    $$(".tw-sn-badge").forEach(hochzaehlen);
+    window.addEventListener("resize", function () { markierungenAktualisieren(true); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { markierungenAktualisieren(true); });
+    setTimeout(function () { markierungenAktualisieren(true); }, 1500);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
+})();
+</script>
 </head>
 <body>
 <div id="tw-lader" aria-hidden="true"><div class="tw-lader-kern"><span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span><span class="sweep"></span><img src="/assets/logo-icon.png?v=gold" alt=""></div><div class="tw-lader-text" id="tw-lader-text">Signal wird gesucht</div><script>try{if(localStorage.getItem("tw_lang")==="en"){document.getElementById("tw-lader-text").textContent="Searching for signals";}}catch(e){}</script></div>
