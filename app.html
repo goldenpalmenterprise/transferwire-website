@@ -420,6 +420,304 @@ html body .tw-sn-upgrade:hover, html.tw-dark body .tw-sn-upgrade:hover, .tw-gold
 @media (max-width: 760px) { .tw-ttl-laender { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 359px) { .tw-ttl-laender { grid-template-columns: minmax(0, 1fr); } .tw-talfaktor { grid-template-columns: minmax(80px, 1fr) minmax(44px, 1fr) 30px 40px !important; column-gap: 8px !important; font-size: 13px !important; } }
 </style>
+<!-- A88 (29.10.2026): Schnellspeicher - Antworten je Konto im Browser merken, Doppelaufrufe buendeln, Ansichten vorab laden -->
+<script id="tw-schnell">
+(function () {
+  // A88 (29.10.2026): Schnellspeicher. Antworten der eigenen Schnittstellen (/api/, /db/) werden je Konto im Browser
+  // gemerkt (IndexedDB + Arbeitsspeicher), gleiche Aufrufe gebuendelt und die zuletzt genutzten Aufrufe vorab geladen.
+  // Zusatz ohne Aenderung der App-Logik: sitzt unter dem Lade-Waechter und dem Sitzungs-Kopf; faellt bei jedem Fehler
+  // auf den normalen Abruf zurueck. Schreibende Aufrufe (POST/PUT/PATCH/DELETE) leeren die Eintraege desselben Pfads.
+  if (window.__twSchnell) return;
+  if (typeof window.fetch !== "function" || typeof Response === "undefined" || typeof Headers === "undefined") return;
+  var nativ = window.fetch.bind(window);
+  var DB_NAME = "tw_schnell", LAGER = "antworten", DB_VERSION = 1;
+  var MAX_EINTRAG = 12 * 1024 * 1024, MAX_EINTRAEGE = 120, MAX_GELERNT = 60, JE_PFAD = 8;
+  var ereignisName = "tw-daten-neu";
+  var speicher = new Map();      // Schluessel -> Eintrag {t, status, statusText, kopf:[[k,v]], body, pfad, url}
+  var laufend = new Map();       // Schluessel -> Promise<Ergebnis {eintrag|null, status, statusText, kopf, body}>
+  var dbVersprechen = null, dbKaputt = false, konto = "", zaehlerSchreiben = 0;
+  var stat = { treffer: 0, alt: 0, netz: 0, gebuendelt: 0, vorab: 0 };
+
+  // Regeln je Pfad (erste passende gilt): frisch = ohne Netz aus dem Speicher; alt = sofort aus dem Speicher und im
+  // Hintergrund erneuern; danach normal laden. nie = nicht merken. ereignis = bei neuen Daten "tw-daten-neu" melden.
+  var S = 1000, MIN = 60 * S, STD = 3600 * S;
+  var REGELN = [
+    { re: /^\/api\/transfernews(\?|$)/, frisch: 90 * S, alt: 7 * 24 * STD, ereignis: true },
+    { re: /^\/db\/signals(\?|$)/, nie: true },
+    { re: /^\/api\/(tw-abmelden|tw-anmelden|tw-account|tw-cancel|tw-chat|tw-checkout-start|tw-code-anfordern|tw-code|tw-passwort|tw-ping|tw-registrieren|tw-resend|tw-sitzung|tw-team|tw-assistent|tw-akquise|tw-community-[a-z]+|tw-analytics|tw-fehler|tw-bild|tw-bilder|tw-meldungbilder|tw-fotos|tw-portraets|tw-vereinspruefung|vs-pdf|tw-spiel-laden|tw-spielanalyse|tw-vereinsspiel-analyse|tw-sprache)(\?|$)/, nie: true },
+    { re: /^\/api\/tw-spieltag(\?|$)/, frisch: 20 * S, alt: 0 },
+    { re: /^\/api\/(tw-watch|tw-listen|tw-scoutsuche|tw-scoutkatalog|tw-performance-v2|tw-markt|tw-community)(\?|$)/, frisch: 2 * MIN, alt: STD },
+    { re: /^\/api\/verein-sucht(\?|$)/, frisch: 3 * MIN, alt: 6 * STD },
+    { re: /^\/api\/(tw-ticker|tw-leistungen|tw-vertraege|tw-vereine|tw-vereine-liste|tw-tabellen|tw-korrekturen|tw-verletzungsbegriffe|tw-ausfaelle|tw-logos|tw-spieler|tw-extra|tw-verein|tw-vereinsseite|tw-vereinsspiele|tw-spiele|tw-spiel|tw-aehnlich|tw-spieler-news)(\?|$)/, frisch: 5 * MIN, alt: 6 * STD },
+    { re: /^\/db\//, frisch: 5 * MIN, alt: 6 * STD },
+    { re: /^\/api\//, frisch: 45 * S, alt: 0 }
+  ];
+  var KOPF_SCHLUESSEL = ["accept", "prefer", "range", "range-unit", "accept-profile", "content-profile"];
+
+  function kontoLesen() {
+    try {
+      var a = JSON.parse(localStorage.getItem("tw_account") || "null");
+      if (!a) return "";
+      var s = String(a.sitzung || a.code || a.zugangscode || "");
+      return s ? "k" + hash(s + "|" + String(a.email || "")) : "";
+    } catch (e) { return ""; }
+  }
+  function hash(s) { var h = 5381, i; for (i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
+  function pfadVon(u) {
+    try { var x = new URL(u, location.href); if (x.origin !== location.origin) return null; if (x.pathname.indexOf("/api/") !== 0 && x.pathname.indexOf("/db/") !== 0) return null; return x.pathname + x.search; } catch (e) { return null; }
+  }
+  function basisPfad(p) { var m = /^(\/(?:api|db)\/[^/?#]+)/.exec(p); return m ? m[1] : p.split("?")[0]; }
+  function regelFuer(p) { for (var i = 0; i < REGELN.length; i++) if (REGELN[i].re.test(p)) return REGELN[i]; return null; }
+  function kopfAuszug(init) {
+    var out = [];
+    try {
+      var h = new Headers((init && init.headers) || {});
+      KOPF_SCHLUESSEL.forEach(function (k) { var v = h.get(k); if (v) out.push(k + "=" + v); });
+    } catch (e) {}
+    return out.join("&");
+  }
+  function schluessel(p, init) { return konto + "|" + p + "|" + kopfAuszug(init); }
+
+  // ---- IndexedDB
+  function db() {
+    if (dbKaputt || typeof indexedDB === "undefined") return Promise.reject(new Error("kein IndexedDB"));
+    if (dbVersprechen) return dbVersprechen;
+    dbVersprechen = new Promise(function (ok, nein) {
+      try {
+        var req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = function () { var d = req.result; if (!d.objectStoreNames.contains(LAGER)) { var st = d.createObjectStore(LAGER, { keyPath: "k" }); st.createIndex("t", "t"); } };
+        req.onsuccess = function () { var d = req.result; d.onversionchange = function () { try { d.close(); } catch (e) {} dbVersprechen = null; }; ok(d); };
+        req.onerror = function () { dbKaputt = true; nein(req.error); };
+        req.onblocked = function () { nein(new Error("blockiert")); };
+      } catch (e) { dbKaputt = true; nein(e); }
+    });
+    dbVersprechen.catch(function () { dbVersprechen = null; });
+    return dbVersprechen;
+  }
+  function dbLesen(k) {
+    return db().then(function (d) {
+      return new Promise(function (ok) {
+        try { var r = d.transaction(LAGER, "readonly").objectStore(LAGER).get(k); r.onsuccess = function () { ok(r.result || null); }; r.onerror = function () { ok(null); }; } catch (e) { ok(null); }
+      });
+    }).catch(function () { return null; });
+  }
+  function dbSchreiben(k, e) {
+    return db().then(function (d) {
+      return new Promise(function (ok) {
+        try {
+          var tx = d.transaction(LAGER, "readwrite"); var st = tx.objectStore(LAGER);
+          st.put({ k: k, t: e.t, konto: konto, pfad: e.pfad, url: e.url, status: e.status, statusText: e.statusText, kopf: e.kopf, body: e.body });
+          tx.oncomplete = function () { ok(true); }; tx.onerror = function () { ok(false); }; tx.onabort = function () { ok(false); };
+        } catch (e2) { ok(false); }
+      });
+    }).catch(function () { return false; });
+  }
+  function dbLoeschenWenn(pruef) {
+    return db().then(function (d) {
+      return new Promise(function (ok) {
+        try {
+          var tx = d.transaction(LAGER, "readwrite"); var st = tx.objectStore(LAGER); var c = st.openCursor(); var n = 0;
+          c.onsuccess = function () { var cur = c.result; if (!cur) return; try { if (pruef(cur.value)) { cur.delete(); n++; } } catch (e) {} cur.continue(); };
+          tx.oncomplete = function () { ok(n); }; tx.onerror = function () { ok(n); }; tx.onabort = function () { ok(n); };
+        } catch (e2) { ok(0); }
+      });
+    }).catch(function () { return 0; });
+  }
+  function dbAufraeumen() {
+    return db().then(function (d) {
+      return new Promise(function (ok) {
+        try {
+          var tx = d.transaction(LAGER, "readwrite"); var st = tx.objectStore(LAGER); var zr = st.count();
+          zr.onsuccess = function () {
+            var zuviel = zr.result - MAX_EINTRAEGE; if (zuviel <= 0) return;
+            var c = st.index("t").openCursor();
+            c.onsuccess = function () { var cur = c.result; if (!cur || zuviel <= 0) return; cur.delete(); zuviel--; cur.continue(); };
+          };
+          tx.oncomplete = function () { ok(true); }; tx.onerror = function () { ok(false); }; tx.onabort = function () { ok(false); };
+        } catch (e) { ok(false); }
+      });
+    }).catch(function () { return false; });
+  }
+  function allesLeeren() {
+    speicher.clear(); laufend.clear();
+    try { localStorage.removeItem("tw_schnell_urls"); } catch (e) {}
+    return db().then(function (d) {
+      return new Promise(function (ok) { try { var tx = d.transaction(LAGER, "readwrite"); tx.objectStore(LAGER).clear(); tx.oncomplete = function () { ok(true); }; tx.onerror = function () { ok(false); }; } catch (e) { ok(false); } });
+    }).catch(function () { return false; });
+  }
+
+  // ---- Eintraege und Antworten
+  function kopfFiltern(h) {
+    var out = [];
+    try { h.forEach(function (v, k) { var kk = k.toLowerCase(); if (kk === "content-encoding" || kk === "content-length" || kk === "transfer-encoding" || kk === "connection" || kk === "keep-alive") return; out.push([k, v]); }); } catch (e) {}
+    return out;
+  }
+  function antwortAus(e, herkunft) {
+    var h = new Headers();
+    try { (e.kopf || []).forEach(function (p) { try { h.append(p[0], p[1]); } catch (x) {} }); } catch (x) {}
+    try { h.set("X-TW-Schnell", herkunft + ";alter=" + Math.round((Date.now() - e.t) / 1000)); } catch (x) {}
+    return new Response(e.body, { status: e.status, statusText: e.statusText || "", headers: h });
+  }
+  function merkbar(status, kopf, body) {
+    if (!(status === 200 || status === 206)) return false;
+    if (typeof body !== "string" || body.length < 2 || body.length > MAX_EINTRAG) return false;
+    var ct = ""; for (var i = 0; i < kopf.length; i++) if (kopf[i][0].toLowerCase() === "content-type") ct = String(kopf[i][1]).toLowerCase();
+    if (ct.indexOf("json") < 0) return false;
+    var c = body.charAt(0); if (c !== "{" && c !== "[") return false;
+    return true;
+  }
+  function eintragHolen(k) {
+    var e = speicher.get(k); if (e) return Promise.resolve(e);
+    return dbLesen(k).then(function (r) {
+      if (!r || r.konto !== konto || typeof r.body !== "string") return null;
+      var e2 = { t: r.t, status: r.status, statusText: r.statusText, kopf: r.kopf || [], body: r.body, pfad: r.pfad, url: r.url };
+      if (!speicher.has(k)) speicher.set(k, e2);
+      return e2;
+    });
+  }
+  function eintragAblegen(k, e) {
+    speicher.set(k, e);
+    if (speicher.size > MAX_EINTRAEGE) { var erster = speicher.keys().next().value; if (erster !== k) speicher.delete(erster); }
+    dbSchreiben(k, e).then(function () { if ((++zaehlerSchreiben % 15) === 0) dbAufraeumen(); });
+  }
+  function lernen(pfad, init) {
+    try {
+      var liste = JSON.parse(localStorage.getItem("tw_schnell_urls") || "[]"); if (!Array.isArray(liste)) liste = [];
+      var kopf = kopfAuszug(init), basis = basisPfad(pfad), jetzt = Date.now();
+      liste = liste.filter(function (x) { return x && x.u !== pfad; });
+      liste.unshift({ u: pfad, h: kopf, b: basis, t: jetzt });
+      var jePfad = {}; liste = liste.filter(function (x) { jePfad[x.b] = (jePfad[x.b] || 0) + 1; return jePfad[x.b] <= JE_PFAD; }).slice(0, MAX_GELERNT);
+      localStorage.setItem("tw_schnell_urls", JSON.stringify(liste));
+    } catch (e) {}
+  }
+
+  // Netzabruf mit Buendelung gleicher Aufrufe
+  function netz(k, pfad, input, init, regel, vorher) {
+    if (laufend.has(k)) { stat.gebuendelt++; return laufend.get(k); }
+    stat.netz++;
+    var p = nativ(input, init).then(function (r) {
+      var kopf = kopfFiltern(r.headers);
+      return r.text().then(function (body) {
+        var erg = { eintrag: null, status: r.status, statusText: r.statusText, kopf: kopf, body: body };
+        if (merkbar(r.status, kopf, body) && konto) {
+          var e = { t: Date.now(), status: r.status, statusText: r.statusText, kopf: kopf, body: body, pfad: pfad, url: pfad };
+          erg.eintrag = e; eintragAblegen(k, e); lernen(pfad, init);
+          if (regel.ereignis && vorher && vorher.body !== body) {
+            try { window.dispatchEvent(new CustomEvent(ereignisName, { detail: { url: pfad } })); } catch (x) {}
+          }
+        }
+        return erg;
+      });
+    });
+    laufend.set(k, p);
+    var weg = function () { if (laufend.get(k) === p) laufend.delete(k); };
+    p.then(weg, weg);
+    return p;
+  }
+  function antwortAusErgebnis(erg) {
+    if (erg.eintrag) return antwortAus(erg.eintrag, "netz");
+    var h = new Headers(); try { erg.kopf.forEach(function (p) { try { h.append(p[0], p[1]); } catch (x) {} }); } catch (x) {}
+    return new Response(erg.body, { status: erg.status, statusText: erg.statusText || "", headers: h });
+  }
+
+  function abfangen(input, init) {
+    var methode = String((init && init.method) || "GET").toUpperCase();
+    var u = typeof input === "string" ? input : (typeof URL !== "undefined" && input instanceof URL ? input.href : "");
+    if (!u) return nativ(input, init);
+    var pfad = pfadVon(u); if (!pfad) return nativ(input, init);
+    if (methode !== "GET") {
+      // schreibender Aufruf: danach die Eintraege desselben Pfads vergessen
+      var basis = basisPfad(pfad);
+      return nativ(input, init).then(function (r) { ungueltig(basis); return r; });
+    }
+    if (init && init.signal) return nativ(input, init);
+    if (!konto) konto = kontoLesen();
+    if (!konto) return nativ(input, init);
+    var regel = regelFuer(pfad); if (!regel || regel.nie) return nativ(input, init);
+    var frisch = false; try { frisch = !!(init && init.headers && new Headers(init.headers).get("X-TW-Frisch")); } catch (e) {}
+    var k = schluessel(pfad, init);
+    return eintragHolen(k).then(function (e) {
+      var jetzt = Date.now();
+      if (e && !frisch && jetzt - e.t <= regel.frisch) { stat.treffer++; return antwortAus(e, "frisch"); }
+      if (e && !frisch && regel.alt && jetzt - e.t <= regel.alt) {
+        stat.alt++;
+        netz(k, pfad, input, init, regel, e).catch(function () {});
+        return antwortAus(e, "alt");
+      }
+      return netz(k, pfad, input, init, regel, e).then(antwortAusErgebnis);
+    }).catch(function () { return nativ(input, init); });
+  }
+  function ungueltig(basis) {
+    speicher.forEach(function (e, k) { if (e.pfad && basisPfad(e.pfad) === basis) speicher.delete(k); });
+    dbLoeschenWenn(function (r) { return r && r.pfad && basisPfad(r.pfad) === basis; });
+  }
+
+  // ---- Vorabladen der zuletzt genutzten Aufrufe (nur GET, nur wenn nicht frisch im Speicher)
+  function sitzungsKopf(h) {
+    try { var a = JSON.parse(localStorage.getItem("tw_account") || "null") || {}; var s = String(a.sitzung || a.code || a.zugangscode || ""); if (s && s.length <= 200 && encodeURIComponent(s) === s && !h.has("X-TW-Sitzung")) h.set("X-TW-Sitzung", s); } catch (e) {}
+    return h;
+  }
+  function codeErsetzen(pfad) {
+    try {
+      var a = JSON.parse(localStorage.getItem("tw_account") || "null") || {}; var s = String(a.sitzung || a.code || a.zugangscode || "");
+      if (!s) return pfad;
+      return pfad.replace(/([?&]code=)[^&]*/, function (m, p1) { return p1 + encodeURIComponent(s); });
+    } catch (e) { return pfad; }
+  }
+  var vorabLaeuft = false;
+  function vorabLaden() {
+    if (vorabLaeuft || !konto || document.hidden) return;
+    try { if (navigator.connection && navigator.connection.saveData) return; } catch (e) {}
+    var liste; try { liste = JSON.parse(localStorage.getItem("tw_schnell_urls") || "[]"); } catch (e) { liste = []; }
+    if (!Array.isArray(liste) || !liste.length) return;
+    vorabLaeuft = true;
+    var warteschlange = liste.slice(0, MAX_GELERNT), aktiv = 0;
+    var naechster = function () {
+      if (document.hidden) { vorabLaeuft = false; return; }
+      while (aktiv < 2 && warteschlange.length) {
+        var x = warteschlange.shift(); if (!x || !x.u) continue;
+        var pfad = codeErsetzen(x.u), regel = regelFuer(pfad); if (!regel || regel.nie || !regel.alt) continue;
+        var init = { headers: sitzungsKopf(new Headers()), credentials: "same-origin" };
+        if (x.h) x.h.split("&").forEach(function (t) { var i = t.indexOf("="); if (i > 0) { try { init.headers.set(t.slice(0, i), t.slice(i + 1)); } catch (e) {} } });
+        var k = schluessel(pfad, init);
+        aktiv++;
+        (function (k, pfad, init, regel) {
+          eintragHolen(k).then(function (e) {
+            if (e && Date.now() - e.t <= regel.frisch) return null;
+            if (laufend.has(k)) return null;
+            stat.vorab++;
+            return netz(k, pfad, pfad, init, regel, e);
+          }).catch(function () {}).then(function () { aktiv--; setTimeout(naechster, 120); });
+        })(k, pfad, init, regel);
+      }
+      if (!warteschlange.length && aktiv === 0) vorabLaeuft = false;
+    };
+    naechster();
+  }
+
+  // ---- Start
+  function start() {
+    konto = kontoLesen();
+    var vorher = ""; try { vorher = localStorage.getItem("tw_schnell_konto") || ""; } catch (e) {}
+    if (konto !== vorher) { allesLeeren(); try { if (konto) localStorage.setItem("tw_schnell_konto", konto); else localStorage.removeItem("tw_schnell_konto"); } catch (e) {} }
+    window.addEventListener("tw-sitzung-weg", function () { konto = ""; allesLeeren(); try { localStorage.removeItem("tw_schnell_konto"); } catch (e) {} });
+    window.addEventListener("storage", function (ev) { if (ev && ev.key === "tw_account") { var neu = kontoLesen(); if (neu !== konto) { konto = neu; allesLeeren(); try { localStorage.setItem("tw_schnell_konto", konto); } catch (e) {} } } });
+    // Vorabladen, sobald der Start ruhig ist (keine neuen Aufrufe mehr), spaetestens 6 s nach dem Laden
+    var letzter = Date.now(), gestartet = false;
+    var pruefe = function () { if (gestartet) return; if (Date.now() - letzter >= 1500 || Date.now() - t0 > 6000) { gestartet = true; vorabLaden(); } else setTimeout(pruefe, 400); };
+    var t0 = Date.now();
+    var alt = abfangen;
+    abfangen = function (i, n) { letzter = Date.now(); return alt(i, n); };
+    if (document.readyState === "complete") setTimeout(pruefe, 2500); else window.addEventListener("load", function () { setTimeout(pruefe, 2500); });
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) setTimeout(vorabLaden, 800); });
+  }
+  window.fetch = function (input, init) {
+    try { return abfangen(input, init); } catch (e) { return nativ(input, init); }
+  };
+  window.__twSchnell = { stat: stat, leeren: allesLeeren, regel: regelFuer, speicher: speicher, vorab: vorabLaden };
+  start();
+})();
+</script>
 <!-- A87 (29.10.2026): Bewegung + Goldmarkierung, Zusatz ohne React-Aenderung -->
 <style id="tw-bewegung-css">
 /* A87 (29.10.2026): Bewegung + Goldmarkierung — reiner Zusatz, keine bestehende Regel geändert.
@@ -12917,7 +13215,7 @@ function TransferApp({
       setDataState(s => s === "live" ? "live" : "demo");
     });
   };
-  useEffect(() => { ladeFeed(); }, []);
+  useEffect(() => { ladeFeed(); /* A88 (29.10.2026): Schnellspeicher meldet neue Feed-Daten -> einmal neu laden (kommt dann sofort aus dem Speicher) */ const neuLaden = e => { try { if (e && e.detail && /\/api\/transfernews/.test(String(e.detail.url || ""))) ladeFeed(); } catch (x) {} }; window.addEventListener("tw-daten-neu", neuLaden); return () => window.removeEventListener("tw-daten-neu", neuLaden); }, []);
   useEffect(() => {
     const puls = () => {
       try {
