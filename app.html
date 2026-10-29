@@ -6282,6 +6282,42 @@ const ladeVereinSucht = () => {
   });
   return vsLadePromise;
 };
+/* A92 (29.10.2026, Boss 23:53): "Verein sucht" ohne Luecke rechts. Die Kartenlisten (.k3-liste.ist-zwei) sind zweispaltig, eine
+   aufgeklappte Karte (.ist-offen) geht ueber beide Spalten. Steht sie rechts, rutschte sie bisher in die naechste Zeile und liess rechts
+   neben ihrer linken Nachbarin eine leere Flaeche. Jetzt tauschen die beiden nur in der Anzeige (CSS order) die Plaetze: die offene Karte
+   bleibt in ihrer Zeile und geht ueber die ganze Breite, die Nachbarin steht darunter - wie beim Aufklappen links. Einspaltig: nichts. */
+function twVsLueckenfrei(wurzel) {
+  if (!wurzel || typeof MutationObserver === "undefined") return () => {};
+  const ordnen = () => {
+    wurzel.querySelectorAll(".k3-liste.ist-zwei").forEach(liste => {
+      const karten = Array.prototype.filter.call(liste.children, k => k.nodeType === 1);
+      let spalten = 1;
+      try { const g = getComputedStyle(liste).gridTemplateColumns; spalten = g && g !== "none" ? g.trim().split(/\s+/).length : 1; } catch (e) {}
+      const ziel = [];
+      if (spalten === 2) {
+        let sp = 0;
+        karten.forEach(k => {
+          if (k.classList.contains("ist-offen")) { if (sp === 1) { const links = ziel.pop(); ziel.push(k, links); sp = 1; } else { ziel.push(k); sp = 0; } }
+          else { ziel.push(k); sp = sp ? 0 : 1; }
+        });
+      }
+      const getauscht = ziel.length === karten.length && ziel.some((k, i) => k !== karten[i]);
+      karten.forEach(k => { const soll = getauscht ? String(ziel.indexOf(k)) : ""; if (k.style.order !== soll) k.style.order = soll; });
+    });
+  };
+  const beob = new MutationObserver(eintraege => {
+    let noetig = false;
+    for (const r of eintraege) { if (r.type === "childList" || (r.target && r.target.classList && r.target.classList.contains("k3"))) { noetig = true; break; } }
+    if (noetig) { try { ordnen(); } catch (e) {} }
+  });
+  beob.observe(wurzel, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+  let rahmen = 0;
+  const neuMessen = () => { if (rahmen) return; rahmen = requestAnimationFrame(() => { rahmen = 0; try { ordnen(); } catch (e) {} }); };
+  let ro = null;
+  if (typeof ResizeObserver !== "undefined") { ro = new ResizeObserver(neuMessen); ro.observe(wurzel); } else window.addEventListener("resize", neuMessen);
+  try { ordnen(); } catch (e) {}
+  return () => { beob.disconnect(); if (ro) ro.disconnect(); else window.removeEventListener("resize", neuMessen); if (rahmen) cancelAnimationFrame(rahmen); };
+}
 function VereinSuchtVue(props) {
   const en = LANG === "en";
   const [sub, setSub] = React.useState(() => { try { return localStorage.getItem("tw_vs_sub") || "position"; } catch (e) { return "position"; } });
@@ -6295,9 +6331,10 @@ function VereinSuchtVue(props) {
   React.useEffect(() => {
     if (!bereit || !ref.current || !window.VS) return undefined;
     const acct = loadAccount() || {};
-    let h = null;
+    let h = null, lf = null; // A92: lf = Luecken-Ausgleich der zweispaltigen Kartenlisten
     try { h = window.VS.mount(ref.current, { seite: sub, start: start, code: acct.zugangscode || acct.code || "", email: acct.email || "", premium: isPremiumPlan(acct.plan), lang: LANG, watch: props.watch, onWatchClub: props.onWatchClub, onContacts: props.openContacts, onOpen: props.onOpen, onSeite: wechsel }); } catch (e) { setFehler(en ? "The new view could not be started." : "Die neue Ansicht konnte nicht gestartet werden."); }
-    return () => { try { if (h) h.unmount(); } catch (e) {} };
+    try { lf = twVsLueckenfrei(ref.current); } catch (e) {}
+    return () => { try { if (lf) lf(); } catch (e) {} try { if (h) h.unmount(); } catch (e) {} };
   }, [bereit, sub, start]);
   const tabs = [["position", en ? "By position" : "Nach Position", en ? "Which clubs seek which position" : "Welche Vereine welche Position suchen"], ["matching", en ? "Player matching" : "Spieler-Matching", en ? "Where my player fits" : "Wo mein Spieler passt"], ["verein", en ? "Club view" : "Vereinsansicht", en ? "All needs of one club" : "Alle Bedarfe eines Vereins"], ["beobachtet", en ? "Watched" : "Beobachtet", en ? "My clubs, new events" : "Meine Vereine, neue Ereignisse"]];
   return React.createElement("div", { className: "vs-wurzel" },
