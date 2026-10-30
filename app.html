@@ -2,6 +2,38 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
+<script>/* A93 (30.10.2026, Boss 05:03): Datenschutz - fremde Bilder (Vereins- und Ligalogos, Spielerfotos von API-Football/Sportmonks,
+   Flaggen, Quellen-Symbole) laedt der Browser nur noch ueber den eigenen Server (auto.transferwire.de/bild/, Weiterleitung ohne
+   Besucherdaten). Die Daten bleiben unveraendert; umgeschrieben wird nur die Bildadresse beim Einsetzen ins Dokument (src/srcset,
+   innerHTML, insertAdjacentHTML). Ruecknahme: Sicherung /opt/transferwire/backups/vor_a93_bild_20261030_0507. */
+(function () {
+  var Z = "https://auto.transferwire.de/bild/";
+  var K = { "media.api-sports.io": "as", "cdn.sportmonks.com": "sm", "flagcdn.com": "fl", "www.google.com": "fi" };
+  var RE = /https?:\/\/(media\.api-sports\.io|cdn\.sportmonks\.com|flagcdn\.com|www\.google\.com(?=\/s2\/favicons))\//gi;
+  function um(s) {
+    if (typeof s !== "string" || s.indexOf("//") < 0) return s;
+    return s.replace(RE, function (m, h) { return Z + (K[h.toLowerCase()] || "as") + "/"; });
+  }
+  window.twBildUrl = um;
+  try {
+    var sa = Element.prototype.setAttribute;
+    Element.prototype.setAttribute = function (n, v) {
+      if ((n === "src" || n === "srcset") && (this.tagName === "IMG" || this.tagName === "SOURCE")) v = um(String(v));
+      return sa.call(this, n, v);
+    };
+    [window.HTMLImageElement, window.HTMLSourceElement].forEach(function (T) {
+      if (!T) return;
+      ["src", "srcset"].forEach(function (p) {
+        var d = Object.getOwnPropertyDescriptor(T.prototype, p);
+        if (d && d.set && d.configurable) Object.defineProperty(T.prototype, p, { configurable: true, enumerable: d.enumerable, get: d.get, set: function (v) { d.set.call(this, um(String(v))); } });
+      });
+    });
+    var ih = Object.getOwnPropertyDescriptor(Element.prototype, "innerHTML");
+    if (ih && ih.set && ih.configurable) Object.defineProperty(Element.prototype, "innerHTML", { configurable: true, enumerable: ih.enumerable, get: ih.get, set: function (v) { ih.set.call(this, typeof v === "string" ? um(v) : v); } });
+    var ia = Element.prototype.insertAdjacentHTML;
+    if (ia) Element.prototype.insertAdjacentHTML = function (w, t) { return ia.call(this, w, typeof t === "string" ? um(t) : t); };
+  } catch (e) {}
+})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <style>html.tw-handy85{-webkit-text-size-adjust:100%;text-size-adjust:100%}html.tw-handy85,html.tw-handy85 body,html.tw-handy85 #root{touch-action:pan-y pinch-zoom}html.tw-handy85.tw-zoom,html.tw-handy85.tw-zoom body,html.tw-handy85.tw-zoom #root{touch-action:manipulation}</style>
 <script>/* Auftrag 47 (Punkt 93, Freigabe 12.10.) + Auftrag 48 (13.10.): Handyansicht 85 % (Variante 2). Auf Handys im Hochformat wird die
@@ -65,8 +97,441 @@
   }
 }catch(e){}})();</script>
 <title>TransferWire — Transfer news & club needs</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://auto.transferwire.de" crossorigin>
+<style id="tw-schriften">/* A93 (30.10.2026): Inter und Barlow Condensed (SIL Open Font License) ueber den eigenen Server statt Google Fonts */
+/* vietnamese */
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/barlowcondensed/v13/HTxwL3I-JCGChYJ8VI-L6OO_au7B4873z3nWuZEC.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/barlowcondensed/v13/HTxwL3I-JCGChYJ8VI-L6OO_au7B4873z3jWuZEC.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/barlowcondensed/v13/HTxwL3I-JCGChYJ8VI-L6OO_au7B4873z3bWuQ.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/barlowcondensed/v13/HTxwL3I-JCGChYJ8VI-L6OO_au7B46r2z3nWuZEC.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/barlowcondensed/v13/HTxwL3I-JCGChYJ8VI-L6OO_au7B46r2z3jWuZEC.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/barlowcondensed/v13/HTxwL3I-JCGChYJ8VI-L6OO_au7B46r2z3bWuQ.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7SUc.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa0ZL7SUc.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2ZL7SUc.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1pL7SUc.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2pL7SUc.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa25L7SUc.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7SUc.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa0ZL7SUc.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2ZL7SUc.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1pL7SUc.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2pL7SUc.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa25L7SUc.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7SUc.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa0ZL7SUc.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2ZL7SUc.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1pL7SUc.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2pL7SUc.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa25L7SUc.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7SUc.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa0ZL7SUc.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2ZL7SUc.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1pL7SUc.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2pL7SUc.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa25L7SUc.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7SUc.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa0ZL7SUc.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2ZL7SUc.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1pL7SUc.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2pL7SUc.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa25L7SUc.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7SUc.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa0ZL7SUc.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2ZL7SUc.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1pL7SUc.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2pL7SUc.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa25L7SUc.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url(https://auto.transferwire.de/bild/gs/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+</style>
 <style id="tw-design">
   html, body { background: var(--seite); }
 :root { --tw-page:var(--seite); --tw-card:#FFFFFF; --tw-ink:#14181D; --tw-muted:#667085; --tw-hair:var(--linie); --tw-hair-hover:var(--linie2); }
@@ -3344,7 +3809,7 @@ function ttLandName(code, en, roh) {
 function ttFlagge(code, w) {
   const hh = Math.round(w * 0.7);
   if (!code || code.indexOf("x-") === 0) return React.createElement("span", { "aria-hidden": "true", style: { width: w, height: hh, borderRadius: 3, background: "var(--karte2)", border: "1px solid var(--linie2)", boxSizing: "border-box", flexShrink: 0, display: "inline-block" } });
-  return React.createElement("img", { src: "https://flagcdn.com/w40/" + code + ".png", srcSet: "https://flagcdn.com/w80/" + code + ".png 2x", width: w, height: hh, alt: "", loading: "lazy", style: { width: w, height: hh, borderRadius: 3, objectFit: "cover", flexShrink: 0, boxShadow: "0 0 0 1px var(--linie2)" } });
+  return React.createElement("img", { src: "https://auto.transferwire.de/bild/fl/w40/" + code + ".png", srcSet: "https://auto.transferwire.de/bild/fl/w80/" + code + ".png 2x", width: w, height: hh, alt: "", loading: "lazy", style: { width: w, height: hh, borderRadius: 3, objectFit: "cover", flexShrink: 0, boxShadow: "0 0 0 1px var(--linie2)" } });
 }
 function ttPos(p, en) { const t = String(p || "").trim(); if (!t || /^(unknown|unbekannt)\b/i.test(t) || /^\?/.test(t)) return "\u2013"; if (en) return typeof tkPosText === "function" ? tkPosText(t, true) : t; return TT_POS_DE[t.toLowerCase()] || t; }
 function ttGleicherVerein(a, b) { if (!a || !b || typeof clubKey !== "function") return false; const ka = clubKey(a), kb = clubKey(b); if (!ka || !kb) return false; return ka === kb || (ka.length >= 4 && kb.length >= 4 && (ka.indexOf(kb) >= 0 || kb.indexOf(ka) >= 0)); }
@@ -3969,7 +4434,7 @@ function MeldungsPanel({ m, schliessen, onWatch }) {
       (m.sources || []).length ? h("div", null,
         h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.2, color: "var(--t3)", textTransform: "uppercase", marginBottom: 8 } }, en ? "Sources" : "Quellen"),
         (m.sources || []).map((s, i) => h("a", { key: i, href: s.url, target: "_blank", rel: "noopener", style: { display: "flex", alignItems: "center", gap: 8, padding: "10px 0", minHeight: 44, boxSizing: "border-box", borderTop: "1px solid " + HAIR, fontFamily: FONT_BODY, fontSize: 13, fontWeight: 700, color: "var(--t1)", textDecoration: "none" } },
-          h("img", { src: "https://www.google.com/s2/favicons?sz=32&domain=" + encodeURIComponent(String(s.url || "").replace(/^https?:\/\//, "").split("/")[0] || "transferwire.de"), alt: "", width: 14, height: 14, style: { borderRadius: 3 }, onError: e => { e.currentTarget.style.display = "none"; } }),
+          h("img", { src: "https://auto.transferwire.de/bild/fi/s2/favicons?sz=32&domain=" + encodeURIComponent(String(s.url || "").replace(/^https?:\/\//, "").split("/")[0] || "transferwire.de"), alt: "", width: 14, height: 14, style: { borderRadius: 3 }, onError: e => { e.currentTarget.style.display = "none"; } }),
           s.name, h("span", { style: { marginLeft: "auto", color: "var(--gold-text)", fontWeight: 900 } }, "→")))) : null,
       h("div", { style: { display: "flex", gap: 8, marginTop: 18, flexWrap: "wrap" } },
         m.url && h("button", { onClick: () => window.open(m.url, "_blank"), style: { flex: "1 1 150px", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 900, cursor: "pointer", padding: "11px 14px", minHeight: 44, borderRadius: 10, border: "none", background: "var(--dunkel)", color: "#fff" } }, en ? "Open source" : "Quelle öffnen"),
@@ -4354,7 +4819,7 @@ function SourceLine({ sources, fallback }) { const en = LANG === "en"; const lis
   return React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 6, minWidth: 0, fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } },
     React.createElement("span", null, list.length + " " + (en ? (list.length === 1 ? "source" : "sources") : (list.length === 1 ? "Quelle" : "Quellen")) + " \u00b7 "),
     React.createElement("a", { href: list[0].url, onClick: e => { e.preventDefault(); e.stopPropagation(); window.open(list[0].url, "_blank"); }, style: { display: "inline-flex", alignItems: "center", gap: 4, color: INK, fontWeight: 700, textDecoration: "none", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" } },
-      React.createElement("img", { src: "https://www.google.com/s2/favicons?sz=32&domain=" + encodeURIComponent(dom || "transferwire.de"), alt: "", width: 12, height: 12, style: { borderRadius: 3, opacity: .85, flexShrink: 0 }, onError: e => { e.currentTarget.style.display = "none"; } }), dom),
+      React.createElement("img", { src: "https://auto.transferwire.de/bild/fi/s2/favicons?sz=32&domain=" + encodeURIComponent(dom || "transferwire.de"), alt: "", width: 12, height: 12, style: { borderRadius: 3, opacity: .85, flexShrink: 0 }, onError: e => { e.currentTarget.style.display = "none"; } }), dom),
     list.length > 1 ? React.createElement("span", null, "+" + (list.length - 1)) : null);
 }
 const GER_POS = [
@@ -9802,7 +10267,7 @@ function AssistentVue({ account, openPlayer }) {
 }
 
 const FLAGGEN = { Deutschland: "de", England: "gb-eng", Spanien: "es", Italien: "it", Frankreich: "fr", Niederlande: "nl", Portugal: "pt", Belgien: "be", Österreich: "at", Schweiz: "ch", Türkei: "tr", Schottland: "gb-sct", Dänemark: "dk", Norwegen: "no", Schweden: "se", Polen: "pl", Serbien: "rs", Kroatien: "hr", USA: "us", China: "cn", Griechenland: "gr", Russland: "ru", Ukraine: "ua", Tschechien: "cz", Japan: "jp", Brasilien: "br", Argentinien: "ar", Mexiko: "mx" };
-const Flagge = ({ land, size }) => { const code = FLAGGEN[land]; if (!code) return null; const w = size || 22; return React.createElement("img", { src: "https://flagcdn.com/w40/" + code + ".png", srcSet: "https://flagcdn.com/w80/" + code + ".png 2x", width: w, height: Math.round(w * 0.68), alt: "", loading: "lazy", style: { borderRadius: 3, objectFit: "cover", marginRight: 8, flexShrink: 0 } }); };
+const Flagge = ({ land, size }) => { const code = FLAGGEN[land]; if (!code) return null; const w = size || 22; return React.createElement("img", { src: "https://auto.transferwire.de/bild/fl/w40/" + code + ".png", srcSet: "https://auto.transferwire.de/bild/fl/w80/" + code + ".png 2x", width: w, height: Math.round(w * 0.68), alt: "", loading: "lazy", style: { borderRadius: 3, objectFit: "cover", marginRight: 8, flexShrink: 0 } }); };
 function KontakteVue({ isPrem, authQ, openVerein }) {
   const h = React.createElement; const en = LANG === "en";
   const [q, setQ] = useState(""); const [vereine, setVereine] = useState([]); const [land, setLand] = useState(""); const [liga, setLiga] = useState(""); const [wahl, setWahl] = useState(null); const [kont, setKont] = useState(null); const [lade, setLade] = useState(false); const [offen, setOffen] = useState(false);
@@ -9957,7 +10422,7 @@ function masz(v, einheit) { if (v === null || v === undefined || v === '') retur
 function gesuchAlter(n) { const t = n && (n.published || n.published_at || n.createdAt); if (!t) return n && n.publishedAt ? String(n.publishedAt) : ''; const d = new Date(t); if (isNaN(d)) return String(n.publishedAt || ''); const tage = Math.round((Date.now() - d.getTime()) / 86400000); if (LANG === 'en') return tage <= 0 ? 'today' : tage === 1 ? 'since 1 day' : 'since ' + tage + ' days'; return tage <= 0 ? 'heute' : tage === 1 ? 'seit 1 Tag' : 'seit ' + tage + ' Tagen'; }
 function gesucheBlock(passende, onKontakt) { if (!passende || !passende.length) return null; return React.createElement(React.Fragment, null, React.createElement('div', { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 700, color: MUTED, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 } }, t('pl_needs')), React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 7, marginBottom: 14 } }, passende.map(n => { const club = seekingClub(n); return React.createElement('div', { key: n.id, style: { display: 'flex', alignItems: 'center', gap: 10, background: 'var(--karte2)', border: '1px solid var(--linie)', borderRadius: 10, padding: '8px 11px', fontFamily: FONT_BODY, fontSize: 12.5, color: INK } }, React.createElement(ClubLogo, { name: club, size: 26 }), React.createElement('div', { style: { flex: 1, minWidth: 0 } }, React.createElement('div', { style: { fontWeight: 700 } }, clubName(club), React.createElement('span', { style: { color: MUTED, fontWeight: 500 } }, n.league ? ' \u00b7 ' + n.league : '')), React.createElement('div', { style: { fontSize: 12, color: MUTED, marginTop: 1 } }, [n.positionNeeded, gesuchAlter(n)].filter(Boolean).join(' \u00b7 '))), React.createElement('button', { onClick: e => { e.stopPropagation(); if (typeof onKontakt === 'function') onKontakt(club); }, style: { cursor: 'pointer', background: 'transparent', border: '1px solid var(--teal)', color: 'var(--teal)', borderRadius: 8, padding: '6px 10px', fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 700, whiteSpace: 'nowrap' } }, t('kt_btn'))); }))); }
 const LAND_CODE_EN = { denmark: 'dk', germany: 'de', france: 'fr', england: 'gb-eng', spain: 'es', italy: 'it', netherlands: 'nl', portugal: 'pt', belgium: 'be', austria: 'at', switzerland: 'ch', turkey: 'tr', 'türkiye': 'tr', scotland: 'gb-sct', wales: 'gb-wls', ireland: 'ie', 'northern ireland': 'gb-nir', norway: 'no', sweden: 'se', poland: 'pl', serbia: 'rs', croatia: 'hr', usa: 'us', 'united states': 'us', china: 'cn', 'china pr': 'cn', brazil: 'br', argentina: 'ar', japan: 'jp', nigeria: 'ng', ghana: 'gh', senegal: 'sn', 'ivory coast': 'ci', "côte d'ivoire": 'ci', morocco: 'ma', cameroon: 'cm', mali: 'ml', colombia: 'co', uruguay: 'uy', mexico: 'mx', canada: 'ca', australia: 'au', 'south korea': 'kr', 'korea republic': 'kr', greece: 'gr', 'czech republic': 'cz', czechia: 'cz', slovakia: 'sk', hungary: 'hu', romania: 'ro', ukraine: 'ua', russia: 'ru', 'bosnia and herzegovina': 'ba', slovenia: 'si', albania: 'al', kosovo: 'xk', 'north macedonia': 'mk', georgia: 'ge', iceland: 'is', finland: 'fi', israel: 'il', algeria: 'dz', tunisia: 'tn', egypt: 'eg', panama: 'pa', 'sierra leone': 'sl', guinea: 'gn', 'congo dr': 'cd', 'dr congo': 'cd', congo: 'cg', ecuador: 'ec', chile: 'cl', peru: 'pe', paraguay: 'py', venezuela: 've', jamaica: 'jm', iran: 'ir', 'saudi arabia': 'sa', montenegro: 'me', bulgaria: 'bg', cyprus: 'cy', luxembourg: 'lu', angola: 'ao', 'burkina faso': 'bf', gabon: 'ga', togo: 'tg', benin: 'bj', zambia: 'zm', 'south africa': 'za', 'cape verde': 'cv', 'guinea-bissau': 'gw', gambia: 'gm', 'new zealand': 'nz', 'costa rica': 'cr', honduras: 'hn', 'dominican republic': 'do', haiti: 'ht', 'trinidad and tobago': 'tt', suriname: 'sr', armenia: 'am', kazakhstan: 'kz', uzbekistan: 'uz' };
-function landFlagge(name, size) { const code = LAND_CODE_EN[String(name || '').trim().toLowerCase()]; if (!code) return null; const w = size || 18; return React.createElement('img', { src: 'https://flagcdn.com/w40/' + code + '.png', srcSet: 'https://flagcdn.com/w80/' + code + '.png 2x', width: w, height: Math.round(w * 0.68), alt: '', loading: 'lazy', style: { borderRadius: 2, objectFit: 'cover', marginRight: 6, verticalAlign: '-2px' } }); }
+function landFlagge(name, size) { const code = LAND_CODE_EN[String(name || '').trim().toLowerCase()]; if (!code) return null; const w = size || 18; return React.createElement('img', { src: 'https://auto.transferwire.de/bild/fl/w40/' + code + '.png', srcSet: 'https://auto.transferwire.de/bild/fl/w80/' + code + '.png 2x', width: w, height: Math.round(w * 0.68), alt: '', loading: 'lazy', style: { borderRadius: 2, objectFit: 'cover', marginRight: 6, verticalAlign: '-2px' } }); }
 function fmtTag(v) { const t = String(v || '').trim(); const m = t.match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? m[3] + '.' + m[2] + '.' + m[1] : t; }
 /* Auftrag 71 (19.10.2026, Vorgabe Boss 06:09): Beraterhistorie im Spielerprofil als schlichter Zeitstrahl - Berater/Agentur mit Zeitraum, ohne Quellen */
 function twBhDatum(iso, genau) {
@@ -12420,7 +12885,7 @@ function twMwFlagge(landCode, size) {
   const c = String(landCode || "").toLowerCase(); if (!c) return null;
   const code = c === "eng" ? "gb-eng" : c === "sco" ? "gb-sct" : c === "wal" ? "gb-wls" : c.length === 2 ? c : "";
   if (!code) return null; const w = size || 18;
-  return React.createElement("img", { src: "https://flagcdn.com/w40/" + code + ".png", srcSet: "https://flagcdn.com/w80/" + code + ".png 2x", width: w, height: Math.round(w * 0.68), alt: "", loading: "lazy", style: { borderRadius: 2, objectFit: "cover", verticalAlign: "-2px" } });
+  return React.createElement("img", { src: "https://auto.transferwire.de/bild/fl/w40/" + code + ".png", srcSet: "https://auto.transferwire.de/bild/fl/w80/" + code + ".png 2x", width: w, height: Math.round(w * 0.68), alt: "", loading: "lazy", style: { borderRadius: 2, objectFit: "cover", verticalAlign: "-2px" } });
 }
 function MarktwertDetail({ sp, zurueck, openPlayer, zurueckText }) {
   // A86 (28.10.2026): Detailansicht im Marktwertbereich - Profilkopf, Weltmarktwert, Leistungsmarktwert, Vergleich aktuelle Liga / Zielmarkt (Formel 1)
