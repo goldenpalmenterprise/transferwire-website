@@ -911,7 +911,7 @@ html body .tw-sn-upgrade:hover, html.tw-dark body .tw-sn-upgrade:hover, .tw-gold
     { re: /^\/db\/signals(\?|$)/, nie: true },
     { re: /^\/api\/(tw-abmelden|tw-anmelden|tw-account|tw-cancel|tw-chat|tw-checkout-start|tw-code-anfordern|tw-code|tw-passwort|tw-ping|tw-registrieren|tw-resend|tw-sitzung|tw-team|tw-assistent|tw-akquise|tw-community-[a-z]+|tw-analytics|tw-fehler|tw-bild|tw-bilder|tw-meldungbilder|tw-fotos|tw-portraets|tw-vereinspruefung|vs-pdf|tw-spiel-laden|tw-spielanalyse|tw-vereinsspiel-analyse|tw-sprache)(\?|$)/, nie: true },
     { re: /^\/api\/tw-spieltag(\?|$)/, frisch: 20 * S, alt: 0 },
-    { re: /^\/api\/(tw-watch|tw-listen|tw-scoutsuche|tw-scoutkatalog|tw-performance-v2|tw-markt|tw-community)(\?|$)/, frisch: 2 * MIN, alt: STD },
+    { re: /^\/api\/(tw-watch|tw-listen|tw-scoutsuche|tw-scoutkatalog|tw-performance-v2|tw-leistung|tw-markt|tw-community)(\?|$)/, frisch: 2 * MIN, alt: STD },
     { re: /^\/api\/verein-sucht(\?|$)/, frisch: 3 * MIN, alt: 6 * STD },
     { re: /^\/api\/(tw-ticker|tw-leistungen|tw-vertraege|tw-vereine|tw-vereine-liste|tw-tabellen|tw-korrekturen|tw-verletzungsbegriffe|tw-ausfaelle|tw-logos|tw-spieler|tw-extra|tw-verein|tw-vereinsseite|tw-vereinsspiele|tw-spiele|tw-spiel|tw-aehnlich|tw-spieler-news)(\?|$)/, frisch: 5 * MIN, alt: 6 * STD },
     { re: /^\/db\//, frisch: 5 * MIN, alt: 6 * STD },
@@ -2826,7 +2826,7 @@ const I18N = {
     tour3_t: "Ranking, Datenbank & Briefing",
     tour3_d: "Nach jedem Spieltag bewertet unser Scout-System alle Einsätze (Tab „Ranking“), die Spieler-Datenbank liefert Formkurven — und über das Menü oben rechts aktivierst du Alerts und das Morgen-Briefing.",
     totw_title: "Team der Woche",
-    totw_sub: "Die Top-Elf nach TW Performance Score der letzten Tage",
+    totw_sub: "Beste Note je Position (4-3-3) · mind. 45 Minuten in der Woche",
     totw_sub12: "12. Mann — stärkster Einwechsler",
     l_abo_card: "TransferWire Abo",
     l_month: "/ Monat",
@@ -3032,7 +3032,8 @@ const I18N = {
     pl_needs: "Passende Vereins-Gesuche",
     rank_tab: "Ranking",
     rank_title: "Spieler-Performance",
-    rank_sub: "Positionsgewichtete Spieltagsanalyse aus offiziellen Leistungsdaten. Der TW Performance Score wird jede Nacht neu berechnet.",
+    rank_sub: "Jedes Spiel wird bewertet – innerhalb der eigenen Liga und Position, Tore und Vorlagen mit Gegnerstärke. Jede Woche die besten Spieler: Top 50, Top-Elf und 12. Mann.",
+    rank_stand: "Täglich aktualisiert · Wochenwertung Montag bis Sonntag · Note 50 = Durchschnitt, 80 = Top 10 %, 90 = Top 3 %, 95 = Top 1 %",
     rank_search_ph: "Spieler oder Verein suchen …",
     rank_all_lg: "Alle Ligen",
     rank_all_pos: "Alle Positionen",
@@ -3182,7 +3183,7 @@ const I18N = {
     tour3_t: "Ranking, database & briefing",
     tour3_d: "After every matchday our scout system rates all appearances (“Ranking” tab), the player database delivers form curves — and the menu top right activates alerts and the morning briefing.",
     totw_title: "Team of the week",
-    totw_sub: "The top XI by TW Performance Score of the last days",
+    totw_sub: "Best rating per position (4-3-3) · at least 45 minutes in the week",
     totw_sub12: "12th man — best substitute",
     l_abo_card: "TransferWire subscription",
     l_month: "/ month",
@@ -3388,7 +3389,8 @@ const I18N = {
     pl_needs: "Matching club openings",
     rank_tab: "Ranking",
     rank_title: "Player performance",
-    rank_sub: "Position-weighted matchday analysis from official performance data. The TW Performance Score is recalculated every night.",
+    rank_sub: "Every match is rated – within the league and position of the player, goals and assists weighted by opponent strength. Every week the best players: top 50, team of the week and 12th man.",
+    rank_stand: "Updated daily · weekly ranking Monday to Sunday · rating 50 = average, 80 = top 10 %, 90 = top 3 %, 95 = top 1 %",
     rank_search_ph: "Search player or club …",
     rank_all_lg: "All leagues",
     rank_all_pos: "All positions",
@@ -6963,6 +6965,225 @@ function PerfTabelle({ rows, portrait, watch, onWatchToggle, onOpen, offen, setO
         trend,
         pill(x)),
       on ? h("div", { className: "tw-prow-details" }, details(x)) : null); }));
+}
+/* A98 (01.11.2026, Boss 20:43): Spieler-Performance je Spiel. Wochenwertung (Top 50, Top-Elf 4-3-3, 12. Mann) mit Liga-, Positions- und Top-%-Filter
+   samt Niveau-Hinweis; Reiter "Spielerperformance" im Spielerprofil (alle Spiele) und "Spielerperformances" in der Spielanalyse. Daten: GET /api/tw-leistung. */
+const TW_LK_URL = "/api/tw-leistung";
+const TW_LK_CACHE = {};
+function twLkLaden(params) {
+  const q = Object.keys(params).filter(k => params[k] !== undefined && params[k] !== null && params[k] !== "").map(k => k + "=" + encodeURIComponent(params[k])).join("&") + (LANG === "en" ? "&lang=en" : "");
+  const c = TW_LK_CACHE[q];
+  if (c && Date.now() - c.t < 120000) return Promise.resolve(c.d);
+  return fetch(TW_LK_URL + "?" + q, { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(d => { if (d && d.ok) TW_LK_CACHE[q] = { d: d, t: Date.now() }; return d; });
+}
+function twLkNote(n) { if (n === null || n === undefined || n === "") return "–"; const v = Math.min(99.9, Math.floor(Number(n) * 10) / 10); return LANG === "en" ? v.toFixed(1) : v.toFixed(1).replace(".", ","); }
+function twLkNoteKurz(n) { return n === null || n === undefined ? "–" : String(Math.min(99, Math.floor(Number(n)))); }
+function twLkPosName(p) { const en = LANG === "en"; return ({ TW: en ? "Goalkeeper" : "Torwart", IV: en ? "Centre-back" : "Innenverteidiger", AV: en ? "Full-back" : "Außenverteidiger", ZM: en ? "Central midfield" : "Zentrales Mittelfeld", FL: en ? "Winger" : "Flügel", ST: en ? "Striker" : "Sturm" })[p] || ""; }
+function twLkElfPos(p) { const en = LANG === "en"; return ({ TW: en ? "GK" : "TW", LV: en ? "LB" : "LV", IV: en ? "CB" : "IV", RV: en ? "RB" : "RV", ZM: en ? "CM" : "ZM", LF: en ? "LW" : "LF", ST: "ST", RF: en ? "RW" : "RF", "12": "12" })[p] || p || ""; }
+function twLkGegner(g) { const en = LANG === "en"; return ({ top: en ? "top opponent" : "Spitzengegner", stark: en ? "strong opponent" : "starker Gegner", mittel: en ? "average opponent" : "mittlerer Gegner", schwach: en ? "weaker opponent" : "schwächerer Gegner" })[g] || ""; }
+function twLkDatum(d, mitJahr) { const s = String(d || ""); return /^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(8, 10) + "." + s.slice(5, 7) + "." + (mitJahr ? s.slice(0, 4) : "") : s; }
+function twLkWochenText(w) {
+  if (!w || !w.woche) return ""; const en = LANG === "en";
+  const a = new Date(String(w.woche).slice(0, 10) + "T12:00:00Z"); const b = new Date(a.getTime() + 6 * 864e5);
+  const f = d => String(d.getUTCDate()).padStart(2, "0") + "." + String(d.getUTCMonth() + 1).padStart(2, "0") + ".";
+  return (en ? "Week " : "KW ") + w.kw + " · " + f(a) + "–" + f(b) + b.getUTCFullYear() + (w.laufend ? (en ? " (in progress)" : " (läuft)") : "");
+}
+function twLkNiveau(n) {
+  if (!n) return ""; const en = LANG === "en";
+  return (n.ebene ? (en ? "tier " + n.ebene : n.ebene + ". Liga") : "") + (n.land && n.land !== "Germany" ? " " + n.land : "") + (n.stufe ? (en ? " (level " + n.stufe + " of 4)" : " (Stufe " + n.stufe + " von 4)") : "");
+}
+function TwLkNoteBadge({ note, gross }) {
+  const h = React.createElement; const s = Number(note) || 0; const g = gross ? 46 : 34;
+  return h("span", { className: "tw-lk-badge", title: (LANG === "en" ? "Match rating " : "Note ") + twLkNote(note), style: { width: g, height: g, minWidth: g, borderRadius: gross ? 14 : 10, background: note == null ? "var(--karte2)" : scoreBg(s), border: "1px solid " + (note == null ? HAIR : scoreRand(s)), color: note == null ? MUTED : scoreTxt(s), display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: gross ? 19 : 14 } }, note == null ? "–" : twLkNoteKurz(note));
+}
+const TW_LK_CSS = ".tw-lk-filter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.tw-lk-filter select,.tw-lk-filter input{font-family:inherit;font-size:13px;padding:10px 10px;border:1px solid var(--linie);border-radius:9px;background:var(--karte);color:var(--t1,#121821);max-width:100%}.tw-lk-filter input{flex:1 1 180px;font-size:16px}.tw-lk-hinweis{font-size:13px;line-height:1.45;border-radius:12px;padding:10px 14px;margin:0 0 12px;background:var(--gold-tint);border:1px solid var(--gold-rand);color:var(--t1,#121821)}.tw-lk-main{display:grid;grid-template-columns:minmax(0,3fr) minmax(280px,1fr);gap:18px;align-items:stretch}.tw-lk-tab{background:var(--karte);border:1px solid var(--linie);border-radius:16px;overflow:hidden}.tw-lk-row{display:grid;grid-template-columns:44px minmax(0,1.6fr) minmax(0,1.4fr) 120px 54px 96px 72px;gap:10px;align-items:center;padding:9px 14px;border-top:1px solid var(--linie);cursor:pointer;min-width:0}.tw-lk-row>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tw-lk-row:hover{background:var(--zeile-hover)}.tw-lk-kopf{border-top:none;background:#f8fafb;cursor:default;font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#667085}.tw-lk-kopf:hover{background:#f8fafb}.tw-lk-pm{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}.tw-lk-pm .tw-pm-tip{opacity:0;visibility:hidden;transition:opacity .12s}.tw-lk-pm:hover{z-index:6}.tw-lk-pm:hover .tw-pm-tip{opacity:1;visibility:visible}.tw-lk-spiel{display:grid;grid-template-columns:62px minmax(0,1.8fr) 70px 58px 46px 72px;gap:10px;align-items:center;padding:9px 12px;border-top:1px solid var(--linie);cursor:pointer}.tw-lk-spiel:hover{background:var(--zeile-hover)}.tw-lk-spiel>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tw-lk-karten{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.tw-lk-sk{display:flex;align-items:center;gap:10px;background:var(--karte);border:1px solid var(--linie);border-radius:12px;padding:8px 10px;cursor:pointer;min-width:0}.tw-lk-sk:hover{box-shadow:0 6px 16px rgba(15,23,42,.08)}.tw-lk-balken{display:flex;align-items:flex-end;gap:4px;height:64px}.tw-lk-reiter{display:flex;gap:6px;padding:10px 22px 0;background:#F4F6F8}@media (max-width:900px){.tw-lk-main{grid-template-columns:minmax(0,1fr)}}@media (max-width:700px){.tw-lk-row{grid-template-columns:34px minmax(0,1.6fr) 46px 64px}.tw-lk-row>.tw-lk-nm{display:none}.tw-lk-spiel{grid-template-columns:52px minmax(0,1fr) 46px 40px}.tw-lk-spiel>.tw-lk-nm{display:none}.tw-lk-karten{grid-template-columns:minmax(0,1fr)}.tw-lk-reiter{padding:8px 12px 0}}";
+function TwLkPitch({ elf, portrait, onOpen }) {
+  const h = React.createElement; const en = LANG === "en";
+  const reihen = { TW: [], AB: [], MF: [], ST: [] }; let joker = null;
+  const ord = ["TW", "LV", "IV", "RV", "ZM", "LF", "ST", "RF"];
+  (elf || []).slice().sort((a, b) => ord.indexOf(a.pos) - ord.indexOf(b.pos)).forEach(x => { if (x.pos === "12") joker = x; else if (x.pos === "TW") reihen.TW.push(x); else if (["LV", "IV", "RV"].indexOf(x.pos) >= 0) reihen.AB.push(x); else if (x.pos === "ZM") reihen.MF.push(x); else reihen.ST.push(x); });
+  const linie = portrait ? [90, 68, 44, 20] : [9, 31, 55, 79];
+  const marker = [];
+  ["TW", "AB", "MF", "ST"].forEach((k, li) => { const r = reihen[k]; r.forEach((x, i) => { const s = (i + 1) / (r.length + 1) * 100; const pad = portrait ? 8 : 6; const slot = pad + s * (100 - 2 * pad) / 100; const g = portrait ? 34 : 44;
+    marker.push(h("div", { key: x.pos + "-" + x.pid, className: "tw-lk-pm", onClick: () => onOpen && onOpen(x), title: x.name, style: { left: (portrait ? slot : linie[li]) + "%", top: (portrait ? linie[li] : slot) + "%", width: portrait ? 78 : 110 } },
+      h("span", { style: { width: g, height: g, borderRadius: 99, background: scoreBg(x.note), color: scoreTxt(x.note), border: "2.5px solid #fff", boxShadow: "0 4px 12px rgba(0,0,0,.35)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: portrait ? 14 : 17, lineHeight: 1 } }, twLkNoteKurz(x.note)),
+      h("span", { style: { fontFamily: FONT_BODY, fontSize: portrait ? 10.5 : 12.5, fontWeight: 800, color: "#fff", textShadow: "0 1px 3px rgba(0,0,0,.6)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%", textAlign: "center" } }, x.name || "?"),
+      h("span", { style: { fontFamily: FONT_BODY, fontSize: 9.5, fontWeight: 900, letterSpacing: 1, color: "rgba(255,255,255,.85)", textShadow: "0 1px 2px rgba(0,0,0,.5)" } }, twLkElfPos(x.pos)),
+      h("div", { className: "tw-pm-tip", style: { position: "absolute", bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)", width: 220, background: "var(--dunkel)", color: "#fff", borderRadius: 12, padding: "10px 12px", boxShadow: "0 12px 30px rgba(0,0,0,.35)", textAlign: "left", zIndex: 5 } },
+        h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, x.name),
+        h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "rgba(255,255,255,.75)", marginBottom: 6, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, [x.team, x.liga].filter(Boolean).join(" · ")),
+        h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, lineHeight: 1.45 } }, (Number(x.tore) || 0) + (en ? " goals · " : " Tore · ") + (Number(x.vorlagen) || 0) + (en ? " assists · " : " Vorlagen · ") + (Number(x.minuten) || 0) + (en ? " min" : " Min.")),
+        h("div", { style: { marginTop: 6, fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, letterSpacing: .5, textTransform: "uppercase", color: scoreColor(x.note) } }, (en ? "Weekly rating " : "Wochennote ") + twLkNote(x.note))))); }); });
+  return h("div", { className: "tw-card", style: { background: "var(--dunkel)", borderRadius: 16, padding: 14, color: "#fff", overflow: "visible", minWidth: 0 } },
+    h("div", { style: { display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 10 } },
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, textTransform: "uppercase", color: "rgba(255,255,255,.85)" } }, t("totw_title")),
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "rgba(255,255,255,.6)" } }, t("totw_sub"))),
+    h("div", { className: "tw-pitch" + (portrait ? " portrait" : ""), style: { position: "relative", borderRadius: 12, overflow: "visible", aspectRatio: portrait ? "2 / 3" : "3 / 2", background: portrait ? "url(/assets/pitch_p.webp) center / cover no-repeat, #1f7a45" : "url(/assets/pitch.webp) center / cover no-repeat, #1f7a45", boxShadow: "inset 0 0 0 1px rgba(255,255,255,.12)" } },
+      marker.length >= 11 ? marker : h("div", { style: { position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_BODY, fontSize: 13, color: "rgba(255,255,255,.85)", textAlign: "center", padding: 20 } }, marker.length ? marker : (en ? "The team of the week appears as soon as enough rated players are available." : "Die Top-Elf erscheint, sobald genug bewertete Spieler vorliegen."))),
+    joker ? h("div", { style: { marginTop: 10, display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 12, color: "rgba(255,255,255,.8)", flexWrap: "wrap" } },
+      h("span", { style: { fontSize: 10, fontWeight: 900, letterSpacing: 1.4, textTransform: "uppercase", color: "rgba(255,255,255,.6)" } }, t("totw_sub12")),
+      h("button", { type: "button", className: "tw-joker", onClick: () => onOpen && onOpen(joker), style: { cursor: "pointer", background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.18)", color: "#fff", borderRadius: 999, padding: "4px 10px 4px 5px", display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700 } },
+        h("span", { style: { width: 22, height: 22, borderRadius: 99, background: scoreBg(joker.note), color: scoreTxt(joker.note), display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontSize: 11, fontWeight: 700 } }, twLkNoteKurz(joker.note)), joker.name, h("span", { style: { color: "rgba(255,255,255,.6)", fontWeight: 500 } }, joker.team))) : null);
+}
+function TwLkKarte({ x, titel, onPlayer, onSpiel }) {
+  const h = React.createElement; const en = LANG === "en";
+  if (!x) return null;
+  return h("div", { className: "tw-card tw-lk-karte", style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 16, padding: "16px 18px", display: "flex", flexDirection: "column", gap: 12, minWidth: 0 } },
+    h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, textTransform: "uppercase", color: "var(--t3)" } }, titel),
+    h("div", { style: { display: "flex", alignItems: "center", gap: 12, minWidth: 0 } }, h(DbFoto, { x: { name: x.name, photo: x.foto }, size: 56 }),
+      h("div", { style: { minWidth: 0 } }, h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 21, fontWeight: 700, color: INK, lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, x.name || "?"),
+        h("div", { style: { display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, minWidth: 0 } }, h(ClubLogo, { name: x.team, size: 16 }), h("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, x.team)),
+        h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, marginTop: 2 } }, [twLkPosName(x.pos) || twLkElfPos(x.pos), x.liga].filter(Boolean).join(" · ")))),
+    h("div", { style: { background: "var(--gold-tint)", border: "1px solid var(--gold-rand)", borderRadius: 14, padding: "12px 14px", display: "flex", alignItems: "center", gap: 10 } },
+      h("div", null, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1, color: "var(--gold-text)", textTransform: "uppercase" } }, en ? "Weekly rating" : "Wochennote"),
+        h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t2)", marginTop: 3 } }, [x.top ? "Top " + x.top + " %" : "", (Number(x.minuten) || 0) + (en ? " min" : " Min."), (Number(x.tore) || 0) + (en ? " G" : " T") + " · " + (Number(x.vorlagen) || 0) + (en ? " A" : " V")].filter(Boolean).join(" · "))),
+      h("span", { style: { marginLeft: "auto", fontFamily: FONT_DISPLAY, fontSize: 38, fontWeight: 700, color: "var(--gold-text)", lineHeight: 1 } }, twLkNote(x.note))),
+    x.text ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.5, color: INK } }, x.text) : null,
+    h("div", { style: { display: "flex", flexWrap: "wrap", gap: 8, marginTop: "auto" } },
+      x.pid && onPlayer ? h("button", { type: "button", className: "tw-btn-gold", onClick: () => onPlayer(x.pid, x.name, x.team), style: { cursor: "pointer", border: "none", borderRadius: 10, padding: "9px 12px", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, background: "var(--gold)", color: "#121821" } }, en ? "Player performance" : "Spielerperformance") : null,
+      x.pid && x.spiel && onSpiel ? h("button", { type: "button", onClick: () => onSpiel(x.pid, x.spiel), style: { cursor: "pointer", border: "1px solid " + HAIR, borderRadius: 10, padding: "9px 12px", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, background: "var(--karte)", color: INK } }, en ? "Best match in detail" : "Bestes Spiel im Detail") : null));
+}
+function TwLkModal({ z, onClose, titel, kinder }) {
+  const h = React.createElement; const en = LANG === "en";
+  const zu = React.useRef(onClose); zu.current = onClose; useTwZurueck(true, () => { if (zu.current) zu.current(); });
+  React.useEffect(() => { const k = e => { if (e.key === "Escape") { e.stopPropagation(); if (zu.current) zu.current(); } }; document.addEventListener("keydown", k, true); return () => document.removeEventListener("keydown", k, true); }, []);
+  return h(TwEbene, { z: z || 1460, kinder: h("div", { onClick: () => onClose && onClose(), style: { position: "absolute", inset: 0, background: "rgba(10,12,16,.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 } },
+    h("div", { onClick: e => e.stopPropagation(), role: "dialog", "aria-modal": "true", "aria-label": titel, className: "tw-mv-voll tw-lk-modal", style: { width: "min(640px, 100%)", maxHeight: "100%", overflowY: "auto", overscrollBehavior: "contain", background: "var(--karte)", borderRadius: 18, boxShadow: "0 24px 70px rgba(0,0,0,.45)" } },
+      h(TwMobilKopf, { onBack: () => onClose && onClose(), titel: titel }),
+      h("div", { className: "tw-mv-nurdesk", style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "16px 20px 0" } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--t3)" } }, titel),
+        h("button", { type: "button", className: "tw-mv-nurdesk", "aria-label": en ? "Close" : "Schließen", onClick: () => onClose && onClose(), style: { cursor: "pointer", border: "1px solid " + HAIR, background: "var(--karte)", borderRadius: 9, padding: "6px 10px", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: INK } }, "✕ " + (en ? "Close" : "Schließen"))),
+      h("div", { style: { padding: "12px 20px 20px" } }, kinder))) });
+}
+function TwLkSpielDetail({ pid, spiel, onClose, onPlayer }) {
+  const h = React.createElement; const en = LANG === "en";
+  const [d, setD] = useState(null); const [fehler, setFehler] = useState(false);
+  useEffect(() => { let ok = true; setD(null); setFehler(false); twLkLaden({ art: "spielerspiel", pid: pid, spiel: spiel }).then(x => { if (!ok) return; if (x && x.ok) setD(x); else setFehler(true); }).catch(() => { if (ok) setFehler(true); }); return () => { ok = false; }; }, [pid, spiel]);
+  const teil = (lab, v, plus) => h("div", { key: lab, style: { display: "flex", justifyContent: "space-between", gap: 10, padding: "6px 0", borderTop: "1px solid " + HAIR, fontFamily: FONT_BODY, fontSize: 13 } }, h("span", { style: { color: "var(--t2)" } }, lab), h("b", { style: { color: plus === false ? "#b04a3a" : INK } }, (plus === false ? "−" : "+") + (Number(v) || 0).toFixed(2).replace(".", en ? "." : ",")));
+  const statName = { tore: en ? "Goals" : "Tore", elfmetertore: en ? "Penalty goals" : "Elfmetertore", vorlagen: en ? "Assists" : "Vorlagen", xg: "xG", schuesse: en ? "Shots" : "Schüsse", schuesse_tor: en ? "On target" : "Aufs Tor", grosschancen: en ? "Big chances created" : "Großchancen kreiert", schluesselpaesse: en ? "Key passes" : "Schlüsselpässe", paesse: en ? "Passes" : "Pässe", paesse_angekommen: en ? "Accurate passes" : "Pässe angekommen", dribblings: en ? "Dribbles won" : "Dribblings", zweikaempfe: en ? "Duels" : "Zweikämpfe", zweikaempfe_gewonnen: en ? "Duels won" : "Zweikämpfe gewonnen", kopfball_gewonnen: en ? "Aerials won" : "Kopfbälle gewonnen", tacklings: en ? "Tackles" : "Tacklings", abgefangen: en ? "Interceptions" : "Abgefangen", klaerungen: en ? "Clearances" : "Klärungen", ballverluste: en ? "Possession lost" : "Ballverluste", paraden: en ? "Saves" : "Paraden", gegentore: en ? "Goals conceded" : "Gegentore", gelb: en ? "Yellow" : "Gelb", rot: en ? "Red" : "Rot", rating: en ? "Data provider rating" : "Rating (Datenanbieter)" };
+  const inhalt = fehler ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: MUTED, padding: "20px 0" } }, en ? "This match performance could not be loaded." : "Diese Spielerperformance konnte nicht geladen werden.")
+    : !d ? h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), en ? "Loading …" : "Wird geladen …")
+    : h("div", { className: "tw-lk-detail" },
+      h("div", { style: { display: "flex", alignItems: "center", gap: 12, marginBottom: 12 } }, h(DbFoto, { x: { name: d.name, photo: d.foto }, size: 52 }),
+        h("div", { style: { minWidth: 0, flex: 1 } }, h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 20, fontWeight: 700, color: INK, lineHeight: 1.1 } }, d.name || "?"),
+          h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, marginTop: 3 } }, [twLkDatum(d.datum, true), (d.heim ? d.team + " – " + d.gegner : d.gegner + " – " + d.team) + (d.tore_team != null ? " " + (d.heim ? d.tore_team + ":" + d.tore_gegner : d.tore_gegner + ":" + d.tore_team) : ""), d.liga].filter(Boolean).join(" · ")),
+          h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, marginTop: 2 } }, [twLkPosName(d.pos), (Number(d.minuten) || 0) + (en ? " min" : " Min."), d.start === false ? (en ? "substitute" : "eingewechselt") : ""].filter(Boolean).join(" · "))),
+        h(TwLkNoteBadge, { note: d.note, gross: true })),
+      d.daten === "eingeschraenkt" ? h("div", { className: "tw-lk-hinweis" }, en ? "For this league our data source only provides goals and minutes – no match rating is possible." : "Für diese Liga liefert unsere Datenquelle nur Tore und Einsatzzeiten – eine Spielnote ist nicht möglich.") :
+      h("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 } },
+        h("div", null, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1, textTransform: "uppercase", color: "var(--t3)", marginBottom: 4 } }, en ? "How the rating comes about" : "So entsteht die Note"),
+          teil(en ? "Goals" : "Tore", d.teile && d.teile.tore), teil(en ? "Assists" : "Vorlagen", d.teile && d.teile.vorlagen), teil(en ? "Other actions" : "Übrige Aktionen", d.teile && d.teile.spiel_plus), teil(en ? "Mistakes, lost duels, cards" : "Fehler, verlorene Duelle, Karten", d.teile && d.teile.spiel_minus, false),
+          d.teile && Number(d.teile.chancen_bonus) > 0 ? teil(en ? "Finishing bonus" : "Chancenverwertung", d.teile.chancen_bonus) : null,
+          h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, lineHeight: 1.5, marginTop: 8 } },
+            (en ? "Opponent: " : "Gegner: ") + (twLkGegner(d.gegner_label) || "–") + (d.faktor_tore ? (en ? " – goals and assists count ×" : " – Tore und Vorlagen zählen ×") + String(d.faktor_tore).replace(".", en ? "." : ",") : "") + ". " +
+            (en ? "The rating compares this match with all players in the same position in this league (50 = average, 80 = top 10 %, 90 = top 3 %)." : "Die Note vergleicht das Spiel mit allen Spielern derselben Position in dieser Liga (50 = Durchschnitt, 80 = Top 10 %, 90 = Top 3 %)."))),
+        h("div", null, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1, textTransform: "uppercase", color: "var(--t3)", marginBottom: 4 } }, en ? "Match statistics" : "Spielstatistik"),
+          Object.keys(statName).filter(k => d.stats && d.stats[k] !== undefined && d.stats[k] !== null).map(k => h("div", { key: k, style: { display: "flex", justifyContent: "space-between", gap: 10, padding: "5px 0", borderTop: "1px solid " + HAIR, fontFamily: FONT_BODY, fontSize: 12.5 } }, h("span", { style: { color: "var(--t2)" } }, statName[k]), h("b", { style: { color: INK } }, String(d.stats[k]).replace(".", en ? "." : ",")))))),
+      onPlayer && d.pid ? h("button", { type: "button", onClick: () => onPlayer(d.pid, d.name, d.team), style: { marginTop: 14, cursor: "pointer", border: "1px solid " + HAIR, borderRadius: 10, padding: "9px 12px", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, background: "var(--karte)", color: INK } }, en ? "All matches of this player" : "Alle Spiele dieses Spielers") : null);
+  return h(TwLkModal, { onClose: onClose, titel: en ? "Player performance in this match" : "Spielerperformance in diesem Spiel", kinder: inhalt });
+}
+function TwLeistungWoche({ onPlayer }) {
+  const h = React.createElement; const en = LANG === "en";
+  const [woche, setWoche] = useState(""); const [liga, setLiga] = useState(""); const [pos, setPos] = useState(""); const [top, setTop] = useState(""); const [q, setQ] = useState(""); const [q2, setQ2] = useState("");
+  const [d, setD] = useState(null); const [lade, setLade] = useState(true); const [fehler, setFehler] = useState(false); const [gewaehlt, setGewaehlt] = useState(null); const [detail, setDetail] = useState(null);
+  const [portrait, setPortrait] = useState(() => typeof window !== "undefined" && window.innerWidth <= 700);
+  useEffect(() => { const f = () => setPortrait(window.innerWidth <= 700); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);
+  useEffect(() => { const tm = setTimeout(() => setQ2(q.trim()), 350); return () => clearTimeout(tm); }, [q]);
+  useEffect(() => { let ok = true; setLade(true); setFehler(false);
+    twLkLaden({ art: "woche", woche: woche, liga: liga, pos: pos, top: top, q: q2, n: (liga || pos || top || q2) ? 200 : 50 }).then(x => { if (!ok) return; if (x && x.ok) { setD(x); setGewaehlt(null); } else setFehler(true); setLade(false); }).catch(() => { if (ok) { setFehler(true); setLade(false); } });
+    return () => { ok = false; }; }, [woche, liga, pos, top, q2]);
+  const liste = (d && d.liste) || []; const elf = (d && d.elf) || [];
+  const filterAktiv = !!(liga || pos || top || q2);
+  const bester = liste[0] || null;
+  const ligen = (d && d.ligen) || [];
+  const ligaInfo = ligen.find(l => l.liga === liga);
+  const sel = (wert, setz, opts, label) => h("select", { value: wert, onChange: e => setz(e.target.value), "aria-label": label }, opts.map(o => h("option", { key: o[0], value: o[0] }, o[1])));
+  const ligaOpts = [["", en ? "All leagues" : "Alle Ligen"]].concat(ligen.map(l => [l.liga, (l.stufe ? (en ? "L" : "S") + l.stufe + " · " : "") + l.liga + (l.eingeschraenkt ? (en ? " (goals only)" : " (nur Tore)") : "")]));
+  const hinweis = [];
+  if (liga && d && d.niveau) hinweis.push((top ? "Top " + top + " % " + (en ? "of " : "der ") : "") + liga + " · " + (en ? "Level: " : "Niveau: ") + twLkNiveau(d.niveau));
+  return h("div", { className: "tw-lk-wrap" }, h("style", null, TW_LK_CSS),
+    h("div", { className: "tw-lk-filter" },
+      sel(woche || (d && d.woche) || "", setWoche, ((d && d.wochen) || []).map(w => [String(w.woche).slice(0, 10), twLkWochenText(w)]), en ? "Week" : "Woche"),
+      sel(liga, setLiga, ligaOpts, en ? "League" : "Liga"),
+      sel(pos, setPos, [["", en ? "All positions" : "Alle Positionen"], ["TW", twLkPosName("TW")], ["IV", twLkPosName("IV")], ["AV", twLkPosName("AV")], ["ZM", twLkPosName("ZM")], ["FL", twLkPosName("FL")], ["ST", twLkPosName("ST")]], "Position"),
+      sel(top, setTop, [["", en ? "All ratings" : "Alle Noten"], ["10", (en ? "Top 10 % of the league" : "Top 10 % der Liga")], ["3", (en ? "Top 3 % of the league" : "Top 3 % der Liga")], ["2", (en ? "Top 2 % of the league" : "Top 2 % der Liga")]], "Top"),
+      h("input", { value: q, onChange: e => setQ(e.target.value), placeholder: en ? "Search player or club" : "Spieler oder Verein suchen", "aria-label": en ? "Search" : "Suche" })),
+    hinweis.length ? h("div", { className: "tw-lk-hinweis" }, hinweis.join(" · "), h("div", { style: { fontSize: 11.5, color: "var(--t2)", marginTop: 3 } }, en ? "Ratings are measured within each league and position (level 1 = top leagues, 4 = lower tiers)." : "Die Noten werden innerhalb der Liga und Position gemessen (Stufe 1 = Spitzenligen, 4 = Unterbau).")) : null,
+    d && d.eingeschraenkt ? h("div", { className: "tw-lk-hinweis" }, en ? "For this league our data source currently provides only goals and minutes. A fair match rating needs full match data, so this league is not rated yet." : "Für diese Liga liefert unsere Datenquelle derzeit nur Tore und Einsatzzeiten. Für eine faire Spielnote fehlen die Spieldaten – die Liga wird deshalb noch nicht bewertet.") : null,
+    lade && !d ? h("div", { style: { padding: "34px 20px", textAlign: "center", fontFamily: FONT_BODY, color: MUTED } }, t("rank_loading"))
+      : fehler && !d ? h(EmptyState, { icon: "", title: en ? "Performance data unavailable" : "Performance-Daten nicht verfügbar", text: en ? "Please try again in a moment." : "Bitte gleich noch einmal versuchen." })
+      : h(React.Fragment, null,
+        !filterAktiv || liga ? h("div", { className: "tw-lk-main", style: { marginBottom: 16 } }, h(TwLkPitch, { elf: elf, portrait: portrait, onOpen: x => setGewaehlt(x) }),
+          h(TwLkKarte, { x: gewaehlt || bester, titel: gewaehlt ? (en ? "Player analysis" : "Spieler-Analyse") : (en ? "Player of the week" : "Spieler der Woche"), onPlayer: onPlayer, onSpiel: (pid, spiel) => setDetail({ pid: pid, spiel: spiel }) })) : null,
+        h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", margin: "4px 0 10px", fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED } },
+          h("span", null, d ? twLkWochenText({ woche: d.woche, kw: d.kw, laufend: d.laufend }) : ""),
+          h("span", null, d ? (filterAktiv ? (d.n || 0) + (en ? " players" : " Spieler") : (en ? "Top 50 of " : "Top 50 von ") + (d.n || 0) + (en ? " players · at least 45 minutes in the week" : " Spielern · mind. 45 Minuten in der Woche")) : "")),
+        liste.length === 0 ? h("div", { style: { background: "var(--karte)", border: "1px dashed " + HAIR, borderRadius: 14, padding: "36px 20px", textAlign: "center", color: MUTED, fontFamily: FONT_BODY, fontSize: 14 } }, d && d.eingeschraenkt ? (en ? "No rated matches for this league." : "Keine bewerteten Spiele in dieser Liga.") : t("rank_nores"))
+        : h("div", { className: "tw-lk-tab" },
+          h("div", { className: "tw-lk-row tw-lk-kopf" }, h("span", null, "#"), h("span", null, en ? "Player" : "Spieler"), h("span", { className: "tw-lk-nm" }, en ? "Club · League" : "Verein · Liga"), h("span", { className: "tw-lk-nm" }, "Position"), h("span", null, en ? "Rating" : "Note"), h("span", { className: "tw-lk-nm" }, en ? "G · A · Min" : "T · V · Min"), h("span", null, "Top")),
+          liste.map((x, i) => h("div", { key: x.pid + "-" + i, className: "tw-lk-row", role: "button", tabIndex: 0, onClick: () => onPlayer && onPlayer(x.pid, x.name, x.team), onKeyDown: e => { if (e.key === "Enter" && onPlayer) onPlayer(x.pid, x.name, x.team); } },
+            h("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, color: "var(--t2)" } }, x.rang || i + 1),
+            h("span", { style: { display: "flex", alignItems: "center", gap: 9 } }, h(DbFoto, { x: { name: x.name, photo: x.foto }, size: 32 }), h("span", { style: { minWidth: 0, overflow: "hidden" } }, h("span", { style: { display: "block", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, color: INK, overflow: "hidden", textOverflow: "ellipsis" } }, x.name || "?"), h("span", { className: "tw-lk-mob", style: { display: "block", fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, overflow: "hidden", textOverflow: "ellipsis" } }, x.team))),
+            h("span", { className: "tw-lk-nm", style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)" } }, (x.liga || "") + (x.stufe ? (en ? " · L" : " · S") + x.stufe : "")),
+            h("span", { className: "tw-lk-nm", style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)" } }, twLkPosName(x.pos)),
+            h("span", null, h(TwLkNoteBadge, { note: x.note })),
+            h("span", { className: "tw-lk-nm", style: { fontFamily: FONT_BODY, fontSize: 12.5, color: INK } }, (Number(x.tore) || 0) + " · " + (Number(x.vorlagen) || 0) + " · " + (Number(x.minuten) || 0)),
+            h("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, color: x.top ? "var(--gold-text)" : MUTED } }, x.top ? "Top " + x.top + " %" : "–"))))),
+    detail ? h(TwLkSpielDetail, { pid: detail.pid, spiel: detail.spiel, onClose: () => setDetail(null), onPlayer: (pid, name, team) => { setDetail(null); if (onPlayer) onPlayer(pid, name, team); } }) : null);
+}
+function TwLeistungProfil({ pid, name }) {
+  const h = React.createElement; const en = LANG === "en";
+  const [d, setD] = useState(null); const [fehler, setFehler] = useState(false); const [n, setN] = useState(20); const [detail, setDetail] = useState(null);
+  useEffect(() => { let ok = true; setD(null); setFehler(false); if (!pid) return; twLkLaden({ art: "spieler", pid: pid }).then(x => { if (!ok) return; if (x && x.ok) setD(x); else setFehler(true); }).catch(() => { if (ok) setFehler(true); }); return () => { ok = false; }; }, [pid]);
+  if (fehler) return h("div", { className: "tw-spn-leer" }, en ? "The player performance could not be loaded. Please try again later." : "Die Spielerperformance konnte nicht geladen werden. Bitte später erneut versuchen.");
+  if (!d) return h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), en ? "Loading player performance …" : "Spielerperformance wird geladen …");
+  const spiele = d.spiele || []; const bewertet = spiele.filter(s => s.note !== null && s.note !== undefined);
+  const balken = bewertet.slice(0, 15).reverse();
+  const top50 = (d.wochen || []).filter(w => w.top50).length; const elf = (d.wochen || []).filter(w => w.elf).length;
+  const kachel = (lab, wert) => h("div", { style: { background: "var(--karte2)", borderRadius: 12, padding: "10px 12px", minWidth: 0 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: .8, textTransform: "uppercase", color: "var(--t3)" } }, lab), h("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 22, fontWeight: 700, color: INK, marginTop: 2 } }, wert));
+  return h("div", { className: "tw-lk-profil", style: { display: "flex", flexDirection: "column", gap: 14, padding: "4px 0 10px" } }, h("style", null, TW_LK_CSS),
+    h("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10 } },
+      kachel(en ? "Avg. last 5" : "Ø letzte 5", twLkNote(d.schnitt5)), kachel(en ? "Avg. 12 months" : "Ø 12 Monate", twLkNote(d.schnitt_saison)), kachel(en ? "Rated matches" : "Bewertete Spiele", String(bewertet.length)), kachel(en ? "Top 50 / team of week" : "Top 50 / Top-Elf", top50 + " / " + elf)),
+    balken.length ? h("div", { style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, padding: "12px 14px" } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1, textTransform: "uppercase", color: "var(--t3)", marginBottom: 8 } }, en ? "Last matches" : "Letzte Spiele"),
+      h("div", { className: "tw-lk-balken" }, balken.map((s, i) => h("div", { key: i, title: twLkDatum(s.datum) + " " + (s.gegner || "") + ": " + twLkNote(s.note), onClick: () => setDetail({ pid: pid, spiel: s.spiel }), style: { flex: 1, minWidth: 6, height: Math.max(6, Math.min(100, Number(s.note) || 0)) + "%", background: scoreBg(s.note), border: "1px solid " + scoreRand(s.note), borderRadius: 4, cursor: "pointer" } })))) : null,
+    (d.texte || []).length ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.5, color: INK, background: "var(--gold-tint)", border: "1px solid var(--gold-rand)", borderRadius: 12, padding: "10px 14px" } }, d.texte[0].text) : null,
+    spiele.length === 0 ? h("div", { className: "tw-spn-leer" }, en ? "No rated matches for " + (name || "this player") + " yet." : "Für " + (name || "diesen Spieler") + " liegen noch keine bewerteten Spiele vor.")
+    : h("div", { className: "tw-lk-tab" },
+      h("div", { className: "tw-lk-spiel tw-lk-kopf" }, h("span", null, en ? "Date" : "Datum"), h("span", null, en ? "Match" : "Spiel"), h("span", { className: "tw-lk-nm" }, en ? "Result" : "Ergebnis"), h("span", null, "Min"), h("span", null, en ? "Rating" : "Note"), h("span", { className: "tw-lk-nm" }, en ? "G · A" : "T · V")),
+      spiele.slice(0, n).map((s, i) => h("div", { key: s.spiel + "-" + i, className: "tw-lk-spiel", role: "button", tabIndex: 0, onClick: () => setDetail({ pid: pid, spiel: s.spiel }), onKeyDown: e => { if (e.key === "Enter") setDetail({ pid: pid, spiel: s.spiel }); } },
+        h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)" } }, twLkDatum(s.datum)),
+        h("span", { style: { fontFamily: FONT_BODY, fontSize: 13, color: INK } }, h("b", null, (s.heim ? "" : "@ ") + (s.gegner || "?")), h("span", { style: { color: MUTED, fontSize: 11.5 } }, " · " + [s.liga, twLkGegner(s.gegner_label)].filter(Boolean).join(" · "))),
+        h("span", { className: "tw-lk-nm", style: { fontFamily: FONT_BODY, fontSize: 12.5, color: INK } }, s.tore_team != null ? s.tore_team + ":" + s.tore_gegner : "–"),
+        h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)" } }, (Number(s.minuten) || 0) + "'"),
+        h("span", null, h(TwLkNoteBadge, { note: s.note })),
+        h("span", { className: "tw-lk-nm", style: { fontFamily: FONT_BODY, fontSize: 12.5, color: INK } }, (Number(s.tore) || 0) + " · " + (Number(s.vorlagen) || 0))))),
+    spiele.length > n ? h("button", { type: "button", className: "tw-spn-mehr", onClick: () => setN(n + 20) }, (en ? "Load more (" : "Mehr laden (") + n + (en ? " of " : " von ") + spiele.length + ")") : null,
+    h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, lineHeight: 1.5 } }, en ? "Every match is rated within the league and position: 50 = average, 80 = top 10 %, 90 = top 3 %, 95 = top 1 %. Goals and assists against stronger opponents count a little more." : "Jedes Spiel wird innerhalb der Liga und Position bewertet: 50 = Durchschnitt, 80 = Top 10 %, 90 = Top 3 %, 95 = Top 1 %. Tore und Vorlagen gegen stärkere Gegner zählen etwas mehr."),
+    detail ? h(TwLkSpielDetail, { pid: detail.pid, spiel: detail.spiel, onClose: () => setDetail(null) }) : null);
+}
+function TwSpielPerformances({ s, openPlayer }) {
+  const h = React.createElement; const en = LANG === "en";
+  const [d, setD] = useState(null); const [fehler, setFehler] = useState(false); const [detail, setDetail] = useState(null);
+  useEffect(() => { let ok = true; setD(null); setFehler(false); twLkLaden({ art: "spiel", fixture: s.id || s.fixture_id, heim: s.heim, gast: s.gast }).then(x => { if (!ok) return; if (x && x.ok) setD(x); else setFehler(true); }).catch(() => { if (ok) setFehler(true); }); return () => { ok = false; }; }, [s.id, s.fixture_id]);
+  const karte = x => h("div", { key: (x.pid || x.name) + "-" + x.minuten, className: "tw-lk-sk", role: "button", tabIndex: 0, onClick: () => { if (x.pid && x.note != null) setDetail({ pid: x.pid, spiel: d.spiel }); else if (x.pid && openPlayer) openPlayer(x.pid, x.name, x.team); } },
+    h(DbFoto, { x: { name: x.name, photo: x.foto }, size: 38 }),
+    h("div", { style: { minWidth: 0, flex: 1 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, color: INK, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, x.name),
+      h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, [twLkPosName(x.pos), (Number(x.minuten) || 0) + (en ? " min" : " Min."), x.start === false ? (en ? "sub" : "eingewechselt") : "", (Number(x.tore) || 0) ? x.tore + (en ? " G" : " T") : "", (Number(x.vorlagen) || 0) ? x.vorlagen + (en ? " A" : " V") : ""].filter(Boolean).join(" · "))),
+    h(TwLkNoteBadge, { note: x.note }));
+  const spieler = (d && d.spieler) || [];
+  const heim = spieler.filter(x => x.heim), gast = spieler.filter(x => !x.heim);
+  const spalte = (titel, arr) => h("div", { style: { display: "grid", gap: 8, alignContent: "start", minWidth: 0 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: "var(--t2)" } }, titel), arr.length ? arr.map(karte) : h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED } }, "–"));
+  return h("div", { className: "tw-mv-fusspad tw-lk-spielperf", style: { padding: "16px 22px 24px" } }, h("style", null, TW_LK_CSS),
+    fehler ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: "var(--t2)", background: "var(--karte)", borderRadius: 12, padding: "14px 16px" } }, en ? "The player performances could not be loaded." : "Die Spielerperformances konnten nicht geladen werden.")
+    : !d ? h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), en ? "Loading player performances …" : "Spielerperformances werden geladen …")
+    : !spieler.length ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: "var(--t2)", background: "var(--karte)", borderRadius: 12, padding: "14px 16px" } }, en ? "No player ratings yet for this match. They follow the morning after the match once the player data is in." : "Für dieses Spiel liegen noch keine Spielerbewertungen vor. Sie folgen am Morgen nach dem Spiel, sobald die Spielerdaten da sind.")
+    : h(React.Fragment, null, h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED, marginBottom: 10 } }, en ? "Click a player for his performance in this match." : "Spieler anklicken für seine Performance in diesem Spiel."),
+      h("div", { className: "tw-lk-karten" }, spalte(s.heim || (d.kopf && d.kopf.heim) || "", heim), spalte(s.gast || (d.kopf && d.kopf.gast) || "", gast))),
+    detail ? h(TwLkSpielDetail, { pid: detail.pid, spiel: detail.spiel, onClose: () => setDetail(null), onPlayer: openPlayer ? (pid, name, team) => { setDetail(null); openPlayer(pid, name, team); } : null }) : null);
+}
+function TwSpielReiter({ reiter, setReiter }) {
+  const h = React.createElement; const en = LANG === "en";
+  const knopf = (k, lab) => h("button", { key: k, type: "button", role: "tab", "aria-selected": reiter === k, className: "tw-pr-tab" + (reiter === k ? " aktiv" : ""), onClick: () => setReiter(k) }, lab);
+  return h("div", { className: "tw-lk-reiter tw-pr-tabs", role: "tablist", "aria-label": en ? "Match analysis sections" : "Bereiche der Spielanalyse" }, knopf("analyse", en ? "Match analysis" : "Spielanalyse"), knopf("spieler", en ? "Player performances" : "Spielerperformances"));
 }
 function PerfVue({ perf, perfLoading, q, lg, pos, st, sw, watch, onWatchToggle, onOpen, offen, setOffen }) {
   const h = React.createElement; const en = LANG === "en";
@@ -12106,6 +12327,7 @@ function twAnRolle(r) { return LANG === "en" ? (TW_AN_ROLLE_EN[r] || r) : r; }
 function TwSpielAnalyse({ s: s0, onClose, openPlayer, z, mitDatum }) {
   const h = React.createElement; const en = LANG === "en";
   const s = Object.assign({ note_heim: null, note_gast: null, top: [], stats: [], ereignisse: [] }, s0 || {});
+  const [lkReiter, setLkReiter] = React.useState("analyse"); /* A98: Reiter Spielanalyse | Spielerperformances */
   const zu = React.useRef(onClose); zu.current = onClose; useTwZurueck(true, () => { if (zu.current) zu.current(); });
   React.useEffect(() => {
     twScrollSperre(true);
@@ -12136,7 +12358,7 @@ function TwSpielAnalyse({ s: s0, onClose, openPlayer, z, mitDatum }) {
       h("div", { className: "tw-an-band", style: { background: "var(--dunkel)", color: "#fff", padding: "18px 22px 20px", borderRadius: "20px 20px 0 0" } }, h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 12 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#9aa6b8" } }, ligaText(s) + " \u00b7 " + (mitDatum && datumText(s) ? datumText(s) + " \u00b7 " : "") + statusText(s)), h("button", { type: "button", className: "tw-mv-nurdesk", onClick: () => setOffen(null), style: { cursor: "pointer", border: "1px solid rgba(255,255,255,.25)", background: "rgba(255,255,255,.08)", color: "#fff", borderRadius: 9, padding: "6px 10px", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800 } }, "\u2715 " + (en ? "Close" : "Schlie\u00dfen"))),
         h("div", { className: "tw-an-kopf", style: { display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", gap: 14 } }, h("div", { className: "tw-an-team tw-an-heim", style: { display: "flex", alignItems: "center", gap: 12, justifyContent: "flex-end" } }, h("div", { className: "tw-an-text", style: { textAlign: "right" } }, h("div", { className: "tw-an-name", style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 24 } }, s.heim), s.note_heim !== null ? h("div", { className: "tw-an-note", style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#c7d0dc" } }, (en ? "Team rating " : "Teamnote "), h("b", { style: { color: "#fff", fontSize: 14 } }, Math.round(s.note_heim))) : null), h("div", { className: "tw-an-logo", style: { background: "var(--karte)", borderRadius: 12, padding: 4 } }, h(ClubLogo, { name: s.heim, size: 44 }))), h("div", { className: "tw-an-mitte", style: { textAlign: "center" } }, h("div", { className: "tw-an-score", style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 44, lineHeight: 1 } }, (s.tore_heim ?? "\u2013") + " : " + (s.tore_gast ?? "\u2013")), ((s.xg_heim !== null && s.xg_heim !== undefined) || elfText(s)) ? h("div", { className: "tw-an-xg", style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#c7d0dc", marginTop: 4 } }, [s.xg_heim !== null && s.xg_heim !== undefined ? "xG " + Number(s.xg_heim).toFixed(2) + " : " + Number(s.xg_gast).toFixed(2) : null, elfText(s)].filter(Boolean).join(" \u00b7 ")) : null), h("div", { className: "tw-an-team tw-an-gast", style: { display: "flex", alignItems: "center", gap: 12 } }, h("div", { className: "tw-an-logo", style: { background: "var(--karte)", borderRadius: 12, padding: 4 } }, h(ClubLogo, { name: s.gast, size: 44 })), h("div", { className: "tw-an-text" }, h("div", { className: "tw-an-name", style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 24 } }, clubName(s.gast)), s.note_gast !== null ? h("div", { className: "tw-an-note", style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#c7d0dc" } }, (en ? "Team rating " : "Teamnote "), h("b", { style: { color: "#fff", fontSize: 14 } }, Math.round(s.note_gast))) : null))),
         tore.length ? h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6, marginTop: 14 } }, tore.map((e, i) => h("span", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, padding: "5px 10px", borderRadius: 999, background: e.team === "heim" ? "#fff" : GAST, color: e.team === "heim" ? "var(--dunkel)" : "#121821" } }, "" + (e.min || "") + "' " + e.spieler + (e.zu ? " (" + e.zu + ")" : "") + (e.ergebnis ? " " : ""), e.ergebnis ? h("span", { className: "tw-an-stand", style: { whiteSpace: "nowrap" } }, "\u00b7 " + e.ergebnis) : null))) : null),
-      h("div", { className: "tw-mv-fusspad", style: { padding: "16px 22px 24px" } },
+      h(TwSpielReiter, { reiter: lkReiter, setReiter: setLkReiter }), lkReiter === "spieler" ? h(TwSpielPerformances, { s: s, openPlayer: openPlayer }) : h("div", { className: "tw-mv-fusspad", style: { padding: "16px 22px 24px" } },
         h("div", { style: { display: "flex", justifyContent: "space-between", gap: 10, fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, color: "var(--t2)", marginBottom: 8 } }, h("span", null, h("span", { style: { display: "inline-block", width: 12, height: 12, borderRadius: 3, background: HEIM, marginRight: 6, verticalAlign: "-1px" } }), s.heim), h("span", null, s.gast, h("span", { style: { display: "inline-block", width: 12, height: 12, borderRadius: 3, background: GAST, marginLeft: 6, verticalAlign: "-1px" } }))),
         (s.xg_heim !== null && s.xg_heim !== undefined) ? h("div", { style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, padding: "8px 12px", marginBottom: 10 } }, h(TwXgBalken, { xh: s.xg_heim, xg: s.xg_gast, heim: s.heim, gast: s.gast, en: en, farbeH: HEIM, farbeG: GAST })) : null,
         !s.hat_stats ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: "var(--t2)", background: "var(--karte)", borderRadius: 12, padding: "14px 16px", marginBottom: 12 } }, s.ohne_scores ? (en ? "The source provides no team statistics for this match." : "F\u00fcr dieses Spiel liegt in der Quelle keine Teamstatistik vor.") : (en ? "Statistics arrive about 15\u201330 minutes after the final whistle." : "Die Statistik kommt etwa 15\u201330 Minuten nach Abpfiff.")) : null,
@@ -12571,7 +12793,7 @@ function TwProfilReiter({ tab, setTab, pid, d, onAehnlich }) {
   const knopf = (k, lab) => h("button", { key: k, type: "button", role: "tab", "aria-selected": tab === k || (k === "statistik" && statistik), className: "tw-pr-tab" + (tab === k || (k === "statistik" && statistik) ? " aktiv" : ""), onClick: () => { if (k === "statistik") { if (pid) setStatistik(true); return; } setTab(k); } }, lab);
   return h(React.Fragment, null,
     h("div", { className: "tw-pr-tabs", role: "tablist", "aria-label": en ? "Player profile sections" : "Bereiche des Spielerprofils" },
-      knopf("profil", en ? "Profile" : "Profil"), knopf("news", "News"), knopf("statistik", en ? "Match statistics" : "Spielstatistiken"), onAehnlich && pid ? h("button", { key: "aehnlich", type: "button", role: "tab", "aria-selected": false, className: "tw-pr-tab", onClick: () => onAehnlich(), title: en ? "Opens a separate page with similar players" : "\u00d6ffnet eine eigene Seite mit \u00e4hnlichen Spielern" }, en ? "Similar players" : "\u00c4hnliche Spieler") : null),
+      knopf("profil", en ? "Profile" : "Profil"), knopf("news", "News"), knopf("leistung", en ? "Player performance" : "Spielerperformance"), knopf("statistik", en ? "Match statistics" : "Spielstatistiken"), onAehnlich && pid ? h("button", { key: "aehnlich", type: "button", role: "tab", "aria-selected": false, className: "tw-pr-tab", onClick: () => onAehnlich(), title: en ? "Opens a separate page with similar players" : "\u00d6ffnet eine eigene Seite mit \u00e4hnlichen Spielern" }, en ? "Similar players" : "\u00c4hnliche Spieler") : null),
     statistik && pid ? h(TwProfilStatistik, { pid: pid, d: d, onClose: () => setStatistik(false) }) : null);
 }
 const TW_SN = {};
@@ -13602,8 +13824,10 @@ function TransferApp({
   const oeffneAehnlich = sp => { if (!sp || !sp.pid) return; setVorAnsicht(v => (view === "aehnlich" || view === "spielervergleich") && v ? Object.assign({}, v, { profil: { pid: sp.pid, name: sp.name, team: sp.team } }) : { view: view, profil: { pid: sp.pid, name: sp.name, team: sp.team } }); setPlDetail(null); setAehnlichStart(sp); setView("aehnlich"); try { window.scrollTo({ top: 0 }); } catch (e) {} };
   const oeffneVergleich = start => { setVorAnsicht(v => (view === "aehnlich" || view === "spielervergleich") && v ? Object.assign({}, v, { profil: null }) : { view: view, profil: null }); setVglStart((start || []).filter(x => x && x.pid).slice(0, 2)); setView("spielervergleich"); try { window.scrollTo({ top: 0 }); } catch (e) {} };
   const zurueckVonSeite = () => { const v = vorAnsicht; setView(v && v.view && v.view !== "aehnlich" && v.view !== "spielervergleich" ? v.view : "players"); if (v && v.profil && v.profil.pid) { const p = v.profil; setTimeout(() => openPlayer(p.pid, p.name, p.team), 0); } setVorAnsicht(null); };
+  /* A98: Klick in der Wochenwertung oeffnet das Spielerprofil im Reiter "Spielerperformance" */
+  const openPlayerLeistung = (pid, name, team) => { if (!pid) return; openPlayer(pid, name, team); setPlTab("leistung"); };
   useEffect(() => {
-    if (view !== "ranking" || perf !== null || perfLoading) return;
+    if (view !== "ranking_v1" || perf !== null || perfLoading) return; /* A98: Performance-Seite nutzt /api/tw-leistung, tw-performance-v2 wird hier nicht mehr geladen */
     setPerfLoading(true);
     fetch(PERF_URL, {
       credentials: "omit",
@@ -14242,95 +14466,7 @@ function TransferApp({
       lineHeight: 1.5,
       margin: "0 0 6px"
     }
-  }, t("rank_sub")), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, margin: "0 0 22px" } }, perfDatenstand(perf))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      flexWrap: "wrap",
-      gap: 8,
-      marginBottom: 14
-    }
-  }, /*#__PURE__*/React.createElement("input", {
-    value: perfQ,
-    onChange: e => setPerfQ(e.target.value),
-    placeholder: t("rank_search_ph"),
-    style: {
-      flex: "1 1 200px",
-      fontFamily: FONT_BODY,
-      fontSize: 16,
-      padding: "10px 12px",
-      border: `1px solid ${HAIR}`,
-      borderRadius: 9,
-      boxSizing: "border-box",
-      background: "var(--karte)"
-    }
-  }), /*#__PURE__*/React.createElement("select", {
-    value: perfLg,
-    onChange: e => setPerfLg(e.target.value),
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 13,
-      padding: "10px 10px",
-      border: `1px solid ${HAIR}`,
-      borderRadius: 9,
-      background: "var(--karte)",
-      maxWidth: 170
-    }
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, t("rank_all_lg")), [...new Set((perf || []).map(x => x.league).filter(Boolean))].sort().map(l => /*#__PURE__*/React.createElement("option", {
-    key: l,
-    value: l
-  }, l))), /*#__PURE__*/React.createElement("select", {
-    value: perfPos,
-    onChange: e => setPerfPos(e.target.value),
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 13,
-      padding: "10px 10px",
-      border: `1px solid ${HAIR}`,
-      borderRadius: 9,
-      background: "var(--karte)"
-    }
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, t("rank_all_pos")), ["Torwart", "Abwehr", "Mittelfeld", "Sturm"].map(p => /*#__PURE__*/React.createElement("option", {
-    key: p,
-    value: p
-  }, p))), /*#__PURE__*/React.createElement("select", {
-    value: perfSt,
-    onChange: e => setPerfSt(e.target.value),
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 13,
-      padding: "10px 10px",
-      border: `1px solid ${HAIR}`,
-      borderRadius: 9,
-      background: "var(--karte)",
-      maxWidth: 165
-    }
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, t("rank_all_st")), PERF_TAGS.map(p => /*#__PURE__*/React.createElement("option", {
-    key: p,
-    value: p
-  }, p))), /*#__PURE__*/React.createElement("select", {
-    value: perfSw,
-    onChange: e => setPerfSw(e.target.value),
-    style: {
-      fontFamily: FONT_BODY,
-      fontSize: 13,
-      padding: "10px 10px",
-      border: `1px solid ${HAIR}`,
-      borderRadius: 9,
-      background: "var(--karte)",
-      maxWidth: 165
-    }
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, t("rank_all_sw")), PERF_TAGS.map(p => /*#__PURE__*/React.createElement("option", {
-    key: p,
-    value: p
-  }, p)))), /*#__PURE__*/React.createElement(PerfVue, { perf: perf, perfLoading: perfLoading, q: perfQ, lg: perfLg, pos: perfPos, st: perfSt, sw: perfSw, watch: watch.items, onWatchToggle: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); }, onOpen: x => setPerfKarte(x), offen: perfOpen, setOffen: setPerfOpen })), view === "suche" && /*#__PURE__*/React.createElement(ScoutSub, { view: view, setView: setView }), view === "suche" && /*#__PURE__*/React.createElement(SucheVue, { onOpen: (pid, name, team) => openPlayer(pid, name, team) }), view === "nachwuchs" && React.createElement(ScoutSub, { view: view, setView: setView }), view === "nachwuchs" && React.createElement(NachwuchsKatalog, null), view === "listen" && /*#__PURE__*/React.createElement(ScoutSub, { view: view, setView: setView }), view === "listen" && (!listActive ? /*#__PURE__*/React.createElement("div", null, React.createElement(ListenVue, { presets: LIST_PRESETS, myLists: myLists, setMyLists: setMyLists, onOpen: li => ladeListe(li.name, li.params, li.preset ? "" : li.id), onNew: () => setListFormOpen(true), onDelete: delMyList, stand: dbStats && dbStats.stand }), listFormOpen ? /*#__PURE__*/React.createElement("div", {
+  }, t("rank_sub")), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, margin: "0 0 22px" } }, t("rank_stand"))), React.createElement(TwLeistungWoche, { onPlayer: openPlayerLeistung })), view === "suche" && /*#__PURE__*/React.createElement(ScoutSub, { view: view, setView: setView }), view === "suche" && /*#__PURE__*/React.createElement(SucheVue, { onOpen: (pid, name, team) => openPlayer(pid, name, team) }), view === "nachwuchs" && React.createElement(ScoutSub, { view: view, setView: setView }), view === "nachwuchs" && React.createElement(NachwuchsKatalog, null), view === "listen" && /*#__PURE__*/React.createElement(ScoutSub, { view: view, setView: setView }), view === "listen" && (!listActive ? /*#__PURE__*/React.createElement("div", null, React.createElement(ListenVue, { presets: LIST_PRESETS, myLists: myLists, setMyLists: setMyLists, onOpen: li => ladeListe(li.name, li.params, li.preset ? "" : li.id), onNew: () => setListFormOpen(true), onDelete: delMyList, stand: dbStats && dbStats.stand }), listFormOpen ? /*#__PURE__*/React.createElement("div", {
     style: {
       background: "var(--karte)",
       border: `1px solid ${HAIR}`,
@@ -15970,7 +16106,7 @@ function TransferApp({
         background: on ? "var(--gold-tint)" : "transparent", border: on ? "1px solid var(--gold-rand)" : "1px solid var(--linie2)", borderRadius: 9, padding: "9px 13px", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, color: on ? "var(--gold-text)" : INK,
         flexShrink: 0
       }
-    }, on ? "✓" : t("watch_add"))), React.createElement(TwProfilReiter, { tab: plTab, setTab: setPlTab, pid: plDetail.pid || d.player_id || d.pid, d: d, onAehnlich: () => oeffneAehnlich({ pid: plDetail.pid || d.player_id || d.pid, name: d.name, team: d.team, photo: d.photo }) }), plTab === "news" ? React.createElement(SpielerNewsListe, { pid: plDetail.pid || d.player_id || d.pid, name: d.name, onWatch: it => { setPlDetail(null); setAddSheet(it); } }) : null, React.createElement("div", { style: { display: plTab === "news" ? "none" : "block" } }, React.createElement(SpielerdatenTabelle, { d: d, pid: plDetail.pid || d.player_id || d.pid, profil: plDetail.profil }), React.createElement(TwBeraterHistorie, { bh: plDetail.beraterhistorie }), plDetail.injuries && plDetail.injuries.length > 0 && /*#__PURE__*/React.createElement("div", {
+    }, on ? "✓" : t("watch_add"))), React.createElement(TwProfilReiter, { tab: plTab, setTab: setPlTab, pid: plDetail.pid || d.player_id || d.pid, d: d, onAehnlich: () => oeffneAehnlich({ pid: plDetail.pid || d.player_id || d.pid, name: d.name, team: d.team, photo: d.photo }) }), plTab === "news" ? React.createElement(SpielerNewsListe, { pid: plDetail.pid || d.player_id || d.pid, name: d.name, onWatch: it => { setPlDetail(null); setAddSheet(it); } }) : null, plTab === "leistung" ? React.createElement(TwLeistungProfil, { pid: plDetail.pid || d.player_id || d.pid, name: d.name }) : null, React.createElement("div", { style: { display: plTab === "news" || plTab === "leistung" ? "none" : "block" } }, React.createElement(SpielerdatenTabelle, { d: d, pid: plDetail.pid || d.player_id || d.pid, profil: plDetail.profil }), React.createElement(TwBeraterHistorie, { bh: plDetail.beraterhistorie }), plDetail.injuries && plDetail.injuries.length > 0 && /*#__PURE__*/React.createElement("div", {
       style: {
         background: "#fbeeeb",
         border: "1px solid #e8c4bc",
