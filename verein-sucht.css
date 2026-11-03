@@ -487,3 +487,9 @@ html.tw-dark .vs-wurzel{--vsv2-hi-bg:#dcf5e7;--vsv2-hi:#0f7a43;--vsv2-gut-bg:#e3
 @container (max-width:860px){.vsv2-raster,.vsv2-grid2{grid-template-columns:minmax(0,1fr)}.vsv2-trenn{display:none}}
 @container (max-width:560px){.vsv2-prog{grid-template-columns:minmax(0,1fr);gap:12px}.vsv2-werte{grid-template-columns:minmax(0,1fr)}.vsv2-zwei{grid-template-columns:minmax(0,1fr)}.vsv2-diag{grid-template-columns:minmax(0,1fr)}.vsv2-felder{grid-template-columns:repeat(2,minmax(0,1fr))}.vsv2-kz-zeile{grid-template-columns:minmax(0,1fr)}.vsv2-kz-werte{justify-content:flex-start}.vsv2-wz small{text-align:left}.vsv2-sp-k{grid-template-columns:22px minmax(0,1fr)}.vsv2-sp-r{grid-column:2;width:100%;max-width:240px;margin-top:6px}.vsv2-rang{grid-template-columns:110px minmax(0,1fr) 30px}.vsv2-werte-kopf{justify-content:flex-start}.vsv2-kopfwert{align-items:flex-start}}
 @container (max-width:380px){.vsv2-felder{grid-template-columns:minmax(0,1fr)}.vsv2-feld{width:100%}}
+/* 03.11.2026 (Boss 13:54): Vereinsname im Kartenkopf darf nie zusammengedrueckt werden (Buchstaben untereinander). Name und Position behalten ihre Breite; reicht der Platz nicht, rutscht die Prognose in die naechste Zeile. */
+.k3.k3n .k3n-band .k3-verein{flex:0 1 auto;min-width:min(100%,13em)}
+.k3.k3n .k3n-band .k3-verein-text{min-width:min(100%,8em)}
+.k3.k3n .k3n-band .k3-vname span,.k3.k3n .k3n-band .k3-vmeta{overflow-wrap:normal;word-break:normal}
+.k3.k3n .k3n-band .k3n-bpos{flex:0 0 auto;max-width:100%}
+.k3.k3n .k3n-band .vsv2-wertk{flex:0 1 auto;max-width:100%}
