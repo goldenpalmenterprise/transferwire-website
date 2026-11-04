@@ -493,3 +493,27 @@ html.tw-dark .vs-wurzel{--vsv2-hi-bg:#dcf5e7;--vsv2-hi:#0f7a43;--vsv2-gut-bg:#e3
 .k3.k3n .k3n-band .k3-vname span,.k3.k3n .k3n-band .k3-vmeta{overflow-wrap:normal;word-break:normal}
 .k3.k3n .k3n-band .k3n-bpos{flex:0 0 auto;max-width:100%}
 .k3.k3n .k3n-band .vsv2-wertk{flex:0 1 auto;max-width:100%}
+
+/* 04.11.2026 KI-Scout: Spielbild aus Spielberichten (3x3-Zonen, Muster, Hinweis) */
+.vsv2-scout{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:14px;align-items:start}
+.vsv2-scout>div:first-child{order:2}
+.vsv2-zonenfeld{position:relative}
+.vsv2-zone{position:absolute;width:33.333%;height:33.333%;box-sizing:border-box;border:1px dashed rgba(148,163,184,.35);display:flex;align-items:center;justify-content:center}
+.vsv2-zone b{font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.vsv2-musterliste{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
+.vsv2-musterliste li{display:grid;gap:2px;padding:7px 9px;border-radius:8px;background:rgba(148,163,184,.08);border-left:3px solid rgba(148,163,184,.5);font-size:13px;line-height:1.4}
+.vsv2-musterliste li.ist-schwach{border-left-color:#ef4444}
+.vsv2-musterliste li.ist-gut{border-left-color:#22c55e}
+.vsv2-musterliste li span{color:var(--t2);font-size:12.5px}
+.vsv2-tag.ist-scout{background:rgba(139,92,246,.14);color:#a78bfa;border-color:rgba(139,92,246,.35)}
+.vsv2-scout.ohne-feld{grid-template-columns:minmax(0,1fr)}
+.vsv2-zone.ist-heat{border:0}
+.vsv2-zone.ist-muster{border:2px solid;border-radius:6px}
+.vsv2-zone.ist-muster.ist-schwach{border-color:#ef4444;background:rgba(239,68,68,.20)}
+.vsv2-zone.ist-muster.ist-gut{border-color:#22c55e;background:rgba(34,197,94,.18)}
+.vsv2-zone.ist-muster.ist-gemischt{border-color:#f59e0b;background:rgba(245,158,11,.18)}
+.vsv2-zone.ist-muster b{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:rgba(15,23,42,.78);font-size:11.5px;text-shadow:none}
+.vsv2-mnr{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:9px;background:rgba(148,163,184,.22);font-style:normal;font-size:11px;font-weight:700;margin-right:3px;vertical-align:1px}
+.vsv2-musterliste li.ist-schwach .vsv2-mnr{background:rgba(239,68,68,.25)}
+.vsv2-musterliste li.ist-gut .vsv2-mnr{background:rgba(34,197,94,.25)}
+@media (max-width:700px){.vsv2-scout{grid-template-columns:minmax(0,1fr)}.vsv2-scout>div:first-child{order:0}.vsv2-zonenfeld{width:100%;max-width:320px;margin:0 auto}}
