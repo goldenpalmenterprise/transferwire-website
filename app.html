@@ -665,6 +665,39 @@ header:has(+ .tw-tabbar) { background: var(--seite) !important; border-bottom: 1
 .tw-sn-unter { padding: 8px 10px 8px 42px; font-weight: 500; font-size: 13.5px; color: var(--t2); }
 .tw-sn-unter:hover { background: var(--hover); color: var(--t1); }
 .tw-sn-zusatz { border-top: 1px solid var(--linie); padding-top: 8px; margin-bottom: 8px; }
+/* Netzwerk 2.0 (OP 537): Haken, Verifizierungs-Leiste, Dialog */
+.nz-haken { display: inline-flex; width: 15px; height: 15px; margin-left: 5px; vertical-align: -2px; color: var(--gruen-text); }
+.nz-haken.klein { width: 13px; height: 13px; margin-left: 4px; vertical-align: -2px; }
+.nz-haken svg { width: 100%; height: 100%; display: block; }
+.nz-leiste { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; border: 1px solid var(--linie); background: var(--karte); border-radius: 11px; padding: 10px 14px; font-size: 13px; color: var(--t1); }
+.nz-leiste.gruen { border-color: var(--sc-hi-rand); background: var(--sc-hi-bg); }
+.nz-leiste.gelb { border-color: var(--sc-mittel-rand); background: var(--sc-mittel-bg); }
+.nz-leiste.kompakt { border: 0; border-top: 1px solid var(--linie); border-radius: 0; background: transparent; padding: 8px 0 0; margin-top: 6px; }
+.nz-leiste-ikon { display: inline-flex; width: 18px; height: 18px; color: var(--gruen-text); flex: none; }
+.nz-leiste.gelb .nz-leiste-ikon { color: var(--sc-mittel-text); }
+.nz-leiste-ikon svg { width: 100%; height: 100%; }
+.nz-leiste-text { flex: 1; min-width: 160px; line-height: 1.4; }
+.nz-btn { cursor: pointer; font: inherit; font-size: 12.5px; font-weight: 700; padding: 7px 13px; border-radius: 9px; border: 1px solid var(--linie2); background: var(--karte2); color: var(--t1); }
+.nz-btn:hover { background: var(--hover); } .nz-btn:disabled { opacity: .5; cursor: default; }
+.nz-btn.gruen { background: var(--gruen); border-color: var(--gruen); color: #fff; }
+.nz-btn.rot { background: transparent; border-color: var(--sc-schwach-rand); color: var(--sc-schwach-text); }
+.nz-btn.klein { padding: 5px 10px; font-size: 12px; }
+.nz-modal { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,.55); display: flex; align-items: flex-start; justify-content: center; padding: 24px 12px; overflow-y: auto; }
+.nz-box { width: 100%; max-width: 640px; background: var(--karte); color: var(--t1); border: 1px solid var(--linie); border-radius: 16px; padding: 18px 20px 20px; font-size: 14px; line-height: 1.45; box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+.nz-box h2 { margin: 0; font-size: 19px; } .nz-box h3 { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--t3); margin: 16px 0 8px; }
+.nz-kopf { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; } .nz-kopf .nz-x { margin-left: auto; cursor: pointer; border: 0; background: transparent; color: var(--t2); font-size: 24px; line-height: 1; padding: 2px 6px; }
+.nz-sub { color: var(--t2); font-size: 13px; }
+.nz-felder { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } @media (max-width: 560px) { .nz-felder { grid-template-columns: 1fr; } }
+.nz-feld { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--t2); } .nz-feld.breit { grid-column: 1 / -1; }
+.nz-feld input, .nz-feld select, .nz-feld textarea { width: 100%; box-sizing: border-box; font: inherit; font-size: 14px; color: var(--t1); background: var(--seite); border: 1px solid var(--linie2); border-radius: 9px; padding: 9px 11px; }
+.nz-hinweis { background: var(--karte2); border: 1px solid var(--linie); border-radius: 10px; padding: 10px 12px; color: var(--t2); font-size: 13px; }
+.nz-fehler { color: var(--sc-schwach-text); font-size: 13px; } .nz-ok { color: var(--gruen-text); font-size: 13px; }
+.nz-knoepfe { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
+.nz-chip { display: inline-block; border-radius: 999px; padding: 2px 9px; font-size: 12px; border: 1px solid var(--linie2); color: var(--t2); background: var(--karte2); }
+.nz-chip.gruen { background: var(--sc-hi-bg); border-color: var(--sc-hi-rand); color: var(--sc-hi-text); } .nz-chip.gelb { background: var(--sc-mittel-bg); border-color: var(--sc-mittel-rand); color: var(--sc-mittel-text); }
+.nz-datei { display: flex; justify-content: space-between; align-items: center; gap: 10px; border-top: 1px solid var(--linie); padding: 7px 0; font-size: 13px; }
+.nz-dl { display: grid; grid-template-columns: 150px 1fr; gap: 4px 12px; margin: 0; font-size: 13px; } .nz-dl dt { color: var(--t2); } .nz-dl dd { margin: 0; }
+@media (max-width: 560px) { .nz-dl { grid-template-columns: 1fr; } }
 .tw-sn-unter.aktiv { background: var(--aktiv); color: var(--t1); font-weight: 600; }
 .tw-sn-badge { margin-left: auto; font-size: 11px; font-weight: 800; color: var(--gold-text) !important; background: var(--gold-tint); border-radius: 999px; padding: 2px 8px; }
 .tw-sn-unten { padding-top: 10px; border-top: 1px solid var(--linie); }
@@ -2233,6 +2266,188 @@ const TW_ZUSATZ = {
   leeren() { if (!this.seiten.length) return; this.seiten = []; try { window.dispatchEvent(new CustomEvent("tw-zusatz")); } catch (e) {} }
 };
 window.TW_ZUSATZ = TW_ZUSATZ;
+/* ── Netzwerk 2.0, Paket 1 (OP 537, 07.11.2026): feste Rollen, Verifizierung mit Haken, Prüfseite „Verifizierungen“ (nur Unternehmens-Konto).
+   Alle Regeln liegen in der Datenbank (Schema nz, Workflows tw-nz / tw-nz-admin); die App zeigt nur an und reicht Eingaben durch. ── */
+const NZ_API = "/api/tw-nz";
+const NZ_ADMIN_URL = "/api/tw-nz-admin";
+const NZ_ROLLEN = { agent: ["Spielerberater / Agent", "Player agent"], scout: ["Scout", "Scout"], club: ["Verein", "Club"], sportdirector: ["Sportdirektor / Vereinsmitarbeiter", "Sporting director / club staff"], journalist: ["Journalist", "Journalist"], other: ["Sonstiges", "Other"], intern: ["TransferWire-Team", "TransferWire team"] };
+const NZ_HAKEN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>';
+function nzRolleText(r) { const k = String(r || "").toLowerCase().trim(); const m = NZ_ROLLEN[k]; return m ? (LANG === "en" ? m[1] : m[0]) : (r || ""); }
+function nzHaken(p, klein) {
+  const hk = p && p.author_haken; if (!hk) return null;
+  const en = LANG === "en"; const rolle = nzRolleText(hk.rolle);
+  return React.createElement("span", { className: "nz-haken" + (klein ? " klein" : ""), title: en ? "Verified " + rolle + (hk.seit ? " (since " + hk.seit + ")" : "") : "Verifiziert als " + rolle + (hk.seit ? " (seit " + hk.seit + ")" : ""), "aria-label": en ? "verified" : "verifiziert", dangerouslySetInnerHTML: { __html: NZ_HAKEN_SVG } });
+}
+const NZ = { konto: null, email: "", laedt: false };
+function nzRuf(account, aktion, body) {
+  const b = Object.assign({}, body || {}, { aktion: aktion, code: (account && (account.code || account.sitzung)) || "", email: (account && account.email) || "" });
+  return fetch(NZ_API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(b), cache: "no-store", credentials: "omit" })
+    .then(r => r.json().catch(() => ({ ok: false, grund: r.status === 401 ? "auth" : "antwort" })))
+    .catch(() => ({ ok: false, grund: "netz" }));
+}
+function nzKontoSetzen(k) { NZ.konto = k; try { window.dispatchEvent(new CustomEvent("nz-konto")); } catch (e) {} }
+function nzKontoLaden(account) {
+  const email = String((account && account.email) || "").toLowerCase();
+  if (!email || !twHatSitzung(account)) { if (NZ.email || NZ.konto) { NZ.email = ""; nzKontoSetzen(null); } return Promise.resolve(null); }
+  if (NZ.laedt) return Promise.resolve(NZ.konto);
+  NZ.laedt = true; NZ.email = email;
+  return nzRuf(account, "konto", {}).then(d => { NZ.laedt = false; if (d && d.ok) { nzKontoSetzen(d); if (d.admin === true) nzAdminModul(account); } return d; }).catch(() => { NZ.laedt = false; return null; });
+}
+function nzAdminModul(account) {   // Prüfseite „Verifizierungen“ als Zusatzseite (Punkt 356) – Code kommt nur für das Unternehmens-Konto
+  if (TW_ZUSATZ.module[NZ_ADMIN_URL]) { TW_ZUSATZ.melden(TW_ZUSATZ.module[NZ_ADMIN_URL], NZ_ADMIN_URL); return; }
+  if (TW_ZUSATZ.geladen[NZ_ADMIN_URL]) return;
+  TW_ZUSATZ.geladen[NZ_ADMIN_URL] = true;
+  fetch(NZ_ADMIN_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ aktion: "modul", code: account.code || account.sitzung || "", email: account.email || "" }), cache: "no-store", credentials: "omit" })
+    .then(r => r.ok ? r.json() : null).then(d => {
+      if (!d || !d.ok || typeof d.text !== "string" || !d.text) { delete TW_ZUSATZ.geladen[NZ_ADMIN_URL]; return; }
+      const sk = document.createElement("script"); sk.text = d.text; document.head.appendChild(sk);
+    }).catch(() => { delete TW_ZUSATZ.geladen[NZ_ADMIN_URL]; });
+}
+function nzGrund(g, d) {
+  const en = LANG === "en"; const rest = d && d.rest != null ? (en ? " " + d.rest + " attempts left." : " Noch " + d.rest + " Versuche.") : "";
+  const m = {
+    auth: ["Deine Anmeldung ist abgelaufen. Bitte neu anmelden.", "Your session expired. Please sign in again."],
+    premium: ["Die Verifizierung ist Teil von Pro.", "Verification is part of Pro."],
+    offen: ["Es läuft schon ein Antrag.", "A request is already in progress."],
+    gesperrt: ["Nach drei Ablehnungen ist ein neuer Antrag erst nach 90 Tagen möglich.", "After three rejections a new request is possible after 90 days."],
+    bereits: ["Du bist bereits verifiziert.", "You are already verified."],
+    rolle: ["Bitte eine Fachrolle wählen.", "Please choose a professional role."],
+    name: ["Bitte deinen vollen Namen angeben (3 bis 120 Zeichen).", "Please enter your full name (3 to 120 characters)."],
+    organisation: ["Bitte deine Organisation angeben (Agentur, Verein, Redaktion).", "Please enter your organisation (agency, club, newsroom)."],
+    land: ["Bitte das Land angeben.", "Please enter the country."],
+    dienst_email: ["Die dienstliche E-Mail-Adresse ist ungültig.", "The work e-mail address is invalid."],
+    dienst_freemail: ["Bitte eine dienstliche Adresse angeben – keine Freemail-Adresse (Gmail, GMX, Outlook …). Du kannst das Feld auch leer lassen und stattdessen Nachweise hochladen.", "Please use a work address – no free-mail address (Gmail, GMX, Outlook …). You can also leave it empty and upload documents instead."],
+    website: ["Die Website-Adresse ist ungültig.", "The website address is invalid."],
+    antrag: ["Der Antrag wurde nicht gefunden oder ist schon abgeschlossen.", "The request was not found or is already closed."],
+    abgelaufen: ["Der Code ist abgelaufen. Bitte neu anfordern.", "The code expired. Please request a new one."],
+    falsch: ["Der Code ist falsch." + rest, "The code is wrong." + rest],
+    zu_viele: ["Zu viele Versuche oder zu viele Dateien. Bitte später erneut probieren.", "Too many attempts or too many files. Please try again later."],
+    schon: ["Die Adresse ist schon bestätigt.", "The address is already confirmed."],
+    typ: ["Erlaubt sind PDF, JPG, PNG und WebP.", "Allowed: PDF, JPG, PNG and WebP."],
+    groesse: ["Die Datei ist zu groß (höchstens 8 MB).", "The file is too large (8 MB maximum)."],
+    daten: ["Die Datei konnte nicht gelesen werden.", "The file could not be read."],
+    datei: ["Die Datei wurde nicht gefunden.", "The file was not found."],
+    status: ["Der Antrag hat nicht mehr den passenden Status.", "The request no longer has the right status."],
+    text: ["Bitte einen Text eingeben.", "Please enter a text."],
+    netz: ["Keine Verbindung zum Server.", "No connection to the server."],
+    fehler: ["Fehler auf dem Server. Bitte später erneut probieren.", "Server error. Please try again later."]
+  };
+  const x = m[g]; return x ? (en ? x[1] : x[0]) : (en ? "Error: " : "Fehler: ") + (g || "unbekannt");
+}
+function NzVerifLeiste({ account, kompakt }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  const [k, setK] = React.useState(NZ.konto);
+  const [offen, setOffen] = React.useState(false);
+  React.useEffect(() => { const f = () => setK(NZ.konto); window.addEventListener("nz-konto", f); if (!NZ.konto && account && account.email) { try { nzKontoLaden(account); } catch (e) {} } return () => window.removeEventListener("nz-konto", f); }, [account && account.email]);
+  if (!account || account.plan !== "premium" || !k || !k.ok) return null;
+  const rolleTxt = en ? (k.rolle_en || nzRolleText(k.rolle)) : (k.rolle_de || nzRolleText(k.rolle));
+  const antrag = k.offen; let text, art = "";
+  if (k.verifiziert) { text = L("Verifiziert als " + nzRolleText(k.verif_rolle || k.rolle) + (k.gueltig_bis ? " · gültig bis " + fmtDate(k.gueltig_bis) : ""), "Verified as " + nzRolleText(k.verif_rolle || k.rolle) + (k.gueltig_bis ? " · valid until " + fmtDate(k.gueltig_bis) : "")); art = "gruen"; }
+  else if (antrag && antrag.status === "nachfrage") { text = L("Wir haben eine Rückfrage zu deiner Verifizierung – bitte antworten.", "We have a question about your verification – please reply."); art = "gelb"; }
+  else if (antrag && antrag.dienst_email && !antrag.dienst_bestaetigt) { text = L("Verifizierung: bitte den Code aus deiner dienstlichen E-Mail eingeben.", "Verification: please enter the code from your work e-mail."); art = "gelb"; }
+  else if (antrag) { text = L("Verifizierung eingereicht – wir prüfen in der Regel innerhalb von 24 Stunden.", "Verification submitted – we usually review within 24 hours."); art = "gelb"; }
+  else if (k.sperre_bis) { text = L("Ein neuer Verifizierungsantrag ist ab " + fmtDate(k.sperre_bis) + " möglich.", "A new verification request is possible from " + fmtDate(k.sperre_bis) + "."); }
+  else { text = L("Rolle: " + rolleTxt + " · noch nicht verifiziert. Mit dem Haken sehen alle, dass du echt bist.", "Role: " + rolleTxt + " · not verified yet. The badge shows everyone you are genuine."); }
+  const knopf = k.verifiziert ? L("Details", "Details") : antrag ? L("Status ansehen", "View status") : L("Jetzt verifizieren", "Get verified");
+  return h(React.Fragment, null,
+    h("div", { className: "nz-leiste " + art + (kompakt ? " kompakt" : "") },
+      h("span", { className: "nz-leiste-ikon", dangerouslySetInnerHTML: { __html: NZ_HAKEN_SVG } }),
+      h("span", { className: "nz-leiste-text" }, text),
+      (!k.sperre_bis || k.verifiziert || antrag) ? h("button", { type: "button", className: "nz-btn" + (!k.verifiziert && !antrag ? " gruen" : ""), onClick: () => setOffen(true) }, knopf) : null),
+    offen ? h(NzVerifDialog, { account: account, schliessen: () => setOffen(false) }) : null);
+}
+function NzVerifDialog({ account, schliessen }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  const [k, setK] = React.useState(NZ.konto);
+  React.useEffect(() => { const f = () => setK(NZ.konto); window.addEventListener("nz-konto", f); return () => window.removeEventListener("nz-konto", f); }, []);
+  useScrollSperre(true); useTwZurueck(true, schliessen);
+  const rollen = (k && Array.isArray(k.rollen) ? k.rollen : []).filter(r => r && r.verifizierbar);
+  const startRolle = k && rollen.some(r => r.key === k.rolle) ? k.rolle : "agent";
+  const [f, setF] = React.useState({ rolle: startRolle, name: (account && account.name) || "", organisation: "", funktion: "", land: "", website: "", linkedin: "", dienst_email: "", lizenznummer: "", text: "" });
+  const [code, setCode] = React.useState(""); const [antwort, setAntwort] = React.useState("");
+  const [busy, setBusy] = React.useState(false); const [fehler, setFehler] = React.useState(""); const [meldung, setMeldung] = React.useState(""); const [zurueck, setZurueck] = React.useState(false); const [erneuern, setErneuern] = React.useState(false);
+  const feld = (key, label, typ, breit, hinweis) => h("label", { className: "nz-feld" + (breit ? " breit" : "") }, label, h("input", { type: typ || "text", value: f[key] || "", maxLength: 200, onChange: e => setF(Object.assign({}, f, { [key]: e.target.value })) }), hinweis ? h("span", { className: "nz-sub", style: { fontSize: 12 } }, hinweis) : null);
+  const tue = (aktion, body, danach) => { setBusy(true); setFehler(""); setMeldung(""); return nzRuf(account, aktion, body).then(d => { setBusy(false); if (d && d.ok) { if (d.konto) nzKontoSetzen(d.konto); if (danach) danach(d); } else setFehler(nzGrund(d && d.grund, d)); return d; }); };
+  const rolleInfo = rollen.find(r => r.key === f.rolle);
+  const antrag = k && k.offen;
+  const dateiWahl = (ev) => {
+    const datei = ev.target && ev.target.files && ev.target.files[0]; if (!datei || !antrag) return;
+    ev.target.value = "";
+    if (["application/pdf", "image/jpeg", "image/png", "image/webp"].indexOf(datei.type) < 0) { setFehler(nzGrund("typ")); return; }
+    if (datei.size > 8 * 1024 * 1024) { setFehler(nzGrund("groesse")); return; }
+    const leser = new FileReader();
+    leser.onload = () => { const b64 = String(leser.result || "").split(",")[1] || ""; tue("datei", { id: antrag.id, name: datei.name, typ: datei.type, b64: b64 }, () => setMeldung(L("Datei hochgeladen.", "File uploaded."))); };
+    leser.onerror = () => setFehler(nzGrund("daten"));
+    leser.readAsDataURL(datei);
+  };
+  const kopf = h("div", { className: "nz-kopf" }, h("span", { className: "nz-leiste-ikon", dangerouslySetInnerHTML: { __html: NZ_HAKEN_SVG } }), h("h2", null, L("Verifizierung", "Verification")), h("button", { type: "button", className: "nz-x", "aria-label": L("Schließen", "Close"), onClick: schliessen }, "×"));
+  let inhalt;
+  if (!k || !k.ok) {
+    inhalt = h("p", { className: "nz-sub" }, L("Lade …", "Loading …"));
+  } else if (k.verifiziert && !erneuern) {
+    inhalt = h("div", null,
+      h("p", null, L("Dein Konto ist verifiziert. Neben deinem Namen erscheint im Netzwerk der Haken.", "Your account is verified. The badge appears next to your name in the network.")),
+      h("dl", { className: "nz-dl" },
+        h("dt", null, L("Rolle", "Role")), h("dd", null, nzRolleText(k.verif_rolle || k.rolle)),
+        h("dt", null, L("Verifiziert seit", "Verified since")), h("dd", null, fmtDate(k.verif_seit)),
+        h("dt", null, L("Gültig bis", "Valid until")), h("dd", null, fmtDate(k.gueltig_bis) + (k.erneuerung_faellig ? " · " + L("Erneuerung bald fällig", "renewal due soon") : ""))),
+      h("p", { className: "nz-sub", style: { marginTop: 12 } }, L("Der Haken gilt zwölf Monate und ist an deine Rolle gebunden. Wenn du die Rolle wechselst, fällt er weg und du kannst dich neu verifizieren lassen.", "The badge is valid for twelve months and tied to your role. If you change your role it is removed and you can get verified again.")),
+      k.erneuerung_faellig ? h("div", { className: "nz-knoepfe" }, h("button", { type: "button", className: "nz-btn gruen", disabled: busy, onClick: () => setErneuern(true) }, L("Jetzt erneuern", "Renew now"))) : null);
+  }
+  if (k && k.ok && !inhalt) {
+    if (antrag && antrag.dienst_email && !antrag.dienst_bestaetigt) {
+      inhalt = h("div", null,
+        h("p", null, L("Wir haben einen Code an deine dienstliche Adresse geschickt (" + antrag.dienst_email + "). Bitte gib ihn hier ein – er gilt 30 Minuten.", "We sent a code to your work address (" + antrag.dienst_email + "). Please enter it here – it is valid for 30 minutes.")),
+        h("form", { onSubmit: ev => { ev.preventDefault(); const c = code.replace(/\D/g, ""); if (c.length !== 6) { setFehler(L("Bitte die sechs Ziffern eingeben.", "Please enter the six digits.")); return; } tue("code", { id: antrag.id, einmalcode: c }, () => { setCode(""); setMeldung(L("Adresse bestätigt. Danke!", "Address confirmed. Thank you!")); }); } },
+          h("div", { style: { display: "flex", gap: 8, flexWrap: "wrap" } },
+            h("input", { inputMode: "numeric", autoComplete: "one-time-code", maxLength: 6, value: code, onChange: e => setCode(e.target.value.replace(/\D/g, "")), style: { maxWidth: 170, letterSpacing: ".2em", fontSize: 18, font: "inherit", color: "var(--t1)", background: "var(--seite)", border: "1px solid var(--linie2)", borderRadius: 9, padding: "9px 11px" } }),
+            h("button", { type: "submit", className: "nz-btn gruen", disabled: busy }, L("Bestätigen", "Confirm")),
+            h("button", { type: "button", className: "nz-btn", disabled: busy, onClick: () => tue("code_erneut", { id: antrag.id }, () => setMeldung(L("Neuer Code verschickt.", "New code sent."))) }, L("Code erneut senden", "Resend code")))),
+        h("p", { className: "nz-sub", style: { marginTop: 10 } }, L("Du kannst den Antrag auch ohne Bestätigung weiterlaufen lassen – dann prüfen wir ihn anhand deiner Angaben und Nachweise.", "You can also continue without confirming – we will then review your details and documents.")),
+        h("div", { className: "nz-knoepfe" }, h("button", { type: "button", className: "nz-btn klein", onClick: () => nzKontoSetzen(Object.assign({}, k, { offen: Object.assign({}, antrag, { dienst_bestaetigt: true, _uebersprungen: true }) })) }, L("Weiter zu den Nachweisen", "Continue to documents"))));
+    } else if (antrag) {
+      const statusTxt = antrag.status === "nachfrage" ? L("Rückfrage – bitte antworten", "Question – please reply") : L("Eingereicht, wird geprüft", "Submitted, under review");
+      inhalt = h("div", null,
+        h("p", null, h("span", { className: "nz-chip " + (antrag.status === "nachfrage" ? "gelb" : "") }, statusTxt), " ", h("span", { className: "nz-sub" }, L("eingereicht am ", "submitted on ") + fmtDate(antrag.erstellt_am) + " · " + nzRolleText(antrag.rolle))),
+        antrag.status === "nachfrage" ? h("div", { className: "nz-hinweis", style: { marginTop: 10 } }, h("b", null, L("Unsere Rückfrage", "Our question") + (antrag.nachfrage_am ? " (" + fmtDate(antrag.nachfrage_am) + ")" : "") + ": "), antrag.nachfrage_text || "") : null,
+        antrag.status === "nachfrage" ? h("div", { style: { marginTop: 10 } }, h("textarea", { rows: 3, value: antwort, placeholder: L("Deine Antwort", "Your reply"), onChange: e => setAntwort(e.target.value), style: { width: "100%", boxSizing: "border-box", font: "inherit", fontSize: 14, color: "var(--t1)", background: "var(--seite)", border: "1px solid var(--linie2)", borderRadius: 9, padding: "9px 11px" } }),
+          h("div", { className: "nz-knoepfe", style: { marginTop: 8 } }, h("button", { type: "button", className: "nz-btn gruen", disabled: busy || antwort.trim().length < 2, onClick: () => tue("nachfrage_antwort", { id: antrag.id, text: antwort.trim() }, () => { setAntwort(""); setMeldung(L("Antwort gesendet.", "Reply sent.")); }) }, L("Antwort senden", "Send reply")))) : null,
+        h("h3", null, L("Nachweise", "Documents")),
+        h("p", { className: "nz-sub" }, L("Bis zu drei Dateien (PDF, JPG, PNG, WebP, je höchstens 8 MB): Lizenz, Visitenkarte, Vereins- oder Presseausweis, Teamseite. Die Dateien werden verschlüsselt gespeichert und 30 Tage nach der Entscheidung gelöscht.", "Up to three files (PDF, JPG, PNG, WebP, 8 MB each): licence, business card, club or press card, team page. Files are stored encrypted and deleted 30 days after the decision.")),
+        (antrag.dateien || []).map(d => h("div", { key: d.id, className: "nz-datei" }, h("span", null, d.name, h("span", { className: "nz-sub" }, " · " + Math.round((d.groesse || 0) / 1024) + " KB")), h("button", { type: "button", className: "nz-btn klein", disabled: busy, onClick: () => tue("datei_loeschen", { id: antrag.id, datei: d.id }) }, L("Entfernen", "Remove")))),
+        (antrag.dateien || []).length < 3 ? h("div", { className: "nz-knoepfe", style: { marginTop: 8 } }, h("label", { className: "nz-btn", style: { display: "inline-block" } }, busy ? L("Lädt …", "Uploading …") : L("Datei hochladen", "Upload file"), h("input", { type: "file", accept: ".pdf,image/jpeg,image/png,image/webp", style: { display: "none" }, disabled: busy, onChange: dateiWahl }))) : null,
+        antrag.dienst_email && !antrag._uebersprungen ? h("p", { className: "nz-sub", style: { marginTop: 10 } }, L("Dienstliche E-Mail bestätigt: ", "Work e-mail confirmed: ") + antrag.dienst_email) : null,
+        h("h3", null, L("Antrag", "Request")),
+        h("div", { className: "nz-knoepfe", style: { marginTop: 4 } }, h("button", { type: "button", className: "nz-btn rot klein", disabled: busy, onClick: () => { if (zurueck) tue("zurueckziehen", { id: antrag.id }, () => { setZurueck(false); setMeldung(L("Antrag zurückgezogen.", "Request withdrawn.")); }); else setZurueck(true); } }, zurueck ? L("Wirklich zurückziehen", "Really withdraw") : L("Antrag zurückziehen", "Withdraw request")), zurueck ? h("button", { type: "button", className: "nz-btn klein", onClick: () => setZurueck(false) }, L("Abbrechen", "Cancel")) : null));
+    } else {
+      const abschicken = (ev) => {
+        ev.preventDefault();
+        tue("verif_anlegen", Object.assign({}, f, { sprache: LANG }), (d) => { setMeldung(d && d.konto && d.konto.offen && d.konto.offen.dienst_email ? L("Antrag eingereicht. Wir haben dir einen Code an deine dienstliche Adresse geschickt.", "Request submitted. We sent a code to your work address.") : L("Antrag eingereicht. Du kannst jetzt Nachweise hochladen.", "Request submitted. You can now upload documents.")); });
+      };
+      inhalt = h("form", { onSubmit: abschicken },
+        h("p", { className: "nz-sub" }, L("Der Haken zeigt allen im Netzwerk, dass du echt bist. Wir prüfen deine Angaben – in der Regel innerhalb von 24 Stunden. Deine Nachweise sieht nur das TransferWire-Team.", "The badge shows everyone in the network that you are genuine. We review your details – usually within 24 hours. Only the TransferWire team sees your documents.")),
+        k.haken_entzogen ? h("div", { className: "nz-hinweis", style: { marginBottom: 10 } }, L("Dein früherer Haken ist weggefallen (" + fmtDate(k.haken_entzogen.am) + "). Du kannst dich neu verifizieren lassen.", "Your previous badge was removed (" + fmtDate(k.haken_entzogen.am) + "). You can get verified again.")) : null,
+        k.letzte && k.letzte.status === "abgelehnt" ? h("div", { className: "nz-hinweis", style: { marginBottom: 10 } }, L("Dein letzter Antrag wurde abgelehnt", "Your last request was rejected") + (k.letzte.grund ? ": " + k.letzte.grund : ".")) : null,
+        h("div", { className: "nz-felder" },
+          h("label", { className: "nz-feld breit" }, L("Rolle", "Role"), h("select", { value: f.rolle, onChange: e => setF(Object.assign({}, f, { rolle: e.target.value })) }, rollen.map(r => h("option", { key: r.key, value: r.key }, en ? r.en : r.de)))),
+          rolleInfo ? h("div", { className: "nz-hinweis breit", style: { gridColumn: "1 / -1" } }, en ? rolleInfo.nachweis_en : rolleInfo.nachweis_de) : null,
+          feld("name", L("Vor- und Nachname *", "Full name *")),
+          feld("organisation", L("Organisation (Agentur, Verein, Redaktion) *", "Organisation (agency, club, newsroom) *")),
+          feld("funktion", L("Funktion / Position", "Function / position")),
+          feld("land", L("Land *", "Country *")),
+          feld("website", L("Website der Organisation", "Organisation website"), "text"),
+          feld("linkedin", L("LinkedIn-Profil", "LinkedIn profile"), "text"),
+          feld("dienst_email", L("Dienstliche E-Mail (empfohlen)", "Work e-mail (recommended)"), "email", true, L("Wir schicken dir einen Code an diese Adresse – so belegst du, dass du zur Organisation gehörst. Keine Freemail-Adresse.", "We send a code to this address – that proves you belong to the organisation. No free-mail address.")),
+          f.rolle === "agent" ? feld("lizenznummer", L("Lizenz- oder Registernummer (freiwillig)", "Licence or register number (optional)"), "text", true) : null,
+          h("label", { className: "nz-feld breit" }, L("Nachricht an das Team (freiwillig)", "Message to the team (optional)"), h("textarea", { rows: 3, maxLength: 800, value: f.text, onChange: e => setF(Object.assign({}, f, { text: e.target.value })) }))),
+        h("div", { className: "nz-knoepfe" }, h("button", { type: "submit", className: "nz-btn gruen", disabled: busy }, busy ? L("Sendet …", "Sending …") : L("Antrag einreichen", "Submit request")), h("button", { type: "button", className: "nz-btn", onClick: schliessen }, L("Abbrechen", "Cancel"))));
+    }
+  }
+  return h("div", { className: "nz-modal", onClick: ev => { if (ev.target === ev.currentTarget) schliessen(); } },
+    h("div", { className: "nz-box", role: "dialog", "aria-modal": "true" }, kopf, inhalt,
+      fehler ? h("p", { className: "nz-fehler", style: { marginTop: 10 } }, fehler) : null,
+      meldung ? h("p", { className: "nz-ok", style: { marginTop: 10 } }, meldung) : null));
+}
 function twZusatzKonto(konto) {
   const email = String((konto && konto.email) || "").toLowerCase();
   const liste = (konto && Array.isArray(konto.module) ? konto.module : []).filter(u => typeof u === "string" && u.indexOf("/api/") === 0 && u.indexOf("..") < 0).slice(0, 5);
@@ -2845,6 +3060,8 @@ const I18N = {
     role_scout: "Scout",
     role_club: "Verein",
     role_other: "Sonstiges",
+    role_sportdirector: "Sportdirektor / Vereinsmitarbeiter",
+    role_journalist: "Journalist",
     r_consent: "Ich willige ein, dass mir TransferWire (RATH ENTERPRISES) Werbe-E-Mails zu Produkt-Updates und Angeboten sendet. Die Einwilligung kann ich jederzeit per E-Mail an info@transferwire.de widerrufen. ",
     r_consent_b: "Diese Einwilligung ist Voraussetzung für das kostenlose Konto.",
     legal_pre: "Ich habe die ",
@@ -3202,6 +3419,8 @@ const I18N = {
     role_scout: "Scout",
     role_club: "Club",
     role_other: "Other",
+    role_sportdirector: "Sporting director / club staff",
+    role_journalist: "Journalist",
     r_consent: "I agree that TransferWire (RATH ENTERPRISES) may send me marketing e-mails about product updates and offers. I can revoke this consent at any time by e-mailing info@transferwire.de. ",
     r_consent_b: "This consent is required for the free account.",
     legal_pre: "I have read and accept the ",
@@ -6733,7 +6952,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261105-zonen";
+const VS_VERSION = "20261107-netzwerk1b";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -9120,6 +9339,8 @@ function RegisterForm({
     agent: t("role_agent"),
     scout: t("role_scout"),
     club: t("role_club"),
+    sportdirector: t("role_sportdirector"),
+    journalist: t("role_journalist"),
     other: t("role_other")
   };
   const em = () => email.toLowerCase().trim();
@@ -9280,6 +9501,10 @@ function RegisterForm({
   }, t("role_scout")), /*#__PURE__*/React.createElement("option", {
     value: "club"
   }, t("role_club")), /*#__PURE__*/React.createElement("option", {
+    value: "sportdirector"
+  }, t("role_sportdirector")), /*#__PURE__*/React.createElement("option", {
+    value: "journalist"
+  }, t("role_journalist")), /*#__PURE__*/React.createElement("option", {
     value: "other"
   }, t("role_other")))), /*#__PURE__*/React.createElement(FCheck, {
     checked: consent,
@@ -10155,8 +10380,8 @@ function SettingsOverlay({
     v: account.name
   }) : null, account.rolle ? /*#__PURE__*/React.createElement(Row, {
     k: t("st_role"),
-    v: account.rolle
-  }) : null, /*#__PURE__*/React.createElement(Row, { k: t("st_plan"), v: istEnt ? "Enterprise" : istPro ? "Pro" : t("st_plan_test") }), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginTop: 12, flexWrap: "wrap" } }, /*#__PURE__*/React.createElement("button", { type: "button", onClick: onSubscribe, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, color: "#1A1306", backgroundColor: "#C8A355", backgroundImage: "linear-gradient(135deg, #EFD489 0%, #C8A355 48%, #A9822F 100%)", border: "1px solid #B8913F", borderRadius: 9, padding: "10px 14px" }, className: "tw-gold-knopf" }, istPro ? (LANG === "en" ? "Plans & seats" : "Tarif & Nutzer") : (LANG === "en" ? "Upgrade to Pro" : "Auf Pro upgraden")), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED } }, istPro ? (LANG === "en" ? "Enterprise: all Pro features for the whole team, 5 seats included." : "Enterprise: alle Pro-Funktionen f\u00fcrs ganze Team, 5 Nutzer inklusive.") : (LANG === "en" ? "Pro adds Club seeks, club contacts, network, workspace, scouting and the acquisition radar." : "Pro bringt Verein sucht, Vereinskontakte, Netzwerk, Workspace, Scouting und Akquise-Radar.")))), /*#__PURE__*/React.createElement("div", {
+    v: nzRolleText(account.rolle)
+  }) : null, React.createElement(NzVerifLeiste, { account: account, kompakt: true }), /*#__PURE__*/React.createElement(Row, { k: t("st_plan"), v: istEnt ? "Enterprise" : istPro ? "Pro" : t("st_plan_test") }), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginTop: 12, flexWrap: "wrap" } }, /*#__PURE__*/React.createElement("button", { type: "button", onClick: onSubscribe, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, color: "#1A1306", backgroundColor: "#C8A355", backgroundImage: "linear-gradient(135deg, #EFD489 0%, #C8A355 48%, #A9822F 100%)", border: "1px solid #B8913F", borderRadius: 9, padding: "10px 14px" }, className: "tw-gold-knopf" }, istPro ? (LANG === "en" ? "Plans & seats" : "Tarif & Nutzer") : (LANG === "en" ? "Upgrade to Pro" : "Auf Pro upgraden")), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED } }, istPro ? (LANG === "en" ? "Enterprise: all Pro features for the whole team, 5 seats included." : "Enterprise: alle Pro-Funktionen f\u00fcrs ganze Team, 5 Nutzer inklusive.") : (LANG === "en" ? "Pro adds Club seeks, club contacts, network, workspace, scouting and the acquisition radar." : "Pro bringt Verein sucht, Vereinskontakte, Netzwerk, Workspace, Scouting und Akquise-Radar.")))), /*#__PURE__*/React.createElement("div", {
     style: {
       background: CARD,
       border: `1px solid ${HAIR}`,
@@ -11358,7 +11583,7 @@ function MuCommunity({ geheZu }) {
     hh("div", { style: { flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 5 } },
       hh("div", { style: { display: "flex", alignItems: "center", gap: 8, minWidth: 0 } },
         hh("span", { style: { flex: "none", fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, letterSpacing: ".05em", textTransform: "uppercase", color: "#5b21b6", background: "#ede9fe", padding: "2px 8px", borderRadius: 4 } }, en ? "Community post" : "Community-Beitrag"),
-        hh("span", { style: { flex: 1, minWidth: 0, fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, [muCommZeit(p.created_at), p.author_rolle].filter(Boolean).join(" \u00b7 "))),
+        hh("span", { style: { flex: 1, minWidth: 0, fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, [muCommZeit(p.created_at), nzRolleText(p.author_rolle)].filter(Boolean).join(" \u00b7 "), nzHaken(p, true))),
       hh("div", { className: "mu-c2", style: { fontFamily: FONT_DISPLAY, fontSize: 17, fontWeight: 700, lineHeight: 1.2, color: "var(--t1)" } }, muCommTitel(p, en)),
       hh("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t2)" } }, muCommStatus(p.status, en))));
   return hh(React.Fragment, null,
@@ -11370,7 +11595,7 @@ function MuCommunity({ geheZu }) {
           hh("div", { style: { flex: 1, fontFamily: FONT_DISPLAY, fontSize: 15.5, fontWeight: 800, letterSpacing: ".03em", textTransform: "uppercase" } }, en ? "Community post" : "Community-Beitrag"),
           hh("button", { type: "button", onClick: () => setOffen(null), "aria-label": en ? "Close" : "Schlie\u00dfen", style: { cursor: "pointer", border: "none", background: "transparent", color: "#fff", fontSize: 24, lineHeight: 1, padding: 4 } }, "\u00d7")),
         hh("div", { style: { padding: "16px 18px 20px", display: "flex", flexDirection: "column", gap: 10 } },
-          hh("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t3)" } }, [muCommZeit(offen.created_at), offen.author_rolle, muCommStatus(offen.status, en)].filter(Boolean).join(" \u00b7 ")),
+          hh("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t3)" } }, [muCommZeit(offen.created_at), nzRolleText(offen.author_rolle), muCommStatus(offen.status, en)].filter(Boolean).join(" \u00b7 "), nzHaken(offen, true)),
           hh("div", { style: { fontFamily: FONT_DISPLAY, fontSize: 21, fontWeight: 800, color: "var(--t1)", lineHeight: 1.2 } }, muCommTitel(offen, en)),
           hh("div", { style: { fontFamily: FONT_BODY, fontSize: 14.5, lineHeight: 1.6, color: "var(--t1)", whiteSpace: "pre-wrap" } }, muCommText(offen, en)),
           hh("div", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t3)" } }, en ? "Community statements are unconfirmed unless marked otherwise." : "Community-Aussagen sind unbest\u00e4tigt, sofern nicht anders gekennzeichnet."),
@@ -15126,7 +15351,7 @@ function TransferApp({
       cAdminPosts.filter(p => cAdminFilter === "alle" || (cAdminFilter === "gemeldet" ? (p.status === "gemeldet" || Number(p.meldungen) > 0) : cAdminFilter === "abgelehnt" ? p.status === "abgelehnt" : cAdminFilter === "offen" ? (p.status === "neu" || p.status === "prueft") : p.kind === cAdminFilter)).map(p => /*#__PURE__*/React.createElement("div", { key: p.id, className: "tw-card", style: Object.assign({}, CARD_BOX, { padding: 15, borderColor: p.status === "gemeldet" ? "#ecd9a8" : HAIR }) },
         /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 9, marginBottom: 8, flexWrap: "wrap" } },
           /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: .6, textTransform: "uppercase", padding: "3px 9px", borderRadius: 6, background: p.kind === "networking" ? "var(--dunkel)" : "#149a59", color: "#fff" } }, p.kind === "networking" ? "Networking" : "Transfer-Info"),
-          /*#__PURE__*/React.createElement("b", { style: { fontFamily: FONT_BODY, fontSize: 13, color: INK } }, "#" + p.id + " \u00b7 " + (p.author_name || "Mitglied")),
+          /*#__PURE__*/React.createElement("b", { style: { fontFamily: FONT_BODY, fontSize: 13, color: INK } }, "#" + p.id + " \u00b7 " + (p.author_name || "Mitglied"), nzHaken(p)),
           /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, (p.author_email || "") + " \u00b7 " + fmtDate(p.created_at)),
           /*#__PURE__*/React.createElement("div", { style: { marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" } }, /*#__PURE__*/React.createElement(CmtyChip, { status: p.status }), Number(p.meldungen) > 0 && /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, padding: "3px 9px", borderRadius: 999, background: "#fdf3da", color: "#8a5a00" } }, "" + p.meldungen))),
         /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "var(--t1)", whiteSpace: "pre-wrap", marginBottom: 8 } }, p.body),
@@ -15146,7 +15371,7 @@ function TransferApp({
     /*#__PURE__*/React.createElement("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 24, margin: "2px 0 0", textTransform: "uppercase", letterSpacing: .4, color: INK } }, "Networking"),
     /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, margin: "0 0 2px", maxWidth: 720 } }, "Kontakte finden, Deals anschieben: Suche Zug\u00e4nge zu Vereinen, biete Spieler an oder hol dir Hilfe aus dem Netzwerk \u2014 exklusiv f\u00fcr Pro-Mitglieder."),
     account && account.plan === "premium" ? /*#__PURE__*/React.createElement(React.Fragment, null,
-      /*#__PURE__*/React.createElement("div", { style: { border: "1px solid #cfe3f5", background: "#eef6fd", borderRadius: 11, padding: "10px 14px", fontFamily: FONT_BODY, fontSize: 12.5, color: "#1e5d8f", fontWeight: 600 } }, "\u24D8 Anfragen sehen nur Pro-Mitglieder. Kontakt l\u00e4uft \u00fcber TW-Vermittlung \u2014 deine E-Mail wird erst sichtbar, wenn du selbst antwortest."), /*#__PURE__*/React.createElement(CmtySuche, { wert: cNetSuche, setWert: setCNetSuche, gesamt: cNetPosts.length, treffer: cmtyFilter(cNetPosts, cNetSuche).length, placeholder: "Anfragen durchsuchen: Position, Verein, Land, Stichwort \u2026" }),
+      /*#__PURE__*/React.createElement("div", { style: { border: "1px solid #cfe3f5", background: "#eef6fd", borderRadius: 11, padding: "10px 14px", fontFamily: FONT_BODY, fontSize: 12.5, color: "#1e5d8f", fontWeight: 600 } }, "\u24D8 Anfragen sehen nur Pro-Mitglieder. Kontakt l\u00e4uft \u00fcber TW-Vermittlung \u2014 deine E-Mail wird erst sichtbar, wenn du selbst antwortest."), React.createElement(NzVerifLeiste, { account: account }), /*#__PURE__*/React.createElement(CmtySuche, { wert: cNetSuche, setWert: setCNetSuche, gesamt: cNetPosts.length, treffer: cmtyFilter(cNetPosts, cNetSuche).length, placeholder: "Anfragen durchsuchen: Position, Verein, Land, Stichwort \u2026" }),
       /*#__PURE__*/React.createElement("div", { className: "tw-card", style: Object.assign({}, CARD_BOX, { padding: 16 }) },
         /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, letterSpacing: .6, textTransform: "uppercase", color: MUTED, marginBottom: 8 } }, "Frage / Angebot"),
         /*#__PURE__*/React.createElement("textarea", { value: cNetText, onChange: e => setCNetText(e.target.value), maxLength: 1200, placeholder: "z. B. \u201eSuche direkten Kontakt in die sportliche Leitung von \u2026 f\u00fcr einen St\u00fcrmer (U21, abl\u00f6sefrei). Wer kann vermitteln?\u201c", style: { width: "100%", minHeight: 96, resize: "vertical", border: "1px solid " + HAIR, borderRadius: 9, padding: "10px 12px", fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.55, color: INK, boxSizing: "border-box" } }),
@@ -15157,8 +15382,8 @@ function TransferApp({
         /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 9, marginBottom: 8 } },
           /*#__PURE__*/React.createElement("span", { style: { width: 30, height: 30, borderRadius: 99, background: "var(--dunkel)", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 900 } }, (p.author_name || "?")[0].toUpperCase()),
           /*#__PURE__*/React.createElement("div", null,
-            /*#__PURE__*/React.createElement("b", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: INK } }, p.author_name || "Mitglied"),
-            /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, (p.author_rolle || "Mitglied") + " \u00b7 " + fmtDate(p.created_at))),
+            /*#__PURE__*/React.createElement("b", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: INK } }, p.author_name || "Mitglied", nzHaken(p)),
+            /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, (nzRolleText(p.author_rolle) || "Mitglied") + " \u00b7 " + fmtDate(p.created_at))),
           /*#__PURE__*/React.createElement("div", { style: { marginLeft: "auto", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" } }, /*#__PURE__*/React.createElement(UebersetzenButton, { zustand: cUeLaedt[p.id] ? "laedt" : (cUeZeige[p.id] && cUe[p.id] ? "en" : "de"), onClick: () => uebersetzePost(p.id) }), p.own ? /*#__PURE__*/React.createElement(CmtyChip, { status: p.status }) : /*#__PURE__*/React.createElement(MeldeButton, { gemeldet: p.gemeldet_von_mir, onClick: () => meldePost(p.id, "networking") }), /*#__PURE__*/React.createElement(AntwortButton, { eigener: !!p.own, onClick: () => antwortSenden(p.id) }))),
         /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.6, color: "var(--t1)", whiteSpace: "pre-wrap" } }, cmtyBodyText(p, cUe, cUeZeige), cUeZeige[p.id] && cUe[p.id] && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED, marginTop: 6 } }, "\u00dcbersetzt" + (cUe[p.id].lang ? " aus " + cUe[p.id].lang.toUpperCase() : ""))))),
       cNetPosts.length === 0 && /*#__PURE__*/React.createElement(EmptyState, { icon: "", title: "Noch keine Anfragen", text: "Starte das Netzwerk \u2014 stelle eine Frage oder ver\u00f6ffentliche ein Angebot." }), cNetPosts.length > 0 && cmtyFilter(cNetPosts, cNetSuche).length === 0 && /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, padding: "8px 2px" } }, "Keine Treffer f\u00fcr \u201e" + cNetSuche + "\u201c.")) :
@@ -17069,6 +17294,7 @@ function TransferWire() {
     setAccountState(a);
   };
   useEffect(() => { try { twZusatzKonto(account); } catch (e) {} }, [account && account.email, account && JSON.stringify(account.module || [])]);   // Punkt 356
+  useEffect(() => { try { nzKontoLaden(account); } catch (e) {} }, [account && account.email, account && account.plan]);   // Netzwerk 2.0 (OP 537)
   const zurAnmeldung = (em, hinweis) => {
     clearAccount();
     setAccountState(null);
