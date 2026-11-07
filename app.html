@@ -844,6 +844,42 @@ header:has(+ .tw-tabbar) { background: var(--seite) !important; border-bottom: 1
 .tw-cm5-felder b { color: var(--t1); font-weight: 700; }
 .tw-cm5-filter select { max-width: 100%; }
 @media (max-width: 560px) { .tw-cm5-filter { gap: 6px 10px; } .tw-cm5-filter select { flex: 1 1 140px; } }
+/* Netzwerk 2.0 Paket 6: Spieler-Markt */
+.nz6-karten { grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); }
+.nz6-karte { gap: 8px; }
+.nz6-kopf { display: flex; gap: 10px; align-items: center; min-width: 0; }
+.nz6-kopf-text { min-width: 0; flex: 1; }
+.nz6-name { font-weight: 800; font-size: 15px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; color: var(--t1); }
+.nz6-bild { display: inline-flex; align-items: center; justify-content: center; flex: none; border-radius: 50%; background: var(--karte2); border: 1px solid var(--linie); color: var(--t2); font-weight: 800; overflow: hidden; }
+.nz6-bild img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.nz6-kurz { color: var(--t2); }
+.nz-chip.nz6-art { border-color: var(--gruen); color: var(--gruen-text); }
+.nz-chip.nz6-gelb { background: var(--sc-mittel-bg); border-color: var(--sc-mittel-rand); color: var(--sc-mittel-text); }
+.nz-chip.nz6-rot { background: var(--sc-schwach-bg); border-color: var(--sc-schwach-rand); color: var(--sc-schwach-text); }
+.nz6-dls { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 6px 14px; }
+.nz6-dl { display: grid; gap: 1px; font-size: 13.5px; color: var(--t1); }
+.nz6-text { font-size: 13.5px; line-height: 1.5; white-space: pre-wrap; color: var(--t1); margin-top: 8px; }
+.nz6-videos { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 6px; font-size: 13px; }
+.nz6-dateien { display: grid; gap: 6px; }
+.nz6-datei { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 6px 10px; border: 1px solid var(--linie); border-radius: 10px; background: var(--karte2); font-size: 13px; }
+.nz6-datei-name { flex: 1; min-width: 120px; font-weight: 700; overflow-wrap: anywhere; }
+.nz6-passend { display: grid; gap: 8px; }
+.nz6-passend-zeile { display: grid; gap: 2px; padding: 8px 10px; border: 1px solid var(--linie); border-radius: 10px; background: var(--karte2); font-size: 13px; }
+.nz6-passend-kopf { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.nz6-passend-kopf b { color: var(--t1); }
+.nz6-gruende { font-size: 12px; color: var(--t3); }
+.nz6-passend-seite { display: grid; gap: 10px; }
+.nz6-passend-block { display: grid; gap: 10px; }
+.nz6-kontakt { display: grid; gap: 8px; margin-top: 8px; }
+.nz6-eigen { display: grid; gap: 8px; margin-top: 8px; }
+.nz6-wahl { display: grid; gap: 8px; }
+.nz6-treffer-liste { display: grid; gap: 4px; }
+.nz6-treffer { display: flex; gap: 10px; align-items: center; width: 100%; text-align: left; cursor: pointer; font: inherit; color: var(--t1); background: var(--karte2); border: 1px solid var(--linie); border-radius: 10px; padding: 6px 10px; }
+.nz6-treffer:hover { background: var(--hover); }
+.nz6-treffer img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex: none; }
+.nz6-wahl-fertig { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.nz6-wahl-fertig .nz6-treffer { cursor: default; flex: 1; }
+@media (max-width: 560px) { .nz6-dls { grid-template-columns: 1fr; } .nz6-datei { gap: 6px; } }
 .tw-sn-unter.aktiv { background: var(--aktiv); color: var(--t1); font-weight: 600; }
 .tw-sn-badge { margin-left: auto; font-size: 11px; font-weight: 800; color: var(--gold-text) !important; background: var(--gold-tint); border-radius: 999px; padding: 2px 8px; }
 .tw-sn-unten { padding-top: 10px; border-top: 1px solid var(--linie); }
@@ -2937,8 +2973,8 @@ function NzProfilSeite({ account, setView, admin }) {
    Regeln (Free antwortet nur, Tageslimit, nur Verifizierte, Blockieren, Verschlüsselung, Meldungen) liegen in der Datenbank (nz.nachricht_*); die App zeigt an und reicht durch. ── */
 const NZ3 = { ungelesen: 0, anfragen: 0, hinweise: 0, seit: null, timer: null, takt: 60000, geaendert: [] };
 const NZ_BRIEF_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>';
-const NZ_ANHANG_TYPEN = [["spieler", "Spieler", "Players"], ["verein", "Vereine", "Clubs"], ["transfer", "Transfers", "Transfers"], ["verein_sucht", "Verein sucht", "Club seeks"], ["marktwert", "Marktwert", "Market value"], ["scouting", "Scouting", "Scouting"]];
-const NZ_ANHANG_PRO = { verein_sucht: true, marktwert: true, scouting: true };
+const NZ_ANHANG_TYPEN = [["spieler", "Spieler", "Players"], ["verein", "Vereine", "Clubs"], ["transfer", "Transfers", "Transfers"], ["verein_sucht", "Verein sucht", "Club seeks"], ["marktwert", "Marktwert", "Market value"], ["scouting", "Scouting", "Scouting"], ["angebot", "Spieler-Markt", "Player market"]];   // Paket 6: Angebote
+const NZ_ANHANG_PRO = { verein_sucht: true, marktwert: true, scouting: true, angebot: true };
 function nz3Grund(g, d) {
   const en = LANG === "en"; const grenze = d && d.grenze ? d.grenze : null;
   const m = {
@@ -2995,7 +3031,7 @@ function nz3AnhangOeffnen(a, setView, openPlayer, openVerein) {
   if ((a.typ === "spieler" || a.typ === "marktwert") && typeof openPlayer === "function") { openPlayer(Number(a.player_id || a.id) || a.id, a.titel, ""); return; }
   if (a.typ === "verein" && typeof openVerein === "function") { openVerein(a.titel); return; }
   if (typeof setView !== "function") return;
-  if (a.typ === "transfer") setView("geruechte"); else if (a.typ === "verein_sucht") setView("gesucht"); else if (a.typ === "scouting") setView("scouting"); else if (a.typ === "marktwert") setView("marktwert");
+  if (a.typ === "transfer") setView("geruechte"); else if (a.typ === "verein_sucht") setView("gesucht"); else if (a.typ === "scouting") setView("scouting"); else if (a.typ === "marktwert") setView("marktwert"); else if (a.typ === "angebot") nz6Oeffnen(Number(a.id) || null, setView);
 }
 
 /* Brief-Knopf im Kopf: Zähler aus ungelesenen Nachrichten und offenen Anfragen; startet die Abfrage nach Neuem */
@@ -3343,7 +3379,7 @@ function NzBeitragErstellen({ account, schliessen, onNeu, setView }) {
           NZ4_ART.map(a => wahl(a[0], en ? a[2] : a[1], en ? a[4] : a[3], () => setArt(a[0]))),
           wahl("hinweis", L("Transfer-Hinweis", "Transfer tip"), L("Ein Wechsel, eine Leihe, ein Vereinsbedarf – geprüft und in den Transferfeed übernommen.", "A move, a loan, a club need – checked and taken into the transfer feed."), () => { schliessen(); setView("community"); }),
           wahl("verein_sucht", L("Verein sucht", "Club seeks"), L("Als Transfer-Hinweis im Muster „VEREIN sucht POSITION“ – erscheint unter „Verein sucht“.", "As a transfer tip in the pattern “CLUB seeks POSITION” – appears under “Club seeks”."), () => { schliessen(); setView("community"); }),
-          wahl("spieler", L("Spieler anbieten", "Offer a player"), L("Folgt mit dem Spieler-Markt (Netzwerk 2.0, Paket 6).", "Coming with the Player Market (Network 2.0, package 6)."), null, true)),
+          wahl("spieler", L("Spieler anbieten", "Offer a player"), L("Verkauf, Leihe, abl\u00f6sefrei oder Probetraining \u2013 mit Profil, Dateien und passenden Vereinen im Spieler-Markt.", "Transfer, loan, free transfer or trial \u2013 with profile, files and matching clubs in the Player Market."), () => { schliessen(); nz6Neu(setView); })),
         h("p", { className: "nz-sub", style: { marginTop: 10 } }, L("Fragen, Suchen und Angebote erscheinen sofort in den Community-Kontakten – mit Thema und Feldern, damit sie gefunden werden.", "Questions, requests and offers appear immediately in the community contacts – with topic and fields so they can be found.")))
       : h(React.Fragment, null,
         h("div", { className: "nz-felder" },
@@ -3536,6 +3572,390 @@ function NzBeitraegeSeite({ account, setView, admin }) {
     detail ? h(NzBeitragDetail, { key: detail, account: account, id: detail, schliessen: () => setDetail(null), onAenderung: aenderung, onEntfernt: entfernt, setView: setView }) : null,
     erstellen ? h(NzBeitragErstellen, { account: account, schliessen: () => setErstellen(false), onNeu: neu, setView: setView }) : null,
     saNeu ? h(NzSuchauftragNeu, { account: account, filter: { text: f.text.trim(), art: f.art, thema: f.thema, position: f.position.trim(), land: f.land.trim(), liga: f.liga.trim(), nur_verifizierte: f.nur_verifizierte }, schliessen: () => setSaNeu(false), onGespeichert: (l) => { setSa(l); setSaNeu(false); setTab("suchauftraege"); } }) : null);
+}
+/* \u2500\u2500 Netzwerk 2.0 \u00b7 Paket 6: Spieler-Markt (OP 537) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   Berater, Scouts und Vereine bieten Spieler an (Verkauf, Leihe, abl\u00f6sefrei, Probetraining): Spieler aus der Datenbank oder selbst angelegt,
+   Dateien (PDF, Bilder), Videolinks, Sichtbarkeit, Laufzeit. Die Datenbank (nz.angebot_*) rechnet die passenden Vereine aus \u201eVerein sucht\u201c aus,
+   pr\u00fcft Regeln (Pro, Mindestalter 16, Grenzen, Dubletten) und der KI-Ordner ordnet nach; Kontakt l\u00e4uft \u00fcber die Nachrichten (Anhang Typ angebot). \u2500\u2500 */
+const NZ6 = { oeffne: null, neu: false };
+const NZ6_ART = [["verkauf", "Verkauf", "Transfer"], ["leihe", "Leihe", "Loan"], ["abloesefrei", "abl\u00f6sefrei", "Free transfer"], ["probetraining", "Probetraining", "Trial"]];
+const NZ6_POS = [["TW", "Torwart", "Goalkeeper"], ["IV", "Innenverteidiger", "Centre-back"], ["AV", "Au\u00dfenverteidiger", "Full-back"], ["S6", "Sechser", "Defensive midfielder"], ["S8", "Achter", "Central midfielder"], ["S10", "Zehner", "Attacking midfielder"], ["FL", "Fl\u00fcgel", "Winger"], ["MS", "Mittelst\u00fcrmer", "Striker"]];
+const NZ6_GRUPPE = [["TW", "Torwart", "Goalkeeper"], ["ABW", "Abwehr", "Defence"], ["MF", "Mittelfeld", "Midfield"], ["ST", "Sturm", "Attack"]];
+const NZ6_SICHT = [["pro", "alle Pro-Mitglieder", "all Pro members"], ["verifizierte", "nur verifizierte Mitglieder", "verified members only"], ["vereine", "nur verifizierte Vereine und Sportdirektoren", "verified clubs and sporting directors only"]];
+const NZ6_FUSS = [["rechts", "rechts", "right"], ["links", "links", "left"], ["beidfuessig", "beidf\u00fc\u00dfig", "both"]];
+const NZ6_LAUFZEIT = [["30", "30 Tage", "30 days"], ["60", "60 Tage", "60 days"], ["90", "90 Tage", "90 days"], ["180", "180 Tage", "180 days"]];
+const NZ6_IKON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16.5 3l1.1 2.3 2.5.4-1.8 1.8.4 2.5-2.2-1.2-2.2 1.2.4-2.5L12.9 5.7l2.5-.4z"/></svg>';
+function nz6Wort(liste, k, leer) { const en = LANG === "en"; const x = liste.find(y => y[0] === String(k || "")); return x ? (en ? x[2] : x[1]) : (leer !== undefined ? leer : (k || "")); }
+function nz6Art(a) { return nz6Wort(NZ6_ART, a); }
+function nz6Pos(p) { return nz6Wort(NZ6_POS, p); }
+function nz6Gruppe(g) { return nz6Wort(NZ6_GRUPPE, g); }
+function nz6Fenster(f) { const en = LANG === "en"; return f === "sofort" ? (en ? "available now" : "sofort verf\u00fcgbar") : f === "winter" ? (en ? "winter window" : "Winter-Transferperiode") : f === "sommer" ? (en ? "summer window" : "Sommer-Transferperiode") : f === "offen" ? (en ? "later" : "sp\u00e4ter") : ""; }
+function nz6Datum(v) { const m = String(v || "").match(/^(\d{4})-(\d{2})-(\d{2})/); if (!m) return String(v || ""); return LANG === "en" ? m[3] + "/" + m[2] + "/" + m[1] : m[3] + "." + m[2] + "." + m[1]; }
+function nz6Mio(n) { const v = Number(n); if (!v) return ""; const en = LANG === "en"; if (v >= 1e6) return (en ? (Math.round(v / 1e5) / 10).toFixed(1).replace(/\.0$/, "") + "m \u20ac" : (Math.round(v / 1e5) / 10).toFixed(1).replace(".", ",").replace(/,0$/, "") + " Mio. \u20ac"); return (en ? Math.round(v / 1e3) + "k \u20ac" : Math.round(v / 1e3) + " Tsd. \u20ac"); }
+function nz6Status(a) {   // [Text, Klasse, Code] f\u00fcr den Status eines (eigenen) Angebots
+  const en = LANG === "en"; const st = a && a.status; const abgelaufen = st === "aktiv" && a.laeuft_bis && String(a.laeuft_bis) < new Date().toISOString().slice(0, 10);
+  if (st === "aktiv" && !abgelaufen) return [en ? "active" : "aktiv", "gruen", "aktiv"];
+  if (abgelaufen || st === "abgelaufen") return [en ? "expired" : "abgelaufen", "", "abgelaufen"];
+  if (st === "pausiert") return [en ? "paused" : "pausiert", "", "pausiert"];
+  if (st === "vermittelt") return [en ? "placed" : "vermittelt", "nz6-gelb", "vermittelt"];
+  if (st === "abgelehnt") return [en ? "rejected" : "abgelehnt", "nz6-rot", "abgelehnt"];
+  if (st === "geloescht") return [en ? "deleted" : "gel\u00f6scht", "", "geloescht"];
+  return [st || "", "", st || ""];
+}
+function nz6Oeffnen(id, setView) { NZ6.oeffne = id || null; try { window.dispatchEvent(new CustomEvent("nz6-oeffne")); } catch (e) {} if (typeof setView === "function") setView("nz_markt"); }
+function nz6Neu(setView) { NZ6.neu = true; try { window.dispatchEvent(new CustomEvent("nz6-oeffne")); } catch (e) {} if (typeof setView === "function") setView("nz_markt"); }
+function nz6Grund(g, d) {
+  const en = LANG === "en"; const grenze = d && d.grenze ? d.grenze : null; const min = d && d.min ? d.min : 16; const mb = d && d.max_mb ? d.max_mb : 8;
+  const m = {
+    premium: ["Der Spieler-Markt ist Teil von Pro.", "The Player Market is part of Pro."],
+    art: ["Bitte die Art des Angebots w\u00e4hlen (Verkauf, Leihe, abl\u00f6sefrei, Probetraining).", "Please choose the type of offer (transfer, loan, free transfer, trial)."],
+    position: ["Bitte eine g\u00fcltige Position w\u00e4hlen.", "Please choose a valid position."],
+    datum: ["Das Datum ist ung\u00fcltig (h\u00f6chstens 30 Tage zur\u00fcck, h\u00f6chstens zwei Jahre voraus).", "The date is invalid (at most 30 days back, at most two years ahead)."],
+    sichtbarkeit: ["Dieses Angebot ist f\u00fcr dich nicht sichtbar.", "This offer is not visible to you."],
+    laenge: ["Die Beschreibung ist zu lang (h\u00f6chstens 2000 Zeichen).", "The description is too long (2000 characters at most)."],
+    laufzeit: ["Die Laufzeit muss zwischen 7 und 180 Tagen liegen.", "The term must be between 7 and 180 days."],
+    ziel_laender: ["H\u00f6chstens 10 Ziell\u00e4nder.", "At most 10 target countries."],
+    ziel_ligen: ["H\u00f6chstens 10 Zielligen.", "At most 10 target leagues."],
+    video_links: ["H\u00f6chstens 5 Videolinks, jeweils mit https://.", "At most 5 video links, each starting with https://."],
+    limit: ["Du hast die Grenze aktiver Angebote erreicht" + (grenze ? " (" + grenze + ")" : "") + ". Pausiere oder schlie\u00dfe ein Angebot, um ein neues einzustellen.", "You have reached the limit of active offers" + (grenze ? " (" + grenze + ")" : "") + ". Pause or close an offer to post a new one."],
+    spieler: ["Bitte einen Spieler aus der Datenbank w\u00e4hlen oder selbst anlegen.", "Please choose a player from the database or add one yourself."],
+    spieler_name: ["Bitte den Namen des Spielers eingeben (mindestens 3 Zeichen).", "Please enter the player's name (at least 3 characters)."],
+    geburtsdatum: ["Bitte ein g\u00fcltiges Geburtsdatum eingeben.", "Please enter a valid date of birth."],
+    alter: ["Angebote f\u00fcr Spieler unter " + min + " Jahren sind nicht erlaubt.", "Offers for players under " + min + " are not allowed."],
+    doppelt: ["Du hast diesen Spieler bereits im Spieler-Markt eingestellt.", "You have already listed this player in the Player Market."],
+    angebot: ["Das Angebot wurde nicht gefunden.", "The offer was not found."],
+    status: ["Dieser Schritt ist f\u00fcr das Angebot nicht m\u00f6glich.", "This step is not possible for the offer."],
+    anzahl: ["H\u00f6chstens 3 Dateien je Angebot.", "At most 3 files per offer."],
+    inhalt: ["Die Datei konnte nicht gelesen werden.", "The file could not be read."],
+    groesse: ["Die Datei ist zu gro\u00df (h\u00f6chstens " + mb + " MB).", "The file is too large (" + mb + " MB at most)."],
+    typ: ["Erlaubt sind PDF, JPG, PNG und WebP.", "Allowed are PDF, JPG, PNG and WebP."],
+    datei: ["Die Datei wurde nicht gefunden.", "The file was not found."],
+    eigen: ["Das ist dein eigenes Angebot.", "This is your own offer."],
+    bedarf: ["Kein Bedarf angegeben.", "No club need given."],
+    zu_viele: ["Zu viele Meldungen in kurzer Zeit. Bitte sp\u00e4ter erneut.", "Too many reports in a short time. Please try again later."],
+    auth: ["Bitte melde dich erneut an.", "Please sign in again."],
+    netz: ["Keine Verbindung. Bitte sp\u00e4ter erneut versuchen.", "No connection. Please try again later."],
+    antwort: ["Der Dienst hat nicht geantwortet. Bitte sp\u00e4ter erneut versuchen.", "The service did not respond. Please try again later."]
+  };
+  const x = m[g]; return x ? (en ? x[1] : x[0]) : (typeof nz3Grund === "function" ? nz3Grund(g, d) : (g || ""));
+}
+function nz6Zeile(sp, a) {   // \u201eInnenverteidiger \u00b7 24 J. \u00b7 Deutschland\u201c
+  const en = LANG === "en"; const teile = [];
+  const pos = a && a.position_fein ? (en ? a.position_text_en : a.position_text) : (sp && sp.position_grob) || "";
+  if (pos) teile.push(pos);
+  if (sp && sp.alter) teile.push(sp.alter + (en ? " yrs" : " J."));
+  if (sp && sp.nationalitaet) teile.push(sp.nationalitaet);
+  return teile.join(" \u00b7 ");
+}
+function NzSpielerBild({ sp, groesse }) {
+  const h = React.createElement; const [kaputt, setKaputt] = React.useState(false); const g = groesse || 48;
+  const name = (sp && sp.name) || "?"; const init = name.split(/\s+/).map(x => x[0] || "").join("").slice(0, 2).toUpperCase();
+  return h("span", { className: "nz6-bild", style: { width: g, height: g, fontSize: Math.round(g / 2.8) } },
+    sp && sp.foto && !kaputt ? h("img", { src: sp.foto, alt: "", loading: "lazy", onError: () => setKaputt(true) }) : init);
+}
+function nz6Anbieter(a) { return (a && a.anbieter) || {}; }
+function NzAngebotKarte({ account, a, onOeffnen }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  const sp = a.spieler || {}; const an = nz6Anbieter(a); const st = nz6Status(a); const eigen = !!a.own;
+  const felder = [];
+  if (sp.team) felder.push([L("Verein", "Club"), sp.team + (sp.league ? " \u00b7 " + sp.league : "")]);
+  if (sp.vertrag_bis) felder.push([L("Vertrag bis", "Contract until"), nz6Datum(sp.vertrag_bis)]);
+  if (a.verfuegbar_ab) felder.push([L("Verf\u00fcgbar ab", "Available from"), nz6Datum(a.verfuegbar_ab) + (a.fenster ? " (" + nz6Fenster(a.fenster) + ")" : "")]); else if (a.fenster) felder.push([L("Verf\u00fcgbar", "Available"), nz6Fenster(a.fenster)]);
+  if (a.preis_text) felder.push([L("Preis", "Price"), a.preis_text]); else if (a.preis_gesperrt) felder.push([L("Preis", "Price"), L("nur f\u00fcr verifizierte Mitglieder", "verified members only")]);
+  if (sp.marktwert_eur) felder.push([L("Marktwert", "Market value"), sp.marktwert_text || nz6Mio(sp.marktwert_eur)]);
+  const kurz = String(a.zusammenfassung || a.beschreibung || "").replace(/\s+/g, " ").slice(0, 140) + (String(a.zusammenfassung || a.beschreibung || "").length > 140 ? "\u2026" : "");
+  return h("button", { type: "button", className: "nz-b-karte nz6-karte" + (eigen && a.status !== "aktiv" ? " blass" : ""), onClick: () => onOeffnen(a.id), "data-nz6-angebot": a.id },
+    h("div", { className: "nz6-kopf" },
+      h(NzSpielerBild, { sp: sp, groesse: 52 }),
+      h("div", { className: "nz6-kopf-text" },
+        h("div", { className: "nz6-name" }, h("span", null, sp.name || L("Spieler", "Player")), typeof landFlagge === "function" && sp.nationalitaet ? landFlagge(sp.nationalitaet, 16) : null),
+        h("div", { className: "nz-sub" }, nz6Zeile(sp, a)))),
+    h("div", { className: "nz-b-chips" },
+      h("span", { className: "nz-chip nz6-art" }, nz6Art(a.art)),
+      a.gruppe ? h("span", { className: "nz-chip" }, nz6Gruppe(a.gruppe)) : null,
+      a.mehrfach ? h("span", { className: "nz-chip", title: L("Dieser Spieler wird von mehreren Anbietern eingestellt.", "This player is listed by several providers.") }, L("mehrere Anbieter", "several providers")) : null,
+      eigen ? h("span", { className: "nz-chip" }, L("von dir", "yours")) : null,
+      eigen ? h("span", { className: "nz-chip " + st[1] }, st[0]) : null,
+      sp.quelle === "anbieter" ? h("span", { className: "nz-chip", title: L("Vom Anbieter angelegt, noch nicht in der Spielerdatenbank.", "Added by the provider, not yet in the player database.") }, L("eigene Angabe", "provider data")) : null),
+    felder.length ? h("div", { className: "nz-b-felder" }, felder.map(f => h("span", { key: f[0] }, f[0] + ": ", h("b", null, f[1])))) : null,
+    kurz ? h("div", { className: "nz-b-kurz nz6-kurz" }, kurz) : null,
+    h("div", { className: "nz-b-meta" },
+      h(NzAvatar, { account: account, email: an.email, name: an.name, hatFoto: !!an.foto, groesse: "klein" }),
+      h("span", { className: "nz-name" }, h("span", null, an.name || L("Mitglied", "Member")), nzHakenAus(an, true)),
+      h("span", null, nzRolleVon(an)),
+      h("span", { className: "nz-b-zahlen" }, (a.passende_vereine_anzahl || 0) + " " + L("passende Vereine", "matching clubs") + (a.dateien_anzahl ? " \u00b7 " + a.dateien_anzahl + " " + (a.dateien_anzahl === 1 ? L("Datei", "file") : L("Dateien", "files")) : "") + (a.video_links && a.video_links.length ? " \u00b7 " + L("Video", "video") : ""))));
+}
+function nz6DateiLaden(account, d) {   // Datei holen und speichern (Base64 \u2192 Blob \u2192 Download)
+  return nzRuf(account, "angebot_datei", { id: d.id }).then(r => {
+    if (!r || !r.ok || !r.inhalt) return r || { ok: false, grund: "datei" };
+    try {
+      const bin = atob(String(r.inhalt).replace(/\s+/g, "")); const bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const url = URL.createObjectURL(new Blob([bytes], { type: r.typ || "application/octet-stream" }));
+      const a = document.createElement("a"); a.href = url; a.download = r.name || d.name || "datei"; a.rel = "noopener"; document.body.appendChild(a); a.click(); setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 4000);
+      return { ok: true };
+    } catch (e) { return { ok: false, grund: "inhalt" }; }
+  });
+}
+function nz6DateiLesen(file) { return new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result || "")); fr.onerror = () => rej(new Error("lesen")); fr.readAsDataURL(file); }); }
+function NzAngebotDateien({ account, a, eigen, onAenderung }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  const [busy, setBusy] = React.useState(false); const [fehler, setFehler] = React.useState(""); const [laedt, setLaedt] = React.useState(null);
+  const dateien = a.dateien || [];
+  const hochladen = async (ev) => {
+    const files = Array.from((ev.target && ev.target.files) || []); if (ev.target) ev.target.value = "";
+    if (!files.length) return;
+    if (dateien.length + files.length > 3) { setFehler(nz6Grund("anzahl")); return; }
+    setBusy(true); setFehler(""); let akt = a;
+    for (const f of files) {
+      if (f.size > 8 * 1024 * 1024) { setFehler(nz6Grund("groesse", { max_mb: 8 })); break; }
+      let inhalt; try { inhalt = await nz6DateiLesen(f); } catch (e) { setFehler(nz6Grund("inhalt")); break; }
+      const d = await nzRuf(account, "angebot_datei_speichern", { angebot: akt.id, name: f.name, inhalt: inhalt });
+      if (!d || !d.ok) { setFehler(nz6Grund(d && d.grund, d)); break; }
+      akt = Object.assign({}, akt, { dateien: (akt.dateien || []).concat([d.datei]), dateien_anzahl: (akt.dateien_anzahl || 0) + 1 });
+      onAenderung(akt);
+    }
+    setBusy(false);
+  };
+  const loeschen = (d) => { setBusy(true); nzRuf(account, "angebot_datei_loeschen", { id: d.id }).then(r => { setBusy(false); if (r && r.ok) onAenderung(Object.assign({}, a, { dateien: dateien.filter(x => x.id !== d.id), dateien_anzahl: Math.max(0, (a.dateien_anzahl || 1) - 1) })); else setFehler(nz6Grund(r && r.grund, r)); }); };
+  const laden = (d) => { setLaedt(d.id); setFehler(""); nz6DateiLaden(account, d).then(r => { setLaedt(null); if (!r || !r.ok) setFehler(nz6Grund(r && r.grund, r)); }); };
+  const groesse = n => n > 1024 * 1024 ? (Math.round(n / 1024 / 1024 * 10) / 10) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
+  return h("div", { className: "nz-abschnitt", "data-nz6-dateien": "1" },
+    h("div", { className: "nz-abschnitt-kopf" }, h("h3", null, L("Dateien", "Files") + " (" + dateien.length + "/3)"),
+      eigen && dateien.length < 3 ? h("label", { className: "nz-btn klein" + (busy ? " aus" : ""), style: { cursor: busy ? "wait" : "pointer" } }, busy ? L("L\u00e4dt hoch \u2026", "Uploading \u2026") : L("Datei hinzuf\u00fcgen", "Add file"), h("input", { type: "file", accept: "application/pdf,image/jpeg,image/png,image/webp", multiple: true, disabled: busy, onChange: hochladen, style: { display: "none" }, "data-nz6-upload": "1" })) : null),
+    dateien.length ? h("div", { className: "nz6-dateien" }, dateien.map(d => h("div", { key: d.id, className: "nz6-datei" },
+      h("span", { className: "nz6-datei-name" }, d.name), h("span", { className: "nz-sub" }, (d.typ === "application/pdf" ? "PDF" : "Bild") + " \u00b7 " + groesse(d.groesse || 0)),
+      h("button", { type: "button", className: "nz-btn klein", disabled: laedt === d.id, onClick: () => laden(d) }, laedt === d.id ? L("L\u00e4dt \u2026", "Loading \u2026") : L("Herunterladen", "Download")),
+      eigen ? h("button", { type: "button", className: "nz-btn klein rot", disabled: busy, onClick: () => loeschen(d) }, L("Entfernen", "Remove")) : null))) : h("div", { className: "nz-sub" }, eigen ? L("PDF, JPG, PNG oder WebP, bis 8 MB je Datei \u2013 z. B. Spielerprofil, Statistik, Scouting-Bericht.", "PDF, JPG, PNG or WebP, up to 8 MB each \u2013 e.g. player profile, statistics, scouting report.") : L("Keine Dateien.", "No files.")),
+    fehler ? h("p", { className: "nz-fehler" }, fehler) : null);
+}
+function NzPassendeVereine({ liste, setView, kompakt }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  const [alle, setAlle] = React.useState(false);
+  if (!liste || !liste.length) return h("div", { className: "nz-sub" }, L("Noch keine passenden Vereine \u2013 das Matching l\u00e4uft alle 15 Minuten gegen die offenen Bedarfe aus \u201eVerein sucht\u201c.", "No matching clubs yet \u2013 matching runs every 15 minutes against the open needs in \u201cClub seeks\u201d."));
+  const zeigen = alle || kompakt ? liste : liste.slice(0, 5);
+  return h("div", { className: "nz6-passend", "data-nz6-passend": liste.length },
+    zeigen.map(v => h("div", { key: v.bedarf_id, className: "nz6-passend-zeile" },
+      h("div", { className: "nz6-passend-kopf" }, h("b", null, v.team), h("span", { className: "nz-sub" }, [v.league, v.land].filter(Boolean).join(" \u00b7 ")), h("span", { className: "nz-chip" + (v.punkte >= 85 ? " gruen" : "") }, v.punkte + " " + L("Punkte", "pts"))),
+      h("div", { className: "nz-sub" }, [v.position ? L("sucht ", "seeks ") + v.position : null, v.stufe, v.zeitfenster ? nz6Fenster(v.zeitfenster) : null, (v.alter_von || v.alter_bis) ? L("Alter ", "age ") + (v.alter_von || "?") + "\u2013" + (v.alter_bis || "?") : null].filter(Boolean).join(" \u00b7 ")),
+      Array.isArray(v.gruende) && v.gruende.length ? h("div", { className: "nz6-gruende" }, v.gruende.join(" \u00b7 ")) : null)),
+    liste.length > 5 && !kompakt ? h("div", { className: "nz-knoepfe" }, h("button", { type: "button", className: "nz-btn klein", onClick: () => setAlle(!alle) }, alle ? L("weniger", "less") : L("alle " + liste.length + " zeigen", "show all " + liste.length)), typeof setView === "function" ? h("button", { type: "button", className: "nz-btn klein", onClick: () => setView("gesucht") }, L("Zu \u201eVerein sucht\u201c", "To \u201cClub seeks\u201d")) : null) : null);
+}
+function NzAngebotDetail({ account, id, schliessen, onAenderung, onEntfernt, setView, openPlayer, onBearbeiten }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  useScrollSperre(true); useTwZurueck(true, schliessen);
+  const [a, setA] = React.useState(null); const [fehler, setFehler] = React.useState(""); const [busy, setBusy] = React.useState(false); const [ok, setOk] = React.useState("");
+  const [text, setText] = React.useState(""); const [melde, setMelde] = React.useState(false); const [meldeGrund, setMeldeGrund] = React.useState(""); const [frage, setFrage] = React.useState(false);
+  React.useEffect(() => { let alive = true; setA(null); setFehler(""); nzRuf(account, "angebot", { id: id }).then(d => { if (!alive) return; if (d && d.ok) setA(d.angebot); else setFehler(nz6Grund(d && d.grund, d)); }); return () => { alive = false; }; }, [id, account && account.email]);
+  const setze = (neu) => { setA(neu); if (onAenderung) onAenderung(neu); };
+  const status = (st) => { setBusy(true); setFehler(""); nzRuf(account, "angebot_status", { id: id, status: st }).then(d => { setBusy(false); if (d && d.ok) { if (st === "geloescht") { if (onEntfernt) onEntfernt(id); schliessen(); } else { setze(d.angebot); setOk(L("Gespeichert.", "Saved.")); } } else setFehler(nz6Grund(d && d.grund, d)); }); };
+  const kontakt = () => { setBusy(true); setFehler(""); nzRuf(account, "angebot_kontakt", { id: id, text: text.trim() }).then(d => { setBusy(false); if (d && d.ok) { schliessen(); if (typeof nzNachrichtAn === "function") nzNachrichtAn(d.gespraech ? { gespraech: d.gespraech } : { profil: nz6Anbieter(a).email, name: nz6Anbieter(a).name }, setView); } else setFehler(nz6Grund(d && d.grund, d)); }); };
+  const melden = () => { setBusy(true); setFehler(""); nzRuf(account, "angebot_melden", { id: id, grund: meldeGrund }).then(d => { setBusy(false); if (d && d.ok) { setMelde(false); setMeldeGrund(""); setOk(L("Danke, die Meldung ist bei uns eingegangen.", "Thank you, the report has been received.")); } else setFehler(nz6Grund(d && d.grund, d)); }); };
+  const kopf = h("div", { className: "nz-kopf" }, h("h2", null, L("Angebot", "Offer") + (a ? " #" + a.id : "")), h("button", { type: "button", className: "nz-x", "aria-label": L("Schlie\u00dfen", "Close"), onClick: schliessen }, "\u00d7"));
+  if (!a) return h("div", { className: "nz-modal", onClick: ev => { if (ev.target === ev.currentTarget) schliessen(); } }, h("div", { className: "nz-box breit", role: "dialog", "aria-modal": "true" }, kopf, fehler ? h("p", { className: "nz-fehler" }, fehler) : h("div", { className: "nz-sub" }, L("Lade \u2026", "Loading \u2026"))));
+  const sp = a.spieler || {}; const an = nz6Anbieter(a); const eigen = !!a.own; const st = nz6Status(a); const ki = a.ki || null;
+  const zeile = (k, v) => v ? h("div", { className: "nz6-dl" }, h("span", { className: "nz-sub" }, k), h("span", null, v)) : null;
+  const sichtbarkeitText = nz6Wort(NZ6_SICHT, a.sichtbarkeit);
+  const kiText = ki ? (ki.status === "fertig" || ki.status === "geprueft" ? L("vom KI-Ordner gepr\u00fcft", "checked by the AI sorter") : ki.status === "laeuft" || ki.status === "offen" || ki.status === "ausstehend" || !ki.status ? L("KI-Pr\u00fcfung ausstehend (l\u00e4uft alle 15 Minuten, wenn eingeschaltet)", "AI check pending (runs every 15 minutes when switched on)") : ki.status) : "";
+  return h("div", { className: "nz-modal", onClick: ev => { if (ev.target === ev.currentTarget) schliessen(); } },
+    h("div", { className: "nz-box breit", role: "dialog", "aria-modal": "true", "data-nz6-detail": a.id },
+      kopf,
+      h("div", { className: "nz-detail-kopf" },
+        h(NzSpielerBild, { sp: sp, groesse: 72 }),
+        h("div", { style: { flex: 1, minWidth: 0 } },
+          h("div", { className: "nz-name" }, h("span", null, sp.name || L("Spieler", "Player")), typeof landFlagge === "function" && sp.nationalitaet ? landFlagge(sp.nationalitaet, 18) : null),
+          h("div", { className: "nz-sub" }, nz6Zeile(sp, a)),
+          h("div", { className: "nz-b-chips", style: { marginTop: 6 } }, h("span", { className: "nz-chip nz6-art" }, nz6Art(a.art)), a.gruppe ? h("span", { className: "nz-chip" }, nz6Gruppe(a.gruppe)) : null, eigen ? h("span", { className: "nz-chip " + st[1] }, st[0]) : null, a.mehrfach ? h("span", { className: "nz-chip" }, L("mehrere Anbieter", "several providers") + " (" + a.anbieter_anzahl + ")") : null)),
+        sp.player_id && typeof openPlayer === "function" ? h("button", { type: "button", className: "nz-btn klein", onClick: () => { schliessen(); openPlayer(Number(sp.player_id), sp.name, sp.team || ""); } }, L("Spielerprofil", "Player profile")) : null),
+      h("div", { className: "nz-abschnitt" },
+        h("div", { className: "nz6-dls" },
+          zeile(L("Verein", "Club"), sp.team ? sp.team + (sp.league ? " \u00b7 " + sp.league : "") : ""),
+          zeile(L("Vertrag bis", "Contract until"), sp.vertrag_bis ? nz6Datum(sp.vertrag_bis) : ""),
+          zeile(L("Gr\u00f6\u00dfe / Fu\u00df", "Height / foot"), [sp.groesse, sp.fuss ? nz6Wort(NZ6_FUSS, sp.fuss) : ""].filter(Boolean).join(" / ")),
+          zeile(L("Marktwert", "Market value"), sp.marktwert_eur ? (sp.marktwert_text || nz6Mio(sp.marktwert_eur)) : ""),
+          zeile(L("Saison", "Season"), sp.spiele != null ? sp.spiele + " " + L("Spiele", "apps") + (sp.minuten != null ? ", " + sp.minuten + " " + L("Min.", "min") : "") + (sp.tore != null ? ", " + sp.tore + " " + L("Tore", "goals") : "") + (sp.vorlagen != null ? ", " + sp.vorlagen + " " + L("Vorlagen", "assists") : "") : ""),
+          zeile(L("Verf\u00fcgbar ab", "Available from"), a.verfuegbar_ab ? nz6Datum(a.verfuegbar_ab) + (a.fenster ? " (" + nz6Fenster(a.fenster) + ")" : "") : (a.fenster ? nz6Fenster(a.fenster) : "")),
+          zeile(L("Preis", "Price"), a.preis_text || (a.preis_gesperrt ? L("nur f\u00fcr verifizierte Mitglieder sichtbar", "visible to verified members only") : "")),
+          zeile(L("Ziell\u00e4nder", "Target countries"), (a.ziel_laender || []).join(", ")),
+          zeile(L("Zielligen", "Target leagues"), (a.ziel_ligen || []).join(", ")),
+          zeile(L("L\u00e4uft bis", "Runs until"), eigen ? nz6Datum(a.laeuft_bis) : ""),
+          zeile(L("Sichtbar f\u00fcr", "Visible to"), eigen ? sichtbarkeitText : ""),
+          zeile(L("Eingestellt", "Listed"), nz3Zeit(a.erstellt_am))),
+        a.beschreibung ? h("div", { className: "nz6-text" }, a.beschreibung) : null,
+        a.zusammenfassung ? h("div", { className: "nz-sub" }, L("Kurzfassung (KI): ", "Summary (AI): ") + a.zusammenfassung) : null,
+        Array.isArray(a.video_links) && a.video_links.length ? h("div", { className: "nz6-videos" }, h("span", { className: "nz-sub" }, L("Videos: ", "Videos: ")), a.video_links.map((v, i) => h("a", { key: v, className: "nz-link", href: v, target: "_blank", rel: "noopener noreferrer" }, L("Video ", "Video ") + (i + 1)))) : null),
+      h(NzAngebotDateien, { account: account, a: a, eigen: eigen, onAenderung: setze }),
+      h("div", { className: "nz-abschnitt", "data-nz6-abschnitt-passend": "1" }, h("div", { className: "nz-abschnitt-kopf" }, h("h3", null, L("Passende Vereine", "Matching clubs") + " (" + (a.passende_vereine_anzahl || 0) + ")")),
+        h(NzPassendeVereine, { liste: a.passende_vereine || [], setView: setView })),
+      h("div", { className: "nz-abschnitt" }, h("div", { className: "nz-abschnitt-kopf" }, h("h3", null, L("Anbieter", "Provider"))),
+        h("div", { className: "nz-b-meta" }, h(NzAvatar, { account: account, email: an.email, name: an.name, hatFoto: !!an.foto, groesse: "klein" }), h("span", { className: "nz-name" }, h("span", null, an.name || L("Mitglied", "Member")), nzHakenAus(an, true)), h("span", null, nzRolleVon(an)), eigen ? h("span", { className: "nz-b-zahlen" }, (a.gelesen || 0) + " " + L("Mal ge\u00f6ffnet", "views") + " \u00b7 " + (a.kontakte || 0) + " " + L("Kontaktanfragen", "contact requests")) : null),
+        !eigen ? h("div", { className: "nz6-kontakt" },
+          h("label", { className: "nz-feld breit" }, L("Nachricht an den Anbieter (optional)", "Message to the provider (optional)"), h("textarea", { rows: 2, maxLength: 4000, value: text, placeholder: L("Interesse, Fragen, Rahmenbedingungen \u2013 ohne Telefonnummern oder E-Mail-Adressen.", "Interest, questions, conditions \u2013 without phone numbers or e-mail addresses."), onChange: e => setText(e.target.value), "data-nz6-kontakt-text": "1" })),
+          h("div", { className: "nz-knoepfe" },
+            h("button", { type: "button", className: "nz-btn gruen", disabled: busy, onClick: kontakt, "data-nz6-kontakt": "1" }, busy ? L("Sendet \u2026", "Sending \u2026") : L("Anbieter kontaktieren", "Contact provider")),
+            h("button", { type: "button", className: "nz-btn", onClick: () => setMelde(!melde) }, L("Melden", "Report"))),
+          melde ? h("div", { className: "nz-felder", style: { marginTop: 8 } }, h("label", { className: "nz-feld breit" }, L("Grund der Meldung", "Reason for the report"), h("input", { value: meldeGrund, maxLength: 500, onChange: e => setMeldeGrund(e.target.value), placeholder: L("z. B. falsche Angaben, Spieler nicht verf\u00fcgbar, Werbung", "e.g. wrong data, player not available, advertising") })), h("div", { className: "nz-knoepfe" }, h("button", { type: "button", className: "nz-btn klein rot", disabled: busy, onClick: melden }, L("Meldung abschicken", "Send report")))) : null) : null,
+        eigen ? h("div", { className: "nz6-eigen" },
+          ki ? h("div", { className: "nz-hinweis", "data-nz6-ki": ki.status || "" }, kiText, ki.verstoss ? " \u00b7 " + L("Sperrregel: ", "Rule: ") + ki.verstoss : "", ki.begruendung ? " \u00b7 " + ki.begruendung : "", ki.unplausibel ? " \u00b7 " + L("Unplausibel: ", "Implausible: ") + ki.unplausibel : "", ki.dublette_von ? " \u00b7 " + L("Dublette von Angebot #", "Duplicate of offer #") + ki.dublette_von : "") : null,
+          h("div", { className: "nz-knoepfe" },
+            a.status !== "abgelehnt" ? h("button", { type: "button", className: "nz-btn", disabled: busy, onClick: () => onBearbeiten(a), "data-nz6-bearbeiten": "1" }, L("Bearbeiten", "Edit")) : null,
+            st[2] === "aktiv" ? h("button", { type: "button", className: "nz-btn", disabled: busy, onClick: () => status("pausiert"), "data-nz6-pausieren": "1" }, L("Pausieren", "Pause")) : null,
+            st[2] === "pausiert" || st[2] === "abgelaufen" ? h("button", { type: "button", className: "nz-btn gruen", disabled: busy, onClick: () => status(st[2] === "abgelaufen" ? "verlaengern" : "aktiv"), "data-nz6-aktivieren": "1" }, L("Aktivieren", "Activate")) : null,
+            st[2] === "aktiv" ? h("button", { type: "button", className: "nz-btn", disabled: busy, onClick: () => status("verlaengern") }, L("Verl\u00e4ngern (+60 Tage)", "Extend (+60 days)")) : null,
+            a.status === "aktiv" || a.status === "pausiert" ? h("button", { type: "button", className: "nz-btn", disabled: busy, onClick: () => status("vermittelt") }, L("Vermittelt", "Placed")) : null,
+            !frage ? h("button", { type: "button", className: "nz-btn rot", disabled: busy, onClick: () => setFrage(true) }, L("L\u00f6schen", "Delete")) : null),
+          frage ? h("div", { className: "nz-knoepfe" }, h("span", { className: "nz-sub" }, L("Angebot samt Dateien l\u00f6schen?", "Delete the offer including files?")), h("button", { type: "button", className: "nz-btn klein rot", disabled: busy, onClick: () => status("geloescht") }, L("Ja, l\u00f6schen", "Yes, delete")), h("button", { type: "button", className: "nz-btn klein", onClick: () => setFrage(false) }, L("Abbrechen", "Cancel"))) : null) : null),
+      fehler ? h("p", { className: "nz-fehler" }, fehler) : null,
+      ok ? h("p", { className: "nz-sub" }, ok) : null));
+}
+function NzSpielerWahl({ account, wahl, setWahl }) {   // Spieler aus der Datenbank suchen (nz.anhang_suchen) oder selbst anlegen
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  const [q, setQ] = React.useState(""); const [treffer, setTreffer] = React.useState(null); const [laedt, setLaedt] = React.useState(false);
+  React.useEffect(() => {
+    const t = q.trim(); if (t.length < 2 || wahl.eigen) { setTreffer(null); return undefined; }
+    let alive = true; setLaedt(true);
+    const timer = setTimeout(() => { nzRuf(account, "anhang_suchen", { typ: "spieler", text: t }).then(d => { if (!alive) return; setLaedt(false); setTreffer(d && d.ok ? (d.treffer || []) : []); }); }, 250);
+    return () => { alive = false; clearTimeout(timer); };
+  }, [q, wahl.eigen, account && account.email]);
+  const setzEigen = (k, v) => setWahl(Object.assign({}, wahl, { spieler: Object.assign({}, wahl.spieler || {}, { [k]: v }) }));
+  const feld = (k, label, platz, typ) => h("label", { className: "nz-feld" }, label, h("input", { type: typ || "text", value: (wahl.spieler || {})[k] || "", placeholder: platz || "", maxLength: 120, onChange: e => setzEigen(k, e.target.value), "data-nz6-eigen": k }));
+  if (wahl.player_id) return h("div", { className: "nz6-wahl-fertig" }, h("div", { className: "nz6-treffer" }, wahl.bild ? h("img", { src: wahl.bild, alt: "", width: 36, height: 36 }) : null, h("div", null, h("b", null, wahl.titel), h("div", { className: "nz-sub" }, wahl.unter))), h("button", { type: "button", className: "nz-btn klein", onClick: () => setWahl({}) }, L("Anderen Spieler w\u00e4hlen", "Choose another player")));
+  return h("div", { className: "nz6-wahl" },
+    !wahl.eigen ? h(React.Fragment, null,
+      h("label", { className: "nz-feld breit" }, L("Spieler suchen (Name oder Verein)", "Search player (name or club)"), h("input", { value: q, placeholder: L("z. B. M\u00fcller Dortmund", "e.g. Mueller Dortmund"), onChange: e => setQ(e.target.value), "data-nz6-suche": "1" })),
+      laedt ? h("div", { className: "nz-sub" }, L("Suche \u2026", "Searching \u2026")) : null,
+      treffer && treffer.length ? h("div", { className: "nz6-treffer-liste" }, treffer.slice(0, 8).map(t => h("button", { key: t.id, type: "button", className: "nz6-treffer", onClick: () => setWahl({ player_id: Number(t.player_id || t.id), titel: t.titel, unter: t.unter, bild: t.bild }), "data-nz6-treffer": t.player_id || t.id }, t.bild ? h("img", { src: t.bild, alt: "", width: 36, height: 36 }) : h("span", { className: "nz6-bild", style: { width: 36, height: 36, fontSize: 13 } }, String(t.titel || "?").slice(0, 1)), h("div", null, h("b", null, t.titel), h("div", { className: "nz-sub" }, t.unter))))) : null,
+      treffer && !treffer.length && !laedt ? h("div", { className: "nz-sub" }, L("Kein Treffer in der Datenbank.", "No match in the database.")) : null,
+      h("div", { className: "nz-knoepfe" }, h("button", { type: "button", className: "nz-btn klein", onClick: () => setWahl({ eigen: true, spieler: {} }), "data-nz6-eigen-an": "1" }, L("Spieler ist nicht in der Datenbank \u2013 selbst anlegen", "Player is not in the database \u2013 add him yourself"))))
+    : h(React.Fragment, null,
+      h("div", { className: "nz-felder" },
+        feld("name", L("Name", "Name") + " *", L("Vor- und Nachname", "First and last name")),
+        feld("geburtsdatum", L("Geburtsdatum", "Date of birth") + " *", "", "date"),
+        feld("nationalitaet", L("Nationalit\u00e4t", "Nationality"), L("z. B. Deutschland", "e.g. Germany")),
+        feld("verein", L("Aktueller Verein", "Current club"), L("z. B. SV Beispiel", "e.g. Example FC")),
+        feld("vertrag_bis", L("Vertrag bis", "Contract until"), "", "date"),
+        feld("groesse_cm", L("Gr\u00f6\u00dfe (cm)", "Height (cm)"), "z. B. 184", "number"),
+        h("label", { className: "nz-feld" }, L("Starker Fu\u00df", "Preferred foot"), h("select", { value: (wahl.spieler || {}).fuss || "", onChange: e => setzEigen("fuss", e.target.value) }, h("option", { value: "" }, "\u2013"), NZ6_FUSS.map(f => h("option", { key: f[0], value: f[0] }, en ? f[2] : f[1]))))),
+      h("p", { className: "nz-hinweis", style: { marginTop: 8 } }, L("Selbst angelegte Spieler pr\u00fcft der KI-Ordner; gepr\u00fcfte Spieler kommen mit Kennzeichnung \u201eAnbieter\u201c in die Spielerdatenbank. Mindestalter 16 Jahre.", "Players you add are checked by the AI sorter; checked players are added to the player database marked \u201cprovider\u201d. Minimum age 16.")),
+      h("div", { className: "nz-knoepfe" }, h("button", { type: "button", className: "nz-btn klein", onClick: () => setWahl({}) }, L("Doch in der Datenbank suchen", "Search the database instead")))));
+}
+function NzAngebotFormular({ account, vorhanden, schliessen, onFertig }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  useScrollSperre(true); useTwZurueck(true, schliessen);
+  const v = vorhanden || null;
+  const [wahl, setWahl] = React.useState({});
+  const [w, setW] = React.useState(() => ({ art: v ? v.art || "" : "", position_fein: v ? v.position_fein || "" : "", verfuegbar_ab: v && v.verfuegbar_ab ? String(v.verfuegbar_ab).slice(0, 10) : "", preis_text: v ? v.preis_text || "" : "", ziel_laender: v ? (v.ziel_laender || []).join(", ") : "", ziel_ligen: v ? (v.ziel_ligen || []).join(", ") : "", beschreibung: v ? v.beschreibung || "" : "", video_links: v ? (v.video_links || []).join("\n") : "", sichtbarkeit: v ? v.sichtbarkeit || "pro" : "pro", laufzeit_tage: "60" }));
+  const [busy, setBusy] = React.useState(false); const [fehler, setFehler] = React.useState("");
+  const setz = (k, x) => setW(y => Object.assign({}, y, { [k]: x }));
+  const liste = t => String(t || "").split(/[,;\n]/).map(x => x.trim()).filter(Boolean);
+  const senden = () => {
+    if (!w.art) { setFehler(nz6Grund("art")); return; }
+    if (!v && !wahl.player_id && !(wahl.eigen && wahl.spieler)) { setFehler(nz6Grund("spieler")); return; }
+    if (!v && wahl.eigen) { const sp = wahl.spieler || {}; if (String(sp.name || "").trim().length < 3) { setFehler(nz6Grund("spieler_name")); return; } if (!sp.geburtsdatum) { setFehler(nz6Grund("geburtsdatum")); return; } }
+    const body = { art: w.art, position_fein: w.position_fein, verfuegbar_ab: w.verfuegbar_ab, preis_text: w.preis_text, ziel_laender: liste(w.ziel_laender), ziel_ligen: liste(w.ziel_ligen), beschreibung: w.beschreibung.trim(), video_links: liste(w.video_links), sichtbarkeit: w.sichtbarkeit };
+    if (!v) { body.laufzeit_tage = w.laufzeit_tage; if (wahl.player_id) body.player_id = wahl.player_id; else body.spieler = wahl.spieler; } else body.id = v.id;
+    setBusy(true); setFehler("");
+    nzRuf(account, v ? "angebot_aendern" : "angebot_anlegen", body).then(d => { setBusy(false); if (d && d.ok) onFertig(d.angebot); else setFehler(nz6Grund(d && d.grund, d)); });
+  };
+  const sel = (k, label, optionen, leer) => h("label", { className: "nz-feld" }, label, h("select", { value: w[k] || "", onChange: e => setz(k, e.target.value), "data-nz6-feld": k }, leer !== undefined ? h("option", { value: "" }, leer) : null, optionen.map(o => h("option", { key: o[0], value: o[0] }, en ? o[2] : o[1]))));
+  const feld = (k, label, platz, typ) => h("label", { className: "nz-feld" }, label, h("input", { type: typ || "text", value: w[k] || "", placeholder: platz || "", maxLength: 300, onChange: e => setz(k, e.target.value), "data-nz6-feld": k }));
+  return h("div", { className: "nz-modal", onClick: ev => { if (ev.target === ev.currentTarget) schliessen(); } },
+    h("div", { className: "nz-box breit", role: "dialog", "aria-modal": "true", "data-nz6-formular": v ? v.id : "neu" },
+      h("div", { className: "nz-kopf" }, h("h2", null, v ? L("Angebot bearbeiten", "Edit offer") : L("Spieler anbieten", "Offer a player")), h("button", { type: "button", className: "nz-x", "aria-label": L("Schlie\u00dfen", "Close"), onClick: schliessen }, "\u00d7")),
+      !v ? h("div", { className: "nz-abschnitt" }, h("div", { className: "nz-abschnitt-kopf" }, h("h3", null, L("1. Spieler", "1. Player"))), h(NzSpielerWahl, { account: account, wahl: wahl, setWahl: setWahl })) : h("div", { className: "nz-sub" }, L("Spieler: ", "Player: ") + ((v.spieler || {}).name || "")),
+      h("div", { className: "nz-abschnitt" }, h("div", { className: "nz-abschnitt-kopf" }, h("h3", null, v ? L("Angebot", "Offer") : L("2. Angebot", "2. Offer"))),
+        h("div", { className: "nz-felder" },
+          sel("art", L("Art", "Type") + " *", NZ6_ART, L("bitte w\u00e4hlen \u2026", "please choose \u2026")),
+          sel("position_fein", L("Position", "Position"), NZ6_POS, L("wie in der Datenbank", "as in the database")),
+          feld("verfuegbar_ab", L("Verf\u00fcgbar ab", "Available from"), "", "date"),
+          feld("preis_text", L("Preis / Abl\u00f6se / Leihgeb\u00fchr", "Price / fee / loan fee"), L("z. B. 1,5 Mio. \u20ac oder Verhandlungsbasis", "e.g. \u20ac1.5m or negotiable")),
+          feld("ziel_laender", L("Ziell\u00e4nder (Komma)", "Target countries (comma)"), L("z. B. Deutschland, \u00d6sterreich", "e.g. Germany, Austria")),
+          feld("ziel_ligen", L("Zielligen (Komma)", "Target leagues (comma)"), L("z. B. 2. Bundesliga, 3. Liga", "e.g. 2. Bundesliga, 3. Liga")),
+          sel("sichtbarkeit", L("Sichtbar f\u00fcr", "Visible to"), NZ6_SICHT),
+          !v ? sel("laufzeit_tage", L("Laufzeit", "Term"), NZ6_LAUFZEIT) : null,
+          h("label", { className: "nz-feld breit" }, L("Beschreibung", "Description") + " (" + w.beschreibung.length + "/2000)", h("textarea", { rows: 5, maxLength: 2000, value: w.beschreibung, placeholder: L("St\u00e4rken, Spielweise, Situation, Rahmenbedingungen \u2013 keine Telefonnummern oder E-Mail-Adressen, Kontakt l\u00e4uft \u00fcber Nachrichten.", "Strengths, style of play, situation, conditions \u2013 no phone numbers or e-mail addresses, contact runs via messages."), onChange: e => setz("beschreibung", e.target.value), "data-nz6-feld": "beschreibung" })),
+          h("label", { className: "nz-feld breit" }, L("Videolinks (eine Zeile je Link, https://)", "Video links (one per line, https://)"), h("textarea", { rows: 2, value: w.video_links, placeholder: "https://\u2026", onChange: e => setz("video_links", e.target.value), "data-nz6-feld": "video_links" })))),
+      h("p", { className: "nz-hinweis" }, L("Pflicht sind Spieler und Art. Preis sehen nur verifizierte Mitglieder. Dateien (PDF, Bilder, bis 8 MB) kannst du gleich danach im Angebot hochladen. Der KI-Ordner pr\u00fcft Position, Plausibilit\u00e4t, Dubletten und die Regeln (kein Frauenfu\u00dfball, keine anderen Sportarten, keine Werbung, keine Kontaktdaten, Mindestalter 16).", "Required are player and type. Only verified members see the price. Files (PDF, images, up to 8 MB) can be uploaded in the offer right afterwards. The AI sorter checks position, plausibility, duplicates and the rules (men's football only, no other sports, no advertising, no contact details, minimum age 16).")),
+      fehler ? h("p", { className: "nz-fehler" }, fehler) : null,
+      h("div", { className: "nz-knoepfe" },
+        h("button", { type: "button", className: "nz-btn gruen", disabled: busy, onClick: senden, "data-nz6-senden": "1" }, busy ? L("Speichert \u2026", "Saving \u2026") : (v ? L("Speichern", "Save") : L("Angebot einstellen", "Post offer"))),
+        h("button", { type: "button", className: "nz-btn", onClick: schliessen }, L("Abbrechen", "Cancel")))));
+}
+function NzMarktSeite({ account, setView, admin, openPlayer, openVerein }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  const pro = twIstPremium(); const sitzung = !!(account && twHatSitzung(account));
+  const leer = { text: "", gruppe: "", position_fein: "", alter_von: "", alter_bis: "", land: "", liga: "", zielliga: "", art: "", nur_verifizierte: false, mw_bis: "" };
+  const [tab, setTab] = React.useState("alle"); const [f, setF] = React.useState(leer);
+  const [erg, setErg] = React.useState(null); const [laedt, setLaedt] = React.useState(false); const [fehler, setFehler] = React.useState("");
+  const [detail, setDetail] = React.useState(() => { const x = NZ6.oeffne; NZ6.oeffne = null; return x || null; });
+  const [formular, setFormular] = React.useState(() => { const x = NZ6.neu; NZ6.neu = false; return x ? { neu: true } : null; });
+  const [passend, setPassend] = React.useState(null);
+  React.useEffect(() => { const g = () => { if (NZ6.oeffne) { setDetail(NZ6.oeffne); NZ6.oeffne = null; } if (NZ6.neu) { setFormular({ neu: true }); NZ6.neu = false; } }; window.addEventListener("nz6-oeffne", g); return () => window.removeEventListener("nz6-oeffne", g); }, []);
+  const aktiv = !!(f.text.trim() || f.gruppe || f.position_fein || f.alter_von || f.alter_bis || f.land.trim() || f.liga.trim() || f.zielliga.trim() || f.art || f.nur_verifizierte || f.mw_bis);
+  const filterBody = () => ({ text: f.text.trim(), gruppe: f.gruppe, position_fein: f.position_fein, alter_von: f.alter_von, alter_bis: f.alter_bis, land: f.land.trim(), liga: f.liga.trim(), zielliga: f.zielliga.trim(), art: f.art, nur_verifizierte: f.nur_verifizierte, mw_bis: f.mw_bis ? String(Math.round(Number(String(f.mw_bis).replace(",", ".")) * 1e6) || "") : "" });
+  const laden = (seite, anhaengen) => nzRuf(account, "angebote", { sicht: tab === "meine" ? "meine" : "alle", filter: tab === "meine" ? {} : filterBody(), seite: seite || 1 }).then(d => { if (d && d.ok) { setErg(x => anhaengen && x ? Object.assign({}, d, { angebote: (x.angebote || []).concat(d.angebote || []) }) : d); setFehler(""); } else { setErg(null); setFehler(nz6Grund(d && d.grund, d)); } return d; });
+  React.useEffect(() => {
+    if (!sitzung || !pro || tab === "passend") return undefined;
+    let alive = true; setLaedt(true); setFehler("");
+    const timer = setTimeout(() => { laden(1).then(() => { if (alive) setLaedt(false); }); }, 200);
+    return () => { alive = false; clearTimeout(timer); };
+  }, [tab, f.text, f.gruppe, f.position_fein, f.alter_von, f.alter_bis, f.land, f.liga, f.zielliga, f.art, f.nur_verifizierte, f.mw_bis, account && account.email, pro]);
+  React.useEffect(() => {   // \u201ePassende Vereine\u201c: eigene aktive Angebote mit ihren Treffern
+    if (!sitzung || !pro || tab !== "passend") return undefined;
+    let alive = true; setLaedt(true); setPassend(null);
+    nzRuf(account, "angebote", { sicht: "meine", seite: 1 }).then(async d => {
+      if (!alive) return; const meine = d && d.ok ? (d.angebote || []).filter(a => a.status === "aktiv").slice(0, 10) : [];
+      const voll = [];
+      for (const a of meine) { const x = await nzRuf(account, "angebot", { id: a.id }); if (!alive) return; voll.push(x && x.ok ? x.angebot : a); }
+      setPassend(voll); setLaedt(false);
+    });
+    return () => { alive = false; };
+  }, [tab, account && account.email, pro]);
+  const mehr = () => { if (!erg || laedt) return; setLaedt(true); laden((erg.seite || 1) + 1, true).then(() => setLaedt(false)); };
+  const aenderung = (a) => { if (!a) return; setErg(x => x ? Object.assign({}, x, { angebote: (x.angebote || []).map(y => y.id === a.id ? Object.assign({}, y, a) : y) }) : x); };
+  const entfernt = (id) => setErg(x => x ? Object.assign({}, x, { angebote: (x.angebote || []).filter(y => y.id !== id), gesamt: Math.max(0, (x.gesamt || 1) - 1) }) : x);
+  const fertig = (a) => { setFormular(null); if (!a) return; setErg(x => x ? Object.assign({}, x, { angebote: [a].concat((x.angebote || []).filter(y => y.id !== a.id)), gesamt: (x.gesamt || 0) + ((x.angebote || []).some(y => y.id === a.id) ? 0 : 1) }) : x); setDetail(a.id); };
+  const setz = (k, x) => setF(y => Object.assign({}, y, { [k]: x }));
+  const feld = (k, label, platz, typ) => h("label", { className: "nz-feld" }, label, h("input", { type: typ || "text", value: f[k], placeholder: platz || "", onChange: e => setz(k, e.target.value), "data-nz6-filter": k }));
+  const sel = (k, label, optionen, leerText) => h("label", { className: "nz-feld" }, label, h("select", { value: f[k], onChange: e => setz(k, e.target.value), "data-nz6-filter": k }, h("option", { value: "" }, leerText), optionen.map(o => h("option", { key: o[0], value: o[0] }, en ? o[2] : o[1]))));
+  const tabKnopf = (k, label) => h("button", { type: "button", className: "nz-tab" + (tab === k ? " aktiv" : ""), onClick: () => setTab(k), "data-nz6-tab": k }, label);
+  const kopf = h(React.Fragment, null,
+    h("div", { className: "nz-b-kopfzeile" }, h("h1", null, L("Spieler-Markt", "Player Market")),
+      sitzung && pro ? h("button", { type: "button", className: "nz-btn gruen", onClick: () => setFormular({ neu: true }), "data-nz6-neu": "1" }, L("Spieler anbieten", "Offer a player")) : null),
+    h("p", { className: "nz-intro" }, L("Berater, Scouts und Vereine bieten hier Spieler an \u2013 Verkauf, Leihe, abl\u00f6sefrei oder Probetraining. Zu jedem Angebot zeigt TransferWire die passenden Vereine aus \u201eVerein sucht\u201c; Kontakt l\u00e4uft \u00fcber die Nachrichten. Verifizierte Anbieter stehen oben.", "Agents, scouts and clubs offer players here \u2013 transfer, loan, free transfer or trial. For every offer TransferWire shows the matching clubs from \u201cClub seeks\u201d; contact runs via messages. Verified providers come first.")));
+  if (!sitzung) return h("div", { className: "nz-seite" }, kopf, h("div", { className: "nz-hinweis" }, L("Bitte melde dich an, um den Spieler-Markt zu sehen.", "Please sign in to see the Player Market.")));
+  if (!pro) return h("div", { className: "nz-seite" }, kopf, h("div", { className: "nz-hinweis", style: { display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" } }, h("span", { style: { flex: 1 } }, L("Der Spieler-Markt ist Teil von Pro: Angebote sehen, Spieler anbieten, passende Vereine und Kontakt zum Anbieter.", "The Player Market is part of Pro: see offers, offer players, matching clubs and contact to the provider.")), h("button", { type: "button", className: "nz-btn klein gruen", onClick: () => twZuPro() }, L("Pro ansehen", "View Pro"))));
+  const angebote = erg && erg.angebote ? erg.angebote : [];
+  return h("div", { className: "nz-seite", "data-nz6-seite": "1" }, kopf,
+    h("div", { className: "nz-tabs" }, tabKnopf("alle", L("Angebote", "Offers")), tabKnopf("meine", L("Meine Angebote", "My offers")), tabKnopf("passend", L("Passende Vereine", "Matching clubs"))),
+    fehler ? h("p", { className: "nz-fehler" }, fehler) : null,
+    tab === "alle" ? h("div", { className: "nz-karte-box" },
+      h("div", { className: "nz-filter" },
+        h("label", { className: "nz-feld breit" }, L("Suche", "Search"), h("input", { value: f.text, placeholder: L("Spieler, Verein, Stichwort \u2026", "Player, club, keyword \u2026"), onChange: e => setz("text", e.target.value), "data-nz6-filter": "text" })),
+        sel("gruppe", L("Bereich", "Area"), NZ6_GRUPPE, L("alle", "all")),
+        sel("position_fein", L("Position", "Position"), NZ6_POS, L("alle", "all")),
+        sel("art", L("Art", "Type"), NZ6_ART, L("alle", "all")),
+        feld("alter_von", L("Alter von", "Age from"), "16", "number"),
+        feld("alter_bis", L("Alter bis", "Age to"), "40", "number"),
+        feld("land", L("Land (Spieler/Verein)", "Country (player/club)"), L("z. B. Deutschland", "e.g. Germany")),
+        feld("liga", L("Aktuelle Liga", "Current league"), L("z. B. Bundesliga", "e.g. Bundesliga")),
+        feld("zielliga", L("Zielliga / Zielland", "Target league / country"), L("z. B. \u00d6sterreich", "e.g. Austria")),
+        feld("mw_bis", L("Marktwert bis (Mio. \u20ac)", "Market value up to (m \u20ac)"), L("z. B. 2", "e.g. 2"), "number")),
+      h("div", { className: "nz-knoepfe", style: { justifyContent: "space-between" } },
+        h("div", { className: "nz-checks" }, h("label", null, h("input", { type: "checkbox", checked: f.nur_verifizierte, onChange: e => setz("nur_verifizierte", e.target.checked) }), L("nur verifizierte Anbieter", "verified providers only"))),
+        aktiv ? h("button", { type: "button", className: "nz-btn klein", onClick: () => setF(leer) }, L("Filter zur\u00fccksetzen", "Reset filters")) : null)) : null,
+    tab !== "passend" ? h(React.Fragment, null,
+      h("div", { className: "nz-zaehler-text" }, laedt && !erg ? L("Lade \u2026", "Loading \u2026") : (erg ? erg.gesamt + " " + (erg.gesamt === 1 ? L("Angebot", "offer") : L("Angebote", "offers")) + (tab === "meine" && erg.grenze ? " \u00b7 " + L("aktiv ", "active ") + (erg.aktiv || 0) + " / " + erg.grenze : "") : "")),
+      angebote.length ? h("div", { className: "nz-karten nz6-karten" }, angebote.map(a => h(NzAngebotKarte, { key: a.id, account: account, a: a, onOeffnen: setDetail }))) : null,
+      erg && !angebote.length ? h("div", { className: "nz-leer" }, tab === "meine" ? L("Du hast noch kein Angebot eingestellt. Mit \u201eSpieler anbieten\u201c stellst du einen Spieler aus der Datenbank oder einen selbst angelegten Spieler ein.", "You have not posted an offer yet. With \u201cOffer a player\u201d you list a player from the database or one you add yourself.") : (aktiv ? L("Kein Angebot passt zu den Filtern.", "No offer matches the filters.") : L("Noch keine Angebote. Sei der Erste \u2013 mit \u201eSpieler anbieten\u201c.", "No offers yet. Be the first \u2013 with \u201cOffer a player\u201d."))) : null,
+      erg && angebote.length < (erg.gesamt || 0) ? h("div", { className: "nz-knoepfe", style: { justifyContent: "center" } }, h("button", { type: "button", className: "nz-btn", disabled: laedt, onClick: mehr }, laedt ? L("Lade \u2026", "Loading \u2026") : L("Mehr laden", "Load more"))) : null)
+    : h("div", { className: "nz6-passend-seite" },
+      laedt && !passend ? h("div", { className: "nz-zaehler-text" }, L("Lade \u2026", "Loading \u2026")) : null,
+      passend && !passend.length ? h("div", { className: "nz-leer" }, L("Keine aktiven Angebote von dir. Sobald du einen Spieler anbietest, erscheinen hier die Vereine, deren Bedarf passt \u2013 nach Position, Alter, Ligastufe, Preisrahmen und Zeitfenster.", "No active offers from you. As soon as you offer a player, the clubs whose needs match appear here \u2013 by position, age, league level, price range and window.")) : null,
+      (passend || []).map(a => h("div", { key: a.id, className: "nz-karte-box nz6-passend-block" },
+        h("div", { className: "nz6-kopf" }, h(NzSpielerBild, { sp: a.spieler || {}, groesse: 40 }), h("div", { className: "nz6-kopf-text" }, h("div", { className: "nz6-name" }, (a.spieler || {}).name), h("div", { className: "nz-sub" }, nz6Zeile(a.spieler, a) + " \u00b7 " + nz6Art(a.art))), h("button", { type: "button", className: "nz-btn klein", onClick: () => setDetail(a.id) }, L("Angebot", "Offer"))),
+        h(NzPassendeVereine, { liste: a.passende_vereine || [], setView: setView, kompakt: false })))),
+    detail ? h(NzAngebotDetail, { key: "d" + detail, account: account, id: detail, schliessen: () => setDetail(null), onAenderung: aenderung, onEntfernt: entfernt, setView: setView, openPlayer: openPlayer, onBearbeiten: (a) => { setDetail(null); setFormular({ vorhanden: a }); } }) : null,
+    formular ? h(NzAngebotFormular, { key: formular.vorhanden ? "f" + formular.vorhanden.id : "neu", account: account, vorhanden: formular.vorhanden || null, schliessen: () => setFormular(null), onFertig: fertig }) : null);
 }
 function twZusatzKonto(konto) {
   const email = String((konto && konto.email) || "").toLowerCase();
@@ -8041,7 +8461,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261107-netzwerk5c";
+const VS_VERSION = "20261107-netzwerk6";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -12003,6 +12423,7 @@ function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScou
     h("nav", { className: "tw-sn-menue" },
       h("button", { type: "button", className: "tw-sn-punkt" + (aktiv("kontakte") ? " aktiv" : ""), onClick: () => setView("kontakte") }, h("span", { className: "tw-sn-ikon", dangerouslySetInnerHTML: { __html: SIDE_ICONS.kontakte || "" } }), h("span", null, en ? "Contacts" : "Kontakte"), proMarke("kontakte")),
       h("button", { type: "button", className: "tw-sn-punkt" + (aktiv("gesucht") ? " aktiv" : ""), onClick: () => setView("gesucht") }, h("span", { className: "tw-sn-ikon", dangerouslySetInnerHTML: { __html: SIDE_ICONS.gesucht || "" } }), h("span", null, VS_NEU ? (en ? "Club seeks" : "Verein sucht") : "Vereinsbedarf"), proMarke("gesucht") || (gesuchtBadge > 0 ? h("span", { className: "tw-sn-badge" }, gesuchtBadge) : null)),
+      h("button", { type: "button", className: "tw-sn-punkt" + (aktiv("nz_markt") ? " aktiv" : ""), onClick: () => setView("nz_markt"), "data-nz6-menue": "1" }, h("span", { className: "tw-sn-ikon", dangerouslySetInnerHTML: { __html: NZ6_IKON } }), h("span", null, en ? "Player market" : "Spieler-Markt"), proMarke("nz_markt")),   // Netzwerk 2.0 Paket 6
       h("button", { type: "button", className: "tw-sn-punkt" + (aktiv("marktwert") ? " aktiv" : ""), onClick: () => setView("marktwert") }, h("span", { className: "tw-sn-ikon", dangerouslySetInnerHTML: { __html: SIDE_ICONS.marktwert || "" } }), h("span", null, en ? "Market value" : "Marktwert"), proMarke("marktwert")),
       gruppen.map(g => h("div", { key: g.k, className: "tw-sn-gruppe" + (zu[g.k] ? " zu" : "") },
         h("button", { type: "button", className: "tw-sn-kopf", onClick: () => klappe(g.k), "aria-expanded": !zu[g.k] }, h("span", { className: "tw-sn-ikon", dangerouslySetInnerHTML: { __html: IK[g.k] } }), h("span", null, g.label), (!prem && (g.k === "community" || g.k === "workspace")) ? h("span", { className: "tw-sn-pro" }, "PRO") : null, h("span", { className: "tw-sn-pfeil", dangerouslySetInnerHTML: { __html: IK.pfeil } })),
@@ -14347,7 +14768,7 @@ function twLaenderListe(vereine, en) {
 /* ── Tarifmodell Free / Pro / Enterprise (23.10.2026) ──────────────────────────
    Pro-Bereiche: Verein sucht, Vereinskontakte, Netzwerk/Community, Workspace (Merkliste), Scouting, Akquise-Radar.
    Free: alle uebrigen Bereiche inkl. Marktwert, KI-Assistent "Scout" und PDF-Dossiers. */
-const TW_PRO_VIEWS = ["gesucht", "kontakte", "community", "networking", "nz_kontakte", "nz_profil", "watch", "talente", "listen", "suche", "nachwuchs", "akquise"];
+const TW_PRO_VIEWS = ["gesucht", "nz_markt", "kontakte", "community", "networking", "nz_kontakte", "nz_profil", "watch", "talente", "listen", "suche", "nachwuchs", "akquise"];
 const TW_PRO_INFO = {
   gesucht: { de: ["Verein sucht", "Wer gerade welche Spieler braucht: Bedarf je Verein und Position, Club-Fit und Portfolio."], en: ["Club seeks", "Who needs which players right now: demand per club and position, club fit and portfolio."] },
   kontakte: { de: ["Vereinskontakte", "Exklusive Kontakte zu über 750 Sportdirektoren, Geschäftsführern und Scouting-Leitern."], en: ["Club contacts", "Exclusive contacts to more than 750 sporting directors, CEOs and heads of scouting."] },
@@ -14356,7 +14777,7 @@ const TW_PRO_INFO = {
   talente: { de: ["Scouting", "Talent-Rankings, Scouting-Listen und Fähigkeiten-Suche."], en: ["Scouting", "Talent rankings, scouting lists and skills search."] },
   akquise: { de: ["Akquise-Radar", "Spieler ohne Berater finden."], en: ["Acquisition radar", "Find players without an agent."] }
 };
-TW_PRO_INFO.networking = TW_PRO_INFO.community; TW_PRO_INFO.nz_kontakte = TW_PRO_INFO.community; TW_PRO_INFO.nz_profil = TW_PRO_INFO.community; TW_PRO_INFO.listen = TW_PRO_INFO.talente; TW_PRO_INFO.suche = TW_PRO_INFO.talente; TW_PRO_INFO.nachwuchs = TW_PRO_INFO.talente;
+TW_PRO_INFO.networking = TW_PRO_INFO.community; TW_PRO_INFO.nz_kontakte = TW_PRO_INFO.community; TW_PRO_INFO.nz_profil = TW_PRO_INFO.community; TW_PRO_INFO.nz_markt = { de: ["Spieler-Markt", "Spieler anbieten und finden: Verkauf, Leihe, abl\u00f6sefrei, Probetraining \u2013 mit passenden Vereinen aus \u201eVerein sucht\u201c und Kontakt \u00fcber Nachrichten."], en: ["Player Market", "Offer and find players: transfer, loan, free transfer, trial \u2013 with matching clubs from \u201cClub seeks\u201d and contact via messages."] }; TW_PRO_INFO.listen = TW_PRO_INFO.talente; TW_PRO_INFO.suche = TW_PRO_INFO.talente; TW_PRO_INFO.nachwuchs = TW_PRO_INFO.talente;
 (function () {
   try {
     if (document.getElementById("tw-tarif-stil")) return;
@@ -14733,7 +15154,7 @@ function TransferApp({
   const [country, setCountry] = useState("");
   const [league, setLeague] = useState("");
   const [club, setClub] = useState("");
-  const [view, setViewRoh] = useState(() => ((location.hash || "") === "#transfers-ticker" ? "geruechte" : ((location.hash || "") === "#nachrichten" ? "nz_nachrichten" : ((location.hash || "") === "#beitraege" ? "nz_beitraege" : "feed")))); const [proZiel, setProZiel] = useState(null); const setView = (v) => { if (!isPrem && TW_PRO_VIEWS.indexOf(v) >= 0) { setProZiel(v); setViewRoh("pro"); return; } setProZiel(null); setViewRoh(v); }; useEffect(() => { try { if (view !== "geruechte" && location.hash === "#transfers-ticker") history.replaceState(null, "", location.pathname + location.search); if (view !== "nz_nachrichten" && location.hash === "#nachrichten") history.replaceState(null, "", location.pathname + location.search); if (view !== "nz_beitraege" && location.hash === "#beitraege") history.replaceState(null, "", location.pathname + location.search); } catch (e) {} }, [view]);
+  const [view, setViewRoh] = useState(() => ((location.hash || "") === "#transfers-ticker" ? "geruechte" : ((location.hash || "") === "#nachrichten" ? "nz_nachrichten" : ((location.hash || "") === "#beitraege" ? "nz_beitraege" : ((location.hash || "") === "#spieler-markt" ? "nz_markt" : "feed"))))); const [proZiel, setProZiel] = useState(null); const setView = (v) => { if (!isPrem && TW_PRO_VIEWS.indexOf(v) >= 0) { setProZiel(v); setViewRoh("pro"); return; } setProZiel(null); setViewRoh(v); }; useEffect(() => { try { if (view !== "geruechte" && location.hash === "#transfers-ticker") history.replaceState(null, "", location.pathname + location.search); if (view !== "nz_nachrichten" && location.hash === "#nachrichten") history.replaceState(null, "", location.pathname + location.search); if (view !== "nz_beitraege" && location.hash === "#beitraege") history.replaceState(null, "", location.pathname + location.search); if (view !== "nz_markt" && location.hash === "#spieler-markt") history.replaceState(null, "", location.pathname + location.search); } catch (e) {} }, [view]);
   const FEED_SEITE = 60;
   const [feedLimit, setFeedLimit] = useState(FEED_SEITE);
   const [plSel, setPlSel] = useState(null);
@@ -15575,7 +15996,7 @@ function TransferApp({
       alignItems: "center",
       gap: 16
     }
-  }, /*#__PURE__*/React.createElement(MobilNav, { view: view, setView: setView, news: news, needsBySport: needsBySport, onNavigate: onNavigate, onScout: () => setView("assistent"), items: [["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["spieltag", LANG === "en" ? "Matchday" : "Spieltag"], ["gesucht", LANG === "en" ? "Club seeks" : "Verein sucht"], ["ranking", "Performance"], ["players", t("players_tab")], ["marktwert", LANG === "en" ? "Market value" : "Marktwert"], ["chancen", t("ch_tab")], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]] }), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(MobilNav, { view: view, setView: setView, news: news, needsBySport: needsBySport, onNavigate: onNavigate, onScout: () => setView("assistent"), items: [["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["spieltag", LANG === "en" ? "Matchday" : "Spieltag"], ["gesucht", LANG === "en" ? "Club seeks" : "Verein sucht"], ["nz_markt", LANG === "en" ? "Player market" : "Spieler-Markt"], ["ranking", "Performance"], ["players", t("players_tab")], ["marktwert", LANG === "en" ? "Market value" : "Marktwert"], ["chancen", t("ch_tab")], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]] }), /*#__PURE__*/React.createElement("div", {
     className: "tw-logo",
     style: {
       display: "flex",
@@ -15789,7 +16210,7 @@ function TransferApp({
       flexWrap: "wrap"
     },
     className: "tw-tabs"
-  }, [["_h", LANG === "en" ? "Market" : "Markt"], ["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["spieltag", LANG === "en" ? "Matchday" : "Spieltag"], ["gesucht", LANG === "en" ? "Club seeks" : "Verein sucht"], ["ranking", "Performance"], ["players", t("players_tab")], ["marktwert", LANG === "en" ? "Market value" : "Marktwert"], ["chancen", t("ch_tab")], ["_h", LANG === "en" ? "My work" : "Meine Arbeit"], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]].map(([k, label]) => {
+  }, [["_h", LANG === "en" ? "Market" : "Markt"], ["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["spieltag", LANG === "en" ? "Matchday" : "Spieltag"], ["gesucht", LANG === "en" ? "Club seeks" : "Verein sucht"], ["nz_markt", LANG === "en" ? "Player market" : "Spieler-Markt"], ["ranking", "Performance"], ["players", t("players_tab")], ["marktwert", LANG === "en" ? "Market value" : "Marktwert"], ["chancen", t("ch_tab")], ["_h", LANG === "en" ? "My work" : "Meine Arbeit"], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]].map(([k, label]) => {
     if (k === "_h") return /*#__PURE__*/React.createElement("div", { key: "h-" + label, className: "tw-navhead" }, label);
     const active = view === k || (k === "community" && (view === "networking" || view === "moderation" || view === "nz_kontakte" || view === "nz_profil" || view === "nz_nachrichten" || view === "nz_beitraege")) || (k === "talente" && (view === "listen" || view === "suche" || view === "nachwuchs"));
     let badge = 0; try { if (k === "feed") badge = (Array.isArray(news) ? news : []).filter(n => Date.now() - new Date(n.published_at || n.created_at || n.createdAt || 0).getTime() < 864e5).length; else if (k === "gesucht") badge = Array.isArray(needsBySport) ? needsBySport.length : 0; } catch (e) { badge = 0; }
@@ -15821,7 +16242,7 @@ function TransferApp({
       width: "100%",
       boxSizing: "border-box"
     }
-  }, TW_ZUSATZ.finde(view) ? React.createElement(TwZusatzSeite, { key: "zusatz-" + view, seite: TW_ZUSATZ.finde(view), account: account, setView: setView }) : null, view === "pro" && React.createElement(ProSperreVue, { ziel: proZiel }), view === "nz_profil" && React.createElement(NzProfilSeite, { key: "nz-profil", account: account, setView: setView, admin: istAdmin }), view === "nz_nachrichten" && React.createElement(NzNachrichtenSeite, { key: "nz-nachrichten", account: account, setView: setView, admin: istAdmin, openPlayer: openPlayer, openVerein: openVerein }), view === "nz_beitraege" && React.createElement(NzBeitraegeSeite, { key: "nz-beitraege", account: account, setView: setView, admin: istAdmin }), view === "nz_kontakte" && React.createElement(NzKontakteSeite, { key: "nz-kontakte", account: account, setView: setView, admin: istAdmin }), view === "marktwert" && React.createElement(MarktwertVue, { openPlayer: openPlayer, openVerein: openVerein, start: mwStart }), view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein, account: account, setView: setView }), view === "akquise" && /*#__PURE__*/React.createElement(AkquiseVue, { isPrem: isPrem, account: account, openPlayer: openPlayer }), view === "aehnlich" && aehnlichStart && React.createElement(AehnlicheSpielerSeite, { key: "ae-" + aehnlichStart.pid, ausgang: aehnlichStart, onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "spielervergleich" && React.createElement(SpielerVergleichSeite, { key: "vgl-" + (vglStart || []).map(x => x.pid).join("-"), start: vglStart || [], onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news.filter(n => n.type !== "verletzung" && n.type !== "leistung" && n.type !== "meldung" && !n._ausgeblendet), onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(VereinSuchtVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, TW_ZUSATZ.finde(view) ? React.createElement(TwZusatzSeite, { key: "zusatz-" + view, seite: TW_ZUSATZ.finde(view), account: account, setView: setView }) : null, view === "pro" && React.createElement(ProSperreVue, { ziel: proZiel }), view === "nz_profil" && React.createElement(NzProfilSeite, { key: "nz-profil", account: account, setView: setView, admin: istAdmin }), view === "nz_nachrichten" && React.createElement(NzNachrichtenSeite, { key: "nz-nachrichten", account: account, setView: setView, admin: istAdmin, openPlayer: openPlayer, openVerein: openVerein }), view === "nz_beitraege" && React.createElement(NzBeitraegeSeite, { key: "nz-beitraege", account: account, setView: setView, admin: istAdmin }), view === "nz_markt" && React.createElement(NzMarktSeite, { key: "nz-markt", account: account, setView: setView, admin: istAdmin, openPlayer: openPlayer, openVerein: openVerein }), view === "nz_kontakte" && React.createElement(NzKontakteSeite, { key: "nz-kontakte", account: account, setView: setView, admin: istAdmin }), view === "marktwert" && React.createElement(MarktwertVue, { openPlayer: openPlayer, openVerein: openVerein, start: mwStart }), view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein, account: account, setView: setView }), view === "akquise" && /*#__PURE__*/React.createElement(AkquiseVue, { isPrem: isPrem, account: account, openPlayer: openPlayer }), view === "aehnlich" && aehnlichStart && React.createElement(AehnlicheSpielerSeite, { key: "ae-" + aehnlichStart.pid, ausgang: aehnlichStart, onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "spielervergleich" && React.createElement(SpielerVergleichSeite, { key: "vgl-" + (vglStart || []).map(x => x.pid).join("-"), start: vglStart || [], onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news.filter(n => n.type !== "verletzung" && n.type !== "leistung" && n.type !== "meldung" && !n._ausgeblendet), onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(VereinSuchtVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       background: "transparent",
       border: "none",
