@@ -801,6 +801,42 @@ header:has(+ .tw-tabbar) { background: var(--seite) !important; border-bottom: 1
 .nz-g-leer { display: grid; place-items: center; align-content: center; text-align: center; color: var(--t2); font-size: 14px; padding: 40px 20px; gap: 12px; height: 100%; }
 .nz-brief-zahl { position: absolute; top: -6px; right: 2px; min-width: 18px; height: 18px; border-radius: 999px; background: var(--gold); color: var(--gold-schrift); font-size: 10.5px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; padding: 0 5px; border: 2px solid var(--seite); box-sizing: content-box; line-height: 1; }
 @media (max-width: 760px) { .nz-nachrichten { grid-template-columns: 1fr; } .nz-nl { height: auto; max-height: calc(100vh - 170px); min-height: 0; } .nz-gespraech { height: calc(100vh - 150px); min-height: 0; } .nz-blase { max-width: 88%; } .nz-g-aktionen { margin-left: 0; width: 100%; } }
+/* Netzwerk 2.0 Paket 4: Community-Kontakte */
+.nz-b-kopfzeile { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.nz-b-kopfzeile h1 { flex: 1; }
+.nz-b-liste { display: grid; gap: 10px; }
+.nz-b-karte { background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; padding: 12px 14px; display: grid; gap: 7px; min-width: 0; cursor: pointer; text-align: left; font: inherit; color: var(--t1); width: 100%; box-sizing: border-box; }
+.nz-b-karte:hover { border-color: var(--linie2); background: var(--hover); } .nz-b-karte:focus-visible { outline: 2px solid var(--gruen); outline-offset: 2px; }
+.nz-b-karte.blass .nz-b-kurz, .nz-b-karte.blass .nz-b-text { color: var(--t3); }
+.nz-b-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.nz-chip.art-frage { border-color: var(--blau-text); color: var(--blau-text); }
+.nz-chip.art-suche { background: var(--sc-mittel-bg); border-color: var(--sc-mittel-rand); color: var(--sc-mittel-text); }
+.nz-chip.art-angebot { border-color: var(--gruen); color: var(--gruen-text); }
+.nz-chip.passt { background: var(--gruen); border-color: var(--gruen); color: #fff; }
+.nz-b-kurz { font-weight: 800; font-size: 15px; line-height: 1.35; word-break: break-word; }
+.nz-b-text { font-size: 13.5px; color: var(--t2); line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-wrap; word-break: break-word; }
+.nz-b-felder { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--t2); } .nz-b-felder b { color: var(--t1); font-weight: 700; }
+.nz-b-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 12.5px; color: var(--t2); padding-top: 6px; border-top: 1px solid var(--linie); }
+.nz-b-meta .nz-name { font-weight: 700; color: var(--t1); display: inline-flex; align-items: center; gap: 0 6px; }
+.nz-b-zahlen { margin-left: auto; white-space: nowrap; color: var(--t3); }
+.nz-b-text-voll { white-space: pre-wrap; word-break: break-word; line-height: 1.5; font-size: 14.5px; margin: 10px 0 0; }
+.nz-antworten { display: grid; gap: 8px; margin-top: 10px; }
+.nz-antwort { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 10px; background: var(--karte2); border: 1px solid var(--linie); border-radius: 12px; padding: 8px 10px; }
+.nz-antwort .nz-antwort-kopf { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 12.5px; color: var(--t2); } .nz-antwort .nz-antwort-kopf b { color: var(--t1); }
+.nz-antwort .nz-antwort-text { white-space: pre-wrap; word-break: break-word; font-size: 14px; line-height: 1.45; }
+.nz-art-wahl { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; }
+.nz-art-wahl button { text-align: left; font: inherit; color: var(--t1); background: var(--karte2); border: 1px solid var(--linie2); border-radius: 12px; padding: 12px 14px; cursor: pointer; display: grid; gap: 3px; }
+.nz-art-wahl button:hover { border-color: var(--gruen); } .nz-art-wahl button:disabled { opacity: .55; cursor: default; }
+.nz-art-wahl button b { font-size: 14.5px; } .nz-art-wahl button span { font-size: 12.5px; color: var(--t2); line-height: 1.4; }
+.nz-hw { background: var(--sc-mittel-bg); border: 1px solid var(--sc-mittel-rand); border-radius: 14px; padding: 10px 14px; display: grid; gap: 6px; }
+.nz-hw-kopf { display: flex; gap: 8px; align-items: center; font-weight: 800; font-size: 13px; color: var(--t1); } .nz-hw-kopf .nz-x { margin-left: auto; }
+.nz-hw-zeile { display: flex; gap: 10px; align-items: center; font-size: 13.5px; color: var(--t1); flex-wrap: wrap; } .nz-hw-zeile span { flex: 1; min-width: 200px; }
+.nz-sa { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; align-items: center; background: var(--karte); border: 1px solid var(--linie); border-radius: 12px; padding: 10px 14px; }
+.nz-sa b { font-size: 14px; } .nz-sa .nz-sub { margin-top: 2px; }
+.nz-glocke-hw { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; cursor: pointer; font: inherit; font-size: 13px; font-weight: 700; color: var(--t1); background: var(--sc-mittel-bg); border: 1px solid var(--sc-mittel-rand); border-radius: 10px; padding: 8px 10px; margin-bottom: 12px; }
+.nz-glocke-hw .nz-ng-zahl { background: var(--gold); color: var(--gold-schrift); }
+.nz-zaehler-text { font-size: 12px; color: var(--t3); text-align: right; }
+@media (max-width: 560px) { .nz-b-zahlen { margin-left: 0; width: 100%; } .nz-sa { grid-template-columns: 1fr; } }
 .tw-sn-unter.aktiv { background: var(--aktiv); color: var(--t1); font-weight: 600; }
 .tw-sn-badge { margin-left: auto; font-size: 11px; font-weight: 800; color: var(--gold-text) !important; background: var(--gold-tint); border-radius: 999px; padding: 2px 8px; }
 .tw-sn-unten { padding-top: 10px; border-top: 1px solid var(--linie); }
@@ -2892,7 +2928,7 @@ function NzProfilSeite({ account, setView, admin }) {
 }
 /* ── Netzwerk 2.0, Paket 3 (OP 537, 07.11.2026): Direktnachrichten – Gesprächsliste, Gespräch, Anhänge, Hinweise.
    Regeln (Free antwortet nur, Tageslimit, nur Verifizierte, Blockieren, Verschlüsselung, Meldungen) liegen in der Datenbank (nz.nachricht_*); die App zeigt an und reicht durch. ── */
-const NZ3 = { ungelesen: 0, anfragen: 0, seit: null, timer: null, takt: 60000, geaendert: [] };
+const NZ3 = { ungelesen: 0, anfragen: 0, hinweise: 0, seit: null, timer: null, takt: 60000, geaendert: [] };
 const NZ_BRIEF_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>';
 const NZ_ANHANG_TYPEN = [["spieler", "Spieler", "Players"], ["verein", "Vereine", "Clubs"], ["transfer", "Transfers", "Transfers"], ["verein_sucht", "Verein sucht", "Club seeks"], ["marktwert", "Marktwert", "Market value"], ["scouting", "Scouting", "Scouting"]];
 const NZ_ANHANG_PRO = { verein_sucht: true, marktwert: true, scouting: true };
@@ -2918,7 +2954,7 @@ function nzNachrichtAn(ziel, setView) {   // öffnet die Nachrichten mit Gegenü
   if (typeof setView === "function") setView("nz_nachrichten");
 }
 function nzNeuMelden(d) {
-  NZ3.ungelesen = Number(d.ungelesen) || 0; NZ3.anfragen = Number(d.anfragen) || 0; NZ3.geaendert = Array.isArray(d.geaendert) ? d.geaendert : []; if (d.jetzt) NZ3.seit = d.jetzt;
+  NZ3.ungelesen = Number(d.ungelesen) || 0; NZ3.anfragen = Number(d.anfragen) || 0; NZ3.hinweise = Number(d.hinweise) || 0; NZ3.geaendert = Array.isArray(d.geaendert) ? d.geaendert : []; if (d.jetzt) NZ3.seit = d.jetzt;
   try { window.dispatchEvent(new CustomEvent("nz-neu", { detail: d })); } catch (e) {}
 }
 function nzNeuPruefen(account) {   // „Gibt es Neues?“ – wenige Bytes
@@ -3169,6 +3205,330 @@ function NzNachrichtenSeite({ account, setView, admin, openPlayer, openVerein })
     (!schmal || !ziel) ? h("p", { className: "nz-intro" }, L("Direkt und vertraulich: Nachrichten an Scouts, Berater und Vereinsmitarbeiter – mit Spielern, Vereinen, Transfers oder Bedarfen als Anhang. Verifizierte tragen den Haken.", "Direct and confidential: messages to scouts, agents and club staff – with players, clubs, transfers or requests attached. Verified members carry the badge.")) : null,
     einst && (!schmal || !ziel) ? h(NzNachrichtEinstellungen, { account: account, wert: liste && liste.einstellungen, onAenderung: d => setListe(l => Object.assign({}, l, { einstellungen: Object.assign({}, l && l.einstellungen, { nur_verifizierte: d.nur_verifizierte, mail_hinweis: d.mail_hinweis }) })) }) : null,
     schmal ? (ziel ? rechts : listeBox) : h("div", { className: "nz-nachrichten" }, listeBox, rechts));
+}
+/* ── Netzwerk 2.0, Paket 4 (OP 537, 07.11.2026): Community-Kontakte 2.0 – Fragen, Gesuche und Angebote mit Art, Thema und Feldern,
+   Filter und Volltextsuche, „Für mich“, Antworten unter dem Beitrag, erledigt, Suchaufträge mit Zustellung (Glocke + Mail), Hinweise.
+   Regeln (Sichtbarkeit, Limits, Passung, Suchaufträge, KI-Ordner) liegen in der Datenbank (nz.beitrag_*); die App zeigt an und reicht durch. ── */
+const NZ4_ART = [["frage", "Frage", "Question", "Du suchst Rat, Erfahrung oder eine Einschätzung.", "You are looking for advice, experience or an assessment."], ["suche", "Suche", "Request", "Du suchst einen Spieler, Verein, Kontakt oder eine Leistung.", "You are looking for a player, club, contact or service."], ["angebot", "Angebot", "Offer", "Du bietest Kontakte, Erfahrung oder eine Leistung an.", "You offer contacts, experience or a service."]];
+const NZ4_THEMA = [["spieler_gesucht", "Spieler gesucht", "Player wanted"], ["spieler_angebot", "Spieler anzubieten", "Player on offer"], ["verein_gesucht", "Verein gesucht", "Club wanted"], ["kontakt_gesucht", "Kontakt gesucht", "Contact wanted"], ["rat", "Rat / Erfahrung", "Advice / experience"], ["dienstleistung", "Dienstleistung", "Service"], ["sonstiges", "Sonstiges", "Other"]];
+const NZ4_TAKT = [["aus", "keine Mail", "no e-mail"], ["taeglich", "täglich (ab 7 Uhr, nur wenn es Neues gibt)", "daily (from 7 am, only when there is news)"], ["woechentlich", "wöchentlich (montags)", "weekly (Mondays)"]];
+function nz4Art(a) { const en = LANG === "en"; const x = NZ4_ART.find(y => y[0] === a); return x ? (en ? x[2] : x[1]) : (a || ""); }
+function nz4Thema(t) { const en = LANG === "en"; const x = NZ4_THEMA.find(y => y[0] === t); return x ? (en ? x[2] : x[1]) : (t || ""); }
+function nz4Grund(g, d) {
+  const en = LANG === "en";
+  const m = {
+    premium: ["Die Community-Kontakte sind Teil von Pro.", "Community contacts are part of Pro."],
+    laenge: ["Der Text braucht 10 bis 1200 Zeichen.", "The text needs 10 to 1200 characters."],
+    art: ["Bitte eine Art wählen (Frage, Suche oder Angebot).", "Please choose a type (question, request or offer)."],
+    thema: ["Bitte ein Thema wählen.", "Please choose a topic."],
+    alter: ["Das Altersfenster ist verdreht (von größer als bis).", "The age range is reversed (from is larger than to)."],
+    limit: ["Tageslimit erreicht (10 Beiträge bzw. 60 Antworten in 24 Stunden). Morgen geht es weiter.", "Daily limit reached (10 posts or 60 replies in 24 hours). Try again tomorrow."],
+    beitrag: ["Dieser Beitrag ist nicht (mehr) verfügbar.", "This post is not available (any more)."],
+    antwort: ["Diese Antwort wurde nicht gefunden.", "This reply was not found."],
+    filter: ["Bitte mindestens einen Filter oder ein Suchwort setzen.", "Please set at least one filter or a search term."],
+    zu_viele: ["Höchstens 10 Suchaufträge. Lösche zuerst einen alten.", "At most 10 saved searches. Delete an old one first."],
+    takt: ["Unbekannte Einstellung.", "Unknown setting."],
+    text: ["Bitte einen Text eingeben.", "Please enter a text."],
+    doppelt: ["Du hast diesen Beitrag bereits gemeldet.", "You have already reported this post."],
+    netz: ["Verbindung fehlgeschlagen. Bitte später erneut.", "Connection failed. Please try again later."]
+  };
+  const x = m[g]; return x ? (en ? x[1] : x[0]) : nz3Grund(g, d);
+}
+function nz4Alter(b) { const en = LANG === "en"; if (!b) return ""; if (b.alter_von && b.alter_bis) return b.alter_von + "–" + b.alter_bis; if (b.alter_bis) return (en ? "up to " : "bis ") + b.alter_bis; if (b.alter_von) return (en ? "from " : "ab ") + b.alter_von; return ""; }
+function nz4Felder(b) {   // [Bezeichnung, Wert] für Karte und Detail
+  const en = LANG === "en"; const f = [];
+  if (b.position) f.push([en ? "Position" : "Position", b.position]);
+  if (b.land) f.push([en ? "Country" : "Land", b.land]);
+  if (b.liga) f.push([en ? "League" : "Liga", b.liga]);
+  const a = nz4Alter(b); if (a) f.push([en ? "Age" : "Alter", a]);
+  if (b.zeitraum) f.push([en ? "Period" : "Zeitraum", b.zeitraum]);
+  if (b.sprache) f.push([en ? "Language" : "Sprache", b.sprache]);
+  return f;
+}
+function nz4Status(b) {
+  const en = LANG === "en";
+  if (!b) return null;
+  if (b.status === "erledigt") return en ? "done" : "erledigt";
+  if (b.status === "archiv") return en ? "archived" : "Archiv";
+  if (b.status === "entfernt") return en ? "withdrawn" : "zurückgezogen";
+  if (b.status === "pruefung") return en ? "under review" : "in Prüfung";
+  if (b.status === "gemeldet") return en ? "reported" : "gemeldet";
+  return null;
+}
+function nz4Melden(account, id, grund) {   // Melden über den bestehenden Community-Weg (Moderation)
+  return fetch("/api/tw-community-report", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: (account && account.email) || "", code: (account && (account.code || account.sitzung)) || "", post_id: id, grund: String(grund || "").slice(0, 500) }), cache: "no-store", credentials: "omit" })
+    .then(r => r.json().catch(() => ({ ok: false, grund: "antwort" }))).catch(() => ({ ok: false, grund: "netz" }));
+}
+function nz4Hinweise(account) {   // Hinweise laden und als gelesen markieren; Zähler in Glocke und Seitenleiste löschen
+  return nzRuf(account, "hinweise", {}).then(d => {
+    if (!d || !d.ok) return d;
+    if (Number(d.ungelesen) > 0) { nzRuf(account, "hinweise_gelesen", {}); NZ3.hinweise = 0; try { window.dispatchEvent(new CustomEvent("nz-neu", { detail: { ungelesen: NZ3.ungelesen, anfragen: NZ3.anfragen, hinweise: 0, geaendert: [] } })); } catch (e) {} }
+    return d;
+  });
+}
+
+/* Glocke: Zeile „N neue Netzwerk-Hinweise“ */
+function NzGlockeHinweise({ n, onOeffnen }) {
+  const h = React.createElement; const en = LANG === "en";
+  if (!n) return null;
+  return h("button", { type: "button", className: "nz-glocke-hw", onClick: onOeffnen, "data-nz-glocke-hw": "1" },
+    h("span", { className: "nz-ng-zahl" }, n > 99 ? "99+" : String(n)),
+    h("span", { style: { flex: 1 } }, en ? (n === 1 ? "1 new network notice" : n + " new network notices") : (n === 1 ? "1 neuer Netzwerk-Hinweis" : n + " neue Netzwerk-Hinweise")),
+    h("span", { style: { color: "var(--t2)", fontWeight: 600 } }, en ? "Open" : "Öffnen"));
+}
+
+/* Karte eines Beitrags */
+function NzBeitragKarte({ account, b, onOeffnen }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  const st = nz4Status(b); const felder = nz4Felder(b); const a = b.autor || {};
+  const kurz = b.kurzzeile || String(b.text || "").replace(/\s+/g, " ").slice(0, 110) + (String(b.text || "").length > 110 ? "…" : "");
+  return h("button", { type: "button", className: "nz-b-karte" + (b.status !== "offen" ? " blass" : ""), onClick: () => onOeffnen(b.id), "data-nz-beitrag": b.id },
+    h("div", { className: "nz-b-chips" },
+      b.art ? h("span", { className: "nz-chip art-" + b.art }, nz4Art(b.art)) : null,
+      b.thema ? h("span", { className: "nz-chip" }, nz4Thema(b.thema)) : null,
+      st ? h("span", { className: "nz-chip" }, st) : null,
+      !b.own && Number(b.passung) > 0 ? h("span", { className: "nz-chip passt" }, L("passt zu dir", "matches you")) : null,
+      b.own ? h("span", { className: "nz-chip" }, L("von dir", "yours")) : null),
+    h("div", { className: "nz-b-kurz" }, kurz),
+    b.kurzzeile ? h("div", { className: "nz-b-text" }, b.text) : null,
+    felder.length ? h("div", { className: "nz-b-felder" }, felder.map(f => h("span", { key: f[0] }, f[0] + ": ", h("b", null, f[1])))) : null,
+    h("div", { className: "nz-b-meta" },
+      h(NzAvatar, { account: account, email: a.email, name: a.name, hatFoto: !!a.foto, groesse: "klein" }),
+      h("span", { className: "nz-name" }, h("span", null, a.name || L("Mitglied", "Member")), nzHakenAus(a, true)),
+      h("span", null, nzRolleVon(a)), h("span", null, "·"), h("span", null, nz3Zeit(b.erstellt_am)),
+      h("span", { className: "nz-b-zahlen" }, (b.antworten || 0) + " " + (b.antworten === 1 ? L("Antwort", "reply") : L("Antworten", "replies")) + " · " + (b.gelesen || 0) + " " + L("Mal gelesen", "views"))));
+}
+
+/* Felder-Formular (Erstellen und Bearbeiten) */
+function NzBeitragFormular({ w, setz, mitThema }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  const feld = (k, label, platz, typ) => h("label", { className: "nz-feld" }, label, h("input", { type: typ || "text", value: w[k] || "", placeholder: platz || "", onChange: e => setz(k, e.target.value), min: typ === "number" ? 14 : undefined, max: typ === "number" ? 45 : undefined, maxLength: 80 }));
+  return h("div", { className: "nz-felder" },
+    mitThema ? h("label", { className: "nz-feld breit" }, L("Thema", "Topic") + " *", h("select", { value: w.thema || "", onChange: e => setz("thema", e.target.value), "data-nz-thema": "1" }, h("option", { value: "" }, L("bitte wählen …", "please choose …")), NZ4_THEMA.map(t => h("option", { key: t[0], value: t[0] }, en ? t[2] : t[1])))) : null,
+    feld("position", L("Position", "Position"), L("z. B. Linksverteidiger", "e.g. left back")),
+    feld("land", L("Land", "Country"), L("z. B. Spanien", "e.g. Spain")),
+    feld("liga", L("Liga", "League"), L("z. B. LaLiga", "e.g. LaLiga")),
+    feld("alter_von", L("Alter von", "Age from"), "14–45", "number"),
+    feld("alter_bis", L("Alter bis", "Age to"), "14–45", "number"),
+    feld("zeitraum", L("Zeitraum", "Period"), L("z. B. Winter 2026/27", "e.g. winter 2026/27")),
+    feld("sprache", L("Sprache", "Language"), L("z. B. Deutsch", "e.g. German")));
+}
+
+/* Erstellen: zuerst die Art, dann das Formular */
+function NzBeitragErstellen({ account, schliessen, onNeu, setView }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  useScrollSperre(true); useTwZurueck(true, schliessen);
+  const [art, setArt] = React.useState(""); const [w, setW] = React.useState({ thema: "", text: "", position: "", land: "", liga: "", alter_von: "", alter_bis: "", zeitraum: "", sprache: "" });
+  const [busy, setBusy] = React.useState(false); const [fehler, setFehler] = React.useState("");
+  const setz = (k, v) => setW(x => Object.assign({}, x, { [k]: v }));
+  const senden = () => {
+    if (!w.thema) { setFehler(nz4Grund("thema")); return; }
+    if (w.text.trim().length < 10) { setFehler(nz4Grund("laenge")); return; }
+    setBusy(true); setFehler("");
+    nzRuf(account, "beitrag_anlegen", Object.assign({}, w, { art: art, text: w.text.trim() })).then(d => { setBusy(false); if (d && d.ok) { onNeu(d.beitrag); } else setFehler(nz4Grund(d && d.grund, d)); });
+  };
+  const wahl = (k, titel, sub, onClick, aus) => h("button", { key: k, type: "button", onClick: onClick, disabled: !!aus, "data-nz-art": k }, h("b", null, titel), h("span", null, sub));
+  return h("div", { className: "nz-modal", onClick: ev => { if (ev.target === ev.currentTarget) schliessen(); } },
+    h("div", { className: "nz-box breit", role: "dialog", "aria-modal": "true" },
+      h("div", { className: "nz-kopf" }, h("h2", null, art ? L(nz4Art(art) + " erstellen", "Create " + nz4Art(art).toLowerCase()) : L("Was möchtest du erstellen?", "What would you like to create?")), h("button", { type: "button", className: "nz-x", "aria-label": L("Schließen", "Close"), onClick: schliessen }, "×")),
+      !art ? h(React.Fragment, null,
+        h("div", { className: "nz-art-wahl" },
+          NZ4_ART.map(a => wahl(a[0], en ? a[2] : a[1], en ? a[4] : a[3], () => setArt(a[0]))),
+          wahl("hinweis", L("Transfer-Hinweis", "Transfer tip"), L("Ein Wechsel, eine Leihe, ein Vereinsbedarf – geprüft und in den Transferfeed übernommen.", "A move, a loan, a club need – checked and taken into the transfer feed."), () => { schliessen(); setView("community"); }),
+          wahl("verein_sucht", L("Verein sucht", "Club seeks"), L("Als Transfer-Hinweis im Muster „VEREIN sucht POSITION“ – erscheint unter „Verein sucht“.", "As a transfer tip in the pattern “CLUB seeks POSITION” – appears under “Club seeks”."), () => { schliessen(); setView("community"); }),
+          wahl("spieler", L("Spieler anbieten", "Offer a player"), L("Folgt mit dem Spieler-Markt (Netzwerk 2.0, Paket 6).", "Coming with the Player Market (Network 2.0, package 6)."), null, true)),
+        h("p", { className: "nz-sub", style: { marginTop: 10 } }, L("Fragen, Suchen und Angebote erscheinen sofort in den Community-Kontakten – mit Thema und Feldern, damit sie gefunden werden.", "Questions, requests and offers appear immediately in the community contacts – with topic and fields so they can be found.")))
+      : h(React.Fragment, null,
+        h("div", { className: "nz-felder" },
+          h("label", { className: "nz-feld breit" }, L("Text", "Text") + " * (" + w.text.length + "/1200)", h("textarea", { rows: 5, maxLength: 1200, value: w.text, placeholder: L("Was suchst du, was bietest du, was möchtest du wissen? Keine Telefonnummern oder E-Mail-Adressen im Text – Kontakt läuft über Nachrichten.", "What are you looking for, what do you offer, what do you want to know? No phone numbers or e-mail addresses in the text – contact runs via messages."), onChange: e => setz("text", e.target.value), "data-nz-text": "1" }))),
+        h(NzBeitragFormular, { w: w, setz: setz, mitThema: true }),
+        h("p", { className: "nz-hinweis", style: { marginTop: 10 } }, L("Pflicht sind nur Art und Thema. Position, Land, Liga, Alter, Zeitraum und Sprache helfen beim Finden und bei der Zustellung – was fehlt, ergänzt der Ordner aus dem Text.", "Only type and topic are required. Position, country, league, age, period and language help others find your post – missing fields are completed from the text.")),
+        fehler ? h("p", { className: "nz-fehler" }, fehler) : null,
+        h("div", { className: "nz-knoepfe" },
+          h("button", { type: "button", className: "nz-btn gruen", disabled: busy, onClick: senden, "data-nz-senden": "1" }, busy ? L("Speichert …", "Saving …") : L("Veröffentlichen", "Publish")),
+          h("button", { type: "button", className: "nz-btn", onClick: () => { setArt(""); setFehler(""); } }, L("Andere Art", "Other type")),
+          h("button", { type: "button", className: "nz-btn", onClick: schliessen }, L("Abbrechen", "Cancel"))))));
+}
+
+/* Detail: Text, Felder, Autor, Antworten, eigene Verwaltung, Melden */
+function NzBeitragDetail({ account, id, schliessen, onAenderung, onEntfernt, setView }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  useScrollSperre(true); useTwZurueck(true, schliessen);
+  const pro = twIstPremium();
+  const [d, setD] = React.useState(null); const [fehler, setFehler] = React.useState(""); const [busy, setBusy] = React.useState(false); const [ok, setOk] = React.useState("");
+  const [antwort, setAntwort] = React.useState(""); const [bearbeiten, setBearbeiten] = React.useState(false); const [w, setW] = React.useState(null);
+  const [melde, setMelde] = React.useState(false); const [meldeGrund, setMeldeGrund] = React.useState(""); const [frage, setFrage] = React.useState(false);
+  React.useEffect(() => { let alive = true; setD(null); setFehler(""); nzRuf(account, "beitrag", { id: id }).then(x => { if (!alive) return; if (x && x.ok) { setD(x); if (onAenderung) onAenderung(x.beitrag); } else setFehler(nz4Grund(x && x.grund, x)); }); return () => { alive = false; }; }, [id]);
+  const b = d && d.beitrag; const a = (b && b.autor) || {};
+  const setzB = (nb, extra) => { setD(x => Object.assign({}, x, { beitrag: nb }, extra || {})); if (onAenderung) onAenderung(nb); };
+  const antworten = () => {
+    const t = antwort.trim(); if (!t) { setFehler(nz4Grund("text")); return; }
+    setBusy(true); setFehler("");
+    nzRuf(account, "beitrag_antworten", { id: id, text: t }).then(x => { setBusy(false); if (x && x.ok) { setAntwort(""); const nb = Object.assign({}, b, { antworten: x.antworten }); setD(y => Object.assign({}, y, { beitrag: nb, antworten: (y.antworten || []).concat([x.antwort]) })); if (onAenderung) onAenderung(nb); } else setFehler(nz4Grund(x && x.grund, x)); });
+  };
+  const antwortLoeschen = (aid) => { setBusy(true); nzRuf(account, "beitrag_antwort_loeschen", { antwort: aid }).then(x => { setBusy(false); if (x && x.ok) { const nb = Object.assign({}, b, { antworten: Math.max(0, (b.antworten || 0) - 1) }); setD(y => Object.assign({}, y, { beitrag: nb, antworten: (y.antworten || []).filter(z => z.id !== aid) })); if (onAenderung) onAenderung(nb); } else setFehler(nz4Grund(x && x.grund, x)); }); };
+  const erledigt = (an) => { setBusy(true); setOk(""); nzRuf(account, "beitrag_erledigt", { id: id, an: an }).then(x => { setBusy(false); if (x && x.ok) { setzB(x.beitrag); setOk(an ? L("Als erledigt markiert – der Beitrag rutscht nach unten und wandert nach 60 Tagen ins Archiv.", "Marked as done – the post moves down and is archived after 60 days.") : L("Wieder geöffnet.", "Reopened.")); } else setFehler(nz4Grund(x && x.grund, x)); }); };
+  const zurueckziehen = () => { setBusy(true); nzRuf(account, "beitrag_zurueckziehen", { id: id }).then(x => { setBusy(false); if (x && x.ok) { if (onEntfernt) onEntfernt(id); schliessen(); } else setFehler(nz4Grund(x && x.grund, x)); }); };
+  const felderSpeichern = () => { setBusy(true); setOk(""); nzRuf(account, "beitrag_felder", Object.assign({ id: id }, w)).then(x => { setBusy(false); if (x && x.ok) { setzB(x.beitrag); setBearbeiten(false); setOk(L("Felder gespeichert.", "Fields saved.")); } else setFehler(nz4Grund(x && x.grund, x)); }); };
+  const melden = () => { setBusy(true); nz4Melden(account, id, meldeGrund).then(x => { setBusy(false); if (x && x.ok) { setMelde(false); setMeldeGrund(""); setzB(Object.assign({}, b, { gemeldet_von_mir: true })); setOk(L("Danke – der Beitrag wurde gemeldet und wird geprüft.", "Thank you – the post was reported and will be reviewed.")); } else setFehler(nz4Grund(x && x.grund, x)); }); };
+  const felder = b ? nz4Felder(b) : []; const st = nz4Status(b);
+  const titel = b ? (b.kurzzeile || nz4Thema(b.thema) || L("Beitrag", "Post")) : L("Beitrag", "Post");
+  return h("div", { className: "nz-modal", onClick: ev => { if (ev.target === ev.currentTarget) schliessen(); } },
+    h("div", { className: "nz-box breit", role: "dialog", "aria-modal": "true", "data-nz-detail": id },
+      h("div", { className: "nz-kopf" }, h("h2", { style: { fontSize: 18 } }, titel), h("button", { type: "button", className: "nz-x", "aria-label": L("Schließen", "Close"), onClick: schliessen }, "×")),
+      !d && !fehler ? h("p", { className: "nz-sub" }, L("Lade …", "Loading …")) : null,
+      fehler ? h("p", { className: "nz-fehler" }, fehler) : null,
+      b ? h("div", null,
+        h("div", { className: "nz-b-chips" },
+          b.art ? h("span", { className: "nz-chip art-" + b.art }, nz4Art(b.art)) : null, b.thema ? h("span", { className: "nz-chip" }, nz4Thema(b.thema)) : null, st ? h("span", { className: "nz-chip" }, st) : null,
+          b.own ? h("span", { className: "nz-chip" }, L("von dir", "yours")) : null),
+        h("div", { className: "nz-b-meta", style: { borderTop: 0, paddingTop: 8 } },
+          h(NzAvatar, { account: account, email: a.email, name: a.name, hatFoto: !!a.foto, groesse: "klein" }),
+          h("span", { className: "nz-name" }, h("span", null, a.name || L("Mitglied", "Member")), nzHakenAus(a, true)),
+          h("span", null, nzRolleVon(a)), h("span", null, "·"), h("span", null, nz3Zeit(b.erstellt_am)),
+          h("span", { className: "nz-b-zahlen" }, (b.antworten || 0) + " " + L("Antworten", "replies") + " · " + (b.gelesen || 0) + " " + L("Mal gelesen", "views"))),
+        h("p", { className: "nz-b-text-voll" }, b.text),
+        felder.length ? h("div", { className: "nz-b-felder", style: { marginTop: 10 } }, felder.map(f => h("span", { key: f[0] }, f[0] + ": ", h("b", null, f[1])))) : null,
+        b.schluesselwoerter && b.schluesselwoerter.length ? h("div", { className: "nz-chips", style: { marginTop: 8 } }, b.schluesselwoerter.slice(0, 12).map((k, i) => h("span", { key: k + i, className: "nz-chip" }, k))) : null,
+        b.own && b.ki ? h("div", { className: "nz-sub", style: { marginTop: 8 } },
+          b.ki.status === "fertig" ? L("Vom Ordner geprüft", "Checked by the organiser") + ((b.ki.felder || []).length ? " – " + L("ergänzt:", "completed:") + " " + b.ki.felder.join(", ") : "") : (b.ki.status === "ausstehend" || b.ki.status === "laeuft" ? L("Der Ordner ergänzt fehlende Felder, sobald er läuft.", "The organiser completes missing fields once it runs.") : null),
+          b.ki.dublette_von ? h("div", null, L("Ähnelt Beitrag #", "Similar to post #") + b.ki.dublette_von) : null,
+          b.ki.verstoss ? h("div", { className: "nz-fehler", style: { marginTop: 6 } }, L("Der Ordner hat einen möglichen Regelverstoß markiert (" + b.ki.verstoss + "). Der Moderator schaut sich den Beitrag an.", "The organiser flagged a possible rule violation (" + b.ki.verstoss + "). The moderator will review the post.")) : null) : null,
+        h("div", { className: "nz-knoepfe", style: { marginTop: 12 } },
+          !b.own ? h("button", { type: "button", className: "nz-btn gruen", onClick: () => { schliessen(); nzNachrichtAn({ post: b.id, name: a.name }, setView); } }, L("Nachricht", "Message")) : null,
+          !b.own && a.profil && a.email ? h("button", { type: "button", className: "nz-btn", onClick: () => { schliessen(); nzProfilOeffnen(a.email, setView); } }, L("Profil", "Profile")) : null,
+          !b.own && !b.gemeldet_von_mir ? h("button", { type: "button", className: "nz-btn", onClick: () => setMelde(x => !x) }, L("Melden", "Report")) : null,
+          !b.own && b.gemeldet_von_mir ? h("span", { className: "nz-sub" }, L("Von dir gemeldet.", "Reported by you.")) : null,
+          b.own && b.status !== "entfernt" && b.status !== "archiv" ? h("button", { type: "button", className: "nz-btn" + (b.status === "erledigt" ? "" : " gruen"), disabled: busy, onClick: () => erledigt(b.status !== "erledigt") }, b.status === "erledigt" ? L("Wieder öffnen", "Reopen") : L("Erledigt", "Done")) : null,
+          b.own && b.status !== "entfernt" ? h("button", { type: "button", className: "nz-btn", disabled: busy, onClick: () => { setBearbeiten(x => !x); setW({ thema: b.thema || "", position: b.position || "", land: b.land || "", liga: b.liga || "", alter_von: b.alter_von || "", alter_bis: b.alter_bis || "", zeitraum: b.zeitraum || "", sprache: b.sprache || "" }); } }, L("Felder bearbeiten", "Edit fields")) : null,
+          b.own && b.status !== "entfernt" ? (!frage ? h("button", { type: "button", className: "nz-btn rot", disabled: busy, onClick: () => setFrage(true) }, L("Zurückziehen", "Withdraw")) : h(React.Fragment, null, h("button", { type: "button", className: "nz-btn rot", disabled: busy, onClick: zurueckziehen }, L("Wirklich zurückziehen", "Really withdraw")), h("button", { type: "button", className: "nz-btn", onClick: () => setFrage(false) }, L("Abbrechen", "Cancel")))) : null,
+          ok ? h("span", { className: "nz-ok" }, ok) : null),
+        melde ? h("div", { className: "nz-karte-box", style: { marginTop: 10 } },
+          h("label", { className: "nz-feld" }, L("Warum möchtest du diesen Beitrag melden? (optional)", "Why do you want to report this post? (optional)"), h("textarea", { rows: 2, maxLength: 500, value: meldeGrund, onChange: e => setMeldeGrund(e.target.value) })),
+          h("div", { className: "nz-knoepfe" }, h("button", { type: "button", className: "nz-btn rot", disabled: busy, onClick: melden }, L("Jetzt melden", "Report now")), h("button", { type: "button", className: "nz-btn", onClick: () => setMelde(false) }, L("Abbrechen", "Cancel")))) : null,
+        bearbeiten && w ? h("div", { className: "nz-karte-box", style: { marginTop: 10 } },
+          h(NzBeitragFormular, { w: w, setz: (k, v) => setW(x => Object.assign({}, x, { [k]: v })), mitThema: true }),
+          h("div", { className: "nz-knoepfe" }, h("button", { type: "button", className: "nz-btn gruen", disabled: busy, onClick: felderSpeichern }, L("Felder speichern", "Save fields")), h("button", { type: "button", className: "nz-btn", onClick: () => setBearbeiten(false) }, L("Abbrechen", "Cancel")))) : null,
+        h("h3", { style: { marginTop: 16 } }, L("Antworten", "Replies") + " (" + (d.antworten || []).length + ")"),
+        (d.antworten || []).length ? h("div", { className: "nz-antworten" }, d.antworten.map(x => { const xa = x.autor || {}; return h("div", { key: x.id, className: "nz-antwort" },
+          h(NzAvatar, { account: account, email: xa.email, name: xa.name, hatFoto: !!xa.foto, groesse: "klein" }),
+          h("div", { style: { minWidth: 0 } },
+            h("div", { className: "nz-antwort-kopf" }, h("b", null, xa.name || L("Mitglied", "Member")), nzHakenAus(xa, true), h("span", null, nzRolleVon(xa)), h("span", null, "·"), h("span", null, nz3Zeit(x.erstellt_am)), x.eigene ? h("button", { type: "button", className: "nz-btn klein", style: { marginLeft: "auto" }, disabled: busy, onClick: () => antwortLoeschen(x.id) }, L("Löschen", "Delete")) : null),
+            h("div", { className: "nz-antwort-text" }, x.text))); })) : h("p", { className: "nz-sub" }, L("Noch keine Antworten.", "No replies yet.")),
+        b.status === "offen" || b.status === "erledigt" ? h("div", { className: "nz-felder", style: { marginTop: 10 } },
+          h("label", { className: "nz-feld breit" }, L("Deine Antwort (für alle sichtbar – Vertrauliches lieber per Nachricht)", "Your reply (visible to all – use a message for confidential matters)"), h("textarea", { rows: 3, maxLength: 1000, value: antwort, onChange: e => setAntwort(e.target.value), disabled: !pro, "data-nz-antwort": "1" })),
+          h("div", { className: "nz-knoepfe", style: { gridColumn: "1 / -1" } }, h("button", { type: "button", className: "nz-btn gruen", disabled: busy || !pro || !antwort.trim(), onClick: antworten }, L("Antworten", "Reply")), !pro ? h("span", { className: "nz-sub" }, nz4Grund("premium")) : null)) : null) : null));
+}
+
+/* Suchauftrag aus dem aktuellen Filter speichern */
+function NzSuchauftragNeu({ account, filter, schliessen, onGespeichert }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  useScrollSperre(true); useTwZurueck(true, schliessen);
+  const [name, setName] = React.useState(""); const [busy, setBusy] = React.useState(false); const [fehler, setFehler] = React.useState("");
+  const teile = []; if (filter.text) teile.push("„" + filter.text + "“"); if (filter.art) teile.push(nz4Art(filter.art)); if (filter.thema) teile.push(nz4Thema(filter.thema)); if (filter.position) teile.push(filter.position); if (filter.land) teile.push(filter.land); if (filter.liga) teile.push(filter.liga); if (filter.nur_verifizierte) teile.push(L("nur verifizierte", "verified only"));
+  const speichern = () => { setBusy(true); setFehler(""); nzRuf(account, "suchauftrag_speichern", { name: name.trim(), filter: filter }).then(d => { setBusy(false); if (d && d.ok) onGespeichert(d.suchauftraege || []); else setFehler(nz4Grund(d && d.grund, d)); }); };
+  return h("div", { className: "nz-modal", onClick: ev => { if (ev.target === ev.currentTarget) schliessen(); } },
+    h("div", { className: "nz-box", role: "dialog", "aria-modal": "true" },
+      h("div", { className: "nz-kopf" }, h("h2", null, L("Suchauftrag speichern", "Save search")), h("button", { type: "button", className: "nz-x", "aria-label": L("Schließen", "Close"), onClick: schliessen }, "×")),
+      h("p", { className: "nz-sub" }, L("Wir sagen dir Bescheid, wenn ein neuer Beitrag dazu passt – in der Glocke und, wenn du magst, in der Mail-Zusammenfassung.", "We let you know when a new post matches – in the bell and, if you like, in the e-mail summary.")),
+      h("div", { className: "nz-chips", style: { margin: "8px 0" } }, teile.map((t, i) => h("span", { key: i, className: "nz-chip" }, t))),
+      h("div", { className: "nz-felder" }, h("label", { className: "nz-feld breit" }, L("Name (optional)", "Name (optional)"), h("input", { value: name, maxLength: 60, placeholder: teile.join(" · ").slice(0, 60), onChange: e => setName(e.target.value) }))),
+      fehler ? h("p", { className: "nz-fehler" }, fehler) : null,
+      h("div", { className: "nz-knoepfe" }, h("button", { type: "button", className: "nz-btn gruen", disabled: busy, onClick: speichern, "data-nz-sa-speichern": "1" }, L("Speichern", "Save")), h("button", { type: "button", className: "nz-btn", onClick: schliessen }, L("Abbrechen", "Cancel")))));
+}
+
+/* Einstellung der Mail-Zusammenfassung */
+function NzBeitragEinstellungen({ account }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  const [takt, setTakt] = React.useState(null); const [ok, setOk] = React.useState("");
+  React.useEffect(() => { let alive = true; nzRuf(account, "beitrag_einstellungen", {}).then(d => { if (alive && d && d.ok) setTakt(d.mail_takt || "taeglich"); }); return () => { alive = false; }; }, [account && account.email]);
+  const setzen = (t) => { setTakt(t); setOk(""); nzRuf(account, "beitrag_einstellungen", { mail_takt: t }).then(d => { if (d && d.ok) { setTakt(d.mail_takt); setOk(L("Gespeichert.", "Saved.")); } }); };
+  return h("div", { className: "nz-karte-box", "data-nz-einst": "1" },
+    h("b", { style: { fontSize: 13.5 } }, L("Mail-Zusammenfassung", "E-mail summary")),
+    h("p", { className: "nz-sub", style: { margin: "4px 0 8px" } }, L("Treffer zu deinen Suchaufträgen, Antworten auf deine Beiträge und passende Gesuche – gesammelt per Mail. In der App siehst du alles sofort in der Glocke.", "Matches for your saved searches, replies to your posts and matching requests – collected by e-mail. In the app you see everything immediately in the bell.")),
+    h("div", { className: "nz-checks", style: { flexDirection: "column", gap: 6 } }, NZ4_TAKT.map(t => h("label", { key: t[0] }, h("input", { type: "radio", name: "nz-takt", checked: takt === t[0], disabled: takt === null, onChange: () => setzen(t[0]) }), en ? t[2] : t[1]))),
+    ok ? h("div", { className: "nz-ok", style: { marginTop: 6 } }, ok) : null);
+}
+
+/* Seite „Community-Kontakte“ */
+function NzBeitraegeSeite({ account, setView, admin }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  const pro = twIstPremium(); const sitzung = !!(account && twHatSitzung(account));
+  const leer = { text: "", art: "", thema: "", position: "", land: "", liga: "", nur_verifizierte: false, status: "offen", sortierung: "neu" };
+  const [tab, setTab] = React.useState("alle"); const [f, setF] = React.useState(leer);
+  const [erg, setErg] = React.useState(null); const [laedt, setLaedt] = React.useState(false); const [fehler, setFehler] = React.useState("");
+  const [detail, setDetail] = React.useState(null); const [erstellen, setErstellen] = React.useState(false); const [saNeu, setSaNeu] = React.useState(false);
+  const [sa, setSa] = React.useState(null); const [hw, setHw] = React.useState(null); const [hwOffen, setHwOffen] = React.useState(true);
+  const aktiv = !!(f.text.trim() || f.art || f.thema || f.position.trim() || f.land.trim() || f.liga.trim() || f.nur_verifizierte);
+  const filterBody = (seite) => ({ text: f.text.trim(), art: f.art, thema: f.thema, position: f.position.trim(), land: f.land.trim(), liga: f.liga.trim(), nur_verifizierte: f.nur_verifizierte, status: tab === "meine" ? "alle" : f.status, sortierung: tab === "fuer_mich" && f.sortierung === "neu" ? "passend" : f.sortierung, nur: tab === "fuer_mich" ? "fuer_mich" : (tab === "meine" ? "meine" : "alle"), seite: seite || 1 });
+  const ladeSa = () => nzRuf(account, "suchauftraege", {}).then(d => { if (d && d.ok) setSa(d.suchauftraege || []); });
+  React.useEffect(() => { if (!sitzung || !pro) return undefined; ladeSa(); nz4Hinweise(account).then(d => { if (d && d.ok) setHw((d.hinweise || []).filter(x => !x.gelesen)); }); return undefined; }, [account && account.email, pro]);
+  React.useEffect(() => {
+    if (!sitzung || !pro || tab === "suchauftraege") return undefined;
+    let alive = true; setLaedt(true); setFehler("");
+    const timer = setTimeout(() => { nzRuf(account, "beitraege", filterBody(1)).then(d => { if (!alive) return; setLaedt(false); if (d && d.ok) setErg(d); else { setErg(null); setFehler(nz4Grund(d && d.grund, d)); } }); }, 200);
+    return () => { alive = false; clearTimeout(timer); };
+  }, [tab, f.text, f.art, f.thema, f.position, f.land, f.liga, f.nur_verifizierte, f.status, f.sortierung, account && account.email, pro]);
+  const mehr = () => { if (!erg || laedt) return; setLaedt(true); nzRuf(account, "beitraege", filterBody((erg.seite || 1) + 1)).then(d => { setLaedt(false); if (d && d.ok) setErg(Object.assign({}, d, { treffer: (erg.treffer || []).concat(d.treffer || []) })); }); };
+  const aenderung = (b) => { if (!b) return; setErg(x => x ? Object.assign({}, x, { treffer: (x.treffer || []).map(y => y.id === b.id ? Object.assign({}, y, b) : y) }) : x); };
+  const entfernt = (id) => setErg(x => x ? Object.assign({}, x, { treffer: (x.treffer || []).filter(y => y.id !== id), gesamt: Math.max(0, (x.gesamt || 1) - 1) }) : x);
+  const neu = (b) => { setErstellen(false); setErg(x => x && (tab === "alle" || tab === "meine") ? Object.assign({}, x, { treffer: [b].concat(x.treffer || []), gesamt: (x.gesamt || 0) + 1 }) : x); setDetail(b.id); };
+  const setz = (k, v) => setF(x => Object.assign({}, x, { [k]: v }));
+  const feld = (k, label, platz) => h("label", { className: "nz-feld" }, label, h("input", { value: f[k], placeholder: platz || "", onChange: e => setz(k, e.target.value) }));
+  const tabKnopf = (k, label) => h("button", { type: "button", className: "nz-tab" + (tab === k ? " aktiv" : ""), onClick: () => setTab(k), "data-nz-tab": k }, label);
+  const kopf = h(React.Fragment, null,
+    typeof CommunitySub === "function" ? h(CommunitySub, { view: "nz_beitraege", setView: setView, admin: !!admin }) : null,
+    h("div", { className: "nz-b-kopfzeile" }, h("h1", null, L("Community-Kontakte", "Community contacts")),
+      sitzung && pro ? h("button", { type: "button", className: "nz-btn gruen", onClick: () => setErstellen(true), "data-nz-erstellen": "1" }, L("Erstellen", "Create")) : null),
+    h("p", { className: "nz-intro" }, L("Fragen, Gesuche und Angebote von Scouts, Beratern und Vereinen – mit Thema, Position, Land und Liga, damit nichts untergeht. Passende Gesuche kommen zu dir: über „Für mich“, Suchaufträge und die Glocke.", "Questions, requests and offers from scouts, agents and clubs – with topic, position, country and league so nothing gets lost. Matching requests come to you: via “For me”, saved searches and the bell.")));
+  if (!sitzung) return h("div", { className: "nz-seite" }, kopf, h("div", { className: "nz-hinweis" }, L("Bitte melde dich an, um die Community-Kontakte zu sehen.", "Please sign in to see the community contacts.")));
+  if (!pro) return h("div", { className: "nz-seite" }, kopf, h("div", { className: "nz-hinweis", style: { display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" } }, h("span", { style: { flex: 1 } }, L("Die Community-Kontakte sind Teil von Pro: Gesuche und Angebote lesen, selbst schreiben, antworten und Suchaufträge mit Zustellung anlegen.", "Community contacts are part of Pro: read requests and offers, post your own, reply and save searches with delivery.")), h("button", { type: "button", className: "nz-btn klein gruen", onClick: () => twZuPro() }, L("Pro ansehen", "View Pro"))));
+  const treffer = erg && erg.treffer ? erg.treffer : [];
+  return h("div", { className: "nz-seite" }, kopf,
+    hw && hw.length && hwOffen ? h("div", { className: "nz-hw", "data-nz-hw": "1" },
+      h("div", { className: "nz-hw-kopf" }, h("span", null, L("Neu für dich", "New for you") + " (" + hw.length + ")"), h("button", { type: "button", className: "nz-x", "aria-label": L("Ausblenden", "Hide"), onClick: () => setHwOffen(false), style: { cursor: "pointer", border: 0, background: "transparent", color: "var(--t2)", fontSize: 20, lineHeight: 1 } }, "×")),
+      hw.slice(0, 6).map(x => h("div", { key: x.id, className: "nz-hw-zeile" }, h("span", null, x.text), h("span", { className: "nz-sub", style: { flex: "none", minWidth: 0 } }, nz3Zeit(x.erstellt_am)), x.post ? h("button", { type: "button", className: "nz-btn klein", onClick: () => setDetail(x.post) }, L("Öffnen", "Open")) : null)),
+      hw.length > 6 ? h("div", { className: "nz-sub" }, L("… und " + (hw.length - 6) + " weitere.", "… and " + (hw.length - 6) + " more.")) : null) : null,
+    h("div", { className: "nz-tabs" }, tabKnopf("alle", L("Alle", "All")), tabKnopf("fuer_mich", L("Für mich", "For me")), tabKnopf("meine", L("Meine", "Mine")), tabKnopf("suchauftraege", L("Suchaufträge", "Saved searches") + (sa ? " (" + sa.length + ")" : ""))),
+    fehler ? h("p", { className: "nz-fehler" }, fehler) : null,
+    tab !== "suchauftraege" ? h(React.Fragment, null,
+      h("div", { className: "nz-karte-box" },
+        h("div", { className: "nz-filter" },
+          h("label", { className: "nz-feld breit" }, L("Suche", "Search"), h("input", { value: f.text, placeholder: L("Stichwort, Position, Verein, Land …", "Keyword, position, club, country …"), onChange: e => setz("text", e.target.value), "data-nz-suche": "1" })),
+          h("label", { className: "nz-feld" }, L("Art", "Type"), h("select", { value: f.art, onChange: e => setz("art", e.target.value) }, h("option", { value: "" }, L("alle", "all")), NZ4_ART.map(a => h("option", { key: a[0], value: a[0] }, en ? a[2] : a[1])))),
+          h("label", { className: "nz-feld" }, L("Thema", "Topic"), h("select", { value: f.thema, onChange: e => setz("thema", e.target.value) }, h("option", { value: "" }, L("alle", "all")), NZ4_THEMA.map(t => h("option", { key: t[0], value: t[0] }, en ? t[2] : t[1])))),
+          feld("position", L("Position", "Position"), L("z. B. Torwart", "e.g. goalkeeper")),
+          feld("land", L("Land", "Country"), L("z. B. Polen", "e.g. Poland")),
+          feld("liga", L("Liga", "League"), L("z. B. 2. Bundesliga", "e.g. 2. Bundesliga")),
+          tab !== "meine" ? h("label", { className: "nz-feld" }, L("Status", "Status"), h("select", { value: f.status, onChange: e => setz("status", e.target.value) }, h("option", { value: "offen" }, L("offen", "open")), h("option", { value: "erledigt" }, L("erledigt", "done")), h("option", { value: "alle" }, L("alle", "all")))) : null,
+          h("label", { className: "nz-feld" }, L("Sortierung", "Sort"), h("select", { value: f.sortierung, onChange: e => setz("sortierung", e.target.value) }, h("option", { value: "neu" }, L("neueste zuerst", "newest first")), h("option", { value: "passend" }, L("passend zu mir", "matching me")), h("option", { value: "antworten" }, L("meiste Antworten", "most replies"))))),
+        h("div", { className: "nz-knoepfe", style: { justifyContent: "space-between" } },
+          h("div", { className: "nz-checks" }, h("label", null, h("input", { type: "checkbox", checked: f.nur_verifizierte, onChange: e => setz("nur_verifizierte", e.target.checked) }), L("nur verifizierte", "verified only"))),
+          h("div", { className: "nz-knoepfe", style: { marginTop: 0 } },
+            aktiv ? h("button", { type: "button", className: "nz-btn klein gruen", onClick: () => setSaNeu(true), "data-nz-sa-neu": "1" }, L("Als Suchauftrag speichern", "Save as search")) : null,
+            aktiv ? h("button", { type: "button", className: "nz-btn klein", onClick: () => setF(Object.assign({}, leer, { status: f.status, sortierung: f.sortierung })) }, L("Filter zurücksetzen", "Reset filters")) : null))),
+      h("div", { className: "nz-zaehler-text" }, laedt && !erg ? L("Lade …", "Loading …") : (erg ? erg.gesamt + " " + (erg.gesamt === 1 ? L("Beitrag", "post") : L("Beiträge", "posts")) + (tab === "fuer_mich" ? " · " + L("passend zu deinem Profil und deiner Rolle", "matching your profile and role") : "") : "")),
+      treffer.length ? h("div", { className: "nz-b-liste" }, treffer.map(b => h(NzBeitragKarte, { key: b.id, account: account, b: b, onOeffnen: setDetail }))) : null,
+      erg && !treffer.length ? h("div", { className: "nz-leer" },
+        tab === "meine" ? L("Du hast noch keinen Beitrag geschrieben. Stell eine Frage, such einen Spieler oder biete deine Kontakte an – mit „Erstellen“.", "You have not written a post yet. Ask a question, look for a player or offer your contacts – via “Create”.")
+          : tab === "fuer_mich" ? L("Noch nichts Passendes. Je vollständiger dein Profil (Länder, Ligen, Schwerpunkte), desto besser passen die Vorschläge.", "Nothing matching yet. The more complete your profile (countries, leagues, focus), the better the suggestions.")
+          : (aktiv ? L("Keine Beiträge zu dieser Auswahl. Speichere die Suche als Suchauftrag – wir melden dir neue Treffer.", "No posts for this selection. Save the search – we notify you about new matches.") : L("Noch keine Beiträge. Schreib den ersten – mit „Erstellen“.", "No posts yet. Write the first one – via “Create”.")),
+        tab === "fuer_mich" ? h("div", { style: { marginTop: 10 } }, h("button", { type: "button", className: "nz-btn klein", onClick: () => setView("nz_profil") }, L("Zum Profil", "Go to profile"))) : null) : null,
+      erg && erg.seite < erg.seiten ? h("div", { className: "nz-knoepfe", style: { justifyContent: "center" } }, h("button", { type: "button", className: "nz-btn", disabled: laedt, onClick: mehr }, laedt ? L("Lädt …", "Loading …") : L("Mehr laden", "Load more"))) : null)
+    : h(React.Fragment, null,
+      h("p", { className: "nz-sub" }, L("Ein Suchauftrag merkt sich deine Filter („Innenverteidiger Polen“) und meldet neue Treffer in der Glocke und per Mail-Zusammenfassung. Anlegen: Filter setzen und „Als Suchauftrag speichern“.", "A saved search remembers your filters (“centre back Poland”) and reports new matches in the bell and the e-mail summary. Create one: set filters and “Save as search”.")),
+      !sa ? h("div", { className: "nz-sub" }, L("Lade …", "Loading …")) : null,
+      sa && !sa.length ? h("div", { className: "nz-leer" }, L("Noch kein Suchauftrag.", "No saved search yet.")) : null,
+      sa && sa.length ? h("div", { style: { display: "grid", gap: 8 } }, sa.map(x => { const fl = x.filter || {}; const teile = []; if (fl.text) teile.push("„" + fl.text + "“"); if (fl.art) teile.push(nz4Art(fl.art)); if (fl.thema) teile.push(nz4Thema(fl.thema)); if (fl.position) teile.push(fl.position); if (fl.land) teile.push(fl.land); if (fl.liga) teile.push(fl.liga); if (fl.nur_verifizierte) teile.push(L("nur verifizierte", "verified only"));
+        return h("div", { key: x.id, className: "nz-sa", "data-nz-sa": x.id },
+          h("div", { style: { minWidth: 0 } }, h("b", null, x.name), h("div", { className: "nz-sub" }, teile.join(" · ") + " · " + (x.treffer || 0) + " " + L("Treffer bisher", "matches so far"))),
+          h("div", { className: "nz-knoepfe", style: { marginTop: 0 } },
+            h("button", { type: "button", className: "nz-btn klein", onClick: () => { setF(Object.assign({}, leer, { text: fl.text || "", art: fl.art || "", thema: fl.thema || "", position: fl.position || "", land: fl.land || "", liga: fl.liga || "", nur_verifizierte: fl.nur_verifizierte === true || fl.nur_verifizierte === "true" })); setTab("alle"); } }, L("Anzeigen", "Show")),
+            h("button", { type: "button", className: "nz-btn klein rot", onClick: () => nzRuf(account, "suchauftrag_loeschen", { id: x.id }).then(d => { if (d && d.ok) setSa(d.suchauftraege || []); }) }, L("Löschen", "Delete")))); })) : null,
+      h(NzBeitragEinstellungen, { account: account })),
+    detail ? h(NzBeitragDetail, { key: detail, account: account, id: detail, schliessen: () => setDetail(null), onAenderung: aenderung, onEntfernt: entfernt, setView: setView }) : null,
+    erstellen ? h(NzBeitragErstellen, { account: account, schliessen: () => setErstellen(false), onNeu: neu, setView: setView }) : null,
+    saNeu ? h(NzSuchauftragNeu, { account: account, filter: { text: f.text.trim(), art: f.art, thema: f.thema, position: f.position.trim(), land: f.land.trim(), liga: f.liga.trim(), nur_verifizierte: f.nur_verifizierte }, schliessen: () => setSaNeu(false), onGespeichert: (l) => { setSa(l); setSaNeu(false); setTab("suchauftraege"); } }) : null);
 }
 function twZusatzKonto(konto) {
   const email = String((konto && konto.email) || "").toLowerCase();
@@ -5340,7 +5700,7 @@ function CommunitySub({ view, setView, admin }) {
     const an = view === key;
     return React.createElement("button", { key: key, onClick: () => setView(key), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, padding: "8px 16px", borderRadius: 999, border: "1px solid " + (an ? "#b45309" : HAIR), background: an ? "#b45309" : "#fff", color: an ? "#fff" : "var(--t2)", boxShadow: an ? "0 6px 16px rgba(180,83,9,.28)" : "0 1px 2px rgba(15,21,32,.05)" } }, label);
   };
-  return React.createElement("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 4 } }, pill("Transferhinweise", "community"), pill("Networking Pro", "networking"), pill(LANG === "en" ? "Messages" : "Nachrichten", "nz_nachrichten"), pill(LANG === "en" ? "Find contacts" : "Kontakte finden", "nz_kontakte"), pill(LANG === "en" ? "My profile" : "Mein Profil", "nz_profil"), admin && pill("Moderation", "moderation"));
+  return React.createElement("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 4 } }, pill("Transferhinweise", "community"), pill(LANG === "en" ? "Community contacts" : "Community-Kontakte", "nz_beitraege"), pill(LANG === "en" ? "Messages" : "Nachrichten", "nz_nachrichten"), pill(LANG === "en" ? "Find contacts" : "Kontakte finden", "nz_kontakte"), pill(LANG === "en" ? "My profile" : "Mein Profil", "nz_profil"), admin && pill("Moderation", "moderation"));
 }
 
 function MeldungsPanel({ m, schliessen, onWatch }) {
@@ -7674,7 +8034,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261107-netzwerk3";
+const VS_VERSION = "20261107-netzwerk4";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -11560,6 +11920,8 @@ function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScou
   const [zusatz, setZusatz] = useState(() => TW_ZUSATZ.seiten.slice());   // Punkt 356: nachgeladene Zusatzseiten
   const [nzUngelesen, setNzUngelesen] = useState(() => (typeof NZ3 !== "undefined" ? NZ3.ungelesen + NZ3.anfragen : 0));   // Netzwerk 2.0 Paket 3: ungelesene Nachrichten und offene Anfragen
   React.useEffect(() => { const f = () => setNzUngelesen(NZ3.ungelesen + NZ3.anfragen); window.addEventListener("nz-neu", f); return () => window.removeEventListener("nz-neu", f); }, []);
+  const [nzHinweise, setNzHinweise] = useState(() => (typeof NZ3 !== "undefined" ? (NZ3.hinweise || 0) : 0));   // Netzwerk 2.0 Paket 4: ungelesene Netzwerk-Hinweise (Suchaufträge, Antworten)
+  React.useEffect(() => { const f = () => setNzHinweise(NZ3.hinweise || 0); window.addEventListener("nz-neu", f); return () => window.removeEventListener("nz-neu", f); }, []);
   React.useEffect(() => { const f = () => setZusatz(TW_ZUSATZ.seiten.slice()); window.addEventListener("tw-zusatz", f); return () => window.removeEventListener("tw-zusatz", f); }, []);
   React.useEffect(() => { const f = () => setVsZahl(Number(window.VS_ZAHL) || 0); window.addEventListener("vs-zahl", f); if (VS_NEU && !(Number(window.VS_ZAHL) || 0)) { try { const a = JSON.parse(localStorage.getItem("tw_account") || "{}"); const code = a.zugangscode || a.code; if (code && a.email) fetch("/api/verein-sucht?was=liste&gruppe=TW&limit=1&code=" + encodeURIComponent(code) + "&email=" + encodeURIComponent(a.email)).then(r => r.ok ? r.json() : null).then(d => { if (d && d.meta && Array.isArray(d.meta.gruppen)) { const n = d.meta.gruppen.reduce((s, g) => s + (g.konkret != null ? (Number(g.konkret) || 0) : (Number(g.n) || 0)), 0); if (n > 0) { window.VS_ZAHL = n; setVsZahl(n); } } }).catch(() => {}); } catch (e) {} } return () => window.removeEventListener("vs-zahl", f); }, []);
   let feedBadge = 0, gesuchtBadge = 0; try { feedBadge = (Array.isArray(news) ? news : []).filter(n => Date.now() - new Date(n.published_at || n.created_at || n.createdAt || 0).getTime() < 864e5).length; gesuchtBadge = (VS_NEU && vsZahl) ? vsZahl : (Array.isArray(needsBySport) ? needsBySport.length : 0); } catch (e) {}
@@ -11567,7 +11929,7 @@ function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScou
   const IK = { markt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21V12h6v9"/></svg>', community: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.2L4 21l1.8-5.4A8 8 0 1 1 21 12z"/></svg>', workspace: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 20V10"/></svg>', ki: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18 9.4l-4.2 1.8L12 16l-1.8-4.8L6 9.4l4.2-1.8z"/><path d="M5 18l.7 1.8L7.5 20.5l-1.8.7L5 23l-.7-1.8L2.5 20.5l1.8-.7z"/></svg>', pfeil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>' };
   const gruppen = [
     { k: "markt", label: en ? "Market" : "Markt", kinder: [["feed", t("tab_feed"), feedBadge], ["geruechte", "Transfers", 0], ["spieltag", en ? "Matchday" : "Spieltag", 0], ["ranking", "Performance", 0], ["players", t("players_tab"), 0], ["chancen", t("ch_tab"), 0]] },   // A86 (28.10.2026): "Verein sucht" und "Marktwert" sind eigene Punkte bei "Kontakte"
-    { k: "community", label: en ? "Network" : "Netzwerk", kinder: [["community", en ? "Posts" : "Beitr\u00e4ge", 0], ["nz_nachrichten", en ? "Messages" : "Nachrichten", nzUngelesen], ["networking", en ? "Community contacts" : "Community-Kontakte", 0], ["nz_kontakte", en ? "Find contacts" : "Kontakte finden", 0], ["nz_profil", en ? "My profile" : "Mein Profil", 0]] },   // Netzwerk 2.0 Paket 2 + 3
+    { k: "community", label: en ? "Network" : "Netzwerk", kinder: [["community", en ? "Posts" : "Beitr\u00e4ge", 0], ["nz_nachrichten", en ? "Messages" : "Nachrichten", nzUngelesen], ["nz_beitraege", en ? "Community contacts" : "Community-Kontakte", nzHinweise], ["nz_kontakte", en ? "Find contacts" : "Kontakte finden", 0], ["nz_profil", en ? "My profile" : "Mein Profil", 0]] },   // Netzwerk 2.0 Paket 2 + 3 + 4
     { k: "workspace", label: "Workspace", kinder: [["watch", t("watch_tab"), 0], ["talente", "Scouting", 0], ["akquise", en ? "Acquisition radar" : "Akquise-Radar", 0]] }
   ];
   return h("div", { className: "tw-sn" },
@@ -14306,7 +14668,7 @@ function TransferApp({
   const [country, setCountry] = useState("");
   const [league, setLeague] = useState("");
   const [club, setClub] = useState("");
-  const [view, setViewRoh] = useState(() => ((location.hash || "") === "#transfers-ticker" ? "geruechte" : ((location.hash || "") === "#nachrichten" ? "nz_nachrichten" : "feed"))); const [proZiel, setProZiel] = useState(null); const setView = (v) => { if (!isPrem && TW_PRO_VIEWS.indexOf(v) >= 0) { setProZiel(v); setViewRoh("pro"); return; } setProZiel(null); setViewRoh(v); }; useEffect(() => { try { if (view !== "geruechte" && location.hash === "#transfers-ticker") history.replaceState(null, "", location.pathname + location.search); if (view !== "nz_nachrichten" && location.hash === "#nachrichten") history.replaceState(null, "", location.pathname + location.search); } catch (e) {} }, [view]);
+  const [view, setViewRoh] = useState(() => ((location.hash || "") === "#transfers-ticker" ? "geruechte" : ((location.hash || "") === "#nachrichten" ? "nz_nachrichten" : ((location.hash || "") === "#beitraege" ? "nz_beitraege" : "feed")))); const [proZiel, setProZiel] = useState(null); const setView = (v) => { if (!isPrem && TW_PRO_VIEWS.indexOf(v) >= 0) { setProZiel(v); setViewRoh("pro"); return; } setProZiel(null); setViewRoh(v); }; useEffect(() => { try { if (view !== "geruechte" && location.hash === "#transfers-ticker") history.replaceState(null, "", location.pathname + location.search); if (view !== "nz_nachrichten" && location.hash === "#nachrichten") history.replaceState(null, "", location.pathname + location.search); if (view !== "nz_beitraege" && location.hash === "#beitraege") history.replaceState(null, "", location.pathname + location.search); } catch (e) {} }, [view]);
   const FEED_SEITE = 60;
   const [feedLimit, setFeedLimit] = useState(FEED_SEITE);
   const [plSel, setPlSel] = useState(null);
@@ -14394,6 +14756,8 @@ function TransferApp({
   const [perfOpen, setPerfOpen] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [glockeOffen, setGlockeOffen] = useState(false);
+  const [nzHinweise, setNzHinweise] = useState(() => (typeof NZ3 !== "undefined" ? (NZ3.hinweise || 0) : 0));   // Netzwerk 2.0 Paket 4: ungelesene Netzwerk-Hinweise für die Glocke
+  useEffect(() => { const f = () => setNzHinweise(NZ3.hinweise || 0); window.addEventListener("nz-neu", f); return () => window.removeEventListener("nz-neu", f); }, []);
   const [wr, setWr] = useState({ an: null, speichert: false, fehler: null });
   const [aehnlichStart, setAehnlichStart] = useState(null); const [vglStart, setVglStart] = useState(null); const [vorAnsicht, setVorAnsicht] = useState(null);
   const [notifyMode, setNotifyMode] = useState(null);
@@ -15038,7 +15402,7 @@ function TransferApp({
     const q = query.trim().toLowerCase();
     return news.filter(n => {
       if (view === "talente" && n.talent !== true) return false;
-      if (view === "community" || view === "networking" || view === "moderation" || view === "nz_kontakte" || view === "nz_profil" || view === "nz_nachrichten") return false;
+      if (view === "community" || view === "networking" || view === "moderation" || view === "nz_kontakte" || view === "nz_profil" || view === "nz_nachrichten" || view === "nz_beitraege") return false;
       if (view === "feed" && String(n.id || "").startsWith("tal-")) return false;
       if (sport !== "alle" && n.sport !== sport) return false;
       if (type !== "alle" && !feedTypPasst(n, type)) return false;
@@ -15206,7 +15570,7 @@ function TransferApp({
     style: {
       position: "relative"
     }
-  }, React.createElement(NzBriefKnopf, { account: account, aktiv: view === "nz_nachrichten", onClick: () => { setGlockeOffen(false); setMenuOpen(false); setView("nz_nachrichten"); } }), /*#__PURE__*/React.createElement("button", { type: "button", onClick: () => { setGlockeOffen(!glockeOffen); setMenuOpen(false); }, "aria-label": "Benachrichtigungen", title: LANG === "en" ? "Notifications" : "Benachrichtigungen", style: { position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.16)", borderRadius: 9, padding: "10px 11px", marginRight: 8, color: "var(--t1)" } }, /*#__PURE__*/React.createElement("span", { style: { width: 20, height: 20, display: "inline-flex" }, dangerouslySetInnerHTML: { __html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>' } }), ((watch && (watch.alerts || watch.digest)) || wr.an === true) ? /*#__PURE__*/React.createElement("span", { style: { position: "absolute", top: 7, right: 8, width: 8, height: 8, borderRadius: 99, background: "var(--gold)", border: "2px solid var(--seite)" } }) : null), glockeOffen && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", { onClick: () => setGlockeOffen(false), style: { position: "fixed", inset: 0, zIndex: 1100 } }), /*#__PURE__*/React.createElement("div", { style: { position: "absolute", right: 52, top: "calc(100% + 8px)", zIndex: 1110, background: CARD, border: `1px solid ${HAIR}`, borderRadius: 12, boxShadow: "0 14px 38px rgba(0,0,0,.45)", minWidth: 300, padding: "12px 14px" } }, /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, color: MUTED, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 } }, t("set_notif"), isPrem ? "" : " \u00b7 Pro"), /*#__PURE__*/React.createElement("label", { style: { display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 13, color: INK, marginBottom: 8, cursor: "pointer" } }, /*#__PURE__*/React.createElement("input", { type: "checkbox", checked: !!(watch && watch.alerts), onChange: e => updateWatch(Object.assign({}, watch, { alerts: e.target.checked, asked: true })) }), /*#__PURE__*/React.createElement("span", null, t("set_alerts"))), /*#__PURE__*/React.createElement("label", { style: { display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 13, color: INK, marginBottom: 10, cursor: "pointer" } }, /*#__PURE__*/React.createElement("input", { type: "checkbox", checked: !!(watch && watch.digest), onChange: e => updateWatch(Object.assign({}, watch, { digest: e.target.checked, asked: true })) }), /*#__PURE__*/React.createElement("span", null, t("set_digest"))), (isPrem ? React.createElement(TwWochenreportSchalter, { wr: wr, onChange: setWochenreport, angemeldet: !!(account && account.email) }) : React.createElement("button", { type: "button", className: "tw-glocke-pro", onClick: () => { setGlockeOffen(false); twZuPro(); }, style: { display: "block", width: "100%", textAlign: "left", cursor: "pointer", borderTop: "1px solid " + HAIR, borderLeft: "none", borderRight: "none", borderBottom: "none", background: "none", padding: "10px 0 0", marginBottom: 10, fontFamily: FONT_BODY, fontSize: 12.5, lineHeight: 1.5, color: "var(--t2)" } }, LANG === "en" ? "E-mail alerts, morning briefing and the weekly report are part of Pro. " : "E-Mail-Alerts, Morgen-Briefing und der wöchentliche Report gehören zu Pro. ", React.createElement("b", { style: { color: "var(--gold-text)" } }, LANG === "en" ? "View Pro \u2192" : "Pro ansehen \u2192"))), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, (watch && watch.alertEmail) || (account && account.email) || ""), /*#__PURE__*/React.createElement("button", { type: "button", onClick: () => { setGlockeOffen(false); setShowSettings(true); }, style: { marginTop: 10, cursor: "pointer", background: "none", border: "none", padding: 0, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "var(--gold-text)" } }, LANG === "en" ? "All settings \u2192" : "Alle Einstellungen \u2192"))), /*#__PURE__*/React.createElement("button", { onClick: () => { setMenuOpen(!menuOpen); setGlockeOffen(false); }, "aria-label": "Men\u00fc", title: LANG === "en" ? "Settings" : "Einstellungen", style: { display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.16)", borderRadius: 9, padding: "10px 11px", color: "var(--t1)" } }, /*#__PURE__*/React.createElement("span", { style: { width: 20, height: 20, display: "inline-flex" }, dangerouslySetInnerHTML: { __html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>' } })), menuOpen && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, React.createElement(NzBriefKnopf, { account: account, aktiv: view === "nz_nachrichten", onClick: () => { setGlockeOffen(false); setMenuOpen(false); setView("nz_nachrichten"); } }), /*#__PURE__*/React.createElement("button", { type: "button", onClick: () => { setGlockeOffen(!glockeOffen); setMenuOpen(false); }, "aria-label": "Benachrichtigungen", title: LANG === "en" ? "Notifications" : "Benachrichtigungen", style: { position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.16)", borderRadius: 9, padding: "10px 11px", marginRight: 8, color: "var(--t1)" } }, /*#__PURE__*/React.createElement("span", { style: { width: 20, height: 20, display: "inline-flex" }, dangerouslySetInnerHTML: { __html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>' } }), ((watch && (watch.alerts || watch.digest)) || wr.an === true || nzHinweise > 0) ? /*#__PURE__*/React.createElement("span", { style: { position: "absolute", top: 7, right: 8, width: 8, height: 8, borderRadius: 99, background: "var(--gold)", border: "2px solid var(--seite)" } }) : null), glockeOffen && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", { onClick: () => setGlockeOffen(false), style: { position: "fixed", inset: 0, zIndex: 1100 } }), /*#__PURE__*/React.createElement("div", { style: { position: "absolute", right: 52, top: "calc(100% + 8px)", zIndex: 1110, background: CARD, border: `1px solid ${HAIR}`, borderRadius: 12, boxShadow: "0 14px 38px rgba(0,0,0,.45)", minWidth: 300, padding: "12px 14px" } }, React.createElement(NzGlockeHinweise, { n: nzHinweise, onOeffnen: () => { setGlockeOffen(false); setMenuOpen(false); setView("nz_beitraege"); } }), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, color: MUTED, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 } }, t("set_notif"), isPrem ? "" : " \u00b7 Pro"), /*#__PURE__*/React.createElement("label", { style: { display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 13, color: INK, marginBottom: 8, cursor: "pointer" } }, /*#__PURE__*/React.createElement("input", { type: "checkbox", checked: !!(watch && watch.alerts), onChange: e => updateWatch(Object.assign({}, watch, { alerts: e.target.checked, asked: true })) }), /*#__PURE__*/React.createElement("span", null, t("set_alerts"))), /*#__PURE__*/React.createElement("label", { style: { display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 13, color: INK, marginBottom: 10, cursor: "pointer" } }, /*#__PURE__*/React.createElement("input", { type: "checkbox", checked: !!(watch && watch.digest), onChange: e => updateWatch(Object.assign({}, watch, { digest: e.target.checked, asked: true })) }), /*#__PURE__*/React.createElement("span", null, t("set_digest"))), (isPrem ? React.createElement(TwWochenreportSchalter, { wr: wr, onChange: setWochenreport, angemeldet: !!(account && account.email) }) : React.createElement("button", { type: "button", className: "tw-glocke-pro", onClick: () => { setGlockeOffen(false); twZuPro(); }, style: { display: "block", width: "100%", textAlign: "left", cursor: "pointer", borderTop: "1px solid " + HAIR, borderLeft: "none", borderRight: "none", borderBottom: "none", background: "none", padding: "10px 0 0", marginBottom: 10, fontFamily: FONT_BODY, fontSize: 12.5, lineHeight: 1.5, color: "var(--t2)" } }, LANG === "en" ? "E-mail alerts, morning briefing and the weekly report are part of Pro. " : "E-Mail-Alerts, Morgen-Briefing und der wöchentliche Report gehören zu Pro. ", React.createElement("b", { style: { color: "var(--gold-text)" } }, LANG === "en" ? "View Pro \u2192" : "Pro ansehen \u2192"))), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, (watch && watch.alertEmail) || (account && account.email) || ""), /*#__PURE__*/React.createElement("button", { type: "button", onClick: () => { setGlockeOffen(false); setShowSettings(true); }, style: { marginTop: 10, cursor: "pointer", background: "none", border: "none", padding: 0, fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, color: "var(--gold-text)" } }, LANG === "en" ? "All settings \u2192" : "Alle Einstellungen \u2192"))), /*#__PURE__*/React.createElement("button", { onClick: () => { setMenuOpen(!menuOpen); setGlockeOffen(false); }, "aria-label": "Men\u00fc", title: LANG === "en" ? "Settings" : "Einstellungen", style: { display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.16)", borderRadius: 9, padding: "10px 11px", color: "var(--t1)" } }, /*#__PURE__*/React.createElement("span", { style: { width: 20, height: 20, display: "inline-flex" }, dangerouslySetInnerHTML: { __html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>' } })), menuOpen && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     onClick: () => setMenuOpen(false),
     style: {
       position: "fixed",
@@ -15362,7 +15726,7 @@ function TransferApp({
     className: "tw-tabs"
   }, [["_h", LANG === "en" ? "Market" : "Markt"], ["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["spieltag", LANG === "en" ? "Matchday" : "Spieltag"], ["gesucht", LANG === "en" ? "Club seeks" : "Verein sucht"], ["ranking", "Performance"], ["players", t("players_tab")], ["marktwert", LANG === "en" ? "Market value" : "Marktwert"], ["chancen", t("ch_tab")], ["_h", LANG === "en" ? "My work" : "Meine Arbeit"], ["watch", t("watch_tab")], ["talente", "Scouting"], ["community", "Community"]].map(([k, label]) => {
     if (k === "_h") return /*#__PURE__*/React.createElement("div", { key: "h-" + label, className: "tw-navhead" }, label);
-    const active = view === k || (k === "community" && (view === "networking" || view === "moderation" || view === "nz_kontakte" || view === "nz_profil" || view === "nz_nachrichten")) || (k === "talente" && (view === "listen" || view === "suche" || view === "nachwuchs"));
+    const active = view === k || (k === "community" && (view === "networking" || view === "moderation" || view === "nz_kontakte" || view === "nz_profil" || view === "nz_nachrichten" || view === "nz_beitraege")) || (k === "talente" && (view === "listen" || view === "suche" || view === "nachwuchs"));
     let badge = 0; try { if (k === "feed") badge = (Array.isArray(news) ? news : []).filter(n => Date.now() - new Date(n.published_at || n.created_at || n.createdAt || 0).getTime() < 864e5).length; else if (k === "gesucht") badge = Array.isArray(needsBySport) ? needsBySport.length : 0; } catch (e) { badge = 0; }
     const col = k === "talente" ? "var(--teal)" : k === "geruechte" ? "#b3541e" : k === "gesucht" ? TYPE.verein_sucht.color : k === "ranking" ? "#b9860b" : k === "watch" ? "#6b4fd8" : k === "players" ? "#1a6dc0" : k === "chancen" ? "#c2410c" : k === "listen" ? "#087F8C" : "var(--gold)";
     return /*#__PURE__*/React.createElement("button", {
@@ -15392,7 +15756,7 @@ function TransferApp({
       width: "100%",
       boxSizing: "border-box"
     }
-  }, TW_ZUSATZ.finde(view) ? React.createElement(TwZusatzSeite, { key: "zusatz-" + view, seite: TW_ZUSATZ.finde(view), account: account, setView: setView }) : null, view === "pro" && React.createElement(ProSperreVue, { ziel: proZiel }), view === "nz_profil" && React.createElement(NzProfilSeite, { key: "nz-profil", account: account, setView: setView, admin: istAdmin }), view === "nz_nachrichten" && React.createElement(NzNachrichtenSeite, { key: "nz-nachrichten", account: account, setView: setView, admin: istAdmin, openPlayer: openPlayer, openVerein: openVerein }), view === "nz_kontakte" && React.createElement(NzKontakteSeite, { key: "nz-kontakte", account: account, setView: setView, admin: istAdmin }), view === "marktwert" && React.createElement(MarktwertVue, { openPlayer: openPlayer, openVerein: openVerein, start: mwStart }), view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein, account: account, setView: setView }), view === "akquise" && /*#__PURE__*/React.createElement(AkquiseVue, { isPrem: isPrem, account: account, openPlayer: openPlayer }), view === "aehnlich" && aehnlichStart && React.createElement(AehnlicheSpielerSeite, { key: "ae-" + aehnlichStart.pid, ausgang: aehnlichStart, onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "spielervergleich" && React.createElement(SpielerVergleichSeite, { key: "vgl-" + (vglStart || []).map(x => x.pid).join("-"), start: vglStart || [], onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news.filter(n => n.type !== "verletzung" && n.type !== "leistung" && n.type !== "meldung" && !n._ausgeblendet), onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(VereinSuchtVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, TW_ZUSATZ.finde(view) ? React.createElement(TwZusatzSeite, { key: "zusatz-" + view, seite: TW_ZUSATZ.finde(view), account: account, setView: setView }) : null, view === "pro" && React.createElement(ProSperreVue, { ziel: proZiel }), view === "nz_profil" && React.createElement(NzProfilSeite, { key: "nz-profil", account: account, setView: setView, admin: istAdmin }), view === "nz_nachrichten" && React.createElement(NzNachrichtenSeite, { key: "nz-nachrichten", account: account, setView: setView, admin: istAdmin, openPlayer: openPlayer, openVerein: openVerein }), view === "nz_beitraege" && React.createElement(NzBeitraegeSeite, { key: "nz-beitraege", account: account, setView: setView, admin: istAdmin }), view === "nz_kontakte" && React.createElement(NzKontakteSeite, { key: "nz-kontakte", account: account, setView: setView, admin: istAdmin }), view === "marktwert" && React.createElement(MarktwertVue, { openPlayer: openPlayer, openVerein: openVerein, start: mwStart }), view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein, account: account, setView: setView }), view === "akquise" && /*#__PURE__*/React.createElement(AkquiseVue, { isPrem: isPrem, account: account, openPlayer: openPlayer }), view === "aehnlich" && aehnlichStart && React.createElement(AehnlicheSpielerSeite, { key: "ae-" + aehnlichStart.pid, ausgang: aehnlichStart, onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "spielervergleich" && React.createElement(SpielerVergleichSeite, { key: "vgl-" + (vglStart || []).map(x => x.pid).join("-"), start: vglStart || [], onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news.filter(n => n.type !== "verletzung" && n.type !== "leistung" && n.type !== "meldung" && !n._ausgeblendet), onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(VereinSuchtVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       background: "transparent",
       border: "none",
