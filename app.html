@@ -8765,7 +8765,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "op544";
+const VS_VERSION = "sp2b";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -12527,59 +12527,496 @@ function twVideoSichtbar(v) {
   if (Array.isArray(r.blocked)) return r.blocked.indexOf(land) < 0;
   return true;
 }
-function SpieltagVue({ openPlayer, openVerein }) {
+const TW_SP_ALT_CSS = ".tw-sp-name { white-space: normal !important; text-overflow: clip !important; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-height: 1.25; overflow-wrap: break-word; } .tw-sp-heim .tw-sp-name { text-align: right; } @media (max-width: 900px) { .tw-sp-karte { grid-template-columns: minmax(0, 1fr) auto !important; grid-template-areas: \"kopf kopf\" \"h th\" \"g tg\" \"fuss fuss\"; column-gap: 12px !important; row-gap: 0 !important; padding: 10px 14px !important; } .tw-sp-st { grid-area: kopf; justify-self: start; align-self: center; margin-bottom: 6px; } .tw-sp-xg { grid-area: kopf; justify-self: end; align-self: center; margin-bottom: 6px; white-space: nowrap; } .tw-sp-heim { grid-area: h; flex-direction: row-reverse; padding: 3px 0; } .tw-sp-gast { grid-area: g; padding: 3px 0; } .tw-sp-tore, .tw-sp-re { display: contents !important; } .tw-sp-tt { display: none; } .tw-sp-th { grid-area: th; } .tw-sp-tg { grid-area: tg; } .tw-sp-th, .tw-sp-tg { justify-self: end; align-self: center; font-size: 20px; line-height: 1; min-width: 22px; text-align: right; } .tw-sp-heim .tw-sp-name { text-align: left; } .tw-sp-an { grid-area: fuss; justify-self: start; align-self: center; } .tw-sp-an:not(:empty) { margin-top: 6px; } .tw-sp-karte .tw-sp-hl { grid-area: fuss; justify-self: end; align-self: center; margin-top: 6px !important; } } .tw-an-score, .tw-an-xg { white-space: nowrap; } .tw-an-team, .tw-an-text { min-width: 0; } .tw-an-name { overflow-wrap: break-word; } @media (max-width: 900px) { .tw-an-name { font-size: 20px !important; line-height: 1.2; } .tw-an-score { font-size: 38px !important; } } @media (max-width: 760px) { .tw-an-band { padding: 14px 14px 16px !important; } .tw-an-kopf { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important; grid-template-areas: \"h s g\" \"x x x\"; column-gap: 10px !important; row-gap: 8px !important; align-items: start !important; } .tw-an-mitte { display: contents; } .tw-an-heim { grid-area: h; } .tw-an-gast { grid-area: g; } .tw-an-score { grid-area: s; align-self: start; text-align: center; font-size: 34px !important; padding-top: 3px; } .tw-an-xg { grid-area: x; justify-self: center; text-align: center; margin-top: 0 !important; font-size: 12px !important; } .tw-an-team { flex-direction: column; align-items: center !important; justify-content: flex-start !important; gap: 6px !important; text-align: center; } .tw-an-heim .tw-an-logo { order: -1; } .tw-an-text { text-align: center !important; max-width: 100%; } .tw-an-name { font-size: 16px !important; line-height: 1.25; } .tw-an-note { font-size: 11.5px !important; margin-top: 2px; } .tw-an-note b { font-size: 13px !important; } .tw-an-logo { padding: 3px !important; border-radius: 10px !important; line-height: 0; } .tw-an-logo > img, .tw-an-logo > span { width: 34px !important; height: 34px !important; } .tw-an-logo > span { font-size: 14px !important; } .tw-an-logo > span > svg { width: 100%; height: 100%; } } @media (max-width: 380px) { .tw-an-name { font-size: 14.5px !important; } .tw-an-score { font-size: 30px !important; } .tw-an-kopf { column-gap: 8px !important; } } @media (max-width: 480px) { .tw-an-top { grid-template-columns: minmax(0, 1fr) !important; } .tw-an-top > div { min-width: 0; } }";
+/* Spieltag 2.0 (08.11.2026, Boss 20:08/20:25): Ligen und Wettbewerbe schneller finden (Suche, Schnellwahl, Meine Ligen, Laender mit Flaggen und Spielzahl),
+   Liga-Ansicht mit dem ganzen Spieltag, Spieltag vor/zurueck und der Tabelle daneben (Handy: Reiter Spiele | Tabelle), Europapokal-Tabellen,
+   eigene Spielseite: Spielanalyse wie bisher, Startelf und Bank aller Spieler, Link zu den Highlights.
+   Daten: /api/tw-spieltag (Katalog, ?liga=&runde= fuer den Spieltag einer Liga, geplant_tag = Spielplan fuer Ligen ohne eigene Spieldaten),
+   Analyse fuer Spiele nur aus dem Spielplan: /api/tw-vereinsspiel-analyse (wie im Vereinsprofil). */
+const TW_SP2_MEINE = "tw_spieltag_meine";
+function twSp2MeineLesen() { try { const a = JSON.parse(localStorage.getItem(TW_SP2_MEINE) || "[]"); return Array.isArray(a) ? a.filter(k => typeof k === "string" && /^(sm|af):-?\d{1,9}$/.test(k)).slice(0, 40) : []; } catch (e) { return []; } }
+function twSp2MeineSchreiben(a) { try { localStorage.setItem(TW_SP2_MEINE, JSON.stringify(a)); } catch (e) { } }
+function twSp2Zeitpunkt(iso) { if (!iso) return null; const d = new Date(String(iso).replace(" ", "T") + (/Z|[+-]\d\d:?\d\d$/.test(String(iso)) ? "" : "Z")); return isNaN(d) ? null : d; }
+function twSp2Uhr(iso) { const d = twSp2Zeitpunkt(iso); return d ? d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Berlin" }) : ""; }
+function twSp2TagIso(iso) { const d = twSp2Zeitpunkt(iso); if (!d) return ""; const p = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Berlin", year: "numeric", month: "2-digit", day: "2-digit" }).format(d); return p.slice(0, 10); }
+function twSp2TagText(tagIso, lang) { if (!tagIso) return ""; const d = new Date(tagIso + "T12:00:00"); return isNaN(d) ? tagIso : d.toLocaleDateString(LANG === "en" ? "en-GB" : "de-DE", lang ? { weekday: "long", day: "2-digit", month: "long" } : { weekday: "short", day: "2-digit", month: "2-digit" }); }
+function twSp2Spanne(von, bis) {
+  if (!von) return ""; const f = iso => { const d = new Date(iso + "T12:00:00"); return isNaN(d) ? iso : d.toLocaleDateString(LANG === "en" ? "en-GB" : "de-DE", { day: "2-digit", month: "2-digit" }); };
+  return !bis || bis === von ? f(von) : f(von) + "\u2013" + f(bis);
+}
+function twSp2Runde(rt) {
+  const s = String(rt || "").trim(); if (!s) return ""; const en = LANG === "en"; let m;
+  if ((m = s.match(/^1\/(\d+)-finals?$/i))) return en ? "1/" + m[1] + " finals" : "1/" + m[1] + "-Finale";
+  if (/^Friendly International/i.test(s)) return en ? "Friendlies" : "Freundschaftsspiele";
+  if ((m = s.match(/^Regular Season - (\d+)$/i))) return en ? "Matchday " + m[1] : m[1] + ". Spieltag";
+  const t = typeof tw40Runde === "function" ? tw40Runde(s) : s;
+  if (t === s && (m = s.match(/^[^\d]{2,40} - (\d{1,3})$/))) return en ? "Matchday " + m[1] : m[1] + ". Spieltag";
+  return t;
+}
+/* Rundentitel aus dem Spieltags-Eintrag der Schnittstelle (Nachholspiele, Wochenbl\u00f6cke ohne Nummer, Spiele ohne Rundenangabe) */
+function twSp2RundeTitel(r) {
+  const en = LANG === "en"; if (!r) return "";
+  if (!r.rt) return (en ? "Matches on " : "Spiele am ") + twSp2Spanne(r.von, r.bis);
+  let t = twSp2Runde(r.rt);
+  if (String(r.key || "").indexOf("#") > 0) t += " \u00b7 " + twSp2Spanne(r.von, r.bis);
+  if (r.nachhol) t += en ? " (rescheduled)" : " (Nachholspiele)";
+  return t;
+}
+function twSp2AfStatus(st) {
+  const s = String(st || "").toUpperCase();
+  if (s === "FT" || s === "AET" || s === "PEN") return "beendet";
+  if (["1H", "HT", "2H", "ET", "BT", "P", "LIVE", "INT", "SUSP"].indexOf(s) >= 0) return "live";
+  if (s === "PST") return "verlegt";
+  return "geplant";
+}
+/* Eintrag aus dem Spielplan (API-Football) in die Form der Spielkarten bringen */
+function twSp2Geplant(g, ligaName) {
+  const rt = g.runde || "";
+  return { id: g.id, geplant: true, af_id: g.id, wkey: g.wkey || "", anstoss: g.anstoss, status: twSp2AfStatus(g.status), af_status: g.status || "", minute: null, heim: g.heim, gast: g.gast,
+    heim_logo: g.heim_logo || null, gast_logo: g.gast_logo || null, tore_heim: g.tore_heim, tore_gast: g.tore_gast, league: (ligaName || "") + (rt ? " \u00b7 " + rt : ""), stats: [], ereignisse: [], top: [], hat_stats: false, video: null };
+}
+function TwSp2Stern({ an, size }) {
+  const h = React.createElement; const s = size || 16;
+  return h("svg", { width: s, height: s, viewBox: "0 0 24 24", fill: an ? "currentColor" : "none", stroke: "currentColor", strokeWidth: 2, strokeLinejoin: "round", "aria-hidden": "true", style: { flexShrink: 0, display: "block" } },
+    h("path", { d: "M12 3.3l2.6 5.5 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6-4.4-4.2 6-.8z" }));
+}
+function TwSp2LigaLogo({ url, name, size }) {
+  const h = React.createElement; const sz = size || 22;
+  const [fehler, setFehler] = React.useState(false);
+  React.useEffect(() => { setFehler(false); }, [url]);
+  if (url && !fehler) return h("img", { src: url, alt: "", width: sz, height: sz, loading: "lazy", onError: () => setFehler(true), style: { width: sz, height: sz, objectFit: "contain", flexShrink: 0, display: "block" } });
+  const kurz = String(name || "?").replace(/[^A-Za-z0-9\u00c0-\u017f ]/g, "").split(" ").filter(Boolean).map(x => x[0]).slice(0, 2).join("").toUpperCase() || "?";
+  return h("span", { "aria-hidden": "true", style: { width: sz, height: sz, borderRadius: 6, flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", background: "var(--karte2)", border: "1px solid var(--linie)", color: "var(--t2)", fontFamily: FONT_BODY, fontSize: Math.max(8, Math.round(sz * 0.38)), fontWeight: 900 } }, kurz);
+}
+function twSp2Logo(name, url, size) {
+  const h = React.createElement;
+  const eigen = typeof clubLogoUrl === "function" ? clubLogoUrl(name) : null;
+  if (eigen || !url) return h(ClubLogo, { name: name, size: size });
+  return h(TwTeamLogo, { url: url, name: name, size: size });
+}
+/* Startelf und Bank beider Teams: Nummer, Name (Klick oeffnet das Spielerprofil), Position, Tore und Karten aus den Ereignissen */
+function twSp2PosKurz(p) {
+  const t = String((p && (p.position || p.pos)) || "").toUpperCase().trim(); const en = LANG === "en";
+  if (!t) return "";
+  if (/^(G|TW|GK|TOR)/.test(t)) return en ? "GK" : "TW";
+  if (/^(D|ABW|DEF|CB|LB|RB|IV|AV)/.test(t)) return en ? "DEF" : "ABW";
+  if (/^(M|MF|MID|DM|CM|AM|ZM|OM)/.test(t)) return en ? "MID" : "MF";
+  if (/^(F|ST|FW|ATT|CF|LW|RW|STURM)/.test(t)) return en ? "FWD" : "ST";
+  return t.slice(0, 3);
+}
+function TwSpielKader({ s, openPlayer }) {
+  const h = React.createElement; const en = LANG === "en";
+  const auf = (s && s.aufstellungen) || null;
+  const pidmap = (s && s.pidmap) || {};
+  /* Ereignis und Aufstellung schreiben Namen oft verschieden ("A. Gr\u00f8nb\u00e6k" / "Albert Gr\u00f6nbaek"): Abgleich je Team ueber den Nachnamen */
+  const nameKey = (n, seite) => { const t = String(n || "").toLowerCase().replace(/\u00e6/g, "ae").replace(/\u00f8/g, "o").replace(/\u00df/g, "ss").replace(/\u0111/g, "d").replace(/\u0142/g, "l").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/oe/g, "o").replace(/ae/g, "a").replace(/ue/g, "u").replace(/[^a-z ]/g, " ").trim().split(/\s+/).filter(Boolean); return t.length ? (seite || "") + "|" + t[t.length - 1] : ""; };
+  const tore = {}, gelb = {}, rot = {}, eigentor = {};
+  (s.ereignisse || []).forEach(e => {
+    const k = nameKey(e.spieler, e.team); if (!k) return; const typ = String(e.typ || "");
+    if (/own/i.test(typ)) eigentor[k] = (eigentor[k] || 0) + 1;
+    else if (/goal|penalty/i.test(typ)) tore[k] = (tore[k] || 0) + 1;
+    else if (/card/i.test(typ)) { if (/red/i.test(typ)) rot[k] = true; else gelb[k] = true; }
+  });
+  const pidVon = p => { if (!p) return ""; if (p.player_id) return String(p.player_id); const sm = p.sm_player_id; if (sm && pidmap[String(sm)]) return String(pidmap[String(sm)]); return ""; };
+  const ballSvg = h("svg", { width: 12, height: 12, viewBox: "0 0 24 24", "aria-hidden": "true", style: { display: "block" } }, h("circle", { cx: 12, cy: 12, r: 9, fill: "none", stroke: "currentColor", strokeWidth: 2.2 }), h("path", { d: "M12 7.5l3.6 2.6-1.4 4.2H9.8l-1.4-4.2z", fill: "currentColor" }));
+  const marke = (k) => {
+    const out = [];
+    if (tore[k]) out.push(h("span", { key: "t", className: "tw-sp2-marke", title: tore[k] + (en ? (tore[k] > 1 ? " goals" : " goal") : (tore[k] > 1 ? " Tore" : " Tor")) }, ballSvg, tore[k] > 1 ? h("span", null, tore[k]) : null));
+    if (eigentor[k]) out.push(h("span", { key: "e", className: "tw-sp2-marke tw-sp2-marke-et", title: en ? "Own goal" : "Eigentor" }, ballSvg, h("span", null, en ? "OG" : "ET")));
+    if (gelb[k]) out.push(h("span", { key: "g", className: "tw-sp2-karte-gelb", title: en ? "Yellow card" : "Gelbe Karte" }));
+    if (rot[k]) out.push(h("span", { key: "r", className: "tw-sp2-karte-rot", title: en ? "Red card" : "Rote Karte" }));
+    return out;
+  };
+  const zeile = (p, i, team, bank, seite) => {
+    const name = String((p && p.name) || "").trim(); const pid = pidVon(p); const k = nameKey(name, seite); const pos = twSp2PosKurz(p);
+    const klick = pid && openPlayer ? () => openPlayer(pid, name, team) : null;
+    return h("li", { key: (pid || name) + "-" + i, className: "tw-sp2-kz" + (bank ? " tw-sp2-kz-bank" : "") },
+      h("span", { className: "tw-sp2-nr" }, p && p.nr != null ? String(p.nr) : ""),
+      klick ? h("button", { type: "button", className: "tw-sp2-name tw-sp2-name-link", onClick: klick, title: en ? "Open player profile" : "Spielerprofil \u00f6ffnen" }, name || "\u2013") : h("span", { className: "tw-sp2-name" }, name || "\u2013"),
+      h("span", { className: "tw-sp2-marken" }, marke(k)),
+      h("span", { className: "tw-sp2-pos" }, pos));
+  };
+  const team = (seite, name) => {
+    const t = (auf && auf[seite]) || {}; const elf = Array.isArray(t.startelf) ? t.startelf.slice().sort((a, b) => (Number(a.pos_nr) > 0 ? Number(a.pos_nr) : 99) - (Number(b.pos_nr) > 0 ? Number(b.pos_nr) : 99)) : []; const bank = Array.isArray(t.bank) ? t.bank : [];
+    return h("div", { className: "tw-sp2-kteam", key: seite },
+      h("div", { className: "tw-sp2-kkopf" }, h(ClubLogo, { name: name, size: 22 }), h("div", { style: { minWidth: 0 } },
+        h("div", { className: "tw-sp2-kname" }, seite === "gast" ? clubName(name) : name),
+        h("div", { className: "tw-sp2-kinfo" }, [t.formation ? (en ? "Formation " : "Formation ") + t.formation : null, t.trainer ? (en ? "Coach " : "Trainer ") + t.trainer : null].filter(Boolean).join(" \u00b7 ") || "\u00a0"))),
+      elf.length ? h(React.Fragment, null,
+        h("div", { className: "tw-sp2-kteil" }, en ? "Starting XI" : "Startelf"),
+        h("ol", { className: "tw-sp2-kliste" }, elf.map((p, i) => zeile(p, i, name, false, seite))))
+        : h("div", { className: "tw-sp2-kleer" }, en ? "Line-up not available yet." : "Aufstellung noch nicht verf\u00fcgbar."),
+      bank.length ? h(React.Fragment, null,
+        h("div", { className: "tw-sp2-kteil" }, (en ? "Bench" : "Bank") + " (" + bank.length + ")"),
+        h("ol", { className: "tw-sp2-kliste" }, bank.map((p, i) => zeile(p, i, name, true, seite)))) : null);
+  };
+  const hat = auf && ((((auf.heim || {}).startelf) || []).length || (((auf.gast || {}).startelf) || []).length);
+  return h("section", { className: "tw-sp2-kader", "aria-label": en ? "Starting line-ups and bench" : "Startelf und Bank" },
+    h("div", { className: "tw-sp2-ktitel" }, en ? "Starting XI and bench" : "Startelf und Bank"),
+    hat ? h("div", { className: "tw-sp2-kgrid" }, team("heim", s.heim), team("gast", s.gast))
+      : h("div", { className: "tw-sp2-kleer" }, s.status === "beendet" ? (en ? "The source has no line-ups for this match." : "F\u00fcr dieses Spiel liegen in der Quelle keine Aufstellungen vor.") : (en ? "The line-ups appear here about one hour before kick-off." : "Die Aufstellungen erscheinen hier etwa eine Stunde vor Anpfiff.")));
+}
+/* Highlights-Link im Kopf der Spielseite */
+function twSp2Highlights(s) {
+  const h = React.createElement; const en = LANG === "en";
+  if (s && s.video && typeof twVideoSichtbar === "function" && twVideoSichtbar(s.video)) return h("a", { className: "tw-sp2-hl", href: s.video.url, target: "_blank", rel: "noopener noreferrer", title: [s.video.titel, s.video.kanal].filter(Boolean).join(" \u00b7 ") + (en ? " \u00b7 opens YouTube in a new tab" : " \u00b7 \u00f6ffnet YouTube in einem neuen Tab") }, "\u25b6 Highlights");
+  if (!s || s.status !== "beendet") return null;
+  const d = twSp2Zeitpunkt(s.anstoss); const frisch = d && (Date.now() - d.getTime()) < 36 * 3600e3;
+  return h("span", { className: "tw-sp2-hl-keine" }, s.video ? (en ? "Highlights blocked here" : "Highlights hier gesperrt") : (s.geplant || s.ohne_scores ? (en ? "No highlights linked" : "Keine Highlights verkn\u00fcpft") : (frisch ? (en ? "Highlights pending" : "Highlights folgen") : (en ? "No highlights" : "Keine Highlights"))));
+}
+/* Eigene Spielseite (statt Fenster): Zurueck zur Liste, Spielanalyse wie bisher, Startelf und Bank, Highlights */
+function TwSpielSeite({ spiel, kontext, onBack, openPlayer, authQ, tabelle }) {
+  const h = React.createElement; const en = LANG === "en";
+  const [an, setAn] = useState(null); const [lade, setLade] = useState(false); const [hinweis, setHinweis] = useState("");
+  const zu = React.useRef(onBack); zu.current = onBack;
+  useTwZurueck(true, () => { if (zu.current) zu.current(); });
+  React.useEffect(() => { try { const sv = document.documentElement.style.scrollBehavior; document.documentElement.style.scrollBehavior = "auto"; window.scrollTo(0, 0); document.documentElement.style.scrollBehavior = sv; } catch (e) { } }, [spiel && spiel.id]);
+  const gp = !!(spiel && spiel.geplant);
+  const d = spiel ? twSp2Zeitpunkt(spiel.anstoss) : null;
+  const bald = d && (d.getTime() - Date.now()) < 75 * 60e3;
+  React.useEffect(() => {
+    if (!gp || !spiel) return; if (spiel.status === "geplant" && !bald) { setAn(null); setHinweis(""); return; }
+    let ok = true; setLade(true); setHinweis("");
+    fetch("/api/tw-vereinsspiel-analyse?id=" + encodeURIComponent(spiel.af_id || spiel.id) + (authQ || ""), { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(x => {
+      if (!ok) return; setLade(false);
+      if (x && x.ok && x.spiel && !x.leer) setAn(Object.assign({}, x.spiel, { league: spiel.league || x.spiel.league, video: spiel.video || null }));
+      else if (x && x.ok) setHinweis(en ? "No analysis data is available for this match from the connected sources yet (statistics, events and line-ups)." : "F\u00fcr dieses Spiel liegen in den angebundenen Quellen noch keine Analysedaten vor (Statistik, Ereignisse und Aufstellungen).");
+      else setHinweis(x && x.grund === "konto" ? (en ? "Please sign in to load the analysis." : "Bitte anmelden, um die Analyse zu laden.") : x && x.grund === "limit" ? (en ? "The daily limit for loading analyses has been reached. Please try again tomorrow." : "Das Tageslimit f\u00fcr das Nachladen von Analysen ist erreicht. Bitte morgen erneut versuchen.") : (en ? "The analysis could not be loaded. Please try again later." : "Die Analyse konnte nicht geladen werden. Bitte sp\u00e4ter erneut versuchen."));
+    }).catch(() => { if (ok) { setLade(false); setHinweis(en ? "The analysis could not be loaded. Please try again later." : "Die Analyse konnte nicht geladen werden. Bitte sp\u00e4ter erneut versuchen."); } });
+    return () => { ok = false; };
+  }, [spiel && spiel.id, gp, spiel && spiel.status]);
+  if (!spiel) return null;
+  const voll = gp ? an : spiel;
+  const zurueck = h("div", { className: "tw-sp2-zurueckleiste" },
+    h("button", { type: "button", className: "tw-sp2-zurueck", onClick: () => { if (zu.current) zu.current(); } },
+      h("svg", { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.4, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" }, h("path", { d: "M15 18l-6-6 6-6" })),
+      h("span", null, en ? "Back" : "Zur\u00fcck")),
+    h("span", { className: "tw-sp2-zurueck-text" }, (kontext && kontext.titel) || (en ? "Matchday" : "Spieltag")));
+  if (voll) return h("div", { className: "tw-sp2-seite" }, zurueck,
+    h(TwSpielAnalyse, { s: voll, onClose: () => { if (zu.current) zu.current(); }, openPlayer: openPlayer, mitDatum: true, seite: true, kopfRechts: twSp2Highlights(voll) }));
+  /* Spiel nur aus dem Spielplan, noch ohne Analyse: Vorschau mit Anstoss, Stand und Tabellenplatz */
+  const zeileTab = name => { const k = typeof clubKey === "function" ? clubKey(name) : String(name || "").toLowerCase(); return (tabelle || []).find(t => (typeof clubKey === "function" ? clubKey(t.team) : String(t.team || "").toLowerCase()) === k) || null; };
+  const team = (name, logo, seite) => { const t = zeileTab(name); return h("div", { className: "tw-sp2-vteam" }, h("div", { className: "tw-sp2-vlogo" }, twSp2Logo(name, logo, 44)), h("div", { className: "tw-sp2-vname" }, seite === "gast" ? clubName(name) : name),
+    t ? h("div", { className: "tw-sp2-vinfo" }, (en ? "Rank " : "Platz ") + t.rang + " \u00b7 " + t.punkte + (en ? " pts" : " Pkt.") + (t.form ? " \u00b7 " + (en ? "Form " : "Form ") + String(t.form).slice(-5).replace(/W/g, en ? "W" : "S").replace(/D/g, en ? "D" : "U").replace(/L/g, en ? "L" : "N") : "")) : null); };
+  const st = spiel.status === "live" ? (en ? "live" : "l\u00e4uft") : spiel.status === "beendet" ? (en ? "full time" : "beendet") : spiel.status === "verlegt" ? (en ? "postponed" : "verlegt") : "";
+  return h("div", { className: "tw-sp2-seite" }, zurueck,
+    h("div", { className: "tw-sp2-vorschau" },
+      h("div", { className: "tw-sp2-vkopf" }, h("span", null, [(typeof tw40Wb === "function" ? tw40Wb({ wettbewerb: spiel.league }) : spiel.league), String(spiel.league || "").indexOf(" \u00b7 ") > 0 ? twSp2Runde(String(spiel.league).split(" \u00b7 ")[1]) : null, d ? d.toLocaleDateString(en ? "en-GB" : "de-DE", { weekday: "short", day: "2-digit", month: "2-digit", year: "numeric", timeZone: "Europe/Berlin" }) + ", " + twSp2Uhr(spiel.anstoss) : null, st || null].filter(Boolean).join(" \u00b7 ")), twSp2Highlights(spiel)),
+      h("div", { className: "tw-sp2-vmitte" }, team(spiel.heim, spiel.heim_logo, "heim"),
+        h("div", { className: "tw-sp2-vstand" }, spiel.tore_heim != null ? spiel.tore_heim + " : " + spiel.tore_gast : twSp2Uhr(spiel.anstoss) || "\u2013"),
+        team(spiel.gast, spiel.gast_logo, "gast")),
+      lade ? h("div", { className: "tw-lade", style: { justifyContent: "center", color: "#c7d0dc" } }, h("span", { className: "tw-spin" }), en ? "Loading analysis \u2026" : "Analyse wird geladen \u2026") : null),
+    hinweis ? h("div", { className: "tw-sp2-hinweis" }, hinweis) : null,
+    !lade && !hinweis && spiel.status === "geplant" ? h("div", { className: "tw-sp2-hinweis" }, en ? "The line-ups (starting XI and bench) and the match analysis appear here as soon as the data is available \u2013 line-ups about one hour before kick-off." : "Aufstellungen (Startelf und Bank) und die Spielanalyse erscheinen hier, sobald die Daten vorliegen \u2013 die Aufstellungen etwa eine Stunde vor Anpfiff.") : null);
+}
+const TW_SP2_CSS = [
+  ".tw-sp2-kopf{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}",
+  ".tw-sp2-suche{position:relative;flex:1 1 320px;max-width:520px;min-width:0}",
+  ".tw-sp2-suche input{width:100%;box-sizing:border-box;font-family:" + FONT_BODY + ";font-size:14px;font-weight:600;color:var(--t1);background:var(--karte);border:1.5px solid var(--linie2);border-radius:12px;padding:11px 38px 11px 38px;outline:none}",
+  ".tw-sp2-suche input:focus{border-color:var(--gold)}",
+  ".tw-sp2-suche input::-webkit-search-cancel-button,.tw-sp2-suche input::-webkit-search-decoration{-webkit-appearance:none;appearance:none;display:none}",
+  ".tw-sp2-an .tw-spielfeld-wrap>div>div:nth-child(3){display:none}",
+  ".tw-sp2-auf{flex:none;cursor:pointer;border:1px solid var(--linie);background:var(--karte);color:var(--t2);border-radius:10px;padding:6px 10px;font-family:" + FONT_BODY + ";font-size:12px;font-weight:800;white-space:nowrap}",
+  ".tw-sp2-auf:hover{color:var(--t1);border-color:var(--linie2)}",
+  ".tw-sp2-gk-akt{margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap}",
+  ".tw-sp2-livezahl{font-family:" + FONT_BODY + ";font-size:11px;font-weight:900;color:#149a59}",
+  ".tw-sp2-tagkopf{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-family:" + FONT_BODY + ";font-size:12.5px;font-weight:700;color:var(--t2);margin:2px 0 10px}",
+  ".tw-sp2-suche-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none;display:flex}",
+  ".tw-sp2-suche-weg{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:none;background:none;color:var(--t2);font-size:15px;font-weight:800;cursor:pointer;padding:6px 8px;border-radius:8px}",
+  ".tw-sp2-treffer{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:40;background:var(--karte);border:1px solid var(--linie);border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,.18);padding:6px;max-height:420px;overflow-y:auto}",
+  ".tw-sp2-zeile{display:flex;align-items:center;gap:10px;width:100%;text-align:left;cursor:pointer;background:none;border:none;border-radius:10px;padding:8px 10px;font-family:" + FONT_BODY + ";color:var(--t1)}",
+  ".tw-sp2-zeile:hover,.tw-sp2-zeile.aktiv,.tw-sp2-zeile:focus-visible{background:var(--gold-tint);outline:none}",
+  ".tw-sp2-zeile-name{flex:1;min-width:0;font-size:13.5px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
+  ".tw-sp2-zeile-land{display:block;font-size:11.5px;font-weight:600;color:var(--t2);margin-top:1px}",
+  ".tw-sp2-zahl{flex:none;min-width:22px;text-align:center;font-size:11.5px;font-weight:800;padding:2px 7px;border-radius:999px;background:var(--karte2);color:var(--t2)}",
+  ".tw-sp2-zahl.an{background:var(--gold);color:var(--gold-schrift)}",
+  ".tw-sp2-leiste{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;margin:0 0 6px;scrollbar-width:thin;-webkit-overflow-scrolling:touch}",
+  ".tw-sp2-chip{flex:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-family:" + FONT_BODY + ";font-size:12.5px;font-weight:800;padding:7px 11px 7px 8px;border-radius:12px;border:1px solid var(--linie);background:var(--karte);color:var(--t1);white-space:nowrap}",
+  ".tw-sp2-chip:hover{border-color:var(--linie2)}",
+  ".tw-sp2-chip.aktiv{border-color:var(--dunkel);background:var(--dunkel);color:#fff}",
+  ".tw-sp2-chip.aktiv .tw-sp2-zahl{background:rgba(255,255,255,.18);color:#fff}",
+  ".tw-sp2-chip .tw-sp2-zahl{min-width:0;padding:1px 6px;font-size:10.5px}",
+  ".tw-sp2-chip-meine{color:var(--gold-text)}",
+  ".tw-sp2-label{flex:none;align-self:center;font-family:" + FONT_BODY + ";font-size:10.5px;font-weight:900;letter-spacing:1.1px;text-transform:uppercase;color:var(--t3);padding-right:2px}",
+  ".tw-sp2-stern{display:inline-flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid transparent;background:none;color:var(--t3);border-radius:9px;padding:6px}",
+  ".tw-sp2-stern:hover{color:var(--gold-text);border-color:var(--linie)}",
+  ".tw-sp2-stern.an{color:var(--gold-text)}",
+  ".tw-sp2-alle{background:var(--karte);border:1px solid var(--linie);border-radius:16px;padding:8px;margin:0 0 14px;box-shadow:0 12px 40px rgba(0,0,0,.08)}",
+  ".tw-sp2-alle-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px 10px}",
+  ".tw-sp2-land{border-radius:12px}",
+  ".tw-sp2-land.offen{background:var(--karte2)}",
+  ".tw-sp2-land-knopf{display:flex;align-items:center;gap:10px;width:100%;cursor:pointer;background:none;border:none;border-radius:12px;padding:9px 10px;font-family:" + FONT_BODY + ";font-size:13.5px;font-weight:800;color:var(--t1);text-align:left}",
+  ".tw-sp2-land-knopf:hover{background:var(--karte2)}",
+  ".tw-sp2-land-liste{padding:0 4px 6px}",
+  ".tw-sp2-wb{display:flex;align-items:center;gap:4px}",
+  ".tw-sp2-wb .tw-sp2-zeile{flex:1;min-width:0}",
+  ".tw-sp2-ligakopf{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--karte);border:1px solid var(--linie);border-radius:16px;padding:12px 14px;margin-bottom:12px}",
+  ".tw-sp2-ligakopf-name{font-family:" + FONT_DISPLAY + ";font-weight:700;font-size:24px;line-height:1.1;color:var(--t1)}",
+  ".tw-sp2-ligakopf-land{display:flex;align-items:center;gap:6px;font-family:" + FONT_BODY + ";font-size:12px;font-weight:700;color:var(--t2);margin-top:3px}",
+  ".tw-sp2-runde{display:flex;align-items:center;gap:6px;margin-left:auto;flex-wrap:nowrap;min-width:0}",
+  ".tw-sp2-runde select{min-width:0;max-width:100%;font-family:" + FONT_BODY + ";font-size:13px;font-weight:800;color:var(--t1);background:var(--karte);border:1.5px solid var(--linie2);border-radius:11px;padding:9px 10px;cursor:pointer}",
+  ".tw-sp2-pfeil{flex:none;cursor:pointer;font-family:" + FONT_BODY + ";font-size:14px;font-weight:900;width:40px;height:40px;border-radius:11px;border:1px solid var(--linie2);background:var(--karte);color:var(--t1)}",
+  ".tw-sp2-pfeil:disabled{opacity:.35;cursor:default}",
+  ".tw-sp2-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,420px);gap:16px;align-items:start}",
+  ".tw-sp2-grid.ohne-tabelle{grid-template-columns:minmax(0,1fr)}",
+  ".tw-sp2-tab-col{position:sticky;top:76px}",
+  ".tw-sp2 .tw-sp2-reiter{display:none}",
+  ".tw-sp2-tag{font-family:" + FONT_BODY + ";font-size:11px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;color:var(--t3);margin:4px 0 8px}",
+  ".tw-sp2-tabelle{background:var(--karte);border:1px solid var(--linie);border-radius:16px;padding:10px 8px 8px;overflow:hidden}",
+  ".tw-sp2-tabelle table{width:100%;border-collapse:collapse;font-family:" + FONT_BODY + ";font-size:12.5px;color:var(--t1)}",
+  ".tw-sp2-tabelle th{font-size:10.5px;font-weight:900;letter-spacing:.6px;text-transform:uppercase;color:var(--t3);text-align:center;padding:4px 3px 6px;white-space:nowrap}",
+  ".tw-sp2-tabelle td{text-align:center;padding:6px 3px;border-top:1px solid var(--linie);white-space:nowrap;font-variant-numeric:tabular-nums}",
+  ".tw-sp2-tabelle td.tm,.tw-sp2-tabelle th.tm{text-align:left;width:100%;max-width:0}",
+  ".tw-sp2-tabelle td.tm>span{display:flex;align-items:center;gap:7px;min-width:0}",
+  ".tw-sp2-tabelle td.tm b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
+  ".tw-sp2-tabelle td.pk{font-weight:900}",
+  ".tw-sp2-tabelle tr.spielt td{background:var(--gold-tint)!important}",
+  ".tw-sp2-tabelle tr.teamklick{cursor:pointer}",
+  ".tw-sp2-tabelle tr.teamklick:hover td{background:var(--karte2)}",
+  ".tw-sp2-tab-titel{display:flex;align-items:center;justify-content:space-between;gap:8px;font-family:" + FONT_BODY + ";font-size:11px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;color:var(--t2);padding:0 6px 6px}",
+  ".tw-sp2-tab-titel span{font-weight:600;letter-spacing:0;text-transform:none;color:var(--t3)}",
+  ".tw-sp2-gruppe{font-family:" + FONT_BODY + ";font-size:11.5px;font-weight:800;color:var(--t2);padding:10px 6px 2px}",
+  ".tw-sp2-gruppenkopf{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0 8px}",
+  ".tw-sp2-gruppenkopf-name{display:flex;align-items:center;gap:8px;cursor:pointer;border:none;background:none;padding:2px 0;font-family:" + FONT_BODY + ";font-size:12px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:var(--t2);text-align:left}",
+  ".tw-sp2-gruppenkopf-name:hover{color:var(--t1)}",
+  ".tw-sp2-gruppenkopf-zahl{font-family:" + FONT_BODY + ";font-size:11.5px;font-weight:600;color:var(--t3)}",
+  ".tw-sp2-mehr{margin-left:auto;cursor:pointer;border:1px solid var(--linie);background:var(--karte);color:var(--t1);border-radius:10px;padding:6px 10px;font-family:" + FONT_BODY + ";font-size:12px;font-weight:800;white-space:nowrap}",
+  ".tw-sp2-mehr:hover{border-color:var(--linie2)}",
+  ".tw-sp2-leer{font-family:" + FONT_BODY + ";font-size:13px;color:var(--t2);background:var(--karte);border:1px solid var(--linie);border-radius:12px;padding:16px 18px}",
+  ".tw-sp2-hinweis{font-family:" + FONT_BODY + ";font-size:13px;color:var(--t2);background:var(--karte);border:1px solid var(--linie);border-radius:12px;padding:12px 14px;margin-top:12px}",
+  ".tw-sp-karte:focus-visible{outline:2px solid var(--gold);outline-offset:2px}",
+  ".tw-sp2-zurueckleiste{display:flex;align-items:center;gap:12px;margin:0 0 12px;min-width:0}",
+  ".tw-sp2-zurueck{flex:none;display:inline-flex;align-items:center;gap:4px;min-height:40px;padding:0 13px 0 8px;border-radius:11px;border:1px solid var(--linie2);background:var(--karte);color:var(--t1);font-family:" + FONT_BODY + ";font-size:13.5px;font-weight:800;cursor:pointer}",
+  ".tw-sp2-zurueck-text{min-width:0;font-family:" + FONT_BODY + ";font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
+  ".tw-sp2-seite{max-width:980px;margin:0 auto}",
+  ".tw-sp2-hl{display:inline-flex;align-items:center;gap:6px;color:var(--gold-schrift);background:var(--gold);font-family:" + FONT_BODY + ";font-weight:800;font-size:12.5px;line-height:1.3;padding:6px 11px;border-radius:9px;text-decoration:none;white-space:nowrap}",
+  ".tw-sp2-hl:focus-visible{outline:2px solid #fff;outline-offset:2px}",
+  ".tw-sp2-hl-keine{font-family:" + FONT_BODY + ";font-size:12px;font-weight:700;color:#9aa6b8;white-space:nowrap}",
+  ".tw-sp2-vorschau{background:var(--dunkel);color:#fff;border-radius:20px;padding:18px 22px 22px}",
+  ".tw-sp2-vkopf{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-family:" + FONT_BODY + ";font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#9aa6b8;margin-bottom:16px}",
+  ".tw-sp2-vmitte{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:start;gap:14px}",
+  ".tw-sp2-vteam{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-width:0}",
+  ".tw-sp2-vlogo{background:var(--karte);border-radius:12px;padding:4px;line-height:0}",
+  ".tw-sp2-vname{font-family:" + FONT_DISPLAY + ";font-weight:700;font-size:22px;line-height:1.15;overflow-wrap:anywhere}",
+  ".tw-sp2-vinfo{font-family:" + FONT_BODY + ";font-size:12px;color:#c7d0dc}",
+  ".tw-sp2-vstand{font-family:" + FONT_DISPLAY + ";font-weight:700;font-size:40px;line-height:1;padding-top:10px;white-space:nowrap}",
+  ".tw-sp2-kader{background:var(--karte);border:1px solid var(--linie);border-radius:14px;padding:10px 12px 12px;margin-bottom:10px}",
+  ".tw-sp2-ktitel{font-family:" + FONT_BODY + ";font-size:11px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;color:var(--t2);margin:0 0 8px}",
+  ".tw-sp2-kgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}",
+  ".tw-sp2-kteam{min-width:0}",
+  ".tw-sp2-kkopf{display:flex;align-items:center;gap:8px;padding-bottom:6px;border-bottom:1px solid var(--linie);margin-bottom:4px}",
+  ".tw-sp2-kname{font-family:" + FONT_BODY + ";font-size:13.5px;font-weight:800;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
+  ".tw-sp2-kinfo{font-family:" + FONT_BODY + ";font-size:11.5px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
+  ".tw-sp2-kteil{font-family:" + FONT_BODY + ";font-size:10.5px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin:8px 0 2px}",
+  ".tw-sp2-kliste{list-style:none;margin:0;padding:0}",
+  ".tw-sp2-kz{display:flex;align-items:center;gap:8px;padding:4px 2px;border-radius:8px;font-family:" + FONT_BODY + ";font-size:13px;color:var(--t1);min-width:0}",
+  ".tw-sp2-kz:nth-child(odd){background:var(--karte2)}",
+  ".tw-sp2-kz-bank{color:var(--t2)}",
+  ".tw-sp2-nr{flex:none;width:24px;text-align:right;font-weight:800;color:var(--t3);font-variant-numeric:tabular-nums}",
+  ".tw-sp2-name{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;text-align:left}",
+  ".tw-sp2-name-link{border:none;background:none;padding:0;margin:0;font:inherit;font-weight:700;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-color:var(--linie2);text-underline-offset:3px}",
+  ".tw-sp2-name-link:hover{color:var(--gold-text);text-decoration-color:var(--gold)}",
+  ".tw-sp2-marken{flex:1 1 auto;display:inline-flex;align-items:center;gap:4px;min-width:0}",
+  ".tw-sp2-marke{display:inline-flex;align-items:center;gap:2px;font-size:11px;font-weight:800;color:var(--t1)}",
+  ".tw-sp2-marke-et{color:var(--t3)}",
+  ".tw-sp2-karte-gelb,.tw-sp2-karte-rot{display:inline-block;width:8px;height:11px;border-radius:2px}",
+  ".tw-sp2-karte-gelb{background:#E8C230}",
+  ".tw-sp2-karte-rot{background:#D33A2C}",
+  ".tw-sp2-pos{flex:none;font-size:10.5px;font-weight:800;color:var(--t3);min-width:30px;text-align:right}",
+  ".tw-sp2-kleer{font-family:" + FONT_BODY + ";font-size:12.5px;color:var(--t2);padding:6px 2px}",
+  "@media (max-width: 900px){.tw-sp2-grid{grid-template-columns:minmax(0,1fr)}.tw-sp2-tab-col{position:static}.tw-sp2 .tw-sp2-reiter{display:flex;gap:6px;margin:0 0 10px}.tw-sp2-grid[data-reiter=spiele] .tw-sp2-tab-col{display:none}.tw-sp2-grid[data-reiter=tabelle] .tw-sp2-spiele-col{display:none}.tw-sp2-runde{margin-left:0;width:100%}.tw-sp2-runde select{flex:1}}",
+  "@media (max-width: 760px){.tw-sp2-gk-akt{margin-left:0;width:100%}.tw-sp2-gk-akt .tw-sp2-auf,.tw-sp2-gk-akt .tw-sp2-mehr{padding:5px 9px;font-size:11.5px}.tw-sp2-kgrid{grid-template-columns:minmax(0,1fr)}.tw-sp2-vorschau{padding:14px 14px 16px;border-radius:16px}.tw-sp2-vname{font-size:16px}.tw-sp2-vstand{font-size:32px;padding-top:6px}.tw-sp2-alle-grid{grid-template-columns:minmax(0,1fr)}.tw-sp2-kal{grid-template-columns:minmax(0,1fr)!important}.tw-sp2-ligakopf-name{font-size:21px}}",
+  "@media (max-width: 480px){.tw-sp2-tabelle .opt{display:none}.tw-sp2-tabelle{padding:8px 4px 6px}.tw-sp2-tabelle table{font-size:12px}.tw-sp2-mehr{margin-left:0}}"
+].join("\n");
+
+function SpieltagVue({ openPlayer, openVerein, authQ }) {
   const h = React.createElement; const en = LANG === "en";
   const isoVon = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
   const heuteISO = () => isoVon(new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Berlin" })));
-  const [datum, setDatum] = useState(() => { let s0 = ""; try { s0 = window.__twSpieltagDatum || ""; window.__twSpieltagDatum = null; } catch (e) { } return /^\d{4}-\d{2}-\d{2}$/.test(s0) ? s0 : heuteISO(); }); const [daten, setDaten] = useState(null); const [lade, setLade] = useState(true); const [liga, setLiga] = useState(""); const [offen, setOffen] = useState(null); const [kalOffen, setKalOffen] = useState(false); const [kalMonat, setKalMonat] = useState(heuteISO().slice(0, 7)); const [kal, setKal] = useState(null); const [kalTag, setKalTag] = useState(null); const [filterOffen, setFilterOffen] = useState(false);
-  React.useEffect(() => { let aktiv = true; setLade(true); const holen = () => fetch("/api/tw-spieltag?datum=" + datum, { cache: "no-store" }).then(r => r.json()).then(d => { if (aktiv) { setDaten(d && d.ok ? d : { spiele: [], ligen: [], tage: [], wettbewerbe: [] }); setLade(false); } }).catch(() => { if (aktiv) { setDaten({ spiele: [], ligen: [], tage: [], wettbewerbe: [] }); setLade(false); } }); holen(); const t = setInterval(holen, 120000); return () => { aktiv = false; clearInterval(t); }; }, [datum]);
+  const sitz = (k, f) => { try { const v = sessionStorage.getItem("tw_sp2_" + k); return v == null ? f : v; } catch (e) { return f; } };
+  const sitzSetzen = (k, v) => { try { if (v) sessionStorage.setItem("tw_sp2_" + k, v); else sessionStorage.removeItem("tw_sp2_" + k); } catch (e) { } };
+  const tiefLink = React.useRef(null);
+  const [datum, setDatum] = useState(() => { let s0 = "", sp = null; try { s0 = window.__twSpieltagDatum || ""; sp = window.__twSpieltagSpiel || null; window.__twSpieltagDatum = null; } catch (e) { } if (sp) tiefLink.current = String(sp); return /^\d{4}-\d{2}-\d{2}$/.test(s0) ? s0 : heuteISO(); });
+  const [daten, setDaten] = useState(null); const [lade, setLade] = useState(true);
+  const [liga, setLigaRoh] = useState(() => tiefLink.current ? "" : sitz("liga", "")); const [runde, setRunde] = useState(() => tiefLink.current ? "" : sitz("runde", ""));
+  const [ligaDaten, setLigaDaten] = useState(null); const [ligaLade, setLigaLade] = useState(false);
+  const [offen, setOffen] = useState(null); /* { s, kontext } \u2013 offene Spielseite */
+  const [suche, setSuche] = useState(""); const [sucheOffen, setSucheOffen] = useState(false); const [markiert, setMarkiert] = useState(0);
+  const [alleOffen, setAlleOffen] = useState(false); const [landOffen, setLandOffen] = useState("");
+  const [meine, setMeine] = useState(() => twSp2MeineLesen());
+  const [reiter, setReiter] = useState("spiele"); const [auf, setAuf] = useState({});
+  const [kalOffen, setKalOffen] = useState(false); const [kalMonat, setKalMonat] = useState(heuteISO().slice(0, 7)); const [kal, setKal] = useState(null); const [kalTag, setKalTag] = useState(null);
+  const listeY = React.useRef(0); const sucheRef = React.useRef(null);
+  const setLiga = (k, r) => { if ((k || "") !== liga) setLigaDaten(null); setLigaRoh(k || ""); setRunde(r || ""); setReiter("spiele"); sitzSetzen("liga", k || ""); sitzSetzen("runde", r || ""); };
+  /* Tagesdaten (Katalog, Spiele des Tages, Spielplan), alle 2 Minuten frisch */
+  React.useEffect(() => { let aktiv = true; setLade(true); const leer = { spiele: [], ligen: [], tage: [], wettbewerbe: [], katalog: [], geplant_tag: [] };
+    const holen = () => fetch("/api/tw-spieltag?datum=" + datum, { cache: "no-store" }).then(r => r.json()).then(d => { if (aktiv) { setDaten(d && d.ok ? d : leer); setLade(false); } }).catch(() => { if (aktiv) { setDaten(x => x || leer); setLade(false); } });
+    holen(); const t = setInterval(holen, 120000); return () => { aktiv = false; clearInterval(t); }; }, [datum]);
+  /* Liga-Ansicht: ganzer Spieltag + Tabelle */
+  React.useEffect(() => { if (!liga) return; let aktiv = true; setLigaLade(true);
+    const holen = () => fetch("/api/tw-spieltag?datum=" + datum + "&liga=" + encodeURIComponent(liga) + (runde ? "&runde=" + encodeURIComponent(runde) : ""), { cache: "no-store" }).then(r => r.json()).then(d => { if (!aktiv) return; setLigaDaten(d && d.ok ? d : { spiele: [], liga: null }); setLigaLade(false); }).catch(() => { if (aktiv) { setLigaDaten(x => x || { spiele: [], liga: null }); setLigaLade(false); } });
+    holen(); const t = setInterval(holen, 120000); return () => { aktiv = false; clearInterval(t); }; }, [liga, runde, datum]);
   React.useEffect(() => { if (!kalOffen) return; setKal(null); fetch("/api/tw-spieltag?datum=" + datum + "&kalender=" + kalMonat, { cache: "no-store" }).then(r => r.json()).then(d => setKal(d && Array.isArray(d.kalender) ? d.kalender : [])).catch(() => setKal([])); }, [kalOffen, kalMonat]);
-  React.useEffect(() => { if (!offen) return; twScrollSperre(true); return () => twScrollSperre(false); }, [!!offen]);
-  React.useEffect(() => { let id = null; try { id = window.__twSpieltagSpiel; } catch (e) { } if (!id || !daten) return; const s0 = (daten.spiele || []).find(x => String(x.id) === String(id)); if (s0) { try { window.__twSpieltagSpiel = null; } catch (e) { } setOffen(s0); } }, [daten]);
-  const spiele = (daten && daten.spiele) || []; const ligenHeute = (daten && daten.ligen) || []; const wettbewerbe = (daten && daten.wettbewerbe) || [];
+  const katalog = (daten && daten.katalog) || [];
+  const katMap = useMemo(() => { const m = {}; katalog.forEach((k, i) => { m[k.key] = Object.assign({ i: i }, k); }); return m; }, [daten]);
+  const nameVon = k => k ? (en ? (k.name_en || k.name) : k.name) : "";
+  const landVon = k => k ? (en ? (k.land_en || k.land) : k.land) : "";
+  const spiele = (daten && daten.spiele) || [];
+  const geplantTag = useMemo(() => ((daten && daten.geplant_tag) || []).map(g => twSp2Geplant(g, katMap[g.wkey] ? katMap[g.wkey].name : "")), [daten]);
+  /* Tiefer Link aus Magazin/Ticker: Spiel direkt oeffnen */
+  React.useEffect(() => { const id = tiefLink.current; if (!id || !daten) return; const s0 = spiele.find(x => String(x.id) === id) || geplantTag.find(x => String(x.id) === id); tiefLink.current = null; try { window.__twSpieltagSpiel = null; } catch (e) { } if (s0) oeffne(s0, { titel: (en ? "Matchday \u00b7 " : "Spieltag \u00b7 ") + twSp2TagText(datum) }); }, [daten]);
+  const ligaInfo = ligaDaten && ligaDaten.liga ? ligaDaten.liga : null;
+  const ligaKat = liga ? (katMap[liga] || (ligaInfo ? Object.assign({ key: liga, typ: ligaInfo.wettbewerb.typ, logo: ligaInfo.wettbewerb.logo, land_code: ligaInfo.wettbewerb.land_code }, ligaInfo.wettbewerb) : null)) : null;
+  const istMeine = k => meine.indexOf(k) >= 0;
+  const umMeine = k => { const n = istMeine(k) ? meine.filter(x => x !== k) : meine.concat([k]); setMeine(n); twSp2MeineSchreiben(n); };
+  const oeffne = (s, kontext) => { try { listeY.current = window.pageYOffset || document.documentElement.scrollTop || 0; } catch (e) { } setOffen({ id: (s.geplant ? "w" : "f") + s.id, s: s, kontext: kontext || null }); };
+  const schliessen = () => { setOffen(null); const y = listeY.current || 0; try { requestAnimationFrame(() => { const r = document.documentElement; const sv = r.style.scrollBehavior; r.style.scrollBehavior = "auto"; window.scrollTo(0, y); r.style.scrollBehavior = sv; }); } catch (e) { } };
+  const waehle = k => { setLiga(k, ""); setSuche(""); setSucheOffen(false); setAlleOffen(false); try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) { } };
   const tagPlus = (iso, n) => { const d = new Date(iso + "T12:00:00"); return isoVon(new Date(d.getTime() + n * 86400000)); };
   const label = (iso, lang) => new Date(iso + "T12:00:00").toLocaleDateString(en ? "en-GB" : "de-DE", lang ? { weekday: "long", day: "2-digit", month: "long" } : { weekday: "short", day: "2-digit", month: "2-digit" });
   const zaehl = iso => { const t = ((daten && daten.tage) || []).find(x => String(x.d).slice(0, 10) === iso); return t ? Number(t.n) : 0; };
-  const zeit = iso => { if (!iso) return ""; const d = new Date(String(iso).replace(" ", "T") + (/Z|[+-]\d\d:\d\d$/.test(String(iso)) ? "" : "Z")); return d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Berlin" }); };
-  const gefiltert = liga ? spiele.filter(s => s.league === liga) : spiele;
-  const gruppen = useMemo(() => { const m = {}; gefiltert.forEach(s => { (m[s.league] = m[s.league] || []).push(s); }); return Object.keys(m).map(k => ({ liga: k, spiele: m[k] })); }, [gefiltert]);
-  const statusText = s => s.status === "live" ? (s.minute ? s.minute + "'" : "LIVE") : s.status === "beendet" ? (en ? "FT" : "Ende") : zeit(s.anstoss);
-  const fmtMw = v => v ? (Number(v) >= 1e6 ? (Number(v) / 1e6).toFixed(1).replace(".", ",") + " Mio. \u20ac" : Math.round(Number(v) / 1000) + " Tsd. \u20ac") : "";
-  const signale = t => { const out = []; if (t.vertrag && /^\d{4}/.test(t.vertrag)) { const j = Number(t.vertrag.slice(0, 4)); if (j <= new Date().getFullYear() + 1) out.push((en ? "contract until " : "Vertrag bis ") + t.vertrag.slice(0, 7)); } if (t.age && t.age <= 21) out.push(t.age + (en ? " yrs" : " Jahre")); if (!t.mw) out.push(en ? "no market value listed" : "kein Marktwert gelistet"); else out.push(fmtMw(t.mw)); return out; };
-  const TYP = { liga: en ? "Leagues" : "Ligen", pokal: en ? "Cups" : "Pokale", europapokal: en ? "Europe" : "Europapokal", nationalmannschaft: en ? "National teams" : "Nationalteams" };
-  const knopf = (inhalt, aktiv, onClick, extra) => h("button", Object.assign({ type: "button", onClick, style: Object.assign({ cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, padding: "9px 13px", borderRadius: 12, border: "1px solid " + (aktiv ? "var(--dunkel)" : HAIR), background: aktiv ? "var(--dunkel)" : CARD, color: aktiv ? "#fff" : INK, whiteSpace: "nowrap" }, (extra && extra.style) || {}) }, extra && extra.title ? { title: extra.title } : {}), inhalt);
-  // Datumsleiste: Pfeil, 3 Tage, Pfeil, Kalender
+  const statusText = s => s.status === "live" ? (s.minute ? s.minute + "'" : "LIVE") : s.status === "beendet" ? (en ? "FT" : "Ende") : s.status === "verlegt" ? (en ? "PPD" : "verlegt") : twSp2Uhr(s.anstoss);
+  const knopf = (inhalt, aktiv, onClick, extra) => h("button", Object.assign({ type: "button", onClick, style: Object.assign({ cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, padding: "9px 13px", borderRadius: 12, border: "1px solid " + (aktiv ? "var(--dunkel)" : HAIR), background: aktiv ? "var(--dunkel)" : CARD, color: aktiv ? "#fff" : INK, whiteSpace: "nowrap" }, (extra && extra.style) || {}) }, extra && extra.title ? { title: extra.title, "aria-label": extra.title } : {}), inhalt);
+  /* Spielkarte (Tages- und Liga-Ansicht): ganze Karte oeffnet die Spielseite */
+  const karte = (s, kontext) => {
+    const live = s.status === "live"; const ohneTore = s.tore_heim === null || s.tore_heim === undefined;
+    const aktText = s.hat_stats ? (en ? "Analysis \u2192" : "Analyse \u2192") : s.geplant ? (s.status === "beendet" ? (en ? "Analysis \u2192" : "Analyse \u2192") : live ? (en ? "Match \u2192" : "Zum Spiel \u2192") : s.status === "geplant" ? (en ? "Preview \u2192" : "Vorschau \u2192") : "") : (s.status === "beendet" ? (en ? "stats pending" : "Statistik folgt") : live ? (en ? "Match \u2192" : "Zum Spiel \u2192") : (en ? "Preview \u2192" : "Vorschau \u2192"));
+    const hl = !s.geplant && (s.status === "beendet" || s.hat_stats) ? (twVideoSichtbar(s.video) ? h("a", { className: "tw-sp-hl tw-sp-hl-offiziell", href: s.video.url, target: "_blank", rel: "noopener noreferrer", onClick: e => e.stopPropagation(), onKeyDown: e => e.stopPropagation(), title: [s.video.titel, s.video.kanal].filter(Boolean).join(" \u00b7 ") + (en ? " \u00b7 match highlights" : " \u00b7 Spielzusammenfassung"), style: { display: "inline-block", marginTop: 5, color: "var(--gold-schrift)", background: "var(--gold)", fontWeight: 800, fontSize: 11.5, lineHeight: 1.3, padding: "3px 8px", borderRadius: 7, textDecoration: "none", whiteSpace: "nowrap" } }, "\u25b6 Highlights") : null) : null;
+    const auf = () => oeffne(s, kontext);
+    return h("div", { key: (s.geplant ? "w" : "f") + s.id, className: "tw-sp-karte", role: "button", tabIndex: 0, "aria-label": s.heim + " \u2013 " + s.gast + ", " + statusText(s) + (ohneTore ? "" : ", " + s.tore_heim + ":" + s.tore_gast), onClick: auf, onKeyDown: e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); auf(); } }, style: { display: "grid", gridTemplateColumns: "64px 1fr auto 1fr 96px", alignItems: "center", gap: 10, background: CARD, border: "1px solid " + HAIR, borderRadius: 14, padding: "12px 14px", cursor: "pointer" } },
+      h("div", { className: "tw-sp-st", style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: live ? "#149a59" : MUTED } }, statusText(s)),
+      h("div", { className: "tw-sp-heim", style: { display: "flex", alignItems: "center", gap: 8, justifyContent: "flex-end", minWidth: 0 } }, h("span", { className: "tw-sp-name", style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 700, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, s.heim), twSp2Logo(s.heim, s.heim_logo, 26)),
+      h("div", { className: "tw-sp-tore", style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 22, color: live ? "#149a59" : INK, minWidth: 64, textAlign: "center", background: PAGE, borderRadius: 10, padding: "4px 10px" } }, h("span", { className: "tw-sp-th" }, ohneTore ? "\u2013" : s.tore_heim), h("span", { className: "tw-sp-tt" }, " : "), h("span", { className: "tw-sp-tg" }, ohneTore ? "\u2013" : s.tore_gast)),
+      h("div", { className: "tw-sp-gast", style: { display: "flex", alignItems: "center", gap: 8, minWidth: 0 } }, twSp2Logo(s.gast, s.gast_logo, 26), h("span", { className: "tw-sp-name", style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 700, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, clubName(s.gast))),
+      h("div", { className: "tw-sp-re", style: { textAlign: "right", fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, s.xg_heim !== null && s.xg_heim !== undefined ? h("span", { className: "tw-sp-xg" }, "xG " + Number(s.xg_heim).toFixed(2) + " \u2013 " + Number(s.xg_gast).toFixed(2)) : "", h("div", { className: "tw-sp-an", style: { color: "var(--gold-text)", fontWeight: 800, fontSize: 11.5 } }, aktText), hl));
+  };
+  /* Suche ueber Wettbewerb und Land (DE und EN) */
+  const norm = t => String(t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+  const treffer = useMemo(() => { const q = norm(suche); if (!q) return []; const teile = q.split(" ");
+    return katalog.map(k => { const hay = norm([k.name, k.name_en, k.land, k.land_en, k.typ === "pokal" ? "pokal cup" : "", k.typ === "europapokal" ? "europapokal europe uefa" : ""].join(" ")); if (!teile.every(t => hay.indexOf(t) >= 0)) return null;
+      const n0 = norm(k.name), n1 = norm(k.name_en); const rang = (n0.indexOf(q) === 0 || n1.indexOf(q) === 0 ? 0 : 1) * 1000 + (k.schnell ? 0 : 100) + (k.land_rang || 99); return { k, rang }; }).filter(Boolean).sort((a, b) => a.rang - b.rang).slice(0, 12).map(x => x.k); }, [suche, daten]);
+  const zeileWb = (k, i, opts) => h("div", { key: k.key, className: "tw-sp2-wb" },
+    h("button", { type: "button", className: "tw-sp2-zeile" + (opts && opts.aktiv ? " aktiv" : ""), onMouseDown: opts && opts.maus ? (e => e.preventDefault()) : undefined, onClick: () => waehle(k.key), onMouseEnter: opts && opts.onHover ? () => opts.onHover(i) : undefined },
+      h(TwSp2LigaLogo, { url: k.logo, name: nameVon(k), size: 24 }),
+      h("span", { className: "tw-sp2-zeile-name" }, nameVon(k), opts && opts.mitLand ? h("span", { className: "tw-sp2-zeile-land" }, landVon(k)) : null),
+      h("span", { className: "tw-sp2-zahl" + (k.n_tag ? " an" : ""), title: k.n_tag ? (k.n_tag + (en ? " matches on " : " Spiele am ") + label(datum)) : (en ? "No matches on this day" : "Keine Spiele an diesem Tag") }, k.n_tag || "\u2013")),
+    h("button", { type: "button", className: "tw-sp2-stern" + (istMeine(k.key) ? " an" : ""), onMouseDown: opts && opts.maus ? (e => e.preventDefault()) : undefined, onClick: e => { e.stopPropagation(); umMeine(k.key); }, "aria-pressed": istMeine(k.key), "aria-label": (istMeine(k.key) ? (en ? "Remove from My leagues: " : "Aus Meine Ligen entfernen: ") : (en ? "Add to My leagues: " : "Zu Meine Ligen hinzuf\u00fcgen: ")) + nameVon(k), title: istMeine(k.key) ? (en ? "Remove from My leagues" : "Aus Meine Ligen entfernen") : (en ? "Add to My leagues" : "Zu Meine Ligen hinzuf\u00fcgen") }, h(TwSp2Stern, { an: istMeine(k.key) })));
+  const sucheFeld = h("div", { className: "tw-sp2-suche" },
+    h("span", { className: "tw-sp2-suche-icon" }, h("svg", { width: 17, height: 17, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.4, strokeLinecap: "round", "aria-hidden": "true" }, h("circle", { cx: 11, cy: 11, r: 7 }), h("path", { d: "M20 20l-3.5-3.5" }))),
+    h("input", { ref: sucheRef, type: "search", value: suche, placeholder: en ? "Search league, cup or country \u2026" : "Liga, Pokal oder Land suchen \u2026", "aria-label": en ? "Search competitions" : "Wettbewerb suchen", autoComplete: "off", spellCheck: false,
+      onChange: e => { setSuche(e.target.value); setSucheOffen(true); setMarkiert(0); }, onFocus: () => setSucheOffen(true), onBlur: () => setTimeout(() => setSucheOffen(false), 150),
+      onKeyDown: e => { if (e.key === "ArrowDown") { e.preventDefault(); setMarkiert(m => Math.min(m + 1, Math.max(0, treffer.length - 1))); } else if (e.key === "ArrowUp") { e.preventDefault(); setMarkiert(m => Math.max(0, m - 1)); } else if (e.key === "Enter") { if (treffer[markiert]) { e.preventDefault(); waehle(treffer[markiert].key); try { e.target.blur(); } catch (x) { } } } else if (e.key === "Escape") { setSuche(""); setSucheOffen(false); } } }),
+    suche ? h("button", { type: "button", className: "tw-sp2-suche-weg", onClick: () => { setSuche(""); try { sucheRef.current && sucheRef.current.focus(); } catch (e) { } }, "aria-label": en ? "Clear search" : "Suche leeren" }, "\u2715") : null,
+    sucheOffen && suche ? h("div", { className: "tw-sp2-treffer", role: "listbox" }, treffer.length ? treffer.map((k, i) => zeileWb(k, i, { mitLand: true, aktiv: i === markiert, maus: true, onHover: setMarkiert })) : h("div", { className: "tw-sp2-kleer", style: { padding: "10px 12px" } }, en ? "No competition found." : "Kein Wettbewerb gefunden.")) : null);
+  /* Schnellwahl und Meine Ligen */
+  const chip = (k, extra) => h("button", { key: (extra || "") + k.key, type: "button", className: "tw-sp2-chip" + (liga === k.key ? " aktiv" : ""), onClick: () => (liga === k.key ? setLiga("", "") : waehle(k.key)), "aria-pressed": liga === k.key, title: nameVon(k) + " \u00b7 " + landVon(k) },
+    h(TwSp2LigaLogo, { url: k.logo, name: nameVon(k), size: 20 }), nameVon(k), k.n_tag ? h("span", { className: "tw-sp2-zahl an" }, k.n_tag) : null);
+  const schnell = katalog.filter(k => k.schnell).sort((a, b) => a.schnell - b.schnell);
+  const meineK = meine.map(k => katMap[k]).filter(Boolean);
+  const leisten = h(React.Fragment, null,
+    meineK.length ? h("div", { className: "tw-sp2-leiste", role: "toolbar", "aria-label": en ? "My leagues" : "Meine Ligen" }, h("span", { className: "tw-sp2-label", style: { display: "inline-flex", alignItems: "center", gap: 5, color: "var(--gold-text)" } }, h(TwSp2Stern, { an: true, size: 13 }), en ? "My leagues" : "Meine Ligen"), meineK.map(k => chip(k, "m"))) : null,
+    h("div", { className: "tw-sp2-leiste", role: "toolbar", "aria-label": en ? "Quick selection" : "Schnellwahl" }, schnell.map(k => chip(k, "s")),
+      h("button", { type: "button", className: "tw-sp2-chip" + (alleOffen ? " aktiv" : ""), onClick: () => setAlleOffen(!alleOffen), "aria-expanded": alleOffen }, en ? "All competitions" : "Alle Wettbewerbe", h("span", { "aria-hidden": "true", style: { fontSize: 10 } }, alleOffen ? "\u25b4" : "\u25be"))));
+  /* Alle Wettbewerbe nach Land (Flagge, Spiele am Tag) */
+  const laender = useMemo(() => { const m = {}; const out = []; katalog.forEach(k => { const lk = k.land || "Weitere"; if (!m[lk]) { m[lk] = { land: lk, land_en: k.land_en || lk, code: k.land_code, rang: k.land_rang || 99, wb: [], n: 0 }; out.push(m[lk]); } m[lk].wb.push(k); m[lk].n += Number(k.n_tag) || 0; }); return out.sort((a, b) => a.rang - b.rang || a.land.localeCompare(b.land)); }, [daten]);
+  const allePanel = alleOffen ? h("div", { className: "tw-sp2-alle" },
+    !laender.length ? h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), "\u2026") : h("div", { className: "tw-sp2-alle-grid" }, laender.map(l => h("div", { key: l.land, className: "tw-sp2-land" + (landOffen === l.land ? " offen" : "") },
+      h("button", { type: "button", className: "tw-sp2-land-knopf", onClick: () => setLandOffen(landOffen === l.land ? "" : l.land), "aria-expanded": landOffen === l.land },
+        typeof ttFlagge === "function" ? (l.code === "eu" ? h("span", { "aria-hidden": "true", style: { width: 22, height: 15, borderRadius: 3, background: "#1f3f8f", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#f3cf45", fontSize: 9, fontWeight: 900, flexShrink: 0 } }, "EU") : ttFlagge(l.code, 22)) : null,
+        h("span", { style: { flex: 1, minWidth: 0 } }, en ? l.land_en : l.land, h("span", { style: { fontWeight: 600, color: "var(--t3)", marginLeft: 6, fontSize: 12 } }, l.wb.length + (en ? (l.wb.length > 1 ? " competitions" : " competition") : (l.wb.length > 1 ? " Wettbewerbe" : " Wettbewerb")))),
+        h("span", { className: "tw-sp2-zahl" + (l.n ? " an" : ""), title: en ? "Matches on this day" : "Spiele an diesem Tag" }, l.n || "\u2013"), h("span", { "aria-hidden": "true", style: { color: "var(--t3)", fontSize: 11 } }, landOffen === l.land ? "\u25b4" : "\u25be")),
+      landOffen === l.land ? h("div", { className: "tw-sp2-land-liste" }, l.wb.map((k, i) => zeileWb(k, i))) : null)))) : null;
+  /* Datumsleiste und Kalender (Tagesansicht) */
   const tageLeiste = h("div", { style: { display: "flex", alignItems: "center", gap: 6, marginBottom: 10, flexWrap: "wrap" } },
-    knopf("\u2190", false, () => { setDatum(tagPlus(datum, -1)); setLiga(""); }, { title: en ? "Previous day" : "Vortag" }),
-    [-1, 0, 1].map(o => { const iso = tagPlus(datum, o); const n = zaehl(iso); return h(React.Fragment, { key: iso }, knopf([label(iso), n ? h("span", { style: { marginLeft: 6, fontSize: 10.5, opacity: .9 } }, n) : null], o === 0, () => { setDatum(iso); setLiga(""); }, { style: { minWidth: 118, textAlign: "center" } })); }),
-    knopf("\u2192", false, () => { setDatum(tagPlus(datum, 1)); setLiga(""); }, { title: en ? "Next day" : "Folgetag" }),
+    knopf("\u2190", false, () => setDatum(tagPlus(datum, -1)), { title: en ? "Previous day" : "Vortag" }),
+    [-1, 0, 1].map(o => { const iso = tagPlus(datum, o); const n = zaehl(iso); return h(React.Fragment, { key: iso }, knopf([label(iso), n ? h("span", { key: "n", style: { marginLeft: 6, fontSize: 10.5, opacity: .9 } }, n) : null], o === 0, () => setDatum(iso), { style: { minWidth: 118, textAlign: "center" } })); }),
+    knopf("\u2192", false, () => setDatum(tagPlus(datum, 1)), { title: en ? "Next day" : "Folgetag" }),
+    datum !== heuteISO() ? knopf(en ? "Today" : "Heute", false, () => setDatum(heuteISO())) : null,
     h("span", { style: { flex: 1 } }),
-    knopf("" + (en ? "Calendar" : "Kalender"), kalOffen, () => { setKalOffen(!kalOffen); setKalMonat(datum.slice(0, 7)); setKalTag(datum); }));
-  // Kalender-Fenster
+    knopf(en ? "Calendar" : "Kalender", kalOffen, () => { setKalOffen(!kalOffen); setKalMonat(datum.slice(0, 7)); setKalTag(datum); }));
   const kalender = () => { const [y, m] = kalMonat.split("-").map(Number); const erster = new Date(y, m - 1, 1); const start = (erster.getDay() + 6) % 7; const tageImMonat = new Date(y, m, 0).getDate(); const zellen = []; for (let i = 0; i < start; i++) zellen.push(null); for (let d = 1; d <= tageImMonat; d++) zellen.push(kalMonat + "-" + String(d).padStart(2, "0")); const map = {}; (kal || []).forEach(k => { map[String(k.d).slice(0, 10)] = k.spiele || []; }); const monatLabel = erster.toLocaleDateString(en ? "en-GB" : "de-DE", { month: "long", year: "numeric" }); const wt = en ? ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"] : ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]; const liste = map[kalTag] || [];
-    return h("div", { style: { display: "grid", gridTemplateColumns: "minmax(280px, 360px) 1fr", gap: 16, background: CARD, border: "1px solid " + HAIR, borderRadius: 16, padding: 16, marginBottom: 14, boxShadow: "0 12px 40px rgba(0,0,0,.10)" } },
-      h("div", null, h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 } }, knopf("\u2190", false, () => { const d = new Date(y, m - 2, 1); setKalMonat(isoVon(d).slice(0, 7)); }), h("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 17, color: INK } }, monatLabel), knopf("\u2192", false, () => { const d = new Date(y, m, 1); setKalMonat(isoVon(d).slice(0, 7)); })),
+    return h("div", { className: "tw-sp2-kal", style: { display: "grid", gridTemplateColumns: "minmax(260px, 360px) minmax(0, 1fr)", gap: 16, background: CARD, border: "1px solid " + HAIR, borderRadius: 16, padding: 16, marginBottom: 14, boxShadow: "0 12px 40px rgba(0,0,0,.10)" } },
+      h("div", null, h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 } }, knopf("\u2190", false, () => { const d = new Date(y, m - 2, 1); setKalMonat(isoVon(d).slice(0, 7)); }, { title: en ? "Previous month" : "Vormonat" }), h("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 17, color: INK } }, monatLabel), knopf("\u2192", false, () => { const d = new Date(y, m, 1); setKalMonat(isoVon(d).slice(0, 7)); }, { title: en ? "Next month" : "Folgemonat" })),
         h("div", { style: { display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 } }, wt.map(w => h("div", { key: w, style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, color: MUTED, textAlign: "center", padding: "2px 0" } }, w)), zellen.map((iso, i) => iso ? h("button", { key: iso, type: "button", onClick: () => setKalTag(iso), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, padding: "7px 0", borderRadius: 9, border: "1px solid " + (iso === kalTag ? "var(--dunkel)" : (iso === datum ? "var(--gold)" : HAIR)), background: iso === kalTag ? "var(--dunkel)" : (map[iso] && map[iso].length ? "var(--gold-tint)" : CARD), color: iso === kalTag ? "#fff" : INK } }, String(Number(iso.slice(8))), map[iso] && map[iso].length ? h("div", { style: { fontSize: 9.5, fontWeight: 800, color: iso === kalTag ? "#EFD489" : "var(--gold-text)" } }, map[iso].length) : h("div", { style: { fontSize: 9.5, color: "transparent" } }, "0")) : h("div", { key: "l" + i })))),
-      h("div", { style: { minWidth: 0 } }, h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 8 } }, h("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 17, color: INK } }, kalTag ? label(kalTag, true) : ""), kalTag ? knopf(en ? "Open day \u2192" : "Tag \u00f6ffnen \u2192", true, () => { setDatum(kalTag); setLiga(""); setKalOffen(false); }) : null),
-        kal === null ? h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), "\u2026") : !liste.length ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED } }, en ? "No matches in the covered competitions." : "Keine Spiele in den abgedeckten Wettbewerben.") : h("div", { style: { maxHeight: 300, overflowY: "auto", display: "grid", gap: 4 } }, liste.map((s, i) => h("div", { key: i, style: { display: "grid", gridTemplateColumns: "46px 1fr auto", gap: 8, alignItems: "center", fontFamily: FONT_BODY, fontSize: 12.5, color: INK, padding: "6px 8px", borderRadius: 8, background: i % 2 ? PAGE : "transparent" } }, h("span", { style: { color: MUTED, fontWeight: 700 } }, s.status === "beendet" ? (s.th + ":" + s.tg) : s.zeit), h("span", { style: { fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, s.heim + " \u2013 " + s.gast), h("span", { style: { fontSize: 11, fontWeight: 800, color: s.typ === "liga" ? "var(--t2)" : "var(--teal)", background: s.typ === "liga" ? "var(--karte2)" : "#E6F4F8", padding: "2px 7px", borderRadius: 999, whiteSpace: "nowrap" } }, s.league.replace(/ \u00b7 .*$/, ""))))))); };
-  // Wettbewerbsfilter (Liste)
-  const filter = () => { const gruppenW = {}; wettbewerbe.forEach(w => { const t = w.typ || "liga"; (gruppenW[t] = gruppenW[t] || []).push(w); }); const heute = new Set(ligenHeute); const anzahlHeute = lg => spiele.filter(s => s.league === lg).length;
-    return h("div", { style: { position: "relative", marginBottom: 12 } }, knopf((liga ? liga : (en ? "All competitions" : "Alle Wettbewerbe")) + " \u25be", !!liga, () => setFilterOffen(!filterOffen)), liga ? h("button", { type: "button", onClick: () => setLiga(""), style: { marginLeft: 8, cursor: "pointer", border: "none", background: "none", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: "var(--gold-text)" } }, "\u2715 " + (en ? "reset" : "zur\u00fccksetzen")) : null,
-      filterOffen ? h("div", { style: { position: "absolute", left: 0, top: "calc(100% + 6px)", zIndex: 30, width: 360, maxHeight: 420, overflowY: "auto", background: CARD, border: "1px solid " + HAIR, borderRadius: 14, boxShadow: "0 16px 48px rgba(0,0,0,.16)", padding: 8 } }, h("button", { type: "button", onClick: () => { setLiga(""); setFilterOffen(false); }, style: { display: "flex", justifyContent: "space-between", width: "100%", textAlign: "left", cursor: "pointer", background: !liga ? "var(--gold-tint)" : "none", border: "none", borderRadius: 9, padding: "8px 10px", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, color: INK } }, en ? "All competitions" : "Alle Wettbewerbe", h("span", { style: { color: MUTED } }, spiele.length)), Object.keys(gruppenW).map(t => h("div", { key: t }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--t3)", padding: "8px 10px 4px" } }, TYP[t] || t), gruppenW[t].map(w => { const n = anzahlHeute(w.league); return h("button", { key: w.league, type: "button", onClick: () => { if (!n) return; setLiga(w.league); setFilterOffen(false); }, style: { display: "flex", justifyContent: "space-between", width: "100%", textAlign: "left", cursor: n ? "pointer" : "default", background: liga === w.league ? "var(--gold-tint)" : "none", border: "none", borderRadius: 9, padding: "7px 10px", fontFamily: FONT_BODY, fontSize: 13, fontWeight: n ? 700 : 500, color: n ? INK : "var(--aus)" } }, w.league, h("span", { style: { color: n ? "var(--gold-text)" : "var(--aus)", fontWeight: 800 } }, n ? n : "\u2013")); })))) : null); };
-  const karte = s => h("div", { key: s.id, className: "tw-sp-karte", onClick: () => setOffen(s), style: { display: "grid", gridTemplateColumns: "64px 1fr auto 1fr 96px", alignItems: "center", gap: 10, background: CARD, border: "1px solid " + HAIR, borderRadius: 14, padding: "12px 14px", cursor: "pointer" } },
-    h("div", { className: "tw-sp-st", style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: s.status === "live" ? "#149a59" : MUTED } }, statusText(s)),
-    h("div", { className: "tw-sp-heim", style: { display: "flex", alignItems: "center", gap: 8, justifyContent: "flex-end", minWidth: 0 } }, h("span", { className: "tw-sp-name", style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 700, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, s.heim), h(ClubLogo, { name: s.heim, size: 26 })),
-    h("div", { className: "tw-sp-tore", style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 22, color: s.status === "live" ? "#149a59" : INK, minWidth: 64, textAlign: "center", background: PAGE, borderRadius: 10, padding: "4px 10px" } }, h("span", { className: "tw-sp-th" }, s.tore_heim === null || s.tore_heim === undefined ? "\u2013" : s.tore_heim), h("span", { className: "tw-sp-tt" }, " : "), h("span", { className: "tw-sp-tg" }, s.tore_heim === null || s.tore_heim === undefined ? "\u2013" : s.tore_gast)),
-    h("div", { className: "tw-sp-gast", style: { display: "flex", alignItems: "center", gap: 8, minWidth: 0 } }, h(ClubLogo, { name: s.gast, size: 26 }), h("span", { className: "tw-sp-name", style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 700, color: INK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, clubName(s.gast))),
-    h("div", { className: "tw-sp-re", style: { textAlign: "right", fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED } }, s.xg_heim !== null && s.xg_heim !== undefined ? h("span", { className: "tw-sp-xg" }, "xG " + Number(s.xg_heim).toFixed(2) + " \u2013 " + Number(s.xg_gast).toFixed(2)) : "", h("div", { className: "tw-sp-an", style: { color: "var(--gold-text)", fontWeight: 800, fontSize: 11.5 } }, s.hat_stats ? (en ? "Analysis \u2192" : "Analyse \u2192") : (s.status === "beendet" ? (en ? "stats pending" : "Statistik folgt") : "")), (s.status === "beendet" || s.hat_stats) ? (twVideoSichtbar(s.video) ? h("a", { className: "tw-sp-hl tw-sp-hl-offiziell", href: s.video.url, target: "_blank", rel: "noopener noreferrer", onClick: e => e.stopPropagation(), title: [s.video.titel, s.video.kanal].filter(Boolean).join(" \u00b7 ") + (en ? " \u00b7 match highlights" : " \u00b7 Spielzusammenfassung"), style: { display: "inline-block", marginTop: 5, color: "var(--gold-schrift)", background: "var(--gold)", fontWeight: 800, fontSize: 11.5, lineHeight: 1.3, padding: "3px 8px", borderRadius: 7, textDecoration: "none", whiteSpace: "nowrap" } }, "\u25B6 Highlights") : (s.status === "beendet" ? h("span", { className: "tw-sp-hl tw-sp-hl-keine", title: s.video ? (en ? "The matching video is not available in your country." : "Das passende Video ist in deinem Land nicht abrufbar.") : (en ? "As soon as a matching highlight video is published, it is added here automatically." : "Sobald ein passendes Highlight-Video ver\u00f6ffentlicht ist, wird es hier automatisch erg\u00e4nzt."), style: { display: "inline-block", marginTop: 4, color: "var(--t3)", fontWeight: 700, fontSize: 11.5 } }, s.video ? (en ? "Highlights blocked here" : "Highlights hier gesperrt") : ((Date.now() - new Date(String(s.anstoss || "").replace(" ", "T") + (/Z|[+-]\d\d:\d\d$/.test(String(s.anstoss || "")) ? "" : "Z")).getTime()) < 36 * 3600e3 ? (en ? "Highlights pending" : "Highlights folgen") : (en ? "No highlights" : "Keine Highlights"))) : null)) : null));
-  // Analyse-Fenster: hoher Kontrast
-  return h("div", null,
-    h("style", null, ".tw-sp-name { white-space: normal !important; text-overflow: clip !important; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-height: 1.25; overflow-wrap: break-word; } .tw-sp-heim .tw-sp-name { text-align: right; } @media (max-width: 900px) { .tw-sp-karte { grid-template-columns: minmax(0, 1fr) auto !important; grid-template-areas: \"kopf kopf\" \"h th\" \"g tg\" \"fuss fuss\"; column-gap: 12px !important; row-gap: 0 !important; padding: 10px 14px !important; } .tw-sp-st { grid-area: kopf; justify-self: start; align-self: center; margin-bottom: 6px; } .tw-sp-xg { grid-area: kopf; justify-self: end; align-self: center; margin-bottom: 6px; white-space: nowrap; } .tw-sp-heim { grid-area: h; flex-direction: row-reverse; padding: 3px 0; } .tw-sp-gast { grid-area: g; padding: 3px 0; } .tw-sp-tore, .tw-sp-re { display: contents !important; } .tw-sp-tt { display: none; } .tw-sp-th { grid-area: th; } .tw-sp-tg { grid-area: tg; } .tw-sp-th, .tw-sp-tg { justify-self: end; align-self: center; font-size: 20px; line-height: 1; min-width: 22px; text-align: right; } .tw-sp-heim .tw-sp-name { text-align: left; } .tw-sp-an { grid-area: fuss; justify-self: start; align-self: center; } .tw-sp-an:not(:empty) { margin-top: 6px; } .tw-sp-karte .tw-sp-hl { grid-area: fuss; justify-self: end; align-self: center; margin-top: 6px !important; } } .tw-an-score, .tw-an-xg { white-space: nowrap; } .tw-an-team, .tw-an-text { min-width: 0; } .tw-an-name { overflow-wrap: break-word; } @media (max-width: 900px) { .tw-an-name { font-size: 20px !important; line-height: 1.2; } .tw-an-score { font-size: 38px !important; } } @media (max-width: 760px) { .tw-an-band { padding: 14px 14px 16px !important; } .tw-an-kopf { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important; grid-template-areas: \"h s g\" \"x x x\"; column-gap: 10px !important; row-gap: 8px !important; align-items: start !important; } .tw-an-mitte { display: contents; } .tw-an-heim { grid-area: h; } .tw-an-gast { grid-area: g; } .tw-an-score { grid-area: s; align-self: start; text-align: center; font-size: 34px !important; padding-top: 3px; } .tw-an-xg { grid-area: x; justify-self: center; text-align: center; margin-top: 0 !important; font-size: 12px !important; } .tw-an-team { flex-direction: column; align-items: center !important; justify-content: flex-start !important; gap: 6px !important; text-align: center; } .tw-an-heim .tw-an-logo { order: -1; } .tw-an-text { text-align: center !important; max-width: 100%; } .tw-an-name { font-size: 16px !important; line-height: 1.25; } .tw-an-note { font-size: 11.5px !important; margin-top: 2px; } .tw-an-note b { font-size: 13px !important; } .tw-an-logo { padding: 3px !important; border-radius: 10px !important; line-height: 0; } .tw-an-logo > img, .tw-an-logo > span { width: 34px !important; height: 34px !important; } .tw-an-logo > span { font-size: 14px !important; } .tw-an-logo > span > svg { width: 100%; height: 100%; } } @media (max-width: 380px) { .tw-an-name { font-size: 14.5px !important; } .tw-an-score { font-size: 30px !important; } .tw-an-kopf { column-gap: 8px !important; } } @media (max-width: 480px) { .tw-an-top { grid-template-columns: minmax(0, 1fr) !important; } .tw-an-top > div { min-width: 0; } }"),
-    h("h1", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 26, margin: "0 0 4px", color: INK } }, en ? "Matchday" : "Spieltag"),
-    h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: MUTED, marginBottom: 12 } }, en ? "Results from all covered competitions, live scores, statistics comparison and standout performances \u2013 with transfer signals." : "Ergebnisse aller abgedeckten Wettbewerbe, Livestand, Statistik-Vergleich und auff\u00e4llige Leistungen \u2013 mit Transfer-Signalen."),
-    tageLeiste, kalOffen ? kalender() : null, filter(),
-    lade && !daten ? h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), en ? "Loading matchday \u2026" : "Spieltag wird geladen \u2026") : !gruppen.length ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, background: CARD, border: "1px solid " + HAIR, borderRadius: 12, padding: "16px 18px" } }, en ? "No matches in the covered competitions on this day." : "An diesem Tag keine Spiele in den abgedeckten Wettbewerben.") : gruppen.map(g => h("div", { key: g.liga, style: { marginBottom: 16 } }, h("div", { style: { display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--t3)", margin: "4px 0 8px" } }, g.liga, h("span", { style: { fontWeight: 600, letterSpacing: 0, textTransform: "none" } }, g.spiele.length + (en ? " matches" : " Spiele"))), h("div", { style: { display: "grid", gap: 8 } }, g.spiele.map(karte)))),
-    offen ? h(TwSpielAnalyse, { s: offen, onClose: () => setOffen(null), openPlayer: openPlayer }) : null);
+      h("div", { style: { minWidth: 0 } }, h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 8 } }, h("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 17, color: INK } }, kalTag ? label(kalTag, true) : ""), kalTag ? knopf(en ? "Open day \u2192" : "Tag \u00f6ffnen \u2192", true, () => { setDatum(kalTag); setKalOffen(false); }) : null),
+        kal === null ? h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), "\u2026") : !liste.length ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED } }, en ? "No matches in the covered competitions." : "Keine Spiele in den abgedeckten Wettbewerben.") : h("div", { style: { maxHeight: 300, overflowY: "auto", display: "grid", gap: 4 } }, liste.map((s, i) => h("div", { key: i, style: { display: "grid", gridTemplateColumns: "46px minmax(0, 1fr) auto", gap: 8, alignItems: "center", fontFamily: FONT_BODY, fontSize: 12.5, color: INK, padding: "6px 8px", borderRadius: 8, background: i % 2 ? PAGE : "transparent" } }, h("span", { style: { color: MUTED, fontWeight: 700 } }, s.status === "beendet" ? (s.th + ":" + s.tg) : s.zeit), h("span", { style: { fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, s.heim + " \u2013 " + s.gast), h("span", { style: { fontSize: 11, fontWeight: 800, color: "var(--t2)", background: "var(--karte2)", padding: "2px 7px", borderRadius: 999, whiteSpace: "nowrap", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis" } }, String(s.league || "").replace(/ \u00b7 .*$/, ""))))))); };
+  /* Tagesansicht: Spiele nach Wettbewerb in der Reihenfolge des Katalogs (Deutschland zuerst) */
+  const tagGruppen = useMemo(() => { const m = {}; const add = s => { const k = s.wkey || ("x:" + String(s.league || "").replace(/ \u00b7 .*$/, "")); (m[k] = m[k] || []).push(s); }; spiele.forEach(add); geplantTag.forEach(add);
+    return Object.keys(m).map(k => ({ key: k, kat: katMap[k] || null, spiele: m[k].slice().sort((a, b) => String(a.anstoss).localeCompare(String(b.anstoss))) })).sort((a, b) => (a.kat ? a.kat.i : 9999) - (b.kat ? b.kat.i : 9999) || a.key.localeCompare(b.key)); }, [daten]);
+  const gruppeOffen = g => (auf[g.key] !== undefined ? auf[g.key] : (tagGruppen.length <= 6 || !!(g.kat && (g.kat.schnell || istMeine(g.kat.key)))));
+  const gruppeKopf = g => { const k = g.kat; const offenG = gruppeOffen(g); const nLive = g.spiele.filter(s => s.status === "live").length; const name = k ? nameVon(k) : String((g.spiele[0] || {}).league || "").replace(/ \u00b7 .*$/, ""); const rts = Array.from(new Set(g.spiele.map(s => String(s.league || "").split(" \u00b7 ")[1] || "").filter(Boolean))); const rt = rts.length === 1 ? twSp2Runde(rts[0]) : "";
+    return h("div", { className: "tw-sp2-gruppenkopf" },
+      k ? h("button", { type: "button", className: "tw-sp2-gruppenkopf-name", onClick: () => waehle(k.key), title: en ? "Open matchday and table" : "Spieltag und Tabelle \u00f6ffnen" }, h(TwSp2LigaLogo, { url: k.logo, name: name, size: 20 }), name, k.land_code && k.land_code !== "eu" && typeof ttFlagge === "function" ? ttFlagge(k.land_code, 16) : null) : h("span", { className: "tw-sp2-gruppenkopf-name", style: { cursor: "default" } }, name),
+      h("span", { className: "tw-sp2-gruppenkopf-zahl" }, (rt ? rt + " \u00b7 " : "") + g.spiele.length + (en ? (g.spiele.length > 1 ? " matches" : " match") : (g.spiele.length > 1 ? " Spiele" : " Spiel"))),
+      nLive ? h("span", { className: "tw-sp2-livezahl" }, nLive + " live") : null,
+      h("span", { className: "tw-sp2-gk-akt" },
+      h("button", { type: "button", className: "tw-sp2-auf", onClick: () => setAuf(a => Object.assign({}, a, { [g.key]: !offenG })), "aria-expanded": offenG, "aria-label": (offenG ? (en ? "Hide matches: " : "Spiele ausblenden: ") : (en ? "Show matches: " : "Spiele zeigen: ")) + name }, offenG ? (en ? "Hide \u25b4" : "Zuklappen \u25b4") : (en ? "Show matches \u25be" : "Spiele zeigen \u25be")),
+      k ? h("button", { type: "button", className: "tw-sp2-mehr", style: { marginLeft: 0 }, onClick: () => waehle(k.key) }, k.tabelle ? (en ? "Matchday & table \u2192" : "Spieltag & Tabelle \u2192") : (en ? "All matches \u2192" : "Alle Spiele \u2192")) : null)); };
+  const tagAnsicht = () => {
+    if (lade && !daten) return h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), en ? "Loading matchday \u2026" : "Spieltag wird geladen \u2026");
+    if (!tagGruppen.length) return h("div", { className: "tw-sp2-leer" }, en ? "No matches in the covered competitions on this day." : "An diesem Tag keine Spiele in den abgedeckten Wettbewerben.");
+    const kontext = { titel: (en ? "Matchday \u00b7 " : "Spieltag \u00b7 ") + label(datum) };
+    const nSp = tagGruppen.reduce((a, g) => a + g.spiele.length, 0); const alleAuf = tagGruppen.every(gruppeOffen);
+    return h(React.Fragment, null,
+      tagGruppen.length > 6 ? h("div", { className: "tw-sp2-tagkopf" }, h("span", null, tagGruppen.length + (en ? " competitions \u00b7 " : " Wettbewerbe \u00b7 ") + nSp + (en ? " matches" : " Spiele") + " \u00b7 " + (en ? "your leagues and the quick selection are open" : "Schnellwahl und Meine Ligen sind aufgeklappt")),
+        h("button", { type: "button", className: "tw-sp2-auf", onClick: () => { const n = {}; tagGruppen.forEach(g => { n[g.key] = !alleAuf; }); setAuf(n); } }, alleAuf ? (en ? "Collapse all" : "Alle zuklappen") : (en ? "Expand all" : "Alle aufklappen"))) : null,
+      tagGruppen.map(g => h("div", { key: g.key, style: { marginBottom: gruppeOffen(g) ? 16 : 6 } }, gruppeKopf(g), gruppeOffen(g) ? h("div", { style: { display: "grid", gap: 8 } }, g.spiele.map(s => karte(s, kontext))) : null)));
+  };
+  /* Liga-Ansicht */
+  const runden = (ligaInfo && ligaInfo.runden) || [];
+  const rIdx = ligaInfo ? runden.findIndex(r => r.key === ligaInfo.runde) : -1;
+  const rAkt = rIdx >= 0 ? runden[rIdx] : null;
+  const ligaSpiele = useMemo(() => { if (!ligaDaten || !ligaInfo) return []; const nm = ligaKat ? ligaKat.name : ""; const a = (ligaDaten.spiele || []).slice(); ((ligaInfo && ligaInfo.geplant) || []).forEach(g => a.push(twSp2Geplant(Object.assign({ runde: rAkt ? rAkt.rt : "" }, g), nm))); return a.sort((x, y) => String(x.anstoss).localeCompare(String(y.anstoss))); }, [ligaDaten, daten]);
+  const spieltTeam = useMemo(() => { const m = {}; ligaSpiele.forEach(s => { if (s.status === "live") { [s.heim, s.gast].forEach(n => { m[typeof clubKey === "function" ? clubKey(n) : n] = true; }); } }); return m; }, [ligaSpiele]);
+  const tabelle = (ligaInfo && ligaInfo.tabelle) || [];
+  const tabelleBlock = () => { if (!tabelle.length) return null; const gruppen = {}; const reihe = []; tabelle.forEach(t => { const g = t.gruppe || ""; if (!gruppen[g]) { gruppen[g] = []; reihe.push(g); } gruppen[g].push(t); });
+    const stand = ligaInfo.tabelle_stand ? new Date(ligaInfo.tabelle_stand) : null;
+    const zeile = (t, i) => { const k = typeof clubKey === "function" ? clubKey(t.team) : t.team; return h("tr", { key: (t.gruppe || "") + "-" + t.rang + "-" + t.team, className: (spieltTeam[k] ? "spielt " : "") + (openVerein ? "teamklick" : ""), onClick: openVerein ? () => openVerein(t.team) : undefined, title: openVerein ? (en ? "Open club profile" : "Vereinsprofil \u00f6ffnen") : undefined },
+      h("td", null, t.rang), h("td", { className: "tm" }, h("span", null, twSp2Logo(t.team, t.logo, 18), h("b", null, clubName(t.team)))), h("td", null, t.spiele), h("td", { className: "opt" }, t.s), h("td", { className: "opt" }, t.u), h("td", { className: "opt" }, t.n), h("td", { className: "opt" }, t.tore + ":" + t.gegentore), h("td", null, (t.diff > 0 ? "+" : "") + t.diff), h("td", { className: "pk" }, t.punkte)); };
+    return h("div", { className: "tw-sp2-tabelle" },
+      h("div", { className: "tw-sp2-tab-titel" }, en ? "Table" : "Tabelle", stand && !isNaN(stand) ? h("span", null, (en ? "as of " : "Stand ") + stand.toLocaleString(en ? "en-GB" : "de-DE", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Berlin" })) : null),
+      reihe.map(g => h(React.Fragment, { key: "g" + g }, g ? h("div", { className: "tw-sp2-gruppe" }, g) : null,
+        h("table", null, h("thead", null, h("tr", null, h("th", null, "#"), h("th", { className: "tm" }, en ? "Team" : "Verein"), h("th", { title: en ? "Played" : "Spiele" }, en ? "P" : "Sp"), h("th", { className: "opt", title: en ? "Won" : "Siege" }, en ? "W" : "S"), h("th", { className: "opt", title: en ? "Drawn" : "Unentschieden" }, en ? "D" : "U"), h("th", { className: "opt", title: en ? "Lost" : "Niederlagen" }, en ? "L" : "N"), h("th", { className: "opt" }, en ? "Goals" : "Tore"), h("th", { title: en ? "Goal difference" : "Tordifferenz" }, "+/-"), h("th", null, en ? "Pts" : "Pkt"))),
+          h("tbody", null, gruppen[g].map(zeile))))),
+      Object.keys(spieltTeam).length ? h("div", { className: "tw-sp2-kleer", style: { padding: "8px 6px 2px", fontSize: 11.5 } }, h("span", { style: { display: "inline-block", width: 10, height: 10, borderRadius: 3, background: "var(--gold-tint)", border: "1px solid var(--gold)", marginRight: 6, verticalAlign: "-1px" } }), en ? "Team is playing right now" : "Verein spielt gerade") : null); };
+  const ligaAnsicht = () => {
+    const name = ligaKat ? nameVon(ligaKat) : ""; const land = ligaKat ? landVon(ligaKat) : "";
+    const kopf = h("div", { className: "tw-sp2-ligakopf" },
+      h(TwSp2LigaLogo, { url: ligaKat && ligaKat.logo, name: name, size: 42 }),
+      h("div", { style: { minWidth: 0, flex: "1 1 200px" } }, h("div", { className: "tw-sp2-ligakopf-name" }, name || "\u2026"),
+        h("div", { className: "tw-sp2-ligakopf-land" }, ligaKat && ligaKat.land_code && ligaKat.land_code !== "eu" && typeof ttFlagge === "function" ? ttFlagge(ligaKat.land_code, 18) : null, land, h("button", { type: "button", className: "tw-sp2-stern" + (istMeine(liga) ? " an" : ""), onClick: () => umMeine(liga), "aria-pressed": istMeine(liga), title: istMeine(liga) ? (en ? "Remove from My leagues" : "Aus Meine Ligen entfernen") : (en ? "Add to My leagues" : "Zu Meine Ligen hinzuf\u00fcgen"), style: { padding: 3, marginLeft: 2 } }, h(TwSp2Stern, { an: istMeine(liga), size: 15 }), h("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, marginLeft: 4 } }, istMeine(liga) ? (en ? "My league" : "Meine Liga") : (en ? "Add to My leagues" : "Zu Meine Ligen"))))),
+      runden.length ? h("div", { className: "tw-sp2-runde" },
+        h("button", { type: "button", className: "tw-sp2-pfeil", disabled: rIdx <= 0, onClick: () => { if (rIdx > 0) { setRunde(runden[rIdx - 1].key); sitzSetzen("runde", runden[rIdx - 1].key); } }, "aria-label": en ? "Previous matchday" : "Vorheriger Spieltag", title: en ? "Previous matchday" : "Vorheriger Spieltag" }, "\u2190"),
+        h("select", { value: ligaInfo.runde || "", onChange: e => { setRunde(e.target.value); sitzSetzen("runde", e.target.value); }, "aria-label": en ? "Select matchday" : "Spieltag w\u00e4hlen" }, runden.map(r => h("option", { key: r.key, value: r.key }, twSp2RundeTitel(r) + " \u00b7 " + twSp2Spanne(r.von, r.bis)))),
+        h("button", { type: "button", className: "tw-sp2-pfeil", disabled: rIdx < 0 || rIdx >= runden.length - 1, onClick: () => { if (rIdx >= 0 && rIdx < runden.length - 1) { setRunde(runden[rIdx + 1].key); sitzSetzen("runde", runden[rIdx + 1].key); } }, "aria-label": en ? "Next matchday" : "N\u00e4chster Spieltag", title: en ? "Next matchday" : "N\u00e4chster Spieltag" }, "\u2192")) : null);
+    if (!ligaDaten || (ligaLade && !ligaInfo)) return h(React.Fragment, null, kopf, h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), en ? "Loading matchday \u2026" : "Spieltag wird geladen \u2026"));
+    if (!ligaInfo) return h(React.Fragment, null, kopf, h("div", { className: "tw-sp2-leer" }, en ? "This competition could not be loaded." : "Dieser Wettbewerb konnte nicht geladen werden."));
+    const kontext = { titel: name + (rAkt ? " \u00b7 " + twSp2RundeTitel(rAkt) : "") };
+    const tage = {}; const tagReihe = []; ligaSpiele.forEach(s => { const t = twSp2TagIso(s.anstoss); if (!tage[t]) { tage[t] = []; tagReihe.push(t); } tage[t].push(s); });
+    const spieleSpalte = h("div", { className: "tw-sp2-spiele-col", style: { minWidth: 0 } },
+      rAkt ? h("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 20, color: INK, margin: "0 0 8px", display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" } }, twSp2RundeTitel(rAkt), h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 600, color: MUTED } }, twSp2Spanne(rAkt.von, rAkt.bis) + " \u00b7 " + rAkt.n + (en ? (rAkt.n > 1 ? " matches" : " match") : (rAkt.n > 1 ? " Spiele" : " Spiel")) + (rAkt.n_fertig && rAkt.n_fertig < rAkt.n ? " \u00b7 " + rAkt.n_fertig + (en ? " played" : " gespielt") : ""))) : null,
+      !ligaSpiele.length ? h("div", { className: "tw-sp2-leer" }, en ? "No matches available for this matchday." : "F\u00fcr diesen Spieltag liegen keine Spiele vor.") :
+        tagReihe.map(t => h("div", { key: t, style: { marginBottom: 14 } }, h("div", { className: "tw-sp2-tag" }, twSp2TagText(t, true)), h("div", { style: { display: "grid", gap: 8 } }, tage[t].map(s => karte(s, kontext))))));
+    const mitTab = tabelle.length > 0;
+    return h(React.Fragment, null, kopf,
+      mitTab ? h("div", { className: "tw-sp2-reiter tw-pr-tabs", role: "tablist", "aria-label": en ? "View" : "Ansicht" },
+        h("button", { type: "button", role: "tab", "aria-selected": reiter === "spiele", className: "tw-pr-tab" + (reiter === "spiele" ? " aktiv" : ""), onClick: () => setReiter("spiele") }, en ? "Matches" : "Spiele"),
+        h("button", { type: "button", role: "tab", "aria-selected": reiter === "tabelle", className: "tw-pr-tab" + (reiter === "tabelle" ? " aktiv" : ""), onClick: () => setReiter("tabelle") }, en ? "Table" : "Tabelle")) : null,
+      h("div", { className: "tw-sp2-grid" + (mitTab ? "" : " ohne-tabelle"), "data-reiter": reiter, "aria-busy": ligaLade ? "true" : "false", style: ligaLade ? { opacity: .55, transition: "opacity .15s" } : null }, spieleSpalte, mitTab ? h("div", { className: "tw-sp2-tab-col", style: { minWidth: 0 } }, tabelleBlock()) : null));
+  };
+  const offenS = offen ? (() => { const id = offen.id; if (offen.s.geplant) return ligaSpiele.find(x => "w" + x.id === id) || geplantTag.find(x => "w" + x.id === id) || offen.s; return ((ligaDaten && ligaDaten.spiele) || []).find(x => "f" + x.id === id) || spiele.find(x => "f" + x.id === id) || offen.s; })() : null;
+  return h("div", { className: "tw-sp2" },
+    h("style", null, TW_SP_ALT_CSS + "\n" + TW_SP2_CSS),
+    offen ? h(TwSpielSeite, { key: offen.id, spiel: offenS, kontext: offen.kontext, onBack: schliessen, openPlayer: openPlayer, authQ: authQ, tabelle: liga && ligaInfo ? ligaInfo.tabelle : null }) :
+    h(React.Fragment, null,
+      h("div", { className: "tw-sp2-kopf" }, h("div", null,
+        h("h1", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 26, margin: "0 0 4px", color: INK } }, en ? "Matchday" : "Spieltag"),
+        h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: MUTED } }, en ? "Pick a league: whole matchday, table, line-ups and match analysis." : "Liga w\u00e4hlen: ganzer Spieltag, Tabelle, Aufstellungen und Spielanalyse.")), sucheFeld),
+      leisten, allePanel,
+      liga ? h(React.Fragment, null,
+        h("div", { style: { margin: "0 0 10px" } }, h("button", { type: "button", className: "tw-sp2-mehr", style: { marginLeft: 0 }, onClick: () => setLiga("", "") }, "\u2190 " + (en ? "All matches on " : "Alle Spiele am ") + label(datum))),
+        ligaAnsicht())
+      : h(React.Fragment, null, tageLeiste, kalOffen ? kalender() : null, tagAnsicht())));
 }
 
 function AssistentVue({ account, openPlayer }) {
@@ -14451,22 +14888,22 @@ const TW_AN_EN = { "Angriff": "Attack", "Spielaufbau": "Build-up", "Zweikampf": 
 function twAnText(t) { return LANG === "en" ? (TW_AN_EN[String(t || "").trim()] || t) : t; }
 const TW_AN_ROLLE_EN = { ZM: "CM", FL: "W", AV: "FB", ST: "ST", IV: "CB", OM: "AM", TW: "GK", DM: "DM" };
 function twAnRolle(r) { return LANG === "en" ? (TW_AN_ROLLE_EN[r] || r) : r; }
-function TwSpielAnalyse({ s: s0, onClose, openPlayer, z, mitDatum }) {
+function TwSpielAnalyse({ s: s0, onClose, openPlayer, z, mitDatum, seite, kopfRechts }) { /* Spieltag 2.0: seite = eigene Spielseite statt Fenster */
   const h = React.createElement; const en = LANG === "en";
   const s = Object.assign({ note_heim: null, note_gast: null, top: [], stats: [], ereignisse: [] }, s0 || {});
   const [lkReiter, setLkReiter] = React.useState("analyse"); /* A98: Reiter Spielanalyse | Spielerperformances */
-  const zu = React.useRef(onClose); zu.current = onClose; useTwZurueck(true, () => { if (zu.current) zu.current(); });
+  const zu = React.useRef(onClose); zu.current = onClose; useTwZurueck(!seite, () => { if (zu.current) zu.current(); });
   React.useEffect(() => {
-    twScrollSperre(true);
+    if (!seite) twScrollSperre(true);
     // Escape schliesst nur die Analyse (nicht das Vereinsprofil darunter); liegt eine hoehere Ebene darueber (z. B. Spielerprofil), bleibt die Analyse offen
     const k = e => {
       if (e.key !== "Escape") return;
-      const hoeher = twHoehereEbene(z || 1250);
+      const hoeher = twHoehereEbene(seite ? 5 : (z || 1250));
       if (hoeher) return;
       e.stopPropagation(); if (zu.current) zu.current();
     };
     document.addEventListener("keydown", k);
-    return () => { document.removeEventListener("keydown", k); twScrollSperre(false); };
+    return () => { document.removeEventListener("keydown", k); if (!seite) twScrollSperre(false); };
   }, []);
   const setOffen = () => { if (zu.current) zu.current(); };
   const zeit = iso => { if (!iso) return ""; const d = new Date(String(iso).replace(" ", "T") + (/Z|[+-]\d\d:\d\d$/.test(String(iso)) ? "" : "Z")); return d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Berlin" }); };
@@ -14480,9 +14917,11 @@ function TwSpielAnalyse({ s: s0, onClose, openPlayer, z, mitDatum }) {
     const zeile = (x, i) => { const a = Number(x.heim) || 0, b = Number(x.gast) || 0; const tot = a + b; const pa = tot ? Math.round(a / tot * 100) : 50; const hv = x.heim === null ? "\u2013" : x.heim + (x.einheit || ""), gv = x.gast === null ? "\u2013" : x.gast + (x.einheit || ""); return h("div", { key: x.k, style: { padding: "8px 10px", borderRadius: 10, background: i % 2 ? "#F4F6F8" : "#fff" } }, h("div", { style: { display: "grid", gridTemplateColumns: "72px 1fr 72px", alignItems: "center", marginBottom: 5 } }, h("span", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 18, color: a > b ? HEIM : "var(--t3)" } }, hv), h("span", { style: { textAlign: "center", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, color: "var(--t2)" } }, twAnText(x.k)), h("span", { style: { textAlign: "right", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 18, color: b > a ? "var(--tw-an-gast-text, #8A6A1F)" : "var(--t3)" } }, gv)), h("div", { style: { display: "flex", height: 8, borderRadius: 4, overflow: "hidden", background: "#DDE2E8" } }, h("div", { style: { width: pa + "%", background: HEIM } }), h("div", { style: { flex: 1, background: GAST } }))); };
     const spielerKarte = t => h("div", { key: t.sm_id, style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, padding: 12, display: "flex", gap: 12, alignItems: "flex-start" } }, h("div", { style: { position: "relative", flexShrink: 0 } }, t.photo ? h("img", { src: t.photo, alt: "", loading: "lazy", style: { width: 52, height: 52, borderRadius: "50%", objectFit: "cover", background: "var(--karte2)" } }) : h("div", { style: { width: 52, height: 52, borderRadius: "50%", background: "var(--karte2)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 18, color: "var(--t2)" } }, String(t.name || "?").split(" ").map(x => x[0]).slice(0, 2).join("")), h("div", { style: { position: "absolute", right: -6, bottom: -6, width: 28, height: 28, borderRadius: 9, background: t.score >= 80 ? GAST : HEIM, color: t.score >= 80 ? "#121821" : "var(--tw-an-heim-text, #fff)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 13, border: "2px solid #fff" } }, t.score)), h("div", { style: { minWidth: 0, flex: 1 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, cursor: t.pid ? "pointer" : "default" }, onClick: () => { if (t.pid && openPlayer) openPlayer(t.pid, t.name, t.team); } }, t.name), h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t2)" } }, t.team + " \u00b7 " + twAnRolle(t.rolle) + " \u00b7 " + t.min + (en ? " min" : " Min.") + (t.stufe === "Stichprobe" ? " \u00b7 " + (en ? "small sample" : "Stichprobe") : "")), t.bereiche ? h("div", { style: { display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 } }, Object.entries(t.bereiche).filter(([k, v]) => v !== null).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k, v]) => h("span", { key: k, style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 800, padding: "3px 8px", borderRadius: 999, background: v >= 70 ? "var(--gruen-tint)" : "var(--karte2)", color: v >= 70 ? "var(--gruen-text)" : "var(--t2)" } }, (en ? { A: "Finishing", B: "Creation", C: "Ball carrying", D: "Ball security", E: "Defending", S: "Saves", K: "Box control", P: "Build-up" } : { A: "Abschluss", B: "Kreation", C: "Ballf\u00fchrung", D: "Sicherheit", E: "Defensive", S: "Paraden", K: "Strafraum", P: "Aufbau" })[k] + " " + Math.round(v)))) : null, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 700, color: "var(--teal)", marginTop: 5 } }, signale(t).join(" \u00b7 "))));
     const heimTop = (s.top || []).filter(t => t.team === s.heim), gastTop = (s.top || []).filter(t => t.team === s.gast);
-    return h("div", { onClick: () => setOffen(null), className: "tw-mv-ebene", style: { position: "fixed", inset: 0, zIndex: z || 1250, background: "rgba(10,12,16,.62)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16, overscrollBehavior: "contain" } }, h("div", { onClick: e => e.stopPropagation(), className: "tw-mv-voll tw-mv-ohnepad", role: "dialog", "aria-modal": "true", "aria-label": en ? "Match analysis" : "Spielanalyse", style: { width: "100%", maxWidth: 900, maxHeight: "100%", overflowY: "auto", overscrollBehavior: "contain", background: "#F4F6F8", borderRadius: 20, boxShadow: "0 30px 90px rgba(0,0,0,.45)" } },
-      h(TwMobilKopf, { onBack: () => setOffen(null), titel: en ? "Match analysis" : "Spielanalyse" }),
-      h("div", { className: "tw-an-band", style: { background: "var(--dunkel)", color: "#fff", padding: "18px 22px 20px", borderRadius: "20px 20px 0 0" } }, h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 12 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#9aa6b8" } }, ligaText(s) + " \u00b7 " + (mitDatum && datumText(s) ? datumText(s) + " \u00b7 " : "") + statusText(s)), h("button", { type: "button", className: "tw-mv-nurdesk", onClick: () => setOffen(null), style: { cursor: "pointer", border: "1px solid rgba(255,255,255,.25)", background: "rgba(255,255,255,.08)", color: "#fff", borderRadius: 9, padding: "6px 10px", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800 } }, "\u2715 " + (en ? "Close" : "Schlie\u00dfen"))),
+    const huelle = (...kinder) => seite ? h("div", { className: "tw-sp2-an", role: "region", "aria-label": en ? "Match analysis" : "Spielanalyse", style: { width: "100%", background: "#F4F6F8", borderRadius: 20, overflow: "hidden", border: "1px solid " + HAIR } }, ...kinder)
+      : h("div", { onClick: () => setOffen(null), className: "tw-mv-ebene", style: { position: "fixed", inset: 0, zIndex: z || 1250, background: "rgba(10,12,16,.62)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16, overscrollBehavior: "contain" } }, h("div", { onClick: e => e.stopPropagation(), className: "tw-mv-voll tw-mv-ohnepad", role: "dialog", "aria-modal": "true", "aria-label": en ? "Match analysis" : "Spielanalyse", style: { width: "100%", maxWidth: 900, maxHeight: "100%", overflowY: "auto", overscrollBehavior: "contain", background: "#F4F6F8", borderRadius: 20, boxShadow: "0 30px 90px rgba(0,0,0,.45)" } },
+      h(TwMobilKopf, { onBack: () => setOffen(null), titel: en ? "Match analysis" : "Spielanalyse" }), ...kinder));
+    return huelle(
+      h("div", { className: "tw-an-band", style: { background: "var(--dunkel)", color: "#fff", padding: "18px 22px 20px", borderRadius: "20px 20px 0 0" } }, h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 12 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase", color: "#9aa6b8" } }, ligaText(s) + " \u00b7 " + (mitDatum && datumText(s) ? datumText(s) + " \u00b7 " : "") + statusText(s)), seite ? (kopfRechts || null) : h("button", { type: "button", className: "tw-mv-nurdesk", onClick: () => setOffen(null), style: { cursor: "pointer", border: "1px solid rgba(255,255,255,.25)", background: "rgba(255,255,255,.08)", color: "#fff", borderRadius: 9, padding: "6px 10px", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800 } }, "\u2715 " + (en ? "Close" : "Schlie\u00dfen"))),
         h("div", { className: "tw-an-kopf", style: { display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", gap: 14 } }, h("div", { className: "tw-an-team tw-an-heim", style: { display: "flex", alignItems: "center", gap: 12, justifyContent: "flex-end" } }, h("div", { className: "tw-an-text", style: { textAlign: "right" } }, h("div", { className: "tw-an-name", style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 24 } }, s.heim), s.note_heim !== null ? h("div", { className: "tw-an-note", style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#c7d0dc" } }, (en ? "Team rating " : "Teamnote "), h("b", { style: { color: "#fff", fontSize: 14 } }, Math.round(s.note_heim))) : null), h("div", { className: "tw-an-logo", style: { background: "var(--karte)", borderRadius: 12, padding: 4 } }, h(ClubLogo, { name: s.heim, size: 44 }))), h("div", { className: "tw-an-mitte", style: { textAlign: "center" } }, h("div", { className: "tw-an-score", style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 44, lineHeight: 1 } }, (s.tore_heim ?? "\u2013") + " : " + (s.tore_gast ?? "\u2013")), ((s.xg_heim !== null && s.xg_heim !== undefined) || elfText(s)) ? h("div", { className: "tw-an-xg", style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#c7d0dc", marginTop: 4 } }, [s.xg_heim !== null && s.xg_heim !== undefined ? "xG " + Number(s.xg_heim).toFixed(2) + " : " + Number(s.xg_gast).toFixed(2) : null, elfText(s)].filter(Boolean).join(" \u00b7 ")) : null), h("div", { className: "tw-an-team tw-an-gast", style: { display: "flex", alignItems: "center", gap: 12 } }, h("div", { className: "tw-an-logo", style: { background: "var(--karte)", borderRadius: 12, padding: 4 } }, h(ClubLogo, { name: s.gast, size: 44 })), h("div", { className: "tw-an-text" }, h("div", { className: "tw-an-name", style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 24 } }, clubName(s.gast)), s.note_gast !== null ? h("div", { className: "tw-an-note", style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "#c7d0dc" } }, (en ? "Team rating " : "Teamnote "), h("b", { style: { color: "#fff", fontSize: 14 } }, Math.round(s.note_gast))) : null))),
         tore.length ? h("div", { style: { display: "flex", flexWrap: "wrap", gap: 6, marginTop: 14 } }, tore.map((e, i) => h("span", { key: i, style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, padding: "5px 10px", borderRadius: 999, background: e.team === "heim" ? "#fff" : GAST, color: e.team === "heim" ? "var(--dunkel)" : "#121821" } }, "" + (e.min || "") + "' " + e.spieler + (e.zu ? " (" + e.zu + ")" : "") + (e.ergebnis ? " " : ""), e.ergebnis ? h("span", { className: "tw-an-stand", style: { whiteSpace: "nowrap" } }, "\u00b7 " + e.ergebnis) : null))) : null),
       h(TwSpielReiter, { reiter: lkReiter, setReiter: setLkReiter }), lkReiter === "spieler" ? h(TwSpielPerformances, { s: s, openPlayer: openPlayer }) : h("div", { className: "tw-mv-fusspad", style: { padding: "16px 22px 24px" } },
@@ -14491,8 +14930,9 @@ function TwSpielAnalyse({ s: s0, onClose, openPlayer, z, mitDatum }) {
         !s.hat_stats ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 13.5, color: "var(--t2)", background: "var(--karte)", borderRadius: 12, padding: "14px 16px", marginBottom: 12 } }, s.ohne_scores ? (en ? "The source provides no team statistics for this match." : "F\u00fcr dieses Spiel liegt in der Quelle keine Teamstatistik vor.") : (en ? "Statistics arrive about 15\u201330 minutes after the final whistle." : "Die Statistik kommt etwa 15\u201330 Minuten nach Abpfiff.")) : null,
         Object.keys(gr).map(g => h("div", { key: g, style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, padding: "10px 8px 6px", marginBottom: 10 } }, h("div", { style: { display: "inline-block", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--tw-an-chip-text, #fff)", background: "var(--t2)", padding: "4px 10px", borderRadius: 999, margin: "0 0 6px 10px" } }, twAnText(g)), gr[g].map(zeile))),
         (s.aufstellungen && (twHatRaster((s.aufstellungen.heim || {}).startelf) || twHatRaster((s.aufstellungen.gast || {}).startelf))) ? h("div", { style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, padding: "10px 12px", marginBottom: 10 } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--t2)", margin: "0 0 8px" } }, en ? "Line-ups" : "Aufstellungen"), h(TwSpielfeld, { heim: Object.assign({ name: s.heim }, s.aufstellungen.heim || {}), gast: Object.assign({ name: s.gast }, s.aufstellungen.gast || {}), en: en })) : null,
+        seite ? h(TwSpielKader, { s: s, openPlayer: openPlayer }) : null,
         karten.length ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 600, color: "var(--t2)", background: "var(--karte)", borderRadius: 12, padding: "10px 14px", marginBottom: 12 } }, karten.map(e => (e.min || "") + "' " + (/red/i.test(e.typ) ? (en ? "Red" : "Rot") : (en ? "Yellow" : "Gelb")) + " " + e.spieler).join("  \u00b7  ")) : null,
-        (s.top || []).length ? h("div", null, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--t2)", margin: "14px 0 8px" } }, en ? "Standout players (Score v2)" : "Auff\u00e4llige Spieler (Score v2)"), h("div", { className: "tw-an-top", style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 } }, h("div", { style: { display: "grid", gap: 8, alignContent: "start" } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: HEIM } }, s.heim), (heimTop.length ? heimTop : []).map(spielerKarte)), h("div", { style: { display: "grid", gap: 8, alignContent: "start" } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: "var(--tw-an-gast-text, #8A6A1F)" } }, s.gast), gastTop.map(spielerKarte)))) : (s.status === "beendet" ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)", marginTop: 10 } }, s.ohne_scores ? (en ? "Player scores (Score v2) are only available for matches from TransferWire matchday data." : "Spieler-Scores (Score v2) gibt es nur f\u00fcr Spiele aus den TransferWire-Spieltagsdaten.") : (en ? "Player scores follow after the next scoring run." : "Die Spieler-Scores folgen nach dem n\u00e4chsten Bewertungslauf.")) : null)))); };
+        (s.top || []).length ? h("div", null, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--t2)", margin: "14px 0 8px" } }, en ? "Standout players (Score v2)" : "Auff\u00e4llige Spieler (Score v2)"), h("div", { className: "tw-an-top", style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 } }, h("div", { style: { display: "grid", gap: 8, alignContent: "start" } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: HEIM } }, s.heim), (heimTop.length ? heimTop : []).map(spielerKarte)), h("div", { style: { display: "grid", gap: 8, alignContent: "start" } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: "var(--tw-an-gast-text, #8A6A1F)" } }, s.gast), gastTop.map(spielerKarte)))) : (s.status === "beendet" ? h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)", marginTop: 10 } }, s.ohne_scores ? (en ? "Player scores (Score v2) are only available for matches from TransferWire matchday data." : "Spieler-Scores (Score v2) gibt es nur f\u00fcr Spiele aus den TransferWire-Spieltagsdaten.") : (en ? "Player scores follow after the next scoring run." : "Die Spieler-Scores folgen nach dem n\u00e4chsten Bewertungslauf.")) : null))); };
   return analyse(s);
 }
 
@@ -16570,7 +17010,7 @@ function TransferApp({
       width: "100%",
       boxSizing: "border-box"
     }
-  }, TW_ZUSATZ.finde(view) ? React.createElement(TwZusatzSeite, { key: "zusatz-" + view, seite: TW_ZUSATZ.finde(view), account: account, setView: setView }) : null, view === "pro" && React.createElement(ProSperreVue, { ziel: proZiel }), view === "nz_profil" && React.createElement(NzProfilSeite, { key: "nz-profil", account: account, setView: setView, admin: istAdmin }), view === "nz_nachrichten" && React.createElement(NzNachrichtenSeite, { key: "nz-nachrichten", account: account, setView: setView, admin: istAdmin, openPlayer: openPlayer, openVerein: openVerein }), view === "nz_beitraege" && React.createElement(NzBeitraegeSeite, { key: "nz-beitraege", account: account, setView: setView, admin: istAdmin }), view === "nz_markt" && React.createElement(NzMarktSeite, { key: "nz-markt", account: account, setView: setView, admin: istAdmin, openPlayer: openPlayer, openVerein: openVerein }), view === "nz_kontakte" && React.createElement(NzKontakteSeite, { key: "nz-kontakte", account: account, setView: setView, admin: istAdmin }), view === "marktwert" && React.createElement(MarktwertVue, { openPlayer: openPlayer, openVerein: openVerein, start: mwStart }), view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein, account: account, setView: setView }), view === "akquise" && /*#__PURE__*/React.createElement(AkquiseVue, { isPrem: isPrem, account: account, openPlayer: openPlayer }), view === "aehnlich" && aehnlichStart && React.createElement(AehnlicheSpielerSeite, { key: "ae-" + aehnlichStart.pid, ausgang: aehnlichStart, onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "spielervergleich" && React.createElement(SpielerVergleichSeite, { key: "vgl-" + (vglStart || []).map(x => x.pid).join("-"), start: vglStart || [], onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news.filter(n => n.type !== "verletzung" && n.type !== "leistung" && n.type !== "meldung" && !n._ausgeblendet), onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(VereinSuchtVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, TW_ZUSATZ.finde(view) ? React.createElement(TwZusatzSeite, { key: "zusatz-" + view, seite: TW_ZUSATZ.finde(view), account: account, setView: setView }) : null, view === "pro" && React.createElement(ProSperreVue, { ziel: proZiel }), view === "nz_profil" && React.createElement(NzProfilSeite, { key: "nz-profil", account: account, setView: setView, admin: istAdmin }), view === "nz_nachrichten" && React.createElement(NzNachrichtenSeite, { key: "nz-nachrichten", account: account, setView: setView, admin: istAdmin, openPlayer: openPlayer, openVerein: openVerein }), view === "nz_beitraege" && React.createElement(NzBeitraegeSeite, { key: "nz-beitraege", account: account, setView: setView, admin: istAdmin }), view === "nz_markt" && React.createElement(NzMarktSeite, { key: "nz-markt", account: account, setView: setView, admin: istAdmin, openPlayer: openPlayer, openVerein: openVerein }), view === "nz_kontakte" && React.createElement(NzKontakteSeite, { key: "nz-kontakte", account: account, setView: setView, admin: istAdmin }), view === "marktwert" && React.createElement(MarktwertVue, { openPlayer: openPlayer, openVerein: openVerein, start: mwStart }), view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein, authQ: authQ }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein, account: account, setView: setView }), view === "akquise" && /*#__PURE__*/React.createElement(AkquiseVue, { isPrem: isPrem, account: account, openPlayer: openPlayer }), view === "aehnlich" && aehnlichStart && React.createElement(AehnlicheSpielerSeite, { key: "ae-" + aehnlichStart.pid, ausgang: aehnlichStart, onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "spielervergleich" && React.createElement(SpielerVergleichSeite, { key: "vgl-" + (vglStart || []).map(x => x.pid).join("-"), start: vglStart || [], onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news.filter(n => n.type !== "verletzung" && n.type !== "leistung" && n.type !== "meldung" && !n._ausgeblendet), onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(VereinSuchtVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       background: "transparent",
       border: "none",
