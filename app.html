@@ -844,6 +844,26 @@ header:has(+ .tw-tabbar) { background: var(--seite) !important; border-bottom: 1
 .tw-cm5-felder b { color: var(--t1); font-weight: 700; }
 .tw-cm5-filter select { max-width: 100%; }
 @media (max-width: 560px) { .tw-cm5-filter { gap: 6px 10px; } .tw-cm5-filter select { flex: 1 1 140px; } }
+/* Netzwerk 2.0 Paket 7: Vereine */
+.nz7-wappen { width: 16px; height: 16px; object-fit: contain; vertical-align: middle; margin-left: 4px; }
+.nz7-wappen.klein { width: 14px; height: 14px; }
+.nz7-vp-kopf { display: flex; gap: 12px; align-items: center; }
+.nz7-vp-wappen { width: 48px; height: 48px; object-fit: contain; flex: none; }
+.nz7-liste { display: grid; gap: 10px; }
+.nz7-bedarf { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid var(--linie); border-radius: 12px; background: var(--karte2); }
+.nz7-bedarf.blass { opacity: .7; }
+.nz7-bedarf-kopf { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.nz7-bedarf-kopf b { color: var(--t1); }
+.nz7-bedarf-text { font-size: 13.5px; line-height: 1.5; white-space: pre-wrap; color: var(--t1); }
+.nz7-kader { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 8px; font-size: 13px; }
+.nz7-kader ul { margin: 4px 0 0; padding-left: 16px; }
+.nz7-kader li { margin: 2px 0; }
+.nz7-link { background: none; border: 0; padding: 0; font: inherit; color: var(--blau-text); cursor: pointer; text-decoration: underline; }
+.nz7-vn { display: grid; gap: 8px; margin-bottom: 14px; padding: 12px 14px; border: 1px solid var(--linie); border-radius: 12px; background: var(--karte2); font-family: var(--font-body, inherit); font-size: 13.5px; color: var(--t1); }
+.nz7-vn-kopf { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.nz7-vn-felder { display: grid; gap: 4px; }
+.nz7-vn-leute { display: flex; gap: 10px; flex-wrap: wrap; }
+.nz7-vn-person { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 6px 10px; border: 1px solid var(--linie); border-radius: 10px; background: var(--karte); }
 /* Netzwerk 2.0 Paket 6: Spieler-Markt */
 .nz6-karten { grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); }
 .nz6-karte { gap: 8px; }
@@ -2472,11 +2492,11 @@ function nzKontoLaden(account) {
   const email = String((account && account.email) || "").toLowerCase();
   if (!email || !twHatSitzung(account)) { if (NZ.email || NZ.konto) { NZ.email = ""; nzKontoSetzen(null); } return Promise.resolve(null); }
   if (NZ.laedt) return Promise.resolve(NZ.konto);
-  NZ.laedt = true; NZ.email = email;
+  NZ.laedt = true; NZ.email = email; NZ.account = account;
   return nzRuf(account, "konto", {}).then(d => { NZ.laedt = false; if (d && d.ok) { nzKontoSetzen(d); if (d.admin === true) nzAdminModul(account); } return d; }).catch(() => { NZ.laedt = false; return null; });
 }
 function nzAdminModul(account) {   // Prüfseite „Verifizierungen“ als Zusatzseite (Punkt 356) – Code kommt nur für das Unternehmens-Konto
-  if (TW_ZUSATZ.module[NZ_ADMIN_URL]) { TW_ZUSATZ.melden(TW_ZUSATZ.module[NZ_ADMIN_URL], NZ_ADMIN_URL); return; }
+  if (TW_ZUSATZ.module[NZ_ADMIN_URL]) { TW_ZUSATZ.melden(TW_ZUSATZ.module[NZ_ADMIN_URL], NZ_ADMIN_URL); if (TW_ZUSATZ.module[NZ_ADMIN_URL + "#vereine"]) TW_ZUSATZ.melden(TW_ZUSATZ.module[NZ_ADMIN_URL + "#vereine"], NZ_ADMIN_URL + "#vereine"); return; }
   if (TW_ZUSATZ.geladen[NZ_ADMIN_URL]) return;
   TW_ZUSATZ.geladen[NZ_ADMIN_URL] = true;
   fetch(NZ_ADMIN_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ aktion: "modul", code: account.code || account.sitzung || "", email: account.email || "" }), cache: "no-store", credentials: "omit" })
@@ -2667,7 +2687,7 @@ function NzAvatar({ account, email, name, hatFoto, groesse }) {
   React.useEffect(() => { let alive = true; if (!hatFoto) { setSrc(null); return undefined; } nzFotoHolen(account, email).then(u => { if (alive) setSrc(u); }); return () => { alive = false; }; }, [email, hatFoto, account && account.email]);
   return h("span", { className: "nz-avatar" + (groesse ? " " + groesse : ""), "aria-hidden": "true" }, src ? h("img", { src: src, alt: "" }) : nzInitialen(name));
 }
-function nzHakenAus(p, klein) { return (p && p.haken) ? nzHaken({ author_haken: { rolle: p.rolle, seit: p.haken_seit } }, klein) : null; }
+function nzHakenAus(p, klein) { const hk = (p && p.haken) ? nzHaken({ author_haken: { rolle: p.rolle, seit: p.haken_seit } }, klein) : null; const w = nz7Wappen(p, klein); return (hk || w) ? React.createElement(React.Fragment, null, hk, w) : null; }
 function nzRolleVon(p) { const en = LANG === "en"; return (en ? (p && p.rolle_en) : (p && p.rolle_de)) || nzRolleText(p && p.rolle); }
 function nzZeit(t) { if (!t) return ""; try { return fmtDate(t); } catch (e) { return String(t).slice(0, 10); } }
 function nzLink(u) { const s = String(u || "").trim(); if (!s) return ""; return /^https?:\/\//i.test(s) ? s : "https://" + s; }
@@ -2943,6 +2963,8 @@ function NzProfilSeite({ account, setView, admin }) {
         h("div", { className: "nz-schalter" + (p.freigeschaltet ? " an" : ""), role: "switch", "aria-checked": !!p.freigeschaltet, tabIndex: 0, onClick: schalten, onKeyDown: e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); schalten(); } } }, h("span", { className: "nz-knubbel" }), h("span", null, p.freigeschaltet ? L("Im Netzwerk sichtbar", "Visible in the network") : L("Unsichtbar – jetzt freischalten", "Hidden – make visible now"))),
         h("div", { className: "nz-sub" }, p.freigeschaltet ? L("Andere Pro-Mitglieder finden dich unter „Kontakte finden“. ", "Other Pro members find you under “Find contacts”. ") : L("Zum Freischalten brauchst du deinen Namen und deine Firma oder eine Kurzbeschreibung. ", "To make it visible you need your name and your company or a short bio. "), (p.kontakte || 0) + " " + L("gespeicherte Kontakte", "saved contacts"), " · ", h("button", { type: "button", className: "nz-btn klein", onClick: () => setVorschau(true) }, L("Vorschau", "Preview"))))),
     h(NzVerifLeiste, { account: account }),
+    h(NzVereinsprofilAbschnitt, { account: account, setView: setView }),
+    (!NZ.konto || !NZ.konto.verein) ? h(NzMeineBedarfe, { account: account, setView: setView }) : null,
     h("div", { className: "nz-karte-box" },
       abschnitt(null, L("Name und Rolle", "Name and role"),
         h("div", { className: "nz-felder" }, eingabe("name", L("Name *", "Name *"), { maxLength: 120, placeholder: L("Vor- und Nachname", "Full name") }), h("label", { className: "nz-feld" }, L("Rolle", "Role"), h("input", { value: nzRolleVon(p), disabled: true })), h("div", { className: "nz-sub", style: { gridColumn: "1 / -1" } }, L("Name und Rolle sieht jeder, der dein Profil findet. Die Rolle änderst du auf der Kontoseite.", "Everyone who finds your profile sees name and role. You change the role on the account page.")))),
@@ -3331,7 +3353,9 @@ function NzBeitragKarte({ account, b, onOeffnen }) {
       b.thema ? h("span", { className: "nz-chip" }, nz4Thema(b.thema)) : null,
       st ? h("span", { className: "nz-chip" }, st) : null,
       !b.own && Number(b.passung) > 0 ? h("span", { className: "nz-chip passt" }, L("passt zu dir", "matches you")) : null,
-      b.own ? h("span", { className: "nz-chip" }, L("von dir", "yours")) : null),
+      b.own ? h("span", { className: "nz-chip" }, L("von dir", "yours")) : null,
+      b.bedarf && (b.bedarf.status === "vom_verein" || b.bedarf.status === "gemeldet") ? h("span", { className: "nz-chip gruen", "data-nz7-chip": b.bedarf.id }, L("in \u201eVerein sucht\u201c bis ", "in \u201cClub seeks\u201d until ") + nz7Datum(b.bedarf.laeuft_ab)) : null,
+      b.bedarf && b.bedarf.status === "geschlossen" ? h("span", { className: "nz-chip", "data-nz7-chip": b.bedarf.id }, L("Verein sucht: besetzt", "Club seeks: filled")) : null),
     h("div", { className: "nz-b-kurz" }, kurz),
     b.kurzzeile ? h("div", { className: "nz-b-text" }, b.text) : null,
     felder.length ? h("div", { className: "nz-b-felder" }, felder.map(f => h("span", { key: f[0] }, f[0] + ": ", h("b", null, f[1])))) : null,
@@ -3378,7 +3402,7 @@ function NzBeitragErstellen({ account, schliessen, onNeu, setView }) {
         h("div", { className: "nz-art-wahl" },
           NZ4_ART.map(a => wahl(a[0], en ? a[2] : a[1], en ? a[4] : a[3], () => setArt(a[0]))),
           wahl("hinweis", L("Transfer-Hinweis", "Transfer tip"), L("Ein Wechsel, eine Leihe, ein Vereinsbedarf – geprüft und in den Transferfeed übernommen.", "A move, a loan, a club need – checked and taken into the transfer feed."), () => { schliessen(); setView("community"); }),
-          wahl("verein_sucht", L("Verein sucht", "Club seeks"), L("Als Transfer-Hinweis im Muster „VEREIN sucht POSITION“ – erscheint unter „Verein sucht“.", "As a transfer tip in the pattern “CLUB seeks POSITION” – appears under “Club seeks”."), () => { schliessen(); setView("community"); }),
+          wahl("verein_sucht", L("Verein sucht", "Club seeks"), L("Bedarf melden: Verein, Position, Alter, Zeitfenster. Mit Haken sofort als Karte in „Verein sucht“ (Vereinskonten: „vom Verein eingestellt“), sonst als Beitrag.", "Report a need: club, position, age, time window. With the badge immediately as a card in “Club seeks” (club accounts: “posted by the club”), otherwise as a post."), () => { schliessen(); nz7BedarfNeu(setView); }),
           wahl("spieler", L("Spieler anbieten", "Offer a player"), L("Verkauf, Leihe, abl\u00f6sefrei oder Probetraining \u2013 mit Profil, Dateien und passenden Vereinen im Spieler-Markt.", "Transfer, loan, free transfer or trial \u2013 with profile, files and matching clubs in the Player Market."), () => { schliessen(); nz6Neu(setView); })),
         h("p", { className: "nz-sub", style: { marginTop: 10 } }, L("Fragen, Suchen und Angebote erscheinen sofort in den Community-Kontakten – mit Thema und Feldern, damit sie gefunden werden.", "Questions, requests and offers appear immediately in the community contacts – with topic and fields so they can be found.")))
       : h(React.Fragment, null,
@@ -3956,6 +3980,273 @@ function NzMarktSeite({ account, setView, admin, openPlayer, openVerein }) {
         h(NzPassendeVereine, { liste: a.passende_vereine || [], setView: setView, kompakt: false })))),
     detail ? h(NzAngebotDetail, { key: "d" + detail, account: account, id: detail, schliessen: () => setDetail(null), onAenderung: aenderung, onEntfernt: entfernt, setView: setView, openPlayer: openPlayer, onBearbeiten: (a) => { setDetail(null); setFormular({ vorhanden: a }); } }) : null,
     formular ? h(NzAngebotFormular, { key: formular.vorhanden ? "f" + formular.vorhanden.id : "neu", account: account, vorhanden: formular.vorhanden || null, schliessen: () => setFormular(null), onFertig: fertig }) : null);
+}
+/* \u2500\u2500 Netzwerk 2.0 \u00b7 Paket 7: Vereine (OP 537) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   Vereinskonten (Tarif \u201eVereine\u201c, Freischaltung \u00fcber die Pr\u00fcfseite \u201eVereinsanfragen\u201c), Vereinsprofil, \u201eBedarf melden\u201c mit Karten in \u201eVerein sucht\u201c
+   (vom Verein eingestellt / gemeldet von verifiziertem Nutzer), passende Angebote aus dem Spieler-Markt, Vereinswappen am Haken.
+   Alle Regeln (Rechte, Laufzeiten, Sichtbarkeit, Begrenzungen) liegen in der Datenbank (nz.bedarf_*, nz.verein*); die App zeigt an und reicht durch. \u2500\u2500 */
+const NZ7_POS = [["TW", "Torwart", "Goalkeeper"], ["IV", "Innenverteidiger", "Centre-back"], ["AV", "Au\u00dfenverteidiger", "Full-back"], ["S6", "Sechser", "Defensive midfielder"], ["S8", "Achter", "Central midfielder"], ["S10", "Zehner", "Attacking midfielder"], ["FL", "Fl\u00fcgelspieler", "Winger"], ["MS", "Mittelst\u00fcrmer", "Striker"], ["ABW", "Abwehr (allgemein)", "Defence (general)"], ["MF", "Mittelfeld (allgemein)", "Midfield (general)"], ["ST", "Sturm (allgemein)", "Attack (general)"]];
+const NZ7_ZEIT = [["offen", "offen", "open"], ["sofort", "sofort", "immediately"], ["winter", "Winter", "Winter"], ["sommer", "Sommer", "Summer"]];
+const NZ7_BUDGET = [["", "keine Angabe", "not specified"], ["abloesefrei", "abl\u00f6sefrei", "free transfer"], ["bis_500k", "bis 0,5 Mio. \u20ac", "up to \u20ac0.5m"], ["bis_2m", "0,5\u20132 Mio. \u20ac", "\u20ac0.5\u20132m"], ["bis_5m", "2\u20135 Mio. \u20ac", "\u20ac2\u20135m"], ["ueber_5m", "\u00fcber 5 Mio. \u20ac", "over \u20ac5m"]];
+const NZ7_SICHT = [["pro", "alle Pro-Mitglieder", "all Pro members"], ["verifizierte", "nur verifizierte Mitglieder", "verified members only"]];
+function nz7Text(liste, k) { const en = LANG === "en"; const t = liste.find(x => x[0] === String(k || "")); return t ? (en ? t[2] : t[1]) : String(k || ""); }
+function nz7Grund(g, d) {
+  const en = LANG === "en";
+  const m = {
+    auth: ["Deine Anmeldung ist abgelaufen. Bitte neu anmelden.", "Your session expired. Please sign in again."],
+    premium: ["Bedarfe melden ist Teil von Pro.", "Reporting needs is part of Pro."],
+    position: ["Bitte eine Position w\u00e4hlen.", "Please choose a position."],
+    laenge: ["Der Text braucht 10 bis 1000 Zeichen.", "The text needs 10 to 1000 characters."],
+    kontaktdaten: ["Bitte keine Telefonnummern, E-Mail-Adressen oder Messenger-Kennungen im Text \u2013 Kontakt l\u00e4uft \u00fcber die Nachrichten.", "Please no phone numbers, e-mail addresses or messenger handles in the text \u2013 contact runs via messages."],
+    verein: ["Bitte einen Verein aus der Datenbank w\u00e4hlen.", "Please choose a club from the database."],
+    alter: ["Das Altersfenster passt nicht (15\u201345, von \u2264 bis).", "The age window is not valid (15\u201345, from \u2264 to)."],
+    zeitfenster: ["Bitte ein Zeitfenster w\u00e4hlen.", "Please choose a time window."],
+    budget: ["Bitte einen g\u00fcltigen Rahmen w\u00e4hlen.", "Please choose a valid budget range."],
+    sichtbar: ["Bitte w\u00e4hlen, wer den Bedarf sehen darf.", "Please choose who may see the need."],
+    limit: ["Du hast die H\u00f6chstzahl offener Bedarfe erreicht. Schlie\u00dfe zuerst einen Bedarf.", "You reached the maximum of open needs. Close one first."],
+    doppelt: ["F\u00fcr diesen Verein und diese Position hast du schon einen offenen Bedarf.", "You already have an open need for this club and position."],
+    fremd: ["Diesen Bedarf kannst du nicht \u00e4ndern.", "You cannot change this need."],
+    status: ["Dieser Bedarf ist nicht mehr offen.", "This need is no longer open."],
+    bedarf: ["Bedarf nicht gefunden.", "Need not found."],
+    kein_vereinskonto: ["Daf\u00fcr brauchst du ein Vereinskonto (Tarif \u201eVereine\u201c).", "This needs a club account (\u201cClubs\u201d plan)."],
+    vereinsname: ["Bitte den Vereinsnamen angeben.", "Please enter the club name."],
+    ansprechpartner: ["Bitte einen Ansprechpartner angeben.", "Please enter a contact person."],
+    email: ["Bitte eine g\u00fcltige E-Mail-Adresse angeben.", "Please enter a valid e-mail address."],
+    netz: ["Keine Verbindung. Bitte sp\u00e4ter noch einmal versuchen.", "No connection. Please try again later."],
+    fehler: ["Da ist etwas schiefgelaufen. Bitte sp\u00e4ter noch einmal versuchen.", "Something went wrong. Please try again later."]
+  };
+  const t = m[g] || m.fehler; return en ? t[1] : t[0];
+}
+function nz7Wappen(p, klein) {
+  const v = p && p.verein; if (!v || !v.logo) return null;
+  return React.createElement("img", { className: "nz7-wappen" + (klein ? " klein" : ""), src: v.logo, alt: "", title: (LANG === "en" ? "Club account: " : "Vereinskonto: ") + (v.name || ""), loading: "lazy", "data-nz7-wappen": v.id || "" });
+}
+function nz7BedarfNeu(setView) { try { window.dispatchEvent(new CustomEvent("nz7-bedarf", { detail: { neu: true } })); } catch (e) {} }
+function nz7Datum(d) { if (!d) return ""; try { return fmtDate(d); } catch (e) { return String(d).slice(0, 10); } }
+function nz7BedarfStatus(b) {
+  const en = LANG === "en";
+  if (!b) return ["", ""];
+  if (b.status === "vom_verein") return [en ? "Posted by the club" : "Vom Verein eingestellt", "gruen"];
+  if (b.status === "gemeldet") return [en ? "Reported by verified member" : "Gemeldet von verifiziertem Nutzer", "gruen"];
+  if (b.status === "geschlossen") return [b.geschlossen_grund === "besetzt" ? (en ? "Filled" : "Besetzt") : (en ? "Closed" : "Geschlossen"), ""];
+  if (b.status === "abgelaufen") return [en ? "Expired" : "Abgelaufen", "nz6-gelb"];
+  return [b.status, ""];
+}
+/* Vereinswahl (einzeln) aus der Vereinsdatenbank */
+function NzVereinEinzel({ account, wert, onChange }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  const [text, setText] = React.useState(""); const [treffer, setTreffer] = React.useState([]); const [busy, setBusy] = React.useState(false);
+  React.useEffect(() => {
+    if (text.trim().length < 2) { setTreffer([]); return undefined; }
+    let alive = true; setBusy(true);
+    const t = setTimeout(() => { nzRuf(account, "vereine_suchen", { text: text.trim() }).then(d => { if (!alive) return; setBusy(false); setTreffer(d && d.ok && Array.isArray(d.treffer) ? d.treffer : []); }); }, 250);
+    return () => { alive = false; clearTimeout(t); };
+  }, [text]);
+  if (wert) return h("div", { className: "nz6-wahl-fertig", "data-nz7-verein": wert.id },
+    h("div", { className: "nz6-treffer" }, wert.logo ? h("img", { src: wert.logo, alt: "" }) : null, h("div", null, h("b", null, wert.name), h("div", { className: "nz-sub" }, [wert.liga, wert.land].filter(Boolean).join(" \u00b7 ")))),
+    h("button", { type: "button", className: "nz-btn klein", onClick: () => onChange(null) }, L("\u00c4ndern", "Change")));
+  return h("div", { className: "nz6-wahl" },
+    h("label", { className: "nz-feld" }, L("Verein *", "Club *"), h("input", { value: text, placeholder: L("Vereinsname eingeben \u2026", "Type a club name \u2026"), onChange: e => setText(e.target.value), "data-nz7-vereinsuche": "1" })),
+    busy ? h("div", { className: "nz-sub" }, L("Suche \u2026", "Searching \u2026")) : null,
+    treffer.length ? h("div", { className: "nz6-treffer-liste" }, treffer.slice(0, 8).map(v => h("button", { key: v.id, type: "button", className: "nz6-treffer", onClick: () => onChange(v), "data-nz7-treffer": v.id },
+      v.logo ? h("img", { src: v.logo, alt: "" }) : null, h("div", null, h("b", null, v.name), h("div", { className: "nz-sub" }, [v.liga, v.land].filter(Boolean).join(" \u00b7 ")))))) : null);
+}
+/* \u201eBedarf melden\u201c \u2013 Formular (Erstellen \u2192 Verein sucht, Vereinsprofil, Meine Bedarfe) */
+function NzBedarfFormular({ account, schliessen, onNeu, setView }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  useScrollSperre(true); useTwZurueck(true, schliessen);
+  const konto = NZ.konto || {}; const vk = konto.verein || null; const verifiziert = !!konto.verifiziert;
+  const [verein, setVerein] = React.useState(vk ? { id: vk.id, name: vk.name, liga: vk.liga, land: vk.land, logo: vk.logo } : null);
+  const [w, setW] = React.useState({ position: "", alter_von: "", alter_bis: "", zeitfenster: "offen", budget: "", sichtbar: "pro", text: "" });
+  const [busy, setBusy] = React.useState(false); const [fehler, setFehler] = React.useState(""); const [fertig, setFertig] = React.useState(null);
+  const setz = (k, v) => setW(x => Object.assign({}, x, { [k]: v }));
+  const senden = () => {
+    if (!verein) { setFehler(nz7Grund("verein")); return; }
+    if (!w.position) { setFehler(nz7Grund("position")); return; }
+    if (w.text.trim().length < 10) { setFehler(nz7Grund("laenge")); return; }
+    setBusy(true); setFehler("");
+    nzRuf(account, "bedarf_melden", Object.assign({}, w, { verein_id: verein.id, text: w.text.trim() })).then(d => {
+      setBusy(false);
+      if (d && d.ok) { setFertig(d); if (onNeu) onNeu(d); try { window.dispatchEvent(new CustomEvent("nz7-bedarf", { detail: { neu: false, geaendert: true } })); } catch (e) {} }
+      else setFehler(nz7Grund(d && d.grund, d));
+    });
+  };
+  const sel = (k, label, liste, extra) => h("label", { className: "nz-feld" }, label, h("select", Object.assign({ value: w[k], onChange: e => setz(k, e.target.value), ["data-nz7-" + k]: "1" }, extra || {}), liste.map(o => h("option", { key: o[0], value: o[0] }, en ? o[2] : o[1]))));
+  const kopf = h("div", { className: "nz-kopf" }, h("h2", null, L("Bedarf melden", "Report a need")), h("button", { type: "button", className: "nz-x", "aria-label": L("Schlie\u00dfen", "Close"), onClick: schliessen }, "\u00d7"));
+  if (fertig) {
+    const b = fertig.bedarf || null;
+    return h("div", { className: "nz-modal", onClick: ev => { if (ev.target === ev.currentTarget) schliessen(); } },
+      h("div", { className: "nz-box", role: "dialog", "aria-modal": "true", "data-nz7-fertig": fertig.nur_beitrag ? "beitrag" : "karte" }, kopf,
+        fertig.nur_beitrag
+          ? h("p", null, L("Dein Beitrag steht in den Community-Kontakten. Eine Karte in \u201eVerein sucht\u201c entsteht nur mit blauem Haken \u2013 lass dich verifizieren, dann landet der n\u00e4chste Bedarf sofort beim richtigen Verein und bei den passenden Spielern.", "Your post is in the community contacts. A card in \u201cClub seeks\u201d only appears with the blue badge \u2013 get verified and the next need goes straight to the right club and matching players."))
+          : h("p", null, L("Dein Bedarf steht jetzt in \u201eVerein sucht\u201c", "Your need is now in \u201cClub seeks\u201d") + (b ? " (" + nz7BedarfStatus(b)[0] + ", " + L("bis", "until") + " " + nz7Datum(b.laeuft_ab) + ")" : "") + L(" und als Beitrag im Netzwerk. Passende Angebote aus dem Spieler-Markt siehst du unter Mein Profil \u2192 Meine Bedarfe.", " and as a post in the network. Matching offers from the Player Market appear under My profile \u2192 My needs.")),
+        h("div", { className: "nz-knoepfe" },
+          !fertig.nur_beitrag ? h("button", { type: "button", className: "nz-btn gruen", onClick: () => { schliessen(); if (typeof setView === "function") setView("gesucht"); } }, L("Zu \u201eVerein sucht\u201c", "Go to \u201cClub seeks\u201d")) : null,
+          h("button", { type: "button", className: "nz-btn", onClick: () => { schliessen(); if (typeof setView === "function") setView(fertig.nur_beitrag ? "nz_beitraege" : "nz_profil"); } }, fertig.nur_beitrag ? L("Zu den Community-Kontakten", "Go to community contacts") : L("Meine Bedarfe", "My needs")),
+          h("button", { type: "button", className: "nz-btn", onClick: schliessen }, L("Schlie\u00dfen", "Close")))));
+  }
+  return h("div", { className: "nz-modal", onClick: ev => { if (ev.target === ev.currentTarget) schliessen(); } },
+    h("div", { className: "nz-box breit", role: "dialog", "aria-modal": "true", "data-nz7-formular": "1" }, kopf,
+      h("p", { className: "nz-sub" }, vk
+        ? L("Als Vereinskonto erscheint dein Bedarf sofort als Karte \u201evom Verein eingestellt\u201c oben in \u201eVerein sucht\u201c (90 Tage, verl\u00e4ngerbar) und als Beitrag im Netzwerk.", "As a club account your need appears immediately as a card \u201cposted by the club\u201d at the top of \u201cClub seeks\u201d (90 days, extendable) and as a post in the network.")
+        : verifiziert
+          ? L("Mit blauem Haken erscheint dein Hinweis sofort als Karte \u201egemeldet von verifiziertem Nutzer\u201c in \u201eVerein sucht\u201c (30 Tage) und als Beitrag im Netzwerk. Es wird nur gepr\u00fcft, ob dein Konto verifiziert ist.", "With the blue badge your tip appears immediately as a card \u201creported by verified member\u201d in \u201cClub seeks\u201d (30 days) and as a post in the network. Only your verification is checked.")
+          : L("Ohne blauen Haken wird daraus ein Beitrag in den Community-Kontakten \u2013 keine Karte in \u201eVerein sucht\u201c. Lass dich verifizieren, damit Bedarfe sofort beim Verein landen.", "Without the blue badge this becomes a post in the community contacts \u2013 no card in \u201cClub seeks\u201d. Get verified so needs reach the club immediately.")),
+      h("div", { className: "nz-felder" },
+        h("div", { className: "nz-feld breit" }, vk ? h(React.Fragment, null, L("Verein", "Club"), h("div", { className: "nz6-wahl-fertig" }, h("div", { className: "nz6-treffer" }, vk.logo ? h("img", { src: vk.logo, alt: "" }) : null, h("div", null, h("b", null, vk.name), h("div", { className: "nz-sub" }, [vk.liga, vk.land].filter(Boolean).join(" \u00b7 ")))))) : h(NzVereinEinzel, { account: account, wert: verein, onChange: setVerein })),
+        sel("position", L("Position *", "Position *"), [["", L("bitte w\u00e4hlen \u2026", "please choose \u2026"), L("bitte w\u00e4hlen \u2026", "please choose \u2026")]].concat(NZ7_POS)),
+        sel("zeitfenster", L("Zeitfenster", "Time window"), NZ7_ZEIT),
+        h("label", { className: "nz-feld" }, L("Alter von", "Age from"), h("input", { type: "number", min: 15, max: 45, value: w.alter_von, onChange: e => setz("alter_von", e.target.value), placeholder: "15\u201345", "data-nz7-alter_von": "1" })),
+        h("label", { className: "nz-feld" }, L("Alter bis", "Age to"), h("input", { type: "number", min: 15, max: 45, value: w.alter_bis, onChange: e => setz("alter_bis", e.target.value), placeholder: "15\u201345", "data-nz7-alter_bis": "1" })),
+        sel("budget", L("Budgetklasse (optional)", "Budget range (optional)"), NZ7_BUDGET),
+        sel("sichtbar", L("Sichtbar f\u00fcr", "Visible to"), NZ7_SICHT),
+        h("label", { className: "nz-feld breit" }, L("Beschreibung", "Description") + " * (" + w.text.length + "/1000)", h("textarea", { rows: 4, maxLength: 1000, value: w.text, placeholder: L("Was genau gesucht wird: Profil, Erfahrung, Spielidee. Keine Telefonnummern oder E-Mail-Adressen \u2013 Kontakt l\u00e4uft \u00fcber Nachrichten.", "What exactly is needed: profile, experience, style of play. No phone numbers or e-mail addresses \u2013 contact runs via messages."), onChange: e => setz("text", e.target.value), "data-nz7-text": "1" }))),
+      fehler ? h("p", { className: "nz-fehler" }, fehler) : null,
+      h("div", { className: "nz-knoepfe" },
+        h("button", { type: "button", className: "nz-btn gruen", disabled: busy, onClick: senden, "data-nz7-senden": "1" }, busy ? L("Speichert \u2026", "Saving \u2026") : (vk || verifiziert ? L("In \u201eVerein sucht\u201c einstellen", "Post to \u201cClub seeks\u201d") : L("Als Beitrag ver\u00f6ffentlichen", "Publish as post"))),
+        h("button", { type: "button", className: "nz-btn", onClick: schliessen }, L("Abbrechen", "Cancel")))));
+}
+/* Host f\u00fcr das Bedarf-Formular (wird aus dem Erstellen-Dialog, dem Vereinsprofil und \u201eMeine Bedarfe\u201c ge\u00f6ffnet) */
+function NzBedarfHost({ account, setView }) {
+  const h = React.createElement;
+  const [offen, setOffen] = React.useState(false);
+  React.useEffect(() => { const f = ev => { if (ev && ev.detail && ev.detail.neu) setOffen(true); }; window.addEventListener("nz7-bedarf", f); return () => window.removeEventListener("nz7-bedarf", f); }, []);
+  if (!offen || !account || !twHatSitzung(account)) return null;
+  return h(NzBedarfFormular, { account: account, schliessen: () => setOffen(false), setView: setView });
+}
+/* Passende Angebote aus dem Spieler-Markt zu einem Bedarf */
+function NzPassendeAngebote({ account, bedarf, setView }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  const [liste, setListe] = React.useState(null);
+  React.useEffect(() => { let alive = true; if (!bedarf || !bedarf.zentrale_id) { setListe([]); return undefined; } nzRuf(account, "angebote_zu_bedarf", { bedarf_ids: [bedarf.zentrale_id] }).then(d => { if (alive) setListe(d && d.ok && Array.isArray(d.treffer) ? d.treffer : []); }); return () => { alive = false; }; }, [bedarf && bedarf.zentrale_id]);
+  if (liste === null) return h("div", { className: "nz-sub" }, L("Lade \u2026", "Loading \u2026"));
+  if (!liste.length) return h("div", { className: "nz-sub" }, L("Noch keine passenden Angebote \u2013 das Matching l\u00e4uft alle 15 Minuten gegen die aktiven Angebote im Spieler-Markt.", "No matching offers yet \u2013 matching runs every 15 minutes against active offers in the Player Market."));
+  return h("div", { className: "nz6-passend", "data-nz7-angebote": liste.length }, liste.map(t => {
+    const a = t.angebot || {}; const sp = a.spieler || {};
+    return h("button", { key: a.id || t.punkte, type: "button", className: "nz6-treffer", onClick: () => { if (a.id) nz6Oeffnen(a.id, setView); } },
+      sp.foto ? h("img", { src: sp.foto, alt: "" }) : null,
+      h("div", { style: { flex: 1, minWidth: 0 } }, h("b", null, sp.name || L("Spieler", "Player")), h("div", { className: "nz-sub" }, [sp.team, sp.position_grob || sp.position, sp.alter ? sp.alter + " " + L("Jahre", "yrs") : null, nz7Text(NZ6_ART, a.art)].filter(Boolean).join(" \u00b7 "))),
+      h("span", { className: "nz-chip" + (t.punkte >= 85 ? " gruen" : "") }, t.punkte + " " + L("Punkte", "pts")));
+  }));
+}
+/* Meine Bedarfe (Mein Profil; Vereinskonten sehen alle Bedarfe ihres Vereins) */
+function NzMeineBedarfe({ account, setView, ohneKopf }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  const [d, setD] = React.useState(null); const [auf, setAuf] = React.useState(null); const [busy, setBusy] = React.useState(false); const [fehler, setFehler] = React.useState("");
+  const laden = React.useCallback(() => { nzRuf(account, "bedarfe_meine", {}).then(x => { if (x && x.ok) setD(x); else setFehler(nz7Grund(x && x.grund)); }); }, [account && account.email]);
+  React.useEffect(() => { laden(); const f = ev => { if (ev && ev.detail && ev.detail.geaendert) laden(); }; window.addEventListener("nz7-bedarf", f); return () => window.removeEventListener("nz7-bedarf", f); }, [laden]);
+  const status = (b, st) => { setBusy(true); setFehler(""); nzRuf(account, "bedarf_status", { id: b.id, status: st }).then(x => { setBusy(false); if (x && x.ok) laden(); else setFehler(nz7Grund(x && x.grund)); }); };
+  const bedarfe = (d && d.bedarfe) || [];
+  const darf = !!(d && (d.verein || d.verifiziert));
+  return h("div", { className: "nz-karte-box nz7-bedarfe", "data-nz7-bedarfe": bedarfe.length },
+    !ohneKopf ? h("div", { className: "nz-abschnitt-kopf" }, h("h3", null, L("Meine Bedarfe in \u201eVerein sucht\u201c", "My needs in \u201cClub seeks\u201d")), darf ? h("button", { type: "button", className: "nz-btn klein gruen", onClick: () => nz7BedarfNeu(setView), "data-nz7-neu": "1" }, L("Bedarf melden", "Report a need")) : null) : null,
+    !d ? h("div", { className: "nz-sub" }, fehler || L("Lade \u2026", "Loading \u2026")) :
+    !bedarfe.length ? h("div", { className: "nz-sub" }, darf
+        ? L("Noch kein Bedarf gemeldet. Mit \u201eBedarf melden\u201c landet ein Bedarf sofort als Karte in \u201eVerein sucht\u201c \u2013 und du siehst hier die passenden Angebote aus dem Spieler-Markt.", "No need reported yet. With \u201cReport a need\u201d a need appears immediately as a card in \u201cClub seeks\u201d \u2013 and matching offers from the Player Market show up here.")
+        : L("Bedarfe in \u201eVerein sucht\u201c k\u00f6nnen verifizierte Mitglieder und Vereinskonten melden.", "Needs in \u201cClub seeks\u201d can be reported by verified members and club accounts.")) :
+    h("div", { className: "nz7-liste" }, bedarfe.map(b => {
+      const st = nz7BedarfStatus(b); const offen = b.status === "vom_verein" || b.status === "gemeldet";
+      return h("div", { key: b.id, className: "nz7-bedarf" + (offen ? "" : " blass"), "data-nz7-bedarf": b.id },
+        h("div", { className: "nz7-bedarf-kopf" },
+          h("b", null, b.verein + " " + L("sucht", "seeks") + " " + (en ? b.position_text_en : b.position_text)),
+          h("span", { className: "nz-chip" + (st[1] ? " " + st[1] : "") }, st[0]),
+          b.sichtbar === "verifizierte" ? h("span", { className: "nz-chip" }, L("nur Verifizierte", "verified only")) : null),
+        h("div", { className: "nz-sub" }, [(b.alter_von || b.alter_bis) ? L("Alter ", "age ") + (b.alter_von || "") + "\u2013" + (b.alter_bis || "") : null, L("Zeitfenster: ", "window: ") + nz7Text(NZ7_ZEIT, b.zeitfenster), b.budget ? nz7Text(NZ7_BUDGET, b.budget) : null, offen ? L("bis ", "until ") + nz7Datum(b.laeuft_ab) : (b.geschlossen_am ? nz7Datum(b.geschlossen_am) : nz7Datum(b.laeuft_ab))].filter(Boolean).join(" \u00b7 ")),
+        h("div", { className: "nz7-bedarf-text" }, b.text),
+        h("div", { className: "nz-knoepfe" },
+          offen ? h("button", { type: "button", className: "nz-btn klein", onClick: () => setAuf(auf === b.id ? null : b.id), "data-nz7-passend": b.id }, (en ? "Matching offers" : "Passende Angebote") + " (" + (b.passende_angebote || 0) + ")") : null,
+          offen ? h("button", { type: "button", className: "nz-btn klein", disabled: busy, onClick: () => status(b, "besetzt"), "data-nz7-besetzt": b.id }, L("Besetzt", "Filled")) : null,
+          offen ? h("button", { type: "button", className: "nz-btn klein", disabled: busy, onClick: () => status(b, "verlaengern"), "data-nz7-verlaengern": b.id }, L("Verl\u00e4ngern", "Extend")) : null,
+          offen ? h("button", { type: "button", className: "nz-btn klein", disabled: busy, onClick: () => status(b, "zurueckgezogen") }, L("Zur\u00fcckziehen", "Withdraw")) : null,
+          b.post_id && typeof setView === "function" ? h("button", { type: "button", className: "nz-btn klein", onClick: () => setView("nz_beitraege") }, L("Beitrag", "Post")) : null),
+        auf === b.id ? h(NzPassendeAngebote, { account: account, bedarf: b, setView: setView }) : null);
+    })),
+    fehler && d ? h("p", { className: "nz-fehler" }, fehler) : null);
+}
+/* Vereinstarif anfragen (aus der App, angemeldet) */
+function NzVereinsanfrageFormular({ account, schliessen }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  useScrollSperre(true); useTwZurueck(true, schliessen);
+  const [w, setW] = React.useState({ vereinsname: "", land: "", liga: "", ansprechpartner: (account && account.name) || "", funktion: "", email: (account && account.email) || "", telefon: "", nutzer: "", nachricht: "" });
+  const [busy, setBusy] = React.useState(false); const [fehler, setFehler] = React.useState(""); const [ok, setOk] = React.useState(false);
+  const setz = (k, v) => setW(x => Object.assign({}, x, { [k]: v }));
+  const feld = (k, label, extra) => h("label", { className: "nz-feld" }, label, h("input", Object.assign({ value: w[k], onChange: e => setz(k, e.target.value), ["data-nz7-va-" + k]: "1" }, extra || {})));
+  const senden = () => { setBusy(true); setFehler(""); nzRuf(account, "vereinsanfrage", Object.assign({}, w, { sprache: LANG })).then(d => { setBusy(false); if (d && d.ok) setOk(true); else setFehler(nz7Grund(d && d.grund, d)); }); };
+  return h("div", { className: "nz-modal", onClick: ev => { if (ev.target === ev.currentTarget) schliessen(); } },
+    h("div", { className: "nz-box breit", role: "dialog", "aria-modal": "true", "data-nz7-vereinsanfrage": "1" },
+      h("div", { className: "nz-kopf" }, h("h2", null, L("Tarif \u201eVereine\u201c anfragen", "Request the \u201cClubs\u201d plan")), h("button", { type: "button", className: "nz-x", "aria-label": L("Schlie\u00dfen", "Close"), onClick: schliessen }, "\u00d7")),
+      ok ? h(React.Fragment, null, h("p", null, L("Danke \u2013 deine Anfrage ist da. Wir melden uns innerhalb von 2 Werktagen, eine Best\u00e4tigung geht per E-Mail an dich.", "Thank you \u2013 your request has arrived. We will get back to you within 2 working days; a confirmation goes to your e-mail.")), h("div", { className: "nz-knoepfe" }, h("button", { type: "button", className: "nz-btn", onClick: schliessen }, L("Schlie\u00dfen", "Close"))))
+      : h(React.Fragment, null,
+        h("p", { className: "nz-sub" }, L("Alle Funktionen aus Enterprise plus verifiziertes Vereinsprofil mit Wappen und Haken, eigene Bedarfe oben in \u201eVerein sucht\u201c, passende Spieler aus dem Spieler-Markt, Anfragen nur von verifizierten Beratern, beliebig viele Mitarbeiterkonten, Kaderanalyse und ein pers\u00f6nlicher Ansprechpartner. Preis nach Absprache.", "Everything in Enterprise plus a verified club profile with crest and badge, your own needs at the top of \u201cClub seeks\u201d, matching players from the Player Market, enquiries only from verified agents, unlimited staff accounts, squad analysis and a personal contact. Price on request.")),
+        h("div", { className: "nz-felder" },
+          feld("vereinsname", L("Verein *", "Club *"), { maxLength: 120 }), feld("land", L("Land", "Country"), { maxLength: 80 }), feld("liga", L("Liga", "League"), { maxLength: 80 }),
+          feld("ansprechpartner", L("Ansprechpartner *", "Contact person *"), { maxLength: 120 }), feld("funktion", L("Funktion", "Role"), { maxLength: 120, placeholder: L("z. B. Sportdirektor", "e.g. sporting director") }),
+          feld("email", L("Dienstliche E-Mail *", "Work e-mail *"), { type: "email", maxLength: 160 }), feld("telefon", L("Telefon", "Phone"), { maxLength: 60 }), feld("nutzer", L("Anzahl Nutzer (gesch\u00e4tzt)", "Number of users (estimate)"), { type: "number", min: 1, max: 500 }),
+          h("label", { className: "nz-feld breit" }, L("Nachricht", "Message"), h("textarea", { rows: 3, maxLength: 2000, value: w.nachricht, onChange: e => setz("nachricht", e.target.value), "data-nz7-va-nachricht": "1" }))),
+        fehler ? h("p", { className: "nz-fehler" }, fehler) : null,
+        h("div", { className: "nz-knoepfe" }, h("button", { type: "button", className: "nz-btn gold", disabled: busy, onClick: senden, "data-nz7-va-senden": "1" }, busy ? L("Sendet \u2026", "Sending \u2026") : L("Anfrage senden", "Send request")), h("button", { type: "button", className: "nz-btn", onClick: schliessen }, L("Abbrechen", "Cancel"))))));
+}
+/* Vereinsprofil-Abschnitt in \u201eMein Profil\u201c */
+function NzVereinsprofilAbschnitt({ account, setView }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  const [konto, setKonto] = React.useState(NZ.konto);
+  React.useEffect(() => { const f = () => setKonto(NZ.konto); window.addEventListener("nz-konto", f); return () => window.removeEventListener("nz-konto", f); }, []);
+  const [d, setD] = React.useState(null); const [f, setF] = React.useState(null); const [busy, setBusy] = React.useState(false); const [fehler, setFehler] = React.useState(""); const [ok, setOk] = React.useState("");
+  const [kader, setKader] = React.useState(false); const [anfrage, setAnfrage] = React.useState(false);
+  const vk = konto && konto.verein;
+  const uebernehmen = x => { setD(x); const p = x.profil || {}; setF({ ansprechpartner: p.ansprechpartner || "", funktion: p.funktion || "", sprachen: p.sprachen || [], hinweise: p.hinweise || "", kontakt_weg: p.kontakt_weg || "plattform", kontakt_email: p.kontakt_email || "", telefon: p.telefon || "" }); };
+  React.useEffect(() => { if (!vk) return undefined; let alive = true; nzRuf(account, "vereinsprofil", {}).then(x => { if (!alive) return; if (x && x.ok) uebernehmen(x); else setFehler(nz7Grund(x && x.grund)); }); return () => { alive = false; }; }, [vk && vk.id]);
+  if (!vk) {
+    return h("div", { className: "nz-karte-box nz7-tarif", "data-nz7-tarifhinweis": "1" },
+      h("div", { className: "nz-abschnitt-kopf" }, h("h3", null, L("Tarif \u201eVereine\u201c", "\u201cClubs\u201d plan")), h("button", { type: "button", className: "nz-btn klein", onClick: () => setAnfrage(true), "data-nz7-va-oeffnen": "1" }, L("Anfragen", "Request"))),
+      h("div", { className: "nz-sub" }, L("F\u00fcr Vereine: verifiziertes Vereinsprofil mit Wappen und Haken, eigene Bedarfe oben in \u201eVerein sucht\u201c, passende Spieler aus dem Spieler-Markt, beliebig viele Mitarbeiterkonten, Kaderanalyse. Preis nach Absprache.", "For clubs: verified club profile with crest and badge, your own needs at the top of \u201cClub seeks\u201d, matching players from the Player Market, unlimited staff accounts, squad analysis. Price on request.")),
+      anfrage ? h(NzVereinsanfrageFormular, { account: account, schliessen: () => setAnfrage(false) }) : null);
+  }
+  const setz = (k, v) => { setF(x => Object.assign({}, x, { [k]: v })); setOk(""); };
+  const speichern = () => { setBusy(true); setFehler(""); setOk(""); nzRuf(account, "vereinsprofil_speichern", f).then(x => { setBusy(false); if (x && x.ok) { uebernehmen(x); setOk(L("Vereinsprofil gespeichert.", "Club profile saved.")); } else setFehler(nz7Grund(x && x.grund)); }); };
+  const v = (d && d.verein) || vk; const ka = d && d.kaderanalyse; const mit = (d && d.mitarbeiter) || [];
+  const eingabe = (k, label, extra) => h("label", { className: "nz-feld" }, label, h("input", Object.assign({ value: f[k], onChange: e => setz(k, e.target.value), ["data-nz7-vp-" + k]: "1" }, extra || {})));
+  return h("div", { className: "nz-karte-box nz7-vereinsprofil", "data-nz7-vereinsprofil": v.id || "" },
+    h("div", { className: "nz7-vp-kopf" },
+      v.logo ? h("img", { className: "nz7-vp-wappen", src: v.logo, alt: "" }) : null,
+      h("div", { style: { flex: 1, minWidth: 0 } }, h("h3", { style: { margin: 0 } }, L("Vereinsprofil: ", "Club profile: ") + v.name), h("div", { className: "nz-sub" }, [v.liga, v.land, v.kader ? L("Kader ", "Squad ") + v.kader : null, v.trainer ? L("Trainer ", "Coach ") + v.trainer : null].filter(Boolean).join(" \u00b7 ")), h("div", { className: "nz-sub" }, L("Vereinskonto aktiv \u2013 alle Konten deines Vereins pflegen dieses Profil gemeinsam; es erscheint auf der Vereinsseite und an deinen Beitr\u00e4gen (Wappen + Haken).", "Club account active \u2013 all accounts of your club maintain this profile together; it appears on the club page and next to your posts (crest + badge).")))),
+    !f ? h("div", { className: "nz-sub" }, fehler || L("Lade \u2026", "Loading \u2026")) : h(React.Fragment, null,
+      h("div", { className: "nz-felder", style: { marginTop: 10 } },
+        eingabe("ansprechpartner", L("Ansprechpartner f\u00fcr Transfers", "Transfer contact"), { maxLength: 120 }),
+        eingabe("funktion", L("Funktion", "Role"), { maxLength: 120, placeholder: L("z. B. Sportdirektor, Kaderplanung", "e.g. sporting director, squad planning") }),
+        h("label", { className: "nz-feld" }, L("Kontaktweg f\u00fcr Berater", "Contact channel for agents"), h("select", { value: f.kontakt_weg, onChange: e => setz("kontakt_weg", e.target.value), "data-nz7-vp-kontakt_weg": "1" }, h("option", { value: "plattform" }, L("nur Plattform-Nachricht", "platform message only")), h("option", { value: "email" }, L("auch E-Mail (nur f\u00fcr Verifizierte sichtbar)", "also e-mail (visible to verified only)")), h("option", { value: "telefon" }, L("auch Telefon (nur f\u00fcr Verifizierte sichtbar)", "also phone (visible to verified only)")))),
+        f.kontakt_weg === "email" ? eingabe("kontakt_email", L("Kontakt-E-Mail", "Contact e-mail"), { type: "email", maxLength: 160 }) : null,
+        f.kontakt_weg === "telefon" ? eingabe("telefon", L("Telefon", "Phone"), { maxLength: 60 }) : null,
+        h("div", { className: "nz-feld breit" }, L("Sprachen", "Languages"), h(NzListe, { wert: f.sprachen, onChange: x => setz("sprachen", x), platzhalter: L("Sprache eingeben, Enter \u2026", "Type a language, Enter \u2026"), max: 8 })),
+        h("label", { className: "nz-feld breit" }, L("Hinweise f\u00fcr Berater", "Notes for agents"), h("textarea", { rows: 3, maxLength: 600, value: f.hinweise, placeholder: L("z. B. \u201eAnfragen bitte nur per Plattform-Nachricht, Antwort innerhalb einer Woche.\u201c", "e.g. \u201cEnquiries by platform message only, reply within a week.\u201d"), onChange: e => setz("hinweise", e.target.value), "data-nz7-vp-hinweise": "1" }))),
+      h("div", { className: "nz-knoepfe" }, h("button", { type: "button", className: "nz-btn gruen", disabled: busy, onClick: speichern, "data-nz7-vp-speichern": "1" }, busy ? L("Speichert \u2026", "Saving \u2026") : L("Vereinsprofil speichern", "Save club profile")), fehler ? h("span", { className: "nz-fehler" }, fehler) : null, ok ? h("span", { className: "nz-ok" }, ok) : null),
+      mit.length ? h("div", { className: "nz-abschnitt" }, h("h3", null, L("Konten deines Vereins", "Your club\u2019s accounts") + " (" + mit.length + ")"), h("div", { className: "nz-sub" }, mit.map(m => (m.name || m.email) + (m.selbst ? L(" (du)", " (you)") : "")).join(" \u00b7 "))) : null,
+      ka ? h("div", { className: "nz-abschnitt" },
+        h("div", { className: "nz-abschnitt-kopf" }, h("h3", null, L("Kaderanalyse", "Squad analysis")), h("button", { type: "button", className: "nz-btn klein", onClick: () => setKader(!kader), "data-nz7-kader": "1" }, kader ? L("weniger", "less") : L("anzeigen", "show"))),
+        h("div", { className: "nz-sub" }, L("Kader ", "Squad ") + (ka.kader || 0) + " \u00b7 " + L("Vertragsenden bis ", "contracts ending by ") + nz7Datum(ka.stichtag) + ": " + (ka.vertragsenden_anzahl || 0) + " \u00b7 " + L("Leihspieler: ", "loan players: ") + ((ka.leihen || []).length) + " \u00b7 " + L("Positionsl\u00fccken: ", "position gaps: ") + ((ka.positionen || []).filter(p => p.luecke).map(p => p.gruppe).join(", ") || L("keine", "none"))),
+        kader ? h("div", { className: "nz7-kader" },
+          h("div", null, h("b", null, L("Vertragsenden", "Contracts ending")), (ka.vertragsenden || []).length ? h("ul", null, ka.vertragsenden.map(p => h("li", { key: p.id }, h("b", null, p.name), " \u00b7 " + [p.position, p.alter ? p.alter + " " + L("J.", "yrs") : null, L("bis ", "until ") + nz7Datum(p.bis)].filter(Boolean).join(" \u00b7 ")))) : h("div", { className: "nz-sub" }, L("keine bis zum Stichtag", "none before the cut-off"))),
+          h("div", null, h("b", null, L("Leihspieler", "Loan players")), (ka.leihen || []).length ? h("ul", null, ka.leihen.map(p => h("li", { key: p.id }, p.name + " \u00b7 " + [p.position, p.alter ? p.alter + " " + L("J.", "yrs") : null].filter(Boolean).join(" \u00b7 ")))) : h("div", { className: "nz-sub" }, L("keine erkannt", "none detected"))),
+          h("div", null, h("b", null, L("Besetzung je Gruppe", "Players per group")), h("ul", null, (ka.positionen || []).map(p => h("li", { key: p.code }, p.gruppe + ": " + p.anzahl + " (" + L("Richtwert ", "guide ") + p.richtwert + ")" + (p.luecke ? " \u2013 " + L("d\u00fcnn besetzt", "thin") : "")))))) : null) : null,
+      h("div", { className: "nz-abschnitt" }, h(NzMeineBedarfe, { account: account, setView: setView })),
+      h("div", { className: "nz-sub", style: { marginTop: 10 } }, L("Pers\u00f6nlicher Ansprechpartner bei TransferWire: ", "Your personal contact at TransferWire: ") + ((d && d.ansprechpartner_tw) || "info@transferwire.de"))));
+}
+/* Vereinsprofil auf der Vereinsseite (\u00dcbersicht), nur bei aktivem Vereinskonto */
+function NzVereinsNetzwerk({ name, vereinId, onClose }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
+  const account = NZ.account; const [d, setD] = React.useState(null);
+  React.useEffect(() => { let alive = true; setD(null); if (!account || !twHatSitzung(account) || (!name && !vereinId)) return undefined; nzRuf(account, "verein_ansehen", vereinId ? { verein_id: vereinId } : { name: name }).then(x => { if (alive) setD(x || {}); }); return () => { alive = false; }; }, [name, vereinId]);
+  if (!d || !d.ok || !d.vereinskonto) return null;
+  const nachricht = m => { if (!m.email) return; const weiter = v => { if (typeof onClose === "function") onClose(); if (typeof window.twNzNavigieren === "function") window.twNzNavigieren(v); }; nzNachrichtAn({ profil: m.email, name: m.name }, weiter); };
+  return h("div", { className: "nz7-vn", "data-nz7-vereinsnetzwerk": d.verein_id },
+    h("div", { className: "nz7-vn-kopf" }, nzHaken({ author_haken: { rolle: "club", seit: d.verifiziert_am ? nz7Datum(d.verifiziert_am) : "" } }), h("b", null, L("Verifizierter Verein im TransferWire-Netzwerk", "Verified club in the TransferWire network")), h("span", { className: "nz-chip gruen" }, L("Vereinskonto", "Club account"))),
+    h("div", { className: "nz7-vn-felder" },
+      d.ansprechpartner ? h("div", null, h("span", { className: "nz-sub" }, L("Ansprechpartner f\u00fcr Transfers: ", "Transfer contact: ")), h("b", null, d.ansprechpartner + (d.funktion ? " (" + d.funktion + ")" : ""))) : null,
+      Array.isArray(d.sprachen) && d.sprachen.length ? h("div", null, h("span", { className: "nz-sub" }, L("Sprachen: ", "Languages: ")), d.sprachen.join(", ")) : null,
+      d.hinweise ? h("div", null, h("span", { className: "nz-sub" }, L("Hinweis f\u00fcr Berater: ", "Note for agents: ")), d.hinweise) : null,
+      h("div", null, h("span", { className: "nz-sub" }, L("Kontakt: ", "Contact: ")), d.kontakt_weg === "email" && d.kontakt_email ? d.kontakt_email : d.kontakt_weg === "telefon" && d.telefon ? d.telefon : L("Plattform-Nachricht", "platform message") + (d.betrachter_verifiziert ? "" : L(" \u2013 Anfragen nur von verifizierten Mitgliedern", " \u2013 enquiries from verified members only")))),
+    Array.isArray(d.mitarbeiter) && d.mitarbeiter.length ? h("div", { className: "nz7-vn-leute" }, d.mitarbeiter.map((m, i) => h("div", { key: m.email || i, className: "nz7-vn-person" }, h("b", null, m.name), h("span", { className: "nz-sub" }, " \u00b7 " + (en ? (m.rolle_en || "") : (m.rolle_de || ""))), m.email ? h("button", { type: "button", className: "nz-btn klein", onClick: () => nachricht(m), "data-nz7-nachricht": m.email }, L("Nachricht", "Message")) : null))) : null,
+    Array.isArray(d.bedarfe) && d.bedarfe.length ? h("div", { className: "nz-sub", style: { marginTop: 6 } }, L("Offene Bedarfe des Vereins in \u201eVerein sucht\u201c: ", "Open needs of the club in \u201cClub seeks\u201d: ") + d.bedarfe.map(b => (b.position_text || b.position) + (b.zeitfenster && b.zeitfenster !== "offen" ? " (" + nz7Text(NZ7_ZEIT, b.zeitfenster) + ")" : "")).join(", ")) : null);
 }
 function twZusatzKonto(konto) {
   const email = String((konto && konto.email) || "").toLowerCase();
@@ -8461,7 +8752,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261107-netzwerk6";
+const VS_VERSION = "20261108-netzwerk7";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -13569,7 +13860,7 @@ function VereinsSeite({ id, name, authQ, isPrem, onClose, onOpenPlayer }) {
         mobil ? null : h("button", { type: "button", onClick: onClose, "aria-label": vdbT("schliessen"), style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 700, padding: "8px 12px", border: "1px solid var(--linie)", borderRadius: 9, background: "var(--karte)", color: "var(--t1)", cursor: "pointer", flex: "none" } }, vdbT("schliessen"))),
       !d ? h("div", { style: { padding: 30, fontFamily: FONT_BODY, color: "var(--t2)" } }, vdbT("lade_seite")) : !d.ok ? h("div", { style: { padding: 30, fontFamily: FONT_BODY, color: "var(--t2)" } }, vdbT("fehler")) : h("div", null,
         h("div", { role: "tablist", style: { display: "flex", gap: 2, overflowX: "auto", padding: mobil ? "8px 10px 0" : "8px 18px 0", borderBottom: "1px solid var(--linie)", background: "var(--karte)" } }, tabs.map(([k, text]) => h("button", { key: k, role: "tab", "aria-selected": tab === k, type: "button", onClick: (e) => { setTab(k); try { const b = e.currentTarget, z = b.parentElement; if (z && z.scrollWidth > z.clientWidth) z.scrollTo({ left: Math.max(0, b.offsetLeft - (z.clientWidth - b.offsetWidth) / 2), behavior: "smooth" }); } catch (x) { } }, style: { fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 700, padding: "9px 12px", border: "none", borderBottom: tab === k ? "3px solid var(--teal)" : "3px solid transparent", background: "transparent", color: tab === k ? "var(--t1)" : "var(--t2)", cursor: "pointer", whiteSpace: "nowrap" } }, text))),
-        h("div", { style: { padding: mobil ? "10px 12px calc(24px + env(safe-area-inset-bottom))" : "14px 22px 28px" } }, tab === "ueb" ? uebersicht() : tab === "kader" ? kaderListe() : tab === "spiele" ? h(VereinsSpieleTab, { key: "vs-" + ((v && v.id) || id || ""), verein: { id: (v && v.id) || id, name: (v && v.name) || name, anzeige: (v && v.anzeige) || null }, authQ: authQ, mobil: mobil, onOpenPlayer: onOpenPlayer }) : tab === "transfers" ? transfers() : tab === "news" ? news() : kontakte()),
+        h("div", { style: { padding: mobil ? "10px 12px calc(24px + env(safe-area-inset-bottom))" : "14px 22px 28px" } }, tab === "ueb" ? h(React.Fragment, null, h(NzVereinsNetzwerk, { name: (v && v.name) || name, vereinId: (v && v.id) || id || null, onClose: onClose }), uebersicht()) : tab === "kader" ? kaderListe() : tab === "spiele" ? h(VereinsSpieleTab, { key: "vs-" + ((v && v.id) || id || ""), verein: { id: (v && v.id) || id, name: (v && v.name) || name, anzeige: (v && v.anzeige) || null }, authQ: authQ, mobil: mobil, onOpenPlayer: onOpenPlayer }) : tab === "transfers" ? transfers() : tab === "news" ? news() : kontakte()),
         v && v.aliasse && v.aliasse.length ? h("div", { style: { padding: "0 22px 18px", fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t3)" } }, `${vdbT("alias")}: ${v.aliasse.join(", ")}`) : null)));
 }
 /* 28 Spielfeld-Grafik und Team-xG (07.10.2026, Punkt 27): Aufstellungen als Spielfeld (Raster aus API-Football "grid" bzw. Sportmonks "feld" = "Reihe:Spalte", sonst aus Formation/Reihenfolge/Positionen abgeleitet),
@@ -15159,7 +15450,7 @@ function TransferApp({
   const [feedLimit, setFeedLimit] = useState(FEED_SEITE);
   const [plSel, setPlSel] = useState(null);
   const [mwStart, setMwStart] = useState(null); // A91: Spieler, dessen Marktwertanalyse aus dem Profil geoeffnet wurde
-  const [perfKarte, setPerfKarte] = useState(null); const [perfZurueck, setPerfZurueck] = useState(null); useEffect(() => { VP.neu = () => setNews(prev => Array.isArray(prev) ? prev.map(twAufbereiten) : prev); window.twZumTicker = () => { setGerApply({ f: { typ: "ticker" }, n: Date.now() }); setView("geruechte"); try { history.replaceState(null, "", location.pathname + location.search + "#transfers-ticker"); } catch (e) {} }; window.twPerfOeffnen = (it2) => setPerfKarte({ pid: it2.pid, name: (it2.player && it2.player.name) || "", team: it2.team || "", league: it2.league || "", pos: (it2.player && it2.player.position) || "", startFixture: it2.fixture }); window.twMarktwertOeffnen = (sp) => { if (!sp || !sp.pid) return; setPlDetail(null); setMwStart({ pid: sp.pid, name: sp.name || "", team: sp.team || "", n: Date.now() }); setProZiel(null); setViewRoh("marktwert"); try { window.scrollTo({ top: 0 }); } catch (e) {} }; return () => { VP.neu = null; window.twMarktwertOeffnen = null; }; }, []);
+  const [perfKarte, setPerfKarte] = useState(null); const [perfZurueck, setPerfZurueck] = useState(null); useEffect(() => { VP.neu = () => setNews(prev => Array.isArray(prev) ? prev.map(twAufbereiten) : prev); window.twNzNavigieren = v => setView(v); window.twZumTicker = () => { setGerApply({ f: { typ: "ticker" }, n: Date.now() }); setView("geruechte"); try { history.replaceState(null, "", location.pathname + location.search + "#transfers-ticker"); } catch (e) {} }; window.twPerfOeffnen = (it2) => setPerfKarte({ pid: it2.pid, name: (it2.player && it2.player.name) || "", team: it2.team || "", league: it2.league || "", pos: (it2.player && it2.player.position) || "", startFixture: it2.fixture }); window.twMarktwertOeffnen = (sp) => { if (!sp || !sp.pid) return; setPlDetail(null); setMwStart({ pid: sp.pid, name: sp.name || "", team: sp.team || "", n: Date.now() }); setProZiel(null); setViewRoh("marktwert"); try { window.scrollTo({ top: 0 }); } catch (e) {} }; return () => { VP.neu = null; window.twMarktwertOeffnen = null; }; }, []);
   const [plGesamt, setPlGesamt] = useState("");
   const [plModus, setPlModus] = useState("karten");
   const [plSort, setPlSort] = useState({ k: "", d: -1 });
@@ -17131,7 +17422,7 @@ function TransferApp({
       fontSize: 12,
       color: MUTED
     }
-  }, "© ", new Date().getFullYear(), " RATH ENTERPRISES · TransferWire"))), vereinSeite && /*#__PURE__*/React.createElement(VereinsSeite, { id: vereinSeite.id || null, name: vereinSeite.name || null, authQ: authQ, isPrem: isPrem, onClose: () => setVereinSeite(null), onOpenPlayer: (pid, pname, pteam) => openPlayer(pid, pname, pteam) }), vereinName && /*#__PURE__*/React.createElement("div", {
+  }, "© ", new Date().getFullYear(), " RATH ENTERPRISES · TransferWire"))), vereinSeite && /*#__PURE__*/React.createElement(VereinsSeite, { id: vereinSeite.id || null, name: vereinSeite.name || null, authQ: authQ, isPrem: isPrem, onClose: () => setVereinSeite(null), onOpenPlayer: (pid, pname, pteam) => openPlayer(pid, pname, pteam) }), /*#__PURE__*/React.createElement(NzBedarfHost, { key: "nz7-host", account: account, setView: setView }), vereinName && /*#__PURE__*/React.createElement("div", {
     onClick: () => setVereinName(null),
     style: { position: "fixed", inset: 0, zIndex: 1360, background: "rgba(10,12,16,.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16, overscrollBehavior: "contain" } }, /*#__PURE__*/React.createElement("div", { onClick: e => e.stopPropagation(), style: { width: "100%", maxWidth: 760, maxHeight: "90vh", overflowY: "auto", overscrollBehavior: "contain", background: "var(--karte)", borderRadius: 18, padding: "20px 22px 26px", boxShadow: "0 30px 90px rgba(0,0,0,.4)" } }, /*#__PURE__*/React.createElement("div", {
     style: {
