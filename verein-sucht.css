@@ -517,3 +517,30 @@ html.tw-dark .vs-wurzel{--vsv2-hi-bg:#dcf5e7;--vsv2-hi:#0f7a43;--vsv2-gut-bg:#e3
 .vsv2-musterliste li.ist-schwach .vsv2-mnr{background:rgba(239,68,68,.25)}
 .vsv2-musterliste li.ist-gut .vsv2-mnr{background:rgba(34,197,94,.25)}
 @media (max-width:700px){.vsv2-scout{grid-template-columns:minmax(0,1fr)}.vsv2-scout>div:first-child{order:0}.vsv2-zonenfeld{width:100%;max-width:320px;margin:0 auto}}
+/* 08.11.2026 OP 542 (Boss Punkt a): Herkunft der Netzwerk-Karten und passende Angebote aus dem Spieler-Markt. Beide Themen ueber Variablen. */
+.vsv2-herkunft{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:999px;border:1px solid var(--violett-rand);background:var(--violett-bg);color:var(--violett);font-size:11px;font-weight:700;white-space:nowrap;vertical-align:middle}
+.vsv2-herkunft.ist-verein{border-color:var(--gruen-rand);background:var(--gruen-bg);color:var(--gruen-text)}
+.vsv2-herkunft .vs-ik{width:12px;height:12px;flex:0 0 auto}
+.k3n-bkopf .vsv2-herkunft{margin-left:6px}
+.k3n-titelzeile .vsv2-herkunft{margin-left:4px}
+.vsv2-markt-platz{margin-top:8px}
+.vsv2-markt-platz:empty{display:none}
+.vsv2-markt-zeile{display:inline-flex;align-items:center;gap:7px;max-width:100%;padding:6px 10px;border-radius:9px;border:1px solid var(--k3n-rand);background:var(--k3n-innen);color:var(--t1);font:inherit;font-size:12.5px;line-height:1.3;cursor:pointer;text-align:left}
+.vsv2-markt-zeile:hover{background:var(--k3-knopf-hover)}
+.vsv2-markt-zeile b{font-weight:700;font-variant-numeric:tabular-nums}
+.vsv2-markt-zeile .vs-ik{width:15px;height:15px;flex:0 0 auto;color:var(--t2)}
+.vsv2-markt-zeile:focus-visible,.vsv2-angebot:focus-visible{outline:2px solid var(--t1);outline-offset:2px}
+.vsv2-tag.ist-markt{background:var(--teal-bg);color:var(--teal)}
+.vsv2-markt{margin-top:12px}
+.vsv2-angebote{display:flex;flex-direction:column;gap:8px}
+.vsv2-angebot{display:flex;align-items:center;gap:10px;width:100%;padding:9px 11px;border-radius:10px;border:1px solid var(--k3n-rand);background:var(--k3n-innen);color:var(--t1);font:inherit;text-align:left;cursor:pointer}
+.vsv2-angebot:hover{background:var(--k3-knopf-hover)}
+.vsv2-angebot-text{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:1px}
+.vsv2-angebot-text b{font-size:13.5px;font-weight:700;color:var(--t1)}
+.vsv2-angebot-text em{font-style:normal;font-size:12px;color:var(--t2)}
+.vsv2-angebot-text small{font-size:11.5px;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vsv2-angebot-punkte{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;line-height:1.1}
+.vsv2-angebot-punkte b{font-size:17px;font-weight:700;color:var(--t1);font-variant-numeric:tabular-nums}
+.vsv2-angebot-punkte small{font-size:10.5px;color:var(--t2)}
+.vsv2-angebot>.vs-ik{width:16px;height:16px;flex:0 0 auto;color:var(--t3)}
+@media (max-width:560px){.vsv2-angebot{padding:8px 9px;gap:8px}.vsv2-angebot-punkte b{font-size:15px}.vsv2-angebot-text small{white-space:normal}}

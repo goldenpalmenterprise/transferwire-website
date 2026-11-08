@@ -10,8 +10,14 @@
   var Z = "https://auto.transferwire.de/bild/";
   var K = { "media.api-sports.io": "as", "cdn.sportmonks.com": "sm", "flagcdn.com": "fl", "www.google.com": "fi" };
   var RE = /https?:\/\/(media\.api-sports\.io|cdn\.sportmonks\.com|flagcdn\.com|www\.google\.com(?=\/s2\/favicons))\//gi;
+  /* OP 544 (08.11.2026, Boss): Transfermarkt-Bilder laedt der Browser gar nicht mehr - die Bildadresse wird "data:," (sofort Ladefehler),
+     die Ansichten zeigen dann ihr Ersatzbild (naechstes Foto oder Initialen). Gilt fuer src/srcset und fuer Bildadressen in HTML-Texten. */
+  var TMG = /^\s*(?:https?:)?\/\/(?:[a-z0-9-]+\.)*(?:transfermarkt\.[a-z.]{2,12}|tmssl\.akamaized\.net|tmsi\.akamaized\.net)(?::\d+)?\//i;
+  var TMB = /(?:https?:)?\/\/(?:[a-z0-9-]+\.)*(?:transfermarkt\.technology|tmssl\.akamaized\.net|tmsi\.akamaized\.net)\/[^\s"'<>()\\,]*/gi;
   function um(s) {
     if (typeof s !== "string" || s.indexOf("//") < 0) return s;
+    if (TMG.test(s)) return "data:,";
+    if (s.search(TMB) >= 0) s = s.replace(TMB, "data:,");
     return s.replace(RE, function (m, h) { return Z + (K[h.toLowerCase()] || "as") + "/"; });
   }
   window.twBildUrl = um;
@@ -34,6 +40,7 @@
     if (ia) Element.prototype.insertAdjacentHTML = function (w, t) { return ia.call(this, w, typeof t === "string" ? um(t) : t); };
   } catch (e) {}
 })();</script>
+<style>/* OP 544 (08.11.2026): Video-Links statt eingebetteter YouTube-Videos */ .tw-yt-link:hover{border-color:var(--linie2)!important} .tw-yt-link:focus-visible{outline:2px solid var(--t1);outline-offset:2px}</style>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <style>html.tw-handy85{-webkit-text-size-adjust:100%;text-size-adjust:100%}html.tw-handy85,html.tw-handy85 body,html.tw-handy85 #root{touch-action:pan-y pinch-zoom}html.tw-handy85.tw-zoom,html.tw-handy85.tw-zoom body,html.tw-handy85.tw-zoom #root{touch-action:manipulation}</style>
 <script>/* Auftrag 47 (Punkt 93, Freigabe 12.10.) + Auftrag 48 (13.10.): Handyansicht 85 % (Variante 2). Auf Handys im Hochformat wird die
@@ -2495,6 +2502,11 @@ function nzKontoLaden(account) {
   NZ.laedt = true; NZ.email = email; NZ.account = account;
   return nzRuf(account, "konto", {}).then(d => { NZ.laedt = false; if (d && d.ok) { nzKontoSetzen(d); if (d.admin === true) nzAdminModul(account); } return d; }).catch(() => { NZ.laedt = false; return null; });
 }
+function useNzVereinskonto(account) {   // Tarif „Vereine“ (08.11.2026, Boss): aktives Vereinskonto aus dem Netzwerk-Konto, sonst null
+  const [k, setK] = React.useState(NZ.konto);
+  React.useEffect(() => { const f = () => setK(NZ.konto); window.addEventListener("nz-konto", f); if (!NZ.konto && account && account.email) { try { nzKontoLaden(account); } catch (e) {} } return () => window.removeEventListener("nz-konto", f); }, [account && account.email]);
+  return k && k.ok && k.verein && typeof k.verein === "object" && k.verein.name ? k.verein : null;
+}
 function nzAdminModul(account) {   // Prüfseite „Verifizierungen“ als Zusatzseite (Punkt 356) – Code kommt nur für das Unternehmens-Konto
   if (TW_ZUSATZ.module[NZ_ADMIN_URL]) { TW_ZUSATZ.melden(TW_ZUSATZ.module[NZ_ADMIN_URL], NZ_ADMIN_URL); if (TW_ZUSATZ.module[NZ_ADMIN_URL + "#vereine"]) TW_ZUSATZ.melden(TW_ZUSATZ.module[NZ_ADMIN_URL + "#vereine"], NZ_ADMIN_URL + "#vereine"); return; }
   if (TW_ZUSATZ.geladen[NZ_ADMIN_URL]) return;
@@ -3627,6 +3639,7 @@ function nz6Status(a) {   // [Text, Klasse, Code] f\u00fcr den Status eines (eig
   return [st || "", "", st || ""];
 }
 function nz6Oeffnen(id, setView) { NZ6.oeffne = id || null; try { window.dispatchEvent(new CustomEvent("nz6-oeffne")); } catch (e) {} if (typeof setView === "function") setView("nz_markt"); }
+window.twNzAngebotOeffnen = function (id) { nz6Oeffnen(id, typeof window.twNzNavigieren === "function" ? window.twNzNavigieren : null); };   // OP 542 (08.11.2026): aus „Verein sucht“
 function nz6Neu(setView) { NZ6.neu = true; try { window.dispatchEvent(new CustomEvent("nz6-oeffne")); } catch (e) {} if (typeof setView === "function") setView("nz_markt"); }
 function nz6Grund(g, d) {
   const en = LANG === "en"; const grenze = d && d.grenze ? d.grenze : null; const min = d && d.min ? d.min : 16; const mb = d && d.max_mb ? d.max_mb : 8;
@@ -8752,7 +8765,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261108-scoutmarkt";
+const VS_VERSION = "op544";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -11548,6 +11561,7 @@ function SubscribePage({
   const [cInfo, setCInfo] = useState("");
   // Punkt 351 (23.10.2026): bestehende Abo-Inhaber gehen ins Kundenportal statt zu einem zweiten Bezahllink
   const hatBezahltesKonto = !!(account && twHatSitzung(account) && isPremiumPlan(String(account.plan || "")) && String(account.status || "aktiv") === "aktiv");
+  const nzVk = useNzVereinskonto(account);   // Tarif „Vereine“ (08.11.2026)
   const [aboTeam, setAboTeam] = useState(null);
   React.useEffect(() => {
     if (!hatBezahltesKonto) return;
@@ -11592,6 +11606,12 @@ function SubscribePage({
     React.createElement("div", { style: { fontSize: 11, color: MUTED, marginTop: 4, lineHeight: 1.35 } }, p.hint))));
   const planWahl = React.createElement(React.Fragment, null, abrechWahl, planGrid, seatsRow);
   const planLabel = (en ? "Subscribe now \u2014 " : "Jetzt zahlungspflichtig abonnieren \u2014 ") + eurFmt(preisVon(plan)) + (en ? (jahr ? "/year" : "/month") : (jahr ? "/Jahr" : "/Monat")) + (plan === "enterprise" ? " \u00b7 " + seatsEff + (en ? " seats" : " Nutzer") : "") + (en ? " (obligation to pay)" : "");
+  if (hatBezahltesKonto && nzVk) {   // Tarif „Vereine“ (08.11.2026, Boss): Abrechnung nach Vereinbarung, kein Stripe-Abo
+    return React.createElement(FormShell, { title: en ? "TransferWire for clubs" : "TransferWire f\u00fcr Vereine", sub: en ? "The \u201cClubs\u201d plan is set up on request and billed by agreement." : "Der Tarif \u201eVereine\u201c wird auf Anfrage eingerichtet und nach Vereinbarung abgerechnet.", onBack: onBack },
+      React.createElement("div", { className: "tw-abo-portal tw-abo-verein", "data-tw-tarif": "vereine", style: { border: "1.5px solid " + HAIR, padding: "14px 14px", fontFamily: FONT_BODY } },
+        React.createElement("div", { style: { fontSize: 14, fontWeight: 800, color: INK, marginBottom: 6 } }, (en ? "You are on the \u201cClubs\u201d plan" : "Du hast den Tarif \u201eVereine\u201c") + " (" + nzVk.name + ")"),
+        React.createElement("p", { style: { fontSize: 12.5, color: MUTED, lineHeight: 1.55, margin: 0 } }, en ? "Your access runs through your club account. Billing is by agreement with the club \u2014 there is no Stripe subscription and nothing to book here. Changes, more staff accounts or cancellation: info@transferwire.de." : "Dein Zugang l\u00e4uft \u00fcber das Vereinskonto. Abgerechnet wird nach Vereinbarung mit dem Verein \u2014 es gibt kein Stripe-Abo und hier nichts zu buchen. \u00c4nderungen, weitere Mitarbeiter-Zug\u00e4nge oder K\u00fcndigung: info@transferwire.de.")));
+  }
   if (hatBezahltesKonto) {
     const ent = String(account.plan_roh || "") === "enterprise";
     const geladen = !ent || aboTeam !== null;
@@ -12133,6 +12153,7 @@ function SettingsOverlay({
   const isTest = account.plan === "test";
   const ends = isTest ? account.start + TEST_MS : null;
   const istPro = isPremiumPlan(account.plan); const istEnt = account.plan_roh === "enterprise";
+  const nzVk = useNzVereinskonto(account); const istVerein = !!(istPro && nzVk);   // Tarif „Vereine“ (08.11.2026)
   const [teamInfo, setTeamInfo] = React.useState(null);   // 23.10.2026: Enterprise-Team
   React.useEffect(() => { let a = true; twTeamPost("info").then(x => { if (a) setTeamInfo(x && x.ok ? x : { ok: false }); }).catch(() => { if (a) setTeamInfo({ ok: false }); }); return () => { a = false; }; }, []);
   const teamMitglied = !!(teamInfo && teamInfo.rolle === "mitglied");
@@ -12239,7 +12260,7 @@ function SettingsOverlay({
   }) : null, account.rolle ? /*#__PURE__*/React.createElement(Row, {
     k: t("st_role"),
     v: nzRolleText(account.rolle)
-  }) : null, React.createElement(NzVerifLeiste, { account: account, kompakt: true }), /*#__PURE__*/React.createElement(Row, { k: t("st_plan"), v: istEnt ? "Enterprise" : istPro ? "Pro" : t("st_plan_test") }), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginTop: 12, flexWrap: "wrap" } }, /*#__PURE__*/React.createElement("button", { type: "button", onClick: onSubscribe, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, color: "#1A1306", backgroundColor: "#C8A355", backgroundImage: "linear-gradient(135deg, #EFD489 0%, #C8A355 48%, #A9822F 100%)", border: "1px solid #B8913F", borderRadius: 9, padding: "10px 14px" }, className: "tw-gold-knopf" }, istPro ? (LANG === "en" ? "Plans & seats" : "Tarif & Nutzer") : (LANG === "en" ? "Upgrade to Pro" : "Auf Pro upgraden")), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED } }, istPro ? (LANG === "en" ? "Enterprise: all Pro features for the whole team, 5 seats included." : "Enterprise: alle Pro-Funktionen f\u00fcrs ganze Team, 5 Nutzer inklusive.") : (LANG === "en" ? "Pro adds Club seeks, club contacts, network, workspace, scouting and the acquisition radar." : "Pro bringt Verein sucht, Vereinskontakte, Netzwerk, Workspace, Scouting und Akquise-Radar.")))), /*#__PURE__*/React.createElement("div", {
+  }) : null, React.createElement(NzVerifLeiste, { account: account, kompakt: true }), /*#__PURE__*/React.createElement(Row, { k: t("st_plan"), v: istVerein ? (LANG === "en" ? "Clubs" : "Vereine") + " \u00b7 " + nzVk.name : istEnt ? "Enterprise" : istPro ? "Pro" : t("st_plan_test") }), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginTop: 12, flexWrap: "wrap" } }, /*#__PURE__*/React.createElement("button", { type: "button", onClick: onSubscribe, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, color: "#1A1306", backgroundColor: "#C8A355", backgroundImage: "linear-gradient(135deg, #EFD489 0%, #C8A355 48%, #A9822F 100%)", border: "1px solid #B8913F", borderRadius: 9, padding: "10px 14px" }, className: "tw-gold-knopf" }, istVerein ? (LANG === "en" ? "View plan" : "Tarif ansehen") : istPro ? (LANG === "en" ? "Plans & seats" : "Tarif & Nutzer") : (LANG === "en" ? "Upgrade to Pro" : "Auf Pro upgraden")), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED } }, istVerein ? (LANG === "en" ? "\u201cClubs\u201d plan: billing by agreement with your club." : "Tarif \u201eVereine\u201c: Abrechnung nach Vereinbarung mit deinem Verein.") : istPro ? (LANG === "en" ? "Enterprise: all Pro features for the whole team, 5 seats included." : "Enterprise: alle Pro-Funktionen f\u00fcrs ganze Team, 5 Nutzer inklusive.") : (LANG === "en" ? "Pro adds Club seeks, club contacts, network, workspace, scouting and the acquisition radar." : "Pro bringt Verein sucht, Vereinskontakte, Netzwerk, Workspace, Scouting und Akquise-Radar.")))), /*#__PURE__*/React.createElement("div", {
     style: {
       background: CARD,
       border: `1px solid ${HAIR}`,
@@ -12255,7 +12276,7 @@ function SettingsOverlay({
       color: INK,
       marginBottom: 8
     }
-  }, t("st_abos")), teamMitglied ? React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, lineHeight: 1.55, margin: 0 } }, LANG === "en" ? "Your access runs through your team's Enterprise subscription. Billing and cancellation are handled by the team owner." : "Dein Zugang l\u00e4uft \u00fcber das Enterprise-Abo deines Teams. Abrechnung und K\u00fcndigung \u00fcbernimmt der Inhaber des Teams.") : !istPro ? React.createElement(React.Fragment, null, React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, lineHeight: 1.55, margin: "0 0 12px" } }, LANG === "en" ? "You are using Free \u2014 free of charge, no subscription. Pro (\u20ac49/month or \u20ac490/year) adds Club seeks, club contacts, network & community, workspace, scouting and the acquisition radar." : "Du nutzt Free \u2014 kostenlos, ohne Abo. Pro (49\u00a0\u20ac/Monat oder 490\u00a0\u20ac/Jahr) bringt Verein sucht, Vereinskontakte, Netzwerk & Community, Workspace, Scouting und Akquise-Radar."), React.createElement(PBtn, { onClick: onSubscribe, kind: "green", full: true }, LANG === "en" ? "Upgrade to Pro" : "Auf Pro upgraden")) : isTest ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
+  }, t("st_abos")), istVerein ? React.createElement("p", { "data-tw-tarif": "vereine", style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, lineHeight: 1.55, margin: 0 } }, LANG === "en" ? "Your access runs through the \u201cClubs\u201d plan of " + nzVk.name + ". Billing is by agreement with the club \u2014 there is no Stripe subscription. Changes or cancellation: info@transferwire.de." : "Dein Zugang l\u00e4uft \u00fcber den Tarif \u201eVereine\u201c von " + nzVk.name + ". Abgerechnet wird nach Vereinbarung mit dem Verein \u2014 es gibt kein Stripe-Abo. \u00c4nderungen oder K\u00fcndigung: info@transferwire.de.") : teamMitglied ? React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, lineHeight: 1.55, margin: 0 } }, LANG === "en" ? "Your access runs through your team's Enterprise subscription. Billing and cancellation are handled by the team owner." : "Dein Zugang l\u00e4uft \u00fcber das Enterprise-Abo deines Teams. Abrechnung und K\u00fcndigung \u00fcbernimmt der Inhaber des Teams.") : !istPro ? React.createElement(React.Fragment, null, React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, lineHeight: 1.55, margin: "0 0 12px" } }, LANG === "en" ? "You are using Free \u2014 free of charge, no subscription. Pro (\u20ac49/month or \u20ac490/year) adds Club seeks, club contacts, network & community, workspace, scouting and the acquisition radar." : "Du nutzt Free \u2014 kostenlos, ohne Abo. Pro (49\u00a0\u20ac/Monat oder 490\u00a0\u20ac/Jahr) bringt Verein sucht, Vereinskontakte, Netzwerk & Community, Workspace, Scouting und Akquise-Radar."), React.createElement(PBtn, { onClick: onSubscribe, kind: "green", full: true }, LANG === "en" ? "Upgrade to Pro" : "Auf Pro upgraden")) : isTest ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: FONT_BODY,
       fontSize: 12.5,
@@ -12481,6 +12502,22 @@ function twBesucherLand() {
   try { const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; land = TW_TZ_LAND[tz] || (/^America\/(New_York|Chicago|Denver|Los_Angeles|Phoenix|Anchorage|Detroit|Boise|Indiana\/|Kentucky\/)|^Pacific\/Honolulu$/.test(tz) ? "US" : null); } catch (e) { }
   if (!land) { try { const m = /^[a-z]{2,3}[-_]([A-Za-z]{2})\b/.exec(navigator.language || ""); if (m) land = m[1].toUpperCase(); } catch (e) { } }
   twLandCache = land; return land;
+}
+/* OP 544 (08.11.2026, Boss): kein eingebettetes YouTube-Video mehr - nur ein Link, der das Video auf YouTube in einem neuen Tab oeffnet.
+   Vor dem Klick wird nichts von YouTube geladen (auch kein Vorschaubild). */
+function twVideoLink(v, i) {
+  const en = LANG === "en";
+  const m = /[?&]v=([\w-]{6,20})(?:[&#]|$)/.exec(String((v && v.url) || ""));
+  const id = m ? m[1] : (/^[\w-]{6,20}$/.test(String((v && v.id) || "")) ? String(v.id) : "");
+  if (!id) return null;
+  const titel = String((v && v.titel) || "").trim() || "Video";
+  return React.createElement("a", { key: id + "-" + i, className: "tw-yt-link", href: "https://www.youtube.com/watch?v=" + id, target: "_blank", rel: "noopener noreferrer", title: (en ? "Opens on YouTube: " : "\u00d6ffnet auf YouTube: ") + titel, style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 10, border: "1px solid " + HAIR, background: "var(--karte2)", color: INK, textDecoration: "none", fontFamily: FONT_BODY } },
+    React.createElement("span", { "aria-hidden": "true", style: { flex: "0 0 auto", width: 40, height: 28, borderRadius: 7, background: INK, color: CARD, display: "flex", alignItems: "center", justifyContent: "center" } },
+      React.createElement("svg", { viewBox: "0 0 24 24", width: 14, height: 14 }, React.createElement("path", { d: "M8 5.5v13l10.5-6.5z", fill: "currentColor" }))),
+    React.createElement("span", { style: { flex: "1 1 auto", minWidth: 0 } },
+      React.createElement("span", { style: { display: "block", fontSize: 12.5, fontWeight: 700, lineHeight: 1.35, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, titel),
+      React.createElement("span", { style: { display: "block", fontSize: 11, color: MUTED, marginTop: 2 } }, en ? "Watch on YouTube \u00b7 opens in a new tab" : "Auf YouTube ansehen \u00b7 \u00f6ffnet in neuem Tab")),
+    React.createElement("svg", { "aria-hidden": "true", viewBox: "0 0 24 24", width: 15, height: 15, style: { flex: "0 0 auto", color: MUTED } }, React.createElement("path", { d: "M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" })));
 }
 function twVideoSichtbar(v) {
   if (!v || typeof v.url !== "string" || !/^https:\/\/www\.youtube\.com\/watch\?v=[\w-]{6,20}$/.test(v.url)) return false;
@@ -18384,36 +18421,7 @@ function TransferApp({
         gap: 10,
         marginBottom: 14
       }
-    }, plExtra.videos.map((v, i) => /*#__PURE__*/React.createElement("div", {
-      key: i
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        position: "relative",
-        width: "100%",
-        paddingBottom: "56.25%",
-        borderRadius: 10,
-        overflow: "hidden",
-        background: "#000"
-      }
-    }, /*#__PURE__*/React.createElement("iframe", {
-      src: `https://www.youtube-nocookie.com/embed/${v.id}`,
-      title: v.titel,
-      allowFullScreen: true,
-      style: {
-        position: "absolute",
-        inset: 0,
-        width: "100%",
-        height: "100%",
-        border: "none"
-      }
-    })), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontFamily: FONT_BODY,
-        fontSize: 11.5,
-        color: MUTED,
-        marginTop: 4
-      }
-    }, v.titel)))) : /*#__PURE__*/React.createElement("div", {
+    }, plExtra.videos.map((v, i) => twVideoLink(v, i))) : /*#__PURE__*/React.createElement("div", {
       style: {
         marginBottom: 14
       }
