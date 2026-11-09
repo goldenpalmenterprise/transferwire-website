@@ -8808,7 +8808,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261109-spielerprofil";
+const VS_VERSION = "20261109-transferkarten";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -15283,6 +15283,13 @@ function TwTickerAnsicht({ daten, laden, alle, onOpen, beobClubs, filter, onWatc
 
 /* --- Punkt 10: Transferkarten kompakt nach Referenzbild (alle Inhalte, Aktionen und Detailansichten bleiben) --- */
 function tkPunkte(score, n) { const h = React.createElement; const anz = n || 10; const voll = Math.round(Math.max(0, Math.min(100, Number(score) || 0)) / 100 * anz); return h("span", { className: "tw-tk3-punkte", "aria-hidden": "true" }, Array.from({ length: anz }, (_, i) => h("span", { key: i, className: i < voll ? "an" : "" }))); }
+/* Transferkarten wie die Trainerkarten (09.11.2026): kräftige Marke für Leihe, Gerücht, Trade, Vertragslos und Vertrag; „Fixer Deal“ bleibt grün */
+const TK_ART_STARK = { leihe: ["#1a6dc0", "#ffffff"], geruecht: ["#f2b33d", "#2b1d00"], trade: ["#6b4fd8", "#ffffff"], vertragslos: ["#5b6472", "#ffffff"], vertrag: ["#0b7272", "#ffffff"], vertrag_verlaengert: ["#0b7272", "#ffffff"] };
+function TkArtMarke({ it, ty }) {
+  const h = React.createElement; const st = it && it.type !== "fix" ? TK_ART_STARK[it.type] : null;
+  if (!st) return h(Badge, { meta: ty });
+  return h("span", { className: "tw-tk3-art", "data-typ": it.type, style: { background: st[0], color: st[1] } }, h("span", { className: "tw-tk3-art-punkt", "aria-hidden": "true", style: { background: st[1] } }), LANG === "en" ? (ty.en || ty.label) : ty.label);
+}
 function TransferKarte({ item, onWatch, onOpen, foto }) {
   const h = React.createElement; const en = LANG === "en"; const it = item;
   const ty = tkTypMeta(it); const sp = tkSpieler(it); const lg = tkLiga(it);
@@ -15290,6 +15297,10 @@ function TransferKarte({ item, onWatch, onOpen, foto }) {
   const sub = [sp.pos, sp.alter ? sp.alter + (en ? " yrs" : " J.") : "", lg.liga, lg.land].filter(Boolean).join(" · ");
   const von = it.fromClub || it.from; const nach = it.toClub || it.to;
   const datumWert = tkWechseldatum(it) || tkDatum(it);
+  const best = twBestaetigt(it); const anz = Number(it.sourceCount) || 1;
+  const bestOff = /offiziell|official/i.test(String(it.headline || "") + " " + String(it.summary || "")) || ((typeof besteStufe === "function" ? besteStufe(it) : null) || {}).v === "A1";
+  const bestGrund = bestOff ? (en ? "official statement" : "offizielle Vereinsmeldung") : anz >= 2 ? (en ? "two independent sources" : "zwei unabhängige Quellen") : (en ? "reliable data source" : "verlässliche Datenquelle");
+  const bestArt = (it.type === "geruecht" || it._gespr) ? bestGrund : (en ? (ty.en || ty.label) : ty.label);
   return h("article", { className: "tw-card tw-tk tw-tk3", "data-typ": it.type, onClick: () => { if (typeof onOpen === "function") onOpen(it); }, style: { cursor: typeof onOpen === "function" ? "pointer" : "default" } },
     h("div", { className: "tw-tk3-kopf" },
       h("span", { className: "tw-tk3-punkt", style: { background: ty.color } }),
@@ -15301,7 +15312,7 @@ function TransferKarte({ item, onWatch, onOpen, foto }) {
       h("div", { style: { minWidth: 0, flex: 1 } },
         h("div", { className: "tw-tk3-name" }, sp.name || dHClean(it)),
         h("div", { className: "tw-tk3-unter" }, sub || (sp.name ? "" : dHClean(it)))),
-      h(Badge, { meta: ty })),
+      h(TkArtMarke, { it: it, ty: ty })),
     h("div", { className: "tw-tk3-zeile tw-tk3-vereine" },
       h(TkVerein, { name: von, size: 34, leer: vpLeer(it, "von"), titel: vpTitel(it, "von") }),
       h("span", { className: "tw-tk3-pfeil" }, tkIcon("arrow", 18)),
@@ -15311,10 +15322,11 @@ function TransferKarte({ item, onWatch, onOpen, foto }) {
       h("div", { className: "tw-tk3-fakt" }, h("span", { className: "tw-tk3-ikon" }, tkIcon("coins", 16)), h("div", { style: { minWidth: 0 } }, h("div", { className: "tw-tk3-flab" }, en ? "Fee" : "Ablöse"), h("div", { className: "tw-tk3-fwert" }, tkAbloese(it))))),
     h("div", { className: "tw-tk3-zeile tw-tk3-info" }, h("span", { className: "tw-tk3-ikon" }, tkIcon("info", 15)), h("span", null, tkStatusText(it))),
     h("div", { className: "tw-tk3-fuss" },
-      h("div", { style: { minWidth: 0, flex: 1 } },
-        h("div", { className: "tw-tk3-signal" }, h("span", null, (en ? "Signal strength " : "Signalstärke "), h("b", null, sc + "/100")), tkPunkte(sc, 10)),
-        h("div", { className: "tw-tk3-quelle" }, tkVertrauen(it) + " · " + (en ? "Source: " : "Quelle: ") + tkQuelle(it) + ((Number(it.sourceCount) || 0) > 1 ? " +" + (Number(it.sourceCount) - 1) : ""))),
-      h("button", { type: "button", className: "tw-tk3-details", onClick: e => { e.stopPropagation(); if (typeof onOpen === "function") onOpen(it); } }, en ? "Details" : "Details", h("span", { style: { display: "inline-flex" } }, tkIcon("arrow", 14)))));
+      best ? h("div", { className: "tw-tk3-best", title: (en ? "Confirmed: " : "Bestätigt: ") + bestGrund }, "\u2713 " + (en ? "Confirmed" : "Bestätigt") + " \u00b7 " + bestArt)
+        : h("div", { className: "tw-tk3-signal" }, h("span", null, (en ? "Signal strength " : "Signalstärke "), h("b", null, sc + "/100")), tkPunkte(sc, 10)),
+      h("div", { className: "tw-tk3-fuss2" },
+        h("div", { className: "tw-tk3-quelle" }, (best ? "" : tkVertrauen(it) + " · ") + (en ? "Source: " : "Quelle: ") + tkQuelle(it) + ((Number(it.sourceCount) || 0) > 1 ? " +" + (Number(it.sourceCount) - 1) : "")),
+        h("button", { type: "button", className: "tw-tk3-details", onClick: e => { e.stopPropagation(); if (typeof onOpen === "function") onOpen(it); } }, "Details", h("span", { "aria-hidden": "true", style: { display: "inline-flex" } }, tkIcon("arrow", 13))))));
 }
 
 /* --- Punkt 6: News-Live-Band (kuratiert, 10-12 aktuelle Meldungen, nahtloser Lauf, Pause, reduzierte Bewegung) --- */
@@ -16555,7 +16567,11 @@ function twLaenderListe(vereine, en) {
   ".tw-tk3-signal b{color:var(--t1);font-weight:800}",
   ".tw-tk3-punkte{display:inline-flex;gap:3px;align-items:center}.tw-tk3-punkte>span{width:8px;height:8px;border-radius:2px;background:var(--linie2,rgba(127,127,127,.3))}.tw-tk3-punkte>span.an{background:var(--gold)}",
   ".tw-tk3-quelle{font-family:" + FONT_BODY + ";font-size:11.5px;color:var(--t3);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
-  ".tw-tk3-details{cursor:pointer;font-family:" + FONT_BODY + ";font-size:13px;font-weight:800;padding:9px 14px;min-height:38px;border-radius:10px;border:none;background:var(--gold);color:var(--gold-schrift);display:inline-flex;align-items:center;gap:7px;white-space:nowrap;flex-shrink:0}",
+  ".tw-tk3-details{cursor:pointer;font-family:" + FONT_BODY + ";font-size:12.5px;font-weight:800;padding:6px 0 6px 8px;min-height:32px;border-radius:6px;border:none;background:none;color:var(--t1);display:inline-flex;align-items:center;gap:5px;white-space:nowrap;flex-shrink:0}",
+  ".tw-tk3-details:hover{color:var(--gold-text)}.tw-tk3-details:focus-visible{outline:2px solid var(--gold);outline-offset:2px}",
+  ".tw-tk3-fuss{row-gap:4px}.tw-tk3-fuss2{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}.tw-tk3-fuss2 .tw-tk3-quelle{flex:1 1 auto;min-width:0;margin-top:0}",
+  ".tw-tk3-best{font-family:" + FONT_BODY + ";font-size:12.5px;font-weight:800;color:var(--gruen-text,#0d8a4f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}",
+  ".tw-tk3-art{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;font-family:" + FONT_BODY + ";font-size:11.5px;font-weight:800;letter-spacing:.02em;padding:4px 10px;border-radius:999px;line-height:1.35;white-space:nowrap}.tw-tk3-art-punkt{width:6px;height:6px;border-radius:99px;opacity:.9}",
   /* Transferdetails mit Spielerbild (Punkt 2) */
   ".tw-tp-kopf{display:flex;gap:16px;align-items:flex-start;margin-bottom:4px}",
   /* Tickerzeilen (Punkte 1 und 11) */
