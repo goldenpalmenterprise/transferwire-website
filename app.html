@@ -8808,7 +8808,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261109-transferkarten";
+const VS_VERSION = "20261109-marktwert-breite";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -16696,7 +16696,7 @@ TW_PRO_INFO.networking = TW_PRO_INFO.community; TW_PRO_INFO.nz_kontakte = TW_PRO
       ".tw-pro-liste b{color:var(--t1)}",
       ".tw-pro-knoepfe{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}",
       ".tw-pro-knoepfe button{cursor:pointer;min-height:44px;padding:0 18px;font:800 13.5px Inter,system-ui,sans-serif;border-radius:10px}",
-      ".tw-mw{max-width:1180px;margin:0 auto;padding:6px 0 30px}",
+      ".tw-mw{max-width:none;margin:0;padding:6px 0 30px}",
       ".tw-mw-filter{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 12px;align-items:center}",
       ".tw-mw-filter select,.tw-mw-filter input[type=search]{font:600 13px Inter,system-ui,sans-serif;min-height:38px;padding:0 10px;border:1px solid var(--linie);background:var(--karte);color:var(--t1);border-radius:9px;max-width:100%}",
       ".tw-mw-filter input[type=search]{min-width:200px;flex:1 1 200px}",
@@ -16716,7 +16716,7 @@ TW_PRO_INFO.networking = TW_PRO_INFO.community; TW_PRO_INFO.nz_kontakte = TW_PRO
       ".tw-mw-status.ind{color:#1f9d55;border:1px solid rgba(31,157,85,.45);background:rgba(31,157,85,.1)}",
       ".tw-mw-status.ein{color:var(--t2);border:1px solid var(--linie);background:var(--karte2)}",
       ".tw-mw-status.ohne{color:var(--t3);border:1px dashed var(--linie);background:transparent}",
-      ".tw-mw2{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(300px,.85fr);gap:18px;align-items:start;margin-top:14px}",
+      ".tw-mw2{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(360px,1fr);gap:22px;align-items:start;margin-top:14px}",
       ".tw-mw2-links{min-width:0}",
       ".tw-mw2-rechts{position:sticky;top:12px;max-height:calc(100vh - 40px);overflow:auto;border:1px solid var(--linie);border-radius:14px;background:var(--karte);padding:12px 12px 10px;min-width:0}",
       ".tw-mw2-rkopf{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px}",
@@ -16760,6 +16760,7 @@ TW_PRO_INFO.networking = TW_PRO_INFO.community; TW_PRO_INFO.nz_kontakte = TW_PRO
       ".tw-mwd-fakten{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:7px;font:500 12.5px Inter,system-ui,sans-serif;color:var(--t2)}",
       ".tw-mwd-profilknopf{cursor:pointer;min-height:44px;padding:0 18px;border-radius:10px;border:1px solid #B8913F;background-color:#C8A355;background-image:linear-gradient(135deg,#EFD489 0%,#C8A355 48%,#A9822F 100%);color:#1A1306;font:800 13.5px Inter,system-ui,sans-serif;white-space:nowrap;box-shadow:0 6px 16px rgba(200,163,85,.28)}",
       ".tw-mwd-block{margin-top:14px;padding:16px 18px;border:1px solid var(--linie);border-radius:14px;background:var(--karte)}",
+      "@media (min-width:1280px){.tw-mwd{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:16px;align-items:stretch}.tw-mwd>.tw-mwd-kopf,.tw-mwd>.tw-mwd-block:last-child{grid-column:1/-1}}",
       ".tw-mwd-titel{font:800 11px Inter,system-ui,sans-serif;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold-text,#DDB65F)}",
       ".tw-mwd-wertzeile{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:6px}",
       ".tw-mwd-wert{font:700 34px 'Barlow Condensed',Inter,system-ui,sans-serif;color:var(--t1);line-height:1.05}",
