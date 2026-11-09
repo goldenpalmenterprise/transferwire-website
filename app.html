@@ -685,7 +685,19 @@ header:has(+ .tw-tabbar) { background: var(--seite) !important; border-bottom: 1
 .tw-sn-ws-pfeil { margin-left: auto; width: 14px; height: 14px; flex-shrink: 0; display: inline-flex; color: var(--t2); }
 .tw-sn-ws-pfeil svg { width: 14px; height: 14px; }
 .tw-sn-ws .tw-sn-pro { margin-left: auto; }
-.tw-sn-menue > .tw-sn-trenner { margin: 6px 6px 8px; flex-shrink: 0; }
+.tw-sn-menue > .tw-sn-trenner { margin: 5px 6px 6px; flex-shrink: 0; }
+/* Seitenleiste ohne Scrollbalken (09.11.2026, 14:22) */
+.tw-sn { padding-bottom: 6px; }
+.tw-sn-menue { scrollbar-width: none; -ms-overflow-style: none; }
+.tw-sn-menue::-webkit-scrollbar { width: 0; height: 0; display: none; }
+.tw-sn-trenner { margin: 6px 6px 8px; }
+.tw-sn-kopf { margin-top: 0; }
+.tw-sn-kinder { padding: 1px 0 4px; }
+.tw-sn-unter { padding-top: 7px; padding-bottom: 7px; }
+.tw-sn .tw-sn-unten { padding-top: 8px; }
+.tw-sn .tw-sn-upgrade { padding-top: 9px; padding-bottom: 9px; }
+.tw-sn .tw-sn-fuss { margin-top: 6px; }
+.tw-sn .tw-sn-fuss button { font-size: 11px; line-height: 1.25; }
 /* Netzwerk volle Breite (09.11.2026): Gesprächsliste schneidet nichts mehr ab, auf breiten Bildschirmen etwas breiter */
 .nz-seite .nz-nl { grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 1280px) { .nz-seite .nz-nachrichten { grid-template-columns: 360px minmax(0, 1fr); } }
@@ -8782,7 +8794,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261109-seitenleiste";
+const VS_VERSION = "20261109-seitenleiste2";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -15930,7 +15942,7 @@ function TwWochenreportSchalter({ wr, onChange, angemeldet }) {
       h("span", { style: { display: "flex", flexDirection: "column", gap: 3, minWidth: 0 } },
         h("span", { style: { fontWeight: 700, opacity: gesperrt && !w.speichert ? .7 : 1 } }, en ? "Weekly report" : "Wöchentlicher Report"),
         h("span", { className: "tw-wr-status" + (an ? " an" : ""), "aria-live": "polite", style: { alignSelf: "flex-start", fontSize: 11, fontWeight: 800, letterSpacing: .3, padding: "2px 8px", borderRadius: 999, background: an ? "var(--gruen-tint)" : "var(--karte2)", color: an ? "var(--gruen-text)" : "var(--t2)", border: "1px solid " + (an ? "transparent" : "var(--linie)") } }, status))),
-    h("div", { id: "tw-wr-info", style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, lineHeight: 1.45, margin: "5px 0 0 24px", maxWidth: 270 } }, en ? "Most important transfers and rumours, urgent (red) squad needs per league and new contract expiries – by e-mail every Monday. Off by default; switch it on or off here at any time." : "Wichtigste Transfers und Gerüchte, dringender Bedarf (rot) je Liga und neue Vertragsenden – jeden Montag per E-Mail. Standardmäßig aus; hier jederzeit ein- oder ausschalten."),
+    h("div", { id: "tw-wr-info", style: { fontFamily: FONT_BODY, fontSize: 11.5, color: MUTED, lineHeight: 1.45, margin: "5px 0 0 24px", maxWidth: 270 } }, en ? "Most important transfers and rumours, urgent (red) squad needs per league – by e-mail every Monday. Off by default; switch it on or off here at any time." : "Wichtigste Transfers und Gerüchte, dringender Bedarf (rot) je Liga – jeden Montag per E-Mail. Standardmäßig aus; hier jederzeit ein- oder ausschalten."),
     w.fehler === "speichern" ? h("div", { role: "alert", style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 700, color: "var(--sc-schwach-text)", margin: "5px 0 0 24px" } }, en ? "The setting could not be saved. Please try again." : "Die Einstellung konnte nicht gespeichert werden. Bitte erneut versuchen.") : null);
 }
 
