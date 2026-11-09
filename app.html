@@ -1151,7 +1151,7 @@ html body .tw-sn-upgrade:hover, html.tw-dark body .tw-sn-upgrade:hover, .tw-gold
   var REGELN = [
     { re: /^\/api\/transfernews(\?|$)/, frisch: 90 * S, alt: 7 * 24 * STD, ereignis: true },
     { re: /^\/db\/signals(\?|$)/, nie: true },
-    { re: /^\/api\/(tw-abmelden|tw-anmelden|tw-account|tw-cancel|tw-chat|tw-checkout-start|tw-code-anfordern|tw-code|tw-passwort|tw-ping|tw-registrieren|tw-resend|tw-sitzung|tw-team|tw-assistent|tw-akquise|tw-community-[a-z]+|tw-analytics|tw-fehler|tw-bild|tw-bilder|tw-meldungbilder|tw-fotos|tw-portraets|tw-vereinspruefung|vs-pdf|tw-spiel-laden|tw-spielanalyse|tw-vereinsspiel-analyse|tw-sprache|tw-ws)(\?|$)/, nie: true },
+    { re: /^\/api\/(tw-abmelden|tw-anmelden|tw-account|tw-cancel|tw-chat|tw-checkout-start|tw-code-anfordern|tw-code|tw-passwort|tw-ping|tw-registrieren|tw-resend|tw-sitzung|tw-team|tw-assistent|tw-akquise|tw-community-[a-z]+|tw-analytics|tw-fehler|tw-bild|tw-bilder|tw-meldungbilder|tw-fotos|tw-portraets|tw-vereinspruefung|vs-pdf|tw-spiel-laden|tw-spielanalyse|tw-vereinsspiel-analyse|tw-sprache)(\?|$)/, nie: true },
     { re: /^\/api\/tw-spieltag(\?|$)/, frisch: 20 * S, alt: 0 },
     { re: /^\/api\/(tw-watch|tw-listen|tw-scoutsuche|tw-scoutkatalog|tw-performance-v2|tw-leistung|tw-markt|tw-community)(\?|$)/, frisch: 2 * MIN, alt: STD },
     { re: /^\/api\/verein-sucht(\?|$)/, frisch: 3 * MIN, alt: 6 * STD },
@@ -3802,7 +3802,7 @@ function NzAngebotDetail({ account, id, schliessen, onAenderung, onEntfernt, set
           h("div", { className: "nz-name" }, h("span", null, sp.name || L("Spieler", "Player")), typeof landFlagge === "function" && sp.nationalitaet ? landFlagge(sp.nationalitaet, 18) : null),
           h("div", { className: "nz-sub" }, nz6Zeile(sp, a)),
           h("div", { className: "nz-b-chips", style: { marginTop: 6 } }, h("span", { className: "nz-chip nz6-art" }, nz6Art(a.art)), a.gruppe ? h("span", { className: "nz-chip" }, nz6Gruppe(a.gruppe)) : null, eigen ? h("span", { className: "nz-chip " + st[1] }, st[0]) : null, a.mehrfach ? h("span", { className: "nz-chip" }, L("mehrere Anbieter", "several providers") + " (" + a.anbieter_anzahl + ")") : null)),
-        sp.player_id && typeof openPlayer === "function" ? h("button", { type: "button", className: "nz-btn klein", onClick: () => { schliessen(); openPlayer(Number(sp.player_id), sp.name, sp.team || ""); } }, L("Spielerprofil", "Player profile")) : null, !eigen ? h(WsAngebotBeob, { account: account, a: a }) : null),
+        sp.player_id && typeof openPlayer === "function" ? h("button", { type: "button", className: "nz-btn klein", onClick: () => { schliessen(); openPlayer(Number(sp.player_id), sp.name, sp.team || ""); } }, L("Spielerprofil", "Player profile")) : null),
       h("div", { className: "nz-abschnitt" },
         h("div", { className: "nz6-dls" },
           zeile(L("Verein", "Club"), sp.team ? sp.team + (sp.league ? " \u00b7 " + sp.league : "") : ""),
@@ -3879,7 +3879,7 @@ function NzAngebotFormular({ account, vorhanden, schliessen, onFertig }) {
   const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de);
   useScrollSperre(true); useTwZurueck(true, schliessen);
   const v = vorhanden || null;
-  const [wahl, setWahl] = React.useState(() => { const x = (!v && NZ6.vorwahl) ? NZ6.vorwahl : {}; NZ6.vorwahl = null; return x; });   // Workspace 2.0: Vorauswahl aus „Meine Spieler“
+  const [wahl, setWahl] = React.useState({});
   const [w, setW] = React.useState(() => ({ art: v ? v.art || "" : "", position_fein: v ? v.position_fein || "" : "", verfuegbar_ab: v && v.verfuegbar_ab ? String(v.verfuegbar_ab).slice(0, 10) : "", preis_text: v ? v.preis_text || "" : "", ziel_laender: v ? (v.ziel_laender || []).join(", ") : "", ziel_ligen: v ? (v.ziel_ligen || []).join(", ") : "", beschreibung: v ? v.beschreibung || "" : "", video_links: v ? (v.video_links || []).join("\n") : "", sichtbarkeit: v ? v.sichtbarkeit || "pro" : "pro", laufzeit_tage: "60" }));
   const [busy, setBusy] = React.useState(false); const [fehler, setFehler] = React.useState("");
   const setz = (k, x) => setW(y => Object.assign({}, y, { [k]: x }));
@@ -6550,7 +6550,7 @@ function SucheVue({ onOpen }) {
 function ScoutSub({ view, setView }) {
   const h = React.createElement;
   return h("div", { style: { display: "flex", gap: 8, marginBottom: 16, alignItems: "flex-start", alignSelf: "start", flexWrap: "wrap" } },
-    [["talente", LANG === "en" ? "Talent rankings" : "Talent-Rankings"], ["listen", LANG === "en" ? "Scouting lists" : "Scouting-Listen"], ["suche", LANG === "en" ? "Skill search" : "Fähigkeiten-Suche"], ["nachwuchs", LANG === "en" ? "Youth leagues & sources" : "Nachwuchsligen & Quellen"], ["akquise", LANG === "en" ? "Acquisition radar" : "Akquise-Radar"]].map(([k, lab]) => {   // Workspace 2.0 (09.11.2026): Akquise-Radar unter Scouting
+    [["talente", LANG === "en" ? "Talent rankings" : "Talent-Rankings"], ["listen", LANG === "en" ? "Scouting lists" : "Scouting-Listen"], ["suche", LANG === "en" ? "Skill search" : "Fähigkeiten-Suche"], ["nachwuchs", LANG === "en" ? "Youth leagues & sources" : "Nachwuchsligen & Quellen"]].map(([k, lab]) => {
       const a = view === k;
       return h("button", { key: k, onClick: () => setView(k), style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, cursor: "pointer", padding: "9px 16px", borderRadius: 10, border: "1px solid " + (a ? "#087F8C" : HAIR), background: a ? "#087F8C" : "#fff", color: a ? "#fff" : "var(--t2)" } }, lab);
     }));
@@ -8765,7 +8765,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "ws2b";
+const VS_VERSION = "sp2b";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -9564,564 +9564,6 @@ function mkGespeicherteSuchen() {
 }
 function mkTage(d) { const t = d ? new Date(d).getTime() : 0; return t ? Math.floor((Date.now() - t) / 86400000) : null; }
 function mkRel(d) { const t = mkTage(d); const en = LANG === "en"; if (t === null) return "\u2013"; if (t <= 0) return en ? "today" : "heute"; if (t === 1) return en ? "yesterday" : "gestern"; return en ? t + " days ago" : "vor " + t + " Tagen"; }
-/* ── Workspace 2.0 (09.11.2026, Boss 00:16/00:38): „Meine Spieler“ (eigene Spieler unter Vertrag oder im Scouting – aus der Datenbank oder selbst angelegt),
-   „Gemerkt“ (gemerkte Spieler) und „Beobachtet“ (Verein-sucht-Karten, Spieler-Markt-Angebote, Vereine, Positionen, Suchprofile, gespeicherte Suchen).
-   Benachrichtigung je Eintrag über die Glocke (Start: aus). Grenze: Pro 50 Spieler, Enterprise unbegrenzt. Daten und Regeln liegen in der Datenbank
-   (Schema ws, Workflow „TW Workspace … (POST /api/tw-ws)“); die App zeigt nur an und reicht Eingaben durch. ── */
-const WS_API = "/api/tw-ws";
-const WS = { daten: null, laedt: null, account: null, email: "", fehler: "" };
-const WS_POS = [["Torwart", "Goalkeeper"], ["Innenverteidiger", "Centre-back"], ["Linksverteidiger", "Left-back"], ["Rechtsverteidiger", "Right-back"], ["Außenverteidiger", "Full-back"], ["Sechser", "Defensive midfielder"], ["Achter", "Central midfielder"], ["Zehner", "Attacking midfielder"], ["Flügel", "Winger"], ["Stürmer", "Striker"]];
-const WS_STAERKEN = [["Abschluss", "Finishing"], ["Chancenverwertung", "Chance conversion"], ["Chancenkreation", "Chance creation"], ["Passspiel", "Passing"], ["Ballsicherheit", "Ball security"], ["Spielaufbau", "Build-up play"], ["Zweikampf", "Duels"], ["Defensive Stabilität", "Defensive stability"], ["Stellungsspiel", "Positioning"], ["Tempo/Dribbling", "Pace/dribbling"], ["Pressing/Balleroberung", "Pressing/ball winning"], ["Kopfball/Luftduelle", "Heading/aerial duels"], ["Standards", "Set pieces"], ["Strafraumpräsenz", "Box presence"], ["Paraden/Reflexe", "Saves/reflexes"], ["Disziplin", "Discipline"], ["Konzentration", "Concentration"], ["Effizienz", "Efficiency"]];
-const WS_FUSS = [["rechts", "right"], ["links", "left"], ["beidfüßig", "both feet"]];
-const WS_STUFE = { Akut: ["akut", "Urgent"], Wahrscheinlich: ["wahrscheinlich", "Likely"], Beobachten: ["beobachten", "Watch"] };
-const WS_GLOCKE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
-const WS_GLOCKE_AUS_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.7 3A6 6 0 0 1 18 8c0 2.7.4 4.6 1 6"/><path d="M17 17H3s3-2 3-9c0-.8.1-1.5.4-2.2"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><path d="M3 3l18 18"/></svg>';
-const WS_LUPE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
-const WS_CSS = ".ws2{display:flex;flex-direction:column;gap:16px;min-width:0}"
-  + ".ws2-kopf{display:flex;flex-direction:column;gap:4px;margin-bottom:8px;min-width:0}"
-  + ".ws2-titel{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:30px;line-height:38px;margin:0;color:var(--t1)}"
-  + ".ws2-lead{font-family:Inter,system-ui,sans-serif;font-size:14.5px;line-height:1.5;color:var(--t2);margin:0 0 8px;max-width:780px}"
-  + ".ws2-kopf-zeile{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}"
-  + ".ws2-pillen{display:flex;gap:6px;flex-wrap:wrap}"
-  + ".ws2-pille{cursor:pointer;font:800 13px Inter,system-ui,sans-serif;padding:8px 14px;border-radius:999px;border:1px solid var(--linie2);background:var(--karte);color:var(--t1);display:inline-flex;align-items:center;gap:7px;min-height:38px}"
-  + ".ws2-pille.an{background:var(--dunkel);border-color:var(--gold-rand);color:#fff}html.tw-dark .ws2-pille.an{border-color:var(--dunkel)}"
-  + ".ws2-pille-n{font:700 14px 'Barlow Condensed','Arial Narrow',sans-serif;color:var(--t2)}.ws2-pille.an .ws2-pille-n{color:rgba(255,255,255,.78)}"
-  + ".ws2-alertchip{cursor:pointer;display:inline-flex;align-items:center;gap:7px;font:700 12.5px Inter,system-ui,sans-serif;padding:7px 12px;border-radius:999px;border:1px solid var(--linie2);background:var(--karte);color:var(--t2);min-height:36px}"
-  + ".ws2-alertchip svg{width:15px;height:15px}.ws2-alertchip.an{background:var(--gold-tint);border-color:var(--gold-rand);color:var(--gold-text)}"
-  + ".ws2-raster{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}"
-  + "@media (max-width:1100px){.ws2-raster{grid-template-columns:minmax(0,1fr)}}"
-  + ".ws2-haupt{display:flex;flex-direction:column;gap:12px;min-width:0}"
-  + ".ws2-suche{display:flex;flex-direction:column;gap:8px;background:var(--karte);border:1px solid var(--linie);border-radius:14px;padding:12px}"
-  + ".ws2-suche-zeile{display:flex;gap:8px;flex-wrap:wrap;align-items:center}"
-  + ".ws2-suchfeld{flex:1 1 260px;position:relative;display:flex;align-items:center;min-width:0}"
-  + ".ws2-suchfeld input{width:100%;box-sizing:border-box;min-height:44px;border-radius:10px;border:1px solid var(--linie2);background:var(--seite);color:var(--t1);font:500 16px Inter,system-ui,sans-serif;padding:0 12px 0 38px}"
-  + ".ws2-lupe{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--t3);pointer-events:none;display:inline-flex}.ws2-lupe svg{width:18px;height:18px}"
-  + ".ws2-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}"
-  + ".ws2-btn{cursor:pointer;font:800 13px Inter,system-ui,sans-serif;padding:8px 13px;border-radius:10px;border:1px solid var(--linie2);background:var(--karte2);color:var(--t1);min-height:38px;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;white-space:nowrap;box-sizing:border-box}"
-  + ".ws2-btn:hover{border-color:var(--gold-rand)}.ws2-btn.gold{background:var(--gold);border-color:var(--gold);color:var(--gold-schrift)}"
-  + ".ws2-btn.klein{min-height:32px;padding:5px 10px;font-size:12px}.ws2-btn.rot{background:transparent;border-color:var(--sc-schwach-rand);color:var(--sc-schwach-text)}"
-  + ".ws2-btn.leise{background:transparent;color:var(--t2)}.ws2-btn:disabled{opacity:.55;cursor:default}"
-  + ".ws2-btn:focus-visible,.ws2-pille:focus-visible,.ws2-glocke:focus-visible,.ws2-wchip:focus-visible,.ws2-link:focus-visible,.ws2-name:focus-visible,.ws2-alertchip:focus-visible{outline:2px solid var(--gold);outline-offset:2px}"
-  + ".ws2-treffer{display:flex;flex-direction:column;border:1px solid var(--linie);border-radius:12px;overflow:hidden}"
-  + ".ws2-treffer-zeile{display:flex;align-items:center;gap:10px;padding:8px 10px;border-top:1px solid var(--linie);background:var(--karte);flex-wrap:wrap}.ws2-treffer-zeile:first-child{border-top:0}"
-  + ".ws2-treffer-text{flex:1 1 180px;min-width:0;display:flex;flex-direction:column;font:500 12.5px Inter,system-ui,sans-serif;color:var(--t2)}"
-  + ".ws2-treffer-text b{font-size:14px;color:var(--t1);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ws2-treffer-text span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
-  + ".ws2-wahl{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.ws2-wahl>span{font:700 12px Inter,system-ui,sans-serif;color:var(--t2)}"
-  + ".ws2-filterzeile{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.ws2-filter{display:flex;gap:6px;flex-wrap:wrap}"
-  + ".ws2-zaehler{font:700 12.5px Inter,system-ui,sans-serif;color:var(--t2)}.ws2-zaehler.voll{color:var(--sc-schwach-text)}"
-  + ".ws2-karten{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,440px),1fr));gap:12px;align-items:start}"
-  + ".ws2-karte{background:var(--karte);border:1px solid var(--linie);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:12px;min-width:0}"
-  + ".ws2-k-kopf{display:flex;align-items:center;gap:12px;min-width:0}.ws2-k-foto{display:inline-flex;flex-shrink:0;border-radius:999px}.ws2-k-foto.link{cursor:pointer}"
-  + ".ws2-k-name{flex:1;min-width:0}.ws2-k-zeile1{display:flex;align-items:center;gap:8px;flex-wrap:wrap}"
-  + ".ws2-name{font:800 16px Inter,system-ui,sans-serif;color:var(--t1);background:none;border:0;padding:0;text-align:left;overflow-wrap:anywhere}"
-  + ".ws2-name.link{cursor:pointer}.ws2-name.link:hover{color:var(--gold-text);text-decoration:underline}"
-  + ".ws2-k-sub{font:500 12.5px Inter,system-ui,sans-serif;color:var(--t2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
-  + ".ws2-status{font:800 11px Inter,system-ui,sans-serif;letter-spacing:.3px;padding:3px 8px;border-radius:999px;border:1px solid var(--linie2);white-space:nowrap}"
-  + ".ws2-status.vertrag{background:var(--gold-tint);border-color:var(--gold-rand);color:var(--gold-text)}.ws2-status.scouting{background:var(--teal-tint);border-color:var(--teal);color:var(--teal)}"
-  + ".ws2-chip{font:700 11px Inter,system-ui,sans-serif;padding:3px 8px;border-radius:999px;border:1px solid var(--linie2);background:var(--karte2);color:var(--t2);white-space:nowrap}"
-  + ".ws2-glocke{cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:36px;min-width:36px;justify-content:center;padding:6px 9px;border-radius:10px;border:1px solid var(--linie2);background:var(--karte);color:var(--t2);font:800 12px Inter,system-ui,sans-serif;white-space:nowrap;flex-shrink:0;box-sizing:border-box}"
-  + ".ws2-glocke.an{background:var(--gold-tint);border-color:var(--gold-rand);color:var(--gold-text)}.ws2-glocke.klein{min-height:30px;padding:4px 8px;font-size:11.5px}"
-  + ".ws2-glocke-ik{width:16px;height:16px;display:inline-flex}.ws2-glocke-ik svg{width:16px;height:16px}"
-  + ".ws2-k-werte{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}@media (max-width:560px){.ws2-k-werte{grid-template-columns:repeat(2,minmax(0,1fr))}}"
-  + ".ws2-wert{border:1px solid var(--linie);border-radius:10px;padding:7px 9px;min-width:0}"
-  + ".ws2-wert span{display:block;font:800 10px Inter,system-ui,sans-serif;letter-spacing:.7px;text-transform:uppercase;color:var(--t3)}"
-  + ".ws2-wert b{display:block;font:700 13.5px Inter,system-ui,sans-serif;color:var(--t1);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ws2-wert.gold b{color:var(--gold-text)}"
-  + ".ws2-label{font:800 10.5px Inter,system-ui,sans-serif;letter-spacing:.9px;text-transform:uppercase;color:var(--t3);margin:0 0 6px}"
-  + ".ws2-form{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}.ws2-form .ws2-label{flex-basis:100%;margin:0}"
-  + ".ws2-balken{display:flex;align-items:flex-end;gap:4px;height:38px;flex:1 1 140px;max-width:280px}.ws2-bar{flex:1;border-radius:3px 3px 0 0;min-height:4px}"
-  + ".ws2-bar.hi{background:var(--sc-hi-text)}.ws2-bar.gut{background:var(--sc-gut-text)}.ws2-bar.mittel{background:var(--sc-mittel-text)}.ws2-bar.schwach{background:var(--sc-schwach-text)}.ws2-bar.leer{background:var(--linie2)}"
-  + ".ws2-form-n{font:700 12.5px Inter,system-ui,sans-serif;color:var(--t2)}"
-  + ".ws2-hinweise{display:flex;gap:6px;flex-wrap:wrap}"
-  + ".ws2-hinweis{font:800 11.5px Inter,system-ui,sans-serif;padding:4px 9px;border-radius:8px;border:1px solid var(--linie2);background:var(--karte2);color:var(--t1)}"
-  + ".ws2-hinweis.verletzt{background:var(--sc-schwach-bg);border-color:var(--sc-schwach-rand);color:var(--sc-schwach-text)}"
-  + ".ws2-hinweis.kaum,.ws2-hinweis.form_minus{background:var(--sc-mittel-bg);border-color:var(--sc-mittel-rand);color:var(--sc-mittel-text)}"
-  + ".ws2-hinweis.form_plus{background:var(--sc-gut-bg);border-color:var(--sc-gut-rand);color:var(--sc-gut-text)}"
-  + ".ws2-hinweis.vertrag{background:var(--gold-tint);border-color:var(--gold-rand);color:var(--gold-text)}"
-  + ".ws2-fits{display:flex;flex-direction:column;gap:7px}.ws2-fit{display:flex;align-items:center;gap:9px;min-width:0}"
-  + ".ws2-fit-t{flex:1;min-width:0;display:flex;flex-direction:column;font:500 12px Inter,system-ui,sans-serif;color:var(--t2)}"
-  + ".ws2-fit-t b{font-size:13.5px;color:var(--t1);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ws2-fit-t span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
-  + ".ws2-score{min-width:38px;height:26px;border-radius:8px;border:1px solid var(--linie2);display:inline-flex;align-items:center;justify-content:center;font:700 15px 'Barlow Condensed','Arial Narrow',sans-serif;flex-shrink:0}"
-  + ".ws2-stufe{font:800 10.5px Inter,system-ui,sans-serif;padding:3px 7px;border-radius:999px;border:1px solid var(--linie2);color:var(--t2);white-space:nowrap;flex-shrink:0}"
-  + ".ws2-stufe.akut{background:var(--sc-schwach-bg);border-color:var(--sc-schwach-rand);color:var(--sc-schwach-text)}.ws2-stufe.wahrscheinlich{background:var(--sc-mittel-bg);border-color:var(--sc-mittel-rand);color:var(--sc-mittel-text)}"
-  + ".ws2-link{cursor:pointer;background:none;border:0;padding:0;font:700 12.5px Inter,system-ui,sans-serif;color:var(--gold-text);text-align:left;text-decoration:underline}"
-  + ".ws2-notiz{font:500 12.5px/1.5 Inter,system-ui,sans-serif;color:var(--t2);font-style:italic;border-left:3px solid var(--linie2);padding-left:9px;white-space:pre-wrap;overflow-wrap:anywhere}"
-  + ".ws2-team{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ws2-zust{display:flex;align-items:center;gap:6px;font:700 12px Inter,system-ui,sans-serif;color:var(--t2)}"
-  + ".ws2-zust select{min-height:36px;border-radius:9px;border:1px solid var(--linie2);background:var(--seite);color:var(--t1);font:600 13px Inter,system-ui,sans-serif;padding:0 8px;max-width:220px}"
-  + ".ws2-komm{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--linie);padding-top:10px}"
-  + ".ws2-komm-e{background:var(--karte2);border-radius:10px;padding:8px 10px}.ws2-komm-k{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;font:500 11.5px Inter,system-ui,sans-serif;color:var(--t3)}"
-  + ".ws2-komm-k b{font-size:12.5px;color:var(--t1)}.ws2-komm-t{font:500 13px/1.45 Inter,system-ui,sans-serif;color:var(--t1);white-space:pre-wrap;overflow-wrap:anywhere;margin-top:3px}"
-  + ".ws2-komm-neu{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}.ws2-komm-neu textarea{flex:1 1 220px;min-height:64px;border-radius:10px;border:1px solid var(--linie2);background:var(--seite);color:var(--t1);font:500 16px Inter,system-ui,sans-serif;padding:8px 10px;resize:vertical;box-sizing:border-box}"
-  + ".ws2-aktionen{display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--linie);padding-top:10px}.ws2-weg{display:inline-flex;gap:6px;flex-wrap:wrap}"
-  + ".ws2-aside{display:flex;flex-direction:column;gap:12px;min-width:0}.ws2-kasten{background:var(--karte);border:1px solid var(--linie);border-radius:14px;padding:14px 16px;min-width:0}"
-  + ".ws2-kasten h3{font:800 14.5px Inter,system-ui,sans-serif;margin:0 0 8px;color:var(--t1)}"
-  + ".ws2-frist{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font:500 13px Inter,system-ui,sans-serif;color:var(--t1);padding:6px 0;border-bottom:1px solid var(--linie);flex-wrap:wrap}"
-  + ".ws2-frist:last-child{border-bottom:0}.ws2-frist b{font-weight:800;white-space:nowrap}.ws2-frist b.bald{color:var(--sc-schwach-text)}.ws2-frist small{flex-basis:100%;color:var(--t3);font-size:11.5px}"
-  + ".ws2-sub{font:500 12.5px/1.5 Inter,system-ui,sans-serif;color:var(--t2);margin:0}.ws2-kasten .ws2-label{margin-top:10px}.ws2-kasten .ws2-label:first-of-type{margin-top:0}"
-  + ".ws2-leer{background:var(--karte);border:1px dashed var(--linie2);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:10px;font:500 13.5px/1.55 Inter,system-ui,sans-serif;color:var(--t2)}"
-  + ".ws2-leer h3{font:700 21px 'Barlow Condensed','Arial Narrow',sans-serif;margin:0;color:var(--t1)}.ws2-leer .ws2-knoepfe{display:flex;gap:8px;flex-wrap:wrap}"
-  + ".ws2-fehler{color:var(--sc-schwach-text);font:600 13px Inter,system-ui,sans-serif}.ws2-ok{color:var(--gruen-text);font:600 13px Inter,system-ui,sans-serif}"
-  + ".ws2-chips{display:flex;gap:6px;flex-wrap:wrap}.ws2-wchip{cursor:pointer;font:700 12px Inter,system-ui,sans-serif;padding:6px 10px;border-radius:999px;border:1px solid var(--linie2);background:var(--karte);color:var(--t2);min-height:32px}"
-  + ".ws2-wchip.an{background:var(--gold-tint);border-color:var(--gold-rand);color:var(--gold-text)}"
-  + ".ws2-liste{background:var(--karte);border:1px solid var(--linie);border-radius:14px;overflow:hidden}"
-  + ".ws2-zeile{display:flex;align-items:center;gap:10px;padding:11px 14px;border-top:1px solid var(--linie);flex-wrap:wrap}.ws2-liste .ws2-zeile:first-child{border-top:0}"
-  + ".ws2-zeile-t{flex:1 1 200px;min-width:0;display:flex;flex-direction:column;gap:1px}.ws2-zeile-t b{font:800 14px Inter,system-ui,sans-serif;color:var(--t1);overflow-wrap:anywhere}"
-  + ".ws2-zeile-t span{font:500 12.5px Inter,system-ui,sans-serif;color:var(--t2)}.ws2-zeile-k{display:flex;gap:6px;flex-wrap:wrap;align-items:center}"
-  + ".ws2-logo-vorschau{max-width:150px;max-height:52px;border:1px solid var(--linie);border-radius:6px;background:#fff;padding:3px;display:block}"
-  + ".ws2-einst{display:flex;flex-direction:column;gap:8px}.ws2-einst .nz-feld input{min-height:40px}"
-  + ".ws2-mtab{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}"
-  + ".ws2-meldung{display:flex;gap:10px;align-items:baseline;padding:9px 14px;border-top:1px solid var(--linie);font:500 13px Inter,system-ui,sans-serif;color:var(--t1);flex-wrap:wrap}.ws2-meldung:first-child{border-top:0}.ws2-meldung small{color:var(--t3);font-size:12px;white-space:nowrap}"
-  + ".nz-btn.ws2-nzbeob.an{background:var(--gold-tint);border-color:var(--gold-rand);color:var(--gold-text)}"
-  + "@media (max-width:760px){.ws2-titel{font-size:26px;line-height:32px}.ws2-karte{padding:12px}.ws2-aktionen .ws2-btn{flex:1 1 auto}}";
-
-function wsEn() { return LANG === "en"; }
-function wsWort(liste, k) { const x = liste.find(y => y[0] === k); return x ? (wsEn() ? x[1] : x[0]) : (k || ""); }
-function wsKonto() { if (WS.account && WS.account.email) return WS.account; try { return (typeof loadAccount === "function" ? loadAccount() : JSON.parse(localStorage.getItem("tw_account") || "null")) || null; } catch (e) { return null; } }
-function wsRuf(account, aktion, body) {
-  const a = account || wsKonto();
-  const b = Object.assign({}, body || {}, { aktion: aktion, code: (a && (a.code || a.sitzung)) || "", email: (a && a.email) || "" });
-  return fetch(WS_API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(b), cache: "no-store", credentials: "omit" })
-    .then(r => r.json().catch(() => ({ ok: false, grund: r.status === 401 ? "auth" : "antwort" })))
-    .then(d => (d && typeof d === "object") ? d : { ok: false, grund: "antwort" })
-    .catch(() => ({ ok: false, grund: "netz" }));
-}
-function wsMeldung(t) { try { let el = document.getElementById("tw-dossier-toast"); if (!el) { el = document.createElement("div"); el.id = "tw-dossier-toast"; el.setAttribute("role", "status"); el.style.cssText = "position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:100001;background:#0f1520;color:#fff;padding:11px 18px;border-radius:10px;font:600 14px Inter,system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.25);max-width:90vw;text-align:center"; document.body.appendChild(el); } el.textContent = t; el.style.display = "block"; clearTimeout(el._t); el._t = setTimeout(() => { el.style.display = "none"; }, 4600); } catch (e) { } }
-function wsNeu() { try { window.dispatchEvent(new CustomEvent("ws-neu")); } catch (e) { } }
-function wsLaden(account, neu) {
-  const a = account || wsKonto();
-  if (!a || !a.email || !twHatSitzung(a)) { if (!WS.daten && !WS.fehler) { WS.fehler = "auth"; wsNeu(); } return Promise.resolve(null); }
-  if (WS.laedt && !neu) return WS.laedt;
-  WS.account = a;
-  const p = wsRuf(a, "laden", {}).then(d => {
-    if (WS.laedt === p) WS.laedt = null;
-    if (String(a.email || "").toLowerCase() !== WS.email) return d;
-    if (d && d.ok) { WS.daten = d; WS.fehler = ""; } else if (!WS.daten) WS.fehler = (d && d.grund) || "antwort";
-    wsNeu(); return d;
-  });
-  WS.laedt = p; return p;
-}
-function useWsTakt() { const [, setN] = React.useState(0); React.useEffect(() => { const f = () => setN(n => n + 1); window.addEventListener("ws-neu", f); return () => window.removeEventListener("ws-neu", f); }, []); }
-function useWs(account) {
-  useWsTakt();
-  const a = account || wsKonto();
-  const em = String((a && a.email) || "").toLowerCase();
-  React.useEffect(() => {
-    if (!em || !twIstPremium()) return;
-    if (WS.email !== em) { WS.email = em; WS.daten = null; WS.laedt = null; WS.fehler = ""; }
-    if (!WS.daten && !WS.laedt) wsLaden(a);
-  }, [em]);
-  return WS.email === em ? WS.daten : null;
-}
-function wsGrund(g, d) {
-  const en = wsEn(); const lim = d && d.limit ? d.limit : 50;
-  const m = {
-    auth: ["Deine Anmeldung ist abgelaufen. Bitte neu anmelden.", "Your session expired. Please sign in again."],
-    premium: ["Der Workspace ist Teil von Pro.", "The workspace is part of Pro."],
-    limit: ["Du hast die Grenze von " + lim + " Spielern erreicht. Mit Enterprise ist die Anzahl unbegrenzt.", "You have reached the limit of " + lim + " players. With Enterprise the number is unlimited."],
-    position: ["Bitte eine Position wählen.", "Please choose a position."],
-    spieler: ["Der Spieler wurde in der Datenbank nicht gefunden.", "The player was not found in the database."],
-    doppelt: ["Dieser Spieler ist schon in deiner Liste.", "This player is already in your list."],
-    name: ["Bitte einen Namen mit 3 bis 80 Zeichen angeben.", "Please enter a name with 3 to 80 characters."],
-    geburtsdatum: ["Das Geburtsdatum ist ungültig (Alter 12 bis 50 Jahre).", "The date of birth is invalid (age 12 to 50)."],
-    nicht_gefunden: ["Der Eintrag wurde nicht gefunden – bitte die Seite neu laden.", "The entry was not found – please reload the page."],
-    zustaendig: ["Diese Person gehört nicht zu deinem Team.", "This person is not part of your team."],
-    video: ["Der Video-Link muss mit http:// oder https:// beginnen.", "The video link must start with http:// or https://."],
-    eingabe: ["Die Eingabe ist ungültig.", "The input is invalid."],
-    sichtbarkeit: ["Dieses Angebot ist für dich nicht sichtbar.", "This offer is not visible to you."],
-    text: ["Der Text ist zu lang (höchstens 2.000 Zeichen).", "The text is too long (2,000 characters at most)."],
-    tageslimit: ["Zu viele Kommentare in kurzer Zeit – bitte später erneut versuchen.", "Too many comments in a short time – please try again later."],
-    logo: ["Das Logo muss ein PNG-, JPG- oder WebP-Bild bis 400 KB sein.", "The logo must be a PNG, JPG or WebP image up to 400 KB."],
-    netz: ["Keine Verbindung – bitte erneut versuchen.", "No connection – please try again."]
-  };
-  const x = m[g]; return x ? (en ? x[1] : x[0]) : (en ? "That did not work – please try again." : "Das hat nicht geklappt – bitte erneut versuchen.");
-}
-function wsDatum(v) { return dbDatum(String(v || "").slice(0, 10)); }
-function wsZeit(v) { const d = new Date(v); if (isNaN(d)) return ""; const z = n => String(n).padStart(2, "0"); return z(d.getDate()) + "." + z(d.getMonth() + 1) + "." + d.getFullYear() + ", " + z(d.getHours()) + ":" + z(d.getMinutes()); }
-function wsGlockeIst(art, ref) { const g = WS.daten && WS.daten.glocken; return !!(g && g[art + "|" + ref]); }
-function wsGlockeSetzen(art, ref, an, opt) {
-  const en = wsEn(); ref = String(ref);
-  if (!WS.daten) { wsMeldung(en ? "One moment – your workspace is still loading." : "Einen Moment – dein Workspace lädt noch."); wsLaden(); return; }
-  const key = art + "|" + ref; const setz = x => { const g = Object.assign({}, (WS.daten && WS.daten.glocken) || {}); if (x) g[key] = true; else delete g[key]; WS.daten = Object.assign({}, WS.daten, { glocken: g }); wsNeu(); };
-  setz(an);
-  wsRuf(WS.account, "glocke", { art: art, ref: ref, an: an }).then(d => {
-    if (!(d && d.ok)) { setz(!an); wsMeldung(wsGrund(d && d.grund, d)); return; }
-    const w = opt && opt.watch;
-    if (an && w && !w.alerts && opt.onUpdateWatch) {
-      opt.onUpdateWatch(Object.assign({}, w, { alerts: true, asked: true }));
-      wsMeldung(en ? "Notification on. E-mail notifications for your account are now switched on as well." : "Benachrichtigung an. Die E-Mail-Benachrichtigungen deines Kontos sind jetzt ebenfalls eingeschaltet.");
-    } else wsMeldung(an ? (en ? "Notification on – you will get an e-mail when something changes." : "Benachrichtigung an – du bekommst eine E-Mail, sobald sich etwas ändert.") : (en ? "Notification off." : "Benachrichtigung aus."));
-  });
-}
-function WsGlocke({ art, wert, watch, onUpdateWatch, text, klein }) {
-  useWsTakt();
-  const h = React.createElement; const en = wsEn(); const an = wsGlockeIst(art, String(wert));
-  const lab = an ? (en ? "Notification on" : "Benachrichtigung an") : (en ? "Notification off" : "Benachrichtigung aus");
-  return h("button", { type: "button", className: "ws2-glocke" + (an ? " an" : "") + (klein ? " klein" : ""), "aria-pressed": an, "aria-label": lab, title: lab + (en ? " – click to switch" : " – zum Umschalten klicken"), "data-ws-glocke": art,
-    onClick: e => { e.stopPropagation(); wsGlockeSetzen(art, String(wert), !an, { watch: watch, onUpdateWatch: onUpdateWatch }); } },
-    h("span", { className: "ws2-glocke-ik", dangerouslySetInnerHTML: { __html: an ? WS_GLOCKE_SVG : WS_GLOCKE_AUS_SVG } }), text === false ? null : h("span", null, lab));
-}
-function wsSpielerSetzen(sp) {
-  if (!WS.daten || !sp || !sp.id) return;
-  const liste = (WS.daten.spieler || []).slice(); const i = liste.findIndex(x => x.id === sp.id);
-  if (i >= 0) liste[i] = sp; else liste.unshift(sp);
-  WS.daten = Object.assign({}, WS.daten, { spieler: liste, anzahl: liste.length }); wsNeu();
-}
-function wsSpielerWeg(id) { if (!WS.daten) return; const liste = (WS.daten.spieler || []).filter(x => x.id !== id); WS.daten = Object.assign({}, WS.daten, { spieler: liste, anzahl: liste.length }); wsNeu(); }
-function wsNachladen() { setTimeout(() => { wsLaden(null, true); }, 9000); }   // passende Vereine rechnet der Portfolio-Agent im Hintergrund
-function wsHinzu(pid, status) {
-  const en = wsEn();
-  return wsRuf(WS.account, "hinzufuegen", { pid: pid, status: status || "scouting" }).then(d => {
-    if (d && d.ok) { wsSpielerSetzen(d.spieler); wsNachladen(); wsMeldung(en ? "Added to My players. Matching clubs are calculated in the background." : "Zu „Meine Spieler“ hinzugefügt. Passende Vereine werden im Hintergrund berechnet."); }
-    else wsMeldung(wsGrund(d && d.grund, d));
-    return d;
-  });
-}
-function wsMeineKnopf(d, item, knopf) {
-  const en = wsEn(); const pid = d && d.ok ? d.pid : null;
-  const drin = !!(pid && WS.daten && (WS.daten.spieler || []).some(s => String(s.pid) === String(pid)));
-  return knopf(drin ? (en ? "In My players" : "In Meine Spieler") : (en ? "Add to My players" : "Zu Meine Spieler"), () => { if (!pid) return; if (drin) { if (typeof window.twNzNavigieren === "function") window.twNzNavigieren("ws_spieler"); return; } wsHinzu(pid, "scouting"); }, drin, "ms");
-}
-function WsKopf({ view, onNav, watch, profiles }) {
-  useWsTakt();
-  const h = React.createElement; const en = wsEn(); const d = WS.daten;
-  const items = (watch && watch.items) || [];
-  const nG = items.filter(x => x.t === "spieler").length;
-  const nB = items.filter(x => x.t === "verein" || x.t === "position").length + (profiles || []).length + (d && d.beob ? (d.beob.vs || []).length + (d.beob.angebote || []).length : 0);
-  const nS = d ? (d.anzahl != null ? d.anzahl : (d.spieler || []).length) : null;
-  const gl = d && d.glocken ? Object.keys(d.glocken).length : 0;
-  const alerts = !!(watch && watch.alerts);
-  const reiter = [["ws_spieler", en ? "My players" : "Meine Spieler", nS], ["watch", en ? "Saved" : "Gemerkt", nG], ["ws_beob", en ? "Watching" : "Beobachtet", nB]];
-  const lead = {
-    ws_spieler: ["Die Spieler, die du betreust (unter Vertrag) oder intensiv scoutest – mit Form, Einsatzzeit, Vertrag, passenden Vereinen, Exposé und Spieler-Markt.", "The players you represent (under contract) or scout closely – with form, playing time, contract, matching clubs, exposé and Player market."],
-    watch: ["Spieler, die du dir gemerkt hast. Mit der Glocke schaltest du Benachrichtigungen je Spieler ein.", "Players you have saved. Use the bell to switch on notifications per player."],
-    ws_beob: ["Was du verfolgst: Karten aus „Verein sucht“, Angebote im Spieler-Markt, Vereine, Positionen, Suchprofile und gespeicherte Suchen.", "What you follow: cards from “Club seeks”, Player market offers, clubs, positions, search profiles and saved searches."]
-  }[view] || ["", ""];
-  return h("div", { className: "ws2-kopf" },
-    h("h2", { className: "ws2-titel" }, "Workspace"), h("style", null, WS_CSS),
-    h("p", { className: "ws2-lead" }, en ? lead[1] : lead[0]),
-    h("div", { className: "ws2-kopf-zeile" },
-      h("div", { className: "ws2-pillen", role: "tablist", "aria-label": "Workspace" }, reiter.map(([k, lab, n]) => h("button", { key: k, type: "button", role: "tab", "aria-selected": view === k, className: "ws2-pille" + (view === k ? " an" : ""), onClick: () => onNav(k), "data-ws-reiter": k }, h("span", null, lab), n != null ? h("span", { className: "ws2-pille-n" }, n) : null))),
-      h("button", { type: "button", className: "ws2-alertchip" + (alerts && gl ? " an" : ""), title: en ? "Manage e-mail notifications" : "E-Mail-Benachrichtigungen verwalten", onClick: () => { if (typeof window.twWatchDlg === "function") window.twWatchDlg(); } },
-        h("span", { dangerouslySetInnerHTML: { __html: alerts ? WS_GLOCKE_SVG : WS_GLOCKE_AUS_SVG } }),
-        h("span", null, alerts ? (gl ? (en ? "E-mail on · " + gl + (gl === 1 ? " bell" : " bells") : "E-Mail an · " + gl + (gl === 1 ? " Glocke" : " Glocken")) : (en ? "E-mail on · no bell on yet" : "E-Mail an · noch keine Glocke an")) : (en ? "E-mail notifications off" : "E-Mail-Benachrichtigungen aus")))));
-}
-function WsSuche({ account, voll, lim, onAnlegen }) {
-  const h = React.createElement; const en = wsEn();
-  const [q, setQ] = React.useState(""); const [treffer, setTreffer] = React.useState(null); const [laedt, setLaedt] = React.useState(false); const [wahl, setWahl] = React.useState(null); const [busy, setBusy] = React.useState(false);
-  React.useEffect(() => {
-    const t = q.trim(); if (t.length < 2) { setTreffer(null); setLaedt(false); return undefined; }
-    let alive = true; setLaedt(true);
-    const tm = setTimeout(() => { wsRuf(account, "suchen", { q: t }).then(r => { if (!alive) return; setLaedt(false); setTreffer(r && r.ok ? (r.treffer || []) : []); }); }, 260);
-    return () => { alive = false; clearTimeout(tm); };
-  }, [q]);
-  const add = (t, st) => { setBusy(true); wsHinzu(t.pid, st).then(r => { setBusy(false); if (r && r.ok) { setWahl(null); setQ(""); setTreffer(null); } }); };
-  return h("div", { className: "ws2-suche" },
-    h("div", { className: "ws2-suche-zeile" },
-      h("label", { className: "ws2-suchfeld" }, h("span", { className: "ws2-sr" }, en ? "Add a player from the database" : "Spieler aus der Datenbank hinzufügen"), h("span", { className: "ws2-lupe", dangerouslySetInnerHTML: { __html: WS_LUPE_SVG } }),
-        h("input", { type: "search", value: q, disabled: voll, placeholder: en ? "Add a player from the database: name or club …" : "Spieler aus der Datenbank hinzufügen: Name oder Verein …", onChange: e => { setQ(e.target.value); setWahl(null); }, "data-ws-suche": "1", autoComplete: "off" })),
-      h("button", { type: "button", className: "ws2-btn gold", onClick: onAnlegen, disabled: voll, "data-ws-anlegen": "1" }, en ? "Create own player" : "Eigenen Spieler anlegen")),
-    voll ? h("p", { className: "ws2-fehler", style: { margin: 0 } }, wsGrund("limit", { limit: lim })) : null,
-    laedt ? h("p", { className: "ws2-sub" }, en ? "Searching …" : "Suche …") : null,
-    treffer && treffer.length ? h("div", { className: "ws2-treffer" }, treffer.map(t => h("div", { key: t.pid, className: "ws2-treffer-zeile", "data-ws-treffer": t.pid },
-      h(DbFoto, { x: { name: t.name, photo: t.foto }, size: 34 }),
-      h("div", { className: "ws2-treffer-text" }, h("b", null, t.name), h("span", null, [t.team, t.liga, t.position, t.alter ? t.alter + (en ? " yrs" : " J.") : ""].filter(Boolean).join(" · "))),
-      t.drin ? h("span", { className: "ws2-chip" }, en ? "already in your list" : "schon in deiner Liste")
-        : wahl === t.pid ? h("div", { className: "ws2-wahl" }, h("span", null, en ? "Add as:" : "Hinzufügen als:"), h("button", { type: "button", className: "ws2-btn klein gold", disabled: busy, onClick: () => add(t, "vertrag"), "data-ws-als": "vertrag" }, en ? "Under contract" : "Unter Vertrag"), h("button", { type: "button", className: "ws2-btn klein", disabled: busy, onClick: () => add(t, "scouting"), "data-ws-als": "scouting" }, en ? "Scouting" : "Im Scouting"))
-        : h("button", { type: "button", className: "ws2-btn klein", onClick: () => setWahl(t.pid), "data-ws-hinzu": t.pid }, en ? "Add" : "Hinzufügen")))) : null,
-    treffer && !treffer.length && !laedt ? h("p", { className: "ws2-sub" }, en ? "No match in the database – create the player as your own profile." : "Kein Treffer in der Datenbank – lege den Spieler als eigenes Profil an.") : null);
-}
-function wsStufe(s) { const x = WS_STUFE[s]; return x ? [x[0], wsEn() ? x[1] : s] : ["", s || ""]; }
-function WsSpielerKarte({ sp, d, account, openPlayer, setView, watch, onUpdateWatch, onBearbeiten }) {
-  const h = React.createElement; const en = wsEn();
-  const [offen, setOffen] = React.useState(false); const [weg, setWeg] = React.useState(false); const [busy, setBusy] = React.useState(false);
-  const team = d.team || {}; const istTeam = !!team.ist_team;
-  const pos = sp.pos ? wsWort(WS_POS, sp.pos) : (sp.position || "");
-  const kopfInfo = [sp.team, pos, sp.alter ? sp.alter + (en ? " yrs" : " Jahre") : ""].filter(Boolean).join(" · ");
-  const vertragTxt = sp.vertrag ? wsDatum(sp.vertrag) : (sp.vertrag_text || "–");
-  const noten = (sp.spiele || []).slice(0, 10).reverse();
-  const oeffne = () => { if (sp.pid) openPlayer(Number(sp.pid), sp.name, sp.team || ""); };
-  const aendern = b => wsRuf(account, "aendern", Object.assign({ id: sp.id }, b)).then(r => { if (r && r.ok) { wsSpielerSetzen(r.spieler); if (r.fits) wsNachladen(); } else wsMeldung(wsGrund(r && r.grund, r)); return r; });
-  const entfernen = () => { setBusy(true); wsRuf(account, "entfernen", { id: sp.id }).then(r => { setBusy(false); if (r && r.ok) { wsSpielerWeg(sp.id); wsMeldung(en ? "Player removed." : "Spieler entfernt."); } else wsMeldung(wsGrund(r && r.grund, r)); }); };
-  const anbieten = () => {
-    const fuss = sp.fuss === "beidfüßig" ? "beidfuessig" : (sp.fuss === "links" || sp.fuss === "rechts" ? sp.fuss : "");
-    NZ6.vorwahl = sp.pid ? { player_id: Number(sp.pid), titel: sp.name, unter: [sp.team, sp.position || pos].filter(Boolean).join(" · "), bild: sp.foto || "" }
-      : { eigen: true, spieler: { name: sp.name || "", geburtsdatum: sp.geburtsdatum ? String(sp.geburtsdatum).slice(0, 10) : "", nationalitaet: sp.nationalitaet || "", verein: sp.team || "", vertrag_bis: sp.vertrag ? String(sp.vertrag).slice(0, 10) : "", groesse_cm: "", fuss: fuss } };
-    nz6Neu(setView);
-  };
-  const wert = (lab, v, kl, titel) => h("div", { className: "ws2-wert" + (kl ? " " + kl : ""), title: titel || "" }, h("span", null, lab), h("b", null, v));
-  const einsatz = sp.spiele3 ? (en ? (sp.einsaetze3 || 0) + " of " + sp.spiele3 + " · " + (sp.min3 || 0) + " min" : (sp.einsaetze3 || 0) + " von " + sp.spiele3 + " · " + (sp.min3 || 0) + " Min.") : "–";
-  const fits = sp.fits || [];
-  return h("article", { className: "ws2-karte", "data-ws-spieler": sp.id },
-    h("div", { className: "ws2-k-kopf" },
-      h("span", { className: "ws2-k-foto" + (sp.pid ? " link" : ""), onClick: sp.pid ? oeffne : undefined }, h(DbFoto, { x: { name: sp.name, photo: sp.foto }, size: 46 })),
-      h("div", { className: "ws2-k-name" },
-        h("div", { className: "ws2-k-zeile1" },
-          sp.pid ? h("button", { type: "button", className: "ws2-name link", onClick: oeffne, title: en ? "Open player profile" : "Spielerprofil öffnen" }, sp.name) : h("span", { className: "ws2-name" }, sp.name),
-          h("span", { className: "ws2-status " + (sp.status === "vertrag" ? "vertrag" : "scouting") }, sp.status === "vertrag" ? (en ? "Under contract" : "Unter Vertrag") : (en ? "Scouting" : "Im Scouting")),
-          sp.quelle === "frei" ? h("span", { className: "ws2-chip" }, en ? "own profile" : "eigenes Profil") : null),
-        h("div", { className: "ws2-k-sub" }, kopfInfo || "–")),
-      h(WsGlocke, { art: "meinspieler", wert: String(sp.id), watch: watch, onUpdateWatch: onUpdateWatch, text: false })),
-    h("div", { className: "ws2-k-werte" },
-      wert(en ? "Market value" : "Marktwert", sp.mw_text || "–", "gold", sp.quelle === "frei" ? (en ? "your own entry" : "eigene Angabe") : (en ? "TransferWire estimate" : "Schätzung TransferWire")),
-      wert(en ? "Contract until" : "Vertrag bis", vertragTxt),
-      wert("TW Score", sp.score != null ? String(Math.round(Number(sp.score))) : "–"),
-      wert(en ? "Last matches" : "Letzte Spiele", einsatz, null, en ? "Appearances in the team's last matches and minutes played" : "Einsätze in den letzten Spielen der Mannschaft und Minuten")),
-    noten.length ? h("div", { className: "ws2-form" },
-      h("div", { className: "ws2-label" }, en ? "Form · match ratings (0–100)" : "Form · Spielnoten (0–100)"),
-      h("div", { className: "ws2-balken", role: "img", "aria-label": (en ? "Ratings of the last matches: " : "Noten der letzten Spiele: ") + noten.map(s => s.n == null ? "–" : twLkNoteKurz(s.n)).join(", ") },
-        noten.map((s, i) => h("span", { key: i, className: "ws2-bar " + (s.n == null ? "leer" : scoreBand(Number(s.n))), style: { height: (s.n == null ? 8 : Math.max(12, Math.min(100, Math.round((Number(s.n) - 25) / 75 * 100)))) + "%" }, title: wsDatum(s.d) + (s.g ? " " + (s.h ? (en ? "vs " : "gegen ") : (en ? "at " : "bei ")) + s.g : "") + " · " + (s.m || 0) + (en ? " min" : " Min.") + (s.n != null ? " · " + (en ? "rating " : "Note ") + twLkNoteKurz(s.n) : "") }))),
-      sp.note3 != null ? h("span", { className: "ws2-form-n" }, (en ? "Avg. last 3: " : "Ø letzte 3: ") + Math.round(Number(sp.note3))) : null) : null,
-    (sp.hinweise || []).length ? h("div", { className: "ws2-hinweise" }, sp.hinweise.map(x => h("span", { key: x.k, className: "ws2-hinweis " + x.k, title: x.info || "" }, en ? (x.te || x.t) : x.t))) : null,
-    h("div", { className: "ws2-fits" },
-      h("div", { className: "ws2-label" }, (en ? "Matching clubs" : "Passende Vereine") + (sp.fits_n ? " (" + sp.fits_n + ")" : "")),
-      fits.length ? fits.map(f => { const st = wsStufe(f.stufe); return h("div", { key: f.karte, className: "ws2-fit" }, h(ClubLogo, { name: f.team, size: 22 }), h("span", { className: "ws2-fit-t" }, h("b", null, f.team), h("span", null, [f.titel, f.liga].filter(Boolean).join(" · "))), f.stufe ? h("span", { className: "ws2-stufe " + st[0] }, st[1]) : null, h("span", { className: "ws2-score", title: en ? "Club fit" : "Club-Fit", style: { background: scoreBg(f.summe), borderColor: scoreRand(f.summe), color: scoreTxt(f.summe) } }, Math.round(Number(f.summe)))); })
-        : h("p", { className: "ws2-sub" }, en ? "No matching club need yet – calculated daily from “Club seeks”." : "Noch kein passender Vereinsbedarf – wird täglich aus „Verein sucht“ berechnet."),
-      sp.fits_n > fits.length ? h("button", { type: "button", className: "ws2-link", onClick: () => setView("gesucht") }, en ? "Show all in “Club seeks”" : "Alle in „Verein sucht“ ansehen") : null),
-    sp.notizen ? h("div", { className: "ws2-notiz" }, sp.notizen) : null,
-    istTeam ? h("div", { className: "ws2-team" },
-      h("label", { className: "ws2-zust" }, h("span", null, en ? "Responsible" : "Zuständig"), h("select", { value: (sp.zustaendig && sp.zustaendig.email) || "", onChange: e => aendern({ zustaendig: e.target.value }), "data-ws-zustaendig": sp.id }, h("option", { value: "" }, en ? "nobody" : "niemand"), (team.mitglieder || []).map(m => h("option", { key: m.email, value: m.email }, (m.name || "") + (m.ich ? (en ? " (you)" : " (du)") : ""))))),
-      h("button", { type: "button", className: "ws2-btn klein", onClick: () => setOffen(!offen), "aria-expanded": offen }, (en ? "Comments" : "Kommentare") + " (" + (sp.kommentare || 0) + ")")) : null,
-    offen ? h(WsKommentare, { account: account, id: sp.id, onZahl: n => { if (n !== sp.kommentare) wsSpielerSetzen(Object.assign({}, sp, { kommentare: n })); } }) : null,
-    h("div", { className: "ws2-aktionen" },
-      h("button", { type: "button", className: "ws2-btn", onClick: () => wsExpose(sp), "data-ws-expose": sp.id }, en ? "Exposé (PDF)" : "Exposé (PDF)"),
-      h("button", { type: "button", className: "ws2-btn", onClick: anbieten, "data-ws-anbieten": sp.id }, en ? "Offer on Player market" : "Im Spieler-Markt anbieten"),
-      sp.pid ? h("button", { type: "button", className: "ws2-btn", onClick: oeffne }, en ? "Open profile" : "Profil öffnen") : null,
-      h("button", { type: "button", className: "ws2-btn", onClick: onBearbeiten, "data-ws-bearbeiten": sp.id }, en ? "Edit" : "Bearbeiten"),
-      sp.video_url ? h("a", { className: "ws2-btn", href: sp.video_url, target: "_blank", rel: "noopener noreferrer" }, "Video") : null,
-      weg ? h("span", { className: "ws2-weg" }, h("button", { type: "button", className: "ws2-btn rot", disabled: busy, onClick: entfernen, "data-ws-weg-ja": sp.id }, en ? "Really remove" : "Wirklich entfernen"), h("button", { type: "button", className: "ws2-btn leise", onClick: () => setWeg(false) }, en ? "Cancel" : "Abbrechen"))
-        : h("button", { type: "button", className: "ws2-btn leise", onClick: () => setWeg(true), "data-ws-weg": sp.id }, en ? "Remove" : "Entfernen")));
-}
-function WsKommentare({ account, id, onZahl }) {
-  const h = React.createElement; const en = wsEn();
-  const [liste, setListe] = React.useState(null); const [text, setText] = React.useState(""); const [busy, setBusy] = React.useState(false); const [fehler, setFehler] = React.useState("");
-  const setz = r => { if (r && r.ok) { const l = r.kommentare || []; setListe(l); setFehler(""); if (onZahl) onZahl(l.length); } else { setFehler(wsGrund(r && r.grund, r)); if (liste === null) setListe([]); } };
-  React.useEffect(() => { let alive = true; wsRuf(account, "kommentare", { id: id }).then(r => { if (alive) setz(r); }); return () => { alive = false; }; }, [id]);
-  const senden = () => { const t = text.trim(); if (!t) return; setBusy(true); wsRuf(account, "kommentar", { id: id, text: t }).then(r => { setBusy(false); if (r && r.ok) setText(""); setz(r); }); };
-  return h("div", { className: "ws2-komm" },
-    liste === null ? h("p", { className: "ws2-sub" }, en ? "Loading …" : "Lade …")
-      : liste.length ? liste.map(k => h("div", { key: k.id, className: "ws2-komm-e" }, h("div", { className: "ws2-komm-k" }, h("b", null, k.name || ""), h("span", null, wsZeit(k.am)), k.ich ? h("button", { type: "button", className: "ws2-link", onClick: () => wsRuf(account, "kommentar_loeschen", { kid: k.id }).then(setz) }, en ? "Delete" : "Löschen") : null), h("div", { className: "ws2-komm-t" }, k.text)))
-      : h("p", { className: "ws2-sub" }, en ? "No comments yet. Comments are visible to your team." : "Noch keine Kommentare. Kommentare sieht dein Team."),
-    h("div", { className: "ws2-komm-neu" }, h("textarea", { rows: 2, maxLength: 2000, value: text, placeholder: en ? "Comment for your team …" : "Kommentar für dein Team …", onChange: e => setText(e.target.value), "aria-label": en ? "New comment" : "Neuer Kommentar" }), h("button", { type: "button", className: "ws2-btn gold", disabled: busy || !text.trim(), onClick: senden }, en ? "Post" : "Senden")),
-    fehler ? h("div", { className: "ws2-fehler" }, fehler) : null);
-}
-function WsSpielerDialog({ account, art, sp, schliessen }) {
-  const h = React.createElement; const en = wsEn(); const L = (de, x) => (en ? x : de);
-  useScrollSperre(true); useTwZurueck(true, schliessen);
-  const neu = art === "anlegen"; const frei = neu || !!(sp && sp.quelle === "frei");
-  const [w, setW] = React.useState(() => neu ? { name: "", geburtsdatum: "", pos: "", fuss: "", verein: "", liga: "", nationalitaet: "", vertrag_bis: "", wert: "", video_url: "", staerken: [], status: "vertrag", notiz: "" }
-    : { name: sp.name || "", geburtsdatum: sp.geburtsdatum ? String(sp.geburtsdatum).slice(0, 10) : "", pos: sp.pos || "", fuss: sp.fuss || "", verein: sp.team || "", liga: sp.liga || "", nationalitaet: sp.nationalitaet || "", vertrag_bis: sp.vertrag ? String(sp.vertrag).slice(0, 10) : "", wert: sp.quelle === "frei" ? String(sp.mw_text || "").replace(/\s*Mio\..*$/, "") : "", video_url: sp.video_url || "", staerken: Array.isArray(sp.staerken) ? sp.staerken.slice() : [], status: sp.status === "vertrag" ? "vertrag" : "scouting", notiz: sp.notizen || "" });
-  const [busy, setBusy] = React.useState(false); const [fehler, setFehler] = React.useState("");
-  const setz = (k, x) => setW(y => Object.assign({}, y, { [k]: x }));
-  const feld = (k, label, platz, typ, max) => h("label", { className: "nz-feld" }, label, h("input", { type: typ || "text", value: w[k] || "", placeholder: platz || "", maxLength: max || 120, onChange: e => setz(k, e.target.value), "data-ws-feld": k }));
-  const auswahl = (k, label, liste, leer) => h("label", { className: "nz-feld" }, label, h("select", { value: w[k] || "", onChange: e => setz(k, e.target.value), "data-ws-feld": k }, h("option", { value: "" }, leer), liste.map(o => h("option", { key: o[0], value: o[0] }, en ? o[1] : o[0]))));
-  const speichern = () => {
-    if (frei && w.name.trim().length < 3) { setFehler(wsGrund("name")); return; }
-    if (!w.pos) { setFehler(wsGrund("position")); return; }
-    if (w.video_url.trim() && !/^https?:\/\//i.test(w.video_url.trim())) { setFehler(wsGrund("video")); return; }
-    let body;
-    if (neu) body = { name: w.name.trim(), geburtsdatum: w.geburtsdatum, pos: w.pos, fuss: w.fuss, verein: w.verein.trim(), liga: w.liga.trim(), nationalitaet: w.nationalitaet.trim(), vertrag_bis: w.vertrag_bis, wert: w.wert.trim(), staerken: w.staerken, video_url: w.video_url.trim(), notiz: w.notiz, status: w.status };
-    else { body = { id: sp.id, status: w.status, pos: w.pos, notizen: w.notiz, staerken: w.staerken, video_url: w.video_url.trim() }; if (frei) Object.assign(body, { name: w.name.trim(), verein: w.verein.trim(), liga: w.liga.trim(), fuss: w.fuss, wert: w.wert.trim(), vertrag_bis: w.vertrag_bis, nationalitaet: w.nationalitaet.trim(), geburtsdatum: w.geburtsdatum }); }
-    setBusy(true); setFehler("");
-    wsRuf(account, neu ? "anlegen" : "aendern", body).then(r => {
-      setBusy(false);
-      if (r && r.ok) { wsSpielerSetzen(r.spieler); if (neu || r.fits) wsNachladen(); wsMeldung(neu ? L("Spieler angelegt. Passende Vereine werden im Hintergrund berechnet.", "Player created. Matching clubs are calculated in the background.") : L("Gespeichert.", "Saved.")); schliessen(); }
-      else setFehler(wsGrund(r && r.grund, r));
-    });
-  };
-  return h("div", { className: "nz-modal", onClick: ev => { if (ev.target === ev.currentTarget) schliessen(); } },
-    h("div", { className: "nz-box breit", role: "dialog", "aria-modal": "true", "aria-labelledby": "ws2-dlg-t", "data-ws-dialog": art },
-      h("div", { className: "nz-kopf" }, h("h2", { id: "ws2-dlg-t", style: { margin: 0, fontFamily: FONT_DISPLAY, fontSize: 24 } }, neu ? L("Eigenen Spieler anlegen", "Create own player") : L("Spieler bearbeiten", "Edit player") + (sp && sp.name ? ": " + sp.name : "")), h("button", { type: "button", className: "nz-x", "aria-label": L("Schließen", "Close"), onClick: schliessen }, "×")),
-      neu ? h("p", { className: "ws2-sub", style: { marginBottom: 10 } }, L("Für Spieler, die nicht in der Datenbank stehen. Die Angaben siehst nur du (bei Enterprise dein Team); sie kommen nicht in die öffentliche Datenbank.", "For players who are not in the database. Only you (with Enterprise: your team) can see the details; they are not added to the public database.")) : null,
-      h("div", { className: "nz-felder" },
-        frei ? feld("name", L("Name", "Name") + " *", L("Vor- und Nachname", "First and last name"), "text", 80) : null,
-        frei ? feld("geburtsdatum", L("Geburtsdatum", "Date of birth"), "", "date") : null,
-        auswahl("pos", L("Position", "Position") + " *", WS_POS, L("bitte wählen …", "please choose …")),
-        frei ? auswahl("fuss", L("Starker Fuß", "Preferred foot"), WS_FUSS, "–") : null,
-        frei ? feld("verein", L("Aktueller Verein", "Current club"), L("z. B. SV Sandhausen U19", "e.g. Example FC U19"), "text", 80) : null,
-        frei ? feld("liga", L("Liga", "League"), L("z. B. A-Junioren-Bundesliga", "e.g. U19 league"), "text", 80) : null,
-        frei ? feld("nationalitaet", L("Nationalität", "Nationality"), L("z. B. Deutschland", "e.g. Germany"), "text", 80) : null,
-        frei ? feld("vertrag_bis", L("Vertrag bis", "Contract until"), "", "date") : null,
-        frei ? feld("wert", L("Marktwert (Mio. €, optional)", "Market value (m €, optional)"), L("z. B. 0,3", "e.g. 0.3"), "text", 10) : null,
-        feld("video_url", L("Video-Link", "Video link"), "https://", "url", 400)),
-      h("div", { className: "nz-feld", style: { marginTop: 12 } }, L("Stärken", "Strengths"), h("div", { className: "ws2-chips" }, WS_STAERKEN.map(o => { const an = w.staerken.indexOf(o[0]) >= 0; return h("button", { key: o[0], type: "button", className: "ws2-wchip" + (an ? " an" : ""), "aria-pressed": an, onClick: () => setz("staerken", an ? w.staerken.filter(x => x !== o[0]) : w.staerken.concat([o[0]])) }, en ? o[1] : o[0]); }))),
-      h("div", { className: "nz-feld", style: { marginTop: 12 } }, "Status", h("div", { className: "ws2-chips" }, [["vertrag", L("Unter Vertrag", "Under contract")], ["scouting", L("Im Scouting", "Scouting")]].map(([k, lab]) => h("button", { key: k, type: "button", className: "ws2-wchip" + (w.status === k ? " an" : ""), "aria-pressed": w.status === k, onClick: () => setz("status", k), "data-ws-status": k }, lab)))),
-      h("label", { className: "nz-feld", style: { marginTop: 12 } }, L("Notiz (nur für dich bzw. dein Team)", "Note (only for you or your team)"), h("textarea", { rows: 3, maxLength: 2000, value: w.notiz, onChange: e => setz("notiz", e.target.value), "data-ws-feld": "notiz" })),
-      fehler ? h("p", { className: "ws2-fehler", role: "alert" }, fehler) : null,
-      h("div", { className: "nz-knoepfe" }, h("button", { type: "button", className: "ws2-btn", onClick: schliessen }, L("Abbrechen", "Cancel")), h("button", { type: "button", className: "ws2-btn gold", disabled: busy, onClick: speichern, "data-ws-speichern": "1" }, busy ? L("Speichert …", "Saving …") : (neu ? L("Spieler anlegen", "Create player") : L("Speichern", "Save"))))));
-}
-function wsExposeHtml(s, e, en) {
-  const L = (de, x) => (en ? x : de);
-  const esc = x => String(x == null ? "" : x).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const zahl = (v, dz) => (v == null || v === "" || isNaN(Number(v))) ? "" : Number(v).toLocaleString(en ? "en-GB" : "de-DE", { maximumFractionDigits: dz || 0 });
-  const name = s.name || ""; const ini = name.split(/\s+/).filter(Boolean).map(x => x[0]).slice(0, 2).join("").toUpperCase();
-  const pos = s.pos ? wsWort(WS_POS, s.pos) : (s.position || "");
-  const z1 = [pos, s.alter ? s.alter + L(" Jahre", " years") : "", s.fuss ? L("Fuß: ", "Foot: ") + wsWort(WS_FUSS, s.fuss) : "", s.nationalitaet || ""].filter(Boolean).join(" · ");
-  const z2 = [s.team || "", s.liga || "", s.vertrag ? L("Vertrag bis ", "Contract until ") + wsDatum(s.vertrag) : ""].filter(Boolean).join(" · ");
-  const noten = (s.spiele || []).filter(x => x.n != null).slice(0, 5); const schnitt = noten.length ? Math.round(noten.reduce((a, x) => a + Number(x.n), 0) / noten.length) : null;
-  const kachel = (l, w, gold) => w ? "<div class=\"k\"><div class=\"l\">" + esc(l) + "</div><div class=\"w" + (gold ? " g" : "") + "\">" + esc(w) + "</div></div>" : "";
-  const kacheln = kachel(L("Marktwert", "Market value"), s.mw_text || "", true) + kachel("TW Score", s.score != null ? String(Math.round(Number(s.score))) : "") + kachel(L("Spiele / Minuten", "Apps / minutes"), s.apps != null ? zahl(s.apps) + " / " + zahl(s.minuten) : "") + kachel(L("Ø Note, letzte " + noten.length + " Spiele", "Avg. rating, last " + noten.length + " matches"), schnitt != null ? String(schnitt) : "");
-  const st = (s.staerken || []).map(x => wsWort(WS_STAERKEN, x)).filter(Boolean);
-  const reihe = (l, w) => w ? "<tr><td>" + esc(l) + "</td><td class=\"r\"><b>" + esc(w) + "</b></td></tr>" : "";
-  const saison = reihe(L("Passquote", "Pass accuracy"), s.passquote != null && s.passquote !== "" ? zahl(s.passquote) + " %" : "") + reihe(L("Gewonnene Zweikämpfe", "Duels won"), s.zweikampf != null && s.zweikampf !== "" ? zahl(s.zweikampf) + " %" : "") + reihe(L("Tore / Vorlagen", "Goals / assists"), s.tore != null || s.vorlagen != null ? zahl(s.tore || 0) + " / " + zahl(s.vorlagen || 0) : "") + reihe(L("Bewertung (Datenanbieter)", "Rating (data provider)"), s.rating != null && s.rating !== "" ? zahl(s.rating, 2) : "");
-  const letzte = (s.spiele || []).slice(0, 5).map(x => esc(wsDatum(x.d)) + " " + (x.h ? L("gegen ", "vs ") : L("bei ", "at ")) + esc(x.g || "") + " · " + esc(x.m || 0) + L(" Min.", " min") + (x.n != null ? " · " + L("Note ", "rating ") + esc(Math.round(Number(x.n))) : "")).join("<br>");
-  const logo = e && e.logo && /^data:image\/(png|jpeg|webp);base64,/.test(e.logo) ? "<img class=\"logo\" src=\"" + e.logo + "\" alt=\"\">" : "";
-  const firma = [e && e.firma ? esc(e.firma) : "", e && e.kontakt ? esc(e.kontakt) : ""].filter(Boolean).join("<br>");
-  const heute = wsDatum(new Date().toISOString());
-  const css = "@page{size:A4;margin:14mm 15mm}*{box-sizing:border-box}body{margin:0;font-family:\"Liberation Sans\",Arial,Helvetica,sans-serif;color:#111827;font-size:10pt;line-height:1.45}"
-    + ".kopf{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #111827;padding-bottom:8px;margin-bottom:16px}.kl{display:flex;gap:12px;align-items:center}.logo{max-width:150px;max-height:52px}"
-    + ".firma{font-size:9.5pt;color:#4b5563;font-weight:600}.stand{font-size:8.5pt;color:#4b5563;text-align:right}"
-    + ".person{display:flex;gap:16px;align-items:center;margin-bottom:16px}.ini{width:84px;height:84px;border-radius:50%;background:#0f1520;color:#fff;font-size:26pt;font-weight:700;display:flex;align-items:center;justify-content:center}"
-    + "h1{margin:0;font-size:26pt;line-height:1.05}.zeile{font-size:10.5pt;color:#4b5563;margin-top:4px}"
-    + ".kacheln{display:flex;gap:8px;margin-bottom:16px}.k{flex:1;border:1px solid #E1E5E2;border-radius:8px;padding:7px 9px}.l{font-size:7.5pt;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#5E6873}.w{font-size:12pt;font-weight:700;margin-top:2px}.w.g{color:#7D5F1A}"
-    + "h3{font-size:8.5pt;letter-spacing:.8px;text-transform:uppercase;color:#5E6873;margin:14px 0 5px}table{width:100%;border-collapse:collapse}td{padding:5px 0;border-bottom:1px solid #E1E5E2;font-size:9.5pt}.r{text-align:right}"
-    + ".fuss{margin-top:22px;font-size:7.8pt;color:#6b7280;border-top:1px solid #E1E5E2;padding-top:7px}a{color:#1e4e79}";
-  const inhalt = "<div class=\"kopf\"><div class=\"kl\">" + logo + (firma ? "<div class=\"firma\">" + firma + "</div>" : "") + "</div><div class=\"stand\">" + L("Spieler-Exposé", "Player exposé") + "<br>" + L("Stand: ", "As of: ") + esc(heute) + "</div></div>"
-    + "<div class=\"person\"><div class=\"ini\">" + esc(ini) + "</div><div><h1>" + esc(name) + "</h1>" + (z1 ? "<div class=\"zeile\">" + esc(z1) + "</div>" : "") + (z2 ? "<div class=\"zeile\">" + esc(z2) + "</div>" : "") + "</div></div>"
-    + (kacheln ? "<div class=\"kacheln\">" + kacheln + "</div>" : "")
-    + (st.length ? "<h3>" + L("Stärken", "Strengths") + "</h3><div>" + esc(st.join(" · ")) + "</div>" : "")
-    + (saison ? "<h3>" + L("Aktuelle Saison", "Current season") + "</h3><table>" + saison + "</table>" : "")
-    + (letzte ? "<h3>" + L("Letzte Spiele", "Recent matches") + "</h3><div>" + letzte + "</div>" : "")
-    + (s.video_url && /^https?:\/\//i.test(s.video_url) ? "<h3>Video</h3><div><a href=\"" + esc(s.video_url) + "\">" + esc(s.video_url) + "</a></div>" : "")
-    + "<div class=\"fuss\">" + (s.quelle === "frei" ? L("Alle Angaben zum Spieler stammen vom Anbieter. ", "All details about the player come from the provider. ") : L("Daten: TransferWire (TW Score, Marktwert-Schätzung, Spielnoten 0–100), Spieldaten von Sportmonks bzw. API-Football. ", "Data: TransferWire (TW Score, market value estimate, match ratings 0–100), match data from Sportmonks or API-Football. ")) + L("Erstellt mit TransferWire am ", "Created with TransferWire on ") + esc(heute) + L(". Alle Angaben ohne Gewähr.", ". All information without guarantee.") + "</div>";
-  return "<!DOCTYPE html><html lang=\"" + (en ? "en" : "de") + "\"><head><title>" + esc(L("Exposé ", "Exposé ") + name) + "</title><style>" + css + "</style></head><body>" + inhalt + "</body></html>";
-}
-async function wsExpose(sp) {
-  const en = wsEn(); const L = (de, x) => (en ? x : de);
-  wsMeldung(L("Exposé wird erstellt …", "Creating exposé …"));
-  try {
-    const r = await wsRuf(WS.account, "expose", { id: sp.id });
-    if (!(r && r.ok)) throw new Error(wsGrund(r && r.grund, r));
-    const s = r.spieler || {}; const html = wsExposeHtml(s, r.einstellung || {}, en);
-    let konto = {}; try { konto = JSON.parse(localStorage.getItem("tw_account") || "{}") || {}; } catch (e) { konto = {}; }
-    const code = konto.zugangscode || konto.code || "", email = konto.email || "";
-    const datei = ["TransferWire", L("Expose", "Expose"), s.name || "Spieler", new Date().toISOString().slice(0, 10)].join("_").replace(/[^A-Za-z0-9ÄÖÜäöüßÀ-ÿ_.-]+/g, "-") + ".pdf";
-    const pr = await fetch("/api/vs-pdf", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: code, email: email, lang: en ? "en" : "de", datei: datei, html: html }) });
-    const typ = pr.headers.get("content-type") || "";
-    if (!pr.ok || typ.indexOf("application/pdf") < 0) { let f = ""; try { f = ((await pr.json()) || {}).fehler || ""; } catch (e) { } throw new Error(f || ("HTTP " + pr.status)); }
-    const blob = await pr.blob(); if (!blob || blob.size < 1000) throw new Error("leer");
-    const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = datei; a.rel = "noopener"; a.style.display = "none";
-    document.body.appendChild(a); a.click(); setTimeout(() => { try { URL.revokeObjectURL(url); a.remove(); } catch (e) { } }, 10000);
-    wsMeldung(L("Exposé heruntergeladen.", "Exposé downloaded."));
-    return { ok: true, datei: datei, groesse: blob.size };
-  } catch (e) {
-    wsMeldung(L("Das Exposé konnte nicht erstellt werden. ", "The exposé could not be created. ") + (e && e.message && e.message.length < 140 ? e.message : ""));
-    return { ok: false, fehler: String(e && e.message) };
-  }
-}
-window.twWsExpose = function (id) { const sp = WS.daten && (WS.daten.spieler || []).find(x => String(x.id) === String(id)); return sp ? wsExpose(sp) : Promise.resolve({ ok: false, fehler: "nicht_gefunden" }); };
-function WsEinstellung({ account, d }) {
-  const h = React.createElement; const en = wsEn(); const L = (de, x) => (en ? x : de);
-  const e0 = d.einstellung || {};
-  const [firma, setFirma] = React.useState(e0.firma || ""); const [kontakt, setKontakt] = React.useState(e0.kontakt || "");
-  const [logo, setLogo] = React.useState(undefined); const [hatLogo, setHatLogo] = React.useState(!!e0.logo);
-  const [busy, setBusy] = React.useState(false); const [ok, setOk] = React.useState(""); const [fehler, setFehler] = React.useState("");
-  const datei = ev => { const f = ev.target.files && ev.target.files[0]; ev.target.value = ""; if (!f) return; if (!/^image\/(png|jpeg|webp)$/.test(f.type) || f.size > 400 * 1024) { setFehler(wsGrund("logo")); return; } const rd = new FileReader(); rd.onload = () => { setLogo(String(rd.result || "")); setFehler(""); setOk(""); }; rd.readAsDataURL(f); };
-  const speichern = () => {
-    const b = { firma: firma.trim(), kontakt: kontakt.trim() }; if (logo) b.logo = logo; else if (logo === null) b.logo = null;
-    setBusy(true); setOk(""); setFehler("");
-    wsRuf(account, "einstellung", b).then(r => { setBusy(false); if (r && r.ok) { setOk(L("Gespeichert – gilt für alle neuen Exposés.", "Saved – applies to all new exposés.")); const mitLogo = logo ? true : (logo === null ? false : hatLogo); setHatLogo(mitLogo); setLogo(undefined); if (WS.daten) WS.daten = Object.assign({}, WS.daten, { einstellung: { firma: b.firma, kontakt: b.kontakt, logo: mitLogo } }); } else setFehler(wsGrund(r && r.grund, r)); });
-  };
-  return h("div", { className: "ws2-einst" },
-    h("p", { className: "ws2-sub" }, L("Erscheint oben im Exposé-PDF.", "Shown at the top of the exposé PDF.")),
-    h("label", { className: "nz-feld" }, L("Firma / Agentur", "Company / agency"), h("input", { value: firma, maxLength: 120, onChange: e => setFirma(e.target.value), "data-ws-einst": "firma" })),
-    h("label", { className: "nz-feld" }, L("Kontakt (Name, Telefon oder E-Mail)", "Contact (name, phone or e-mail)"), h("input", { value: kontakt, maxLength: 240, onChange: e => setKontakt(e.target.value), "data-ws-einst": "kontakt" })),
-    logo ? h("img", { className: "ws2-logo-vorschau", src: logo, alt: L("Logo-Vorschau", "Logo preview") }) : h("p", { className: "ws2-sub" }, hatLogo && logo !== null ? L("Logo hinterlegt.", "Logo saved.") : L("Noch kein Logo.", "No logo yet.")),
-    h("div", { className: "ws2-chips" },
-      h("label", { className: "ws2-btn klein", style: { cursor: "pointer" } }, L("Logo wählen (PNG, JPG, WebP, bis 400 KB)", "Choose logo (PNG, JPG, WebP, up to 400 KB)"), h("input", { type: "file", accept: "image/png,image/jpeg,image/webp", onChange: datei, className: "ws2-sr" })),
-      (hatLogo || logo) ? h("button", { type: "button", className: "ws2-btn klein leise", onClick: () => { setLogo(null); setOk(""); } }, L("Logo entfernen", "Remove logo")) : null),
-    h("div", null, h("button", { type: "button", className: "ws2-btn gold", disabled: busy, onClick: speichern, "data-ws-einst-speichern": "1" }, busy ? L("Speichert …", "Saving …") : L("Speichern", "Save"))),
-    ok ? h("p", { className: "ws2-ok", role: "status" }, ok) : null, fehler ? h("p", { className: "ws2-fehler", role: "alert" }, fehler) : null);
-}
-function WsAside({ d, liste, account, wr, setWochenreport }) {
-  const h = React.createElement; const en = wsEn(); const L = (de, x) => (en ? x : de);
-  const fristen = liste.filter(s => s.vertrag && s.monate != null && Number(s.monate) <= 12).sort((a, b) => String(a.vertrag).localeCompare(String(b.vertrag)));
-  const fenster = (d.fristen && d.fristen.fenster) || [];
-  const team = d.team || {};
-  const LAND = { England: ["England", "England"], Deutschland: ["Deutschland", "Germany"] };
-  const kasten = (titel, kinder, key) => h("section", { key: key, className: "ws2-kasten", "data-ws-kasten": key }, h("h3", null, titel), kinder);
-  return h("aside", { className: "ws2-aside" },
-    kasten(L("Fristen", "Deadlines"), [
-      h("div", { key: "lv", className: "ws2-label" }, L("Vertragsenden (12 Monate)", "Contract ends (12 months)")),
-      fristen.length ? h("div", { key: "v" }, fristen.slice(0, 10).map(s => h("div", { key: s.id, className: "ws2-frist" }, h("span", null, s.name), h("b", { className: Number(s.monate) <= 6 ? "bald" : "" }, wsDatum(s.vertrag))))) : h("p", { key: "v0", className: "ws2-sub" }, L("Kein Vertrag deiner Spieler endet in den nächsten 12 Monaten.", "No contract of your players ends within the next 12 months.")),
-      h("div", { key: "lf", className: "ws2-label" }, L("Transferfenster", "Transfer windows")),
-      fenster.length ? h("div", { key: "f" }, fenster.map(f => h("div", { key: f.land + f.von, className: "ws2-frist" }, h("span", null, (LAND[f.land] ? LAND[f.land][en ? 1 : 0] : f.land) + (f.art === "winter" ? L(", Winter", ", winter") : f.art === "sommer" ? L(", Sommer", ", summer") : "")), h("b", null, wsDatum(f.von) + " – " + wsDatum(f.bis)), !f.bestaetigt ? h("small", null, L("gemeldet, noch nicht offiziell bestätigt", "reported, not yet officially confirmed")) : null))) : h("p", { key: "f0", className: "ws2-sub" }, L("Für die nächsten 120 Tage ist noch kein Fenster eingetragen.", "No window has been entered for the next 120 days yet."))], "fristen"),
-    kasten(L("Wochenbericht", "Weekly report"), [h("p", { key: "t", className: "ws2-sub", style: { marginBottom: 8 } }, L("Mit eigenem Abschnitt „Deine Spieler“: Form, Minuten, neue passende Vereine und Fristen.", "With its own section “Your players”: form, minutes, new matching clubs and deadlines.")), h(TwWochenreportSchalter, { key: "s", wr: wr, onChange: setWochenreport, angemeldet: !!(account && account.email) })], "wochenbericht"),
-    kasten(L("Benachrichtigungen", "Notifications"), h("p", { className: "ws2-sub" }, L("Alles startet ohne Benachrichtigung. Mit der Glocke an einem Spieler, einer Karte oder einem Angebot bekommst du eine E-Mail, sobald sich etwas ändert (Einsatzzeit, Form, Verletzung, Vertrag, neue passende Vereine, Meldungen).", "Everything starts without notification. With the bell on a player, card or offer you get an e-mail as soon as something changes (playing time, form, injury, contract, new matching clubs, reports).")), "glocken"),
-    team.ist_team ? kasten("Team", h("div", null, (team.mitglieder || []).map(m => h("div", { key: m.email, className: "ws2-frist" }, h("span", null, (m.name || "") + (m.ich ? L(" (du)", " (you)") : "")), h("b", { style: { fontWeight: 600, color: "var(--t3)" } }, m.eigner ? L("Inhaber", "Owner") : L("Mitglied", "Member")))), h("p", { className: "ws2-sub", style: { marginTop: 8 } }, L("Alle sehen dieselben Spieler, Zuständigkeiten und Kommentare.", "Everyone sees the same players, responsibilities and comments."))), "team") : null,
-    kasten(L("Exposé-Einstellungen", "Exposé settings"), h(WsEinstellung, { account: account, d: d }), "expose"));
-}
-function WsSpielerVue({ account, openPlayer, setView, watch, onUpdateWatch, profiles, wr, setWochenreport }) {
-  const h = React.createElement; const en = wsEn(); const L = (de, x) => (en ? x : de);
-  const d = useWs(account);
-  const [filter, setFilter] = React.useState("alle"); const [dialog, setDialog] = React.useState(null);
-  React.useEffect(() => { if (WS.daten) wsLaden(account, true); }, []);
-  const kopf = h(WsKopf, { view: "ws_spieler", onNav: setView, watch: watch, profiles: profiles });
-  if (!d) return h("div", { className: "ws2", "data-ws-seite": "spieler" }, kopf, h("div", { className: "ws2-leer" }, WS.fehler ? [h("span", { key: "f", className: "ws2-fehler" }, wsGrund(WS.fehler)), h("div", { key: "b", className: "ws2-knoepfe" }, h("button", { type: "button", className: "ws2-btn", onClick: () => { WS.fehler = ""; wsLaden(account, true); wsNeu(); } }, L("Erneut laden", "Reload")))] : L("Dein Workspace wird geladen …", "Loading your workspace …")));
-  const liste = d.spieler || [];
-  const nV = liste.filter(s => s.status === "vertrag").length, nSc = liste.length - nV;
-  const sicht = liste.filter(s => filter === "alle" || (filter === "vertrag" ? s.status === "vertrag" : s.status !== "vertrag"));
-  const lim = d.limit == null ? null : Number(d.limit); const voll = lim != null && liste.length >= lim;
-  const zaehler = lim == null ? L(liste.length + " Spieler · unbegrenzt (Enterprise)", liste.length + " players · unlimited (Enterprise)") : L(liste.length + " von " + lim + " Spielern", liste.length + " of " + lim + " players");
-  return h("div", { className: "ws2", "data-ws-seite": "spieler" }, kopf,
-    h("div", { className: "ws2-raster" },
-      h("div", { className: "ws2-haupt" },
-        h(WsSuche, { account: account, voll: voll, lim: lim, onAnlegen: () => setDialog({ art: "anlegen" }) }),
-        h("div", { className: "ws2-filterzeile" },
-          h("div", { className: "ws2-filter" }, [["alle", L("Alle", "All"), liste.length], ["vertrag", L("Unter Vertrag", "Under contract"), nV], ["scouting", L("Im Scouting", "Scouting"), nSc]].map(([k, lab, n]) => h("button", { key: k, type: "button", className: "ws2-pille" + (filter === k ? " an" : ""), "aria-pressed": filter === k, onClick: () => setFilter(k), "data-ws-filter": k }, h("span", null, lab), h("span", { className: "ws2-pille-n" }, n)))),
-          h("span", { className: "ws2-zaehler" + (voll ? " voll" : ""), "data-ws-zaehler": "1" }, zaehler)),
-        sicht.length ? h("div", { className: "ws2-karten" }, sicht.map(sp => h(WsSpielerKarte, { key: sp.id, sp: sp, d: d, account: account, openPlayer: openPlayer, setView: setView, watch: watch, onUpdateWatch: onUpdateWatch, onBearbeiten: () => setDialog({ art: "aendern", sp: sp }) })))
-          : h("div", { className: "ws2-leer" }, liste.length ? L("In diesem Filter ist kein Spieler.", "No player in this filter.") : [
-            h("h3", { key: "t" }, L("Lege deine Spieler an", "Add your players")),
-            h("span", { key: "x" }, L("Hier führst du die Spieler, die du betreust („Unter Vertrag“) oder intensiv beobachtest („Im Scouting“) – aus der Datenbank über die Suche oben oder als eigenes Profil. Für jeden Spieler siehst du Form, Einsatzzeit, Vertrag und passende Vereine aus „Verein sucht“, erstellst ein Exposé oder bietest ihn im Spieler-Markt an.", "Here you keep the players you represent (“under contract”) or scout closely (“scouting”) – from the database via the search above or as your own profile. For every player you see form, playing time, contract and matching clubs from “Club seeks”, create an exposé or offer him on the Player market.")),
-            h("div", { key: "b", className: "ws2-knoepfe" }, h("button", { type: "button", className: "ws2-btn gold", onClick: () => setDialog({ art: "anlegen" }) }, L("Eigenen Spieler anlegen", "Create own player")), h("button", { type: "button", className: "ws2-btn", onClick: () => setView("players") }, L("Spieler in der Datenbank entdecken", "Discover players in the database")))])),
-      h(WsAside, { d: d, liste: liste, account: account, wr: wr, setWochenreport: setWochenreport })),
-    dialog ? h(WsSpielerDialog, { account: account, art: dialog.art, sp: dialog.sp, schliessen: () => setDialog(null) }) : null);
-}
-function WsBeobKarten({ watch, onUpdateWatch, onNav }) {
-  const h = React.createElement; const en = wsEn(); const L = (de, x) => (en ? x : de);
-  const liste = (WS.daten && WS.daten.beob && WS.daten.beob.vs) || [];
-  if (!WS.daten) return h("div", { className: "ws2-leer" }, L("Wird geladen …", "Loading …"));
-  if (!liste.length) return h("div", { className: "ws2-leer" }, L("Noch keine Karten gemerkt – merke dir in „Verein sucht“ eine Karte, dann erscheint sie hier.", "No cards saved yet – save a card in “Club seeks” and it appears here."), h("div", { className: "ws2-knoepfe" }, h("button", { type: "button", className: "ws2-btn", onClick: () => onNav("gesucht") }, L("Zu „Verein sucht“", "Go to “Club seeks”"))));
-  return h("div", { className: "ws2-liste", "data-ws-liste": "karten" }, liste.map(k => { const st = wsStufe(k.stufe); return h("div", { key: k.karte, className: "ws2-zeile" },
-    h(ClubLogo, { name: k.team, size: 26 }),
-    h("div", { className: "ws2-zeile-t" }, h("b", null, (k.team || "") + (k.titel ? " · " + k.titel : "")), h("span", null, [k.liga, k.quellen ? k.quellen + L(" Medienberichte", " media reports") : "", k.status && k.status !== "aktiv" ? k.status : ""].filter(Boolean).join(" · "))),
-    h("div", { className: "ws2-zeile-k" }, k.stufe ? h("span", { className: "ws2-stufe " + st[0] }, st[1] + (k.wahr != null ? " · " + Math.round(Number(k.wahr)) + " %" : "")) : null,
-      h(WsGlocke, { art: "vs_karte", wert: k.karte, watch: watch, onUpdateWatch: onUpdateWatch, klein: true }),
-      h("button", { type: "button", className: "ws2-btn klein", onClick: () => onNav("gesucht") }, L("Öffnen", "Open")))); }));
-}
-function WsBeobAngebote({ watch, onUpdateWatch, onNav }) {
-  const h = React.createElement; const en = wsEn(); const L = (de, x) => (en ? x : de);
-  const [busy, setBusy] = React.useState(null);
-  const liste = (WS.daten && WS.daten.beob && WS.daten.beob.angebote) || [];
-  if (!WS.daten) return h("div", { className: "ws2-leer" }, L("Wird geladen …", "Loading …"));
-  if (!liste.length) return h("div", { className: "ws2-leer" }, L("Noch keine Angebote beobachtet – öffne ein Angebot im Spieler-Markt und tippe auf „Beobachten“.", "No offers watched yet – open an offer on the Player market and tap “Watch”."), h("div", { className: "ws2-knoepfe" }, h("button", { type: "button", className: "ws2-btn", onClick: () => onNav("nz_markt") }, L("Zum Spieler-Markt", "Go to Player market"))));
-  const weg = a => { setBusy(a.id); wsRuf(WS.account, "beob", { art: "angebot", ref: String(a.id), an: false }).then(r => { setBusy(null); if (r && r.ok) { wsMeldung(L("Nicht mehr beobachtet.", "No longer watched.")); wsLaden(null, true); } else wsMeldung(wsGrund(r && r.grund, r)); }); };
-  return h("div", { className: "ws2-liste", "data-ws-liste": "angebote" }, liste.map(a => { const sp = a.spieler || {}; const st = typeof nz6Status === "function" ? nz6Status({ status: a.status, laeuft_bis: a.bis }) : [a.status || "", "", ""]; return h("div", { key: a.id, className: "ws2-zeile" },
-    h(DbFoto, { x: { name: sp.name || "?", photo: sp.bild || sp.foto || "" }, size: 32 }),
-    h("div", { className: "ws2-zeile-t" }, h("b", null, sp.name || (a.titel || L("Angebot", "Offer") + " #" + a.id)), h("span", null, [typeof nz6Art === "function" ? nz6Art(a.art) : a.art, a.position && typeof nz6Pos === "function" ? nz6Pos(a.position) : "", sp.team || "", a.bis ? L("läuft bis ", "until ") + wsDatum(a.bis) : ""].filter(Boolean).join(" · ") + (a.sichtbar === false ? L(" · nicht mehr sichtbar", " · no longer visible") : ""))),
-    h("div", { className: "ws2-zeile-k" }, h("span", { className: "ws2-chip" }, st[0]),
-      h(WsGlocke, { art: "angebot", wert: String(a.id), watch: watch, onUpdateWatch: onUpdateWatch, klein: true }),
-      a.sichtbar !== false ? h("button", { type: "button", className: "ws2-btn klein", onClick: () => nz6Oeffnen(a.id, onNav) }, L("Öffnen", "Open")) : null,
-      h("button", { type: "button", className: "ws2-btn klein leise", disabled: busy === a.id, onClick: () => weg(a) }, L("Nicht mehr beobachten", "Stop watching")))); }));
-}
-function WsMeldungen({ liste, onNav }) {
-  const h = React.createElement; const en = wsEn(); const L = (de, x) => (en ? x : de);
-  const l = (liste || []).slice(0, 30);
-  if (!l.length) return h("div", { className: "ws2-leer" }, L("Noch keine Meldungen zu deinen Beobachtungen.", "No reports about what you follow yet."));
-  return h("div", null, h("div", { className: "ws2-liste" }, l.map((n, i) => { const t = typeof zeitVonItem === "function" ? zeitVonItem(n) : 0; return h("div", { key: n.id || i, className: "ws2-meldung" }, h("small", null, t ? wsDatum(new Date(t).toISOString()) : ""), h("span", null, (en && n.headline_en) ? n.headline_en : (n.headline || ""))); })),
-    h("div", { style: { marginTop: 10 } }, h("button", { type: "button", className: "ws2-btn", onClick: () => onNav("watch") }, L("Alle Meldungen mit Details", "All reports with details"))));
-}
-function WsAngebotBeob({ account, a }) {
-  const d = useWs(account);
-  const h = React.createElement; const en = wsEn();
-  const [busy, setBusy] = React.useState(false);
-  if (!a || !a.id || !twIstPremium()) return null;
-  const id = String(a.id);
-  const drin = !!(d && d.beob && (d.beob.angebote || []).some(x => String(x.id) === id));
-  return h("button", { type: "button", className: "nz-btn klein ws2-nzbeob" + (drin ? " an" : ""), "aria-pressed": drin, disabled: busy || !d, "data-ws-beob": id,
-    onClick: () => { setBusy(true); wsRuf(account, "beob", { art: "angebot", ref: id, titel: (a.spieler && a.spieler.name) || "", an: !drin }).then(r => { setBusy(false); if (r && r.ok) { wsMeldung(!drin ? (en ? "Offer watched – you find it under Workspace > Watching." : "Angebot beobachtet – du findest es unter Workspace > Beobachtet.") : (en ? "No longer watched." : "Nicht mehr beobachtet.")); wsLaden(account, true); } else wsMeldung(wsGrund(r && r.grund, r)); }); } },
-    drin ? (en ? "Watching" : "Beobachtet") : (en ? "Watch" : "Beobachten"));
-}
-
 function MerkSpielerZeile({ item, news, onOpen, onRemove, onAlert, onVergleich, onScout, imScout, imVgl, note, onNote, mobil }) {
   const h = React.createElement; const en = LANG === "en";
   const [d, setD] = useState(null);
@@ -10148,13 +9590,12 @@ function MerkSpielerZeile({ item, news, onOpen, onRemove, onAlert, onVergleich, 
   const treffer = (news || []).filter(n => ((n.player || "") + " " + (n.headline || "")).toLowerCase().indexOf(String(item.w).toLowerCase()) >= 0);
   const neu = treffer.filter(n => { const t = zeitVonItem(n); return t && Date.now() - t <= 7 * 86400000; }).length;
   const letzteMeldung = treffer.length ? Math.max.apply(null, treffer.map(zeitVonItem)) : 0;
-  const alertAn = wsGlockeIst(item.t || "spieler", item.w);   // Workspace 2.0: Glocke je Eintrag (Start: aus)
+  const alertAn = item.alert !== false;
   const knopf = (lab, fn, on, key) => h("button", { key: key, title: lab, onClick: e => { e.stopPropagation(); fn(); }, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, padding: "5px 9px", borderRadius: 8, border: "1px solid " + (on ? "var(--gold-rand)" : HAIR), background: on ? "var(--gold-tint)" : "#fff", color: on ? "var(--gold-text)" : "var(--t2)", whiteSpace: "nowrap" } }, lab);
   const aktionen = h("div", { style: { display: "flex", gap: 5, flexWrap: "wrap" } },
     knopf(en ? "Open profile" : "Profil \u00f6ffnen", () => d && d.ok && onOpen(d.pid, item.w, d.team), false, "o"),
     knopf(note ? (en ? "Edit note" : "Notiz bearbeiten") : (en ? "Add note" : "Notiz hinzuf\u00fcgen"), () => onNote(item), !!note, "n"),
-    knopf(alertAn ? (en ? "Notification on" : "Benachrichtigung an") : (en ? "Notification off" : "Benachrichtigung aus"), () => onAlert(item), alertAn, "a"),
-    wsMeineKnopf(d, item, knopf),
+    knopf(alertAn ? (en ? "Alert on" : "Alert an") : (en ? "Alert off" : "Alert aus"), () => onAlert(item), alertAn, "a"),
     knopf(imScout ? (en ? "On scouting list" : "Auf Scouting-Liste") : (en ? "Add to scouting list" : "Zu Scouting-Liste hinzuf\u00fcgen"), () => d && d.ok && onScout({ pid: d.pid, name: item.w, team: d.team }), imScout, "s"),
     knopf(imVgl ? (en ? "In comparison" : "Im Vergleich") : (en ? "Compare" : "Vergleichen"), () => d && d.ok && onVergleich({ pid: d.pid, name: item.w, team: d.team, pos: d.pos, age: d.age, photo: d.photo }), imVgl, "v"),
     knopf(en ? "Remove" : "Entfernen", () => onRemove(item), false, "r"));
@@ -10179,12 +9620,11 @@ function MerkSpielerZeile({ item, news, onOpen, onRemove, onAlert, onVergleich, 
       h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED } }, stand)),
     h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginTop: 6 } }, note ? h("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t2)", fontStyle: "italic" } }, "\u270E " + note) : h("span"), aktionen));
 }
-function MerkVue({ watch, watchList, profiles, onOpen, onRemove, onUpdateWatch, onNav, onProfilSheet, onMatchProfil, vergleich, setVergleich, applySearch, nur }) {   // Workspace 2.0: nur = "gemerkt" | "beob"
+function MerkVue({ watch, watchList, profiles, onOpen, onRemove, onUpdateWatch, onNav, onProfilSheet, onMatchProfil, vergleich, setVergleich, applySearch }) {
   const h = React.createElement; const en = LANG === "en";
-  useWs(); React.useEffect(() => { if (nur === "beob" && WS.daten) wsLaden(null, true); }, [nur]);
   const items = (watch && watch.items) || [];
   const spieler = items.filter(x => x.t === "spieler"), vereine = items.filter(x => x.t === "verein"), positionen = items.filter(x => x.t === "position");
-  const [tab, setTab] = useState(nur === "beob" ? "karten" : "spieler");
+  const [tab, setTab] = useState("spieler");
   const [notes, setNotes] = useState(() => mkLese(MK_NOTES_KEY, {}));
   const [scout, setScout] = useState(() => mkLese("tw_scoutlist", []));
   const [suchen, setSuchen] = useState(() => mkGespeicherteSuchen());
@@ -10193,7 +9633,7 @@ function MerkVue({ watch, watchList, profiles, onOpen, onRemove, onUpdateWatch, 
   const tabs = [["spieler", en ? "Players" : "Spieler", spieler.length], ["vereine", en ? "Clubs" : "Vereine", vereine.length], ["meldungen", en ? "Reports" : "Meldungen", (watchList || []).length], ["profile", en ? "Player profiles" : "Spielerprofile", (profiles || []).length], ["suchen", en ? "Saved searches" : "Gespeicherte Suchen", suchen.length]];
   const leer = items.length === 0 && (profiles || []).length === 0;
   const onNote = it => { const k = it.t + ":" + it.w; const n = window.prompt(en ? "Note for " + it.w + ":" : "Notiz zu " + it.w + ":", notes[k] || ""); if (n === null) return; const neu = Object.assign({}, notes); if (n.trim()) neu[k] = n.trim(); else delete neu[k]; setNotes(neu); mkSchreib(MK_NOTES_KEY, neu); };
-  const onAlert = it => wsGlockeSetzen(it.t, it.w, !wsGlockeIst(it.t, it.w), { watch: watch, onUpdateWatch: onUpdateWatch });   // Workspace 2.0: Glocke je Eintrag (Start: aus)
+  const onAlert = it => onUpdateWatch(Object.assign({}, watch, { items: items.map(x => x.t === it.t && x.w === it.w ? Object.assign({}, x, { alert: x.alert === false }) : x) }));
   const onScout = p => { const n = scout.some(s => s.pid === p.pid) ? scout.filter(s => s.pid !== p.pid) : [...scout, p]; setScout(n); mkSchreib("tw_scoutlist", n); };
   const onVergleich = p => setVergleich(v => v.some(y => y.pid === p.pid) ? v.filter(y => y.pid !== p.pid) : (v.length >= 3 ? v : [...v, p]));
   const btn = (lab, fn, primary, key) => h("button", { key: key, onClick: fn, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 16px", borderRadius: 10, border: primary ? "none" : "1px solid " + HAIR, background: primary ? "var(--gold)" : "#fff", color: primary ? "var(--gold-schrift)" : INK, whiteSpace: "nowrap" } }, lab);
@@ -10211,24 +9651,14 @@ function MerkVue({ watch, watchList, profiles, onOpen, onRemove, onUpdateWatch, 
   const kopfZeile = h("div", { className: "tw-mkgrid tw-mkhead" }, [en ? "Player" : "Spieler", en ? "Club · position" : "Verein · Position", "TW Performance Score", en ? "New reports" : "Neue Meldungen", en ? "Contract end" : "Vertragsende", en ? "Last update" : "Letzte Aktualisierung"].map((x, i) => h("span", { key: i }, x)));
   const hinweis = txt => h("div", { style: { background: "var(--karte)", border: "1px dashed " + HAIR, borderRadius: 12, padding: "18px 16px", fontFamily: FONT_BODY, fontSize: 13, color: MUTED } }, txt);
   const spielerTab = spieler.length ? h("div", { style: { display: "flex", flexDirection: "column", gap: mobil ? 8 : 0, background: mobil ? "none" : "#fff", border: mobil ? "none" : "1px solid " + HAIR, borderRadius: 14, overflow: "hidden" } }, mobil ? null : kopfZeile, spieler.map(it => h(MerkSpielerZeile, { key: it.w, item: it, news: watchList, onOpen: onOpen, onRemove: it2 => onRemove(it2.t, it2.w), onAlert: onAlert, onVergleich: onVergleich, onScout: onScout, imScout: false, imVgl: false, note: notes["spieler:" + it.w] || "", onNote: onNote, mobil: mobil }))) : hinweis(en ? "No players on the watchlist yet \u2014 use \u201cWatch\u201d on a player or a report." : "Noch keine Spieler auf der Merkliste \u2014 nutze \u201eBeobachten\u201c bei einem Spieler oder einer Meldung.");
-  const vereinZeile = it => { const tr = (watchList || []).filter(n => ((n.toClub || "") + " " + (n.fromClub || "") + " " + (n.headline || "")).toLowerCase().indexOf(String(it.w).toLowerCase()) >= 0); const neu = tr.filter(n => { const t = zeitVonItem(n); return t && Date.now() - t <= 7 * 86400000; }).length; const letzte = tr.length ? Math.max.apply(null, tr.map(zeitVonItem)) : 0; const alertAn = wsGlockeIst(it.t, it.w);
+  const vereinZeile = it => { const tr = (watchList || []).filter(n => ((n.toClub || "") + " " + (n.fromClub || "") + " " + (n.headline || "")).toLowerCase().indexOf(String(it.w).toLowerCase()) >= 0); const neu = tr.filter(n => { const t = zeitVonItem(n); return t && Date.now() - t <= 7 * 86400000; }).length; const letzte = tr.length ? Math.max.apply(null, tr.map(zeitVonItem)) : 0; const alertAn = it.alert !== false;
     return h("div", { key: it.w, className: "tw-mkrow" }, h("div", { style: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" } }, h(ClubLogo, { name: it.w, size: 26 }), h("span", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, flex: 1, minWidth: 120 } }, clubName(it.w)), h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: neu ? "var(--gold-text)" : "var(--t2)", fontWeight: neu ? 800 : 500 } }, neu ? neu + (en ? " new reports" : " neue Meldungen") : tr.length + (en ? " reports" : " Meldungen")), h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED } }, letzte ? mkRel(new Date(letzte).toISOString()) : "\u2013"),
-      h("span", { style: { display: "flex", gap: 5 } }, h("button", { onClick: () => onAlert(it), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, padding: "5px 9px", borderRadius: 8, border: "1px solid " + (alertAn ? "var(--gold-rand)" : HAIR), background: alertAn ? "var(--gold-tint)" : "#fff", color: alertAn ? "var(--gold-text)" : "var(--t2)" } }, alertAn ? (en ? "Notification on" : "Benachrichtigung an") : (en ? "Notification off" : "Benachrichtigung aus")), h("button", { onClick: () => onRemove(it.t, it.w), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, padding: "5px 9px", borderRadius: 8, border: "1px solid " + HAIR, background: "var(--karte)", color: "var(--t2)" } }, en ? "Remove" : "Entfernen")))); };
-  const vereineTab = vereine.length || positionen.length ? h("div", { style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, overflow: "hidden" } }, vereine.map(vereinZeile), positionen.map(it => h("div", { key: "pos" + it.w, className: "tw-mkrow" }, h("div", { style: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: .8, textTransform: "uppercase", color: MUTED } }, "Position"), h("span", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, flex: 1 } }, it.w), h(WsGlocke, { art: it.t, wert: it.w, watch: watch, onUpdateWatch: onUpdateWatch, klein: true }), h("button", { onClick: () => onRemove(it.t, it.w), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, padding: "5px 9px", borderRadius: 8, border: "1px solid " + HAIR, background: "var(--karte)", color: "var(--t2)" } }, en ? "Remove" : "Entfernen"))))) : hinweis(en ? "No clubs or positions watched yet \u2014 use \u201cWatch club\u201d in the matching or the transfer feed." : "Noch keine Vereine oder Positionen beobachtet \u2014 nutze \u201eVerein beobachten\u201c im Matching oder bei Meldungen.");
+      h("span", { style: { display: "flex", gap: 5 } }, h("button", { onClick: () => onAlert(it), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, padding: "5px 9px", borderRadius: 8, border: "1px solid " + (alertAn ? "var(--gold-rand)" : HAIR), background: alertAn ? "var(--gold-tint)" : "#fff", color: alertAn ? "var(--gold-text)" : "var(--t2)" } }, alertAn ? (en ? "Alert on" : "Alert an") : (en ? "Alert off" : "Alert aus")), h("button", { onClick: () => onRemove(it.t, it.w), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, padding: "5px 9px", borderRadius: 8, border: "1px solid " + HAIR, background: "var(--karte)", color: "var(--t2)" } }, en ? "Remove" : "Entfernen")))); };
+  const vereineTab = vereine.length || positionen.length ? h("div", { style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, overflow: "hidden" } }, vereine.map(vereinZeile), positionen.map(it => h("div", { key: "pos" + it.w, className: "tw-mkrow" }, h("div", { style: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: .8, textTransform: "uppercase", color: MUTED } }, "Position"), h("span", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, flex: 1 } }, it.w), h("button", { onClick: () => onRemove(it.t, it.w), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, padding: "5px 9px", borderRadius: 8, border: "1px solid " + HAIR, background: "var(--karte)", color: "var(--t2)" } }, en ? "Remove" : "Entfernen"))))) : hinweis(en ? "No clubs on the watchlist yet \u2014 use \u201cWatch club\u201d in the matching or the transfer feed." : "Noch keine Vereine auf der Merkliste \u2014 nutze \u201eVerein beobachten\u201c im Matching oder bei Meldungen.");
   const meldungenTab = h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 12, padding: "12px 16px" } }, (watchList || []).length ? (en ? (watchList.length + " reports match your watches \u2014 the list follows below.") : (watchList.length + " Meldungen passen zu deinen Beobachtungen \u2014 die Liste folgt unten.")) : t("watch_nohits"));
-  const profileTab = (profiles || []).length ? h("div", { style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, overflow: "hidden" } }, profiles.map(p => h("div", { key: p.raw, className: "tw-mkrow" }, h("div", { style: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, flex: 1, minWidth: 140 } }, p.n || p.l || p.p), h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED } }, [p.l || p.p, p.a1 && p.a2 ? (p.a1 === p.a2 ? p.a1 : p.a1 + "\u2013" + p.a2) + (en ? " yrs" : " Jahre") : "", p.s ? (en ? "strengths: " : "St\u00e4rken: ") + p.s : ""].filter(Boolean).join(" \u00b7 ")), h("span", { style: { display: "flex", gap: 5 } }, btn(en ? "Show matches" : "Matches ansehen", () => { onMatchProfil(p); onNav("gesucht"); }, true, "m"), h(WsGlocke, { art: "profil", wert: p.raw, watch: watch, onUpdateWatch: onUpdateWatch, klein: true }), btn(en ? "Remove" : "Entfernen", () => onRemove("profil", p.raw), false, "r")))))) : hinweis(en ? "No player profiles yet \u2014 create one under \u201cClub needs & player matching\u201d." : "Noch keine Spielerprofile \u2014 lege eines unter \u201eVereinsbedarf & Spieler-Matching\u201c an.");
+  const profileTab = (profiles || []).length ? h("div", { style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, overflow: "hidden" } }, profiles.map(p => h("div", { key: p.raw, className: "tw-mkrow" }, h("div", { style: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, flex: 1, minWidth: 140 } }, p.n || p.l || p.p), h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED } }, [p.l || p.p, p.a1 && p.a2 ? (p.a1 === p.a2 ? p.a1 : p.a1 + "\u2013" + p.a2) + (en ? " yrs" : " Jahre") : "", p.s ? (en ? "strengths: " : "St\u00e4rken: ") + p.s : ""].filter(Boolean).join(" \u00b7 ")), h("span", { style: { display: "flex", gap: 5 } }, btn(en ? "Show matches" : "Matches ansehen", () => { onMatchProfil(p); onNav("gesucht"); }, true, "m"), btn(en ? "Remove" : "Entfernen", () => onRemove("profil", p.raw), false, "r")))))) : hinweis(en ? "No player profiles yet \u2014 create one under \u201cClub needs & player matching\u201d." : "Noch keine Spielerprofile \u2014 lege eines unter \u201eVereinsbedarf & Spieler-Matching\u201c an.");
   const sucheLoeschen = s2 => { const key = s2.art === "feed" ? "tw_savedfilters" : s2.art === "transfers" ? "tw_gsearches" : s2.art === "vdb" ? "tw_vdbviews" : "tw_dbsearches"; /* Punkt 15 (08.10.2026) */ const arr = mkLese(key, []); arr.splice(s2.i, 1); mkSchreib(key, arr); setSuchen(mkGespeicherteSuchen()); };
   const suchenTab = suchen.length ? h("div", { style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, overflow: "hidden" } }, suchen.map((s2, i) => h("div", { key: s2.art + i, className: "tw-mkrow" }, h("div", { style: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: .8, textTransform: "uppercase", color: MUTED, minWidth: 130 } }, s2.lab), h("span", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, flex: 1 } }, "\u25CE " + (s2.n || (en ? "Untitled" : "Ohne Namen"))), h("span", { style: { display: "flex", gap: 5 } }, btn(en ? "Apply" : "Anwenden", () => applySearch(s2), true, "a"), btn(en ? "Delete" : "L\u00f6schen", () => sucheLoeschen(s2), false, "d")))))) : hinweis(en ? "No saved searches yet \u2014 save one in the newsfeed, the transfer terminal or the player database." : "Noch keine gespeicherten Suchen \u2014 speichere eine im Newsfeed, im Transferterminal oder in der Spieler-Datenbank.");
-  const tabLeiste = (liste, aktiv) => h("div", { className: "tw-mktabs", style: { display: "flex", gap: 6, marginBottom: 14, flexWrap: "wrap" } }, liste.map(([k, lab, n]) => h("button", { key: k, onClick: () => setTab(k), "data-ws-tab": k, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "8px 13px", borderRadius: 999, border: "1px solid " + (aktiv === k ? "var(--dunkel)" : HAIR), background: aktiv === k ? "var(--dunkel)" : "var(--karte)", color: aktiv === k ? "#fff" : INK, whiteSpace: "nowrap", flexShrink: 0, display: "inline-flex", alignItems: "center", gap: 6, minHeight: 36 } }, lab, h("span", { style: { fontFamily: FONT_DISPLAY, fontSize: 13, fontWeight: 700, color: aktiv === k ? "rgba(255,255,255,.75)" : MUTED } }, n))));   // Workspace 2.0
-  if (nur === "gemerkt") return h("div", { className: "tw-merk", "data-ws-seite": "gemerkt" }, h(WsKopf, { view: "watch", onNav: onNav, watch: watch, profiles: profiles }),
-    spieler.length ? h("div", { style: { marginBottom: 18 } }, spielerTab) : h("div", { className: "ws2-leer", style: { marginBottom: 18 } }, h("h3", null, en ? "No saved players yet" : "Noch keine Spieler gemerkt"), h("span", null, en ? "Use \u201cWatch\u201d on a player or a report to save him here. Players you represent or scout closely belong in \u201cMy players\u201d." : "Nutze \u201eBeobachten\u201c bei einem Spieler oder einer Meldung, um ihn hier zu merken. Spieler, die du betreust oder intensiv scoutest, geh\u00f6ren in \u201eMeine Spieler\u201c."), h("div", { className: "ws2-knoepfe" }, btn(en ? "Discover players" : "Spieler entdecken", () => onNav("players"), true, "p"), btn(en ? "My players" : "Meine Spieler", () => onNav("ws_spieler"), false, "m"))));
-  if (nur === "beob") {
-    const beob = (WS.daten && WS.daten.beob) || { vs: [], angebote: [] };
-    const bt = [["karten", en ? "Club seeks cards" : "Verein-sucht-Karten", (beob.vs || []).length], ["angebote", en ? "Player market offers" : "Spieler-Markt-Angebote", (beob.angebote || []).length], ["vereine", en ? "Clubs & positions" : "Vereine & Positionen", vereine.length + positionen.length], ["profile", en ? "Search profiles" : "Suchprofile", (profiles || []).length], ["suchen", en ? "Saved searches" : "Gespeicherte Suchen", suchen.length], ["meldungen", en ? "Reports" : "Meldungen", (watchList || []).length]];
-    const tb = bt.some(x => x[0] === tab) ? tab : "karten";
-    return h("div", { className: "tw-merk", "data-ws-seite": "beobachtet" }, h(WsKopf, { view: "ws_beob", onNav: onNav, watch: watch, profiles: profiles }), tabLeiste(bt, tb),
-      h("div", { style: { marginBottom: 18 } }, tb === "karten" ? h(WsBeobKarten, { watch: watch, onUpdateWatch: onUpdateWatch, onNav: onNav }) : tb === "angebote" ? h(WsBeobAngebote, { watch: watch, onUpdateWatch: onUpdateWatch, onNav: onNav }) : tb === "vereine" ? vereineTab : tb === "profile" ? profileTab : tb === "suchen" ? suchenTab : h(WsMeldungen, { liste: watchList, onNav: onNav })));
-  }
   return h("div", { className: "tw-merk" },
     h("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 30, lineHeight: "38px", margin: "0 0 6px", color: INK } }, en ? "Watchlist & alerts" : "Merkliste & Alerts"),
     h("p", { style: { fontFamily: FONT_BODY, fontSize: 14.5, lineHeight: 1.5, color: MUTED, margin: "0 0 16px", maxWidth: 760 } }, en ? "Track players, clubs and reports. Changes in form, contract, injuries and transfers are shown automatically." : "Verfolge Spieler, Vereine und Meldungen. \u00c4nderungen bei Form, Vertrag, Verletzungen und Transfers werden automatisch angezeigt."),
@@ -10237,7 +9667,7 @@ function MerkVue({ watch, watchList, profiles, onOpen, onRemove, onUpdateWatch, 
 }
 function MerkAside({ watch, onAlertDialog, onOpen }) {
   const h = React.createElement; const en = LANG === "en";
-  useWs(); const items = ((watch && watch.items) || []).filter(x => wsGlockeIst(x.t, x.w));   // Workspace 2.0: nur Einträge mit Glocke
+  const items = (watch && watch.items) || [];
   const aktiv = !!(watch && (watch.alerts || watch.digest));
   const stumm = items.filter(x => x.alert === false).length;
   const zuletzt = mkLese(MK_RECENT_KEY, []).slice(0, 6);
@@ -13745,12 +13175,12 @@ function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScou
   React.useEffect(() => { const f = () => setZusatz(TW_ZUSATZ.seiten.slice()); window.addEventListener("tw-zusatz", f); return () => window.removeEventListener("tw-zusatz", f); }, []);
   React.useEffect(() => { const f = () => setVsZahl(Number(window.VS_ZAHL) || 0); window.addEventListener("vs-zahl", f); if (VS_NEU && !(Number(window.VS_ZAHL) || 0)) { try { const a = JSON.parse(localStorage.getItem("tw_account") || "{}"); const code = a.zugangscode || a.code; if (code && a.email) fetch("/api/verein-sucht?was=liste&gruppe=TW&limit=1&code=" + encodeURIComponent(code) + "&email=" + encodeURIComponent(a.email)).then(r => r.ok ? r.json() : null).then(d => { if (d && d.meta && Array.isArray(d.meta.gruppen)) { const n = d.meta.gruppen.reduce((s, g) => s + (g.konkret != null ? (Number(g.konkret) || 0) : (Number(g.n) || 0)), 0); if (n > 0) { window.VS_ZAHL = n; setVsZahl(n); } } }).catch(() => {}); } catch (e) {} } return () => window.removeEventListener("vs-zahl", f); }, []);
   let feedBadge = 0, gesuchtBadge = 0; try { feedBadge = (Array.isArray(news) ? news : []).filter(n => Date.now() - new Date(n.published_at || n.created_at || n.createdAt || 0).getTime() < 864e5).length; gesuchtBadge = (VS_NEU && vsZahl) ? vsZahl : (Array.isArray(needsBySport) ? needsBySport.length : 0); } catch (e) {}
-  const aktiv = k => view === k || (k === "community" && view === "moderation") || (k === "talente" && (view === "listen" || view === "suche" || view === "nachwuchs" || view === "akquise")) || (k === "players" && (view === "spielervergleich" || view === "aehnlich"));
+  const aktiv = k => view === k || (k === "community" && view === "moderation") || (k === "talente" && (view === "listen" || view === "suche" || view === "nachwuchs")) || (k === "players" && (view === "spielervergleich" || view === "aehnlich"));
   const IK = { markt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21V12h6v9"/></svg>', community: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.2L4 21l1.8-5.4A8 8 0 1 1 21 12z"/></svg>', workspace: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 20V10"/></svg>', ki: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18 9.4l-4.2 1.8L12 16l-1.8-4.8L6 9.4l4.2-1.8z"/><path d="M5 18l.7 1.8L7.5 20.5l-1.8.7L5 23l-.7-1.8L2.5 20.5l1.8-.7z"/></svg>', pfeil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>' };
   const gruppen = [
     { k: "markt", label: en ? "Market" : "Markt", kinder: [["feed", t("tab_feed"), feedBadge], ["geruechte", "Transfers", 0], ["spieltag", en ? "Matchday" : "Spieltag", 0], ["ranking", "Performance", 0], ["players", t("players_tab"), 0], ["chancen", t("ch_tab"), 0], ["talente", "Scouting", 0]] },   // Scouting im Markt (08.11.2026); A86 (28.10.2026): "Verein sucht" und "Marktwert" sind eigene Punkte bei "Kontakte"
     { k: "community", label: en ? "Network" : "Netzwerk", kinder: [["community", en ? "Posts" : "Beitr\u00e4ge", 0], ["nz_nachrichten", en ? "Messages" : "Nachrichten", nzUngelesen], ["nz_beitraege", en ? "Community contacts" : "Community-Kontakte", nzHinweise], ["nz_kontakte", en ? "Find contacts" : "Kontakte finden", 0], ["nz_profil", en ? "My profile" : "Mein Profil", 0]] },   // Netzwerk 2.0 Paket 2 + 3 + 4
-    { k: "workspace", label: "Workspace", kinder: [["ws_spieler", en ? "My players" : "Meine Spieler", 0], ["watch", en ? "Saved" : "Gemerkt", 0], ["ws_beob", en ? "Watching" : "Beobachtet", 0]] }   // Workspace 2.0 (09.11.2026)
+    { k: "workspace", label: "Workspace", kinder: [["watch", t("watch_tab"), 0], ["akquise", en ? "Acquisition radar" : "Akquise-Radar", 0]] }
   ];
   return h("div", { className: "tw-sn" },
     h("button", { type: "button", className: "tw-sn-ki" + (view === "assistent" ? " aktiv" : ""), onClick: onScout }, h("span", { className: "tw-sn-ikon tw-sn-funke", dangerouslySetInnerHTML: { __html: IK.ki } }), h("span", null, en ? "AI assistant" : "KI-Assistent")),
@@ -16106,7 +15536,7 @@ function twLaenderListe(vereine, en) {
 /* ── Tarifmodell Free / Pro / Enterprise (23.10.2026) ──────────────────────────
    Pro-Bereiche: Verein sucht, Vereinskontakte, Netzwerk/Community, Workspace (Merkliste), Scouting, Akquise-Radar.
    Free: alle uebrigen Bereiche inkl. Marktwert, KI-Assistent "Scout" und PDF-Dossiers. */
-const TW_PRO_VIEWS = ["gesucht", "nz_markt", "kontakte", "community", "networking", "nz_kontakte", "nz_profil", "watch", "talente", "listen", "suche", "nachwuchs", "akquise", "ws_spieler", "ws_beob"];
+const TW_PRO_VIEWS = ["gesucht", "nz_markt", "kontakte", "community", "networking", "nz_kontakte", "nz_profil", "watch", "talente", "listen", "suche", "nachwuchs", "akquise"];
 const TW_PRO_INFO = {
   gesucht: { de: ["Verein sucht", "Wer gerade welche Spieler braucht: Bedarf je Verein und Position, Club-Fit und Portfolio."], en: ["Club seeks", "Who needs which players right now: demand per club and position, club fit and portfolio."] },
   kontakte: { de: ["Vereinskontakte", "Exklusive Kontakte zu über 750 Sportdirektoren, Geschäftsführern und Scouting-Leitern."], en: ["Club contacts", "Exclusive contacts to more than 750 sporting directors, CEOs and heads of scouting."] },
@@ -16497,7 +15927,7 @@ function TransferApp({
   const [feedLimit, setFeedLimit] = useState(FEED_SEITE);
   const [plSel, setPlSel] = useState(null);
   const [mwStart, setMwStart] = useState(null); // A91: Spieler, dessen Marktwertanalyse aus dem Profil geoeffnet wurde
-  const [perfKarte, setPerfKarte] = useState(null); const [perfZurueck, setPerfZurueck] = useState(null); useEffect(() => { VP.neu = () => setNews(prev => Array.isArray(prev) ? prev.map(twAufbereiten) : prev); window.twNzNavigieren = v => setView(v); window.twWatchDlg = () => setWatchDlg(true); window.twZumTicker = () => { setGerApply({ f: { typ: "ticker" }, n: Date.now() }); setView("geruechte"); try { history.replaceState(null, "", location.pathname + location.search + "#transfers-ticker"); } catch (e) {} }; window.twPerfOeffnen = (it2) => setPerfKarte({ pid: it2.pid, name: (it2.player && it2.player.name) || "", team: it2.team || "", league: it2.league || "", pos: (it2.player && it2.player.position) || "", startFixture: it2.fixture }); window.twMarktwertOeffnen = (sp) => { if (!sp || !sp.pid) return; setPlDetail(null); setMwStart({ pid: sp.pid, name: sp.name || "", team: sp.team || "", n: Date.now() }); setProZiel(null); setViewRoh("marktwert"); try { window.scrollTo({ top: 0 }); } catch (e) {} }; return () => { VP.neu = null; window.twMarktwertOeffnen = null; }; }, []);
+  const [perfKarte, setPerfKarte] = useState(null); const [perfZurueck, setPerfZurueck] = useState(null); useEffect(() => { VP.neu = () => setNews(prev => Array.isArray(prev) ? prev.map(twAufbereiten) : prev); window.twNzNavigieren = v => setView(v); window.twZumTicker = () => { setGerApply({ f: { typ: "ticker" }, n: Date.now() }); setView("geruechte"); try { history.replaceState(null, "", location.pathname + location.search + "#transfers-ticker"); } catch (e) {} }; window.twPerfOeffnen = (it2) => setPerfKarte({ pid: it2.pid, name: (it2.player && it2.player.name) || "", team: it2.team || "", league: it2.league || "", pos: (it2.player && it2.player.position) || "", startFixture: it2.fixture }); window.twMarktwertOeffnen = (sp) => { if (!sp || !sp.pid) return; setPlDetail(null); setMwStart({ pid: sp.pid, name: sp.name || "", team: sp.team || "", n: Date.now() }); setProZiel(null); setViewRoh("marktwert"); try { window.scrollTo({ top: 0 }); } catch (e) {} }; return () => { VP.neu = null; window.twMarktwertOeffnen = null; }; }, []);
   const [plGesamt, setPlGesamt] = useState("");
   const [plModus, setPlModus] = useState("karten");
   const [plSort, setPlSort] = useState({ k: "", d: -1 });
@@ -17548,9 +16978,9 @@ function TransferApp({
       flexWrap: "wrap"
     },
     className: "tw-tabs"
-  }, [["_h", LANG === "en" ? "Market" : "Markt"], ["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["spieltag", LANG === "en" ? "Matchday" : "Spieltag"], ["gesucht", LANG === "en" ? "Club seeks" : "Verein sucht"], ["nz_markt", LANG === "en" ? "Player market" : "Spieler-Markt"], ["ranking", "Performance"], ["players", t("players_tab")], ["marktwert", LANG === "en" ? "Market value" : "Marktwert"], ["chancen", t("ch_tab")], ["talente", "Scouting"], ["_h", LANG === "en" ? "My work" : "Meine Arbeit"], ["ws_spieler", LANG === "en" ? "My players" : "Meine Spieler"], ["watch", LANG === "en" ? "Saved" : "Gemerkt"], ["ws_beob", LANG === "en" ? "Watching" : "Beobachtet"], ["community", "Community"]].map(([k, label]) => {
+  }, [["_h", LANG === "en" ? "Market" : "Markt"], ["kontakte", LANG === "en" ? "Contacts" : "Kontakte"], ["feed", t("tab_feed")], ["geruechte", "Transfers"], ["spieltag", LANG === "en" ? "Matchday" : "Spieltag"], ["gesucht", LANG === "en" ? "Club seeks" : "Verein sucht"], ["nz_markt", LANG === "en" ? "Player market" : "Spieler-Markt"], ["ranking", "Performance"], ["players", t("players_tab")], ["marktwert", LANG === "en" ? "Market value" : "Marktwert"], ["chancen", t("ch_tab")], ["talente", "Scouting"], ["_h", LANG === "en" ? "My work" : "Meine Arbeit"], ["watch", t("watch_tab")], ["community", "Community"]].map(([k, label]) => {
     if (k === "_h") return /*#__PURE__*/React.createElement("div", { key: "h-" + label, className: "tw-navhead" }, label);
-    const active = view === k || (k === "community" && (view === "networking" || view === "moderation" || view === "nz_kontakte" || view === "nz_profil" || view === "nz_nachrichten" || view === "nz_beitraege")) || (k === "talente" && (view === "listen" || view === "suche" || view === "nachwuchs" || view === "akquise"));
+    const active = view === k || (k === "community" && (view === "networking" || view === "moderation" || view === "nz_kontakte" || view === "nz_profil" || view === "nz_nachrichten" || view === "nz_beitraege")) || (k === "talente" && (view === "listen" || view === "suche" || view === "nachwuchs"));
     let badge = 0; try { if (k === "feed") badge = (Array.isArray(news) ? news : []).filter(n => Date.now() - new Date(n.published_at || n.created_at || n.createdAt || 0).getTime() < 864e5).length; else if (k === "gesucht") badge = Array.isArray(needsBySport) ? needsBySport.length : 0; } catch (e) { badge = 0; }
     const col = k === "talente" ? "var(--teal)" : k === "geruechte" ? "#b3541e" : k === "gesucht" ? TYPE.verein_sucht.color : k === "ranking" ? "#b9860b" : k === "watch" ? "#6b4fd8" : k === "players" ? "#1a6dc0" : k === "chancen" ? "#c2410c" : k === "listen" ? "#087F8C" : "var(--gold)";
     return /*#__PURE__*/React.createElement("button", {
@@ -17580,7 +17010,7 @@ function TransferApp({
       width: "100%",
       boxSizing: "border-box"
     }
-  }, TW_ZUSATZ.finde(view) ? React.createElement(TwZusatzSeite, { key: "zusatz-" + view, seite: TW_ZUSATZ.finde(view), account: account, setView: setView }) : null, view === "pro" && React.createElement(ProSperreVue, { ziel: proZiel }), view === "nz_profil" && React.createElement(NzProfilSeite, { key: "nz-profil", account: account, setView: setView, admin: istAdmin }), view === "nz_nachrichten" && React.createElement(NzNachrichtenSeite, { key: "nz-nachrichten", account: account, setView: setView, admin: istAdmin, openPlayer: openPlayer, openVerein: openVerein }), view === "nz_beitraege" && React.createElement(NzBeitraegeSeite, { key: "nz-beitraege", account: account, setView: setView, admin: istAdmin }), view === "nz_markt" && React.createElement(NzMarktSeite, { key: "nz-markt", account: account, setView: setView, admin: istAdmin, openPlayer: openPlayer, openVerein: openVerein }), view === "nz_kontakte" && React.createElement(NzKontakteSeite, { key: "nz-kontakte", account: account, setView: setView, admin: istAdmin }), view === "marktwert" && React.createElement(MarktwertVue, { openPlayer: openPlayer, openVerein: openVerein, start: mwStart }), view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein, authQ: authQ }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein, account: account, setView: setView }), view === "akquise" && React.createElement(ScoutSub, { view: view, setView: setView }), view === "akquise" && /*#__PURE__*/React.createElement(AkquiseVue, { isPrem: isPrem, account: account, openPlayer: openPlayer }), view === "ws_spieler" && React.createElement(WsSpielerVue, { account: account, openPlayer: openPlayer, setView: setView, watch: watch, onUpdateWatch: updateWatch, profiles: profiles, wr: wr, setWochenreport: setWochenreport }), view === "aehnlich" && aehnlichStart && React.createElement(AehnlicheSpielerSeite, { key: "ae-" + aehnlichStart.pid, ausgang: aehnlichStart, onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "spielervergleich" && React.createElement(SpielerVergleichSeite, { key: "vgl-" + (vglStart || []).map(x => x.pid).join("-"), start: vglStart || [], onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news.filter(n => n.type !== "verletzung" && n.type !== "leistung" && n.type !== "meldung" && !n._ausgeblendet), onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(VereinSuchtVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, TW_ZUSATZ.finde(view) ? React.createElement(TwZusatzSeite, { key: "zusatz-" + view, seite: TW_ZUSATZ.finde(view), account: account, setView: setView }) : null, view === "pro" && React.createElement(ProSperreVue, { ziel: proZiel }), view === "nz_profil" && React.createElement(NzProfilSeite, { key: "nz-profil", account: account, setView: setView, admin: istAdmin }), view === "nz_nachrichten" && React.createElement(NzNachrichtenSeite, { key: "nz-nachrichten", account: account, setView: setView, admin: istAdmin, openPlayer: openPlayer, openVerein: openVerein }), view === "nz_beitraege" && React.createElement(NzBeitraegeSeite, { key: "nz-beitraege", account: account, setView: setView, admin: istAdmin }), view === "nz_markt" && React.createElement(NzMarktSeite, { key: "nz-markt", account: account, setView: setView, admin: istAdmin, openPlayer: openPlayer, openVerein: openVerein }), view === "nz_kontakte" && React.createElement(NzKontakteSeite, { key: "nz-kontakte", account: account, setView: setView, admin: istAdmin }), view === "marktwert" && React.createElement(MarktwertVue, { openPlayer: openPlayer, openVerein: openVerein, start: mwStart }), view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein, authQ: authQ }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein, account: account, setView: setView }), view === "akquise" && /*#__PURE__*/React.createElement(AkquiseVue, { isPrem: isPrem, account: account, openPlayer: openPlayer }), view === "aehnlich" && aehnlichStart && React.createElement(AehnlicheSpielerSeite, { key: "ae-" + aehnlichStart.pid, ausgang: aehnlichStart, onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "spielervergleich" && React.createElement(SpielerVergleichSeite, { key: "vgl-" + (vglStart || []).map(x => x.pid).join("-"), start: vglStart || [], onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news.filter(n => n.type !== "verletzung" && n.type !== "leistung" && n.type !== "meldung" && !n._ausgeblendet), onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(VereinSuchtVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       background: "transparent",
       border: "none",
@@ -18247,7 +17677,7 @@ function TransferApp({
   }, t("rank_all_pos")), ["Torwart", "Abwehr", "Mittelfeld", "Sturm"].map(p => /*#__PURE__*/React.createElement("option", {
     key: p,
     value: p
-  }, p)))), /*#__PURE__*/React.createElement(DbVue, { q: plQ, hatFilter: !!(plLg || plLand || plTeam || plPos), items: plItems, loading: plLoading, stats: dbStats, watch: watch.items, onWatchToggle: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); }, onOpen: x => openPlayer(x.pid, x.name, x.team), vergleich: plVergleich, setVergleich: setPlVergleich, onSpielervergleich: oeffneVergleich, filters: { land: plLand, lg: plLg, team: plTeam, pos: plPos }, setFilters: { setPlQ: setPlQ, setPlLand: setPlLand, setPlLg: setPlLg, setPlTeam: setPlTeam, setPlPos: setPlPos } }))), (view === "watch" || view === "ws_beob") && /*#__PURE__*/React.createElement(MerkVue, { nur: view === "ws_beob" ? "beob" : "gemerkt", watch: watch, watchList: watchList, profiles: profiles, onOpen: openPlayer, onRemove: (t2, w) => t2 === "profil" ? removeProfil(w) : removeWatch(t2, w), onUpdateWatch: updateWatch, onNav: setView, onProfilSheet: () => { setPfEdit(null); setProfilSheet(true); }, onMatchProfil: setMatchProfil, vergleich: plVergleich, setVergleich: setPlVergleich, applySearch: s2 => { const e2 = s2.e || {}; if (s2.art === "feed") { setSport(e2.sport || "alle"); setType(e2.type || "alle"); setCountry(e2.country || ""); setLeague(e2.league || ""); setClub(e2.club || ""); setQuery(e2.q || ""); setView("feed"); } else if (s2.art === "transfers") { setGerApply({ f: e2.f || {}, n: Date.now() }); setView("geruechte"); } else if (s2.art === "vdb") { VDB_PENDING = e2; setDbTab("vereine"); setView("players"); } else { DB_PENDING = e2; setDbTab("spieler"); setPlQ(e2.q || ""); setPlLand(e2.land || ""); setPlLg(e2.lg || ""); setPlTeam(e2.team || ""); setPlPos(e2.pos || ""); setView("players"); } } }), (view === "feed" || view === "watch" || view === "talente" || view === "community" || view === "networking" || view === "moderation") && /*#__PURE__*/React.createElement(React.Fragment, null, view === "community" && /*#__PURE__*/React.createElement("div", { style: { gridColumn: "1 / -1", display: "grid", gap: 14 } },
+  }, p)))), /*#__PURE__*/React.createElement(DbVue, { q: plQ, hatFilter: !!(plLg || plLand || plTeam || plPos), items: plItems, loading: plLoading, stats: dbStats, watch: watch.items, onWatchToggle: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); }, onOpen: x => openPlayer(x.pid, x.name, x.team), vergleich: plVergleich, setVergleich: setPlVergleich, onSpielervergleich: oeffneVergleich, filters: { land: plLand, lg: plLg, team: plTeam, pos: plPos }, setFilters: { setPlQ: setPlQ, setPlLand: setPlLand, setPlLg: setPlLg, setPlTeam: setPlTeam, setPlPos: setPlPos } }))), view === "watch" && /*#__PURE__*/React.createElement(MerkVue, { watch: watch, watchList: watchList, profiles: profiles, onOpen: openPlayer, onRemove: (t2, w) => t2 === "profil" ? removeProfil(w) : removeWatch(t2, w), onUpdateWatch: updateWatch, onNav: setView, onProfilSheet: () => { setPfEdit(null); setProfilSheet(true); }, onMatchProfil: setMatchProfil, vergleich: plVergleich, setVergleich: setPlVergleich, applySearch: s2 => { const e2 = s2.e || {}; if (s2.art === "feed") { setSport(e2.sport || "alle"); setType(e2.type || "alle"); setCountry(e2.country || ""); setLeague(e2.league || ""); setClub(e2.club || ""); setQuery(e2.q || ""); setView("feed"); } else if (s2.art === "transfers") { setGerApply({ f: e2.f || {}, n: Date.now() }); setView("geruechte"); } else if (s2.art === "vdb") { VDB_PENDING = e2; setDbTab("vereine"); setView("players"); } else { DB_PENDING = e2; setDbTab("spieler"); setPlQ(e2.q || ""); setPlLand(e2.land || ""); setPlLg(e2.lg || ""); setPlTeam(e2.team || ""); setPlPos(e2.pos || ""); setView("players"); } } }), (view === "feed" || view === "watch" || view === "talente" || view === "community" || view === "networking" || view === "moderation") && /*#__PURE__*/React.createElement(React.Fragment, null, view === "community" && /*#__PURE__*/React.createElement("div", { style: { gridColumn: "1 / -1", display: "grid", gap: 14 } },
     /*#__PURE__*/React.createElement(CommunitySub, { view: view, setView: setView, admin: istAdmin }),
     /*#__PURE__*/React.createElement("h2", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 30, lineHeight: "38px", margin: "2px 0 0", color: INK } }, LANG === "en" ? "Community \u2013 transfer hints" : "Community \u2013 Transferhinweise"),
     /*#__PURE__*/React.createElement("p", { style: { fontFamily: FONT_BODY, fontSize: 14.5, color: MUTED, margin: "0 0 2px", maxWidth: 760, lineHeight: 1.5 } }, LANG === "en" ? "Share reliable hints from your network. Posts are labelled, reviewed and ranked by relevance within TransferWire." : "Teile belastbare Hinweise aus deinem Netzwerk. Beitr\u00e4ge werden gekennzeichnet, gepr\u00fcft und nach Relevanz in TransferWire eingeordnet."),
@@ -18447,7 +17877,7 @@ function TransferApp({
       fontSize: 14,
       gridColumn: "1 / -1"
     }
-  }, "Keine Meldungen für diese Auswahl. Filter zurücksetzen und erneut versuchen.") : (() => { const muAn = muAktivApp(view, type, query, club, league, country, sport); const listeAlle = (view === "watch" ? watchList : (muAn ? muOhneAufmacher(filtered) : filtered)); const liste = listeAlle.slice(0, muAn && feedLimit === FEED_SEITE ? Math.min(12, FEED_SEITE) : feedLimit); let seen = 0; try { seen = Number(localStorage.getItem("tw_seen") || 0); } catch (e) {} const heute = new Date(); heute.setHours(0, 0, 0, 0); const gesternTs = heute.getTime() - 86400000; const gruppe = it => { const d = new Date(it.published || it.publishedAt || 0); if (isNaN(d.getTime())) return ""; const ts = d.getTime(); if (ts >= heute.getTime()) return "Heute"; if (ts >= gesternTs) return "Gestern"; return "Fr\u00fcher"; }; const aus = []; let letzte = null; let neuMarke = false; liste.forEach(it => { const g = gruppe(it); if (g && g !== letzte) { aus.push(/*#__PURE__*/React.createElement("div", { key: "g" + g, style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 900, letterSpacing: 1.6, color: "var(--t3)", margin: "8px 2px 0", textTransform: "uppercase", gridColumn: "1 / -1" } }, g)); letzte = g; } const ts = new Date(it.published || it.publishedAt || 0).getTime(); if (!neuMarke && seen && !isNaN(ts) && ts > 0 && ts <= seen) { aus.push(/*#__PURE__*/React.createElement("div", { key: "seenline", style: { display: "flex", alignItems: "center", gap: 10, margin: "2px 0", gridColumn: "1 / -1" } }, /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, color: "var(--gold-text)" } }, "NEU SEIT DEINEM LETZTEN BESUCH \u2191"), /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }))); neuMarke = true; } aus.push(/*#__PURE__*/React.createElement(view === "feed" ? TickerKarte : FeedKarte, { onWatch: it2 => setAddSheet(it2), onOpen: it2 => twOeffnen(it2, setMSel), key: it.id, item: it })); }); if (listeAlle.length > liste.length) aus.push(/*#__PURE__*/React.createElement("div", { key: "mehr", style: { display: "flex", justifyContent: "center", padding: "8px 0 4px", gridColumn: "1 / -1" } }, /*#__PURE__*/React.createElement("button", { onClick: () => setFeedLimit(l => l + FEED_SEITE), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 22px", borderRadius: 999, border: "1px solid var(--dunkel)", background: "var(--karte)", color: "var(--t1)", boxShadow: "0 1px 2px rgba(15,21,32,.05)" } }, "Mehr laden (" + liste.length + " von " + listeAlle.length + ")"))); if (muAn) aus.push(React.createElement(MuUnten, { key: "mu-unten", liste: filtered, onOpen: it2 => twOeffnen(it2, setMSel), geheZu: setView })); return aus; })())), /*#__PURE__*/React.createElement("aside", null, view === "watch" ? React.createElement(MerkAside, { watch: watch, onAlertDialog: () => setWatchDlg(true), onOpen: openPlayer }) : view !== "ws_beob" && view !== "ws_spieler" && view !== "feed" && view !== "talente" && view !== "community" && view !== "networking" && view !== "moderation" && React.createElement(FeedSuche, { q: query, setQ: setQuery, club: club, setClub: setClub, alle: news, watch: watchList, geheZu: setView, fs: { sport: sport, type: type, country: country, league: league }, setFs: { setSport: setSport, setType: setType, setCountry: setCountry, setLeague: setLeague } }))), perfKarte && /*#__PURE__*/React.createElement(PerfKarte, { x: perfKarte, onClose: () => setPerfKarte(null), onProfil: p => { setPerfZurueck(p); setPerfKarte(null); openPlayer(p.pid, p.name, p.team); }, watched: (watch.items || []).some(w => w.t === "spieler" && w.w === (perfKarte.name || "")), onWatchToggle: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); } }), plSel && /*#__PURE__*/React.createElement(SpielerDrawer, { x: plSel, news: news, schliessen: () => setPlSel(null) }), mSel && /*#__PURE__*/React.createElement(istTransferTyp(mSel) ? TransferPanel : MeldungsPanel, { m: mSel, schliessen: () => setMSel(null), onWatch: it => { setAddSheet(it); setMSel(null); } }), plVergleich.length > 0 && /*#__PURE__*/React.createElement(VergleichUI, { spieler: plVergleich, entf: pid => setPlVergleich(v => v.filter(y => y.pid !== pid)), leeren: () => { setPlVergleich([]); setPlVglOffen(false); }, offen: plVglOffen, setOffen: setPlVglOffen })), /*#__PURE__*/React.createElement("footer", {
+  }, "Keine Meldungen für diese Auswahl. Filter zurücksetzen und erneut versuchen.") : (() => { const muAn = muAktivApp(view, type, query, club, league, country, sport); const listeAlle = (view === "watch" ? watchList : (muAn ? muOhneAufmacher(filtered) : filtered)); const liste = listeAlle.slice(0, muAn && feedLimit === FEED_SEITE ? Math.min(12, FEED_SEITE) : feedLimit); let seen = 0; try { seen = Number(localStorage.getItem("tw_seen") || 0); } catch (e) {} const heute = new Date(); heute.setHours(0, 0, 0, 0); const gesternTs = heute.getTime() - 86400000; const gruppe = it => { const d = new Date(it.published || it.publishedAt || 0); if (isNaN(d.getTime())) return ""; const ts = d.getTime(); if (ts >= heute.getTime()) return "Heute"; if (ts >= gesternTs) return "Gestern"; return "Fr\u00fcher"; }; const aus = []; let letzte = null; let neuMarke = false; liste.forEach(it => { const g = gruppe(it); if (g && g !== letzte) { aus.push(/*#__PURE__*/React.createElement("div", { key: "g" + g, style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 900, letterSpacing: 1.6, color: "var(--t3)", margin: "8px 2px 0", textTransform: "uppercase", gridColumn: "1 / -1" } }, g)); letzte = g; } const ts = new Date(it.published || it.publishedAt || 0).getTime(); if (!neuMarke && seen && !isNaN(ts) && ts > 0 && ts <= seen) { aus.push(/*#__PURE__*/React.createElement("div", { key: "seenline", style: { display: "flex", alignItems: "center", gap: 10, margin: "2px 0", gridColumn: "1 / -1" } }, /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 10.5, fontWeight: 900, letterSpacing: 1.4, color: "var(--gold-text)" } }, "NEU SEIT DEINEM LETZTEN BESUCH \u2191"), /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }))); neuMarke = true; } aus.push(/*#__PURE__*/React.createElement(view === "feed" ? TickerKarte : FeedKarte, { onWatch: it2 => setAddSheet(it2), onOpen: it2 => twOeffnen(it2, setMSel), key: it.id, item: it })); }); if (listeAlle.length > liste.length) aus.push(/*#__PURE__*/React.createElement("div", { key: "mehr", style: { display: "flex", justifyContent: "center", padding: "8px 0 4px", gridColumn: "1 / -1" } }, /*#__PURE__*/React.createElement("button", { onClick: () => setFeedLimit(l => l + FEED_SEITE), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 22px", borderRadius: 999, border: "1px solid var(--dunkel)", background: "var(--karte)", color: "var(--t1)", boxShadow: "0 1px 2px rgba(15,21,32,.05)" } }, "Mehr laden (" + liste.length + " von " + listeAlle.length + ")"))); if (muAn) aus.push(React.createElement(MuUnten, { key: "mu-unten", liste: filtered, onOpen: it2 => twOeffnen(it2, setMSel), geheZu: setView })); return aus; })())), /*#__PURE__*/React.createElement("aside", null, view === "watch" ? React.createElement(MerkAside, { watch: watch, onAlertDialog: () => setWatchDlg(true), onOpen: openPlayer }) : view !== "feed" && view !== "talente" && view !== "community" && view !== "networking" && view !== "moderation" && React.createElement(FeedSuche, { q: query, setQ: setQuery, club: club, setClub: setClub, alle: news, watch: watchList, geheZu: setView, fs: { sport: sport, type: type, country: country, league: league }, setFs: { setSport: setSport, setType: setType, setCountry: setCountry, setLeague: setLeague } }))), perfKarte && /*#__PURE__*/React.createElement(PerfKarte, { x: perfKarte, onClose: () => setPerfKarte(null), onProfil: p => { setPerfZurueck(p); setPerfKarte(null); openPlayer(p.pid, p.name, p.team); }, watched: (watch.items || []).some(w => w.t === "spieler" && w.w === (perfKarte.name || "")), onWatchToggle: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); } }), plSel && /*#__PURE__*/React.createElement(SpielerDrawer, { x: plSel, news: news, schliessen: () => setPlSel(null) }), mSel && /*#__PURE__*/React.createElement(istTransferTyp(mSel) ? TransferPanel : MeldungsPanel, { m: mSel, schliessen: () => setMSel(null), onWatch: it => { setAddSheet(it); setMSel(null); } }), plVergleich.length > 0 && /*#__PURE__*/React.createElement(VergleichUI, { spieler: plVergleich, entf: pid => setPlVergleich(v => v.filter(y => y.pid !== pid)), leeren: () => { setPlVergleich([]); setPlVglOffen(false); }, offen: plVglOffen, setOffen: setPlVglOffen })), /*#__PURE__*/React.createElement("footer", {
     style: {
       borderTop: `1px solid ${HAIR}`,
       background: "var(--karte)",
