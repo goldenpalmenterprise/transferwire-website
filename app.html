@@ -4689,6 +4689,19 @@ window.twDossierPdf = async function (x, vorhanden) {
     const passendHtml = passend.length
       ? "<table><tr><th>" + L("Verein", "Club") + "</th><th>" + L("Liga", "League") + "</th><th>" + L("Bedarf", "Need") + "</th><th>" + L("Wunschalter", "Target age") + "</th><th>" + L("Zeitfenster", "Window") + "</th></tr>" + passend.map((k) => "<tr><td><span class=\"punkt " + esc(k.ampel || "") + "\"></span>" + esc(vn(k.team)) + "</td><td>" + esc(k.league || "") + "</td><td>" + esc(k.titel || k.position || "") + (k.score ? " · " + zahl(k.score) : "") + "</td><td>" + (k.alter_von ? esc(k.alter_von + "–" + (k.alter_bis || "")) : "–") + "</td><td>" + esc(k.zeitfenster === "winter" ? L("Winter", "Winter") : k.zeitfenster === "sommer" ? L("Sommer", "Summer") : (k.zeitfenster || "–")) + "</td></tr>").join("") + "</table><p class=\"klein\">" + L("Vereine mit aktuellem Bedarf auf seiner Position (Ampel rot = dringend), Wunschalter passend zum Spieler. Grundlage: TransferWire „Verein sucht“.", "Clubs with a current need in his position (red = urgent) and a matching target age. Source: TransferWire “Club seeks”.") + "</p>"
       : "<p class=\"klein\">" + L("Gerade keine passenden Vereinsgesuche.", "No matching club needs at the moment.") + "</p>";
+    /* Spielerprofil 2.0 (09.11.2026): Saisonwerte, Kennzahlen und Stärken-Spinne aus /api/tw-profil */
+    let ppD = det.pp && det.pp.ok ? det.pp : null; if (!ppD) { try { const pq = await twPpLaden(x.pid); ppD = pq && pq.ok ? pq : null; } catch (e) { ppD = null; } }
+    const ppTw = ppD && ppD.haupt && ppD.haupt.gruppe === "TW";
+    const ppSp = ppTw ? [["spiele", L("Sp.", "Apps")], ["min", "Min."], ["gk_conceded", L("Gegentore", "Conceded")], ["zu_null", L("Zu null", "Clean sh.")], ["saves", L("Paraden", "Saves")], ["pq", L("Passquote", "Pass %")], ["tw_score", "Ø TW Score"]]
+      : [["spiele", L("Sp.", "Apps")], ["starts", L("Startelf", "Starts")], ["min", "Min."], ["goals", L("Tore", "Goals")], ["assists", L("Vorl.", "Ast.")], ["xg", "xG"], ["shots", L("Schüsse (aufs Tor)", "Shots (on target)")], ["pq", L("Passquote", "Pass %")], ["zq", L("Zweikämpfe", "Duels %")], ["tw_score", "Ø TW Score"]];
+    const ppZelle = (r, k) => k === "xg" ? (r.xg == null ? "–" : zahl(r.xg, 2)) : k === "shots" ? (r.shots_total == null ? "–" : zahl(r.shots_total) + " (" + zahl(r.shots_on) + ")") : k === "pq" ? (twPpQuote(r.passes_acc, r.passes) == null ? "–" : twPpQuote(r.passes_acc, r.passes) + " %") : k === "zq" ? (twPpQuote(r.duels_won, r.duels_total) == null ? "–" : twPpQuote(r.duels_won, r.duels_total) + " %") : k === "tw_score" ? (r.tw_score == null ? "–" : zahl(r.tw_score, 1)) : zahl(r[k]);
+    const ppRows = ppD && ppD.saison && ppD.saison.length ? ppD.saison : [];
+    const ppSaisonHtml = ppRows.length ? "<table><tr><th>" + L("Wettbewerb", "Competition") + "</th>" + ppSp.map(([k, l]) => "<th class=\"r\">" + esc(l) + "</th>").join("") + "</tr>" + ppRows.map((r) => "<tr><td>" + esc(r.league) + " " + esc(r.saison) + "</td>" + ppSp.map(([k]) => "<td class=\"r\">" + esc(ppZelle(r, k)) + "</td>").join("") + "</tr>").join("") + "</table><p class=\"klein\">" + L("Laufende Saison, letztes Spiel ", "Current season, last match ") + esc(datum(ppD.letztes)) + L(". Quellen: Sportmonks und API-Football.", ". Sources: Sportmonks and API-Football.") + "</p>" : saison;
+    const ppKach = twPpKacheln(ppD);
+    const ppKachHtml = ppKach.length ? "<div class=\"kacheln k4\">" + ppKach.map((q) => "<div class=\"kachel\"><b>" + esc(q.wert) + "</b><span>" + esc(q.lab) + "</span>" + (q.p != null ? "<em>" + L("Perzentil ", "Percentile ") + q.p + "</em>" : "") + "</div>").join("") + "</div>" : "";
+    const ppBild = ppD && ppD.radar ? twPpSpinneBild(ppD) : "";
+    const ppAchsen = twPpAchsenListe(ppD).filter((q) => q.v != null);
+    const ppStaerkenHtml = (ppKachHtml || ppBild) ? "<section><h3>" + L("Kennzahlen und Stärkenprofil", "Key figures and strength profile") + "</h3>" + ppKachHtml + (ppBild ? "<div class=\"spinne\"><img src=\"" + ppBild + "\" alt=\"\"><div class=\"achsen\">" + ppAchsen.slice().sort((p1, p2) => p2.v - p1.v).map((q) => "<div class=\"achse\"><span>" + esc(twPpAchseName(q.k)) + "</span><div class=\"bar\"><span style=\"width:" + Math.max(3, Math.min(100, q.v)) + "%\"></span><em>" + q.v + "</em></div></div>").join("") + "<p class=\"klein\">" + esc(twPpVergleichText(ppD)) + " " + L("50 = Durchschnitt der Gruppe.", "50 = group average.") + "</p></div></div>" : "") + "</section>" : "";
     const heute = new Date(); const stand = en ? heute.toISOString().slice(0, 10) : heute.toLocaleDateString("de-DE");
     const css = "*{box-sizing:border-box}body{margin:0;font-family:\"Liberation Sans\",Arial,Helvetica,sans-serif;font-size:9.3pt;line-height:1.42;color:#111827}"
       + ".kopf{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #111827;padding-bottom:6px;margin-bottom:12px}.marke{font-weight:700;font-size:14pt}.marke span{color:#A27D2D}.art{font-size:8.4pt;color:#4b5563;text-align:right}"
@@ -4700,15 +4713,16 @@ window.twDossierPdf = async function (x, vorhanden) {
       + ".bar{position:relative;background:#f3f4f6;border-radius:4px;height:14px;min-width:120px}.bar span{position:absolute;left:0;top:0;bottom:0;background:#16a34a;border-radius:4px;opacity:.85}.bar.blau span{background:#2563eb}.bar em{position:relative;font-style:normal;font-size:8pt;padding-left:5px;font-weight:700}"
       + ".klein{font-size:8.4pt;color:#4b5563;margin:4px 0}.punkt{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:#9ca3af}.punkt.rot{background:#dc2626}.punkt.gelb{background:#d97706}.punkt.gruen{background:#16a34a}"
       + ".zs{border-left:2px solid #d1d5db;margin:2px 0 0 5px;padding-left:12px}.zsp{position:relative;padding:1px 0 7px}.zsd{position:absolute;left:-19px;top:-1px;font-size:11pt;line-height:1;color:#9ca3af}.zsd.akt{color:#0B7A45}.pille{font-size:7.4pt;font-weight:700;color:#0B7A45;background:#e2f3ea;border-radius:99px;padding:1px 6px}.pille.u{color:#8a3110;background:#fdf0dc}"
+      + ".kacheln.k4{grid-template-columns:repeat(4,1fr);gap:7px}.kachel em{display:block;font-style:normal;font-size:7.2pt;color:#7D5F1A;margin-top:1px}.spinne{display:flex;gap:16px;align-items:center;margin-top:10px}.spinne img{width:340px;height:auto;flex:none}.achsen{flex:1}.achse{display:grid;grid-template-columns:130px 1fr;gap:8px;align-items:center;font-size:8.6pt;margin:3px 0}.achse .bar span{background:#A9822F}"
       + ".hinweis{margin-top:16px;font-size:7.8pt;color:#6b7280;border-top:1px solid #e5e7eb;padding-top:6px}";
     const inhalt = "<div class=\"kopf\"><div class=\"marke\">Transfer<span>Wire</span></div><div class=\"art\">" + L("Spielerdossier", "Player dossier") + "<br>" + L("Stand: ", "As of: ") + stand + "</div></div>"
       + "<div class=\"steck\"><div class=\"bild\">" + (fotoOk ? "<img src=\"" + esc(d.photo) + "\" alt=\"\">" : esc(initialen)) + "</div><div style=\"flex:1\"><h1>" + esc(name) + "</h1><div class=\"unter\">" + esc([en ? (POS_EN[pos] || pos) : pos, vn(team), liga].filter(Boolean).join(" · ")) + "</div><div class=\"fakten\">" + fakten + "</div></div></div>"
-      + "<section><h3>" + L("Saisonwerte", "Season stats") + (d.season ? " " + esc(d.season) : "") + "</h3>" + saison + "</section>"
+      + "<section><h3>" + L("Saisonwerte", "Season stats") + (ppD && ppD.haupt ? " " + esc(ppD.haupt.saison) : (d.season ? " " + esc(d.season) : "")) + "</h3>" + ppSaisonHtml + "</section>"
       + "<section><h3>" + L("TW Performance – Formkurve", "TW Performance – form") + "</h3>" + formHtml + "</section>"
+      + ppStaerkenHtml
       
       + "<section><h3>" + L("Verletzungshistorie", "Injury history") + "</h3>" + verlHtml + "</section>"
       + (vereinHtml ? "<section><h3>" + L("Vereinsstationen", "Clubs") + "</h3>" + vereinHtml + "</section>" : "")
-      + (bhHtml ? "<section><h3>" + L("Beraterhistorie", "Agent history") + "</h3>" + bhHtml + "</section>" : "")
       + (aendHtml ? "<section><h3>" + L("Was sich zuletzt geändert hat", "Recent changes") + "</h3>" + aendHtml + "</section>" : "")
       + "<section><h3>" + L("Passende Vereine mit Bedarf", "Matching clubs with a need") + "</h3>" + passendHtml + "</section>"
       + "<div class=\"hinweis\">" + L("Erstellt am ", "Created on ") + stand + L(" mit TransferWire. Quellen: Marktwert TransferWire-Modell (indikative Schätzung); Verletzungen Sportmonks/API-Football; Spielerdatenbank (Profil" + (pr.stand ? ", Stand " + datum(pr.stand) : "") + "), API-Football und Sportmonks (Leistungsdaten), eigene Auswertungen. Alle Angaben ohne Gewähr.", " with TransferWire. Sources: market value TransferWire model (indicative estimate); injuries Sportmonks/API-Football; player database (profile" + (pr.stand ? ", as of " + datum(pr.stand) : "") + "), API-Football and Sportmonks (performance data), own analysis. All information without guarantee.") + "</div>";
@@ -8794,7 +8808,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261109-seitenleiste2";
+const VS_VERSION = "20261109-spielerprofil";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -15962,6 +15976,504 @@ function TwProfilStatistik({ pid, d, onClose }) {
     h(SpielStatistik, { x: x, name: d.name, spiele: spiele, onZurueck: onClose, onSchliessen: onClose, onAnalyse: s => setAnalyse(s), analyseOffen: !!analyse }),
     analyse ? h(SpielAnalyse, { x: Object.assign({}, x, { name: d.name, foto: d.photo }), spiel: analyse, onClose: () => setAnalyse(null) }) : null);
 }
+/* Spielerprofil 2.0 (09.11.2026, Boss 16:17): eigene ganze Seite statt Hochformat-Fenster, Reiter oben mit Scroll-Führung
+   (Profil · Spielstatistiken · Spieler-Performance · News · Ähnliche Spieler), Saisonwerte als Tabelle, Kennzahlen, Stärken-Spinne,
+   Marktwert abgesetzt und umrandet, TW Performance Score im Kopf, ohne Beraterhistorie. Daten: /api/tw-profil (pp.profil_daten). */
+const TW_PP_URL = "/api/tw-profil";
+const TW_PP_CACHE = {};
+function twPpLaden(pid) {
+  const k = String(pid || ""); if (!k) return Promise.resolve(null);
+  const c = TW_PP_CACHE[k]; if (c && Date.now() - c.t < 120000) return Promise.resolve(c.d);
+  return fetch(TW_PP_URL + "?pid=" + encodeURIComponent(k), { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(d => { if (d && d.ok) TW_PP_CACHE[k] = { d: d, t: Date.now() }; return d; }).catch(() => null);
+}
+const TW_PP_ACHSEN = {
+  abschluss: ["Abschluss", "Finishing"], chancen: ["Chancenkreation", "Chance creation"], dribbling: ["Dribbling", "Dribbling"], flanken: ["Flanken", "Crossing"],
+  passspiel: ["Passspiel", "Passing"], balleroberung: ["Balleroberung", "Ball winning"], zweikampf: ["Zweikampf", "Duels"], luftzweikampf: ["Kopfballspiel", "Aerial play"],
+  paraden: ["Paraden", "Shot stopping"], paradenquote: ["Paradenquote", "Save rate"], torverhinderung: ["Gegentore verhindert", "Goals prevented"],
+  strafraum: ["Strafraumbeherrschung", "Box control"], spielaufbau: ["Spielaufbau", "Distribution"], fehlerfrei: ["Fehlerfreiheit", "Error avoidance"]
+};
+const TW_PP_REIHE = { feld: ["abschluss", "chancen", "dribbling", "flanken", "passspiel", "balleroberung", "zweikampf", "luftzweikampf"], tw: ["paraden", "paradenquote", "torverhinderung", "strafraum", "spielaufbau", "fehlerfrei"] };
+const TW_PP_METRIK = {
+  tore90: ["Tore ohne Elfmeter je 90 Min.", "Non-penalty goals per 90"], xg90: ["xG je 90 Min.", "xG per 90"], aufs_tor90: ["Schüsse aufs Tor je 90 Min.", "Shots on target per 90"],
+  schluesselpaesse90: ["Schlüsselpässe je 90 Min.", "Key passes per 90"], grosschancen90: ["Großchancen kreiert je 90 Min.", "Big chances created per 90"], vorlagen90: ["Vorlagen je 90 Min.", "Assists per 90"],
+  flanken_genau90: ["Angekommene Flanken je 90 Min.", "Accurate crosses per 90"], flankenquote: ["Flankenquote", "Cross accuracy"],
+  dribblings90: ["Erfolgreiche Dribblings je 90 Min.", "Successful dribbles per 90"], dribbelquote: ["Dribbelquote", "Dribble success"],
+  passquote: ["Passquote", "Pass accuracy"], paesse_letztes_drittel90: ["Pässe ins letzte Drittel je 90 Min.", "Passes into the final third per 90"], lange_baelle90: ["Angekommene lange Bälle je 90 Min.", "Accurate long balls per 90"],
+  tacklings90: ["Gewonnene Tacklings je 90 Min.", "Tackles won per 90"], abgefangen90: ["Abgefangene Bälle je 90 Min.", "Interceptions per 90"], ballgewinne90: ["Ballgewinne je 90 Min.", "Ball recoveries per 90"],
+  zweikaempfe90: ["Gewonnene Zweikämpfe je 90 Min.", "Duels won per 90"], zweikampfquote: ["Zweikampfquote", "Duel success"],
+  kopfball90: ["Gewonnene Kopfballduelle je 90 Min.", "Aerial duels won per 90"], kopfballquote: ["Kopfballquote", "Aerial success"],
+  paraden90: ["Paraden je 90 Min.", "Saves per 90"], paradenquote: ["Paradenquote", "Save percentage"],
+  verhindert90: ["Verhinderte Gegentore je 90 Min. (xGOT minus Gegentore)", "Goals prevented per 90 (xGOT minus goals conceded)"],
+  strafraum90: ["Flanken abgefangen oder gefaustet je 90 Min.", "Crosses claimed or punched per 90"], fehler90: ["Fehler vor Schuss oder Gegentor je 90 Min.", "Errors leading to a shot or goal per 90"]
+};
+const TW_PP_QUOTEN = { flankenquote: 1, dribbelquote: 1, passquote: 1, zweikampfquote: 1, kopfballquote: 1, paradenquote: 1 };
+const TW_PP_GRUPPE = { TW: ["Torhütern", "goalkeepers", "Torhüter", "Goalkeeper"], IV: ["Innenverteidigern", "centre-backs", "Innenverteidiger", "Centre-back"], AV: ["Außenverteidigern", "full-backs", "Außenverteidiger", "Full-back"], ZM: ["zentralen Mittelfeldspielern", "central midfielders", "Zentrales Mittelfeld", "Central midfield"], FL: ["Flügelspielern", "wingers", "Flügel", "Winger"], ST: ["Stürmern", "strikers", "Sturm", "Striker"] };
+function twPpZ(v, d) { if (v === null || v === undefined || v === "" || isNaN(Number(v))) return "–"; return Number(v).toLocaleString(LANG === "en" ? "en-GB" : "de-DE", { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }); }
+function twPpQuote(a, b) { if (a === null || a === undefined || !Number(b)) return null; return Math.round(100 * Number(a) / Number(b)); }
+function twPpDatum(iso) { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || "")); return m ? (LANG === "en" ? m[3] + "/" + m[2] + "/" + m[1] : m[3] + "." + m[2] + "." + m[1]) : ""; }
+function twPpAchseName(k) { const a = TW_PP_ACHSEN[k]; return a ? (LANG === "en" ? a[1] : a[0]) : k; }
+function twPpMetrikName(k) { const a = TW_PP_METRIK[k]; return a ? (LANG === "en" ? a[1] : a[0]) : k; }
+function twPpMetrikWert(k, w) { if (w === null || w === undefined) return "–"; if (TW_PP_QUOTEN[k]) return twPpZ(100 * w) + " %"; if (k === "fehler90") return twPpZ(Math.abs(w), 2); return twPpZ(w, 2); }
+function twPpVergleichText(pp) {
+  const en = LANG === "en"; if (!pp || !pp.haupt) return "";
+  const g = TW_PP_GRUPPE[pp.haupt.gruppe] || ["Spielern", "players"]; const v = pp.vergleich || {};
+  const basis = v.basis === "liga" ? (en ? " in the " + pp.haupt.league : " der " + pp.haupt.league) : (en ? " across all leagues" : " aller Ligen");
+  return en ? "Percentile compared with " + (v.n || 0) + " " + g[1] + basis + " (at least 270 minutes), season " + pp.haupt.saison + "."
+    : "Perzentil im Vergleich mit " + (v.n || 0) + " " + g[0] + basis + " (mind. 270 Minuten), Saison " + pp.haupt.saison + ".";
+}
+function twPpAchsenListe(pp) {
+  if (!pp || !pp.haupt) return [];
+  const reihe = pp.haupt.gruppe === "TW" ? TW_PP_REIHE.tw : TW_PP_REIHE.feld; const map = {};
+  (pp.radar || []).forEach(a => { if (a && a.k) map[a.k] = a; });
+  return reihe.map(k => map[k] ? { k: k, v: Number(map[k].v), d: map[k].d || [] } : { k: k, v: null, d: [] });
+}
+function twPpMetrikP(pp, m) { let p = null; (pp && pp.radar || []).forEach(a => (a.d || []).forEach(x => { if (x.m === m && p === null) p = x.p; })); return p; }
+function twPpSumme(rows) {
+  const s = {}; const keys = ["spiele", "starts", "min", "min_detail", "goals", "pen_scored", "assists", "xg", "shots_total", "shots_on", "key_passes", "bc_created", "crosses_total", "crosses_acc", "passes", "passes_acc", "passes_final3", "long_balls", "long_balls_won", "dribbles_att", "dribbles_succ", "duels_total", "duels_won", "aerials_won", "aerials_lost", "tackles", "tackles_won", "interceptions", "clearances", "ball_recovery", "yellow", "red", "yellowred", "saves", "gk_conceded", "gk_conceded_sm", "opp_xgot", "high_claim", "punches", "zu_null", "err_shot", "err_goal"];
+  (rows || []).forEach(r => keys.forEach(k => { if (r && r[k] !== null && r[k] !== undefined) s[k] = (s[k] || 0) + Number(r[k]); }));
+  let tw = 0, twMin = 0; (rows || []).forEach(r => { if (r && r.tw_score != null && Number(r.min) > 0) { tw += Number(r.tw_score) * Number(r.min); twMin += Number(r.min); } });
+  s.tw_score = twMin > 0 ? Math.round(tw / twMin * 10) / 10 : null; return s;
+}
+function twPpCss() {
+  if (typeof document === "undefined" || document.getElementById("tw-pp-css")) return;
+  const st = document.createElement("style"); st.id = "tw-pp-css";
+  st.textContent = [
+    ":root { --pp-spinne: rgba(200,163,85,.24); --pp-spinne-rand: #C8A355; --pp-ring: rgba(255,255,255,.10); --pp-ring50: rgba(200,163,85,.42); --pp-kopf: rgba(23,24,25,.97); }",
+    "html.tw-dark { --pp-spinne: rgba(169,130,47,.18); --pp-spinne-rand: #A9822F; --pp-ring: rgba(15,23,32,.10); --pp-ring50: rgba(169,130,47,.45); --pp-kopf: rgba(244,246,248,.97); }",
+    ".tw-pp-ebene { position: fixed; inset: 0; z-index: 1300; background: var(--seite); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }",
+    ".tw-pp-kopf { position: sticky; top: 0; z-index: 20; background: var(--pp-kopf); -webkit-backdrop-filter: saturate(1.4) blur(14px); backdrop-filter: saturate(1.4) blur(14px); border-bottom: 1px solid var(--linie); }",
+    ".tw-pp-breite { max-width: 1680px; margin: 0 auto; padding-left: clamp(16px, 3vw, 44px); padding-right: clamp(16px, 3vw, 44px); }",
+    ".tw-pp-leiste { display: flex; align-items: center; gap: 12px; min-height: 64px; }",
+    ".tw-pp-titel { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; }",
+    ".tw-pp-titel .tw-pp-label { font-family: 'Inter', system-ui, sans-serif; font-size: 13px; font-weight: 600; color: var(--t2); }",
+    ".tw-pp-titel .tw-pp-mini { display: flex; align-items: center; gap: 10px; min-width: 0; opacity: 0; transform: translateY(4px); transition: opacity .18s, transform .18s; pointer-events: none; }",
+    ".tw-pp-titel.zeigt .tw-pp-mini { opacity: 1; transform: none; }",
+    ".tw-pp-titel.zeigt .tw-pp-label { display: none; }",
+    ".tw-pp-mini b { font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 21px; font-weight: 700; text-transform: uppercase; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }",
+    ".tw-pp-knopf { cursor: pointer; display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--linie2); background: var(--karte); color: var(--t1); font-family: 'Inter', system-ui, sans-serif; font-size: 13px; font-weight: 700; white-space: nowrap; }",
+    ".tw-pp-knopf:hover { border-color: var(--gold-rand); }",
+    ".tw-pp-knopf.an { background: var(--gold-tint); border-color: var(--gold-rand); color: var(--gold-text); }",
+    ".tw-pp-knopf:focus-visible, .tw-pp-reiter button:focus-visible, .tw-pp-zeile:focus-visible, .tw-pp-aehnlich-karte:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }",
+    ".tw-pp-knopf .kurz { display: none; }",
+    ".tw-pp-zu { width: 40px; padding: 0; justify-content: center; font-size: 15px; color: var(--t2); }",
+    ".tw-pp-reiter { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; margin-bottom: -1px; }",
+    ".tw-pp-reiter::-webkit-scrollbar { display: none; }",
+    ".tw-pp-reiter button { flex: none; cursor: pointer; background: none; border: none; border-bottom: 2px solid transparent; padding: 11px 14px 12px; font-family: 'Inter', system-ui, sans-serif; font-size: 13.5px; font-weight: 600; color: var(--t2); white-space: nowrap; transition: color .15s, border-color .2s; }",
+    ".tw-pp-reiter button:hover { color: var(--t1); }",
+    ".tw-pp-reiter button.aktiv { color: var(--t1); border-bottom-color: var(--gold); }",
+    ".tw-pp-inhalt { padding-top: 28px; padding-bottom: 96px; }",
+    ".tw-pp-abschnitt { scroll-margin-top: 130px; padding-top: 8px; margin-bottom: 44px; }",
+    ".tw-pp-h2 { font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 30px; font-weight: 700; line-height: 1.05; color: var(--t1); margin: 0 0 4px; }",
+    ".tw-pp-unter { font-family: 'Inter', system-ui, sans-serif; font-size: 13px; color: var(--t2); margin: 0 0 18px; line-height: 1.5; }",
+    ".tw-pp-karte { background: var(--karte); border: 1px solid var(--linie); border-radius: 16px; padding: 20px 22px; min-width: 0; }",
+    ".tw-pp-h3 { font-family: 'Inter', system-ui, sans-serif; font-size: 14px; font-weight: 700; color: var(--t1); margin: 0 0 14px; display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }",
+    ".tw-pp-h3 small { font-size: 12px; font-weight: 500; color: var(--t3); }",
+    ".tw-pp-raster { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 20px; align-items: start; }",
+    ".tw-pp-perf { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: 'k s' 'v s'; grid-template-rows: auto 1fr; gap: 20px; align-items: start; }",
+    ".tw-pp-perf-k { grid-area: k; min-width: 0; } .tw-pp-perf-s { grid-area: s; min-width: 0; } .tw-pp-perf-v { grid-area: v; }",
+    ".tw-pp-spalte { display: flex; flex-direction: column; gap: 20px; min-width: 0; }",
+    ".tw-pp-held { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 26px; align-items: center; margin-bottom: 24px; }",
+    ".tw-pp-name { font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: clamp(34px, 4.2vw, 54px); font-weight: 700; line-height: .98; text-transform: uppercase; letter-spacing: .3px; color: var(--t1); margin: 0; overflow-wrap: anywhere; }",
+    ".tw-pp-verein { display: flex; align-items: center; gap: 9px; margin-top: 10px; font-family: 'Inter', system-ui, sans-serif; font-size: 15px; font-weight: 600; color: var(--t1); flex-wrap: wrap; }",
+    ".tw-pp-verein span.liga { color: var(--t2); font-weight: 500; }",
+    ".tw-pp-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }",
+    ".tw-pp-chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--linie2); border-radius: 999px; padding: 5px 12px; font-family: 'Inter', system-ui, sans-serif; font-size: 12.5px; font-weight: 600; color: var(--t1); background: var(--karte); }",
+    ".tw-pp-chip i { font-style: normal; color: var(--t3); font-weight: 500; }",
+    ".tw-pp-score { display: flex; align-items: center; gap: 16px; background: var(--karte); border: 1px solid var(--linie); border-radius: 18px; padding: 16px 20px; min-width: 300px; }",
+    ".tw-pp-score-zahl { width: 84px; height: 84px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 44px; font-weight: 700; line-height: 1; flex: none; }",
+    ".tw-pp-score-zahl small { font-size: 13px; font-weight: 700; margin-top: 2px; }",
+    ".tw-pp-score-text { font-family: 'Inter', system-ui, sans-serif; font-size: 12.5px; color: var(--t2); line-height: 1.55; }",
+    ".tw-pp-score-text b { display: block; font-size: 14px; color: var(--t1); margin-bottom: 2px; }",
+    ".tw-pp-daten { display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; }",
+    ".tw-pp-dz { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--linie); font-family: 'Inter', system-ui, sans-serif; font-size: 13.5px; min-width: 0; }",
+    ".tw-pp-dz span { color: var(--t2); flex: none; }",
+    ".tw-pp-dz b { color: var(--t1); font-weight: 700; text-align: right; min-width: 0; overflow-wrap: anywhere; display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }",
+    ".tw-pp-mw { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; border: 1.5px solid var(--gold-rand); border-radius: 16px; padding: 16px 22px; background: linear-gradient(0deg, var(--gold-tint), var(--gold-tint)), var(--karte); }",
+    ".tw-pp-mw .wert { font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 34px; font-weight: 700; line-height: 1; color: var(--gold-text); }",
+    ".tw-pp-mw .text { flex: 1; min-width: 180px; font-family: 'Inter', system-ui, sans-serif; font-size: 12.5px; color: var(--t2); line-height: 1.5; }",
+    ".tw-pp-mw .text b { display: block; font-size: 13.5px; color: var(--t1); }",
+    ".tw-pp-tabelle { width: 100%; border-collapse: separate; border-spacing: 0; font-family: 'Inter', system-ui, sans-serif; font-size: 13px; font-variant-numeric: tabular-nums; }",
+    ".tw-pp-tabelle th { text-align: right; font-size: 11.5px; font-weight: 600; color: var(--t3); padding: 0 10px 10px; border-bottom: 1px solid var(--linie2); white-space: nowrap; }",
+    ".tw-pp-tabelle th:first-child, .tw-pp-tabelle td:first-child { text-align: left; padding-left: 0; }",
+    ".tw-pp-tabelle td { text-align: right; padding: 11px 10px; border-bottom: 1px solid var(--linie); color: var(--t1); white-space: nowrap; }",
+    ".tw-pp-seite table.tw-pp-tabelle tbody tr:nth-child(even) > td, .tw-main .tw-pp-seite table.tw-pp-tabelle tbody tr:nth-child(even) > td { background: transparent; }",
+    ".tw-pp-tabelle tbody tr:last-child td { border-bottom: none; }",
+    ".tw-pp-tabelle tfoot td { font-weight: 800; border-top: 1px solid var(--linie2); border-bottom: none; }",
+    ".tw-pp-tabelle td.leise { color: var(--t2); }",
+    ".tw-pp-zeile { cursor: pointer; }",
+    ".tw-pp-seite table.tw-pp-tabelle tbody tr.tw-pp-zeile:hover > td { background: var(--zeile-hover); }",
+    ".tw-pp-scroll { overflow-x: auto; }",
+    ".tw-pp-ergebnis { display: inline-flex; align-items: center; gap: 6px; }",
+    ".tw-pp-ergebnis i { font-style: normal; width: 20px; height: 20px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; }",
+    ".tw-pp-ergebnis i.s { background: var(--gold-tint); color: var(--gold-text); border: 1px solid var(--gold-rand); }",
+    ".tw-pp-ergebnis i.u { background: var(--karte2); color: var(--t2); border: 1px solid var(--linie2); }",
+    ".tw-pp-ergebnis i.n { background: var(--sc-schwach-bg); color: var(--sc-schwach-text); border: 1px solid var(--sc-schwach-rand); }",
+    ".tw-pp-kacheln { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }",
+    ".tw-pp-kachel { background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; padding: 14px 16px 13px; min-width: 0; }",
+    ".tw-pp-kachel .lab { font-family: 'Inter', system-ui, sans-serif; font-size: 12px; font-weight: 600; color: var(--t2); line-height: 1.3; min-height: 31px; }",
+    ".tw-pp-kachel .wert { font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 34px; font-weight: 700; color: var(--t1); line-height: 1.05; margin-top: 4px; }",
+    ".tw-pp-kachel .sub { font-family: 'Inter', system-ui, sans-serif; font-size: 11.5px; color: var(--t3); margin-top: 2px; min-height: 15px; }",
+    ".tw-pp-balken { height: 4px; border-radius: 4px; background: var(--karte2); margin-top: 10px; overflow: hidden; }",
+    ".tw-pp-balken span { display: block; height: 100%; border-radius: 4px; background: var(--t3); }",
+    ".tw-pp-balken span.hoch { background: var(--gold); }",
+    ".tw-pp-fuss { font-family: 'Inter', system-ui, sans-serif; font-size: 12px; color: var(--t3); line-height: 1.55; margin-top: 12px; }",
+    ".tw-pp-spinne-wrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }",
+    ".tw-pp-spinne svg { width: 100%; height: auto; display: block; max-width: 540px; margin: 0 auto; overflow: visible; }",
+    ".tw-pp-spinne .flaeche { transform-origin: 50% 50%; animation: twPpAuf .7s cubic-bezier(.2,.8,.2,1) both; }",
+    "@keyframes twPpAuf { from { transform: scale(.55); opacity: 0; } to { transform: scale(1); opacity: 1; } }",
+    "@media (prefers-reduced-motion: reduce) { .tw-pp-spinne .flaeche { animation: none; } .tw-pp-titel .tw-pp-mini { transition: none; } }",
+    ".tw-pp-spinne text { font-family: 'Inter', system-ui, sans-serif; }",
+    ".tw-pp-achse { cursor: pointer; }",
+    ".tw-pp-detail { border-top: 1px solid var(--linie); padding-top: 14px; }",
+    ".tw-pp-detail .kopf { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-family: 'Inter', system-ui, sans-serif; font-size: 14px; font-weight: 700; color: var(--t1); margin-bottom: 8px; }",
+    ".tw-pp-detail .kopf span { font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 24px; color: var(--gold-text); }",
+    ".tw-pp-metrik { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; font-family: 'Inter', system-ui, sans-serif; font-size: 12.5px; color: var(--t2); padding: 6px 0; }",
+    ".tw-pp-metrik b { color: var(--t1); font-weight: 700; text-align: right; }",
+    ".tw-pp-metrik .tw-pp-balken { grid-column: 1 / -1; margin-top: 4px; }",
+    ".tw-pp-staerken { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }",
+    ".tw-pp-staerken span { border: 1px solid var(--gold-rand); background: var(--gold-tint); color: var(--gold-text); border-radius: 999px; padding: 3px 10px; font-family: 'Inter', system-ui, sans-serif; font-size: 12px; font-weight: 700; }",
+    ".tw-pp-leer { font-family: 'Inter', system-ui, sans-serif; font-size: 13px; color: var(--t2); line-height: 1.55; padding: 6px 0; }",
+    ".tw-pp-zeitstrahl { display: flex; flex-direction: column; }",
+    ".tw-pp-station { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--linie); font-family: 'Inter', system-ui, sans-serif; font-size: 13px; color: var(--t1); }",
+    ".tw-pp-station:last-child { border-bottom: none; }",
+    ".tw-pp-station i { width: 9px; height: 9px; border-radius: 50%; background: var(--linie2); justify-self: center; }",
+    ".tw-pp-station i.akt { background: var(--gold); box-shadow: 0 0 0 3px var(--gold-tint); }",
+    ".tw-pp-station small { color: var(--t3); font-size: 12px; white-space: nowrap; }",
+    ".tw-pp-aehnlich { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }",
+    ".tw-pp-aehnlich-karte { cursor: pointer; display: flex; gap: 12px; align-items: center; background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; padding: 14px; text-align: left; min-width: 0; font: inherit; color: inherit; }",
+    ".tw-pp-aehnlich-karte:hover { border-color: var(--gold-rand); }",
+    ".tw-pp-aehnlich-karte .n { font-family: 'Inter', system-ui, sans-serif; font-size: 14px; font-weight: 800; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }",
+    ".tw-pp-aehnlich-karte .m { font-family: 'Inter', system-ui, sans-serif; font-size: 12px; color: var(--t2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }",
+    ".tw-pp-aehnlich-karte .p { font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 24px; font-weight: 700; color: var(--gold-text); line-height: 1; text-align: right; }",
+    ".tw-pp-aehnlich-karte .p small { display: block; font-family: 'Inter', system-ui, sans-serif; font-size: 10.5px; font-weight: 600; color: var(--t3); margin-top: 2px; }",
+    ".tw-pp-seite .tw-lk-profil .tw-lk-tab, .tw-pp-seite .tw-lk-profil > .tw-spn-mehr { display: none; }",
+    ".tw-pp-gesund { display: flex; flex-direction: column; gap: 12px; }",
+    ".tw-pp-hinweis { border-radius: 12px; padding: 10px 13px; font-family: 'Inter', system-ui, sans-serif; font-size: 13px; line-height: 1.5; }",
+    ".tw-pp-hinweis.rot { background: var(--sc-schwach-bg); border: 1px solid var(--sc-schwach-rand); color: var(--sc-schwach-text); }",
+    ".tw-pp-hinweis.blau { background: var(--karte2); border: 1px solid var(--linie2); color: var(--t1); }",
+    ".tw-pp-verl { display: flex; flex-direction: column; max-height: 230px; overflow-y: auto; }",
+    ".tw-pp-verl div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--linie); font-family: 'Inter', system-ui, sans-serif; font-size: 12.5px; color: var(--t1); }",
+    ".tw-pp-verl div small { color: var(--t3); white-space: nowrap; }",
+    ".tw-pp-ende { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--linie); padding-top: 18px; }",
+    "@media (max-width: 1180px) { .tw-pp-held { grid-template-columns: auto minmax(0, 1fr); } .tw-pp-held .tw-pp-score { grid-column: 1 / -1; min-width: 0; } .tw-pp-kacheln { grid-template-columns: repeat(2, minmax(0, 1fr)); } }",
+    "@media (max-width: 980px) { .tw-pp-raster { grid-template-columns: minmax(0, 1fr); } .tw-pp-perf { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'k' 's' 'v'; grid-template-rows: auto; } }",
+    "@media (max-width: 640px) { .tw-pp-held { grid-template-columns: minmax(0, 1fr); gap: 14px; } .tw-pp-held .tw-pp-foto { justify-self: start; } .tw-pp-daten { grid-template-columns: minmax(0, 1fr); } .tw-pp-karte { padding: 16px; border-radius: 14px; } .tw-pp-h2 { font-size: 26px; } .tw-pp-knopf .lang { display: none; } .tw-pp-knopf .kurz { display: inline; } .tw-pp-leiste { gap: 8px; min-height: 58px; } .tw-pp-inhalt { padding-top: 18px; } .tw-pp-kachel .wert { font-size: 28px; } .tw-pp-mw .wert { font-size: 28px; } }"
+  ].join("\n");
+  document.head.appendChild(st);
+}
+/* Stärken-Spinne: Perzentile je Achse (0–100) gegen die Vergleichsgruppe; 50 = Durchschnitt (gestrichelt) */
+function TwPpSpinne({ pp, aktiv, setAktiv }) {
+  const h = React.createElement; const en = LANG === "en";
+  const achsen = twPpAchsenListe(pp); const n = achsen.length; if (!n) return null;
+  const S = 460, c = S / 2, R = 158;
+  const pkt = (i, r) => { const w = (-90 + i * 360 / n) * Math.PI / 180; return [c + r * Math.cos(w), c + r * Math.sin(w)]; };
+  const ring = f => achsen.map((a, i) => pkt(i, R * f).map(z => z.toFixed(1)).join(",")).join(" ");
+  const flaeche = achsen.map((a, i) => pkt(i, R * Math.max(0.04, (a.v == null ? 0 : a.v) / 100)).map(z => z.toFixed(1)).join(",")).join(" ");
+  const label = (a, i) => {
+    const [x, y] = pkt(i, R + 30); const anker = Math.abs(x - c) < 8 ? "middle" : x > c ? "start" : "end";
+    const dy = y < c - R * .6 ? -12 : y > c + R * .6 ? 16 : 0; const an = aktiv === a.k; const stark = a.v != null && a.v >= 70;
+    return h("g", { key: "l" + a.k, className: "tw-pp-achse", onMouseEnter: () => setAktiv(a.k), onFocus: () => setAktiv(a.k), onClick: () => setAktiv(a.k), tabIndex: 0, role: "button", "aria-label": twPpAchseName(a.k) + ": " + (a.v == null ? (en ? "no data" : "keine Daten") : a.v) },
+      h("text", { x: x, y: y + dy, textAnchor: anker, style: { fontSize: 17, fontWeight: an ? 800 : 600, fill: an ? "var(--t1)" : "var(--t2)" } }, twPpAchseName(a.k)),
+      h("text", { x: x, y: y + dy + 23, textAnchor: anker, style: { fontSize: 22, fontWeight: 800, fill: a.v == null ? "var(--t3)" : stark ? "var(--gold-text)" : "var(--t1)", fontFamily: "'Barlow Condensed', 'Arial Narrow', sans-serif" } }, a.v == null ? "–" : String(a.v)));
+  };
+  const beschr = achsen.filter(a => a.v != null).map(a => twPpAchseName(a.k) + " " + a.v).join(", ");
+  return h("div", { className: "tw-pp-spinne" },
+    h("svg", { viewBox: "-95 -22 650 510", role: "img", "aria-label": (en ? "Strength profile: " : "Stärkenprofil: ") + beschr },
+      [1, .75, .5, .25].map(f => h("polygon", { key: "r" + f, points: ring(f), fill: "none", stroke: f === .5 ? "var(--pp-ring50)" : "var(--pp-ring)", strokeWidth: f === .5 ? 1.3 : 1, strokeDasharray: f === .5 ? "4 4" : null })),
+      achsen.map((a, i) => { const [x, y] = pkt(i, R); return h("line", { key: "a" + a.k, x1: c, y1: c, x2: x, y2: y, stroke: "var(--pp-ring)", strokeWidth: 1 }); }),
+      h("g", { className: "flaeche" },
+        h("polygon", { points: flaeche, fill: "var(--pp-spinne)", stroke: "var(--pp-spinne-rand)", strokeWidth: 2.2, strokeLinejoin: "round" }),
+        achsen.map((a, i) => { if (a.v == null) return null; const [x, y] = pkt(i, R * Math.max(0.04, a.v / 100)); return h("circle", { key: "p" + a.k, cx: x, cy: y, r: aktiv === a.k ? 6 : 4.2, fill: "var(--pp-spinne-rand)", stroke: "var(--karte)", strokeWidth: 2, onMouseEnter: () => setAktiv(a.k), style: { cursor: "pointer" } }); })),
+      achsen.map(label)));
+}
+/* Spinne als Bild (PNG) für das Profil-PDF – der PDF-Dienst nimmt kein SVG, aber eingebettete PNG-Bilder */
+const TW_PP_KURZ = { abschluss: ["Abschluss", "Finishing"], chancen: ["Chancen", "Chances"], dribbling: ["Dribbling", "Dribbling"], flanken: ["Flanken", "Crossing"], passspiel: ["Passspiel", "Passing"], balleroberung: ["Balleroberung", "Ball winning"], zweikampf: ["Zweikampf", "Duels"], luftzweikampf: ["Kopfball", "Aerial"], paraden: ["Paraden", "Saves"], paradenquote: ["Paradenquote", "Save rate"], torverhinderung: ["Verhindert", "Prevented"], strafraum: ["Strafraum", "Box control"], spielaufbau: ["Spielaufbau", "Distribution"], fehlerfrei: ["Fehlerfrei", "Error-free"] };
+function twPpSpinneBild(pp) {
+  try {
+    const achsen = twPpAchsenListe(pp); const n = achsen.length; if (!n) return "";
+    const k = 2.5, W = 540 * k, H = 430 * k, c = [270 * k, 214 * k], R = 118 * k;
+    const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const g = cv.getContext("2d"); if (!g) return "";
+    g.fillStyle = "#ffffff"; g.fillRect(0, 0, W, H);
+    const pkt = (i, r) => { const w = (-90 + i * 360 / n) * Math.PI / 180; return [c[0] + r * Math.cos(w), c[1] + r * Math.sin(w)]; };
+    const poly = (f, s, fill, dash, lw) => { g.beginPath(); achsen.forEach((a, i) => { const [x, y] = pkt(i, R * (typeof f === "function" ? f(a) : f)); if (i) g.lineTo(x, y); else g.moveTo(x, y); }); g.closePath(); if (fill) { g.fillStyle = fill; g.fill(); } g.setLineDash(dash || []); g.lineWidth = lw || k; g.strokeStyle = s; g.stroke(); g.setLineDash([]); };
+    [1, .75, .25].forEach(f => poly(f, "#e5e7eb", null, null, k)); poly(.5, "#c9a24e", null, [5 * k, 5 * k], 1.3 * k);
+    achsen.forEach((a, i) => { const [x, y] = pkt(i, R); g.beginPath(); g.moveTo(c[0], c[1]); g.lineTo(x, y); g.strokeStyle = "#e5e7eb"; g.lineWidth = k; g.stroke(); });
+    poly(a => Math.max(.04, (a.v == null ? 0 : a.v) / 100), "#A9822F", "rgba(169,130,47,.22)", null, 2.4 * k);
+    achsen.forEach((a, i) => { if (a.v == null) return; const [x, y] = pkt(i, R * Math.max(.04, a.v / 100)); g.beginPath(); g.arc(x, y, 4.5 * k, 0, Math.PI * 2); g.fillStyle = "#A9822F"; g.fill(); g.lineWidth = 2 * k; g.strokeStyle = "#ffffff"; g.stroke(); });
+    const en = LANG === "en";
+    achsen.forEach((a, i) => {
+      const [x, y] = pkt(i, R + 22 * k); g.textAlign = Math.abs(x - c[0]) < 8 * k ? "center" : x > c[0] ? "left" : "right";
+      const dy = y < c[1] - R * .6 ? -12 * k : y > c[1] + R * .6 ? 14 * k : 0;
+      const nm = (TW_PP_KURZ[a.k] || [a.k, a.k])[en ? 1 : 0];
+      g.fillStyle = "#374151"; g.font = "600 " + (16 * k) + "px Arial, Helvetica, sans-serif"; g.fillText(nm, x, y + dy);
+      g.fillStyle = a.v != null && a.v >= 70 ? "#7D5F1A" : "#111827"; g.font = "700 " + (19 * k) + "px Arial, Helvetica, sans-serif"; g.fillText(a.v == null ? "–" : String(a.v), x, y + dy + 20 * k);
+    });
+    return cv.toDataURL("image/png");
+  } catch (e) { return ""; }
+}
+function twPpKacheln(pp) {
+  const en = LANG === "en"; if (!pp || !pp.saison || !pp.saison.length) return [];
+  const s = twPpSumme(pp.saison); const gr = pp.haupt && pp.haupt.gruppe; const min = s.min || 0; const md = s.min_detail || 0;
+  const je90 = (v, m) => (v == null || !(m || min)) ? "" : twPpZ(v * 90 / (m || min), 2) + (en ? " per 90" : " je 90 Min.");
+  const K = (lab, wert, sub, m) => ({ lab: lab, wert: wert, sub: sub || "", p: m ? twPpMetrikP(pp, m) : null });
+  const L = (de, e) => en ? e : de;
+  const pq = twPpQuote(s.passes_acc, s.passes), zq = twPpQuote(s.duels_won, s.duels_total), aq = twPpQuote(s.aerials_won, (s.aerials_won || 0) + (s.aerials_lost || 0));
+  if (gr === "TW") {
+    const sq = twPpQuote(s.saves, (s.saves || 0) + (s.gk_conceded || 0)); const verh = s.opp_xgot != null && s.gk_conceded_sm != null ? s.opp_xgot - s.gk_conceded_sm : null;
+    return [K(L("Paraden", "Saves"), twPpZ(s.saves), je90(s.saves), "paraden90"), K(L("Paradenquote", "Save percentage"), sq == null ? "–" : sq + " %", "", "paradenquote"),
+      K(L("Zu-null-Spiele", "Clean sheets"), twPpZ(s.zu_null), s.spiele ? (en ? "of " : "von ") + s.spiele + (en ? " matches" : " Spielen") : ""), K(L("Gegentore", "Goals conceded"), twPpZ(s.gk_conceded), je90(s.gk_conceded)),
+      K(L("Verhinderte Gegentore", "Goals prevented"), verh == null ? "–" : (verh > 0 ? "+" : "") + twPpZ(verh, 1), L("xGOT minus Gegentore", "xGOT minus goals conceded"), "verhindert90"),
+      K(L("Strafraumbeherrschung", "Box control"), twPpZ((s.high_claim || 0) + (s.punches || 0)), L("Flanken abgefangen oder gefaustet", "Crosses claimed or punched"), "strafraum90"),
+      K(L("Passquote", "Pass accuracy"), pq == null ? "–" : pq + " %", s.passes ? twPpZ(s.passes) + L(" Pässe", " passes") : "", "passquote"), K(L("Fehler vor Gegentor", "Errors leading to goal"), twPpZ(s.err_goal), L("Fehler vor Schuss: ", "Errors leading to shot: ") + twPpZ(s.err_shot), "fehler90")];
+  }
+  if (gr === "IV" || gr === "AV") {
+    const erst = gr === "AV" ? K(L("Angekommene Flanken", "Accurate crosses"), twPpZ(s.crosses_acc), je90(s.crosses_acc, md), "flanken_genau90") : K(L("Klärende Aktionen", "Clearances"), twPpZ(s.clearances), je90(s.clearances, md));
+    return [K(L("Zweikampfquote", "Duel success"), zq == null ? "–" : zq + " %", s.duels_total ? twPpZ(s.duels_won) + L(" von ", " of ") + twPpZ(s.duels_total) : "", "zweikampfquote"),
+      K(L("Kopfballduelle gewonnen", "Aerial duels won"), twPpZ(s.aerials_won), aq == null ? "" : aq + L(" % gewonnen", " % won"), "kopfball90"),
+      K(L("Abgefangene Bälle", "Interceptions"), twPpZ(s.interceptions), je90(s.interceptions), "abgefangen90"), K(L("Tacklings gewonnen", "Tackles won"), twPpZ(s.tackles_won), je90(s.tackles_won, md), "tacklings90"),
+      K(L("Ballgewinne", "Ball recoveries"), twPpZ(s.ball_recovery), je90(s.ball_recovery, md), "ballgewinne90"), erst,
+      K(L("Passquote", "Pass accuracy"), pq == null ? "–" : pq + " %", s.passes ? twPpZ(s.passes) + L(" Pässe", " passes") : "", "passquote"),
+      K(L("Tore und Vorlagen", "Goals and assists"), twPpZ((s.goals || 0) + (s.assists || 0)), twPpZ(s.goals) + (Number(s.goals) === 1 ? L(" Tor · ", " goal · ") : L(" Tore · ", " goals · ")) + twPpZ(s.assists) + (Number(s.assists) === 1 ? L(" Vorlage", " assist") : L(" Vorlagen", " assists")))];
+  }
+  if (gr === "ZM") {
+    return [K(L("Tore", "Goals"), twPpZ(s.goals), je90(s.goals), "tore90"), K(L("Vorlagen", "Assists"), twPpZ(s.assists), je90(s.assists), "vorlagen90"),
+      K("Expected Goals (xG)", s.xg == null ? "–" : twPpZ(s.xg, 2), s.xg == null ? "" : je90(s.xg, md), "xg90"), K(L("Schlüsselpässe", "Key passes"), twPpZ(s.key_passes), je90(s.key_passes), "schluesselpaesse90"),
+      K(L("Passquote", "Pass accuracy"), pq == null ? "–" : pq + " %", s.passes ? twPpZ(s.passes) + L(" Pässe", " passes") : "", "passquote"), K(L("Pässe ins letzte Drittel", "Passes into final third"), twPpZ(s.passes_final3), je90(s.passes_final3, md), "paesse_letztes_drittel90"),
+      K(L("Ballgewinne", "Ball recoveries"), twPpZ(s.ball_recovery), je90(s.ball_recovery, md), "ballgewinne90"), K(L("Zweikampfquote", "Duel success"), zq == null ? "–" : zq + " %", s.duels_total ? twPpZ(s.duels_won) + L(" von ", " of ") + twPpZ(s.duels_total) : "", "zweikampfquote")];
+  }
+  const tb = (s.goals || 0) + (s.assists || 0); const dq = twPpQuote(s.dribbles_succ, s.dribbles_att);
+  return [K(L("Tore", "Goals"), twPpZ(s.goals), je90(s.goals), "tore90"), K("Expected Goals (xG)", s.xg == null ? "–" : twPpZ(s.xg, 2), s.xg == null ? "" : je90(s.xg, md), "xg90"),
+    K(L("Vorlagen", "Assists"), twPpZ(s.assists), je90(s.assists), "vorlagen90"), K(L("Schüsse aufs Tor", "Shots on target"), twPpZ(s.shots_on), s.shots_total ? L("von ", "of ") + twPpZ(s.shots_total) + L(" Schüssen", " shots") : "", "aufs_tor90"),
+    K(L("Großchancen kreiert", "Big chances created"), twPpZ(s.bc_created), je90(s.bc_created, md), "grosschancen90"), K(L("Schlüsselpässe", "Key passes"), twPpZ(s.key_passes), je90(s.key_passes), "schluesselpaesse90"),
+    K(L("Erfolgreiche Dribblings", "Successful dribbles"), twPpZ(s.dribbles_succ), dq == null ? "" : dq + L(" % erfolgreich", " % success"), "dribblings90"),
+    K(L("Minuten je Torbeteiligung", "Minutes per goal involvement"), tb ? twPpZ(Math.round(min / tb)) : "–", twPpZ(tb) + (tb === 1 ? L(" Torbeteiligung", " goal involvement") : L(" Torbeteiligungen", " goal involvements")))];
+}
+function TwPpKennzahlen({ pp }) {
+  const h = React.createElement; const en = LANG === "en"; const k = twPpKacheln(pp);
+  if (!k.length) return h("div", { className: "tw-pp-karte tw-pp-leer" }, en ? "No appearances in the current season yet." : "In der laufenden Saison liegen noch keine Einsätze vor.");
+  const s = twPpSumme(pp.saison); const g = TW_PP_GRUPPE[(pp.haupt || {}).gruppe] || ["Spielern", "players"];
+  return h("div", null,
+    h("div", { className: "tw-pp-kacheln" }, k.map((x, i) => h("div", { key: i, className: "tw-pp-kachel", title: x.p != null ? (en ? "Better than " + x.p + " % of comparable " + g[1] : "Besser als " + x.p + " % der vergleichbaren " + g[0].replace(/n$/, "")) : undefined },
+      h("div", { className: "lab" }, x.lab), h("div", { className: "wert" }, x.wert), h("div", { className: "sub" }, x.sub),
+      x.p != null ? h("div", { className: "tw-pp-balken", "aria-label": (en ? "Percentile " : "Perzentil ") + x.p }, h("span", { className: x.p >= 70 ? "hoch" : "", style: { width: Math.max(3, Math.min(100, x.p)) + "%" } })) : null))),
+    h("div", { className: "tw-pp-fuss" }, (en ? "Current season, all league matches. The bar shows the percentile within the comparison group of the strength profile." : "Laufende Saison, alle Ligaspiele. Der Balken zeigt das Perzentil in der Vergleichsgruppe des Stärkenprofils.")
+      + (s.min_detail != null && s.min && s.min_detail < s.min ? (en ? " Detailed values (xG, big chances, crosses, aerial duels, ball recoveries, tackles) come from " + twPpZ(s.min_detail) + " of " + twPpZ(s.min) + " minutes; for the remaining matches the source only delivers basic values." : " Detailwerte (xG, Großchancen, Flanken, Kopfballduelle, Ballgewinne, Tacklings) stammen aus " + twPpZ(s.min_detail) + " von " + twPpZ(s.min) + " Einsatzminuten; für die übrigen Spiele liefert die Quelle nur Grundwerte.") : "")));
+}
+function TwPpStaerken({ pp }) {
+  const h = React.createElement; const en = LANG === "en";
+  const achsen = twPpAchsenListe(pp); const [aktiv, setAktiv] = React.useState(null);
+  const mitWert = achsen.filter(a => a.v != null);
+  const start = mitWert.slice().sort((a, b) => b.v - a.v)[0];
+  const akt = achsen.find(a => a.k === (aktiv || (start && start.k)));
+  if (!pp || !pp.radar || !mitWert.length) return h("div", { className: "tw-pp-karte" }, h("div", { className: "tw-pp-h3" }, en ? "Strength profile" : "Stärkenprofil"),
+    h("div", { className: "tw-pp-leer" }, pp && pp.haupt && Number(pp.haupt.min) < 180 ? (en ? "Too little playing time this season for a reliable strength profile (at least 180 minutes)." : "Zu wenig Einsatzzeit in dieser Saison für ein belastbares Stärkenprofil (mindestens 180 Minuten).") : (en ? "No strength profile available for this player yet." : "Für diesen Spieler liegt noch kein Stärkenprofil vor.")));
+  const stark = mitWert.filter(a => a.v >= 70).sort((a, b) => b.v - a.v);
+  return h("div", { className: "tw-pp-karte tw-pp-spinne-wrap" },
+    h("div", { className: "tw-pp-h3" }, en ? "Strength profile" : "Stärkenprofil", h("small", null, (TW_PP_GRUPPE[pp.haupt.gruppe] || [])[en ? 3 : 2] || "")),
+    h(TwPpSpinne, { pp: pp, aktiv: akt && akt.k, setAktiv: setAktiv }),
+    stark.length ? h("div", { className: "tw-pp-staerken", "aria-label": en ? "Strengths" : "Stärken" }, stark.map(a => h("span", { key: a.k }, twPpAchseName(a.k) + " " + a.v))) : null,
+    akt ? h("div", { className: "tw-pp-detail" },
+      h("div", { className: "kopf" }, twPpAchseName(akt.k), h("span", null, akt.v == null ? "–" : akt.v)),
+      akt.d.length ? akt.d.map(m => h("div", { key: m.m, className: "tw-pp-metrik" }, h("span", null, twPpMetrikName(m.m)), h("b", null, twPpMetrikWert(m.m, m.w)),
+        h("div", { className: "tw-pp-balken" }, h("span", { className: m.p >= 70 ? "hoch" : "", style: { width: Math.max(3, Math.min(100, m.p)) + "%" } }))))
+        : h("div", { className: "tw-pp-leer" }, en ? "Not enough data for this area." : "Für diesen Bereich reichen die Daten nicht.")) : null,
+    h("div", { className: "tw-pp-fuss", style: { marginTop: 0 } }, twPpVergleichText(pp) + (en ? " Dashed line = group average (50), outer ring = best in the group (100)." : " Gestrichelte Linie = Durchschnitt der Gruppe (50), äußerer Ring = Bestwert der Gruppe (100).")));
+}
+function TwPpSaison({ pp }) {
+  const h = React.createElement; const en = LANG === "en"; const rows = (pp && pp.saison) || [];
+  if (!rows.length) return h("div", { className: "tw-pp-karte tw-pp-leer" }, en ? "No appearances in the current season yet." : "In der laufenden Saison liegen noch keine Einsätze vor.");
+  const tw = (pp.haupt && pp.haupt.gruppe) === "TW";
+  const sp = tw ? [["spiele", en ? "Apps" : "Sp."], ["min", "Min."], ["gk_conceded", en ? "Conceded" : "Gegentore"], ["zu_null", en ? "Clean sheets" : "Zu null"], ["saves", en ? "Saves" : "Paraden"], ["sq", en ? "Save %" : "Paradenquote"], ["pq", en ? "Pass %" : "Passquote"], ["yellow", en ? "Yellow" : "Gelb"], ["red", en ? "Red" : "Rot"], ["tw_score", "Ø TW Score"]]
+    : [["spiele", en ? "Apps" : "Sp."], ["starts", en ? "Starts" : "Startelf"], ["min", "Min."], ["goals", en ? "Goals" : "Tore"], ["assists", en ? "Assists" : "Vorl."], ["xg", "xG"], ["shots", en ? "Shots (on target)" : "Schüsse (aufs Tor)"], ["pq", en ? "Pass %" : "Passquote"], ["zq", en ? "Duels %" : "Zweikampfquote"], ["yellow", en ? "Yellow" : "Gelb"], ["red", en ? "Red" : "Rot"], ["tw_score", "Ø TW Score"]];
+  const zelle = (r, k) => {
+    if (k === "xg") return r.xg == null ? "–" : twPpZ(r.xg, 2);
+    if (k === "shots") return r.shots_total == null ? "–" : twPpZ(r.shots_total) + " (" + twPpZ(r.shots_on) + ")";
+    if (k === "pq") { const q = twPpQuote(r.passes_acc, r.passes); return q == null ? "–" : q + " %"; }
+    if (k === "zq") { const q = twPpQuote(r.duels_won, r.duels_total); return q == null ? "–" : q + " %"; }
+    if (k === "sq") { const q = twPpQuote(r.saves, (r.saves || 0) + (r.gk_conceded || 0)); return q == null ? "–" : q + " %"; }
+    if (k === "red") return twPpZ((Number(r.red) || 0) + (Number(r.yellowred) || 0));
+    if (k === "tw_score") return r.tw_score == null ? "–" : h(TwLkNoteBadge, { note: r.tw_score });
+    return twPpZ(r[k]);
+  };
+  const summe = rows.length > 1 ? Object.assign(twPpSumme(rows), { league: en ? "Total" : "Gesamt" }) : null;
+  return h("div", { className: "tw-pp-karte" },
+    h("div", { className: "tw-pp-scroll" }, h("table", { className: "tw-pp-tabelle" },
+      h("thead", null, h("tr", null, h("th", null, en ? "Competition" : "Wettbewerb"), h("th", null, en ? "Season" : "Saison"), sp.map(([k, l]) => h("th", { key: k }, l)))),
+      h("tbody", null, rows.map((r, i) => h("tr", { key: r.league + i }, h("td", null, h("span", { style: { fontWeight: 700 } }, r.league)), h("td", { className: "leise" }, r.saison), sp.map(([k]) => h("td", { key: k }, zelle(r, k)))))),
+      summe ? h("tfoot", null, h("tr", null, h("td", null, summe.league), h("td", null, ""), sp.map(([k]) => h("td", { key: k }, zelle(summe, k))))) : null)),
+    h("div", { className: "tw-pp-fuss" }, (en ? "Current season · last match " : "Laufende Saison · letztes Spiel ") + (twPpDatum(pp.letztes) || "–") + (en ? " · Sources: Sportmonks and API-Football · updated every 2 hours" : " · Quellen: Sportmonks und API-Football · Aktualisierung alle 2 Stunden")));
+}
+function TwPpSpiele({ pid, d, onAlle }) {
+  const h = React.createElement; const en = LANG === "en";
+  const [spiele, setSpiele] = React.useState(null); const [analyse, setAnalyse] = React.useState(null);
+  React.useEffect(() => { let ok = true; setSpiele(null); Promise.resolve(pkLadeSpiele(pid)).then(l => { if (ok) setSpiele(Array.isArray(l) ? l : []); }).catch(() => { if (ok) setSpiele([]); }); return () => { ok = false; }; }, [pid]);
+  if (spiele === null) return h("div", { className: "tw-pp-karte" }, h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), en ? "Loading matches …" : "Spiele werden geladen …"));
+  const liste = spiele.slice().sort((a, b) => String(b.datum || "").localeCompare(String(a.datum || ""))).slice(0, 10);
+  const x = { pid: pid, name: d.name, foto: d.photo, team: d.team, league: d.league, pos: d.pos };
+  const erg = s => { const eig = s.heim === false ? s.tore_gast : s.tore_heim, geg = s.heim === false ? s.tore_heim : s.tore_gast; if (eig == null || geg == null) return h("span", { className: "leise" }, "–"); const k = Number(eig) > Number(geg) ? "s" : Number(eig) < Number(geg) ? "n" : "u"; return h("span", { className: "tw-pp-ergebnis" }, h("i", { className: k }, en ? { s: "W", u: "D", n: "L" }[k] : { s: "S", u: "U", n: "N" }[k]), eig + ":" + geg); };
+  return h("div", { className: "tw-pp-karte" },
+    h("div", { className: "tw-pp-h3" }, en ? "Recent matches" : "Letzte Spiele", h("small", null, en ? "Click a match for the match analysis" : "Klick auf ein Spiel öffnet die Spielanalyse")),
+    liste.length === 0 ? h("div", { className: "tw-pp-leer" }, en ? "No matches with statistics yet." : "Noch keine Spiele mit Statistik.") :
+      h("div", { className: "tw-pp-scroll" }, h("table", { className: "tw-pp-tabelle" },
+        h("thead", null, h("tr", null, [en ? "Match" : "Spiel", en ? "Date" : "Datum", en ? "Result" : "Ergebnis", "Min.", en ? "Goals" : "Tore", en ? "Assists" : "Vorl.", en ? "Shots" : "Schüsse", en ? "Passes" : "Pässe", en ? "Duels won" : "Zweikämpfe", "TW Score"].map((l, i) => h("th", { key: i }, l)))),
+        h("tbody", null, liste.map((s, i) => h("tr", { key: (s.fixture_id || "") + "-" + i, className: "tw-pp-zeile", tabIndex: 0, onClick: () => setAnalyse(s), onKeyDown: e => { if (e.key === "Enter") setAnalyse(s); } },
+          h("td", null, h("span", { style: { fontWeight: 700 } }, (s.heim === false ? "@ " : (en ? "vs " : "vs. ")) + (s.gegner || "?")), h("span", { style: { color: "var(--t3)", fontSize: 12 } }, s.league ? " · " + s.league : "")),
+          h("td", { className: "leise" }, twPpDatum(s.datum)), h("td", null, erg(s)), h("td", null, twPpZ(s.minutes)), h("td", null, twPpZ(s.tore)), h("td", null, twPpZ(s.vorlagen)),
+          h("td", null, s.schuesse == null ? "–" : twPpZ(s.schuesse)), h("td", null, s.paesse == null ? "–" : twPpZ(s.paesse) + (s.pass_q != null ? " (" + twPpZ(s.pass_q) + " %)" : "")),
+          h("td", null, s.duelle == null ? "–" : twPpZ(s.duelle_gew) + "/" + twPpZ(s.duelle)), h("td", null, (s.tw_score != null || s.score_v2 != null) ? h(TwLkNoteBadge, { note: Number(s.score_v2 != null ? s.score_v2 : s.tw_score) }) : "–")))))),
+    spiele.length ? h("div", { style: { marginTop: 14 } }, h("button", { type: "button", className: "tw-pp-knopf", onClick: onAlle }, (en ? "All matches and match analyses" : "Alle Spiele und Spielanalysen") + " (" + spiele.length + ")")) : null,
+    analyse ? h(React.Fragment, null, h("div", { className: "tw-28-ebene", "aria-hidden": "true", style: { display: "none" } }), h(SpielAnalyse, { x: Object.assign({}, x, { name: d.name, foto: d.photo }), spiel: analyse, onClose: () => setAnalyse(null) })) : null);
+}
+function TwPpAehnliche({ pid, d, onOpenPlayer, onAlle }) {
+  const h = React.createElement; const en = LANG === "en"; const [l, setL] = React.useState(null);
+  React.useEffect(() => { let ok = true; setL(null); fetch("/api/tw-aehnlich?pid=" + encodeURIComponent(pid) + "&n=8", { credentials: "omit" }).then(r => r.json()).then(x => { if (ok) setL(x && x.ok && Array.isArray(x.liste) ? x.liste : []); }).catch(() => { if (ok) setL([]); }); return () => { ok = false; }; }, [pid]);
+  if (l === null) return h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), en ? "Finding similar players …" : "Ähnliche Spieler werden gesucht …");
+  if (!l.length) return h("div", { className: "tw-pp-karte tw-pp-leer" }, en ? "No similar players found." : "Keine ähnlichen Spieler gefunden.");
+  return h("div", null,
+    h("div", { className: "tw-pp-aehnlich" }, l.slice(0, 8).map(s => h("button", { key: s.pid, type: "button", className: "tw-pp-aehnlich-karte", onClick: () => onOpenPlayer(s.pid, s.name, s.team) },
+      h(DbFoto, { x: { name: s.name, photo: s.photo }, size: 48 }),
+      h("div", { style: { minWidth: 0, flex: 1 } }, h("div", { className: "n" }, s.name), h("div", { className: "m" }, clubName(s.team) + (s.league ? " · " + s.league : "")), h("div", { className: "m" }, [s.pos, s.age ? s.age + (en ? " yrs" : " J.") : ""].filter(Boolean).join(" · "))),
+      s.aehnlichkeit != null ? h("div", { className: "p" }, s.aehnlichkeit + " %", h("small", null, en ? "match" : "ähnlich")) : null))),
+    h("div", { style: { marginTop: 14 } }, h("button", { type: "button", className: "tw-pp-knopf", onClick: onAlle }, en ? "Open the full comparison page" : "Alle ähnlichen Spieler mit Vergleich ansehen")));
+}
+function TwPpDaten({ d, pid, profil, plDetail }) {
+  const h = React.createElement; const en = LANG === "en"; const [info, setInfo] = React.useState(null);
+  React.useEffect(() => { if (!pid) return; let ok = true; fetch("/db/players?player_id=eq." + encodeURIComponent(pid) + "&select=name,birth_date,age,height,weight,nationality,position,foot,team,league,tm_joined,contract_until,tm_value_text,mw_status,mw_von,mw_bis", { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(rows => { if (ok && Array.isArray(rows) && rows[0]) setInfo(rows[0]); }).catch(() => {}); return () => { ok = false; }; }, [pid]);
+  const x = Object.assign({}, d || {}, info || {});
+  const groesse = (() => { const n = parseFloat(String(x.height || "").replace(",", ".")); if (!n) return ""; return n > 3 ? (n / 100).toFixed(2).replace(".", en ? "." : ",") + " m" : n.toFixed(2).replace(".", en ? "." : ",") + " m"; })();
+  const gewicht = (() => { const n = parseFloat(String(x.weight || "").replace(",", ".")); return n ? Math.round(n) + " kg" : ""; })();
+  const fuss = x.foot ? ({ rechts: en ? "right" : "rechts", links: en ? "left" : "links", "beidfüßig": en ? "both feet" : "beidfüßig" })[x.foot] || x.foot : "";
+  const nat = x.nationality || x.nat || "";
+  const zeilen = [[en ? "Date of birth" : "Geburtsdatum", x.birth_date ? fmtTag(x.birth_date) + (x.age ? " (" + x.age + ")" : "") : ""], [en ? "Citizenship" : "Staatsbürgerschaft", nat ? h(React.Fragment, null, landFlagge(nat), nat) : ""],
+    [en ? "Height" : "Größe", groesse], [en ? "Weight" : "Gewicht", gewicht], [en ? "Position" : "Position", x.position || x.pos], [en ? "Foot" : "Fuß", fuss],
+    [en ? "Current club" : "Aktueller Verein", x.team ? h(React.Fragment, null, h(ClubLogo, { name: x.team, size: 18 }), clubName(x.team)) : ""], [en ? "League" : "Liga", x.league],
+    [en ? "In the team since" : "Im Team seit", x.tm_joined ? fmtTag(x.tm_joined) : ""], [en ? "Contract until" : "Vertrag bis", x.contract_until ? fmtTag(x.contract_until) : ""],
+    [en ? "Agent" : "Berater", profil && profil.berater ? profil.berater : ""]].filter(z => z[1]);
+  const mwText = x.tm_value_text || "";
+  return h("div", { className: "tw-pp-spalte" },
+    h("div", { className: "tw-pp-karte" }, h("div", { className: "tw-pp-h3" }, en ? "Player data" : "Spielerdaten"),
+      h("div", { className: "tw-pp-daten" }, zeilen.map((z, i) => h("div", { key: i, className: "tw-pp-dz" }, h("span", null, z[0]), h("b", null, z[1]))))),
+    h("div", { className: "tw-pp-mw", role: "group", "aria-label": en ? "Market value" : "Marktwert" },
+      h("div", null, h("div", { style: { fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, color: "var(--gold-text)", marginBottom: 6 } }, en ? "Market value" : "Marktwert"),
+        h("div", { className: "wert" }, mwText || (x.mw_status === "unzureichend" ? (en ? "insufficient data" : "Datenlage unzureichend") : "–"))),
+      h("div", { className: "text" }, h("b", null, en ? "TransferWire model" : "TransferWire-Modell"), x.mw_von && x.mw_bis ? (en ? "Range " : "Spanne ") + twPpGeld(x.mw_von) + " – " + twPpGeld(x.mw_bis) : (en ? "Indicative estimate from performance, age, league and contract." : "Indikative Schätzung aus Leistung, Alter, Liga und Vertrag.")),
+      h("button", { type: "button", className: "tw-pp-knopf", onClick: () => { if (typeof window.twMarktwertOeffnen === "function") window.twMarktwertOeffnen({ pid: pid, name: x.name, team: x.team }); } }, en ? "Market value analysis" : "Marktwertanalyse")));
+}
+function twPpGeld(v) { const n = Number(v); if (!n) return "–"; const en = LANG === "en"; return n >= 1e6 ? (Math.round(n / 1e5) / 10).toLocaleString(en ? "en-GB" : "de-DE") + (en ? "m €" : " Mio. €") : Math.round(n / 1e3).toLocaleString(en ? "en-GB" : "de-DE") + (en ? "k €" : " Tsd. €"); }
+function TwPpGesundheit({ plDetail, plExtra, d }) {
+  const h = React.createElement; const en = LANG === "en"; const ex = plExtra && plExtra.pid === d.pid ? plExtra : null;
+  const hist = historieOhneSperren(plDetail.historie || []).slice(0, 20);
+  return h("div", { className: "tw-pp-karte tw-pp-gesund" },
+    h("div", { className: "tw-pp-h3", style: { marginBottom: 2 } }, en ? "Fitness and availability" : "Fitness und Verfügbarkeit", hist.length ? h("small", null, verletzungSumme(plDetail.historie)) : null),
+    plDetail.injuries && plDetail.injuries.length ? h("div", { className: "tw-pp-hinweis rot" }, h("b", null, t("pl_injury") + ": "), plDetail.injuries.map(i => verletzungDe(i.grund)).join(" · ")) : h("div", { className: "tw-pp-hinweis blau" }, en ? "No current injury reported." : "Keine aktuelle Verletzung gemeldet."),
+    d.fitness_note ? h("div", { className: "tw-pp-hinweis blau" }, h("b", null, t("px_fitness") + ": "), twFitnessText(d.fitness_note)) : null,
+    ex ? h("div", { style: { display: "flex", alignItems: "center", gap: 12 } }, h("span", { style: { minWidth: 48, textAlign: "center", background: scoreBg(ex.robust), border: "1px solid " + scoreRand(ex.robust), color: scoreTxt(ex.robust), borderRadius: 10, padding: "7px 0", fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 18 } }, ex.robust),
+      h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t2)", lineHeight: 1.5 } }, h("b", { style: { color: "var(--t1)", display: "block" } }, t("px_robust")), t("px_robust_sub") + ": " + ex.faelle24 + " " + t("px_faelle") + " · " + ex.tage24 + " " + t("px_tage") + (ex.muskel24 ? " · " + ex.muskel24 + "× " + t("px_muskel") : ""))) : null,
+    hist.length ? h("div", null, h("div", { style: { fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 700, color: "var(--t1)", margin: "4px 0 4px" } }, en ? "Injury history" : "Verletzungshistorie"),
+      h("div", { className: "tw-pp-verl" }, hist.map((v, i) => h("div", { key: i }, h("span", { style: { fontWeight: (v.aktiv && !v.bis) || Number(v.spiele) >= 10 || tageZwischen(v.von, v.bis) >= 30 ? 700 : 500 } }, verletzungDe(v.grund)),
+        h("small", null, (v.von ? twPpDatum(v.von) : "?") + " – " + (v.bis ? twPpDatum(v.bis) : (en ? "ongoing" : "laufend")) + (v.spiele ? " · " + v.spiele + (Number(v.spiele) === 1 ? (en ? " game" : " Spiel") : (en ? " games" : " Spiele")) : "")))))) : h("div", { className: "tw-pp-leer" }, t("px_hist_none")));
+}
+function TwPpVereine({ vereine }) {
+  const h = React.createElement; const en = LANG === "en";
+  const l = (vereine || []).slice().sort((a, b) => String(b.von || "").localeCompare(String(a.von || ""))).slice(0, 10);
+  if (!l.length) return null;
+  const jahr = v => String(v || "").slice(0, 4);
+  return h("div", { className: "tw-pp-karte" }, h("div", { className: "tw-pp-h3" }, en ? "Club history" : "Vereinshistorie"),
+    h("div", { className: "tw-pp-zeitstrahl" }, l.map((v, i) => h("div", { key: i, className: "tw-pp-station" }, h("i", { className: v.aktuell ? "akt" : "" }),
+      h("span", { style: { display: "inline-flex", alignItems: "center", gap: 8, minWidth: 0 } }, h(ClubLogo, { name: v.team, size: 18 }), h("span", { style: { fontWeight: v.aktuell ? 800 : 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, clubName(v.team)), v.liga ? h("small", null, v.liga) : null),
+      h("small", null, (v.genau ? "" : (en ? "since " : "seit ")) + jahr(v.von) + " – " + (v.aktuell ? (en ? "today" : "heute") : jahr(v.bis)))))));
+}
+function TwPpVideos({ d, plExtra, plVidLoading, ladeExtra }) {
+  const h = React.createElement; const ex = plExtra && plExtra.pid === d.pid ? plExtra : null;
+  return h("div", { className: "tw-pp-karte" }, h("div", { className: "tw-pp-h3" }, t("px_videos")),
+    ex && ex.videos && ex.videos.length ? h("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12 } }, ex.videos.map((v, i) => twVideoLink(v, i)))
+      : h("div", null, h("div", { className: "tw-pp-leer", style: { marginBottom: 10 } }, plVidLoading ? t("px_vid_loading") : t("px_vid_none")),
+        !plVidLoading ? h("div", { style: { display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" } }, h("button", { type: "button", className: "tw-pp-knopf", onClick: () => ladeExtra(d.pid, d.name, d.team, true) }, t("px_vid_btn")),
+          h("a", { href: "https://www.youtube.com/results?search_query=" + encodeURIComponent(d.name + " highlights"), target: "_blank", rel: "noreferrer", style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 700, color: "var(--t1)", textDecoration: "underline" } }, t("px_yt"))) : null));
+}
+const TW_PP_ABSCHNITTE = [["profil", "Profil", "Profile"], ["statistik", "Spielstatistiken", "Match statistics"], ["leistung", "Spieler-Performance", "Player performance"], ["news", "News", "News"], ["aehnlich", "Ähnliche Spieler", "Similar players"]];
+function TwSpielerSeite({ plDetail, laedt, plTab, plExtra, plVidLoading, ladeExtra, watch, addWatch, removeWatch, onSchliessen, onZurueck, zurueckMitPerf, onAehnlich, onOpenPlayer, onWatchNews }) {
+  const h = React.createElement; const en = LANG === "en"; twPpCss();
+  const ebene = React.useRef(null), kopf = React.useRef(null), held = React.useRef(null);
+  const [aktiv, setAktiv] = React.useState("profil"); const [kompakt, setKompakt] = React.useState(false);
+  const [pp, setPp] = React.useState(null); const [statistikVoll, setStatistikVoll] = React.useState(false);
+  const d = (plDetail && plDetail.detail) || {}; const pid = (plDetail && plDetail.pid) || d.player_id || d.pid;
+  const zielGesetzt = React.useRef(false);
+  React.useEffect(() => { let ok = true; setPp(null); if (pid && !laedt) twPpLaden(pid).then(x => { if (ok) setPp(x && x.ok ? x : { ok: false, saison: [] }); }); return () => { ok = false; }; }, [pid, laedt]);
+  React.useEffect(() => { zielGesetzt.current = false; if (ebene.current) ebene.current.scrollTop = 0; setAktiv("profil"); }, [pid]);
+  const springe = (k, sanft) => {
+    const el = ebene.current, ziel = document.getElementById("tw-pp-" + k); if (!el || !ziel) return;
+    const ruhig = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const oben = ziel.getBoundingClientRect().top - el.getBoundingClientRect().top + el.scrollTop - ((kopf.current && kopf.current.offsetHeight) || 110) - 12;
+    try { el.scrollTo({ top: Math.max(0, oben), behavior: sanft && !ruhig ? "smooth" : "auto" }); } catch (e) { el.scrollTop = Math.max(0, oben); }
+    setAktiv(k);
+  };
+  React.useEffect(() => { if (laedt || zielGesetzt.current || !pid) return; if (plTab && plTab !== "profil" && pp) { zielGesetzt.current = true; setTimeout(() => springe(plTab === "leistung" ? "leistung" : plTab, false), 60); } }, [laedt, pid, plTab, pp]);
+  const beimScrollen = () => {
+    const el = ebene.current; if (!el) return; const kh = (kopf.current && kopf.current.offsetHeight) || 110;
+    const hb = held.current ? held.current.offsetTop + held.current.offsetHeight - kh : 260; setKompakt(el.scrollTop > hb);
+    let akt = "profil"; const basis = el.getBoundingClientRect().top + kh + 40;
+    TW_PP_ABSCHNITTE.forEach(([k]) => { const s = document.getElementById("tw-pp-" + k); if (s && s.getBoundingClientRect().top <= basis) akt = k; });
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 4) akt = TW_PP_ABSCHNITTE[TW_PP_ABSCHNITTE.length - 1][0];
+    setAktiv(a => a === akt ? a : akt);
+  };
+  const on = (watch && watch.items || []).some(w => w.t === "spieler" && w.w === d.name);
+  const pdf = () => { try { if (window.twDossierPdf) window.twDossierPdf({ pid: pid, name: d.name, team: d.team, league: d.league, pos: d.pos }, Object.assign({}, plDetail, { pp: pp && pp.ok ? pp : null })); } catch (e) { } };
+  const l = plDetail && plDetail.leistung;
+  const abschnitt = (k, titel, unter, kinder) => h("section", { id: "tw-pp-" + k, className: "tw-pp-abschnitt", "aria-labelledby": "tw-pp-h-" + k }, h("h2", { id: "tw-pp-h-" + k, className: "tw-pp-h2" }, titel), unter ? h("p", { className: "tw-pp-unter" }, unter) : null, kinder);
+  const kopfLeiste = h("header", { className: "tw-pp-kopf", ref: kopf },
+    h("div", { className: "tw-pp-breite" },
+      h("div", { className: "tw-pp-leiste" }, pkZurueck(h, onZurueck),
+        h("div", { className: "tw-pp-titel" + (kompakt ? " zeigt" : "") }, h("span", { className: "tw-pp-label" }, en ? "Player profile" : "Spielerprofil"),
+          !laedt ? h("div", { className: "tw-pp-mini", "aria-hidden": !kompakt }, h(TkFoto, { name: d.name, foto: d.photo ? { photo: d.photo } : null, size: 34, e: { pid: pid, name: d.name, verein: d.team } }), h("b", null, d.name), l && l.score != null ? h(TwLkNoteBadge, { note: l.score }) : null) : null),
+        !laedt ? h("button", { type: "button", className: "tw-pp-knopf" + (on ? " an" : ""), onClick: () => { if (on) removeWatch("spieler", d.name); else addWatch("spieler", d.name); }, "aria-pressed": on }, on ? "✓" : "+", h("span", { className: "lang" }, on ? (en ? "Watching" : "Beobachtet") : t("watch_add"))) : null,
+        !laedt ? h("button", { type: "button", className: "tw-pp-knopf", onClick: pdf, title: en ? "Download the player profile as PDF" : "Spielerprofil als PDF herunterladen" }, h("span", { className: "kurz" }, "PDF"), h("span", { className: "lang" }, en ? "Profile as PDF" : "Profil als PDF")) : null,
+        h("button", { type: "button", className: "tw-pp-knopf tw-pp-zu" + (zurueckMitPerf ? "" : " tw-mv-nurdesk"), onClick: onSchliessen, "aria-label": en ? "Close" : "Schließen" }, "✕")),
+      h("nav", { className: "tw-pp-reiter", role: "tablist", "aria-label": en ? "Sections of the player profile" : "Bereiche des Spielerprofils" },
+        TW_PP_ABSCHNITTE.map(([k, de, e]) => h("button", { key: k, type: "button", role: "tab", "aria-selected": aktiv === k, className: aktiv === k ? "aktiv" : "", onClick: () => springe(k, true) }, en ? e : de)))));
+  if (laedt) return h("div", { className: "tw-pp-ebene tw-pp-seite", role: "dialog", "aria-modal": "true", ref: ebene }, kopfLeiste,
+    h("main", { className: "tw-pp-breite tw-pp-inhalt" }, h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), en ? "Loading profile …" : "Profil wird geladen …")));
+  const pos = d.pos ? (en ? ({ Torwart: "Goalkeeper", Abwehr: "Defender", Mittelfeld: "Midfielder", Sturm: "Forward" })[d.pos] || d.pos : d.pos) : "";
+  const trend = l && (l.trend === "auf" ? "↑" : l.trend === "ab" ? "↓" : l.trend === "gleich" ? "→" : "");
+  const held1 = h("div", { className: "tw-pp-held", ref: held },
+    h("div", { className: "tw-pp-foto" }, h(TkFoto, { name: d.name, foto: d.photo ? { photo: d.photo } : null, size: 112, e: { pid: pid, name: d.name, verein: d.team } })),
+    h("div", { style: { minWidth: 0 } }, h("h1", { className: "tw-pp-name" }, d.name),
+      h("div", { className: "tw-pp-verein" }, d.team ? h(ClubLogo, { name: d.team, size: 22 }) : null, d.team ? clubName(d.team) : "", d.league ? h("span", { className: "liga" }, "· " + d.league) : null),
+      h("div", { className: "tw-pp-chips" }, pos ? h("span", { className: "tw-pp-chip" }, pos) : null, d.age ? h("span", { className: "tw-pp-chip" }, h("i", null, en ? "Age" : "Alter"), d.age) : null,
+        d.nat ? h("span", { className: "tw-pp-chip" }, landFlagge(d.nat), d.nat) : null, pp && pp.haupt && TW_PP_GRUPPE[pp.haupt.gruppe] && TW_PP_GRUPPE[pp.haupt.gruppe][en ? 3 : 2] !== pos ? h("span", { className: "tw-pp-chip" }, h("i", null, en ? "Role" : "Rolle"), TW_PP_GRUPPE[pp.haupt.gruppe][en ? 3 : 2]) : null)),
+    l && l.score != null ? h("div", { className: "tw-pp-score" },
+      h("div", { className: "tw-pp-score-zahl", style: { background: scoreBg(l.score), border: "1px solid " + scoreRand(l.score), color: scoreTxt(l.score) } }, Math.round(l.score), trend ? h("small", null, trend) : null),
+      h("div", { className: "tw-pp-score-text" }, h("b", null, "TW Performance Score", h(ScoreInfo, { kind: "performance", size: 13 })),
+        l.score_liga != null ? (en ? "League-adjusted " : "Ligabereinigt ") + Math.round(l.score_liga) : null, l.score_liga != null && l.perzentil != null ? " · " : null,
+        l.perzentil != null ? (en ? "Top " : "Top ") + Math.max(1, 100 - Math.round(l.perzentil)) + " %" : null, h("br"),
+        l.saison != null ? (en ? "Season " : "Saison ") + Math.round(l.saison) : null, l.saison != null && l.form != null ? " · " : null, l.form != null ? "Form " + Math.round(l.form) : null,
+        l.spiele ? " · " + l.spiele + (en ? " matches" : " Spiele") : null)) : null);
+  return h("div", { className: "tw-pp-ebene tw-pp-seite", role: "dialog", "aria-modal": "true", "aria-label": (en ? "Player profile " : "Spielerprofil ") + (d.name || ""), ref: ebene, onScroll: beimScrollen },
+    kopfLeiste,
+    h("main", { className: "tw-pp-breite tw-pp-inhalt" },
+      h("section", { id: "tw-pp-profil", className: "tw-pp-abschnitt", "aria-label": en ? "Profile" : "Profil" }, held1,
+        h("div", { className: "tw-pp-raster" },
+          h(TwPpDaten, { d: d, pid: pid, profil: plDetail.profil, plDetail: plDetail }),
+          h("div", { className: "tw-pp-spalte" }, h(TwPpGesundheit, { plDetail: plDetail, plExtra: plExtra, d: d }), h(TwPpVereine, { vereine: plDetail.vereine }))),
+        h("div", { style: { marginTop: 20 } }, h(TwPpVideos, { d: d, plExtra: plExtra, plVidLoading: plVidLoading, ladeExtra: ladeExtra }))),
+      abschnitt("statistik", en ? "Match statistics" : "Spielstatistiken", en ? "Season values by competition and the latest matches with their key figures." : "Saisonwerte je Wettbewerb und die letzten Spiele mit ihren wichtigsten Werten.",
+        h("div", { className: "tw-pp-spalte" }, pp ? h(TwPpSaison, { pp: pp }) : h("div", { className: "tw-pp-karte" }, h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), en ? "Loading season values …" : "Saisonwerte werden geladen …")),
+          h(TwPpSpiele, { pid: pid, d: d, onAlle: () => setStatistikVoll(true) }))),
+      abschnitt("leistung", en ? "Player performance" : "Spieler-Performance", en ? "Key figures of the current season, strength profile within the comparison group and the course of the TW Performance Score." : "Kennzahlen der laufenden Saison, Stärkenprofil in der Vergleichsgruppe und Verlauf des TW Performance Score.",
+        h("div", { className: "tw-pp-spalte" },
+          h("div", { className: "tw-pp-perf" },
+            h("div", { className: "tw-pp-perf-k" }, pp ? h(TwPpKennzahlen, { pp: pp }) : h("div", { className: "tw-pp-karte" }, h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" })))),
+            h("div", { className: "tw-pp-perf-s" }, pp ? h(TwPpStaerken, { pp: pp }) : null),
+            h("div", { className: "tw-pp-perf-v tw-pp-karte" }, h("div", { className: "tw-pp-h3" }, en ? "TW Performance Score – course" : "TW Performance Score – Verlauf"), h(TwLeistungProfil, { pid: pid, name: d.name }))))),
+      abschnitt("news", "News", en ? "All reports clearly assigned to the player from the last 30 days." : "Alle eindeutig zugeordneten Meldungen der letzten 30 Tage.",
+        h("div", { className: "tw-pp-karte" }, h(SpielerNewsListe, { pid: pid, name: d.name, onWatch: onWatchNews }))),
+      abschnitt("aehnlich", en ? "Similar players" : "Ähnliche Spieler", en ? "Players with a comparable profile: position, age, league level, TW Score and abilities." : "Spieler mit vergleichbarem Profil: Position, Alter, Liganiveau, TW Score und Fähigkeiten.",
+        h(TwPpAehnliche, { pid: pid, d: d, onOpenPlayer: onOpenPlayer, onAlle: () => onAehnlich({ pid: pid, name: d.name, team: d.team, photo: d.photo }) })),
+      h("div", { className: "tw-pp-ende" }, h(PdfKnopf, { onClick: pdf, label: en ? "Profile as PDF" : "Profil als PDF", titel: en ? "Download the player profile as PDF" : "Spielerprofil als PDF herunterladen", primaer: true }),
+        h("button", { type: "button", className: "tw-pp-knopf", onClick: onSchliessen }, t("watch_close")))),
+    statistikVoll && pid ? h(TwProfilStatistik, { pid: pid, d: d, onClose: () => setStatistikVoll(false) }) : null);
+}
+
 function TwProfilReiter({ tab, setTab, pid, d, onAehnlich }) {
   const h = React.createElement; const en = LANG === "en"; const [statistik, setStatistik] = React.useState(false);
   const knopf = (k, lab) => h("button", { key: k, type: "button", role: "tab", "aria-selected": tab === k || (k === "statistik" && statistik), className: "tw-pr-tab" + (tab === k || (k === "statistik" && statistik) ? " aktiv" : ""), onClick: () => { if (k === "statistik") { if (pid) setStatistik(true); return; } setTab(k); } }, lab);
@@ -17342,7 +17854,7 @@ function TransferApp({
           .tw-vt-kpis > div, .tw-db > div:first-child > div { flex: 1 1 calc(50% - 10px) !important; min-width: 0 !important; }
           .tw-perf-main { grid-template-columns: minmax(0, 1fr) !important; }
           .tw-main table { font-size: 12px; }
-        } .tw-cmkarte { transition: box-shadow .15s; } .tw-cmkarte:hover { box-shadow: 0 8px 22px rgba(15,23,42,.08); } .tw-likarte { transition: box-shadow .15s, transform .15s; } .tw-likarte:hover { box-shadow: 0 10px 26px rgba(15,23,42,.10); transform: translateY(-1px); } @media (max-width: 760px) { .tw-litabs { overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; } .tw-litabs::-webkit-scrollbar { display: none; } } .tw-talrow:hover td { background: var(--zeile-hover); } @media (max-width: 900px) { .tw-taltop { grid-template-columns: minmax(0, 1fr) !important; } } .tw-mk-link { cursor: pointer; } .tw-mk-link:hover { text-decoration: underline; text-underline-offset: 2px; } .tw-mk-link:focus-visible { outline: 2px solid var(--gold-rand); outline-offset: 2px; border-radius: 6px; } .tw-mkgrid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.4fr) 150px 110px 100px 130px; gap: 10px; align-items: center; } .tw-mkhead { padding: 9px 14px; background: #f8fafb; border-bottom: 1px solid var(--linie); font-family: inherit; font-size: 10.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: #667085; } .tw-mkrow { padding: 10px 14px; } .tw-mkrow + .tw-mkrow { border-top: 1px solid var(--linie); } .tw-mkgrid > span { min-width: 0; } @media (max-width: 760px) { .tw-mktabs { overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; } .tw-mktabs::-webkit-scrollbar { display: none; } .tw-mk-empf { grid-template-columns: minmax(0, 1fr) !important; } } .tw-vtrow:hover td { background: var(--zeile-hover); } .tw-dbrow .tw-dbact { opacity: 0; transition: opacity .12s; } .tw-dbrow:hover .tw-dbact, .tw-dbrow.on .tw-dbact { opacity: 1; } .tw-dbrow:hover td { background: var(--zeile-hover); } .tw-dbrow.on td { background: var(--zeile-aktiv); } @media (max-width: 760px) { .tw-dbact { opacity: 1 !important; } } .tw-perf-main { display: grid; grid-template-columns: minmax(0, 3fr) minmax(280px, 1fr); gap: 18px; align-items: stretch; } .tw-pm .tw-pm-tip { opacity: 0; visibility: hidden; transition: opacity .12s; } .tw-pm:hover { z-index: 6; } .tw-pm:hover .tw-pm-tip { opacity: 1; visibility: visible; } .tw-prow { display: grid; grid-template-columns: 52px minmax(0, 1.5fr) minmax(0, 1.4fr) 96px 62px minmax(0, 1.6fr) 58px 78px; gap: 10px; align-items: center; padding: 9px 14px; border-top: 1px solid var(--linie); cursor: pointer; min-width: 0; } .tw-prow > span { min-width: 0; } .tw-prow:hover, .tw-prow.on { background: var(--zeile-hover); } .tw-phead { border-top: none; background: #f8fafb; cursor: default; font-family: inherit; font-size: 10.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: #667085; } .tw-phead:hover { background: var(--zeile-hover); } @media (max-width: 900px) { .tw-perf-main { grid-template-columns: minmax(0, 1fr); } } .tw-glist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: stretch; } .tw-gfilter-mobile { display: none; } @media (max-width: 860px) { .tw-glist { grid-template-columns: minmax(0, 1fr); } } @media (max-width: 700px) { .tw-gfilter-row { display: none !important; } .tw-gfilter-mobile { display: flex !important; } .tw-gchips { flex-wrap: nowrap !important; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; scrollbar-width: none; } .tw-gchips::-webkit-scrollbar { display: none; } .tw-gchips > button { flex-shrink: 0; } } .tw-clamp2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; } .tw-clamp3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; } .tw-gtable { overflow-x:auto; } .tw-grow { display:grid; grid-template-columns: 76px 104px minmax(0,1.1fr) minmax(0,1.5fr) 118px 110px 118px; gap:10px; align-items:center; min-width:820px; padding:7px 12px; border-top:1px solid var(--linie); font-family: inherit; font-size:12.5px; cursor:pointer; } .tw-grow > span, .tw-grow > a { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; } .tw-grow:hover { background: var(--zeile-hover); } .tw-ghead { border-top:none; background:#f8fafb; cursor:default; font-size:10.5px; font-weight:800; letter-spacing:.6px; text-transform:uppercase; color:#667085; } .tw-ghead:hover { background: var(--zeile-hover); } .tw-hover-only { opacity: 0; transition: opacity .15s; } .tw-card:hover .tw-hover-only, .tw-card:focus-within .tw-hover-only { opacity: 1; } .tw-route-club { display: inline-flex; align-items: center; gap: 6px; min-width: 0; } .tw-route-club span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        } .tw-cmkarte { transition: box-shadow .15s; } .tw-cmkarte:hover { box-shadow: 0 8px 22px rgba(15,23,42,.08); } .tw-likarte { transition: box-shadow .15s, transform .15s; } .tw-likarte:hover { box-shadow: 0 10px 26px rgba(15,23,42,.10); transform: translateY(-1px); } @media (max-width: 760px) { .tw-litabs { overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; } .tw-litabs::-webkit-scrollbar { display: none; } } .tw-talrow:hover td { background: var(--zeile-hover); } @media (max-width: 900px) { .tw-taltop { grid-template-columns: minmax(0, 1fr) !important; } } .tw-mk-link { cursor: pointer; } .tw-mk-link:hover { text-decoration: underline; text-underline-offset: 2px; } .tw-mk-link:focus-visible { outline: 2px solid var(--gold-rand); outline-offset: 2px; border-radius: 6px; } .tw-mkgrid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.4fr) 150px 110px 100px 130px; gap: 10px; align-items: center; } .tw-mkhead { padding: 9px 14px; background: #f8fafb; border-bottom: 1px solid var(--linie); font-family: inherit; font-size: 10.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: #667085; } .tw-mkrow { padding: 10px 14px; } .tw-mkrow + .tw-mkrow { border-top: 1px solid var(--linie); } .tw-mkgrid > span { min-width: 0; } @media (max-width: 760px) { .tw-mktabs { overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; } .tw-mktabs::-webkit-scrollbar { display: none; } .tw-mk-empf { grid-template-columns: minmax(0, 1fr) !important; } } .tw-vtrow:hover td { background: var(--zeile-hover); } .tw-dbrow .tw-dbact { opacity: 0; transition: opacity .12s; } .tw-dbrow:hover .tw-dbact, .tw-dbrow.on .tw-dbact { opacity: 1; } .tw-dbrow:hover td { background: var(--zeile-hover); } .tw-dbrow.on td { background: var(--zeile-aktiv); } /* Spielerdatenbank ohne hell/dunkel-Streifen (09.11.2026) */ .tw-main .tw-dbtable table tbody tr:nth-child(even) > td, .tw-dbtable table tbody tr:nth-child(even) > td { background: transparent; } .tw-main .tw-dbtable table tbody tr.tw-dbrow:hover > td, .tw-dbtable table tbody tr.tw-dbrow:hover > td { background: var(--zeile-hover); } .tw-main .tw-dbtable table tbody tr.tw-dbrow.on > td, .tw-dbtable table tbody tr.tw-dbrow.on > td { background: var(--zeile-aktiv); } .tw-dbtable thead th { background: var(--karte) !important; border-bottom: 1px solid var(--linie2) !important; padding-top: 13px !important; padding-bottom: 12px !important; } .tw-dbtable tbody td { padding-top: 12px !important; padding-bottom: 12px !important; } .tw-dbtable tbody tr:last-child > td { border-bottom: none !important; } .tw-dbrow > td:first-child { box-shadow: inset 3px 0 0 transparent; transition: box-shadow .15s, background .12s; } .tw-dbrow:hover > td:first-child, .tw-dbrow.on > td:first-child { box-shadow: inset 3px 0 0 var(--gold); } .tw-dbtable { box-shadow: 0 1px 2px rgba(15,23,42,.05); } .tw-dbrow:not(.on) > td:first-child > span { background: var(--karte) !important; } @media (max-width: 760px) { .tw-dbact { opacity: 1 !important; } } .tw-perf-main { display: grid; grid-template-columns: minmax(0, 3fr) minmax(280px, 1fr); gap: 18px; align-items: stretch; } .tw-pm .tw-pm-tip { opacity: 0; visibility: hidden; transition: opacity .12s; } .tw-pm:hover { z-index: 6; } .tw-pm:hover .tw-pm-tip { opacity: 1; visibility: visible; } .tw-prow { display: grid; grid-template-columns: 52px minmax(0, 1.5fr) minmax(0, 1.4fr) 96px 62px minmax(0, 1.6fr) 58px 78px; gap: 10px; align-items: center; padding: 9px 14px; border-top: 1px solid var(--linie); cursor: pointer; min-width: 0; } .tw-prow > span { min-width: 0; } .tw-prow:hover, .tw-prow.on { background: var(--zeile-hover); } .tw-phead { border-top: none; background: #f8fafb; cursor: default; font-family: inherit; font-size: 10.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: #667085; } .tw-phead:hover { background: var(--zeile-hover); } @media (max-width: 900px) { .tw-perf-main { grid-template-columns: minmax(0, 1fr); } } .tw-glist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: stretch; } .tw-gfilter-mobile { display: none; } @media (max-width: 860px) { .tw-glist { grid-template-columns: minmax(0, 1fr); } } @media (max-width: 700px) { .tw-gfilter-row { display: none !important; } .tw-gfilter-mobile { display: flex !important; } .tw-gchips { flex-wrap: nowrap !important; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; scrollbar-width: none; } .tw-gchips::-webkit-scrollbar { display: none; } .tw-gchips > button { flex-shrink: 0; } } .tw-clamp2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; } .tw-clamp3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; } .tw-gtable { overflow-x:auto; } .tw-grow { display:grid; grid-template-columns: 76px 104px minmax(0,1.1fr) minmax(0,1.5fr) 118px 110px 118px; gap:10px; align-items:center; min-width:820px; padding:7px 12px; border-top:1px solid var(--linie); font-family: inherit; font-size:12.5px; cursor:pointer; } .tw-grow > span, .tw-grow > a { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; } .tw-grow:hover { background: var(--zeile-hover); } .tw-ghead { border-top:none; background:#f8fafb; cursor:default; font-size:10.5px; font-weight:800; letter-spacing:.6px; text-transform:uppercase; color:#667085; } .tw-ghead:hover { background: var(--zeile-hover); } .tw-hover-only { opacity: 0; transition: opacity .15s; } .tw-card:hover .tw-hover-only, .tw-card:focus-within .tw-hover-only { opacity: 1; } .tw-route-club { display: inline-flex; align-items: center; gap: 6px; min-width: 0; } .tw-route-club span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         @media (min-width: 1280px) {
           .tw-feedlist { grid-template-columns: minmax(0,1fr) minmax(0,1fr) !important; gap:14px; }
         }
@@ -19225,293 +19737,7 @@ function TransferApp({
       color: MUTED,
       textDecoration: "underline"
     }
-  }, t("tour_skip")))), plDetail && /*#__PURE__*/React.createElement("div", {
-    onClick: () => setPlDetail(null), className: "tw-mv-ebene",
-    style: {
-      position: "fixed",
-      inset: 0,
-      zIndex: 1300,
-      background: "rgba(0,0,0,.74)",
-      display: "flex",
-      alignItems: "center", padding: 16, overscrollBehavior: "contain",
-      justifyContent: "center"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    onClick: e => e.stopPropagation(), className: "tw-mv-voll tw-mv-mitfuss", role: "dialog", "aria-modal": "true",
-    style: {
-      width: "100%",
-      maxWidth: 640, maxHeight: "100%", overflowY: "auto", overscrollBehavior: "contain", background: "var(--karte)", borderRadius: 18, padding: "22px 24px 26px", boxShadow: "0 24px 80px rgba(0,0,0,.35)"
-    }
-  }, React.createElement("div", { className: "tw-pl-kopf", style: { position: "sticky", top: -22, margin: "-22px -24px 12px", padding: "12px 24px", background: "var(--karte)", borderBottom: "1px solid var(--linie)", display: "flex", alignItems: "center", gap: 10, zIndex: 3 } }, pkZurueck(React.createElement, () => { const z = perfZurueck; setPlDetail(null); if (z) setTimeout(() => setPerfKarte(z), 0); }), React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--t3)", flex: 1 } }, LANG === "en" ? "Player profile" : "Spielerprofil"), React.createElement("button", { onClick: () => setPlDetail(null), className: perfZurueck ? undefined : "tw-mv-nurdesk", "aria-label": LANG === "en" ? "Close" : "Schlie\u00dfen", style: { width: 40, height: 40, borderRadius: 10, border: "1px solid var(--linie)", background: "var(--karte)", cursor: "pointer", fontSize: 16, fontWeight: 800, color: "var(--t2)", flexShrink: 0 } }, "\u2715")), plDetailLoading || plDetail.lade ? /*#__PURE__*/React.createElement("div", { className: "tw-lade" }, /*#__PURE__*/React.createElement("span", { className: "tw-spin" }), LANG === "en" ? "Loading profile \u2026" : "Profil wird geladen \u2026") : (() => {
-    const d = plDetail.detail;
-    const on = (watch.items || []).some(w => w.t === "spieler" && w.w === d.name);
-    const geb = d.birth_date ? new Date(d.birth_date).toLocaleDateString(LANG === "en" ? "en-GB" : "de-DE") : "";
-    const GR = {
-      Torwart: ["torwart", "keeper"],
-      Abwehr: ["verteidiger", "abwehr"],
-      Mittelfeld: ["mittelfeld", "sechser", "achter", "zehner"],
-      Sturm: ["stürmer", "stuermer", "sturm", "flügel", "fluegel", "angreifer"]
-    };
-    const kws = GR[d.pos] || [];
-    const passende = news.filter(n => n.type === "verein_sucht" && kws.some(k => ((n.positionNeeded || "") + "").toLowerCase().indexOf(k) >= 0)).slice(0, 4);
-    return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        alignItems: "center",
-        gap: 13,
-        marginBottom: 12
-      }
-    }, React.createElement(TkFoto, { name: d.name, foto: d.photo ? { photo: d.photo } : null, size: 56, e: { pid: plDetail.pid || d.player_id || d.pid, name: d.name, verein: d.team } }), /*#__PURE__*/React.createElement("div", {
-      style: {
-        flex: 1, minWidth: 0
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontFamily: FONT_DISPLAY,
-        fontWeight: 700,
-        fontSize: 19,
-        textTransform: "uppercase",
-        lineHeight: 1.1, overflowWrap: "anywhere"
-      }
-    }, d.name), /*#__PURE__*/), /*#__PURE__*/React.createElement("button", {
-      onClick: () => {
-        if (on) removeWatch("spieler", d.name);else addWatch("spieler", d.name);
-      },
-      style: {
-        cursor: "pointer",
-        background: on ? "var(--gold-tint)" : "transparent", border: on ? "1px solid var(--gold-rand)" : "1px solid var(--linie2)", borderRadius: 9, padding: "9px 13px", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, color: on ? "var(--gold-text)" : INK,
-        flexShrink: 0
-      }
-    }, on ? "✓" : t("watch_add"))), React.createElement(TwProfilReiter, { tab: plTab, setTab: setPlTab, pid: plDetail.pid || d.player_id || d.pid, d: d, onAehnlich: () => oeffneAehnlich({ pid: plDetail.pid || d.player_id || d.pid, name: d.name, team: d.team, photo: d.photo }) }), plTab === "news" ? React.createElement(SpielerNewsListe, { pid: plDetail.pid || d.player_id || d.pid, name: d.name, onWatch: it => { setPlDetail(null); setAddSheet(it); } }) : null, plTab === "leistung" ? React.createElement(TwLeistungProfil, { pid: plDetail.pid || d.player_id || d.pid, name: d.name }) : null, React.createElement("div", { style: { display: plTab === "news" || plTab === "leistung" ? "none" : "block" } }, React.createElement(SpielerdatenTabelle, { d: d, pid: plDetail.pid || d.player_id || d.pid, profil: plDetail.profil }), React.createElement(TwBeraterHistorie, { bh: plDetail.beraterhistorie }), plDetail.injuries && plDetail.injuries.length > 0 && /*#__PURE__*/React.createElement("div", {
-      style: {
-        background: "#fbeeeb",
-        border: "1px solid #e8c4bc",
-        borderRadius: 10,
-        padding: "9px 12px",
-        marginBottom: 12,
-        fontFamily: FONT_BODY,
-        fontSize: 12.5,
-        color: "#8c3527"
-      }
-    }, /*#__PURE__*/React.createElement("strong", null, t("pl_injury"), ":"), " ", plDetail.injuries.map(i => verletzungDe(i.grund)).join(" · ")), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontFamily: FONT_BODY,
-        fontSize: 11,
-        fontWeight: 700,
-        color: MUTED,
-        textTransform: "uppercase",
-        letterSpacing: 1,
-        marginBottom: 5
-      }
-    }, t("pl_season_line")), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 10,
-        fontFamily: FONT_BODY,
-        fontSize: 12.5,
-        color: "var(--t2)",
-        marginBottom: 14
-      }
-    }, /*#__PURE__*/React.createElement("span", null, d.apps, LANG === "en" ? " games" : " Spiele"), /*#__PURE__*/React.createElement("span", null, d.min, " Min."), d.rating > 0 && /*#__PURE__*/React.createElement("span", null, (LANG === "en" ? "Rating " : "Note "), d.rating), /*#__PURE__*/React.createElement("span", null, d.goals, (LANG === "en" ? " goals / " : " Tore / "), d.assists, " Assists"), d.pass_acc > 0 && /*#__PURE__*/React.createElement("span", null, (LANG === "en" ? "Pass accuracy " : "Passquote "), Math.round(Number(d.pass_acc)), " %"), d.duels_pct > 0 && /*#__PURE__*/React.createElement("span", null, (LANG === "en" ? "Duels won " : "Zweikämpfe "), Math.round(Number(d.duels_pct)), " %"), /*#__PURE__*/React.createElement("span", null, d.yellow, (LANG === "en" ? " yellow / " : " Gelb / "), d.red, (LANG === "en" ? " red" : " Rot"))), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontFamily: FONT_BODY,
-        fontSize: 11,
-        fontWeight: 700,
-        color: MUTED,
-        textTransform: "uppercase",
-        letterSpacing: 1, marginBottom: 6 } }, (plDetail.form && plDetail.form.length === 1 ? (LANG === "en" ? "Last appearance — TW Performance Score" : "Letzter Einsatz — TW Performance Score") : t("pl_form")), /*#__PURE__*/React.createElement(ScoreInfo, { kind: "performance", size: 13 })), plDetail.leistung ? /*#__PURE__*/React.createElement(TwLeistungZeile, { l: plDetail.leistung }) : null, !plDetail.form || plDetail.form.length === 0 ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontFamily: FONT_BODY,
-        fontSize: 12.5,
-        color: "var(--t2)",
-        marginBottom: 14,
-        lineHeight: 1.55
-      }
-    }, t("pl_noform")) : /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        gap: 7,
-        marginBottom: 14
-      }
-    }, plDetail.form.map((f, i) => /*#__PURE__*/React.createElement("div", {
-      key: i,
-      style: {
-        display: "flex",
-        alignItems: "center",
-        gap: 10
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        minWidth: 42,
-        textAlign: "center",
-        background: scoreBg(f.score), border: "1px solid " + scoreRand(f.score),
-        color: scoreTxt(f.score),
-        borderRadius: 8,
-        padding: "5px 0",
-        fontFamily: FONT_DISPLAY,
-        fontWeight: 700,
-        fontSize: 15
-      }
-    }, f.score), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontFamily: FONT_BODY,
-        fontSize: 12,
-        color: "var(--t2)", flex: 1 } }, (/^\d{4}-\d{2}-\d{2}$/.test(String(f.date || "")) ? f.date.slice(8, 10) + "." + f.date.slice(5, 7) + "." + f.date.slice(0, 4) : f.date), f.gegner ? ` · ${f.gegner}` : "", " · ", f.min, "′", f.sub ? " (eingew.)" : "", ((LANG === "en" && f.st_en) || f.st) ? ` · ✓ ${String((LANG === "en" && f.st_en) || f.st).split(/;|\n/)[0]}` : "")))), plDetail.historie && plDetail.historie.length > 0 ? /*#__PURE__*/React.createElement("div", { style: { background: "var(--karte2)", border: "1px solid var(--linie)", borderRadius: 10, padding: "9px 12px", marginBottom: 12, fontFamily: FONT_BODY, fontSize: 12.5, color: INK } }, /*#__PURE__*/React.createElement("div", { style: { display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap", marginBottom: 6 } }, /*#__PURE__*/React.createElement("strong", null, LANG === "en" ? "Injury history" : "Verletzungshistorie"), /*#__PURE__*/React.createElement("span", { style: { color: INK, fontSize: 13, fontWeight: 700 } }, verletzungSumme(plDetail.historie))), /*#__PURE__*/React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 3, maxHeight: 190, overflowY: "auto" } }, historieOhneSperren(plDetail.historie).slice(0, 20).map((h, i) => /*#__PURE__*/React.createElement("div", { key: i, style: { display: "flex", gap: 8, alignItems: "baseline", fontSize: 12 } }, /*#__PURE__*/React.createElement("span", { style: { color: h.aktiv && !h.bis ? "#b04a3a" : MUTED, minWidth: 150, fontVariantNumeric: "tabular-nums" } }, (h.von ? h.von.slice(8, 10) + "." + h.von.slice(5, 7) + "." + h.von.slice(0, 4) : "?") + " \u2013 " + (h.bis ? h.bis.slice(8, 10) + "." + h.bis.slice(5, 7) + "." + h.bis.slice(0, 4) : (LANG === "en" ? "ongoing" : "laufend"))), /*#__PURE__*/React.createElement("span", { style: { flex: 1, fontWeight: (h.aktiv && !h.bis) || Number(h.spiele) >= 10 || tageZwischen(h.von, h.bis) >= 30 ? 700 : 500, color: Number(h.spiele) >= 10 || tageZwischen(h.von, h.bis) >= 30 ? "var(--sc-schwach-text)" : INK } }, verletzungDe(h.grund)), h.spiele ? /*#__PURE__*/React.createElement("span", { style: { color: MUTED } }, h.spiele + (Number(h.spiele) === 1 ? (LANG === "en" ? " game" : " Spiel") : (LANG === "en" ? " games" : " Spiele"))) : null)))) : null, (d.contract_until || d.contract_note) && /*#__PURE__*/React.createElement("div", {
-      style: {
-        background: "#fdf0e8",
-        border: "1px solid #f3d5c2",
-        borderRadius: 10,
-        padding: "8px 12px",
-        marginBottom: 12,
-        fontFamily: FONT_BODY,
-        fontSize: 12.5,
-        color: "#8a3d12"
-      }
-    }, /*#__PURE__*/React.createElement("strong", null, t("px_contract"), ":"), " ", d.contract_until || "—", d.contract_note && d.contract_note !== d.contract_until ? ` · ${d.contract_note}` : ""), d.fitness_note && /*#__PURE__*/React.createElement("div", {
-      style: {
-        background: "#eef3f7",
-        border: "1px solid #cddeed",
-        borderRadius: 10,
-        padding: "8px 12px",
-        marginBottom: 12,
-        fontFamily: FONT_BODY,
-        fontSize: 12.5,
-        color: "var(--blau-text)",
-        lineHeight: 1.5
-      }
-    }, /*#__PURE__*/React.createElement("strong", null, t("px_fitness"), ":"), " ", twFitnessText(d.fitness_note)), plExtra && plExtra.pid === d.pid && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontFamily: FONT_BODY,
-        fontSize: 11,
-        fontWeight: 700,
-        color: MUTED,
-        textTransform: "uppercase",
-        letterSpacing: 1,
-        marginBottom: 6
-      }
-    }, t("px_robust")), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        marginBottom: 8
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        minWidth: 46,
-        textAlign: "center",
-        background: scoreBg(plExtra.robust), border: "1px solid " + scoreRand(plExtra.robust),
-        color: scoreTxt(plExtra.robust),
-        borderRadius: 8,
-        padding: "6px 0",
-        fontFamily: FONT_DISPLAY,
-        fontWeight: 700,
-        fontSize: 16
-      }
-    }, plExtra.robust), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontFamily: FONT_BODY,
-        fontSize: 12,
-        color: "var(--t2)"
-      }
-    }, t("px_robust_sub"), ": ", plExtra.faelle24, " ", t("px_faelle"), " · ", plExtra.tage24, " ", t("px_tage"), plExtra.muskel24 ? ` · ${plExtra.muskel24}× ${t("px_muskel")}` : "")), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontFamily: FONT_BODY,
-        fontSize: 11,
-        fontWeight: 700,
-        color: MUTED,
-        textTransform: "uppercase",
-        letterSpacing: 1,
-        marginBottom: 6
-      }
-    }, t("px_hist")), !plExtra.historie || plExtra.historie.length === 0 ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontFamily: FONT_BODY,
-        fontSize: 12.5,
-        color: "var(--t2)",
-        marginBottom: 14
-      }
-    }, t("px_hist_none")) : /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        gap: 5,
-        marginBottom: 14
-      }
-    }, plExtra.historie.slice(0, 6).map((h, i) => /*#__PURE__*/React.createElement("div", {
-      key: i,
-      style: {
-        fontFamily: FONT_BODY,
-        fontSize: 12,
-        color: "var(--t2)"
-      }
-    }, "• ", verletzungDe(h.typ) || (LANG === "en" ? "Absence" : "Ausfall"), " ", /*#__PURE__*/React.createElement("span", {
-      style: {
-        color: MUTED
-      }
-    }, "(", twDatumKurz(h.von), h.bis ? " – " + twDatumKurz(h.bis) : "", ")")))), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontFamily: FONT_BODY,
-        fontSize: 11,
-        fontWeight: 700,
-        color: MUTED,
-        textTransform: "uppercase",
-        letterSpacing: 1,
-        marginBottom: 6
-      }
-    }, t("px_videos")), plExtra.videos && plExtra.videos.length > 0 ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        gap: 10,
-        marginBottom: 14
-      }
-    }, plExtra.videos.map((v, i) => twVideoLink(v, i))) : /*#__PURE__*/React.createElement("div", {
-      style: {
-        marginBottom: 14
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontFamily: FONT_BODY,
-        fontSize: 12.5,
-        color: "var(--t2)",
-        marginBottom: 8
-      }
-    }, plVidLoading ? t("px_vid_loading") : t("px_vid_none")), !plVidLoading && /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        gap: 8,
-        flexWrap: "wrap"
-      }
-    }, /*#__PURE__*/React.createElement("button", {
-      onClick: () => ladeExtra(d.pid, d.name, d.team, true),
-      style: {
-        cursor: "pointer",
-        background: "#1a6dc0",
-        color: "#fff",
-        border: "none",
-        borderRadius: 8,
-        padding: "8px 13px",
-        fontFamily: FONT_BODY,
-        fontSize: 12,
-        fontWeight: 800
-      }
-    }, t("px_vid_btn")), /*#__PURE__*/React.createElement("a", {
-      href: `https://www.youtube.com/results?search_query=${encodeURIComponent(d.name + " highlights")}`,
-      target: "_blank",
-      rel: "noreferrer",
-      style: {
-        fontFamily: FONT_BODY,
-        fontSize: 12,
-        fontWeight: 700,
-        color: "#1a6dc0",
-        alignSelf: "center",
-        textDecoration: "underline"
-      }
-    }, t("px_yt")))))), React.createElement("div", { className: "tw-pl-fuss", style: { position: "sticky", bottom: -26, margin: "14px -24px -26px", padding: "12px 24px 14px", background: "var(--karte)", borderTop: "1px solid var(--linie)", display: "flex", alignItems: "center", gap: 10, zIndex: 2 } }, React.createElement("button", { onClick: () => setPlDetail(null), className: "tw-mv-nurdesk", style: { background: "none", border: "none", cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, textDecoration: "underline", minHeight: 40 } }, t("watch_close")), React.createElement("span", { style: { flex: 1 } }), React.createElement(PdfKnopf, { onClick: () => { try { window.twDossierPdf && window.twDossierPdf({ pid: plDetail.pid || d.player_id || d.pid, name: d.name, team: d.team, league: d.league, pos: d.pos }, plDetail); } catch (e) { } }, label: LANG === "en" ? "Profile as PDF" : "Profil als PDF", titel: LANG === "en" ? "Download the player profile as PDF" : "Spielerprofil als PDF herunterladen", primaer: true })));
-  })())), notifyMode && /*#__PURE__*/React.createElement("div", {
+  }, t("tour_skip")))), plDetail && React.createElement(TwSpielerSeite, { plDetail: plDetail, laedt: !!(plDetailLoading || plDetail.lade), plTab: plTab, plExtra: plExtra, plVidLoading: plVidLoading, ladeExtra: ladeExtra, watch: watch, addWatch: addWatch, removeWatch: removeWatch, onSchliessen: () => setPlDetail(null), onZurueck: () => { const z = perfZurueck; setPlDetail(null); if (z) setTimeout(() => setPerfKarte(z), 0); }, zurueckMitPerf: !!perfZurueck, onAehnlich: sp => oeffneAehnlich(sp), onOpenPlayer: (p, n, tm) => openPlayer(p, n, tm), onWatchNews: it => { setPlDetail(null); setAddSheet(it); } }), notifyMode && /*#__PURE__*/React.createElement("div", {
     onClick: () => setNotifyMode(null),
     style: {
       position: "fixed",
