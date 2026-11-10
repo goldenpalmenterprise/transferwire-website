@@ -8809,7 +8809,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261110-gold-einstellungen";
+const VS_VERSION = "20261110-handy-spieltag";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -13489,7 +13489,7 @@ function SpieltagVue({ openPlayer, openVerein, authQ }) {
   const label = (iso, lang) => new Date(iso + "T12:00:00").toLocaleDateString(en ? "en-GB" : "de-DE", lang ? { weekday: "long", day: "2-digit", month: "long" } : { weekday: "short", day: "2-digit", month: "2-digit" });
   const zaehl = iso => { const t = ((daten && daten.tage) || []).find(x => String(x.d).slice(0, 10) === iso); return t ? Number(t.n) : 0; };
   const statusText = s => s.status === "live" ? (s.minute ? s.minute + "'" : "LIVE") : s.status === "beendet" ? (en ? "FT" : "Ende") : s.status === "verlegt" ? (en ? "PPD" : "verlegt") : twSp2Uhr(s.anstoss);
-  const knopf = (inhalt, aktiv, onClick, extra) => h("button", Object.assign({ type: "button", className: "tw-k tw-k-s", "aria-pressed": aktiv ? true : undefined, onClick, style: Object.assign({ cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, padding: "9px 13px", borderRadius: 12, border: "1px solid " + (aktiv ? "var(--dunkel)" : HAIR), background: aktiv ? "var(--dunkel)" : CARD, color: aktiv ? "#fff" : INK, whiteSpace: "nowrap" }, (extra && extra.style) || {}) }, extra && extra.title ? { title: extra.title, "aria-label": extra.title } : {}), inhalt);
+  const knopf = (inhalt, aktiv, onClick, extra) => h("button", Object.assign({ type: "button", className: "tw-k tw-k-s" + (extra && extra.cls ? " " + extra.cls : ""), "aria-pressed": aktiv ? true : undefined, onClick, style: Object.assign({ cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12.5, fontWeight: 800, padding: "9px 13px", borderRadius: 12, border: "1px solid " + (aktiv ? "var(--dunkel)" : HAIR), background: aktiv ? "var(--dunkel)" : CARD, color: aktiv ? "#fff" : INK, whiteSpace: "nowrap" }, (extra && extra.style) || {}) }, extra && extra.title ? { title: extra.title, "aria-label": extra.title } : {}), inhalt);
   /* Spielkarte (Tages- und Liga-Ansicht): ganze Karte oeffnet die Spielseite */
   const karte = (s, kontext) => {
     const live = s.status === "live"; const ohneTore = s.tore_heim === null || s.tore_heim === undefined;
@@ -13540,13 +13540,13 @@ function SpieltagVue({ openPlayer, openVerein, authQ }) {
         h("span", { className: "tw-sp2-zahl" + (l.n ? " an" : ""), title: en ? "Matches on this day" : "Spiele an diesem Tag" }, l.n || "\u2013"), h("span", { "aria-hidden": "true", style: { color: "var(--t3)", fontSize: 11 } }, landOffen === l.land ? "\u25b4" : "\u25be")),
       landOffen === l.land ? h("div", { className: "tw-sp2-land-liste" }, l.wb.map((k, i) => zeileWb(k, i))) : null)))) : null;
   /* Datumsleiste und Kalender (Tagesansicht) */
-  const tageLeiste = h("div", { style: { display: "flex", alignItems: "center", gap: 6, marginBottom: 10, flexWrap: "wrap" } },
-    knopf("\u2190", false, () => setDatum(tagPlus(datum, -1)), { title: en ? "Previous day" : "Vortag" }),
-    [-1, 0, 1].map(o => { const iso = tagPlus(datum, o); const n = zaehl(iso); return h(React.Fragment, { key: iso }, knopf([label(iso), n ? h("span", { key: "n", style: { marginLeft: 6, fontSize: 11, opacity: .9 } }, n) : null], o === 0, () => setDatum(iso), { style: { minWidth: 118, textAlign: "center" } })); }),
-    knopf("\u2192", false, () => setDatum(tagPlus(datum, 1)), { title: en ? "Next day" : "Folgetag" }),
-    datum !== heuteISO() ? knopf(en ? "Today" : "Heute", false, () => setDatum(heuteISO())) : null,
-    h("span", { style: { flex: 1 } }),
-    knopf(en ? "Calendar" : "Kalender", kalOffen, () => { setKalOffen(!kalOffen); setKalMonat(datum.slice(0, 7)); setKalTag(datum); }));
+  const tageLeiste = h("div", { className: "tw-sp2-tage", style: { display: "flex", alignItems: "center", gap: 6, marginBottom: 10, flexWrap: "wrap" } },
+    knopf("\u2190", false, () => setDatum(tagPlus(datum, -1)), { title: en ? "Previous day" : "Vortag", cls: "tw-sp2-tag-pfeil" }),
+    [-1, 0, 1].map(o => { const iso = tagPlus(datum, o); const n = zaehl(iso); return h(React.Fragment, { key: iso }, knopf([label(iso), n ? h("span", { key: "n", style: { marginLeft: 6, fontSize: 11, opacity: .9 } }, n) : null], o === 0, () => setDatum(iso), { style: { minWidth: 118, textAlign: "center" }, cls: o === 0 ? "tw-sp2-tag-akt" : "tw-sp2-tag-neben" })); }),
+    knopf("\u2192", false, () => setDatum(tagPlus(datum, 1)), { title: en ? "Next day" : "Folgetag", cls: "tw-sp2-tag-pfeil" }),
+    datum !== heuteISO() ? knopf(en ? "Today" : "Heute", false, () => setDatum(heuteISO()), { cls: "tw-sp2-tag-heute" }) : null,
+    h("span", { className: "tw-sp2-tag-luecke", style: { flex: 1 } }),
+    knopf(en ? "Calendar" : "Kalender", kalOffen, () => { setKalOffen(!kalOffen); setKalMonat(datum.slice(0, 7)); setKalTag(datum); }, { cls: "tw-sp2-tag-kal" }));
   const kalender = () => { const [y, m] = kalMonat.split("-").map(Number); const erster = new Date(y, m - 1, 1); const start = (erster.getDay() + 6) % 7; const tageImMonat = new Date(y, m, 0).getDate(); const zellen = []; for (let i = 0; i < start; i++) zellen.push(null); for (let d = 1; d <= tageImMonat; d++) zellen.push(kalMonat + "-" + String(d).padStart(2, "0")); const map = {}; (kal || []).forEach(k => { map[String(k.d).slice(0, 10)] = k.spiele || []; }); const monatLabel = erster.toLocaleDateString(en ? "en-GB" : "de-DE", { month: "long", year: "numeric" }); const wt = en ? ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"] : ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]; const liste = map[kalTag] || [];
     return h("div", { className: "tw-sp2-kal", style: { display: "grid", gridTemplateColumns: "minmax(260px, 360px) minmax(0, 1fr)", gap: 16, background: CARD, border: "1px solid " + HAIR, borderRadius: 16, padding: 16, marginBottom: 14, boxShadow: "0 12px 40px rgba(0,0,0,.10)" } },
       h("div", null, h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 } }, knopf("\u2190", false, () => { const d = new Date(y, m - 2, 1); setKalMonat(isoVon(d).slice(0, 7)); }, { title: en ? "Previous month" : "Vormonat" }), h("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 17, color: INK } }, monatLabel), knopf("\u2192", false, () => { const d = new Date(y, m, 1); setKalMonat(isoVon(d).slice(0, 7)); }, { title: en ? "Next month" : "Folgemonat" })),
@@ -16777,6 +16777,52 @@ function TwSoGehts({ kurz, lang, label }) {
     ].join("\n");
     document.head.appendChild(st);
   } catch (e) {}
+})();
+
+/* Handy-Version 10.11.2026 (Boss 03:43): Spieltag-Datumsleiste in einer Zeile, Tabelle größer, Marktwert-Auswahl größer */
+(function () {
+  try {
+    if (document.getElementById("tw-handy-sm")) return;
+    const st = document.createElement("style"); st.id = "tw-handy-sm";
+    st.textContent = [
+      /* A1 Datumsleiste: nur der gewählte Tag, Pfeile, Heute und Kalender in einer Zeile */
+      "@media (max-width:720px){",
+      "html body .tw-sp2-tage{flex-wrap:nowrap!important;gap:8px!important}",
+      "html body .tw-sp2-tage .tw-sp2-tag-neben,html body .tw-sp2-tage .tw-sp2-tag-luecke{display:none!important}",
+      "html body .tw-sp2-tage .tw-k{font-size:14.5px!important;padding:11px 12px!important;border-radius:12px!important;min-height:44px}",
+      "html body .tw-sp2-tage .tw-sp2-tag-akt{flex:1 1 auto;min-width:0!important;overflow:hidden;text-overflow:ellipsis}",
+      "html body .tw-sp2-tage .tw-sp2-tag-akt span{font-size:12.5px!important}",
+      "html body .tw-sp2-tage .tw-sp2-tag-pfeil{flex:0 0 auto;min-width:46px;font-size:17px!important;padding:9px 10px!important}",
+      "html body .tw-sp2-tage .tw-sp2-tag-heute,html body .tw-sp2-tage .tw-sp2-tag-kal{flex:0 0 auto}",
+      "}",
+      /* A2 Tabelle: größere Schrift, Zahlenspalten breiter (näher am Namen) */
+      "@media (max-width:560px){",
+      "html body .tw-sp2-tabelle .opt{display:none}",
+      "html body .tw-sp2-tabelle{padding:10px 6px 8px}",
+      "html body .tw-sp2-tabelle table{font-size:15px}",
+      "html body .tw-sp2-tabelle th{font-size:12px;padding:5px 4px 8px}",
+      "html body .tw-sp2-tabelle td{padding:10px 4px}",
+      "html body .tw-sp2-tabelle th:first-child,html body .tw-sp2-tabelle td:first-child{width:30px;min-width:30px}",
+      "html body .tw-sp2-tabelle td:first-child{color:var(--t2);font-weight:700}",
+      "html body .tw-sp2-tabelle th:not(.tm):not(:first-child),html body .tw-sp2-tabelle td:not(.tm):not(:first-child){width:14%;min-width:50px}",
+      "html body .tw-sp2-tabelle td.tm>span{gap:9px}",
+      "html body .tw-sp2-tabelle td.pk{font-size:16px}",
+      "html body .tw-sp2-tab-titel{font-size:15px}",
+      "}",
+      /* A3/A4 Marktwert: aktueller Markt und Zielmarkt größer */
+      "@media (max-width:720px){",
+      "html body .tw-mwd-kartenkopf{font-size:12.5px;margin-bottom:10px}",
+      "html body .tw-mwd-land{font-size:18px;gap:9px}",
+      "html body .tw-mwd-land .tw-mwd-grau{font-weight:600;color:var(--t2)}",
+      "html body .tw-mwd-liga{font-size:16px;font-weight:600;margin-top:4px}",
+      "html body .tw-mwd-auswahl{gap:12px;margin-bottom:14px}",
+      "html body .tw-mwd-auswahl label{font-size:12.5px;gap:6px}",
+      "html body .tw-mwd-auswahl select{font:700 17px Inter,system-ui,sans-serif!important;min-height:52px!important;padding:0 14px!important;border-radius:12px!important;border:1px solid var(--linie2,var(--linie))!important}",
+      "html body .tw-mwd-klein{font-size:13.5px}",
+      "}"
+    ].join("\n");
+    (document.head || document.documentElement).appendChild(st);
+  } catch (e) { }
 })();
 /* ── Tarifmodell Free / Pro / Enterprise (23.10.2026) ──────────────────────────
    Pro-Bereiche: Verein sucht, Vereinskontakte, Netzwerk/Community, Workspace (Merkliste), Scouting, Akquise-Radar.
