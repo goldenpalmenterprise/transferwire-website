@@ -2723,11 +2723,47 @@ function nzFotoHolen(account, email) {
   if (!nzFotoCache[e]) nzFotoCache[e] = nzRuf(account, "foto", { profil: e }).then(d => (d && d.ok && d.b64) ? "data:" + (d.typ || "image/jpeg") + ";base64," + d.b64 : null).catch(() => null);
   return nzFotoCache[e];
 }
+(function tw1111Css() {
+  if (typeof document === "undefined" || document.getElementById("tw-1111-css")) return;
+  const st = document.createElement("style"); st.id = "tw-1111-css";
+  st.textContent = ":root{--nz-leer-bg:#3b3f45;--nz-leer-fg:#80868f}html.tw-dark{--nz-leer-bg:#dcdfe3;--nz-leer-fg:#ffffff}"
+    + ".nz-avatar.leer{background:var(--nz-leer-bg);color:var(--nz-leer-fg);border-color:transparent;align-items:flex-end}.nz-avatar.leer svg{width:100%;height:100%;display:block}"
+    + ".nz-foto-spalte{display:grid;gap:10px;justify-items:center;flex:none;min-width:max-content}"
+    + ".nz-foto-knoepfe{display:flex;gap:8px;flex-wrap:nowrap;justify-content:center;align-items:center}"
+    + ".nz-foto-knoepfe .nz-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;min-height:34px;line-height:1.2;box-sizing:border-box}"
+    + ".nz-foto-knoepfe .nz-btn svg{flex:none}"
+    + ".nz-schalter{min-height:40px;padding:6px 14px 6px 8px;border-radius:999px;border:1px solid var(--linie2);background:var(--karte2);user-select:none;justify-self:start;max-width:100%}"
+    + ".nz-schalter:hover{background:var(--hover)}.nz-schalter:focus-visible{outline:2px solid var(--gold);outline-offset:2px}"
+    + ".nz-schalter.an{border-color:var(--gruen)}.nz-schalter[aria-disabled=true]{opacity:.6;cursor:progress}"
+    + ".nz-schalt-msg{font-size:13px;line-height:1.45;border-radius:10px;padding:8px 11px}"
+    + ".nz-schalt-msg.fehler{background:var(--sc-schwach-bg);border:1px solid var(--sc-schwach-rand);color:var(--sc-schwach-text)}"
+    + ".nz-schalt-msg.ok{background:var(--karte2);border:1px solid var(--linie2);color:var(--t1)}"
+    + ".nz-status-zeile{display:flex;align-items:center;gap:8px;flex-wrap:wrap}"
+    + ".nz7-tarif .nz-abschnitt-kopf .nz-btn{background:var(--gold);border-color:var(--gold);color:#1a1405;font-weight:800;min-height:36px;padding:8px 16px;white-space:nowrap}"
+    + ".tw-sp2-alle-knopf{border-color:var(--gold-rand)!important;font-weight:800}"
+    + ".mu-vs-marke{align-self:flex-start;display:inline-block;font-family:'Inter',system-ui,sans-serif;font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#1a1405;background:var(--gold);padding:4px 10px;border-radius:999px}"
+    + ".mu-vs-logo-klein{display:inline-flex;width:40px;height:40px;border-radius:10px;background:#fff;align-items:center;justify-content:center;flex:none}"
+    + ".mu-vs-wappen{display:flex;align-items:center;justify-content:center}"
+    + ".mu-vs-wappen-rund{display:inline-flex;align-items:center;justify-content:center;width:196px;height:196px;border-radius:50%;background:#fff;box-shadow:0 18px 50px rgba(0,0,0,.35)}"
+    + ".mu-vs-wappen-rund.klein{width:96px;height:96px;box-shadow:0 10px 30px rgba(0,0,0,.3)}"
+    + ".mu-vs-alle{cursor:pointer;font:inherit;font-family:'Inter',system-ui,sans-serif;font-size:12.5px;font-weight:800;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:7px 13px;min-height:34px}"
+    + ".mu-vs-alle:hover{background:rgba(255,255,255,.22)}.mu-vs-alle:focus-visible{outline:2px solid var(--gold);outline-offset:2px}"
+    + "@media (max-width:700px){.mu-vs-hero .mu-vs-wappen{aspect-ratio:auto!important;height:170px}.mu-vs-wappen-rund{width:128px;height:128px}.mu-vs-wappen-rund .tw-clublogo,.mu-vs-wappen-rund img{max-width:86px;max-height:86px}}"
+    + "@media (max-width:560px){.nz-status{align-items:stretch}.nz-foto-spalte{justify-self:center;align-self:center}.nz-status-text{min-width:0}"
+    + ".nz7-tarif .nz-abschnitt-kopf{flex-direction:column;align-items:stretch;gap:10px}.nz7-tarif .nz-abschnitt-kopf .nz-btn{width:100%;min-height:44px}"
+    + ".nz-knoepfe .nz-btn{min-height:40px}.nz-schalter{width:100%;justify-content:flex-start}}";
+  (document.head || document.documentElement).appendChild(st);
+})();
+function nzLeerBild() {
+  return React.createElement("svg", { viewBox: "0 0 24 24", "aria-hidden": "true", focusable: "false" },
+    React.createElement("circle", { cx: 12, cy: 9.2, r: 4.4, fill: "currentColor" }),
+    React.createElement("path", { d: "M2.6 24.6c.5-5.5 4.4-8.9 9.4-8.9s8.9 3.4 9.4 8.9z", fill: "currentColor" }));
+}
 function NzAvatar({ account, email, name, hatFoto, groesse }) {
   const h = React.createElement;
   const [src, setSrc] = React.useState(() => (hatFoto && typeof nzFotoCache[String(email || "").toLowerCase()] === "string") ? nzFotoCache[String(email || "").toLowerCase()] : null);
   React.useEffect(() => { let alive = true; if (!hatFoto) { setSrc(null); return undefined; } nzFotoHolen(account, email).then(u => { if (alive) setSrc(u); }); return () => { alive = false; }; }, [email, hatFoto, account && account.email]);
-  return h("span", { className: "nz-avatar" + (groesse ? " " + groesse : ""), "aria-hidden": "true" }, src ? h("img", { src: src, alt: "" }) : nzInitialen(name));
+  return h("span", { className: "nz-avatar" + (groesse ? " " + groesse : "") + (src ? "" : " leer"), "aria-hidden": "true" }, src ? h("img", { src: src, alt: "" }) : nzLeerBild());
 }
 function nzHakenAus(p, klein) { const hk = (p && p.haken) ? nzHaken({ author_haken: { rolle: p.rolle, seit: p.haken_seit } }, klein) : null; const w = nz7Wappen(p, klein); return (hk || w) ? React.createElement(React.Fragment, null, hk, w) : null; }
 function nzRolleVon(p) { const en = LANG === "en"; return (en ? (p && p.rolle_en) : (p && p.rolle_de)) || nzRolleText(p && p.rolle); }
@@ -2975,7 +3011,26 @@ function NzProfilSeite({ account, setView, admin }) {
       weiter.then(d2 => { setBusy(false); uebernehmen(d2); setOk(L("Profil gespeichert.", "Profile saved.")); try { nzKontoLaden(account); } catch (e) {} });
     });
   };
-  const schalten = () => { if (!p) return; setBusy(true); setFehler(""); nzRuf(account, "profil_freischalten", { an: !p.freigeschaltet }).then(d => { setBusy(false); if (d && d.ok) { uebernehmen(d); setOk(d.freigeschaltet ? L("Dein Profil ist jetzt im Netzwerk sichtbar.", "Your profile is now visible in the network.") : L("Dein Profil ist jetzt unsichtbar.", "Your profile is now hidden.")); } else setFehler(nz2Grund(d && d.grund, d)); }); };
+  const [schaltMsg, setSchaltMsg] = React.useState(null);
+  const schalten = () => {
+    if (!p || busy || !f) return; setFehler(""); setSchaltMsg(null); const an = !p.freigeschaltet;
+    if (an) {
+      const nameOk = String(f.name || "").trim().length >= 2; const restOk = !!(String(f.firma || "").trim() || String(f.bio || "").trim());
+      if (!nameOk || !restOk) {
+        const fehlt = [!nameOk ? L("dein Name", "your name") : "", !restOk ? L("deine Firma oder eine Kurzbeschreibung", "your company or a short bio") : ""].filter(Boolean).join(L(" und ", " and "));
+        setSchaltMsg({ art: "fehler", text: L("Zum Freischalten fehlt noch " + fehlt + ". Bitte unten eintragen und dann erneut tippen.", "To make your profile visible, please add " + fehlt + " below and tap again.") });
+        try { const el = document.querySelector(nameOk ? ".nz-seite [data-nz-feld=firma] input" : ".nz-seite [data-nz-feld=name] input"); if (el) { el.scrollIntoView({ block: "center", behavior: "smooth" }); el.focus({ preventScroll: true }); } } catch (e) { }
+        return;
+      }
+    }
+    setBusy(true);
+    const geaendert = ["name", "firma", "bio"].some(k => String(f[k] || "") !== String(p[k] || ""));
+    const body = { name: f.name, firma: f.firma, bio: f.bio, laender: f.laender, ligen: f.ligen, schwerpunkte: f.schwerpunkte, sprachen: f.sprachen, erreichbar: { email: !!f.erreichbar.email, telefon: !!f.erreichbar.telefon }, kontakt_email: f.kontakt_email, telefon: f.telefon, website: f.website, linkedin: f.linkedin, sichtbar: f.sichtbar };
+    (an && geaendert ? nzRuf(account, "profil_speichern", body) : Promise.resolve({ ok: true })).then(sv => {
+      if (!sv || !sv.ok) { setBusy(false); setSchaltMsg({ art: "fehler", text: nz2Grund(sv && sv.grund, sv) }); return; }
+      return nzRuf(account, "profil_freischalten", { an: an }).then(d => { setBusy(false); if (d && d.ok) { uebernehmen(d); setSchaltMsg({ art: "ok", text: d.freigeschaltet ? L("Dein Profil ist jetzt im Netzwerk sichtbar.", "Your profile is now visible in the network.") : L("Dein Profil ist jetzt unsichtbar.", "Your profile is now hidden.") }); try { nzKontoLaden(account); } catch (e) { } } else setSchaltMsg({ art: "fehler", text: nz2Grund(d && d.grund, d) }); });
+    });
+  };
   const fotoWaehlen = ev => {
     const file = ev.target.files && ev.target.files[0]; ev.target.value = ""; if (!file) return;
     setFotoBusy(true); setFehler("");
@@ -2985,7 +3040,7 @@ function NzProfilSeite({ account, setView, admin }) {
   const abschnitt = (key, titel, inhalt, hinweis) => h("div", { className: "nz-abschnitt" },
     h("div", { className: "nz-abschnitt-kopf" }, h("h3", null, titel), key ? h(NzSichtbar, { wert: f.sichtbar[key], onChange: v => setzSicht(key, v) }) : null),
     hinweis ? h("div", { className: "nz-sub" }, hinweis) : null, inhalt);
-  const eingabe = (k, label, extra) => h("label", { className: "nz-feld" }, label, h("input", Object.assign({ value: f[k], onChange: e => setz(k, e.target.value) }, extra || {})));
+  const eingabe = (k, label, extra) => h("label", { className: "nz-feld", "data-nz-feld": k }, label, h("input", Object.assign({ value: f[k], onChange: e => setz(k, e.target.value) }, extra || {})));
   const kopf = h(React.Fragment, null,
     typeof CommunitySub === "function" ? h(CommunitySub, { view: "nz_profil", setView: setView, admin: !!admin }) : null,
     h("h1", null, L("Mein Profil", "My profile")),
@@ -2994,15 +3049,16 @@ function NzProfilSeite({ account, setView, admin }) {
   const fertig = Math.max(0, Math.min(100, Number(p.fertig) || 0));
   return h("div", { className: "nz-seite" }, kopf,
     h("div", { className: "nz-karte-box nz-status" },
-      h("div", { style: { display: "grid", gap: 8, justifyItems: "center" } },
+      h("div", { className: "nz-foto-spalte" },
         h(NzAvatar, { key: "a" + (p._fotoStand || 0), account: account, email: account.email, name: f.name || account.name, hatFoto: !!p.foto, groesse: "gross" }),
-        h("div", { className: "nz-knoepfe", style: { marginTop: 0, justifyContent: "center" } },
-          h("label", { className: "nz-btn klein", style: { display: "inline-block" } }, fotoBusy ? L("Lädt …", "Uploading …") : (p.foto ? L("Foto ändern", "Change photo") : L("Foto hochladen", "Upload photo")), h("input", { type: "file", accept: "image/jpeg,image/png,image/webp", style: { display: "none" }, disabled: fotoBusy, onChange: fotoWaehlen })),
+        h("div", { className: "nz-foto-knoepfe" },
+          h("label", { className: "nz-btn klein", tabIndex: 0, role: "button", onKeyDown: e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); try { e.currentTarget.querySelector("input").click(); } catch (x) { } } } }, h("svg", { viewBox: "0 0 24 24", width: 14, height: 14, fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true" }, h("path", { d: "M12 16V4M7 9l5-5 5 5M5 20h14" })), fotoBusy ? L("Lädt …", "Uploading …") : (p.foto ? L("Foto ändern", "Change photo") : L("Foto hochladen", "Upload photo")), h("input", { type: "file", accept: "image/jpeg,image/png,image/webp", style: { display: "none" }, disabled: fotoBusy, onChange: fotoWaehlen })),
           p.foto ? h("button", { type: "button", className: "nz-btn klein", disabled: fotoBusy, onClick: fotoLoeschen }, L("Entfernen", "Remove")) : null)),
       h("div", { className: "nz-status-text" },
         h("div", { className: "nz-status-name" }, h("span", null, f.name || account.name || "–"), p.verifiziert ? nzHaken({ author_haken: { rolle: p.rolle } }) : null, h("span", { className: "nz-chip" }, nzRolleVon(p))),
         h("div", null, h("div", { className: "nz-sub", style: { marginBottom: 4 } }, L("Profil zu " + fertig + " % ausgefüllt", "Profile " + fertig + " % complete") + (fertig < 60 ? L(" – je vollständiger, desto besser wirst du gefunden.", " – the more complete, the better you are found.") : "")), h("div", { className: "nz-balken" }, h("span", { style: { width: fertig + "%" } }))),
-        h("div", { className: "nz-schalter" + (p.freigeschaltet ? " an" : ""), role: "switch", "aria-checked": !!p.freigeschaltet, tabIndex: 0, onClick: schalten, onKeyDown: e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); schalten(); } } }, h("span", { className: "nz-knubbel" }), h("span", null, p.freigeschaltet ? L("Im Netzwerk sichtbar", "Visible in the network") : L("Unsichtbar – jetzt freischalten", "Hidden – make visible now"))),
+        h("div", { className: "nz-schalter" + (p.freigeschaltet ? " an" : ""), role: "switch", "aria-checked": !!p.freigeschaltet, "aria-disabled": busy ? "true" : "false", tabIndex: 0, onClick: schalten, onKeyDown: e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); schalten(); } } }, h("span", { className: "nz-knubbel" }), h("span", null, busy ? L("Einen Moment …", "One moment …") : p.freigeschaltet ? L("Im Netzwerk sichtbar", "Visible in the network") : L("Unsichtbar – jetzt freischalten", "Hidden – make visible now"))),
+        schaltMsg ? h("div", { className: "nz-schalt-msg " + schaltMsg.art, role: schaltMsg.art === "fehler" ? "alert" : "status" }, schaltMsg.text) : null,
         h("div", { className: "nz-sub" }, p.freigeschaltet ? L("Andere Pro-Mitglieder finden dich unter „Mitglieder finden“. ", "Other Pro members find you under “Find members”. ") : L("Zum Freischalten brauchst du deinen Namen und deine Firma oder eine Kurzbeschreibung. ", "To make it visible you need your name and your company or a short bio. "), (p.kontakte || 0) + " " + L("gespeicherte Kontakte", "saved contacts"), " · ", h("button", { type: "button", className: "nz-btn klein", onClick: () => setVorschau(true) }, L("Vorschau", "Preview"))))),
     h(NzVerifLeiste, { account: account }),
     h(NzVereinsprofilAbschnitt, { account: account, setView: setView }),
@@ -8809,7 +8865,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261110-handy-spieltag";
+const VS_VERSION = "20261111-kleinigkeiten3";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -13528,8 +13584,8 @@ function SpieltagVue({ openPlayer, openVerein, authQ }) {
   const meineK = meine.map(k => katMap[k]).filter(Boolean);
   const leisten = h(React.Fragment, null,
     meineK.length ? h("div", { className: "tw-sp2-leiste", role: "toolbar", "aria-label": en ? "My leagues" : "Meine Ligen" }, h("span", { className: "tw-sp2-label", style: { display: "inline-flex", alignItems: "center", gap: 5, color: "var(--gold-text)" } }, h(TwSp2Stern, { an: true, size: 13 }), en ? "My leagues" : "Meine Ligen"), meineK.map(k => chip(k, "m"))) : null,
-    h("div", { className: "tw-sp2-leiste", role: "toolbar", "aria-label": en ? "Quick selection" : "Schnellwahl" }, schnell.map(k => chip(k, "s")),
-      h("button", { type: "button", className: "tw-sp2-chip" + (alleOffen ? " aktiv" : ""), onClick: () => setAlleOffen(!alleOffen), "aria-expanded": alleOffen }, en ? "All competitions" : "Alle Wettbewerbe", h("span", { "aria-hidden": "true", style: { fontSize: 11 } }, alleOffen ? "\u25b4" : "\u25be"))));
+    h("div", { className: "tw-sp2-leiste", role: "toolbar", "aria-label": en ? "Quick selection" : "Schnellwahl" }, h("button", { type: "button", className: "tw-sp2-chip tw-sp2-alle-knopf" + (alleOffen ? " aktiv" : ""), onClick: () => setAlleOffen(!alleOffen), "aria-expanded": alleOffen }, en ? "All competitions" : "Alle Wettbewerbe", h("span", { "aria-hidden": "true", style: { fontSize: 11 } }, alleOffen ? "\u25b4" : "\u25be")),
+      schnell.map(k => chip(k, "s"))));
   /* Alle Wettbewerbe nach Land (Flagge, Spiele am Tag) */
   const laender = useMemo(() => { const m = {}; const out = []; katalog.forEach(k => { const lk = k.land || "Weitere"; if (!m[lk]) { m[lk] = { land: lk, land_en: k.land_en || lk, code: k.land_code, rang: k.land_rang || 99, wb: [], n: 0 }; out.push(m[lk]); } m[lk].wb.push(k); m[lk].n += Number(k.n_tag) || 0; }); return out.sort((a, b) => a.rang - b.rang || a.land.localeCompare(b.land)); }, [daten]);
   const allePanel = alleOffen ? h("div", { className: "tw-sp2-alle" },
@@ -13977,18 +14033,101 @@ function muNach(it) { return it.toClub || it.to_club || muClub(it.to) || ""; }
 function muName(it) { const sp = typeof tkSpieler === "function" ? tkSpieler(it) : null; return (sp && sp.name) || it.player_name || (it.player && it.player.name) || ""; }
 function muPos(it) { const sp = typeof tkSpieler === "function" ? tkSpieler(it) : null; return (sp && (sp.pos || sp.position)) || it.position || it.pos || ""; }
 function muAktivApp(view, type, query, club, league, country, sport) { return view === "feed" && type === "alle" && !query && !club && !league && !country && (!sport || sport === "alle"); }
+/* 11.11.2026 (Boss): Newsfeed nur mit bekannten Vereinen/Ligen; Kopfkarte "Verein sucht", zwei Transfers, Spieler-Markt */
+const TW_NF_TOPLIGEN = /^(Bundesliga|Premier League|LaLiga|La Liga|Serie A|Ligue 1)$/i;
+const TW_NF_GROSSE = ["bayern", "bayern munchen", "borussia dortmund", "dortmund", "bayer leverkusen", "leverkusen", "rb leipzig", "vfb stuttgart", "eintracht frankfurt", "real madrid", "barcelona", "fc barcelona", "atletico madrid", "manchester city", "manchester united", "liverpool", "arsenal", "chelsea", "tottenham", "tottenham hotspur", "newcastle", "newcastle united", "aston villa", "juventus", "inter", "inter mailand", "inter milan", "ac milan", "milan", "napoli", "ssc napoli", "as roma", "roma", "lazio", "atalanta", "paris saint germain", "psg", "olympique marseille", "marseille", "as monaco", "monaco", "olympique lyon", "lyon", "benfica", "sl benfica", "fc porto", "porto", "sporting cp", "ajax", "psv", "psv eindhoven", "feyenoord", "galatasaray", "fenerbahce", "besiktas", "celtic", "rangers", "al hilal", "al nassr", "al ittihad", "al ahli", "inter miami", "club brugge"];
+let TW_NF_KLUB = null; const TW_NF_CACHE = new WeakMap();
+function twNfKlubLiga() {
+  if (TW_NF_KLUB) return TW_NF_KLUB; const m = {};
+  try { const H = (typeof HIERARCHY !== "undefined" && HIERARCHY.fussball) || {}; Object.keys(H).forEach(land => Object.keys(H[land] || {}).forEach(liga => (H[land][liga] || []).forEach(k => { const n = muNorm(typeof k === "string" ? k : (k && k.name)); if (n && !m[n]) m[n] = liga; }))); } catch (e) { }
+  TW_NF_KLUB = m; return m;
+}
+const TW_NF_NATIONEN = /^(Deutschland|Germany|Spanien|Spain|Frankreich|France|England|Italien|Italy|Portugal|Niederlande|Netherlands|Brasilien|Brazil|Argentinien|Argentina|Belgien|Belgium|Kroatien|Croatia|Österreich|Austria|Schweiz|Switzerland|USA|Uruguay|Kolumbien|Colombia|Marokko|Morocco|Japan|Mexiko|Mexico|Dänemark|Denmark|Türkei|Turkey|T\u00fcrkiye|Norwegen|Norway|Schottland|Scotland)$/i;
+const TW_NF_GENAU = ["inter", "milan", "roma", "porto", "lyon", "monaco", "psv", "ajax", "celtic", "rangers", "lazio", "napoli", "benfica", "chelsea", "arsenal", "liverpool", "bayern", "dortmund", "leverkusen", "marseille", "atalanta", "juventus", "feyenoord", "galatasaray", "fenerbahce", "besiktas", "barcelona", "tottenham", "newcastle"];
+function twNfKlubStufe(name) {
+  const n = muNorm(name); if (!n || n === "?") return 0; const w = " " + n + " ";
+  const kern = n.replace(/^(fc|sc|sv|ac|as|ss|ssc|og|sl|afc|bv|cf)\s+|\s+(fc|cf|ac|sc|afc|ss)$/g, "");
+  if (TW_NF_GENAU.indexOf(kern) >= 0) return 2;
+  if (TW_NF_GROSSE.some(g => TW_NF_GENAU.indexOf(g) < 0 && w.indexOf(" " + g + " ") >= 0)) return 2;
+  const liga = twNfKlubLiga()[n] || twNfKlubLiga()[n.replace(/^(fc|sc|sv|vfl|vfb|tsg|ac|as|ss|ssc|rc|rcd|cf|cd|ud|sd|ca|og|ogc|sl|afc)\s+|\s+(fc|cf|ac|sc|afc)$/g, "")];
+  return liga && TW_NF_TOPLIGEN.test(liga) ? 1 : 0;
+}
+function twNfStufe(it) {
+  if (!it || typeof it !== "object") return 0; if (TW_NF_CACHE.has(it)) return TW_NF_CACHE.get(it);
+  let st = 0; [muVon(it), muNach(it), it.team, it.club].forEach(k => { if (k) st = Math.max(st, twNfKlubStufe(k)); });
+  if (!st && TW_NF_TOPLIGEN.test(String(it.league || "").replace(/ \u00b7 .*$/, ""))) st = 1;
+  TW_NF_CACHE.set(it, st); return st;
+}
+function twNfBekannt(it) { return !!it && (it.type === "community" || twNfStufe(it) > 0); }
+function muVsWahl(liste) {
+  const jetzt = Date.now();
+  const k = (liste || []).filter(it => it && it.type === "verein_sucht" && muTitel(it) && !it._ausgeblendet);
+  if (!k.length) return null;
+  const wert = it => twNfStufe(it) * 40 + (muTs(it) ? Math.max(0, 30 - (jetzt - muTs(it)) / 864e5) : 0);
+  return k.slice().sort((a, b) => wert(b) - wert(a))[0] || null;
+}
+const MU_MARKT = { t: 0, a: null };
+function useMuMarkt(account) {
+  const [a, setA] = React.useState(MU_MARKT.a || null);
+  React.useEffect(() => {
+    if (!account || !account.email || typeof nzRuf !== "function") return undefined; let alive = true;
+    if (MU_MARKT.t && Date.now() - MU_MARKT.t < 6e5) { setA(MU_MARKT.a || null); return undefined; }
+    nzRuf(account, "angebote", { sicht: "alle", filter: {}, seite: 1 }).then(d => {
+      const l = d && d.ok ? (d.angebote || []).filter(x => x && x.id && (!x.status || x.status === "aktiv")) : [];
+      l.sort((x, y) => (Number((y.spieler || {}).marktwert_eur) || 0) - (Number((x.spieler || {}).marktwert_eur) || 0));
+      MU_MARKT.a = l[0] || null; MU_MARKT.t = Date.now(); if (alive) setA(MU_MARKT.a);
+    }).catch(() => { });
+    return () => { alive = false; };
+  }, [account && account.email]);
+  return a;
+}
+function MuVsHero({ it, onOpen }) {
+  const hh = React.createElement; const en = muEn(); const klub = (typeof seekingClubSafe === "function" ? seekingClubSafe(it) : "") || it.club || "";
+  const klubOk = klub && klub !== "\u2014"; const intro = muIntro(it);
+  const meta = [muZeit(it), String(it.league || "").replace(/ \u00b7 .*$/, "")].filter(Boolean).join(" \u00b7 ");
+  const zuVs = e => { e.stopPropagation(); if (typeof window.twNzNavigieren === "function") window.twNzNavigieren("gesucht"); };
+  return hh("div", { className: "mu-hero mu-karte mu-vs-hero", "data-id": it.id, role: "button", tabIndex: 0, onClick: () => onOpen(it), onKeyDown: e => { if (e.key === "Enter") onOpen(it); },
+      style: { position: "relative", borderRadius: 12, overflow: "hidden", cursor: "pointer", border: "1px solid " + HAIR, background: MU_RUHIG } },
+    hh("div", { className: "mu-heroneu", style: { position: "relative" } },
+      hh("div", { style: { display: "flex", flexDirection: "column", gap: 10, padding: "20px 22px 22px", minWidth: 0 } },
+        hh("span", { className: "mu-vs-marke" }, en ? "Club seeks" : "Verein sucht"),
+        hh("div", { style: { flex: 1 } }),
+        klubOk ? hh("div", { style: { display: "flex", alignItems: "center", gap: 10, minWidth: 0 } }, hh("span", { className: "mu-vs-logo-klein" }, hh(ClubLogo, { name: klub, size: 30 })), hh("span", { className: "mu-c1", style: { fontFamily: FONT_BODY, fontSize: 15, fontWeight: 800, color: "#fff" } }, klub)) : null,
+        hh("h2", { className: "mu-c3", style: { margin: 0, fontFamily: FONT_DISPLAY, fontSize: 30, lineHeight: 1.1, fontWeight: 800, color: "#fff" } }, muTitel(it)),
+        intro && intro !== muTitel(it) ? hh("p", { className: "mu-c2", style: { margin: 0, fontFamily: FONT_BODY, fontSize: 14.5, lineHeight: 1.45, color: "rgba(255,255,255,.88)" } }, intro) : null,
+        hh("div", { style: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" } },
+          meta ? hh("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "rgba(255,255,255,.88)" } }, meta) : null,
+          hh("button", { type: "button", className: "mu-vs-alle", onClick: zuVs }, en ? "All club needs" : "Alle Vereinsbedarfe"))),
+      hh("div", { className: "mu-hero-foto mu-vs-wappen", "aria-hidden": "true" }, klubOk ? hh("span", { className: "mu-vs-wappen-rund" }, hh(ClubLogo, { name: klub, size: 132 })) : null)));
+}
+function MuMarktTeaser({ a }) {
+  const hh = React.createElement; const en = muEn(); const sp = a.spieler || {};
+  const name = sp.name || a.titel || (en ? "Player" : "Spieler");
+  const unter = [sp.position_text || sp.position || "", sp.team || ""].filter(Boolean).join(" \u00b7 ");
+  const mw = sp.marktwert_text || (sp.marktwert_eur && typeof tw40Mw === "function" ? tw40Mw(sp.marktwert_eur) : "");
+  const auf = () => { if (typeof window.twNzAngebotOeffnen === "function") window.twNzAngebotOeffnen(a.id); };
+  return hh("div", { className: "mu-karte mu-teaser mu-markt", role: "button", tabIndex: 0, onClick: auf, onKeyDown: e => { if (e.key === "Enter") auf(); },
+      style: { display: "flex", flexDirection: "column", borderRadius: 12, overflow: "hidden", cursor: "pointer", background: "var(--karte)", border: "1px solid " + HAIR, minWidth: 0 } },
+    hh("div", { className: "mu-thumb", style: { background: MU_RUHIG, display: "flex", alignItems: "center", justifyContent: "center" } },
+      sp.team ? hh("span", { className: "mu-vs-wappen-rund klein" }, hh(ClubLogo, { name: sp.team, size: 64 })) : null,
+      hh("div", { style: { position: "absolute", left: 12, bottom: 12 } }, hh("span", { className: "mu-vs-marke" }, en ? "Player market" : "Spieler-Markt"))),
+    hh("div", { style: { display: "flex", flexDirection: "column", gap: 6, padding: "11px 12px 13px" } },
+      hh("div", { className: "mu-c3", style: { fontFamily: FONT_DISPLAY, fontSize: 17, lineHeight: 1.2, fontWeight: 700, color: "var(--t1)" } }, name + (en ? " is available" : " ist auf dem Markt")),
+      hh("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, [unter, mw].filter(Boolean).join(" \u00b7 ") || (en ? "Offer in the Player Market" : "Angebot im Spieler-Markt"))));
+}
 const MU_HAUPT = { fix: 30, leihe: 22, trade: 20, trainer: 18, vertrag_verlaengert: 16, vertrag: 14, bericht: 13, geruecht: 12 };
 function muAuswahl(liste) {
   const jetzt = Date.now();
-  const wert = it => MU_HAUPT[muKategorie(it)] + (Number(it.reliability) || 3) * 6 + Math.min(20, (Number(it.relevanz || it.relevance) || 0) / 5) - (jetzt - muTs(it)) / 36e5 / 3;
-  let kand = liste.filter(it => MU_HAUPT[muKategorie(it)] != null && muTitel(it) && muTs(it) && jetzt - muTs(it) < 72 * 36e5);
-  if (kand.length < 4) kand = liste.filter(it => MU_HAUPT[muKategorie(it)] != null && muTitel(it));
+  const wert = it => MU_HAUPT[muKategorie(it)] + (Number(it.reliability) || 3) * 6 + Math.min(20, (Number(it.relevanz || it.relevance) || 0) / 5) + (twNfStufe(it) >= 2 ? 10 : 0) - (jetzt - muTs(it)) / 36e5 / 3;
+  const basis = liste.filter(it => MU_HAUPT[muKategorie(it)] != null && muTitel(it)); const bek = basis.filter(twNfBekannt); const quelle = bek.length >= 4 ? bek : basis;
+  let kand = quelle.filter(it => muTs(it) && jetzt - muTs(it) < 72 * 36e5);
+  if (kand.length < 4) kand = quelle;
   kand = kand.slice().sort((a, b) => wert(b) - wert(a));
   const gew = [], seen = new Set();
   for (const it of kand) { const k = muNorm(muName(it)) || it.id; if (seen.has(k)) continue; seen.add(k); gew.push(it); if (gew.length >= 4) break; }
   return { hero: gew[0] || null, teaser: gew.slice(1, 4), ids: new Set(gew.map(x => x.id)), alle: gew, wert: new Map(gew.map(x => [x.id, wert(x)])) };
 }
-function muOhneAufmacher(liste) { const ids = muAuswahl(liste).ids; return liste.filter(it => !ids.has(it.id) && it.type !== "leistung"); }
+function muOhneAufmacher(liste) { const ids = muAuswahl(liste).ids; const vs = muVsWahl(liste); const rest = liste.filter(it => !ids.has(it.id) && it.type !== "leistung" && !(vs && it.id === vs.id)); const bek = rest.filter(twNfBekannt); return bek.length >= 8 ? bek : rest; }
 /* Fotos: frei lizenzierte Archivfotos (Wikimedia Commons) und Porträts der Datenanbieter */
 const MU_BILDER = {}; const MU_BILD_WART = new Set(); const muBildHoerer = new Set();
 function muBildAnfordern(namen) {
@@ -14244,7 +14383,7 @@ function MuScore({ wert }) {
 }
 function MuFokus({ liste, onOpen }) {
   const hh = React.createElement; const en = muEn();
-  const top = liste.filter(it => it.type === "leistung").sort((a, b) => (Number(b.tw_score) || 0) - (Number(a.tw_score) || 0)).slice(0, 6);
+  const lst = liste.filter(it => it.type === "leistung"); const lstB = lst.filter(twNfBekannt); const top = (lstB.length >= 3 ? lstB : lst).sort((a, b) => (Number(b.tw_score) || 0) - (Number(a.tw_score) || 0)).slice(0, 6);
   return hh("div", { style: { display: "flex", flexDirection: "column", borderRadius: 12, overflow: "hidden", background: "var(--karte)", border: "1px solid " + HAIR, minWidth: 0 } },
     hh(MuKopf, { titel: en ? "Players in focus" : "Spieler im Fokus" }),
     top.length ? top.map((it, i) => hh("div", { key: it.id || i, className: "mu-zeile", role: "button", tabIndex: 0, onClick: () => onOpen(it), onKeyDown: e => { if (e.key === "Enter") onOpen(it); },
@@ -14256,12 +14395,25 @@ function MuFokus({ liste, onOpen }) {
         hh("div", { className: "mu-c1", style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t3)", marginTop: 1 } }, muTitel(it))),
       hh(MuScore, { wert: it.tw_score }))) : hh("div", { style: { padding: 16, fontFamily: FONT_BODY, fontSize: 13, color: "var(--t3)" } }, en ? "No standout performances yet." : "Noch keine herausragenden Leistungen."));
 }
-function MuAufmacher({ liste, onOpen }) {
+function MuAufmacher({ liste, onOpen, account }) {
   muCss(); const hh = React.createElement;
   const aus = React.useMemo(() => muAuswahl(liste), [liste]);
+  const vs = React.useMemo(() => muVsWahl(liste), [liste]);
   const namen = aus.alle.map(muName);
   const bilder = useMuBilder(namen); const mbilder = useMuMeldungBilder(aus.alle.map(x => x.id)); const hgs = useMuHintergruende();
-  if (!aus.hero) return null;
+  const markt = useMuMarkt(account);
+  if (!aus.hero && !vs) return null;
+  if (vs) {
+    const r = aus.alle.slice(); const echt0 = (x) => muEchtesBild(mbilder[x.id], bilder[muName(x)]);
+    r.sort((a, b) => (echt0(b) ? 1 : 0) - (echt0(a) ? 1 : 0));
+    const zwei = r.slice(0, 2); const dritte = r[2]; const hgV = muHgWahl(r.slice(0, 3).map(x => x.id), hgs);
+    const karten = zwei.map(t => hh(MuTeaser, { key: t.id, it: t, bild: bilder[muName(t)], mb: mbilder[t.id], onOpen, hg: hgV.get(t.id) }));
+    if (markt) karten.push(hh(MuMarktTeaser, { key: "markt-" + markt.id, a: markt }));
+    else if (dritte) karten.push(hh(MuTeaser, { key: dritte.id, it: dritte, bild: bilder[muName(dritte)], mb: mbilder[dritte.id], onOpen, hg: hgV.get(dritte.id) }));
+    return hh("section", { "aria-label": muEn() ? "Top stories" : "Hauptmeldungen", style: { marginBottom: 8 } },
+      hh("div", { className: "mu-top" }, hh(MuVsHero, { it: vs, onOpen }), hh(MuFokus, { liste, onOpen })),
+      karten.length ? hh("div", { className: "mu-t3", style: { marginTop: 14 } }, karten) : null);
+  }
   let reihe = aus.alle.slice();
   const echt = (x) => muEchtesBild(mbilder[x.id], bilder[muName(x)]);
   if (!echt(reihe[0])) { const k = reihe.findIndex((x, i) => i > 0 && echt(x) && (aus.wert.get(x.id) || 0) >= 0.85 * (aus.wert.get(reihe[0].id) || 0)); if (k > 0) { const t = reihe[k]; reihe.splice(k, 1); reihe.unshift(t); } }
@@ -15401,7 +15553,9 @@ function TwNewsLive({ news, filtered, magazin, onOpen, geheZu }) {
     laden(); const iv = setInterval(laden, 10 * 6e4); return () => { aktiv = false; clearInterval(iv); };
   }, []);
   const ausschluss = React.useMemo(() => magazin ? muAuswahl(filtered || []).ids : new Set(), [filtered, magazin]);
-  const neu = React.useMemo(() => twNlAuswahl(news || [], spiele, ausschluss, en), [news, spiele, ausschluss, en]);
+  const nwBek = React.useMemo(() => { const l = news || []; const b = l.filter(twNfBekannt); return b.length >= 8 ? b : l; }, [news]);
+  const spBek = React.useMemo(() => (spiele || []).filter(sp => { const lg = String(sp.league || "").replace(/ \u00b7 .*$/, ""); const t = [sp.heim, sp.gast].filter(x => typeof x === "string"); if (/\bU ?(1\d|2[0-3])\b/i.test(t.join(" ") + " " + lg)) return false; if (TW_NF_TOPLIGEN.test(lg)) return true; if (/WM|World Cup|Weltmeister|EM-|Euro|Nations League|Qualifi/i.test(lg) && !/Friendl|Freundschaft/i.test(lg)) return true; if (t.some(x => TW_NF_NATIONEN.test(String(x).trim()))) return true; return t.some(x => twNfKlubStufe(x) > 0); }), [spiele]);
+  const neu = React.useMemo(() => twNlAuswahl(nwBek, spBek, ausschluss, en), [nwBek, spBek, ausschluss, en]);
   const sig = l => l.map(x => x.key).join("|"); const startRef = React.useRef(Date.now());
   const [eintraege, setEintraege] = React.useState(neu); const offen = React.useRef(null);
   const reduziert = React.useMemo(() => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) { return false; } }, []);
@@ -16006,7 +16160,13 @@ const TW_PP_ACHSEN = {
   paraden: ["Paraden", "Shot stopping"], paradenquote: ["Paradenquote", "Save rate"], torverhinderung: ["Gegentore verhindert", "Goals prevented"],
   strafraum: ["Strafraumbeherrschung", "Box control"], spielaufbau: ["Spielaufbau", "Distribution"], fehlerfrei: ["Fehlerfreiheit", "Error avoidance"]
 };
-const TW_PP_REIHE = { feld: ["abschluss", "chancen", "dribbling", "flanken", "passspiel", "balleroberung", "zweikampf", "luftzweikampf"], tw: ["paraden", "paradenquote", "torverhinderung", "strafraum", "spielaufbau", "fehlerfrei"] };
+const TW_PP_REIHE = { feld: ["abschluss", "chancen", "dribbling", "flanken", "passspiel", "balleroberung", "zweikampf", "luftzweikampf"], tw: ["paraden", "paradenquote", "torverhinderung", "strafraum", "spielaufbau", "fehlerfrei"],
+  /* 11.11.2026: je Position nur die Achsen, die fuer die Rolle zaehlen (Werte unveraendert gegen dieselbe Vergleichsgruppe) */
+  ST: ["abschluss", "chancen", "dribbling", "passspiel", "zweikampf", "luftzweikampf", "balleroberung"],
+  FL: ["abschluss", "chancen", "dribbling", "flanken", "passspiel", "zweikampf", "balleroberung"],
+  ZM: ["abschluss", "chancen", "dribbling", "passspiel", "balleroberung", "zweikampf", "luftzweikampf"],
+  AV: ["chancen", "flanken", "dribbling", "passspiel", "balleroberung", "zweikampf", "luftzweikampf"],
+  IV: ["passspiel", "dribbling", "chancen", "balleroberung", "zweikampf", "luftzweikampf"] };
 const TW_PP_METRIK = {
   tore90: ["Tore ohne Elfmeter je 90 Min.", "Non-penalty goals per 90"], xg90: ["xG je 90 Min.", "xG per 90"], aufs_tor90: ["Schüsse aufs Tor je 90 Min.", "Shots on target per 90"],
   schluesselpaesse90: ["Schlüsselpässe je 90 Min.", "Key passes per 90"], grosschancen90: ["Großchancen kreiert je 90 Min.", "Big chances created per 90"], vorlagen90: ["Vorlagen je 90 Min.", "Assists per 90"],
@@ -16037,7 +16197,7 @@ function twPpVergleichText(pp) {
 }
 function twPpAchsenListe(pp) {
   if (!pp || !pp.haupt) return [];
-  const reihe = pp.haupt.gruppe === "TW" ? TW_PP_REIHE.tw : TW_PP_REIHE.feld; const map = {};
+  const reihe = pp.haupt.gruppe === "TW" ? TW_PP_REIHE.tw : (TW_PP_REIHE[pp.haupt.gruppe] || TW_PP_REIHE.feld); const map = {};
   (pp.radar || []).forEach(a => { if (a && a.k) map[a.k] = a; });
   return reihe.map(k => map[k] ? { k: k, v: Number(map[k].v), d: map[k].d || [] } : { k: k, v: null, d: [] });
 }
@@ -17019,8 +17179,8 @@ function MarktwertDetail({ sp, zurueck, openPlayer, zurueckText }) {
     h("div", { className: "tw-mwd-wertzeile" }, h("div", { className: "tw-mwd-wert" }, twMwText(sp.weltmarkt_eur)), h("span", { className: "tw-mw-status " + (sp.status === "indikativ" ? "ind" : "ein") }, statusTxt)),
     (sp.spanne_von && sp.spanne_bis) ? h("div", { className: "tw-mwd-klein" }, (en ? "Range " : "Spanne ") + twMwText(sp.spanne_von) + " – " + twMwText(sp.spanne_bis)) : null,
     h("p", { className: "tw-mwd-text" }, en
-      ? "The value of the player in his current league with buyers from every league (TransferWire model Formel 3: performance, remuneration, comparable transfers and the player’s own transfer fee, assessed by our market-value reviewer)." + (stand ? " As of " + stand + "." : "")
-      : "Der Wert des Spielers in seiner aktuellen Liga mit Käufern aus jeder Liga (TransferWire-Modell, Formel 3: Leistung, Vergütung, Vergleichstransfers und eigene Ablöse, eingeordnet durch unseren Marktwert-Bewerter)." + (stand ? " Stand " + stand + "." : "")));
+      ? "The value of the player in his current league with buyers from every league." + (stand ? " As of " + stand + "." : "")
+      : "Der Wert des Spielers in seiner aktuellen Liga mit Käufern aus jeder Liga." + (stand ? " Stand " + stand + "." : "")));
   const block2 = h("section", { className: "tw-mwd-block" },
     h("div", { className: "tw-mwd-titel" }, en ? "Performance market value" : "Leistungsmarktwert"),
     h("div", { className: "tw-mwd-wertzeile" }, h("div", { className: "tw-mwd-wert" }, twMwText(sp.leistungsmarktwert_eur)), (sp.pkt || sp.klasse) ? h("span", { className: "tw-mwd-pille" }, [sp.pkt ? (en ? "Score " : "Punkte ") + String(sp.pkt).replace(".", en ? "." : ",") : "", klasseTxt].filter(Boolean).join(" · ")) : null),
@@ -17043,14 +17203,14 @@ function MarktwertDetail({ sp, zurueck, openPlayer, zurueckText }) {
       ziel.ist_heimat ? h("div", { className: "tw-mwd-klein" }, en ? "This is his current league." : "Das ist seine aktuelle Liga.") : null,
       ziel.marktwert_danach_eur ? h(React.Fragment, null,
         h("div", { className: "tw-mwd-karte-wert" }, twMwText(ziel.marktwert_danach_eur), diff(heim ? heim.kaufpreis_eur : sp.weltmarkt_eur, ziel.marktwert_danach_eur) ? h("span", { className: "tw-mwd-diff" }, diff(heim ? heim.kaufpreis_eur : sp.weltmarkt_eur, ziel.marktwert_danach_eur)) : null),
-        h("div", { className: "tw-mwd-klein" }, en ? "Market value in this league (Formel 1: country and league factored in)" : "Marktwert in dieser Liga (Formel 1, mit Land und Liga gerechnet)"),
+        h("div", { className: "tw-mwd-klein" }, en ? "Market value in this league (country and league factored in)" : "Marktwert in dieser Liga (mit Land und Liga gerechnet)"),
         ziel.kaufpreis_eur && !ziel.ist_heimat ? h("div", { className: "tw-mwd-klein", style: { marginTop: 4 } }, (en ? "Purchase price today for a club from this league: " : "Kaufpreis heute für einen Verein aus dieser Liga: ") + twMwText(ziel.kaufpreis_eur)) : null)
         : h("div", { className: "tw-mwd-karte-wert leer" }, en ? "no value" : "kein Wert"),
       hinweisText(ziel.hinweis_art) ? h("div", { className: "tw-mwd-hinweis" }, hinweisText(ziel.hinweis_art)) : null)
       : h("div", { className: "tw-mwd-klein" }, en ? "Choose a country and a league." : "Land und Liga auswählen."));
   const block3 = h("section", { className: "tw-mwd-block" },
     h("div", { className: "tw-mwd-titel" }, en ? "Current league vs. target market" : "Aktuelle Liga im Vergleich zum Zielmarkt"),
-    h("p", { className: "tw-mwd-text" }, en ? "Left: his current league and value. Right: pick any country and league – Formel 1 of the TransferWire model recalculates his market value for that market so you can compare both directly." : "Links die aktuelle Liga mit ihrem Wert, rechts ein frei wählbarer Zielmarkt: Formel 1 des TransferWire-Modells rechnet den Marktwert für Land und Liga um, so lässt sich beides direkt vergleichen."),
+    h("p", { className: "tw-mwd-text" }, en ? "Left: his current league and value. Right: pick any country and league – TransferWire recalculates his market value for that market so you can compare both directly." : "Links die aktuelle Liga mit ihrem Wert, rechts ein frei wählbarer Zielmarkt: TransferWire rechnet den Marktwert für Land und Liga um, so lässt sich beides direkt vergleichen."),
     fehler ? h("div", { className: "tw-mwd-klein", style: { color: "var(--sc-schwach-text)" } }, fehler) : null,
     ligen === null ? h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), en ? "Loading league comparison …" : "Ligavergleich wird geladen …")
       : ligen.length === 0 ? h("div", { className: "tw-mwd-klein" }, en ? "No league values calculated for this player yet." : "Für diesen Spieler liegen noch keine Ligawerte vor.")
@@ -19096,7 +19256,7 @@ function TransferApp({
     style: {
       color: INK
     }
-  }, club), " — ", filtered.length, " ", filtered.length === 1 ? "Meldung" : "Meldungen", ".")), view === "feed" && React.createElement(TwTickerKnopf, { gross: window.innerWidth <= 760 }), muAktivApp(view, type, query, club, league, country, sport) && React.createElement(MuAufmacher, { liste: filtered, onOpen: it2 => twOeffnen(it2, setMSel) }), muAktivApp(view, type, query, club, league, country, sport) && React.createElement(MuTitel, { titel: LANG === "en" ? "Latest news" : "Aktuelle Nachrichten" }), view !== "talente" && view !== "community" && view !== "networking" && view !== "moderation" && /*#__PURE__*/React.createElement("div", {
+  }, club), " — ", filtered.length, " ", filtered.length === 1 ? "Meldung" : "Meldungen", ".")), view === "feed" && React.createElement(TwTickerKnopf, { gross: window.innerWidth <= 760 }), muAktivApp(view, type, query, club, league, country, sport) && React.createElement(MuAufmacher, { liste: filtered, onOpen: it2 => twOeffnen(it2, setMSel), account: typeof account !== "undefined" ? account : null }), muAktivApp(view, type, query, club, league, country, sport) && React.createElement(MuTitel, { titel: LANG === "en" ? "Latest news" : "Aktuelle Nachrichten" }), view !== "talente" && view !== "community" && view !== "networking" && view !== "moderation" && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 7,
