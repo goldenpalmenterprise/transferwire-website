@@ -8865,7 +8865,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261111-kleinigkeiten3";
+const VS_VERSION = "20261111-kleinigkeiten4";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -14058,6 +14058,8 @@ function twNfStufe(it) {
   if (!st && TW_NF_TOPLIGEN.test(String(it.league || "").replace(/ \u00b7 .*$/, ""))) st = 1;
   TW_NF_CACHE.set(it, st); return st;
 }
+const TW_NF_BREIT = /^(2\. Bundesliga|Championship|LaLiga 2|La Liga 2|Serie B|Ligue 2|Eredivisie|Liga Portugal|S\u00fcper Lig|Jupiler Pro League|Pro League|Scottish Premiership|Saudi Pro League|MLS|Bundesliga \(\u00d6sterreich\)|Super League \(Schweiz\))$/i;
+function twNfBreit(it) { if (!it) return false; if (twNfBekannt(it)) return true; const m = twNfKlubLiga(); return [muVon(it), muNach(it), it.team, it.club].some(k => { const l = k && m[muNorm(k)]; return !!(l && TW_NF_BREIT.test(l)); }) || TW_NF_BREIT.test(String(it.league || "").replace(/ \u00b7 .*$/, "")); }
 function twNfBekannt(it) { return !!it && (it.type === "community" || twNfStufe(it) > 0); }
 function muVsWahl(liste) {
   const jetzt = Date.now();
@@ -15555,7 +15557,7 @@ function TwNewsLive({ news, filtered, magazin, onOpen, geheZu }) {
   const ausschluss = React.useMemo(() => magazin ? muAuswahl(filtered || []).ids : new Set(), [filtered, magazin]);
   const nwBek = React.useMemo(() => { const l = news || []; const b = l.filter(twNfBekannt); return b.length >= 8 ? b : l; }, [news]);
   const spBek = React.useMemo(() => (spiele || []).filter(sp => { const lg = String(sp.league || "").replace(/ \u00b7 .*$/, ""); const t = [sp.heim, sp.gast].filter(x => typeof x === "string"); if (/\bU ?(1\d|2[0-3])\b/i.test(t.join(" ") + " " + lg)) return false; if (TW_NF_TOPLIGEN.test(lg)) return true; if (/WM|World Cup|Weltmeister|EM-|Euro|Nations League|Qualifi/i.test(lg) && !/Friendl|Freundschaft/i.test(lg)) return true; if (t.some(x => TW_NF_NATIONEN.test(String(x).trim()))) return true; return t.some(x => twNfKlubStufe(x) > 0); }), [spiele]);
-  const neu = React.useMemo(() => twNlAuswahl(nwBek, spBek, ausschluss, en), [nwBek, spBek, ausschluss, en]);
+  const neu = React.useMemo(() => { const a = twNlAuswahl(nwBek, spBek, ausschluss, en); if (a.length >= 4) return a; const nb = (news || []).filter(twNfBreit); const b = twNlAuswahl(nb.length >= 8 ? nb : (news || []), (spiele || []).filter(sp => !/\bU ?(1\d|2[0-3])\b/i.test(String(sp.heim || "") + " " + String(sp.gast || "") + " " + String(sp.league || ""))), ausschluss, en); const c = b.length >= a.length ? b : a; return c.length >= 3 ? c : twNlAuswahl(news || [], spiele, ausschluss, en); }, [nwBek, spBek, news, spiele, ausschluss, en]);
   const sig = l => l.map(x => x.key).join("|"); const startRef = React.useRef(Date.now());
   const [eintraege, setEintraege] = React.useState(neu); const offen = React.useRef(null);
   const reduziert = React.useMemo(() => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) { return false; } }, []);
