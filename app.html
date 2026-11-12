@@ -8865,7 +8865,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261111-kleinigkeiten4";
+const VS_VERSION = "20261112-chancen";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -9775,6 +9775,16 @@ const WS_CSS = ".ws2{display:flex;flex-direction:column;gap:16px;min-width:0}"
   + ".ws2-stufe{font:800 11px Inter,system-ui,sans-serif;padding:3px 7px;border-radius:999px;border:1px solid var(--linie2);color:var(--t2);white-space:nowrap;flex-shrink:0}"
   + ".ws2-stufe.akut{background:var(--sc-schwach-bg);border-color:var(--sc-schwach-rand);color:var(--sc-schwach-text)}.ws2-stufe.wahrscheinlich{background:var(--sc-mittel-bg);border-color:var(--sc-mittel-rand);color:var(--sc-mittel-text)}"
   + ".ws2-link{cursor:pointer;background:none;border:0;padding:0;font:700 12.5px Inter,system-ui,sans-serif;color:var(--gold-text);text-align:left;text-decoration:underline}"
+  + ".ws2-fit-liste{display:flex;flex-direction:column;min-width:0}.ws2-fit-box{display:flex;flex-direction:column;gap:6px;padding:9px 0;border-top:1px solid var(--linie);min-width:0}"
+  + ".ws2-fit-liste .ws2-fit-box:first-child{border-top:0;padding-top:2px}.ws2-fit-st{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding-left:31px}"
+  + ".ws2-fit-sel{font:700 13px Inter,system-ui,sans-serif;padding:0 8px;max-width:100%}.ws2-fit-sel option{color:var(--t1);background:var(--karte)}"
+  + ".tw-main .ws2-fit-sel.st-kontaktiert,.tw-main .ws2-fit-sel.st-termin,.tw-main .ws2-fit-sel.st-gewonnen{border-color:var(--gold-rand)!important;background:var(--gold-tint)!important;color:var(--gold-text)!important}.tw-main .ws2-fit-sel.st-verloren{color:var(--t3)!important}"
+  + ".ws2-daumen{width:44px;height:44px;border-radius:10px;border:1px solid var(--linie2);background:var(--karte);color:var(--t2);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex-shrink:0}"
+  + ".ws2-daumen svg{width:18px;height:18px;pointer-events:none}.ws2-daumen:hover:not(:disabled){border-color:var(--gold-rand);color:var(--t1)}.ws2-daumen:focus-visible,.ws2-fit-sel:focus-visible{outline:2px solid var(--gold);outline-offset:2px}.ws2-daumen.an{background:var(--gold-tint);border-color:var(--gold-rand);color:var(--gold-text)}"
+  + ".ws2-daumen.nein.an{background:var(--sc-schwach-bg);border-color:var(--sc-schwach-rand);color:var(--sc-schwach-text)}.ws2-daumen:disabled,.ws2-fit-sel:disabled{opacity:.55;cursor:default}"
+  + ".ws2-fit-hin{display:flex;flex-direction:column;gap:2px;font:500 12px/1.45 Inter,system-ui,sans-serif;color:var(--t2);padding-left:31px;overflow-wrap:anywhere}.ws2-fit-hin b{font-weight:800;color:var(--t1)}"
+  + ".ws2-fit-weg{font:700 11px Inter,system-ui,sans-serif;color:var(--t3);border:1px dashed var(--linie2);border-radius:999px;padding:3px 8px;white-space:nowrap;flex-shrink:0}"
+  + "@media (max-width:560px){.ws2-fit-st,.ws2-fit-hin{padding-left:0}.ws2-fit-sel{flex:1 1 150px;font-size:16px}}"
   + ".ws2-notiz{font:500 12.5px/1.5 Inter,system-ui,sans-serif;color:var(--t2);font-style:italic;border-left:3px solid var(--linie2);padding-left:9px;white-space:pre-wrap;overflow-wrap:anywhere}"
   + ".ws2-team{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ws2-zust{display:flex;align-items:center;gap:6px;font:700 12px Inter,system-ui,sans-serif;color:var(--t2)}"
   + ".ws2-zust select{min-height:36px;border-radius:9px;border:1px solid var(--linie2);background:var(--seite);color:var(--t1);font:600 13px Inter,system-ui,sans-serif;padding:0 8px;max-width:220px}"
@@ -9960,10 +9970,30 @@ function WsSuche({ account, voll, lim, onAnlegen }) {
         : h("button", { type: "button", className: "ws2-btn klein", onClick: () => setWahl(t.pid), "data-ws-hinzu": t.pid }, en ? "Add" : "Hinzufügen")))) : null,
     treffer && !treffer.length && !laedt ? h("p", { className: "ws2-sub" }, en ? "No match in the database – create the player as your own profile." : "Kein Treffer in der Datenbank – lege den Spieler als eigenes Profil an.") : null);
 }
+const WS_CH_STATUS = [["offen", "Offen", "Open"], ["kontaktiert", "Kontaktiert", "Contacted"], ["termin", "Termin", "Meeting"], ["gewonnen", "Gewonnen", "Won"], ["verloren", "Verloren", "Lost"]];
+const WS_DAUMEN_HOCH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10v11"/><path d="M15 5.9 14 10h5.8a2 2 0 0 1 1.9 2.6l-2.3 7A2 2 0 0 1 17.5 21H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h2.8a2 2 0 0 0 1.8-1.1L12 2a3.1 3.1 0 0 1 3 3.9z"/></svg>';
+const WS_DAUMEN_RUNTER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 14V3"/><path d="M9 18.1 10 14H4.2a2 2 0 0 1-1.9-2.6l2.3-7A2 2 0 0 1 6.5 3H20a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-2.8a2 2 0 0 0-1.8 1.1L12 22a3.1 3.1 0 0 1-3-3.9z"/></svg>';
+// Verein sucht 3.0 (12.11.2026): eine Chance = passender Verein zu einem eigenen Spieler, mit Status, Rueckmeldung und Hinweisen
+function WsChance({ sp, f, account }) {
+  const h = React.createElement; const en = wsEn();
+  const [busy, setBusy] = React.useState(false);
+  const st = wsStufe(f.stufe); const status = f.st || "offen"; const ur = Number(f.ur) || 0;
+  const setze = body => { setBusy(true); wsRuf(account, "chance", Object.assign({ id: sp.id, karte: f.karte }, body)).then(r => { setBusy(false); if (r && r.ok) wsSpielerSetzen(r.spieler); else wsMeldung(wsGrund(r && r.grund, r)); }); };
+  const daumen = (wert, svg, lab) => h("button", { type: "button", className: "ws2-daumen" + (wert < 0 ? " nein" : "") + (ur === wert ? " an" : ""), "aria-pressed": ur === wert, "aria-label": lab, title: lab, disabled: busy, onClick: () => setze({ urteil: ur === wert ? 0 : wert }), "data-ws-daumen": wert, dangerouslySetInnerHTML: { __html: svg } });
+  return h("div", { className: "ws2-fit-box", "data-ws-chance": f.karte },
+    h("div", { className: "ws2-fit" }, h(ClubLogo, { name: f.team, size: 22 }),
+      h("span", { className: "ws2-fit-t" }, h("b", null, f.team || "–"), h("span", null, [f.titel, f.liga].filter(Boolean).join(" · "))),
+      f.weg ? h("span", { className: "ws2-fit-weg", title: en ? "This card is no longer active in “Club seeks”." : "Diese Karte ist in „Verein sucht“ nicht mehr aktiv." }, en ? "no longer active" : "nicht mehr aktiv") : (f.stufe ? h("span", { className: "ws2-stufe " + st[0] }, st[1]) : null),
+      f.summe != null ? h("span", { className: "ws2-score", title: en ? "Club fit" : "Club-Fit", style: { background: scoreBg(f.summe), borderColor: scoreRand(f.summe), color: scoreTxt(f.summe) } }, Math.round(Number(f.summe))) : null),
+    h("div", { className: "ws2-fit-st" },
+      h("select", { className: "ws2-fit-sel st-" + status, value: status, disabled: busy, "aria-label": (en ? "Status of the opportunity at " : "Status der Chance bei ") + (f.team || ""), onChange: e => setze({ status: e.target.value }), "data-ws-chance-status": f.karte }, WS_CH_STATUS.map(x => h("option", { key: x[0], value: x[0] }, en ? x[2] : x[1]))),
+      daumen(1, WS_DAUMEN_HOCH, en ? "Good fit" : "Passt"), daumen(-1, WS_DAUMEN_RUNTER, en ? "Not a fit" : "Passt nicht")),
+    (f.hin || []).length ? h("div", { className: "ws2-fit-hin" }, f.hin.map((x, i) => h("span", { key: i }, h("b", null, en ? "Note: " : "Hinweis: "), (en ? (x.te || x.t) : x.t) + (x.q ? " (" + x.q + (x.d ? ", " + wsDatum(x.d) : "") + ")" : "")))) : null);
+}
 function wsStufe(s) { const x = WS_STUFE[s]; return x ? [x[0], wsEn() ? x[1] : s] : ["", s || ""]; }
 function WsSpielerKarte({ sp, d, account, openPlayer, setView, watch, onUpdateWatch, onBearbeiten }) {
   const h = React.createElement; const en = wsEn();
-  const [offen, setOffen] = React.useState(false); const [weg, setWeg] = React.useState(false); const [busy, setBusy] = React.useState(false);
+  const [offen, setOffen] = React.useState(false); const [weg, setWeg] = React.useState(false); const [busy, setBusy] = React.useState(false); const [mehr, setMehr] = React.useState(false);
   const team = d.team || {}; const istTeam = !!team.ist_team;
   const pos = sp.pos ? wsWort(WS_POS, sp.pos) : (sp.position || "");
   const kopfInfo = [sp.team, pos, sp.alter ? sp.alter + (en ? " yrs" : " Jahre") : ""].filter(Boolean).join(" · ");
@@ -9980,7 +10010,7 @@ function WsSpielerKarte({ sp, d, account, openPlayer, setView, watch, onUpdateWa
   };
   const wert = (lab, v, kl, titel) => h("div", { className: "ws2-wert" + (kl ? " " + kl : ""), title: titel || "" }, h("span", null, lab), h("b", null, v));
   const einsatz = sp.spiele3 ? (en ? (sp.einsaetze3 || 0) + " of " + sp.spiele3 + " · " + (sp.min3 || 0) + " min" : (sp.einsaetze3 || 0) + " von " + sp.spiele3 + " · " + (sp.min3 || 0) + " Min.") : "–";
-  const fits = sp.fits || [];
+  const fits = sp.fits || []; const fitsMehr = sp.fits_mehr || [];
   return h("article", { className: "ws2-karte", "data-ws-spieler": sp.id },
     h("div", { className: "ws2-k-kopf" },
       h("span", { className: "ws2-k-foto" + (sp.pid ? " link" : ""), onClick: sp.pid ? oeffne : undefined }, h(DbFoto, { x: { name: sp.name, photo: sp.foto }, size: 46 })),
@@ -10004,9 +10034,11 @@ function WsSpielerKarte({ sp, d, account, openPlayer, setView, watch, onUpdateWa
     (sp.hinweise || []).length ? h("div", { className: "ws2-hinweise" }, sp.hinweise.map(x => h("span", { key: x.k, className: "ws2-hinweis " + x.k, title: x.info || "" }, en ? (x.te || x.t) : x.t))) : null,
     h("div", { className: "ws2-fits" },
       h("div", { className: "ws2-label" }, (en ? "Matching clubs" : "Passende Vereine") + (sp.fits_n ? " (" + sp.fits_n + ")" : "")),
-      fits.length ? fits.map(f => { const st = wsStufe(f.stufe); return h("div", { key: f.karte, className: "ws2-fit" }, h(ClubLogo, { name: f.team, size: 22 }), h("span", { className: "ws2-fit-t" }, h("b", null, f.team), h("span", null, [f.titel, f.liga].filter(Boolean).join(" · "))), f.stufe ? h("span", { className: "ws2-stufe " + st[0] }, st[1]) : null, h("span", { className: "ws2-score", title: en ? "Club fit" : "Club-Fit", style: { background: scoreBg(f.summe), borderColor: scoreRand(f.summe), color: scoreTxt(f.summe) } }, Math.round(Number(f.summe)))); })
+      fits.length ? h("div", { className: "ws2-fit-liste" }, fits.map(f => h(WsChance, { key: f.karte, sp: sp, f: f, account: account })))
         : h("p", { className: "ws2-sub" }, en ? "No matching club need yet – calculated daily from “Club seeks”." : "Noch kein passender Vereinsbedarf – wird täglich aus „Verein sucht“ berechnet."),
-      sp.fits_n > fits.length ? h("button", { type: "button", className: "ws2-link", onClick: () => setView("gesucht") }, en ? "Show all in “Club seeks”" : "Alle in „Verein sucht“ ansehen") : null),
+      sp.fits_n > fits.length ? h("button", { type: "button", className: "ws2-link", onClick: () => setView("gesucht") }, en ? "Show all in “Club seeks”" : "Alle in „Verein sucht“ ansehen") : null,
+      fitsMehr.length ? h("button", { type: "button", className: "ws2-link", onClick: () => setMehr(!mehr), "aria-expanded": mehr, "data-ws-chance-mehr": sp.id }, (mehr ? (en ? "Hide closed and dismissed" : "Abgeschlossene und aussortierte ausblenden") : (en ? "Show closed and dismissed" : "Abgeschlossene und aussortierte anzeigen")) + " (" + fitsMehr.length + ")") : null,
+      mehr && fitsMehr.length ? h("div", { className: "ws2-fit-liste" }, fitsMehr.map(f => h(WsChance, { key: f.karte, sp: sp, f: f, account: account }))) : null),
     sp.notizen ? h("div", { className: "ws2-notiz" }, sp.notizen) : null,
     istTeam ? h("div", { className: "ws2-team" },
       h("label", { className: "ws2-zust" }, h("span", null, en ? "Responsible" : "Zuständig"), h("select", { value: (sp.zustaendig && sp.zustaendig.email) || "", onChange: e => aendern({ zustaendig: e.target.value }), "data-ws-zustaendig": sp.id }, h("option", { value: "" }, en ? "nobody" : "niemand"), (team.mitglieder || []).map(m => h("option", { key: m.email, value: m.email }, (m.name || "") + (m.ich ? (en ? " (you)" : " (du)") : ""))))),
