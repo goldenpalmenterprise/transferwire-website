@@ -9068,7 +9068,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261113-w29-tastenkuerzel";
+const VS_VERSION = "20261114-datenschutz-chancen";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -11206,7 +11206,13 @@ function DatenschutzContent() {
       margin: 0
     }
   }, "Quellenverweise führen zu Websites Dritter. Beim Aufruf dieser Links gelten die Datenschutzhinweise des jeweiligen Anbieters.")), /*#__PURE__*/React.createElement(LegalSection, {
-    title: "6. Ihre Rechte"
+    title: "6. Rückmeldungen zu Chancen (Workspace)"
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0
+    }
+  }, "Wenn Sie in „Mein Workspace“ zu einer Chance einen Status (z. B. „Kontaktiert“ oder „Gewonnen“) oder eine Rückmeldung („Passt“ / „Passt nicht“) hinterlegen, speichern wir diese Angaben zu Ihrem Konto, um sie Ihnen anzuzeigen (Art. 6 Abs. 1 lit. b DSGVO). Zur Verbesserung unserer Vorschläge werten wir Status und Rückmeldung außerdem in zusammengefasster, anonymisierter Form aus – ohne Bezug zu Ihrem Konto oder zu Ihren Spielern; Notizen werden dafür nicht verwendet (Art. 6 Abs. 1 lit. f DSGVO).")), /*#__PURE__*/React.createElement(LegalSection, {
+    title: "7. Ihre Rechte"
   }, /*#__PURE__*/React.createElement("p", {
     style: {
       margin: 0
@@ -11218,7 +11224,7 @@ function DatenschutzContent() {
       color: MUTED,
       margin: 0
     }
-  }, "Stand: August 2026"));
+  }, "Stand: November 2026"));
 }
 function AgbContent() {
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(LegalSection, {
