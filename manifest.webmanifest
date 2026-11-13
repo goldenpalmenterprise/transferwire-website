@@ -1,15 +1,19 @@
 {
+  "id": "./",
   "name": "TransferWire",
   "short_name": "TransferWire",
-  "description": "Transfermeldungen, Vereinsbedarfe, Scout-Ranking und Spieler-Datenbank aus 20 Ligen.",
+  "description": "Football transfer intelligence for agents, scouts and clubs: transfer news, club needs with player matching, market values, player performance and a player database from 53 leagues in 32 countries.",
+  "lang": "en",
+  "dir": "ltr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#101012",
   "theme_color": "#101012",
+  "categories": ["sports", "news", "business"],
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
