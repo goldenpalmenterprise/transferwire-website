@@ -1,2 +1,7 @@
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+# W13 (14.11.2026): Verein sucht wird immer mit ?v=VS_VERSION geladen, neue Version = neue Adresse
+/verein-sucht.js
+  Cache-Control: public, max-age=31536000, immutable
+/verein-sucht.css
+  Cache-Control: public, max-age=31536000, immutable
