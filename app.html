@@ -9068,7 +9068,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261114-datenschutz-chancen";
+const VS_VERSION = "20261114-knopf-gold";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -11455,8 +11455,8 @@ function PBtn({
   kind = "orange",
   full
 }) {
-  const bg = kind === "orange" ? ORANGE : kind === "green" ? LGREEN : "#fff";
-  const col = kind === "ghost" ? INK : kind === "green" ? "#1A1306" : "#fff";
+  const bg = kind === "orange" || kind === "green" ? LGREEN : "#fff";
+  const col = kind === "ghost" ? INK : kind === "orange" || kind === "green" ? "#1A1306" : "#fff";
   return /*#__PURE__*/React.createElement("button", {
     onClick: onClick,
     style: {
