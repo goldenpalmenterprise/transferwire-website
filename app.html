@@ -9068,7 +9068,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261114-knopf-gold";
+const VS_VERSION = "20261115-ws3-workspace";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -9941,6 +9941,126 @@ const WS_STUFE = { Akut: ["akut", "Urgent"], Wahrscheinlich: ["wahrscheinlich", 
 const WS_GLOCKE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
 const WS_GLOCKE_AUS_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.7 3A6 6 0 0 1 18 8c0 2.7.4 4.6 1 6"/><path d="M17 17H3s3-2 3-9c0-.8.1-1.5.4-2.2"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><path d="M3 3l18 18"/></svg>';
 const WS_LUPE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
+// WS3 (14.11.2026): Transferfenster-Zeitleiste, Reiter „Angebote“ und „Notizen“ (beide Themen über die Farbvariablen; html.tw-dark = helles Thema)
+const WS3_CSS = ""
+  /* Transferfenster */
+  + ".ws3-tf{container-type:inline-size;--tf-offen:var(--gold);--tf-kommend:var(--t3);--tf-bald:var(--sc-schwach-text);--tf-l:0px;--tf-r:0px}"
+  + "html.tw-dark .ws3-tf{--tf-offen:#a9822f}"
+  + ".ws3-tf-kopf{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:0 0 12px}.ws3-tf .ws3-tf-kopf h3{margin:0}"
+  + ".ws3-seg{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--linie2);border-radius:999px;background:var(--karte2)}"
+  + ".ws3-seg button{cursor:pointer;border:0;background:transparent;color:var(--t2);font:700 12px Inter,system-ui,sans-serif;padding:5px 10px;border-radius:999px;min-height:30px;white-space:nowrap;font-variant-numeric:tabular-nums}"
+  + ".ws3-seg button[aria-pressed=\"true\"]{background:var(--karte);color:var(--t1);box-shadow:0 1px 2px rgba(0,0,0,.14)}"
+  + ".ws3-seg button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}"
+  + ".ws3-tf-held{display:flex;align-items:center;gap:12px;padding:0 0 12px;margin:0 0 4px;border-bottom:1px solid var(--linie)}"
+  + ".ws3-tf-zahl{font:700 46px/.9 'Barlow Condensed','Arial Narrow',sans-serif;color:var(--gold-text);font-variant-numeric:tabular-nums;flex-shrink:0}"
+  + ".ws3-tf-held-t{display:flex;flex-direction:column;gap:3px;min-width:0}"
+  + ".ws3-tf-held-t b{font:800 13px/1.3 Inter,system-ui,sans-serif;color:var(--t1)}.ws3-tf-held-t span{font:500 12px/1.45 Inter,system-ui,sans-serif;color:var(--t2)}"
+  + ".ws3-tf-liste{list-style:none;margin:0;padding:0}"
+  + ".ws3-tf-achse{position:relative;height:18px;margin:6px var(--tf-r) 0 var(--tf-l)}"
+  + ".ws3-tf-achse span{position:absolute;top:2px;transform:translateX(-50%);font:700 10.5px Inter,system-ui,sans-serif;letter-spacing:.2px;color:var(--t3);white-space:nowrap}"
+  + ".ws3-tf .ws3-tf-zeile{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:\"land datum\" \"spur spur\";column-gap:8px;row-gap:6px;align-items:baseline;padding:8px 0 9px;border-bottom:1px solid var(--linie);flex-wrap:nowrap}"
+  + ".ws3-tf .ws3-tf-zeile:last-child{border-bottom:0}"
+  + ".ws3-tf-land{grid-area:land;font:700 13px Inter,system-ui,sans-serif;color:var(--t1);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}"
+  + ".ws3-tf .ws3-tf-datum{grid-area:datum;display:flex;flex-direction:column;align-items:flex-end;gap:1px;font:600 12px Inter,system-ui,sans-serif;color:var(--t2);font-variant-numeric:tabular-nums;white-space:nowrap}"
+  + ".ws3-tf .ws3-tf-datum small{flex-basis:auto;font:700 11px Inter,system-ui,sans-serif;color:var(--t3)}"
+  + ".ws3-tf .ws3-tf-datum small.offen{color:var(--gold-text)}.ws3-tf .ws3-tf-datum small.bald{color:var(--tf-bald)}"
+  + ".ws3-tf-spur{grid-area:spur;position:relative;height:8px;border-radius:999px;background:var(--karte2)}"
+  + ".ws3-tf-m{position:absolute;top:-2px;bottom:-2px;width:1px;background:var(--linie2)}"
+  + ".ws3-tf-balken{position:absolute;top:0;bottom:0;min-width:4px;border-radius:999px;background:var(--tf-kommend)}"
+  + ".ws3-tf-zeile.offen .ws3-tf-balken{background:var(--tf-offen)}.ws3-tf-zeile.bald .ws3-tf-balken{background:var(--tf-bald)}"
+  + ".ws3-tf-zeile.unbest .ws3-tf-balken{background:transparent;border:1.5px dashed var(--tf-kommend);box-sizing:border-box}"
+  + ".ws3-tf-heute{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;border-radius:1px;background:var(--gold-text)}"
+  + "@container (min-width:440px){.ws3-tf{--tf-l:128px;--tf-r:112px}.ws3-tf .ws3-tf-zeile{grid-template-columns:var(--tf-l) minmax(0,1fr) var(--tf-r);grid-template-areas:\"land spur datum\";column-gap:0;align-items:center;padding:7px 0}"
+  + ".ws3-tf-land{padding-right:10px}.ws3-tf .ws3-tf-datum{padding-left:12px}.ws3-tf-zahl{font-size:52px}}"
+  + ".ws3-tf-legende{display:flex;flex-wrap:wrap;gap:6px 14px;margin:12px 0 0;font:600 11.5px Inter,system-ui,sans-serif;color:var(--t2)}"
+  + ".ws3-tf-legende span{display:inline-flex;align-items:center;gap:6px}"
+  + ".ws3-tf-sw{display:inline-block;width:16px;height:6px;border-radius:999px;background:var(--tf-kommend)}"
+  + ".ws3-tf-sw.offen{background:var(--tf-offen)}.ws3-tf-sw.bald{background:var(--tf-bald)}.ws3-tf-sw.unbest{background:transparent;border:1.5px dashed var(--tf-kommend);box-sizing:border-box;height:8px}"
+  + ".ws3-tf-sw.heute{width:2px;height:12px;border-radius:1px;background:var(--gold-text)}"
+  + ".ws3-tf-fehlend{margin:12px 0 0;padding:10px 0 0;border-top:1px solid var(--linie);font:500 12px/1.5 Inter,system-ui,sans-serif;color:var(--t2)}.ws3-tf-fehlend b{color:var(--t1);font-weight:800}"
+  + ".ws3-tf-quelle{margin:10px 0 0;font:500 11.5px/1.5 Inter,system-ui,sans-serif;color:var(--t3)}"
+  + ".ws3-link{color:var(--gold-text);text-decoration:underline;text-underline-offset:2px}.ws3-link:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:2px}"
+  /* gemeinsame Leiste, Auswahl, Hinweise */
+  + ".ws3-leiste{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}"
+  + ".ws3-leiste2{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ws3-leiste2 .ws3-suche{flex:1 1 240px;max-width:none}"
+  + ".ws3-suche{flex:1 1 200px;max-width:320px}.ws3-suche input{min-height:40px;font-size:14px}"
+  + ".ws3-auswahl select,.ws3-sel{min-height:40px;border-radius:10px;border:1px solid var(--linie2);background:var(--karte);color:var(--t1);font:700 13px Inter,system-ui,sans-serif;padding:0 10px;max-width:100%}"
+  + ".ws3-auswahl select:focus-visible,.ws3-sel:focus-visible{outline:2px solid var(--gold);outline-offset:2px}"
+  + ".ws3-sel option,.ws3-auswahl option{color:var(--t1);background:var(--karte)}"
+  + ".ws3-sel.st-pruefung,.ws3-sel.st-verhandlung{border-color:var(--gold-rand);background:var(--gold-tint);color:var(--gold-text)}"
+  + ".ws3-sel.st-angenommen{border-color:var(--sc-gut-rand);background:var(--sc-gut-bg);color:var(--sc-gut-text)}.ws3-sel.st-abgelehnt{color:var(--t3)}"
+  + ".ws3-zeile-info{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font:600 12.5px Inter,system-ui,sans-serif;color:var(--t2)}"
+  + ".ws3-neu{display:inline-flex;align-items:center;font:800 11px Inter,system-ui,sans-serif;letter-spacing:.3px;padding:2px 8px;border-radius:999px;border:1px solid var(--gold-rand);background:var(--gold-tint);color:var(--gold-text);white-space:nowrap}"
+  + ".ws2-pille-neu{font:800 11px Inter,system-ui,sans-serif;padding:1px 7px;border-radius:999px;border:1px solid var(--gold-rand);background:var(--gold-tint);color:var(--gold-text);white-space:nowrap}.ws2-pille.an .ws2-pille-neu{background:var(--gold);border-color:var(--gold);color:var(--gold-schrift)}"
+  /* Angebote */
+  + ".ws3-ang-liste{list-style:none;margin:0;padding:0;background:var(--karte);border:1px solid var(--linie);border-radius:14px;overflow:hidden}"
+  + ".ws3-ang{display:grid;grid-template-columns:44px minmax(0,1fr) auto;grid-template-areas:'foto haupt rechts' '. knoepfe knoepfe';gap:8px 14px;align-items:start;padding:14px 16px;border-top:1px solid var(--linie);position:relative}.ws3-ang>.ws2-k-foto{grid-area:foto}.ws3-ang-haupt{grid-area:haupt}.ws3-ang-rechts{grid-area:rechts}.ws3-ang>.ws3-ang-knoepfe{grid-area:knoepfe}"
+  + ".ws3-ang:first-child{border-top:0}.ws3-ang.neu{box-shadow:inset 3px 0 0 var(--gold)}"
+  + ".ws3-ang-haupt{display:flex;flex-direction:column;gap:4px;min-width:0}"
+  + ".ws3-ang-z1{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}"
+  + ".ws3-ang-sub,.ws3-ang-meta{font:500 12.5px/1.45 Inter,system-ui,sans-serif;color:var(--t2);overflow-wrap:anywhere}.ws3-ang-meta{color:var(--t3)}"
+  + ".ws3-ang-kond{font:500 13px/1.5 Inter,system-ui,sans-serif;color:var(--t1);overflow-wrap:anywhere;white-space:pre-wrap}.ws3-ang-kond b{font-weight:800}"
+  + ".ws3-ang-rechts{display:flex;flex-direction:column;align-items:flex-end;gap:8px;min-width:0}"
+  + ".ws3-ang-knoepfe{display:flex;gap:6px;flex-wrap:wrap}"
+  + ".ws3-frist{font:700 12px Inter,system-ui,sans-serif;padding:4px 9px;border-radius:8px;border:1px solid var(--linie2);color:var(--t2);background:var(--karte2);white-space:nowrap;font-variant-numeric:tabular-nums}"
+  + ".ws3-frist.bald{border-color:var(--sc-schwach-rand);background:var(--sc-schwach-bg);color:var(--sc-schwach-text)}.ws3-frist.vorbei{color:var(--sc-schwach-text);background:transparent}"
+  + "@media (max-width:760px){.ws3-ang{grid-template-columns:40px minmax(0,1fr);grid-template-areas:'foto haupt' 'rechts rechts' 'knoepfe knoepfe';padding:12px}.ws3-ang-rechts{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-start}.ws3-ang-rechts .ws3-sel{font-size:16px;flex:1 1 180px}}"
+  + ".ws3-meter{display:grid;grid-template-columns:minmax(0,1fr) 72px 28px;align-items:center;gap:8px;padding:5px 0;font:600 12.5px Inter,system-ui,sans-serif;color:var(--t1)}"
+  + ".ws3-meter i{display:block;height:6px;border-radius:999px;background:var(--karte2);overflow:hidden}.ws3-meter i b{display:block;height:100%;border-radius:999px;background:var(--t3)}"
+  + ".ws3-meter span:last-child{text-align:right;font:700 15px 'Barlow Condensed','Arial Narrow',sans-serif;font-variant-numeric:tabular-nums;color:var(--t1)}"
+  + ".ws3-fristliste{list-style:none;margin:0;padding:0}.ws3-fristliste li{border-top:1px solid var(--linie)}.ws3-fristliste li:first-child{border-top:0}"
+  + ".ws3-fristliste button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;justify-content:space-between;gap:8px;width:100%;padding:7px 0;font:600 12.5px Inter,system-ui,sans-serif;color:var(--t1)}"
+  + ".ws3-fristliste button span:last-child{color:var(--t2);white-space:nowrap;font-variant-numeric:tabular-nums}.ws3-fristliste button:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}"
+  + ".ws3-fristliste button:hover span:first-child{color:var(--gold-text);text-decoration:underline}"
+  + ".ws3-punkte{margin:0;padding:0 0 0 16px;display:flex;flex-direction:column;gap:6px;font:500 12.5px/1.5 Inter,system-ui,sans-serif;color:var(--t2)}.ws3-punkte b{color:var(--t1);font-weight:800}"
+  /* Auswahlfeld Spieler (Dialog, Anheften, @-Vorschläge) */
+  + ".ws3-wahl{position:relative;min-width:0}.ws3-wahl>.ws3-vorschlag{position:absolute;left:0;right:0;top:100%;z-index:40}"
+  + ".ws3-vorschlag{list-style:none;margin:6px 0 0;padding:4px;border:1px solid var(--linie2);border-radius:12px;background:var(--karte);box-shadow:0 10px 28px rgba(0,0,0,.18);max-height:320px;overflow-y:auto}"
+  + ".ws3-vorschlag li{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:9px;cursor:pointer;min-width:0}"
+  + ".ws3-vorschlag li[aria-selected=\"true\"],.ws3-vorschlag li:hover{background:var(--karte2)}"
+  + ".ws3-vorschlag .ws3-v-t{display:flex;flex-direction:column;min-width:0;font:500 12px Inter,system-ui,sans-serif;color:var(--t2)}"
+  + ".ws3-vorschlag .ws3-v-t b{font:800 13.5px Inter,system-ui,sans-serif;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ws3-vorschlag .ws3-v-t span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
+  + ".ws3-vorschlag .ws3-v-q{margin-left:auto;font:700 11px Inter,system-ui,sans-serif;color:var(--t3);white-space:nowrap}"
+  + ".ws3-vorschlag .ws3-v-leer{cursor:default;font:500 12.5px Inter,system-ui,sans-serif;color:var(--t2)}.ws3-vorschlag .ws3-v-leer:hover{background:transparent}"
+  + ".ws3-gewaehlt{display:flex;align-items:center;gap:10px;padding:6px 8px;border:1px solid var(--gold-rand);border-radius:10px;background:var(--gold-tint);min-width:0}"
+  + ".ws3-gewaehlt .ws3-v-t{display:flex;flex-direction:column;min-width:0;flex:1;font:500 12px Inter,system-ui,sans-serif;color:var(--t2)}.ws3-gewaehlt .ws3-v-t b{font:800 13.5px Inter,system-ui,sans-serif;color:var(--t1)}"
+  + ".ws3-dlg .nz-feld textarea{min-height:72px;resize:vertical}"
+  + "@media (max-width:760px){.ws3-dlg .nz-feld input,.ws3-dlg .nz-feld select,.ws3-dlg .nz-feld textarea,.ws3-editor textarea,.ws3-suche input{font-size:16px}}"
+  + ".ws3-dlg-hinweis{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;background:var(--karte2);border:1px solid var(--linie);border-radius:10px;padding:9px 12px;margin:0 0 12px;font:500 12.5px/1.5 Inter,system-ui,sans-serif;color:var(--t2)}"
+  /* Notizen */
+  + ".ws3-editor{background:var(--karte);border:1px solid var(--linie);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}"
+  + ".ws3-editor.bearbeiten{border-color:var(--gold-rand)}"
+  + ".ws3-editor-kopf{display:flex;align-items:center;justify-content:space-between;gap:8px;font:800 13px Inter,system-ui,sans-serif;color:var(--t1)}"
+  + ".ws3-editor textarea{width:100%;box-sizing:border-box;min-height:92px;max-height:360px;resize:none;border-radius:10px;border:1px solid var(--linie2);background:var(--seite);color:var(--t1);font:500 15px/1.55 Inter,system-ui,sans-serif;padding:10px 12px;overflow-y:auto}"
+  + ".ws3-editor textarea:focus-visible{outline:2px solid var(--gold);outline-offset:1px}"
+  + ".ws3-editor-fuss{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ws3-editor-fuss .ws3-platz{flex:1}"
+  + ".ws3-tipp{font:500 12px Inter,system-ui,sans-serif;color:var(--t3)}.ws3-tipp kbd{font:700 11px Inter,system-ui,sans-serif;border:1px solid var(--linie2);border-bottom-width:2px;border-radius:5px;padding:0 5px;color:var(--t2);background:var(--karte2)}"
+  + "@media (max-width:760px),(hover:none){.ws3-taste{display:none}}"
+  + ".ws3-npillen{display:flex;gap:6px;flex-wrap:wrap}"
+  + ".ws3-npille{display:inline-flex;align-items:center;gap:6px;max-width:100%;font:700 12px Inter,system-ui,sans-serif;padding:4px 6px 4px 10px;border-radius:999px;border:1px solid var(--linie2);background:var(--karte2);color:var(--t1);min-height:30px;box-sizing:border-box}"
+  + ".ws3-npille small{font-weight:600;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
+  + ".ws3-npille button{cursor:pointer;border:0;background:transparent;color:inherit;font:700 15px/1 Inter,system-ui,sans-serif;width:24px;height:24px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;padding:0}"
+  + ".ws3-npille button:hover{background:rgba(0,0,0,.08)}.ws3-npille button:focus-visible,.ws3-npille.link:focus-visible{outline:2px solid var(--gold);outline-offset:2px}"
+  + ".ws3-npille.link{cursor:pointer;padding-right:10px}.ws3-npille.link:hover{border-color:var(--gold-rand);color:var(--gold-text)}"
+  + ".ws3-anheften{display:flex;flex-direction:column;gap:6px;border-top:1px dashed var(--linie2);padding-top:10px}"
+  + ".ws3-notizen{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}"
+  + ".ws3-notiz{background:var(--karte);border:1px solid var(--linie);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-width:0}"
+  + ".ws3-notiz.fix{border-color:var(--gold-rand)}.ws3-notiz.aktiv{box-shadow:0 0 0 2px var(--gold-rand)}"
+  + ".ws3-notiz-kopf{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font:600 12px Inter,system-ui,sans-serif;color:var(--t3)}.ws3-notiz-kopf .ws3-platz{flex:1}.ws3-notiz-akt{display:flex;gap:2px;flex-wrap:wrap}.ws3-notiz-akt .ws2-btn{border-color:transparent;min-height:32px}.ws3-notiz-akt .ws2-btn:hover{border-color:var(--linie2)}.ws3-notiz-akt .ws2-btn.rot{border-color:var(--sc-schwach-rand)}"
+  + ".ws3-fix{display:inline-flex;align-items:center;gap:4px;font:800 11px Inter,system-ui,sans-serif;color:var(--gold-text)}.ws3-fix svg{width:13px;height:13px}"
+  + ".ws3-notiz-text{font:500 14px/1.6 Inter,system-ui,sans-serif;color:var(--t1);white-space:pre-wrap;overflow-wrap:anywhere}"
+  + ".ws3-nlink{cursor:pointer;border:0;background:none;padding:0;font:inherit;font-weight:700;color:var(--gold-text);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}"
+  + ".ws3-nlink:hover{text-decoration-thickness:2px}.ws3-nlink:focus-visible,.ws3-nurl:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:2px}"
+  + ".ws3-nurl{color:var(--gold-text);text-decoration:underline;overflow-wrap:anywhere}"
+  + ""
+  + ".ws3-ikon{display:inline-flex;width:15px;height:15px}.ws3-ikon svg{width:15px;height:15px}"
+  + ".ws3-spl{list-style:none;margin:0;padding:0}.ws3-spl li{border-top:1px solid var(--linie)}.ws3-spl li:first-child{border-top:0}"
+  + ".ws3-spl button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:8px;width:100%;padding:7px 0;font:700 12.5px Inter,system-ui,sans-serif;color:var(--t1)}"
+  + ".ws3-spl button span:nth-child(2){flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}"
+  + ".ws3-spl button span:last-child{font:700 14px 'Barlow Condensed','Arial Narrow',sans-serif;color:var(--t2);font-variant-numeric:tabular-nums}"
+  + ".ws3-spl button[aria-pressed=\"true\"]{color:var(--gold-text)}.ws3-spl button:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}"
+  + ".ws3-blink{box-shadow:0 0 0 3px var(--gold-rand)!important;transition:box-shadow .3s}"
+  + "@media (prefers-reduced-motion:reduce){.ws3-blink{transition:none}}";
 const WS_CSS = ".ws2{display:flex;flex-direction:column;gap:16px;min-width:0}"
   + ".ws2-kopf{display:flex;flex-direction:column;gap:4px;margin-bottom:8px;min-width:0}"
   + ".ws2-titel{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:30px;line-height:38px;margin:0;color:var(--t1)}"
@@ -10045,7 +10165,7 @@ const WS_CSS = ".ws2{display:flex;flex-direction:column;gap:16px;min-width:0}"
   + ".ws2-mtab{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}"
   + ".ws2-meldung{display:flex;gap:10px;align-items:baseline;padding:9px 14px;border-top:1px solid var(--linie);font:500 13px Inter,system-ui,sans-serif;color:var(--t1);flex-wrap:wrap}.ws2-meldung:first-child{border-top:0}.ws2-meldung small{color:var(--t3);font-size:12px;white-space:nowrap}"
   + ".nz-btn.ws2-nzbeob.an{background:var(--gold-tint);border-color:var(--gold-rand);color:var(--gold-text)}"
-  + "@media (max-width:760px){.ws2-titel{font-size:26px;line-height:32px}.ws2-karte{padding:12px}.ws2-aktionen .ws2-btn{flex:1 1 auto}}";
+  + "@media (max-width:760px){.ws2-titel{font-size:26px;line-height:32px}.ws2-karte{padding:12px}.ws2-aktionen .ws2-btn{flex:1 1 auto}}" + WS3_CSS;
 
 function wsEn() { return LANG === "en"; }
 function wsWort(liste, k) { const x = liste.find(y => y[0] === k); return x ? (wsEn() ? x[1] : x[0]) : (k || ""); }
@@ -10068,7 +10188,7 @@ function wsLaden(account, neu) {
   const p = wsRuf(a, "laden", {}).then(d => {
     if (WS.laedt === p) WS.laedt = null;
     if (String(a.email || "").toLowerCase() !== WS.email) return d;
-    if (d && d.ok) { WS.daten = d; WS.fehler = ""; } else if (!WS.daten) WS.fehler = (d && d.grund) || "antwort";
+    if (d && d.ok) { WS.daten = d; WS.fehler = ""; wsANeuSetzen(d.angebote_neu); } else if (!WS.daten) WS.fehler = (d && d.grund) || "antwort";
     wsNeu(); return d;
   });
   WS.laedt = p; return p;
@@ -10080,12 +10200,13 @@ function useWs(account) {
   const em = String((a && a.email) || "").toLowerCase();
   React.useEffect(() => {
     if (!em || !twIstPremium()) return;
-    if (WS.email !== em) { WS.email = em; WS.daten = null; WS.laedt = null; WS.fehler = ""; }
+    if (WS.email !== em) { WS.email = em; WS.daten = null; WS.laedt = null; WS.fehler = ""; WS.angebote = null; WS.notizen = null; WS.aLaedt = null; WS.nLaedt = null; WS.aFehler = ""; WS.nFehler = ""; WS.aNeu = undefined; }
     if (!WS.daten && !WS.laedt) wsLaden(a);
   }, [em]);
   return WS.email === em ? WS.daten : null;
 }
 function wsGrund(g, d) {
+  if (WS3_GRUND[g]) return wsEn() ? WS3_GRUND[g][1] : WS3_GRUND[g][0];
   const en = wsEn(); const lim = d && d.limit ? d.limit : 50;
   const m = {
     auth: ["Deine Anmeldung ist abgelaufen. Bitte neu anmelden.", "Your session expired. Please sign in again."],
@@ -10163,17 +10284,20 @@ function WsKopf({ view, onNav, watch, profiles }) {
   const nS = d ? (d.anzahl != null ? d.anzahl : (d.spieler || []).length) : null;
   const gl = d && d.glocken ? Object.keys(d.glocken).length : 0;
   const alerts = !!(watch && watch.alerts);
-  const reiter = [["ws_spieler", en ? "My players" : "Meine Spieler", nS], ["watch", en ? "Watchlist" : "Merkliste", nG], ["ws_beob", en ? "Watching" : "Beobachtet", nB]];
+  const nA = WS.angebote ? WS.angebote.length : (d && d.angebote_n != null ? Number(d.angebote_n) : null); const nN = WS.notizen ? WS.notizen.length : (d && d.notizen_n != null ? Number(d.notizen_n) : null); const aNeu = Number(WS.aNeu) || 0;
+  const reiter = [["ws_spieler", en ? "My players" : "Meine Spieler", nS], ["watch", en ? "Watchlist" : "Merkliste", nG], ["ws_beob", en ? "Watching" : "Beobachtet", nB], ["ws_angebote", en ? "Offers" : "Angebote", nA, aNeu], ["ws_notizen", en ? "Notes" : "Notizen", nN]];
   const lead = {
     ws_spieler: ["Die Spieler, die du betreust (unter Vertrag) oder intensiv scoutest – mit Form, Einsatzzeit, Vertrag, passenden Vereinen, Exposé und Spieler-Markt.", "The players you represent (under contract) or scout closely – with form, playing time, contract, matching clubs, exposé and Player market."],
     watch: ["Spieler, die du dir gemerkt hast. Mit der Glocke schaltest du Benachrichtigungen je Spieler ein.", "Players you have saved. Use the bell to switch on notifications per player."],
-    ws_beob: ["Was du verfolgst: Karten aus „Verein sucht“, Angebote im Spieler-Markt, Vereine, Positionen, Suchprofile und gespeicherte Suchen.", "What you follow: cards from “Club seeks”, Player market offers, clubs, positions, search profiles and saved searches."]
+    ws_beob: ["Was du verfolgst: Karten aus „Verein sucht“, Angebote im Spieler-Markt, Vereine, Positionen, Suchprofile und gespeicherte Suchen.", "What you follow: cards from “Club seeks”, Player market offers, clubs, positions, search profiles and saved searches."],
+    ws_angebote: ["Anfragen und Angebote zu Spielern an einem Ort: automatisch aus deinen Nachrichten und dem Spieler-Markt – oder selbst eingetragen, wenn sie per Telefon, E-Mail oder WhatsApp kommen.", "Inquiries and offers about players in one place: automatically from your messages and the Player market – or added by you when they come by phone, e-mail or WhatsApp."],
+    ws_notizen: ["Deine Notizen mit Spielern verknüpft: Tippe @ und einen Namen, und der Spieler wird zum Link auf sein Profil.", "Your notes, linked to players: type @ and a name, and the player becomes a link to his profile."]
   }[view] || ["", ""];
   return h("div", { className: "ws2-kopf" },
     h("h1", { className: "ws2-titel tw-seitentitel" }, "Workspace"), h("style", null, WS_CSS),
     h("p", { className: "ws2-lead" }, en ? lead[1] : lead[0]),
     h("div", { className: "ws2-kopf-zeile" },
-      h("div", { className: "ws2-pillen", role: "tablist", "aria-label": "Workspace" }, reiter.map(([k, lab, n]) => h("button", { key: k, type: "button", role: "tab", "aria-selected": view === k, className: "ws2-pille" + (view === k ? " an" : ""), onClick: () => onNav(k), "data-ws-reiter": k }, h("span", null, lab), n != null ? h("span", { className: "ws2-pille-n" }, n) : null))),
+      h("div", { className: "ws2-pillen", role: "tablist", "aria-label": "Workspace" }, reiter.map(([k, lab, n, neu]) => h("button", { key: k, type: "button", role: "tab", "aria-selected": view === k, className: "ws2-pille" + (view === k ? " an" : ""), onClick: () => onNav(k), "data-ws-reiter": k }, h("span", null, lab), n != null ? h("span", { className: "ws2-pille-n" }, n) : null, neu ? h("span", { className: "ws2-pille-neu" }, neu + (en ? " new" : " neu")) : null))),
       h("button", { type: "button", className: "ws2-alertchip" + (alerts && gl ? " an" : ""), title: en ? "Manage e-mail notifications" : "E-Mail-Benachrichtigungen verwalten", onClick: () => { if (typeof window.twWatchDlg === "function") window.twWatchDlg(); } },
         h("span", { dangerouslySetInnerHTML: { __html: alerts ? WS_GLOCKE_SVG : WS_GLOCKE_AUS_SVG } }),
         h("span", null, alerts ? (gl ? (en ? "E-mail on · " + gl + (gl === 1 ? " bell" : " bells") : "E-Mail an · " + gl + (gl === 1 ? " Glocke" : " Glocken")) : (en ? "E-mail on · no bell on yet" : "E-Mail an · noch keine Glocke an")) : (en ? "E-mail notifications off" : "E-Mail-Benachrichtigungen aus")))));
@@ -10426,6 +10550,563 @@ function WsEinstellung({ account, d }) {
     h("div", null, h("button", { type: "button", className: "ws2-btn gold", disabled: busy, onClick: speichern, "data-ws-einst-speichern": "1" }, busy ? L("Speichert …", "Saving …") : L("Speichern", "Save"))),
     ok ? h("p", { className: "ws2-ok", role: "status" }, ok) : null, fehler ? h("p", { className: "ws2-fehler", role: "alert" }, fehler) : null);
 }
+/* WS3 (14.11.2026): Workspace – Transferfenster als Zeitleiste, Reiter „Angebote“ und „Notizen“ */
+const WS3_ART = [["anfrage", "Anfrage", "Inquiry"], ["spieler", "Spielerangebot", "Player offer"], ["verein", "Vereinsangebot", "Club offer"], ["vertrag", "Vertragsangebot", "Contract offer"], ["sonstiges", "Sonstiges", "Other"]];
+const WS3_STATUS = [["neu", "Neu", "New"], ["pruefung", "In Prüfung", "Reviewing"], ["verhandlung", "In Verhandlung", "Negotiating"], ["angenommen", "Angenommen", "Accepted"], ["abgelehnt", "Abgelehnt", "Declined"]];
+const WS3_OFFEN = ["neu", "pruefung", "verhandlung"];
+const WS3_MONATE = [["Jan", "Jan"], ["Feb", "Feb"], ["Mär", "Mar"], ["Apr", "Apr"], ["Mai", "May"], ["Jun", "Jun"], ["Jul", "Jul"], ["Aug", "Aug"], ["Sep", "Sep"], ["Okt", "Oct"], ["Nov", "Nov"], ["Dez", "Dec"]];
+const WS3_PIN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"/><path d="M9 3h6l-1 6 3 4H7l3-4z"/><path d="M7 13h10"/></svg>';
+const WS3_GRUND = {
+  limit_angebote: ["Du hast die Grenze von 2.000 Angeboten erreicht. Bitte lösche erledigte Einträge.", "You have reached the limit of 2,000 offers. Please delete finished entries."],
+  limit_notizen: ["Du hast die Grenze von 1.000 Notizen erreicht. Bitte lösche alte Notizen.", "You have reached the limit of 1,000 notes. Please delete old notes."],
+  angebot_leer: ["Bitte einen Spieler oder einen Betreff angeben.", "Please enter a player or a subject."],
+  name_angebot: ["Der Spielername ist zu lang (höchstens 120 Zeichen).", "The player name is too long (120 characters at most)."],
+  konditionen: ["Die Konditionen sind zu lang (höchstens 1.000 Zeichen).", "The terms are too long (1,000 characters at most)."],
+  datum: ["Bitte ein gültiges Datum angeben.", "Please enter a valid date."],
+  notiz_leer: ["Die Notiz ist leer.", "The note is empty."],
+  text_notiz: ["Die Notiz ist zu lang (höchstens 4.000 Zeichen).", "The note is too long (4,000 characters at most)."],
+  fehler: ["Das hat nicht geklappt – bitte erneut versuchen.", "That did not work – please try again."]
+};
+function ws3Wort(liste, k) { const x = liste.find(y => y[0] === k); return x ? (wsEn() ? x[2] : x[1]) : (k || ""); }
+function ws3Norm(s) { return String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ß/g, "ss"); }
+function ws3Heute() { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function ws3Tag(s) { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s || "")); return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null; }
+function ws3Diff(a, b) { return Math.round((a - b) / 864e5); }
+function ws3Iso(d) { const z = n => String(n).padStart(2, "0"); return d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()); }
+function ws3Kurz(d) { const z = n => String(n).padStart(2, "0"); return z(d.getDate()) + "." + z(d.getMonth() + 1) + "."; }
+function ws3In(n, en) { return en ? (n === 1 ? "in 1 day" : "in " + n + " days") : (n === 1 ? "in 1 Tag" : "in " + n + " Tagen"); }
+function ws3Noch(n, en) { return n <= 0 ? (en ? "closes today" : "schließt heute") : (en ? (n === 1 ? "1 day left" : n + " days left") : (n === 1 ? "noch 1 Tag" : "noch " + n + " Tage")); }
+function ws3Aufzaehlung(namen, en) {
+  if (namen.length <= 1) return namen.join("");
+  if (namen.length <= 3) return namen.slice(0, -1).join(", ") + (en ? " and " : " und ") + namen[namen.length - 1];
+  return namen.slice(0, 3).join(", ") + (en ? " and " + (namen.length - 3) + " more" : " und " + (namen.length - 3) + " weitere");
+}
+function ws3Key(c) { return c && c.pid ? "p" + c.pid : (c && c.wid ? "w" + c.wid : "n:" + ws3Norm(c && c.name)); }
+
+/* Zähler für neue Angebote: Laden, Seitenleiste, kurze Meldung bei neuen Einträgen */
+function wsANeuSetzen(n, still) {
+  if (n == null) return;
+  n = Number(n) || 0; const alt = WS.aNeu; WS.aNeu = n;
+  if (!still && alt != null && n > alt) {
+    const en = wsEn(); const x = n - alt;
+    wsMeldung(en ? (x === 1 ? "New offer in your workspace – see “Offers”." : x + " new offers in your workspace – see “Offers”.") : (x === 1 ? "Neues Angebot in deinem Workspace – unter „Angebote“." : x + " neue Angebote in deinem Workspace – unter „Angebote“."));
+  }
+  if (alt !== n) wsNeu();
+}
+let WS3_Z_LETZT = 0, WS3_Z_TIMER = null, WS3_NZ_STAND = null;
+function wsZaehler() {
+  const a = wsKonto();
+  if (!a || !a.email || !twHatSitzung(a) || !twIstPremium()) return Promise.resolve(null);
+  const em = String(a.email).toLowerCase(); WS3_Z_LETZT = Date.now();
+  return wsRuf(a, "zaehler", {}).then(d => { const b = wsKonto(); if (d && d.ok && b && String(b.email || "").toLowerCase() === em) wsANeuSetzen(d.angebote_neu); return d; });
+}
+function wsZaehlerStart() {
+  if (window.__ws3Zaehler) return; window.__ws3Zaehler = true;
+  setTimeout(() => { wsZaehler(); }, 3500);
+  window.addEventListener("nz-neu", () => {
+    try {
+      const n = (typeof NZ3 !== "undefined" && NZ3) ? (Number(NZ3.ungelesen) || 0) + (Number(NZ3.anfragen) || 0) : 0;
+      const alt = WS3_NZ_STAND; WS3_NZ_STAND = n;
+      if (alt != null && n > alt) { clearTimeout(WS3_Z_TIMER); WS3_Z_TIMER = setTimeout(() => { wsZaehler(); }, Math.max(4000, 20000 - (Date.now() - WS3_Z_LETZT))); }
+    } catch (e) { }
+  });
+}
+
+/* Speicher der Reiter */
+function wsAngeboteLaden(account) {
+  if (WS.aLaedt) return WS.aLaedt;
+  const em = WS.email;
+  const p = wsRuf(account, "angebote", {}).then(d => {
+    if (WS.aLaedt === p) WS.aLaedt = null;
+    if (WS.email !== em) return d;
+    if (d && d.ok) { WS.angebote = d.angebote || []; WS.aFehler = ""; ws3Zahlen(); wsANeuSetzen(d.angebote_neu); } else if (!WS.angebote) WS.aFehler = (d && d.grund) || "antwort";
+    wsNeu(); return d;
+  });
+  WS.aLaedt = p; return p;
+}
+function wsNotizenLaden(account) {
+  if (WS.nLaedt) return WS.nLaedt;
+  const em = WS.email;
+  const p = wsRuf(account, "notizen", {}).then(d => {
+    if (WS.nLaedt === p) WS.nLaedt = null;
+    if (WS.email !== em) return d;
+    if (d && d.ok) { WS.notizen = d.notizen || []; WS.nFehler = ""; ws3Zahlen(); } else if (!WS.notizen) WS.nFehler = (d && d.grund) || "antwort";
+    wsNeu(); return d;
+  });
+  WS.nLaedt = p; return p;
+}
+function ws3Zahlen() { if (WS.daten) WS.daten = Object.assign({}, WS.daten, { angebote_n: WS.angebote ? WS.angebote.length : WS.daten.angebote_n, notizen_n: WS.notizen ? WS.notizen.length : WS.daten.notizen_n }); }
+function wsAngebotSetzen(a) { if (!a || !a.id) return; const l = (WS.angebote || []).slice(); const i = l.findIndex(x => x.id === a.id); if (i >= 0) l[i] = a; else l.unshift(a); WS.angebote = l; ws3Zahlen(); wsNeu(); }
+function wsAngebotWeg(id) { if (!WS.angebote) return; WS.angebote = WS.angebote.filter(x => x.id !== id); ws3Zahlen(); wsNeu(); }
+function ws3NotizSort(l) { return l.sort((a, b) => ((b.angeheftet ? 1 : 0) - (a.angeheftet ? 1 : 0)) || ((Date.parse(b.geaendert) || 0) - (Date.parse(a.geaendert) || 0)) || (b.id - a.id)); }
+function wsNotizSetzen(n) { if (!n || !n.id) return; const l = (WS.notizen || []).filter(x => x.id !== n.id); l.push(n); WS.notizen = ws3NotizSort(l); ws3Zahlen(); wsNeu(); }
+function wsNotizWeg(id) { if (!WS.notizen) return; WS.notizen = WS.notizen.filter(x => x.id !== id); ws3Zahlen(); wsNeu(); }
+function ws3Kasten(h, titel, kinder, key) { return h("section", { key: key, className: "ws2-kasten", "data-ws-kasten": key }, h("h3", null, titel), kinder); }
+
+/* Transferfenster: Zeitleiste je Land mit Countdown */
+function WsTransferfenster({ fr }) {
+  const h = React.createElement; const en = wsEn(); const L = (de, x) => (en ? x : de);
+  const kern = (fr && Array.isArray(fr.fenster)) ? fr.fenster : [];
+  const alle = (fr && Array.isArray(fr.fenster_alle) && fr.fenster_alle.length) ? fr.fenster_alle : kern;
+  const fehlend = (fr && Array.isArray(fr.fehlend)) ? fr.fehlend : [];
+  const [modus, setModusRoh] = React.useState(() => { try { return localStorage.getItem("tw_ws_tf") === "alle" ? "alle" : "kern"; } catch (e) { return "kern"; } });
+  const setModus = m => { setModusRoh(m); try { localStorage.setItem("tw_ws_tf", m); } catch (e) { } };
+  if (!fr) return h("section", { className: "ws2-kasten ws3-tf", "data-ws-kasten": "fristen" }, h("h3", null, L("Transferfenster", "Transfer windows")), h("p", { className: "ws2-sub" }, L("Wird geladen …", "Loading …")));
+  const heute = ws3Heute();
+  const name = f => (en ? (f.land_en || f.land) : f.land) || "";
+  const artText = f => f.art === "winter" ? L("Winterfenster", "winter window") : f.art === "sommer" ? L("Sommerfenster", "summer window") : L("Transferfenster", "transfer window");
+  const zaehle = l => new Set(l.map(f => f.land)).size;
+  const roh = modus === "alle" ? alle : kern;
+  const zeilen = roh.map(f => {
+    const von = ws3Tag(f.von), bis = ws3Tag(f.bis); if (!von || !bis) return null;
+    const offen = von <= heute && heute <= bis; const rest = ws3Diff(bis, heute);
+    return { f: f, von: von, bis: bis, offen: offen, rest: rest, start: ws3Diff(von, heute), bald: offen && rest <= 7, unbest: f.bestaetigt === false };
+  }).filter(Boolean).sort((a, b) => ((b.offen ? 1 : 0) - (a.offen ? 1 : 0)) || (a.offen ? a.bis - b.bis : (a.von - b.von) || (a.bis - b.bis)) || name(a.f).localeCompare(name(b.f), en ? "en" : "de"));
+  const offene = zeilen.filter(z => z.offen);
+  let held = null;
+  if (offene.length) {
+    const z = offene[0];
+    held = { zahl: Math.max(0, z.rest), b: z.rest === 1 ? L("Tag bis zum nächsten Fensterschluss", "day until the next window closes") : L("Tage bis zum nächsten Fensterschluss", "days until the next window closes"),
+      t: L(name(z.f) + " schließt am " + wsDatum(z.f.bis), name(z.f) + " closes on " + wsDatum(z.f.bis)) + " · " + (offene.length === 1 ? L("1 Fenster offen", "1 window open") : L(offene.length + " Fenster offen", offene.length + " windows open")) };
+  } else if (zeilen.length) {
+    const z = zeilen[0]; const gleich = zeilen.filter(y => y.von.getTime() === z.von.getTime()).map(y => name(y.f));
+    held = { zahl: z.start, b: z.start === 1 ? L("Tag bis zur Öffnung", "day until opening") : L("Tage bis zur Öffnung", "days until opening"),
+      t: en ? "On " + wsDatum(z.f.von) + " " + ws3Aufzaehlung(gleich, en) + (gleich.length === 1 ? " opens" : " open") : "Am " + wsDatum(z.f.von) + (gleich.length === 1 ? " öffnet " : " öffnen ") + ws3Aufzaehlung(gleich, en) };
+  }
+  let a0 = null, a1 = null;
+  zeilen.forEach(z => { if (!a0 || z.von < a0) a0 = z.von; if (!a1 || z.bis > a1) a1 = z.bis; });
+  if (a0 && heute < a0) a0 = heute;
+  const start = a0 ? new Date(a0.getFullYear(), a0.getMonth(), 1) : null;
+  const ende = a1 ? new Date(a1.getFullYear(), a1.getMonth() + 1, 1) : null;
+  const span = start && ende ? Math.max(1, ende - start) : 1;
+  const pos = d => Math.max(0, Math.min(100, (d - start) / span * 100));
+  const monate = []; if (start && ende) for (let d = new Date(start); d < ende; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) monate.push(d);
+  const heuteDrin = !!(start && heute >= start && heute < ende);
+  const satz = z => name(z.f) + ": " + artText(z.f) + L(" vom ", " from ") + wsDatum(z.f.von) + L(" bis ", " to ") + wsDatum(z.f.bis) + ", "
+    + (z.offen ? L("offen, ", "open, ") + ws3Noch(z.rest, en) : L("öffnet ", "opens ") + ws3In(z.start, en)) + (z.unbest ? L(", noch nicht offiziell bestätigt", ", not yet officially confirmed") : "");
+  const zeile = z => {
+    const l = pos(z.von), r = pos(new Date(z.bis.getFullYear(), z.bis.getMonth(), z.bis.getDate() + 1));
+    const st = z.offen ? (z.bald ? "bald" : "offen") : "kommend";
+    return h("li", { key: z.f.land + "|" + z.f.von, className: "ws3-tf-zeile ws2-frist " + st + (z.unbest ? " unbest" : ""), "data-tf-land": z.f.land, title: satz(z) },
+      h("span", { className: "ws3-tf-land", "aria-hidden": "true" }, name(z.f)),
+      h("span", { className: "ws3-tf-datum", "aria-hidden": "true" }, ws3Kurz(z.von) + "–" + ws3Kurz(z.bis),
+        z.offen ? h("small", { className: z.bald ? "bald" : "offen" }, ws3Noch(z.rest, en)) : (z.unbest ? h("small", null, L("noch nicht bestätigt", "not yet confirmed")) : null)),
+      h("span", { className: "ws3-tf-spur", "aria-hidden": "true" },
+        monate.slice(1).map(m => h("i", { key: m.getTime(), className: "ws3-tf-m", style: { left: pos(m) + "%" } })),
+        h("i", { className: "ws3-tf-balken", style: { left: l + "%", width: Math.max(0, r - l) + "%" } }),
+        heuteDrin ? h("i", { className: "ws3-tf-heute", style: { left: pos(heute) + "%" } }) : null),
+      h("span", { className: "ws2-sr" }, satz(z)));
+  };
+  const quellen = []; roh.forEach(f => { const q = String(f.quelle || "").trim(); if (!q || /transfermarkt/i.test(q)) return; let x = quellen.find(y => y.q === q); if (!x) { x = { q: q, url: "", laender: [] }; quellen.push(x); } if (!x.url && /^https:\/\//i.test(String(f.url || "")) && !/transfermarkt/i.test(String(f.url))) x.url = f.url; x.laender.push(name(f)); });
+  quellen.sort((a, b) => b.laender.length - a.laender.length);
+  const qLink = x => x.url ? h("a", { key: "q" + x.q, href: x.url, target: "_blank", rel: "noopener noreferrer", className: "ws3-link" }, x.q) : h("span", { key: "q" + x.q }, x.q);
+  const nKern = zaehle(kern), nAlle = zaehle(alle);
+  const segKnopf = (k, lab, n) => h("button", { type: "button", "aria-pressed": modus === k ? "true" : "false", onClick: () => setModus(k), "data-tf-modus": k }, lab + " (" + n + ")");
+  const fehlendSicht = (modus === "alle" ? fehlend : fehlend.filter(x => x.kern)).slice().sort((a, b) => name(a).localeCompare(name(b), en ? "en" : "de"));
+  return h("section", { className: "ws2-kasten ws3-tf", "data-ws-kasten": "fristen", "aria-labelledby": "ws3-tf-t" },
+    h("div", { className: "ws3-tf-kopf" }, h("h3", { id: "ws3-tf-t" }, L("Transferfenster", "Transfer windows")),
+      (nAlle > nKern || fehlend.length) ? h("div", { className: "ws3-seg", role: "group", "aria-label": L("Länder", "Countries") }, segKnopf("kern", L("Kernmärkte", "Core markets"), nKern), segKnopf("alle", L("Alle", "All"), nAlle)) : null),
+    held ? h("div", { className: "ws3-tf-held" }, h("span", { className: "ws3-tf-zahl", "aria-hidden": "true" }, held.zahl), h("div", { className: "ws3-tf-held-t" }, h("b", null, h("span", { className: "ws2-sr" }, held.zahl + " "), held.b), h("span", null, held.t))) : null,
+    zeilen.length ? [
+      h("div", { key: "a", className: "ws3-tf-achse", "aria-hidden": "true" }, monate.map(m => h("span", { key: m.getTime(), style: { left: pos(new Date(m.getTime() + (new Date(m.getFullYear(), m.getMonth() + 1, 1) - m) / 2)) + "%" } }, WS3_MONATE[m.getMonth()][en ? 1 : 0]))),
+      h("ul", { key: "l", className: "ws3-tf-liste", "aria-label": L("Transferfenster je Land", "Transfer windows by country") }, zeilen.map(zeile)),
+      h("div", { key: "g", className: "ws3-tf-legende", "aria-hidden": "true" },
+        h("span", null, h("i", { className: "ws3-tf-sw" }), L("kommend", "upcoming")),
+        offene.length ? h("span", null, h("i", { className: "ws3-tf-sw offen" }), L("offen", "open")) : null,
+        zeilen.some(z => z.bald) ? h("span", null, h("i", { className: "ws3-tf-sw bald" }), L("schließt in höchstens 7 Tagen", "closes within 7 days")) : null,
+        zeilen.some(z => z.unbest) ? h("span", null, h("i", { className: "ws3-tf-sw unbest" }), L("noch nicht bestätigt", "not yet confirmed")) : null,
+        heuteDrin ? h("span", null, h("i", { className: "ws3-tf-sw heute" }), L("heute", "today")) : null)]
+      : h("p", { className: "ws2-sub" }, L("Für die nächsten 120 Tage ist noch kein Fenster eingetragen.", "No window has been entered for the next 120 days yet.")),
+    fehlendSicht.length ? h("p", { className: "ws3-tf-fehlend" }, h("b", null, L("Noch ohne Termin: ", "No dates yet: ")), fehlendSicht.map(x => name(x) + (x.naechstes_von ? L(" (ab ", " (from ") + wsDatum(x.naechstes_von) + ")" : "")).join(", ")) : null,
+    h("p", { className: "ws3-tf-quelle" }, L("Fenster der nächsten 120 Tage, jede Woche abgeglichen. ", "Windows of the next 120 days, checked every week. "),
+      quellen.length ? [L("Quelle: ", "Source: "), qLink(quellen[0])].concat(quellen.slice(1).map(x => h("span", { key: "z" + x.q }, "; " + x.laender.join(", ") + ": ", qLink(x)))) : null));
+}
+
+/* Suche in der Spielerdatenbank (Aktion „suchen“), mit kurzer Verzögerung */
+function useWs3Suche(account, q) {
+  const [st, setSt] = React.useState({ q: "", treffer: null, laedt: false });
+  React.useEffect(() => {
+    const t = String(q || "").trim(); if (t.length < 2) { setSt({ q: "", treffer: null, laedt: false }); return undefined; }
+    let alive = true; setSt(s => ({ q: t, treffer: s.q === t ? s.treffer : null, laedt: true }));
+    const tm = setTimeout(() => { wsRuf(account, "suchen", { q: t }).then(r => { if (!alive) return; setSt({ q: t, treffer: r && r.ok ? (r.treffer || []) : [], laedt: false }); }); }, 250);
+    return () => { alive = false; clearTimeout(tm); };
+  }, [q]);
+  return st;
+}
+/* Vorschlagsliste (Spieler) für Eingabefelder mit Pfeiltasten */
+function Ws3Vorschlaege({ id, liste, aktiv, onWahl, leer }) {
+  const h = React.createElement; const en = wsEn();
+  return h("ul", { id: id, className: "ws3-vorschlag", role: "listbox", "aria-label": en ? "Suggested players" : "Vorgeschlagene Spieler" },
+    liste.length ? liste.map((c, i) => h("li", { key: ws3Key(c), id: id + "-" + i, role: "option", "aria-selected": i === aktiv ? "true" : "false", onMouseDown: e => { e.preventDefault(); onWahl(c); }, "data-ws3-vorschlag": ws3Key(c) },
+      h(DbFoto, { x: { name: c.name, photo: c.foto || "" }, size: 30 }),
+      h("span", { className: "ws3-v-t" }, h("b", null, c.name), h("span", null, [c.team, c.liga, c.position].filter(Boolean).join(" · ") || " ")),
+      c.quelle ? h("span", { className: "ws3-v-q" }, c.quelle) : null))
+      : h("li", { className: "ws3-v-leer", role: "option", "aria-disabled": "true", "aria-selected": "false" }, leer));
+}
+/* Spieler wählen: Datenbank-Treffer oder freier Name */
+function Ws3SpielerFeld({ account, wert, onWert, label, platz, fid, fokus }) {
+  const h = React.createElement; const en = wsEn(); const L = (de, x) => (en ? x : de);
+  const [offen, setOffen] = React.useState(false); const [akt, setAkt] = React.useState(0); const blurT = React.useRef(null);
+  React.useEffect(() => () => clearTimeout(blurT.current), []);
+  const s = useWs3Suche(account, offen && !wert.pid ? wert.name : "");
+  const liste = (s.treffer || []).slice(0, 8).map(t => ({ pid: t.pid, name: t.name, team: t.team, liga: t.liga, position: t.position, foto: t.foto }));
+  const nimm = c => { onWert({ pid: c.pid, name: c.name, team: c.team || "" }); setOffen(false); };
+  if (wert.pid) return h("div", { className: "nz-feld breit" }, label,
+    h("div", { className: "ws3-gewaehlt", "data-ws3-gewaehlt": wert.pid }, h(DbFoto, { x: { name: wert.name, photo: "" }, size: 30 }),
+      h("span", { className: "ws3-v-t" }, h("b", null, wert.name), h("span", null, [wert.team, L("aus der Datenbank", "from the database")].filter(Boolean).join(" · "))),
+      h("button", { type: "button", className: "ws2-btn klein leise", onClick: () => onWert({ pid: null, name: wert.name, team: "" }) }, L("Ändern", "Change"))));
+  const lid = fid + "-liste"; const zeigen = offen && String(wert.name || "").trim().length >= 2 && (s.treffer !== null);
+  return h("div", { className: "nz-feld breit ws3-wahl" }, h("label", { htmlFor: fid }, label),
+    h("input", { id: fid, type: "text", value: wert.name || "", placeholder: platz, maxLength: 120, autoComplete: "off", autoFocus: !!fokus, role: "combobox", "aria-autocomplete": "list", "aria-expanded": zeigen ? "true" : "false", "aria-controls": lid,
+      "aria-activedescendant": zeigen && liste.length ? lid + "-" + Math.min(akt, liste.length - 1) : undefined,
+      onChange: e => { clearTimeout(blurT.current); onWert({ pid: null, name: e.target.value, team: "" }); setOffen(true); setAkt(0); }, onFocus: () => { clearTimeout(blurT.current); setOffen(true); }, onBlur: () => { clearTimeout(blurT.current); blurT.current = setTimeout(() => setOffen(false), 150); },
+      onKeyDown: e => { if (!zeigen || !liste.length) return; if (e.key === "ArrowDown") { e.preventDefault(); setAkt(i => (i + 1) % liste.length); } else if (e.key === "ArrowUp") { e.preventDefault(); setAkt(i => (i - 1 + liste.length) % liste.length); } else if (e.key === "Enter") { e.preventDefault(); nimm(liste[Math.min(akt, liste.length - 1)]); } else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); setOffen(false); } },
+      "data-ws3-feld": "spieler" }),
+    zeigen ? h(Ws3Vorschlaege, { id: lid, liste: liste, aktiv: akt, onWahl: nimm, leer: s.laedt ? L("Suche …", "Searching …") : L("Kein Treffer in der Datenbank – der Name wird so gespeichert.", "No match in the database – the name is saved as typed.") }) : null);
+}
+
+/* Angebote: Fristanzeige */
+function ws3Frist(frist, status) {
+  const en = wsEn(); const d = ws3Tag(frist); if (!d) return null;
+  if (WS3_OFFEN.indexOf(status) < 0) return { k: "", t: (en ? "Deadline " : "Frist ") + wsDatum(frist) };
+  const n = ws3Diff(d, ws3Heute());
+  if (n < 0) return { k: "vorbei", t: en ? "Deadline passed (" + ws3Kurz(d) + ")" : "Frist abgelaufen (" + ws3Kurz(d) + ")" };
+  if (n === 0) return { k: "bald", t: en ? "Deadline today" : "Frist heute" };
+  if (n <= 3) return { k: "bald", t: (en ? "Deadline " : "Frist ") + ws3In(n, en) };
+  return { k: "", t: (en ? "Deadline " : "Frist ") + wsDatum(frist) + " · " + ws3In(n, en) };
+}
+function WsAngebotZeile({ a, account, openPlayer, setView, onOeffnen }) {
+  const h = React.createElement; const en = wsEn(); const L = (de, x) => (en ? x : de);
+  const [busy, setBusy] = React.useState(false); const [weg, setWeg] = React.useState(false);
+  const haupt = a.spieler || a.titel || L("Ohne Spieler", "No player");
+  const status = WS3_STATUS.some(x => x[0] === a.status) ? a.status : "neu";
+  const gelesen = () => { if (a.gelesen) return; wsAngebotSetzen(Object.assign({}, a, { gelesen: true })); wsRuf(account, "angebot_gelesen", { id: a.id }).then(r => { if (r && r.ok) wsANeuSetzen(r.angebote_neu, true); }); };
+  const setzeStatus = v => { setBusy(true); wsRuf(account, "angebot_status", { id: a.id, status: v }).then(r => { setBusy(false); if (r && r.ok) { wsAngebotSetzen(r.angebot); wsANeuSetzen(r.angebote_neu, true); } else wsMeldung(wsGrund(r && r.grund, r)); }); };
+  const loeschen = () => { setBusy(true); wsRuf(account, "angebot_loeschen", { id: a.id }).then(r => { setBusy(false); if (r && r.ok) { wsAngebotWeg(a.id); wsANeuSetzen(r.angebote_neu, true); wsMeldung(L("Angebot gelöscht.", "Offer deleted.")); } else wsMeldung(wsGrund(r && r.grund, r)); }); };
+  const quelle = a.quelle === "nachricht" ? L("per Nachricht", "via message") : a.quelle === "spieler_markt" ? L("über den Spieler-Markt", "via Player market") : L("selbst eingetragen", "added by you");
+  const sub = a.pid ? [a.team, a.position, a.alter ? a.alter + L(" J.", " yrs") : "", a.spieler && a.titel && a.quelle === "eigen" ? a.titel : ""].filter(Boolean).join(" · ") : (a.spieler && a.titel ? a.titel : "");
+  const meta = [a.von ? L("von ", "from ") + a.von : "", a.verein || "", wsDatum(a.eingang), quelle].filter(Boolean).join(" · ");
+  const frist = ws3Frist(a.frist, status);
+  return h("li", { className: "ws3-ang" + (a.gelesen ? "" : " neu"), "data-ws3-angebot": a.id },
+    h("span", { className: "ws2-k-foto" + (a.pid ? " link" : ""), "aria-hidden": "true", onClick: a.pid ? () => { gelesen(); openPlayer(Number(a.pid), a.spieler, a.team || ""); } : undefined }, h(DbFoto, { x: { name: haupt, photo: a.foto || "" }, size: 44 })),
+    h("div", { className: "ws3-ang-haupt" },
+      h("div", { className: "ws3-ang-z1" },
+        a.pid ? h("button", { type: "button", className: "ws2-name link", onClick: () => { gelesen(); openPlayer(Number(a.pid), a.spieler, a.team || ""); }, title: L("Spielerprofil öffnen", "Open player profile") }, haupt) : h("span", { className: "ws2-name" }, haupt),
+        h("span", { className: "ws2-chip" }, ws3Wort(WS3_ART, a.art)),
+        !a.gelesen ? h("span", { className: "ws3-neu" }, L("Neu", "New")) : null),
+      sub ? h("div", { className: "ws3-ang-sub" }, sub) : null,
+      h("div", { className: "ws3-ang-meta" }, meta),
+      a.konditionen ? h("div", { className: "ws3-ang-kond" }, h("b", null, L("Konditionen: ", "Terms: ")), a.konditionen) : null,
+      a.notiz ? h("div", { className: "ws2-notiz" }, a.notiz) : null),
+    h("div", { className: "ws3-ang-rechts" },
+      h("select", { className: "ws3-sel st-" + status, value: status, disabled: busy, onChange: e => setzeStatus(e.target.value), "aria-label": L("Stand des Angebots: ", "State of the offer: ") + haupt, "data-ws3-status": a.id }, WS3_STATUS.map(x => h("option", { key: x[0], value: x[0] }, en ? x[2] : x[1]))),
+      frist ? h("span", { className: "ws3-frist " + frist.k }, frist.t) : null),
+    h("div", { className: "ws3-ang-knoepfe" },
+        a.gespraech ? h("button", { type: "button", className: "ws2-btn klein", onClick: () => { gelesen(); nzNachrichtAn({ gespraech: a.gespraech }, setView); }, "data-ws3-gespraech": a.id }, L("Gespräch öffnen", "Open conversation")) : null,
+        a.quelle === "spieler_markt" && a.markt ? h("button", { type: "button", className: "ws2-btn klein leise", onClick: () => { gelesen(); nz6Oeffnen(Number(a.markt), setView); } }, L("Im Spieler-Markt", "In Player market")) : null,
+        h("button", { type: "button", className: "ws2-btn klein leise", onClick: () => { gelesen(); onOeffnen(a); }, "data-ws3-bearbeiten": a.id }, L("Bearbeiten", "Edit")),
+        weg ? h("span", { className: "ws2-weg", role: "group", "aria-label": L("Löschen bestätigen", "Confirm deletion") }, h("button", { type: "button", className: "ws2-btn klein rot", disabled: busy, onClick: loeschen, "data-ws3-loeschen-ja": a.id }, L("Ja, löschen", "Yes, delete")), h("button", { type: "button", className: "ws2-btn klein leise", onClick: () => setWeg(false) }, L("Behalten", "Keep")))
+          : h("button", { type: "button", className: "ws2-btn klein leise", onClick: () => setWeg(true), "aria-label": L("Angebot löschen: ", "Delete offer: ") + haupt, "data-ws3-loeschen": a.id }, L("Löschen", "Delete"))));
+}
+function WsAngebotDialog({ account, a, schliessen }) {
+  const h = React.createElement; const en = wsEn(); const L = (de, x) => (en ? x : de);
+  useScrollSperre(true); useTwZurueck(true, schliessen);
+  const neu = !a || !a.id; const auto = !neu && a.quelle && a.quelle !== "eigen";
+  const [w, setW] = React.useState(() => ({ art: (a && a.art) || "spieler", status: (a && a.status) || "neu", sp: { pid: (a && a.pid) || null, name: (a && a.spieler) || "", team: (a && a.team) || "" },
+    titel: (a && a.titel) || "", von: (a && a.von) || "", verein: (a && a.verein) || "", konditionen: (a && a.konditionen) || "", frist: (a && a.frist) ? String(a.frist).slice(0, 10) : "",
+    eingang: (a && a.eingang && !isNaN(new Date(a.eingang))) ? ws3Iso(new Date(a.eingang)) : ws3Iso(ws3Heute()), notiz: (a && a.notiz) || "" }));
+  const [busy, setBusy] = React.useState(false); const [fehler, setFehler] = React.useState("");
+  const setz = (k, x) => setW(y => Object.assign({}, y, { [k]: x }));
+  const feld = (k, label, platz, typ, max, breit) => h("label", { className: "nz-feld" + (breit ? " breit" : "") }, label, h("input", { type: typ || "text", value: w[k] || "", placeholder: platz || "", maxLength: max || 120, onChange: e => setz(k, e.target.value), "data-ws3-feld": k }));
+  const speichern = () => {
+    const name = String(w.sp.name || "").trim();
+    if (!w.sp.pid && !name && !w.titel.trim()) { setFehler(wsGrund("angebot_leer")); return; }
+    const body = { art: w.art, status: w.status, titel: w.titel.trim(), von: w.von.trim(), verein: w.verein.trim(), konditionen: w.konditionen.trim(), frist: w.frist, notiz: w.notiz.trim(), eingang: w.eingang };
+    if (w.sp.pid) { body.pid = w.sp.pid; body.spieler = ""; } else body.spieler = name;
+    if (!neu) body.id = a.id;
+    setBusy(true); setFehler("");
+    wsRuf(account, "angebot_speichern", body).then(r => {
+      setBusy(false);
+      if (r && r.ok) { wsAngebotSetzen(r.angebot); wsANeuSetzen(r.angebote_neu, true); wsMeldung(neu ? L("Angebot eingetragen.", "Offer added.") : L("Gespeichert.", "Saved.")); schliessen(); }
+      else setFehler(wsGrund(r && r.grund, r));
+    });
+  };
+  return h("div", { className: "nz-modal", onClick: ev => { if (ev.target === ev.currentTarget) schliessen(); } },
+    h("div", { className: "nz-box breit ws3-dlg", role: "dialog", "aria-modal": "true", "aria-labelledby": "ws3-dlg-t", "data-ws3-dialog": neu ? "neu" : "bearbeiten" },
+      h("div", { className: "nz-kopf" }, h("h2", { id: "ws3-dlg-t", style: { margin: 0, fontFamily: FONT_DISPLAY, fontSize: 24 } }, neu ? L("Angebot eintragen", "Add offer") : L("Angebot bearbeiten", "Edit offer")), h("button", { type: "button", className: "nz-x", "aria-label": L("Schließen", "Close"), onClick: schliessen }, "×")),
+      neu ? h("p", { className: "ws2-sub", style: { marginBottom: 12 } }, L("Für Angebote, die per Telefon, E-Mail oder WhatsApp kommen. Die Angaben siehst nur du.", "For offers that come by phone, e-mail or WhatsApp. Only you can see the details."))
+        : (auto ? h("p", { className: "ws3-dlg-hinweis" }, (a.quelle === "spieler_markt" ? L("Automatisch übernommen aus dem Spieler-Markt", "Added automatically from the Player market") : L("Automatisch übernommen aus einer Nachricht", "Added automatically from a message")) + (a.von ? L(" von ", " from ") + a.von : "") + L(" am ", " on ") + wsDatum(a.eingang) + ".") : null),
+      h("div", { className: "nz-feld", style: { marginBottom: 12 } }, L("Art", "Type"), h("div", { className: "ws2-chips", role: "group", "aria-label": L("Art des Angebots", "Type of offer") }, WS3_ART.map(x => h("button", { key: x[0], type: "button", className: "ws2-wchip" + (w.art === x[0] ? " an" : ""), "aria-pressed": w.art === x[0], onClick: () => setz("art", x[0]), "data-ws3-art-wahl": x[0] }, en ? x[2] : x[1])))),
+      h("div", { className: "nz-felder" },
+        h(Ws3SpielerFeld, { account: account, wert: w.sp, onWert: v => setz("sp", v), fokus: neu, label: L("Spieler", "Player"), platz: L("Name eingeben – Treffer aus der Datenbank erscheinen", "Type a name – matches from the database appear"), fid: "ws3-dlg-sp" }),
+        feld("titel", L("Betreff (wenn kein Spieler)", "Subject (if no player)"), L("z. B. Stürmer für die Rückrunde gesucht", "e.g. striker wanted for the second half"), "text", 240, true),
+        feld("von", L("Von (Person oder Agentur)", "From (person or agency)"), L("z. B. Name des Beraters", "e.g. name of the agent")),
+        feld("verein", L("Verein", "Club"), L("z. B. interessierter Verein", "e.g. interested club")),
+        feld("eingang", L("Eingegangen am", "Received on"), "", "date"),
+        feld("frist", L("Frist (optional)", "Deadline (optional)"), "", "date"),
+        h("label", { className: "nz-feld" }, L("Stand", "State"), h("select", { value: w.status, onChange: e => setz("status", e.target.value), "data-ws3-feld": "status" }, WS3_STATUS.map(x => h("option", { key: x[0], value: x[0] }, en ? x[2] : x[1]))))),
+      h("label", { className: "nz-feld", style: { marginTop: 12 } }, L("Konditionen", "Terms"), h("textarea", { rows: 3, maxLength: 1000, value: w.konditionen, placeholder: L("z. B. Leihe mit Kaufoption, Ablöse, Gehalt, Laufzeit", "e.g. loan with option to buy, fee, salary, contract length"), onChange: e => setz("konditionen", e.target.value), "data-ws3-feld": "konditionen" })),
+      h("label", { className: "nz-feld", style: { marginTop: 12 } }, L("Notiz (nur für dich)", "Note (only for you)"), h("textarea", { rows: 3, maxLength: 2000, value: w.notiz, onChange: e => setz("notiz", e.target.value), "data-ws3-feld": "notiz" })),
+      fehler ? h("p", { className: "ws2-fehler", role: "alert" }, fehler) : null,
+      h("div", { className: "nz-knoepfe" }, h("button", { type: "button", className: "ws2-btn", onClick: schliessen }, L("Abbrechen", "Cancel")), h("button", { type: "button", className: "ws2-btn gold", disabled: busy, onClick: speichern, "data-ws3-speichern": "angebot" }, busy ? L("Speichert …", "Saving …") : (neu ? L("Angebot eintragen", "Add offer") : L("Speichern", "Save"))))));
+}
+function WsAngeboteAside({ liste, fr, onOeffnen }) {
+  const h = React.createElement; const en = wsEn(); const L = (de, x) => (en ? x : de);
+  const zahl = k => liste.filter(a => a.status === k).length; const max = Math.max(1, ...WS3_STATUS.map(x => zahl(x[0])));
+  const heute = ws3Heute();
+  const fristen = liste.filter(a => WS3_OFFEN.indexOf(a.status) >= 0 && ws3Tag(a.frist) && ws3Tag(a.frist) >= heute).sort((a, b) => ws3Tag(a.frist) - ws3Tag(b.frist)).slice(0, 4);
+  return h("aside", { className: "ws2-aside" },
+    ws3Kasten(h, L("Überblick", "Overview"), [
+      h("div", { key: "m", role: "list" }, WS3_STATUS.map(x => { const n = zahl(x[0]); return h("div", { key: x[0], className: "ws3-meter", role: "listitem" }, h("span", null, en ? x[2] : x[1]), h("i", { "aria-hidden": "true" }, h("b", { style: { width: (n / max * 100) + "%" } })), h("span", null, n)); })),
+      h("div", { key: "fl", className: "ws2-label", style: { marginTop: 12 } }, L("Nächste Fristen", "Next deadlines")),
+      fristen.length ? h("ul", { key: "f", className: "ws3-fristliste" }, fristen.map(a => h("li", { key: a.id }, h("button", { type: "button", onClick: () => onOeffnen(a) }, h("span", null, a.spieler || a.titel || "–"), h("span", null, wsDatum(a.frist) + " · " + ws3In(ws3Diff(ws3Tag(a.frist), heute), en))))))
+        : h("p", { key: "f0", className: "ws2-sub" }, L("Keine offenen Fristen.", "No open deadlines."))], "ueberblick"),
+    ws3Kasten(h, L("So kommen Angebote hierher", "How offers get here"), h("ul", { className: "ws3-punkte" },
+      h("li", null, h("b", null, L("Automatisch: ", "Automatically: ")), L("wenn dir jemand in den Nachrichten einen Spieler, einen Marktwert, einen Scoutingbericht oder ein Angebot aus dem Spieler-Markt schickt – oder nach deinem Angebot im Spieler-Markt fragt.", "when someone sends you a player, a market value, a scouting report or a Player market offer in Messages – or asks about your Player market offer.")),
+      h("li", null, h("b", null, L("Selbst eintragen: ", "Add yourself: ")), L("Angebote per Telefon, E-Mail oder WhatsApp.", "offers by phone, e-mail or WhatsApp.")),
+      h("li", null, L("Der Text deiner Nachrichten wird dafür nicht ausgewertet – nur der angehängte Spieler.", "The text of your messages is not analysed for this – only the attached player."))), "herkunft"),
+    h(WsTransferfenster, { key: "fristen", fr: fr }));
+}
+function WsAngeboteVue({ account, openPlayer, setView, watch, profiles }) {
+  const h = React.createElement; const en = wsEn(); const L = (de, x) => (en ? x : de);
+  const d = useWs(account);
+  const [filter, setFilter] = React.useState("alle"); const [art, setArt] = React.useState(""); const [q, setQ] = React.useState(""); const [dialog, setDialog] = React.useState(null);
+  React.useEffect(() => { if (twIstPremium()) wsAngeboteLaden(account); }, []);
+  const kopf = h(WsKopf, { view: "ws_angebote", onNav: setView, watch: watch, profiles: profiles });
+  const liste = WS.angebote;
+  if (!liste) return h("div", { className: "ws2", "data-ws-seite": "angebote" }, kopf, h("div", { className: "ws2-leer" }, WS.aFehler ? [h("span", { key: "f", className: "ws2-fehler" }, wsGrund(WS.aFehler)), h("div", { key: "b", className: "ws2-knoepfe" }, h("button", { type: "button", className: "ws2-btn", onClick: () => { WS.aFehler = ""; wsAngeboteLaden(account); wsNeu(); } }, L("Erneut laden", "Reload")))] : L("Deine Angebote werden geladen …", "Loading your offers …")));
+  const istOffen = a => WS3_OFFEN.indexOf(a.status) >= 0;
+  const nOffen = liste.filter(istOffen).length, nZu = liste.length - nOffen, nNeu = liste.filter(a => !a.gelesen).length;
+  const t = ws3Norm(q.trim());
+  const sicht = liste.filter(a => (filter === "alle" || (filter === "offen" ? istOffen(a) : !istOffen(a))) && (!art || a.art === art)
+    && (!t || ws3Norm([a.spieler, a.titel, a.von, a.verein, a.konditionen, a.notiz, a.team].join(" ")).indexOf(t) >= 0));
+  const alleGelesen = () => { WS.angebote = liste.map(a => Object.assign({}, a, { gelesen: true })); wsANeuSetzen(0, true); wsNeu(); wsRuf(account, "angebot_gelesen", { alle: true }).then(r => { if (r && r.ok) wsANeuSetzen(r.angebote_neu, true); }); };
+  return h("div", { className: "ws2", "data-ws-seite": "angebote" }, kopf,
+    h("div", { className: "ws2-raster" },
+      h("div", { className: "ws2-haupt" },
+        h("div", { className: "ws3-leiste" },
+          h("div", { className: "ws2-filter", role: "group", "aria-label": L("Nach Stand filtern", "Filter by state") }, [["alle", L("Alle", "All"), liste.length], ["offen", L("Offen", "Open"), nOffen], ["zu", L("Abgeschlossen", "Closed"), nZu]].map(([k, lab, n]) => h("button", { key: k, type: "button", className: "ws2-pille" + (filter === k ? " an" : ""), "aria-pressed": filter === k, onClick: () => setFilter(k), "data-ws3-filter": k }, h("span", null, lab), h("span", { className: "ws2-pille-n" }, n)))),
+          h("button", { type: "button", className: "ws2-btn gold", onClick: () => setDialog({ a: null }), "data-ws3-neu": "angebot" }, L("Angebot eintragen", "Add offer"))),
+        liste.length ? h("div", { className: "ws3-leiste2" },
+            liste.length ? h("label", { className: "ws2-suchfeld ws3-suche" }, h("span", { className: "ws2-sr" }, L("Angebote durchsuchen", "Search offers")), h("span", { className: "ws2-lupe", dangerouslySetInnerHTML: { __html: WS_LUPE_SVG } }), h("input", { type: "search", value: q, placeholder: L("Spieler, Person, Verein …", "Player, person, club …"), onChange: e => setQ(e.target.value), autoComplete: "off", "data-ws3-suche": "angebote" })) : null,
+            liste.length ? h("label", { className: "ws3-auswahl" }, h("span", { className: "ws2-sr" }, L("Art des Angebots", "Type of offer")), h("select", { value: art, onChange: e => setArt(e.target.value), "data-ws3-art": "1" }, h("option", { value: "" }, L("Alle Arten", "All types")), WS3_ART.map(x => h("option", { key: x[0], value: x[0] }, en ? x[2] : x[1])))) : null) : null,
+        nNeu ? h("div", { className: "ws3-zeile-info", role: "status" }, h("span", null, nNeu === 1 ? L("1 neues Angebot", "1 new offer") : L(nNeu + " neue Angebote", nNeu + " new offers")), h("button", { type: "button", className: "ws2-link", onClick: alleGelesen, "data-ws3-gelesen": "alle" }, L("Alle als gelesen markieren", "Mark all as read"))) : null,
+        sicht.length ? h("ul", { className: "ws3-ang-liste", "aria-label": L("Angebote", "Offers") }, sicht.map(a => h(WsAngebotZeile, { key: a.id, a: a, account: account, openPlayer: openPlayer, setView: setView, onOeffnen: x => setDialog({ a: x }) })))
+          : h("div", { className: "ws2-leer" }, liste.length ? [h("span", { key: "t" }, L("Für diese Auswahl gibt es kein Angebot.", "No offer matches this selection.")), h("div", { key: "b", className: "ws2-knoepfe" }, h("button", { type: "button", className: "ws2-btn", onClick: () => { setFilter("alle"); setArt(""); setQ(""); } }, L("Filter zurücksetzen", "Reset filters")))] : [
+            h("h3", { key: "t" }, L("Noch keine Angebote", "No offers yet")),
+            h("span", { key: "x" }, L("Sobald dir jemand in den Nachrichten einen Spieler oder ein Angebot aus dem Spieler-Markt schickt oder nach deinem Angebot fragt, erscheint es hier automatisch. Angebote per Telefon, E-Mail oder WhatsApp trägst du selbst ein – mit Konditionen, Frist und Stand.", "As soon as someone sends you a player or a Player market offer in Messages, or asks about your offer, it appears here automatically. Offers by phone, e-mail or WhatsApp you add yourself – with terms, deadline and state.")),
+            h("div", { key: "b", className: "ws2-knoepfe" }, h("button", { type: "button", className: "ws2-btn gold", onClick: () => setDialog({ a: null }) }, L("Angebot eintragen", "Add offer")), h("button", { type: "button", className: "ws2-btn", onClick: () => setView("nz_nachrichten") }, L("Zu den Nachrichten", "Go to Messages")))])),
+      h(WsAngeboteAside, { liste: liste, fr: d && d.fristen, onOeffnen: x => setDialog({ a: x }) })),
+    dialog ? h(WsAngebotDialog, { account: account, a: dialog.a, schliessen: () => setDialog(null) }) : null);
+}
+
+/* Notizen: bekannte Spieler (eigene Liste, Merkliste, andere Notizen) für Verlinkung und Vorschläge */
+function ws3Kandidaten(d, watch, notizen) {
+  const en = wsEn(); const aus = []; const seen = {};
+  const add = c => { if (!c || !c.name || String(c.name).trim().length < 3) return; const k = ws3Key(c); if (seen[k]) return; seen[k] = true; aus.push(c); };
+  ((d && d.spieler) || []).forEach(sp => add(sp.pid ? { pid: Number(sp.pid), name: sp.name, team: sp.team || "", liga: sp.liga || "", foto: sp.foto || "", quelle: en ? "My players" : "Meine Spieler" } : { wid: sp.id, name: sp.name, team: sp.team || "", liga: sp.liga || "", quelle: en ? "My players" : "Meine Spieler" }));
+  (notizen || []).forEach(n => (n.spieler || []).forEach(c => add({ pid: c.pid || null, wid: c.wid || null, name: c.name, team: c.team || "", quelle: en ? "Notes" : "Notizen" })));
+  const namen = {}; aus.forEach(c => { namen[ws3Norm(c.name)] = true; });
+  ((watch && watch.items) || []).filter(x => x.t === "spieler" && x.w && !namen[ws3Norm(x.w)]).forEach(x => add({ name: String(x.w), team: "", quelle: en ? "Watchlist" : "Merkliste" }));
+  return aus;
+}
+function ws3Escape(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+let WS3_UNI = null;
+function ws3Uni() { if (WS3_UNI === null) { try { new RegExp("\\p{L}", "u"); WS3_UNI = true; } catch (e) { WS3_UNI = false; } } return WS3_UNI; }
+/* Namen in der Notiz finden: volle Namen (Groß/klein egal), einzelne Wörter nur in genauer Schreibweise; Nachnamen der in dieser Notiz verknüpften Spieler */
+function ws3Treffer(text, eigene, kand) {
+  const map = new Map();
+  const setz = (wort, c, prio, genau) => { const w = String(wort || "").trim(); if (w.length < 3) return; const k = w.toLowerCase(); const alt = map.get(k); if (!alt || prio > alt.prio) map.set(k, { c: c, prio: prio, genau: genau, wort: w }); };
+  kand.forEach(c => { const n = String(c.name).trim(); setz(n, c, c.pid || c.wid ? 1 : 0, !/\s/.test(n)); });
+  const nach = {};
+  eigene.forEach(c => { const n = String(c.name || "").trim(); setz(n, c, 3, !/\s/.test(n)); const teile = n.split(/\s+/); if (teile.length > 1) { const s = teile[teile.length - 1]; if (s.length >= 4) { const k = s.toLowerCase(); nach[k] = nach[k] === undefined ? { s: s, c: c } : null; } } });
+  Object.keys(nach).forEach(k => { const x = nach[k]; if (x && !map.has(k)) map.set(k, { c: x.c, prio: 2, genau: true, wort: x.s }); });
+  if (!map.size || !text) return [];
+  const namen = Array.from(map.values()).map(x => x.wort).sort((a, b) => b.length - a.length).map(ws3Escape);
+  const re = ws3Uni() ? new RegExp("(^|[^\\p{L}\\p{N}_])(@?)(" + namen.join("|") + ")(?![\\p{L}\\p{N}_])", "giu") : new RegExp("(^|[^A-Za-zÀ-ÿ0-9_])(@?)(" + namen.join("|") + ")(?![A-Za-zÀ-ÿ0-9_])", "gi");
+  const aus = []; let m;
+  while ((m = re.exec(text))) {
+    const x = map.get(m[3].toLowerCase()); if (!x) continue;
+    if (x.genau && m[3] !== x.wort) continue;
+    aus.push({ start: m.index + m[1].length, laenge: m[2].length + m[3].length, wort: m[3], c: x.c });
+  }
+  return aus;
+}
+function ws3NotizTeile(text, eigene, kand, oeffne) {
+  const h = React.createElement; const en = wsEn(); const teile = []; let key = 0;
+  String(text || "").split(/(https?:\/\/[^\s<>"']+)/g).forEach((stk, i) => {
+    if (i % 2 === 1) { const url = stk.replace(/[.,;:!?)\]]+$/, ""); teile.push(h("a", { key: key++, href: url, target: "_blank", rel: "noopener noreferrer", className: "ws3-nurl" }, url)); if (stk.length > url.length) teile.push(stk.slice(url.length)); return; }
+    let last = 0;
+    ws3Treffer(stk, eigene, kand).forEach(t => {
+      if (t.start < last) return;
+      if (t.start > last) teile.push(stk.slice(last, t.start));
+      teile.push(h("button", { key: key++, type: "button", className: "ws3-nlink", onClick: () => oeffne(t.c), title: (t.c.pid ? (en ? "Open player profile" : "Spielerprofil öffnen") : t.c.wid ? (en ? "Show in My players" : "In „Meine Spieler“ zeigen") : (en ? "Find player in the database" : "Spieler in der Datenbank suchen")) + (t.c.team ? " · " + t.c.team : ""), "data-ws3-link": ws3Key(t.c) }, t.wort));
+      last = t.start + t.laenge;
+    });
+    if (last < stk.length) teile.push(stk.slice(last));
+  });
+  return teile;
+}
+function ws3ZuMeinemSpieler(wid, setView) {
+  if (typeof setView === "function") setView("ws_spieler");
+  let n = 0; const tm = setInterval(() => { const el = document.querySelector('[data-ws-spieler="' + Number(wid) + '"]'); if (el || ++n > 40) { clearInterval(tm); if (el) { try { el.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (e) { el.scrollIntoView(); } el.classList.add("ws3-blink"); setTimeout(() => el.classList.remove("ws3-blink"), 1800); } } }, 100);
+}
+function WsNotizEditor({ account, kand, edit, onFertig }) {
+  const h = React.createElement; const en = wsEn(); const L = (de, x) => (en ? x : de);
+  const ta = React.useRef(null); const blurT = React.useRef(null);
+  React.useEffect(() => () => clearTimeout(blurT.current), []);
+  const [text, setText] = React.useState(""); const [sp, setSp] = React.useState([]); const [pin, setPin] = React.useState(false);
+  const [men, setMen] = React.useState(null); const [akt, setAkt] = React.useState(0); const [aus, setAus] = React.useState({});
+  const [anh, setAnh] = React.useState(false); const [aq, setAq] = React.useState(""); const [aakt, setAakt] = React.useState(0);
+  const [busy, setBusy] = React.useState(false); const [fehler, setFehler] = React.useState("");
+  React.useEffect(() => {
+    setText(edit ? edit.text : ""); setSp(edit ? (edit.spieler || []).slice() : []); setPin(edit ? !!edit.angeheftet : false); setMen(null); setAus({}); setFehler(""); setAnh(false);
+    if (edit && ta.current) { try { ta.current.focus(); ta.current.scrollIntoView({ block: "center" }); } catch (e) { } }
+  }, [edit ? edit.id : 0]);
+  React.useLayoutEffect(() => { const el = ta.current; if (!el) return; el.style.height = "auto"; el.style.height = Math.min(360, Math.max(92, el.scrollHeight + 2)) + "px"; }, [text]);
+  const qn = men ? men.q.trim() : "";
+  const db = useWs3Suche(account, men && qn.length >= 2 ? qn : "");
+  const vorschlagAus = (q, dbt) => {
+    const nq = ws3Norm(q); const lokal = q ? kand.filter(c => (c.pid || c.wid) && ws3Norm(c.name).indexOf(nq) >= 0).slice(0, 5) : [];
+    const dbl = (dbt || []).map(t => ({ pid: Number(t.pid), name: t.name, team: t.team, liga: t.liga, position: t.position, foto: t.foto }));
+    const erg = []; const seen = {}; lokal.concat(dbl).forEach(c => { const k = ws3Key(c); if (!seen[k]) { seen[k] = true; erg.push(c); } });
+    return erg.slice(0, 8);
+  };
+  const vorschlaege = men && qn.length >= 1 ? vorschlagAus(qn, db.treffer) : [];
+  const zeigeMen = !!(men && qn.length >= 1 && (vorschlaege.length || (qn.length >= 2 && !/\s/.test(qn))));
+  const as = useWs3Suche(account, anh ? aq : "");
+  const anVorschlaege = anh && aq.trim().length >= 1 ? vorschlagAus(aq.trim(), as.treffer) : [];
+  const pruefe = (wert, pos) => {
+    const vor = wert.slice(0, pos);
+    const m = /(^|[\s(\[{"'„“‚‘,;:])@([^\s@]{0,30}(?: [^\s@]{1,30}){0,2})$/.exec(vor);
+    if (!m) { if (men) setMen(null); return; }
+    const at = vor.length - m[2].length - 1;
+    if (aus[at]) { if (men) setMen(null); return; }
+    setMen({ at: at, q: m[2] }); setAkt(0);
+  };
+  const hinzu = c => setSp(s => s.some(x => ws3Key(x) === ws3Key(c)) || s.length >= 30 ? s : s.concat([{ pid: c.pid || null, wid: c.wid || null, name: c.name, team: c.team || "" }]));
+  const nimm = c => {
+    const el = ta.current; const pos = el ? el.selectionStart : text.length;
+    const vorher = text.slice(0, men.at); const nachher = text.slice(pos).replace(/^[^\s]*/, "").replace(/^\s+/, "");
+    const einf = "@" + c.name + " "; const neu = vorher + einf + nachher;
+    setText(neu); setMen(null); hinzu(c);
+    const p = (vorher + einf).length;
+    requestAnimationFrame(() => { if (el) { el.focus(); try { el.setSelectionRange(p, p); } catch (e) { } } });
+  };
+  const speichern = () => {
+    const t = text.trim();
+    if (!t) { setFehler(wsGrund("notiz_leer")); return; }
+    if (t.length > 4000) { setFehler(wsGrund("text_notiz")); return; }
+    const auto = ws3Treffer(t, sp, kand).map(x => x.c).filter(c => c.pid || c.wid);
+    const alle = sp.concat(auto).filter((c, i, arr) => arr.findIndex(y => ws3Key(y) === ws3Key(c)) === i).slice(0, 30);
+    const body = { text: t, spieler: alle.map(c => c.pid ? { pid: c.pid } : { wid: c.wid }), angeheftet: pin };
+    if (edit) body.id = edit.id;
+    setBusy(true); setFehler("");
+    wsRuf(account, "notiz_speichern", body).then(r => {
+      setBusy(false);
+      if (r && r.ok) { wsNotizSetzen(r.notiz); wsMeldung(edit ? L("Notiz gespeichert.", "Note saved.") : L("Notiz angelegt.", "Note added.")); if (!edit) { setText(""); setSp([]); setPin(false); setAus({}); } onFertig(r.notiz); }
+      else setFehler(wsGrund(r && r.grund, r));
+    });
+  };
+  const lid = "ws3-men-liste";
+  return h("section", { className: "ws3-editor" + (edit ? " bearbeiten" : ""), "aria-label": edit ? L("Notiz bearbeiten", "Edit note") : L("Neue Notiz", "New note"), "data-ws3-editor": edit ? "bearbeiten" : "neu" },
+    h("div", { className: "ws3-editor-kopf" }, h("label", { htmlFor: "ws3-notiz-text" }, edit ? L("Notiz bearbeiten", "Edit note") : L("Neue Notiz", "New note")),
+      text.length > 3500 ? h("span", { className: "ws3-tipp", "aria-live": "polite" }, text.length.toLocaleString(en ? "en-GB" : "de-DE") + " / 4.000") : null),
+    h("div", { className: "ws3-wahl" },
+      h("textarea", { id: "ws3-notiz-text", ref: ta, value: text, maxLength: 4000, placeholder: L("Notiz schreiben … Mit @ und einem Namen verknüpfst du einen Spieler.", "Write a note … Type @ and a name to link a player."),
+        role: "combobox", "aria-autocomplete": "list", "aria-expanded": zeigeMen ? "true" : "false", "aria-controls": lid, "aria-activedescendant": zeigeMen && vorschlaege.length ? lid + "-" + Math.min(akt, vorschlaege.length - 1) : undefined,
+        onChange: e => { clearTimeout(blurT.current); setText(e.target.value); pruefe(e.target.value, e.target.selectionStart); },
+        onSelect: e => pruefe(e.target.value, e.target.selectionStart),
+        onFocus: () => clearTimeout(blurT.current),
+        onBlur: () => { clearTimeout(blurT.current); blurT.current = setTimeout(() => setMen(null), 150); },
+        onKeyDown: e => {
+          if (zeigeMen && vorschlaege.length) {
+            if (e.key === "ArrowDown") { e.preventDefault(); setAkt(i => (i + 1) % vorschlaege.length); return; }
+            if (e.key === "ArrowUp") { e.preventDefault(); setAkt(i => (i - 1 + vorschlaege.length) % vorschlaege.length); return; }
+            if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); nimm(vorschlaege[Math.min(akt, vorschlaege.length - 1)]); return; }
+          }
+          if (men && e.key === "Escape") { e.preventDefault(); e.stopPropagation(); const at = men.at; setAus(x => Object.assign({}, x, { [at]: true })); setMen(null); return; }
+          if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); speichern(); }
+        }, "data-ws3-notiz-text": "1" }),
+      zeigeMen ? h(Ws3Vorschlaege, { id: lid, liste: vorschlaege, aktiv: akt, onWahl: nimm, leer: db.laedt ? L("Suche …", "Searching …") : L("Kein Spieler gefunden.", "No player found.") }) : null),
+    sp.length ? h("div", { className: "ws3-npillen", "aria-label": L("Verknüpfte Spieler", "Linked players") }, sp.map(c => h("span", { key: ws3Key(c), className: "ws3-npille", "data-ws3-pille": ws3Key(c) }, c.name, c.team ? h("small", null, c.team) : null,
+      h("button", { type: "button", "aria-label": L("Verknüpfung entfernen: ", "Remove link: ") + c.name, onClick: () => setSp(s => s.filter(x => ws3Key(x) !== ws3Key(c))) }, "×")))) : null,
+    anh ? h("div", { className: "ws3-anheften ws3-wahl" },
+      h("label", { className: "ws2-suchfeld" }, h("span", { className: "ws2-sr" }, L("Spieler zum Anheften suchen", "Search a player to attach")), h("span", { className: "ws2-lupe", dangerouslySetInnerHTML: { __html: WS_LUPE_SVG } }),
+        h("input", { type: "search", value: aq, autoFocus: true, placeholder: L("Spieler suchen: Name oder Verein …", "Search player: name or club …"), autoComplete: "off", role: "combobox", "aria-autocomplete": "list", "aria-expanded": anVorschlaege.length ? "true" : "false", "aria-controls": "ws3-anh-liste",
+          "aria-activedescendant": anVorschlaege.length ? "ws3-anh-liste-" + Math.min(aakt, anVorschlaege.length - 1) : undefined,
+          onChange: e => { setAq(e.target.value); setAakt(0); },
+          onKeyDown: e => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); setAnh(false); setAq(""); return; } if (!anVorschlaege.length) return; if (e.key === "ArrowDown") { e.preventDefault(); setAakt(i => (i + 1) % anVorschlaege.length); } else if (e.key === "ArrowUp") { e.preventDefault(); setAakt(i => (i - 1 + anVorschlaege.length) % anVorschlaege.length); } else if (e.key === "Enter") { e.preventDefault(); hinzu(anVorschlaege[Math.min(aakt, anVorschlaege.length - 1)]); setAq(""); } },
+          "data-ws3-anheften-suche": "1" })),
+      aq.trim().length >= 1 ? h(Ws3Vorschlaege, { id: "ws3-anh-liste", liste: anVorschlaege, aktiv: aakt, onWahl: c => { hinzu(c); setAq(""); }, leer: as.laedt ? L("Suche …", "Searching …") : L("Kein Spieler gefunden.", "No player found.") }) : null) : null,
+    fehler ? h("p", { className: "ws2-fehler", role: "alert", style: { margin: 0 } }, fehler) : null,
+    h("div", { className: "ws3-editor-fuss" },
+      h("button", { type: "button", className: "ws2-btn klein" + (anh ? " an" : ""), "aria-expanded": anh ? "true" : "false", onClick: () => { setAnh(!anh); setAq(""); }, "data-ws3-anheften": "1" }, anh ? L("Suche schließen", "Close search") : L("Spieler anheften", "Attach player")),
+      h("button", { type: "button", className: "ws2-btn klein leise", "aria-pressed": pin ? "true" : "false", onClick: () => setPin(!pin), "data-ws3-fix": "editor" }, h("span", { className: "ws3-ikon", dangerouslySetInnerHTML: { __html: WS3_PIN_SVG } }), pin ? L("Oben fixiert", "Pinned to top") : L("Oben fixieren", "Pin to top")),
+      h("span", { className: "ws3-platz" }),
+      h("span", { className: "ws3-tipp ws3-taste" }, h("kbd", null, /Mac|iPhone|iPad/.test(navigator.platform || "") ? "⌘" : (en ? "Ctrl" : "Strg")), " + ", h("kbd", null, "Enter"), L(" speichert", " saves")),
+      edit ? h("button", { type: "button", className: "ws2-btn klein", onClick: () => onFertig(null) }, L("Abbrechen", "Cancel")) : null,
+      h("button", { type: "button", className: "ws2-btn gold", disabled: busy || !text.trim(), onClick: speichern, "data-ws3-speichern": "notiz" }, busy ? L("Speichert …", "Saving …") : (edit ? L("Speichern", "Save") : L("Notiz speichern", "Save note")))));
+}
+function WsNotizKarte({ n, account, kand, oeffne, onBearbeiten, aktiv }) {
+  const h = React.createElement; const en = wsEn(); const L = (de, x) => (en ? x : de);
+  const [busy, setBusy] = React.useState(false); const [weg, setWeg] = React.useState(false);
+  const pin = () => { setBusy(true); wsRuf(account, "notiz_anheften", { id: n.id, an: !n.angeheftet }).then(r => { setBusy(false); if (r && r.ok) wsNotizSetzen(r.notiz); else wsMeldung(wsGrund(r && r.grund, r)); }); };
+  const loeschen = () => { setBusy(true); wsRuf(account, "notiz_loeschen", { id: n.id }).then(r => { setBusy(false); if (r && r.ok) { wsNotizWeg(n.id); wsMeldung(L("Notiz gelöscht.", "Note deleted.")); } else wsMeldung(wsGrund(r && r.grund, r)); }); };
+  return h("li", { className: "ws3-notiz" + (n.angeheftet ? " fix" : "") + (aktiv ? " aktiv" : ""), "data-ws3-notiz": n.id },
+    h("div", { className: "ws3-notiz-kopf" }, h("span", null, wsZeit(n.geaendert)), n.angeheftet ? h("span", { className: "ws3-fix" }, h("span", { className: "ws3-ikon", dangerouslySetInnerHTML: { __html: WS3_PIN_SVG } }), L("Oben fixiert", "Pinned")) : null,
+      h("span", { className: "ws3-platz" }),
+      h("div", { className: "ws3-notiz-akt" },
+      h("button", { type: "button", className: "ws2-btn klein leise", disabled: busy, "aria-pressed": n.angeheftet ? "true" : "false", onClick: pin, "data-ws3-fix": n.id }, h("span", { className: "ws3-ikon", dangerouslySetInnerHTML: { __html: WS3_PIN_SVG } }), n.angeheftet ? L("Lösen", "Unpin") : L("Oben fixieren", "Pin to top")),
+      h("button", { type: "button", className: "ws2-btn klein leise", onClick: () => onBearbeiten(n), "data-ws3-bearbeiten-notiz": n.id }, L("Bearbeiten", "Edit")),
+      weg ? h("span", { className: "ws2-weg", role: "group", "aria-label": L("Löschen bestätigen", "Confirm deletion") }, h("button", { type: "button", className: "ws2-btn klein rot", disabled: busy, onClick: loeschen, "data-ws3-notiz-loeschen-ja": n.id }, L("Ja, löschen", "Yes, delete")), h("button", { type: "button", className: "ws2-btn klein leise", onClick: () => setWeg(false) }, L("Behalten", "Keep")))
+        : h("button", { type: "button", className: "ws2-btn klein leise", onClick: () => setWeg(true), "data-ws3-notiz-loeschen": n.id }, L("Löschen", "Delete")))),
+    h("div", { className: "ws3-notiz-text" }, ws3NotizTeile(n.text, n.spieler || [], kand, oeffne)),
+    (n.spieler || []).length ? h("div", { className: "ws3-npillen" }, n.spieler.map(c => h("button", { key: ws3Key(c), type: "button", className: "ws3-npille link", onClick: () => oeffne(c), title: c.pid ? L("Spielerprofil öffnen", "Open player profile") : L("In „Meine Spieler“ zeigen", "Show in My players") }, c.name, c.team ? h("small", null, c.team) : null))) : null);
+}
+function WsNotizenVue({ account, openPlayer, setView, watch, profiles }) {
+  const h = React.createElement; const en = wsEn(); const L = (de, x) => (en ? x : de);
+  const d = useWs(account);
+  const [q, setQ] = React.useState(""); const [spf, setSpf] = React.useState(null); const [edit, setEdit] = React.useState(null);
+  React.useEffect(() => { if (twIstPremium()) wsNotizenLaden(account); }, []);
+  const kopf = h(WsKopf, { view: "ws_notizen", onNav: setView, watch: watch, profiles: profiles });
+  const liste = WS.notizen;
+  if (!liste) return h("div", { className: "ws2", "data-ws-seite": "notizen" }, kopf, h("div", { className: "ws2-leer" }, WS.nFehler ? [h("span", { key: "f", className: "ws2-fehler" }, wsGrund(WS.nFehler)), h("div", { key: "b", className: "ws2-knoepfe" }, h("button", { type: "button", className: "ws2-btn", onClick: () => { WS.nFehler = ""; wsNotizenLaden(account); wsNeu(); } }, L("Erneut laden", "Reload")))] : L("Deine Notizen werden geladen …", "Loading your notes …")));
+  const kand = ws3Kandidaten(d, watch, liste);
+  const oeffne = c => {
+    if (c.pid) { openPlayer(Number(c.pid), c.name, c.team || ""); return; }
+    if (c.wid) { ws3ZuMeinemSpieler(c.wid, setView); return; }
+    wsRuf(account, "suchen", { q: c.name }).then(r => { const t = r && r.ok ? (r.treffer || []).find(x => ws3Norm(x.name) === ws3Norm(c.name)) : null; if (t) openPlayer(Number(t.pid), t.name, t.team || ""); else wsMeldung(L("Dieser Spieler wurde in der Datenbank nicht gefunden.", "This player was not found in the database.")); });
+  };
+  const spielerVon = n => { const m = {}; (n.spieler || []).forEach(c => { m[ws3Key(c)] = c; }); ws3Treffer(n.text, n.spieler || [], kand).forEach(t => { if (t.c.pid || t.c.wid) m[ws3Key(t.c)] = t.c; }); return m; };
+  const proNotiz = liste.map(n => ({ n: n, sp: spielerVon(n) }));
+  const zaehler = {}; proNotiz.forEach(x => Object.keys(x.sp).forEach(k => { if (!zaehler[k]) zaehler[k] = { c: x.sp[k], n: 0 }; zaehler[k].n++; }));
+  const spListe = Object.keys(zaehler).map(k => zaehler[k]).sort((a, b) => b.n - a.n || String(a.c.name).localeCompare(String(b.c.name), en ? "en" : "de")).slice(0, 15);
+  const t = ws3Norm(q.trim());
+  const sicht = proNotiz.filter(x => (!spf || x.sp[spf.k]) && (!t || ws3Norm(x.n.text + " " + Object.keys(x.sp).map(k => x.sp[k].name).join(" ")).indexOf(t) >= 0)).map(x => x.n);
+  return h("div", { className: "ws2", "data-ws-seite": "notizen" }, kopf,
+    h("div", { className: "ws2-raster" },
+      h("div", { className: "ws2-haupt" },
+        h(WsNotizEditor, { account: account, kand: kand, edit: edit, onFertig: () => setEdit(null) }),
+        liste.length ? h("div", { className: "ws3-leiste" },
+          h("label", { className: "ws2-suchfeld ws3-suche" }, h("span", { className: "ws2-sr" }, L("Notizen durchsuchen", "Search notes")), h("span", { className: "ws2-lupe", dangerouslySetInnerHTML: { __html: WS_LUPE_SVG } }), h("input", { type: "search", value: q, placeholder: L("Notizen durchsuchen …", "Search notes …"), onChange: e => setQ(e.target.value), autoComplete: "off", "data-ws3-suche": "notizen" })),
+          h("div", { className: "ws3-zeile-info" },
+            spf ? h("span", { className: "ws3-npille" }, L("Spieler: ", "Player: ") + spf.name, h("button", { type: "button", "aria-label": L("Spieler-Filter entfernen", "Remove player filter"), onClick: () => setSpf(null) }, "×")) : null,
+            h("span", { className: "ws2-zaehler" }, (sicht.length === liste.length ? "" : sicht.length + L(" von ", " of ")) + (liste.length === 1 ? L("1 Notiz", "1 note") : L(liste.length + " Notizen", liste.length + " notes"))))) : null,
+        sicht.length ? h("ul", { className: "ws3-notizen", "aria-label": L("Notizen", "Notes") }, sicht.map(n => h(WsNotizKarte, { key: n.id, n: n, account: account, kand: kand, oeffne: oeffne, aktiv: !!(edit && edit.id === n.id), onBearbeiten: x => setEdit(x) })))
+          : h("div", { className: "ws2-leer" }, liste.length ? [h("span", { key: "t" }, L("Keine Notiz passt zu deiner Suche.", "No note matches your search.")), h("div", { key: "b", className: "ws2-knoepfe" }, h("button", { type: "button", className: "ws2-btn", onClick: () => { setQ(""); setSpf(null); } }, L("Suche zurücksetzen", "Reset search")))] : [
+            h("h3", { key: "t" }, L("Noch keine Notizen", "No notes yet")),
+            h("span", { key: "x" }, L("Halte fest, was du nach einem Spielbesuch, einem Telefonat oder einem Gespräch wissen willst. Tippe @ und einen Namen – der Spieler wird verknüpft und sein Name zum Link auf sein Profil.", "Write down what you want to remember after a match, a call or a meeting. Type @ and a name – the player gets linked and his name becomes a link to his profile."))])),
+      h("aside", { className: "ws2-aside" },
+        ws3Kasten(h, L("Spieler in deinen Notizen", "Players in your notes"), spListe.length ? h("ul", { className: "ws3-spl" }, spListe.map(x => { const k = ws3Key(x.c); const an = !!(spf && spf.k === k); return h("li", { key: k }, h("button", { type: "button", "aria-pressed": an ? "true" : "false", onClick: () => setSpf(an ? null : { k: k, name: x.c.name }), title: an ? L("Filter entfernen", "Remove filter") : L("Nur Notizen mit diesem Spieler zeigen", "Show only notes with this player") }, h(DbFoto, { x: { name: x.c.name, photo: "" }, size: 26 }), h("span", null, x.c.name), h("span", null, x.n))); }))
+          : h("p", { className: "ws2-sub" }, L("Sobald du Spieler verknüpfst, siehst du sie hier – ein Klick zeigt alle Notizen zu einem Spieler.", "As soon as you link players, they show up here – one click shows all notes about a player.")), "spieler"),
+        ws3Kasten(h, L("So funktionieren Notizen", "How notes work"), h("ul", { className: "ws3-punkte" },
+          h("li", null, h("b", null, "@ " + L("und Name: ", "and name: ")), L("verknüpft einen Spieler aus der Datenbank oder aus deiner Liste.", "links a player from the database or from your list.")),
+          h("li", null, h("b", null, L("Automatisch verlinkt: ", "Linked automatically: ")), L("Namen deiner Spieler, deiner Merkliste und bereits verknüpfter Spieler.", "names of your players, your watchlist and players you have linked before.")),
+          h("li", null, h("b", null, L("Spieler anheften: ", "Attach player: ")), L("verknüpft einen Spieler, ohne den Namen in den Text zu schreiben.", "links a player without writing the name into the text.")),
+          h("li", null, h("b", null, L("Oben fixieren: ", "Pin to top: ")), L("wichtige Notizen bleiben oben.", "important notes stay at the top.")),
+          h("li", null, L("Notizen siehst nur du.", "Only you can see your notes."))), "tipps"))));
+}
 function WsAside({ d, liste, account, wr, setWochenreport }) {
   const h = React.createElement; const en = wsEn(); const L = (de, x) => (en ? x : de);
   const fristen = liste.filter(s => s.vertrag && s.monate != null && Number(s.monate) <= 12).sort((a, b) => String(a.vertrag).localeCompare(String(b.vertrag)));
@@ -10434,9 +11115,7 @@ function WsAside({ d, liste, account, wr, setWochenreport }) {
   const LAND = { England: ["England", "England"], Deutschland: ["Deutschland", "Germany"] };
   const kasten = (titel, kinder, key) => h("section", { key: key, className: "ws2-kasten", "data-ws-kasten": key }, h("h3", null, titel), kinder);
   return h("aside", { className: "ws2-aside" },
-    kasten(L("Fristen", "Deadlines"), [
-      h("div", { key: "lf", className: "ws2-label" }, L("Transferfenster", "Transfer windows")),
-      fenster.length ? h("div", { key: "f" }, fenster.map(f => h("div", { key: f.land + f.von, className: "ws2-frist" }, h("span", null, (en ? (f.land_en || (LAND[f.land] ? LAND[f.land][1] : f.land)) : f.land) + (f.art === "winter" ? L(", Winter", ", winter") : f.art === "sommer" ? L(", Sommer", ", summer") : "")), h("b", null, wsDatum(f.von) + " – " + wsDatum(f.bis)), !f.bestaetigt ? h("small", null, L("gemeldet, noch nicht offiziell bestätigt", "reported, not yet officially confirmed")) : null))) : h("p", { key: "f0", className: "ws2-sub" }, L("Für die nächsten 120 Tage ist noch kein Fenster eingetragen.", "No window has been entered for the next 120 days yet.")), fensterAlle.length > fensterKern.length ? h("button", { key: "fa", type: "button", className: "ws2-btn klein leise", style: { marginTop: 8 }, "aria-pressed": fAlle ? "true" : "false", onClick: () => setFAlle(!fAlle) }, fAlle ? L("Nur Kernmärkte", "Core markets only") : L("Alle Länder", "All countries") + " (" + new Set(fensterAlle.map(x => x.land)).size + ")") : null], "fristen"),
+    h(WsTransferfenster, { key: "fristen", fr: d.fristen }),
     kasten(L("Wochenbericht", "Weekly report"), [h("p", { key: "t", className: "ws2-sub", style: { marginBottom: 8 } }, L("Mit eigenem Abschnitt „Deine Spieler“: Form, Minuten, neue passende Vereine und Fristen.", "With its own section “Your players”: form, minutes, new matching clubs and deadlines.")), h(TwWochenreportSchalter, { key: "s", wr: wr, onChange: setWochenreport, angemeldet: !!(account && account.email), eingebettet: true })], "wochenbericht"),
     kasten(L("Benachrichtigungen", "Notifications"), h("p", { className: "ws2-sub" }, L("Alles startet ohne Benachrichtigung. Mit der Glocke an einem Spieler, einer Karte oder einem Angebot bekommst du eine E-Mail, sobald sich etwas ändert (Einsatzzeit, Form, Verletzung, neue passende Vereine, Meldungen).", "Everything starts without notification. With the bell on a player, card or offer you get an e-mail as soon as something changes (playing time, form, injury, new matching clubs, reports).")), "glocken"),
     team.ist_team ? kasten("Team", h("div", null, (team.mitglieder || []).map(m => h("div", { key: m.email, className: "ws2-frist" }, h("span", null, (m.name || "") + (m.ich ? L(" (du)", " (you)") : "")), h("b", { style: { fontWeight: 600, color: "var(--t3)" } }, m.eigner ? L("Inhaber", "Owner") : L("Mitglied", "Member")))), h("p", { className: "ws2-sub", style: { marginTop: 8 } }, L("Alle sehen dieselben Spieler, Zuständigkeiten und Kommentare.", "Everyone sees the same players, responsibilities and comments."))), "team") : null,
@@ -14108,11 +14787,14 @@ function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScou
   React.useEffect(() => { const f = () => setNzUngelesen(NZ3.ungelesen + NZ3.anfragen); window.addEventListener("nz-neu", f); return () => window.removeEventListener("nz-neu", f); }, []);
   const [nzHinweise, setNzHinweise] = useState(() => (typeof NZ3 !== "undefined" ? (NZ3.hinweise || 0) : 0));   // Netzwerk 2.0 Paket 4: ungelesene Netzwerk-Hinweise (Suchaufträge, Antworten)
   React.useEffect(() => { const f = () => setNzHinweise(NZ3.hinweise || 0); window.addEventListener("nz-neu", f); return () => window.removeEventListener("nz-neu", f); }, []);
+  const [wsANeu, setWsANeu] = useState(() => Number(WS.aNeu) || 0);   // WS3: neue Angebote im Workspace
+  React.useEffect(() => { const f = () => setWsANeu(Number(WS.aNeu) || 0); window.addEventListener("ws-neu", f); return () => window.removeEventListener("ws-neu", f); }, []);
+  React.useEffect(() => { if (prem) wsZaehlerStart(); }, [prem]);
   React.useEffect(() => { const f = () => setZusatz(TW_ZUSATZ.seiten.slice()); window.addEventListener("tw-zusatz", f); return () => window.removeEventListener("tw-zusatz", f); }, []);
   React.useEffect(() => { const f = () => setVsZahl(Number(window.VS_ZAHL) || 0); window.addEventListener("vs-zahl", f); if (VS_NEU && !(Number(window.VS_ZAHL) || 0)) { try { const a = JSON.parse(localStorage.getItem("tw_account") || "{}"); const code = a.zugangscode || a.code; if (code && a.email) fetch("/api/verein-sucht?was=liste&gruppe=TW&limit=1&code=" + encodeURIComponent(code) + "&email=" + encodeURIComponent(a.email)).then(r => r.ok ? r.json() : null).then(d => { if (d && d.meta && Array.isArray(d.meta.gruppen)) { const n = d.meta.gruppen.reduce((s, g) => s + (g.konkret != null ? (Number(g.konkret) || 0) : (Number(g.n) || 0)), 0); if (n > 0) { window.VS_ZAHL = n; setVsZahl(n); } } }).catch(() => {}); } catch (e) {} } return () => window.removeEventListener("vs-zahl", f); }, []);
   let feedBadge = 0, gesuchtBadge = 0; try { feedBadge = (Array.isArray(news) ? news : []).filter(n => Date.now() - new Date(n.published_at || n.created_at || n.createdAt || 0).getTime() < 864e5).length; gesuchtBadge = (VS_NEU && vsZahl) ? vsZahl : (Array.isArray(needsBySport) ? needsBySport.length : 0); } catch (e) {}
   const aktiv = k => view === k || (k === "community" && view === "moderation") || (k === "talente" && (view === "listen" || view === "suche" || view === "nachwuchs" || view === "akquise" || view === "talent2")) || (k === "players" && (view === "spielervergleich" || view === "aehnlich"));
-  const WS_K = ["ws_spieler", "watch", "ws_beob"]; const wsAktiv = WS_K.indexOf(view) >= 0;   // Seitenleiste neu (09.11.2026)
+  const WS_K = ["ws_spieler", "watch", "ws_beob", "ws_angebote", "ws_notizen"]; const wsAktiv = WS_K.indexOf(view) >= 0;   // Seitenleiste neu (09.11.2026)
   React.useEffect(() => { if (WS_K.indexOf(view) >= 0) { try { localStorage.setItem("tw_ws_reiter", view); } catch (e) {} } }, [view]);
   const wsZiel = () => { let z = "ws_spieler"; try { const r = localStorage.getItem("tw_ws_reiter"); if (WS_K.indexOf(r) >= 0) z = r; } catch (e) {} return z; };
   let wsEnt = false; try { const a = (typeof loadAccount === "function" ? loadAccount() : JSON.parse(localStorage.getItem("tw_account") || "null")) || {}; wsEnt = a.plan_roh === "enterprise"; } catch (e) {}
@@ -14124,10 +14806,10 @@ function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScou
   ];
   return h("div", { className: "tw-sn" },
     h("button", { type: "button", className: "tw-sn-ki" + (view === "assistent" ? " aktiv" : ""), onClick: onScout }, h("span", { className: "tw-sn-ikon tw-sn-funke", dangerouslySetInnerHTML: { __html: IK.ki } }), h("span", null, en ? "AI assistant" : "KI-Assistent")),
-    h("button", { type: "button", className: "tw-sn-ws" + (wsAktiv ? " aktiv" : ""), onClick: () => setView(wsZiel()), "data-sn-ws": "1", "aria-current": wsAktiv ? "page" : undefined },
+    h("button", { type: "button", className: "tw-sn-ws" + (wsAktiv ? " aktiv" : ""), onClick: () => setView(prem && wsANeu > 0 && !wsAktiv ? "ws_angebote" : wsZiel()), "data-sn-ws": "1", "aria-current": wsAktiv ? "page" : undefined },
       h("span", { className: "tw-sn-ws-logo", "aria-hidden": "true", dangerouslySetInnerHTML: { __html: IK.koffer } }),
       h("span", { className: "tw-sn-ws-text" }, h("span", { className: "tw-sn-ws-titel" }, en ? "My workspace" : "Mein Workspace"), h("span", { className: "tw-sn-ws-unter" }, wsEnt ? "Enterprise Workspace" : "Professional Workspace")),
-      !prem ? h("span", { className: "tw-sn-pro" }, "PRO") : h("span", { className: "tw-sn-ws-pfeil", dangerouslySetInnerHTML: { __html: IK.rechts } })),
+      !prem ? h("span", { className: "tw-sn-pro" }, "PRO") : (wsANeu > 0 ? h("span", { className: "tw-sn-badge", "data-sn-ws-neu": wsANeu }, wsANeu > 99 ? "99+" : wsANeu, h("span", { className: "tw-sr-nur" }, en ? (wsANeu === 1 ? " new offer" : " new offers") : (wsANeu === 1 ? " neues Angebot" : " neue Angebote"))) : h("span", { className: "tw-sn-ws-pfeil", dangerouslySetInnerHTML: { __html: IK.rechts } }))),
     h("div", { className: "tw-sn-trenner" }),
     h("nav", { className: "tw-sn-menue" },
       h("button", { type: "button", className: "tw-sn-punkt" + (aktiv("kontakte") ? " aktiv" : ""), onClick: () => setView("kontakte") }, h("span", { className: "tw-sn-ikon", dangerouslySetInnerHTML: { __html: SIDE_ICONS.kontakte || "" } }), h("span", null, en ? "Club contacts" : "Vereinskontakte"), proMarke("kontakte")),
@@ -17250,7 +17932,7 @@ function TwSoGehts({ kurz, lang, label }) {
 /* ── Tarifmodell Free / Pro / Enterprise (23.10.2026) ──────────────────────────
    Pro-Bereiche: Verein sucht, Vereinskontakte, Netzwerk/Community, Workspace (Merkliste), Scouting, Akquise-Radar.
    Free: alle uebrigen Bereiche inkl. Marktwert, KI-Assistent "Scout" und PDF-Dossiers. */
-const TW_PRO_VIEWS = ["gesucht", "nz_markt", "kontakte", "community", "networking", "nz_kontakte", "nz_profil", "watch", "talente", "listen", "suche", "nachwuchs", "akquise", "ws_spieler", "ws_beob", "talent2"];
+const TW_PRO_VIEWS = ["gesucht", "nz_markt", "kontakte", "community", "networking", "nz_kontakte", "nz_profil", "watch", "talente", "listen", "suche", "nachwuchs", "akquise", "ws_spieler", "ws_beob", "ws_angebote", "ws_notizen", "talent2"];
 const TW_PRO_INFO = {
   gesucht: { de: ["Verein sucht", "Wer gerade welche Spieler braucht: Bedarf je Verein und Position, Club-Fit und Portfolio."], en: ["Club seeks", "Who needs which players right now: demand per club and position, club fit and portfolio."] },
   kontakte: { de: ["Vereinskontakte", "Exklusive Kontakte zu über 750 Sportdirektoren, Geschäftsführern und Scouting-Leitern."], en: ["Club contacts", "Exclusive contacts to more than 750 sporting directors, CEOs and heads of scouting."] },
@@ -18726,7 +19408,7 @@ function TransferApp({
       width: "100%",
       boxSizing: "border-box"
     }
-  }, TW_ZUSATZ.finde(view) ? React.createElement(TwZusatzSeite, { key: "zusatz-" + view, seite: TW_ZUSATZ.finde(view), account: account, setView: setView }) : null, view === "pro" && React.createElement(ProSperreVue, { ziel: proZiel }), view === "nz_profil" && React.createElement(NzProfilSeite, { key: "nz-profil", account: account, setView: setView, admin: istAdmin }), view === "nz_nachrichten" && React.createElement(NzNachrichtenSeite, { key: "nz-nachrichten", account: account, setView: setView, admin: istAdmin, openPlayer: openPlayer, openVerein: openVerein }), view === "nz_beitraege" && React.createElement(NzBeitraegeSeite, { key: "nz-beitraege", account: account, setView: setView, admin: istAdmin }), view === "nz_markt" && React.createElement(NzMarktSeite, { key: "nz-markt", account: account, setView: setView, admin: istAdmin, openPlayer: openPlayer, openVerein: openVerein }), view === "nz_kontakte" && React.createElement(NzKontakteSeite, { key: "nz-kontakte", account: account, setView: setView, admin: istAdmin }), view === "marktwert" && React.createElement(MarktwertVue, { openPlayer: openPlayer, openVerein: openVerein, start: mwStart }), view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein, authQ: authQ }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein, account: account, setView: setView }), view === "akquise" && React.createElement(ScoutSub, { view: view, setView: setView }), false && view === "akquise" && /*#__PURE__*/React.createElement(AkquiseVue, { isPrem: isPrem, account: account, openPlayer: openPlayer }), view === "ws_spieler" && React.createElement(WsSpielerVue, { account: account, openPlayer: openPlayer, setView: setView, watch: watch, onUpdateWatch: updateWatch, profiles: profiles, wr: wr, setWochenreport: setWochenreport }), view === "aehnlich" && aehnlichStart && React.createElement(AehnlicheSpielerSeite, { key: "ae-" + aehnlichStart.pid, ausgang: aehnlichStart, onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "spielervergleich" && React.createElement(SpielerVergleichSeite, { key: "vgl-" + (vglStart || []).map(x => x.pid).join("-"), start: vglStart || [], onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news.filter(n => n.type !== "verletzung" && n.type !== "leistung" && n.type !== "meldung" && !n._ausgeblendet), onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(VereinSuchtVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, TW_ZUSATZ.finde(view) ? React.createElement(TwZusatzSeite, { key: "zusatz-" + view, seite: TW_ZUSATZ.finde(view), account: account, setView: setView }) : null, view === "pro" && React.createElement(ProSperreVue, { ziel: proZiel }), view === "nz_profil" && React.createElement(NzProfilSeite, { key: "nz-profil", account: account, setView: setView, admin: istAdmin }), view === "nz_nachrichten" && React.createElement(NzNachrichtenSeite, { key: "nz-nachrichten", account: account, setView: setView, admin: istAdmin, openPlayer: openPlayer, openVerein: openVerein }), view === "nz_beitraege" && React.createElement(NzBeitraegeSeite, { key: "nz-beitraege", account: account, setView: setView, admin: istAdmin }), view === "nz_markt" && React.createElement(NzMarktSeite, { key: "nz-markt", account: account, setView: setView, admin: istAdmin, openPlayer: openPlayer, openVerein: openVerein }), view === "nz_kontakte" && React.createElement(NzKontakteSeite, { key: "nz-kontakte", account: account, setView: setView, admin: istAdmin }), view === "marktwert" && React.createElement(MarktwertVue, { openPlayer: openPlayer, openVerein: openVerein, start: mwStart }), view === "assistent" && /*#__PURE__*/React.createElement(AssistentVue, { account: account, openPlayer: openPlayer }), view === "spieltag" && /*#__PURE__*/React.createElement(SpieltagVue, { openPlayer: openPlayer, openVerein: openVerein, authQ: authQ }), view === "kontakte" && /*#__PURE__*/React.createElement(KontakteVue, { isPrem: isPrem, authQ: authQ, openVerein: openVerein, account: account, setView: setView }), view === "akquise" && React.createElement(ScoutSub, { view: view, setView: setView }), false && view === "akquise" && /*#__PURE__*/React.createElement(AkquiseVue, { isPrem: isPrem, account: account, openPlayer: openPlayer }), view === "ws_spieler" && React.createElement(WsSpielerVue, { account: account, openPlayer: openPlayer, setView: setView, watch: watch, onUpdateWatch: updateWatch, profiles: profiles, wr: wr, setWochenreport: setWochenreport }), view === "ws_angebote" && React.createElement(WsAngeboteVue, { account: account, openPlayer: openPlayer, setView: setView, watch: watch, profiles: profiles }), view === "ws_notizen" && React.createElement(WsNotizenVue, { account: account, openPlayer: openPlayer, setView: setView, watch: watch, profiles: profiles }), view === "aehnlich" && aehnlichStart && React.createElement(AehnlicheSpielerSeite, { key: "ae-" + aehnlichStart.pid, ausgang: aehnlichStart, onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "spielervergleich" && React.createElement(SpielerVergleichSeite, { key: "vgl-" + (vglStart || []).map(x => x.pid).join("-"), start: vglStart || [], onOpen: (pid, name, team) => openPlayer(pid, name, team), onZurueck: zurueckVonSeite }), view === "geruechte" && /*#__PURE__*/React.createElement(GerVue, { alle: news.filter(n => n.type !== "verletzung" && n.type !== "leistung" && n.type !== "meldung" && !n._ausgeblendet), onWatch: it => setAddSheet(it), onOpen: it => setMSel(it), updatedAt: updatedAt, watch: watchList, onSide: setGerSide, apply: gerApply }), view === "gesucht" && /*#__PURE__*/React.createElement(VereinSuchtVue, { needs: needsBySport, profiles: profiles, matchProfil: matchProfil, setMatchProfil: setMatchProfil, posSet: posSet, activePos: activePos, setPosFilter: setPosFilter, onNewProfile: () => { setPfEdit(null); setProfilSheet(true); }, onEditProfile: p => { setPfEdit(p.raw); setPfName(p.n || ""); setPfPos(p.p || "DM"); setPfA1(p.a1 ? String(p.a1) : ""); setPfA2(p.a2 ? String(p.a2) : ""); setPfSt(p.s ? String(p.s).split(",").map(x => x.trim()).filter(Boolean) : []); setProfilSheet(true); }, removeProfil: removeProfil, openContacts: openContacts, onOpen: it => setMSel(it), onWatchClub: name => addWatch("verein", name), watch: watch.items }), view === "ranking" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       background: "transparent",
       border: "none",
@@ -19569,7 +20251,7 @@ function TransferApp({
       fontSize: 14,
       gridColumn: "1 / -1"
     }
-  }, "Keine Meldungen für diese Auswahl. Filter zurücksetzen und erneut versuchen.") : (() => { const muAn = muAktivApp(view, type, query, club, league, country, sport); const listeAlle = (view === "watch" ? watchList : (muAn ? muOhneAufmacher(filtered) : filtered)); const liste = listeAlle.slice(0, muAn && feedLimit === FEED_SEITE ? Math.min(12, FEED_SEITE) : feedLimit); let seen = 0; try { seen = Number(localStorage.getItem("tw_seen") || 0); } catch (e) {} const heute = new Date(); heute.setHours(0, 0, 0, 0); const gesternTs = heute.getTime() - 86400000; const gruppe = it => { const d = new Date(it.published || it.publishedAt || 0); if (isNaN(d.getTime())) return ""; const ts = d.getTime(); if (ts >= heute.getTime()) return "Heute"; if (ts >= gesternTs) return "Gestern"; return "Fr\u00fcher"; }; const aus = []; let letzte = null; let neuMarke = false; liste.forEach(it => { const g = gruppe(it); if (g && g !== letzte) { aus.push(/*#__PURE__*/React.createElement("div", { key: "g" + g, style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 900, letterSpacing: 1.6, color: "var(--t3)", margin: "8px 2px 0", textTransform: "uppercase", gridColumn: "1 / -1" } }, g)); letzte = g; } const ts = new Date(it.published || it.publishedAt || 0).getTime(); if (!neuMarke && seen && !isNaN(ts) && ts > 0 && ts <= seen) { aus.push(/*#__PURE__*/React.createElement("div", { key: "seenline", style: { display: "flex", alignItems: "center", gap: 10, margin: "2px 0", gridColumn: "1 / -1" } }, /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1.4, color: "var(--gold-text)" } }, "NEU SEIT DEINEM LETZTEN BESUCH \u2191"), /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }))); neuMarke = true; } aus.push(/*#__PURE__*/React.createElement(view === "feed" ? TickerKarte : FeedKarte, { onWatch: it2 => setAddSheet(it2), onOpen: it2 => twOeffnen(it2, setMSel), key: it.id, item: it })); }); if (listeAlle.length > liste.length) aus.push(/*#__PURE__*/React.createElement("div", { key: "mehr", style: { display: "flex", justifyContent: "center", padding: "8px 0 4px", gridColumn: "1 / -1" } }, /*#__PURE__*/React.createElement("button", { onClick: () => setFeedLimit(l => l + FEED_SEITE), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 22px", borderRadius: 999, border: "1px solid var(--dunkel)", background: "var(--karte)", color: "var(--t1)", boxShadow: "0 1px 2px rgba(15,21,32,.05)" } }, "Mehr laden (" + liste.length + " von " + listeAlle.length + ")"))); if (muAn) aus.push(React.createElement(MuUnten, { key: "mu-unten", liste: filtered, onOpen: it2 => twOeffnen(it2, setMSel), geheZu: setView })); return aus; })())), /*#__PURE__*/React.createElement("aside", null, view === "watch" ? React.createElement(MerkAside, { watch: watch, onAlertDialog: () => setWatchDlg(true), onOpen: openPlayer }) : view !== "ws_beob" && view !== "ws_spieler" && view !== "feed" && view !== "talente" && view !== "community" && view !== "networking" && view !== "moderation" && React.createElement(FeedSuche, { q: query, setQ: setQuery, club: club, setClub: setClub, alle: news, watch: watchList, geheZu: setView, fs: { sport: sport, type: type, country: country, league: league }, setFs: { setSport: setSport, setType: setType, setCountry: setCountry, setLeague: setLeague } }))), perfKarte && /*#__PURE__*/React.createElement(PerfKarte, { x: perfKarte, onClose: () => setPerfKarte(null), onProfil: p => { setPerfZurueck(p); setPerfKarte(null); openPlayer(p.pid, p.name, p.team); }, watched: (watch.items || []).some(w => w.t === "spieler" && w.w === (perfKarte.name || "")), onWatchToggle: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); } }), plSel && /*#__PURE__*/React.createElement(SpielerDrawer, { x: plSel, news: news, schliessen: () => setPlSel(null) }), mSel && /*#__PURE__*/React.createElement(istTransferTyp(mSel) ? TransferPanel : MeldungsPanel, { m: mSel, schliessen: () => setMSel(null), onWatch: it => { setAddSheet(it); setMSel(null); } }), plVergleich.length > 0 && /*#__PURE__*/React.createElement(VergleichUI, { spieler: plVergleich, entf: pid => setPlVergleich(v => v.filter(y => y.pid !== pid)), leeren: () => { setPlVergleich([]); setPlVglOffen(false); }, offen: plVglOffen, setOffen: setPlVglOffen })), /*#__PURE__*/React.createElement("footer", {
+  }, "Keine Meldungen für diese Auswahl. Filter zurücksetzen und erneut versuchen.") : (() => { const muAn = muAktivApp(view, type, query, club, league, country, sport); const listeAlle = (view === "watch" ? watchList : (muAn ? muOhneAufmacher(filtered) : filtered)); const liste = listeAlle.slice(0, muAn && feedLimit === FEED_SEITE ? Math.min(12, FEED_SEITE) : feedLimit); let seen = 0; try { seen = Number(localStorage.getItem("tw_seen") || 0); } catch (e) {} const heute = new Date(); heute.setHours(0, 0, 0, 0); const gesternTs = heute.getTime() - 86400000; const gruppe = it => { const d = new Date(it.published || it.publishedAt || 0); if (isNaN(d.getTime())) return ""; const ts = d.getTime(); if (ts >= heute.getTime()) return "Heute"; if (ts >= gesternTs) return "Gestern"; return "Fr\u00fcher"; }; const aus = []; let letzte = null; let neuMarke = false; liste.forEach(it => { const g = gruppe(it); if (g && g !== letzte) { aus.push(/*#__PURE__*/React.createElement("div", { key: "g" + g, style: { fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 900, letterSpacing: 1.6, color: "var(--t3)", margin: "8px 2px 0", textTransform: "uppercase", gridColumn: "1 / -1" } }, g)); letzte = g; } const ts = new Date(it.published || it.publishedAt || 0).getTime(); if (!neuMarke && seen && !isNaN(ts) && ts > 0 && ts <= seen) { aus.push(/*#__PURE__*/React.createElement("div", { key: "seenline", style: { display: "flex", alignItems: "center", gap: 10, margin: "2px 0", gridColumn: "1 / -1" } }, /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1.4, color: "var(--gold-text)" } }, "NEU SEIT DEINEM LETZTEN BESUCH \u2191"), /*#__PURE__*/React.createElement("span", { style: { flex: 1, height: 1, background: HAIR } }))); neuMarke = true; } aus.push(/*#__PURE__*/React.createElement(view === "feed" ? TickerKarte : FeedKarte, { onWatch: it2 => setAddSheet(it2), onOpen: it2 => twOeffnen(it2, setMSel), key: it.id, item: it })); }); if (listeAlle.length > liste.length) aus.push(/*#__PURE__*/React.createElement("div", { key: "mehr", style: { display: "flex", justifyContent: "center", padding: "8px 0 4px", gridColumn: "1 / -1" } }, /*#__PURE__*/React.createElement("button", { onClick: () => setFeedLimit(l => l + FEED_SEITE), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "10px 22px", borderRadius: 999, border: "1px solid var(--dunkel)", background: "var(--karte)", color: "var(--t1)", boxShadow: "0 1px 2px rgba(15,21,32,.05)" } }, "Mehr laden (" + liste.length + " von " + listeAlle.length + ")"))); if (muAn) aus.push(React.createElement(MuUnten, { key: "mu-unten", liste: filtered, onOpen: it2 => twOeffnen(it2, setMSel), geheZu: setView })); return aus; })())), /*#__PURE__*/React.createElement("aside", null, view === "watch" ? React.createElement(MerkAside, { watch: watch, onAlertDialog: () => setWatchDlg(true), onOpen: openPlayer }) : view !== "ws_beob" && view !== "ws_spieler" && view !== "ws_angebote" && view !== "ws_notizen" && view !== "feed" && view !== "talente" && view !== "community" && view !== "networking" && view !== "moderation" && React.createElement(FeedSuche, { q: query, setQ: setQuery, club: club, setClub: setClub, alle: news, watch: watchList, geheZu: setView, fs: { sport: sport, type: type, country: country, league: league }, setFs: { setSport: setSport, setType: setType, setCountry: setCountry, setLeague: setLeague } }))), perfKarte && /*#__PURE__*/React.createElement(PerfKarte, { x: perfKarte, onClose: () => setPerfKarte(null), onProfil: p => { setPerfZurueck(p); setPerfKarte(null); openPlayer(p.pid, p.name, p.team); }, watched: (watch.items || []).some(w => w.t === "spieler" && w.w === (perfKarte.name || "")), onWatchToggle: name => { const on = (watch.items || []).some(w => w.t === "spieler" && w.w === name); if (on) removeWatch("spieler", name); else addWatch("spieler", name); } }), plSel && /*#__PURE__*/React.createElement(SpielerDrawer, { x: plSel, news: news, schliessen: () => setPlSel(null) }), mSel && /*#__PURE__*/React.createElement(istTransferTyp(mSel) ? TransferPanel : MeldungsPanel, { m: mSel, schliessen: () => setMSel(null), onWatch: it => { setAddSheet(it); setMSel(null); } }), plVergleich.length > 0 && /*#__PURE__*/React.createElement(VergleichUI, { spieler: plVergleich, entf: pid => setPlVergleich(v => v.filter(y => y.pid !== pid)), leeren: () => { setPlVergleich([]); setPlVglOffen(false); }, offen: plVglOffen, setOffen: setPlVglOffen })), /*#__PURE__*/React.createElement("footer", {
     style: {
       borderTop: `1px solid ${HAIR}`,
       background: "var(--karte)",
