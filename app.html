@@ -6721,6 +6721,9 @@ function useTwTalentFrei() {
     return () => { ok = false; window.removeEventListener("tw-talent-frei", f); }; }, []);
   return frei;
 }
+/* OP 533/641 (15.11.2026): Talent-Datentexte zweisprachig - k_de/k_en aus /api/tw-talent, sonst der Rohwert */
+function twTs2Txt(p, k, en) { if (!p) return ""; const v = p[k + (en ? "_en" : "_de")]; return String(v || p[k] || ""); }
+function twTs2Liste(p, k, en) { const a = Array.isArray(p && p[k]) ? p[k] : []; if (!en) return a; const b = Array.isArray(p[k + "_en"]) ? p[k + "_en"] : []; return a.map((x, i) => b[i] || x); }
 function TwTs2Stufe({ e, quelle, style }) {
   const st = TW_TS2_STUFE[e]; if (!st) return null; const en = LANG === "en";
   const farbe = e === "hochtalent" ? { background: "var(--gold-tint)", color: "var(--gold-text)", border: "1px solid var(--gold-rand)" } : e === "talent" ? { background: "var(--karte2)", color: "var(--t1)", border: "1px solid var(--gold-rand)" } : { background: "var(--karte2)", color: "var(--t2)", border: "1px solid " + HAIR };
@@ -6759,7 +6762,7 @@ function TwTs2Profil({ p, stichtag, onOpen, kompakt }) {
   const h = React.createElement; const en = LANG === "en"; if (!p) return null;
   const grp = TW_TS2_GRUPPE[p.gruppe]; const z = v => Number(v || 0).toLocaleString(en ? "en-GB" : "de-DE");
   const fussTxt = p.fuss ? ({ rechts: en ? "right foot" : "Rechtsfuß", links: en ? "left foot" : "Linksfuß", "beidfüßig": en ? "both feet" : "beidfüßig" })[p.fuss] || p.fuss : "";
-  const steck = [grp ? grp[en ? 1 : 0] : (p.position || ""), twTs2Alter(p.alter, en), p.jahrgang ? (en ? "born " : "Jg. ") + p.jahrgang : "", p.nation || "", p.groesse_cm ? p.groesse_cm + " cm" : "", fussTxt].filter(Boolean).join(" · ");
+  const steck = [grp ? grp[en ? 1 : 0] : twTs2Txt(p, "position", en), twTs2Alter(p.alter, en), p.jahrgang ? (en ? "born " : "Jg. ") + p.jahrgang : "", twTs2Txt(p, "nation", en), p.groesse_cm ? p.groesse_cm + " cm" : "", fussTxt].filter(Boolean).join(" · ");
   const liste = (titel, arr) => (Array.isArray(arr) && arr.length) ? h("div", { className: "tw-ts2-liste" }, h("div", { className: "tw-ts2-lab" }, titel), h("ul", null, arr.slice(0, 6).map((x, i) => h("li", { key: i }, String(x))))) : null;
   const minuten = [p.herren_minuten ? z(p.herren_minuten) + (en ? " senior minutes" : " Herrenminuten") : "", p.jugend_minuten ? z(p.jugend_minuten) + (en ? " youth minutes" : " Jugendminuten") : "", p.spiele ? z(p.spiele) + (en ? " matches" : " Spiele") : ""].filter(Boolean).join(" · ");
   const zeile = h("div", { className: "tw-ts2-pzeile" }, h(TwTs2Wert, { v: p.gesamt, gross: true }),
@@ -6767,8 +6770,8 @@ function TwTs2Profil({ p, stichtag, onOpen, kompakt }) {
       h("div", { className: "tw-ts2-psub" }, en ? "Overall talent score (0–100)" : "Talentwert gesamt (0–100)")));
   const merkmale = h("div", { className: "tw-ts2-merkmale" }, TW_TS2_MERKMALE.map(([k, de, e2, erkl, erklEn]) => { const roh = p.merkmale ? p.merkmale[k] : null; const v = roh !== null && roh !== undefined && !isNaN(Number(roh)) ? Math.round(Number(roh)) : null;
     return h("div", { key: k, className: "tw-ts2-mz", title: en ? erklEn : erkl }, h("span", null, en ? e2 : de), h("div", { className: "tw-pp-balken" }, h("span", { className: v !== null && v >= 70 ? "hoch" : "", style: { width: Math.max(3, Math.min(100, v || 0)) + "%" } })), h("b", null, v === null ? "–" : v)); }));
-  const rest = [p.typ ? h("div", { key: "typ", className: "tw-ts2-typ" }, h("b", null, en ? "Player type: " : "Spielertyp: "), String(p.typ)) : null,
-    (p.staerken && p.staerken.length) || (p.schwaechen && p.schwaechen.length) ? h("div", { key: "sw", className: "tw-ts2-sw" }, liste(en ? "Strengths" : "Stärken", p.staerken), liste(en ? "Weaknesses" : "Schwächen", p.schwaechen)) : null,
+  const rest = [p.typ ? h("div", { key: "typ", className: "tw-ts2-typ" }, h("b", null, en ? "Player type: " : "Spielertyp: "), twTs2Txt(p, "typ", en)) : null,
+    (p.staerken && p.staerken.length) || (p.schwaechen && p.schwaechen.length) ? h("div", { key: "sw", className: "tw-ts2-sw" }, liste(en ? "Strengths" : "Stärken", twTs2Liste(p, "staerken", en)), liste(en ? "Weaknesses" : "Schwächen", twTs2Liste(p, "schwaechen", en))) : null,
     minuten ? h("div", { key: "min", className: "tw-ts2-psub", style: { marginTop: 10 } }, minuten) : null,
     h(TwStand, { key: "stand", datum: stichtag || p.urteil_datum, art: p.einstufung_quelle === "urteil" ? ["spieldaten", "urteil"] : "formel" }),
     onOpen && p.player_id ? h("button", { key: "auf", type: "button", className: "tw-btn-gold", onClick: () => onOpen(p.player_id, p.name, p.team), style: { marginTop: 12, cursor: "pointer", border: "none", borderRadius: 10, padding: "9px 14px", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, background: "var(--gold)", color: "var(--gold-schrift)" } }, en ? "Open player profile" : "Spielerprofil öffnen") : null];
@@ -6813,8 +6816,8 @@ function TwTalent2Seite({ onOpen }) {
   const gruppen = (meta && meta.gruppen) || {}; const jahre = Object.keys((meta && meta.jahrgaenge) || {}).sort((a, b) => b.localeCompare(a));
   const posOpts = [["", en ? "All positions" : "Alle Positionen"]].concat(Object.keys(TW_TS2_GRUPPE).filter(g => gruppen[g]).map(g => [g, TW_TS2_GRUPPE[g][en ? 1 : 0] + zahl(gruppen[g])]));
   const jgOpts = [["", en ? "All birth years" : "Alle Jahrgänge"]].concat(jahre.map(j => [j, (en ? "Born " : "Jahrgang ") + j + zahl(meta.jahrgaenge[j])]));
-  const landOpts = [["", en ? "All countries (league)" : "Alle Länder (Liga)"]].concat(((meta && meta.laender) || []).map(x => [x.land, x.land + zahl(x.anzahl)]));
-  const natOpts = [["", en ? "All nationalities" : "Alle Nationalitäten"]].concat(((meta && meta.nationen) || []).map(x => [x.nation, x.nation + zahl(x.anzahl)]));
+  const landOpts = [["", en ? "All countries (league)" : "Alle Länder (Liga)"]].concat(((meta && meta.laender) || []).map(x => [x.land, twTs2Txt(x, "land", en) + zahl(x.anzahl)]));
+  const natOpts = [["", en ? "All nationalities" : "Alle Nationalitäten"]].concat(((meta && meta.nationen) || []).map(x => [x.nation, twTs2Txt(x, "nation", en) + zahl(x.anzahl)]));
   const stufeOpts = [["", en ? "Top talent, talent, watch" : "Hochtalent, Talent, Beobachten"], ["hochtalent,talent", en ? "Top talent and talent" : "Hochtalent und Talent"], ["hochtalent", en ? "Top talent only" : "Nur Hochtalent"], ["talent", en ? "Talent only" : "Nur Talent"], ["beobachten", en ? "Watch only" : "Nur Beobachten"]];
   const kopf = h(React.Fragment, null, h("style", null, TW_TS2_CSS),
     h("div", { style: { fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 22, color: INK, margin: "0 0 4px", textTransform: "uppercase", letterSpacing: .3 } }, en ? "Talent profiles" : "Talentprofile"),
@@ -6840,11 +6843,11 @@ function TwTalent2Seite({ onOpen }) {
         liste.map((x, i) => h("div", { key: (x.person_id || "x") + "-" + i, className: "tw-ts2-row", role: "button", tabIndex: 0, "data-ts2-zeile": x.person_id || "", onClick: () => setOffen(x), onKeyDown: e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOffen(x); } } },
           h("span", { className: "tw-ts2-rang" }, i + 1),
           h("span", null, h("span", { className: "tw-ts2-n" }, x.name || "?"),
-            h("span", { className: "tw-ts2-m" }, [twTs2Alter(x.alter, en), x.jahrgang ? (en ? "born " : "Jg. ") + x.jahrgang : "", x.nation || ""].filter(Boolean).join(" · ")),
-            h("span", { className: "tw-ts2-m tw-ts2-mob" }, [x.team ? clubName(x.team) : "", (TW_TS2_GRUPPE[x.gruppe] || [x.position || "", x.position || ""])[en ? 1 : 0]].filter(Boolean).join(" · ")),
+            h("span", { className: "tw-ts2-m" }, [twTs2Alter(x.alter, en), x.jahrgang ? (en ? "born " : "Jg. ") + x.jahrgang : "", twTs2Txt(x, "nation", en)].filter(Boolean).join(" · ")),
+            h("span", { className: "tw-ts2-m tw-ts2-mob" }, [x.team ? clubName(x.team) : "", (TW_TS2_GRUPPE[x.gruppe] || [twTs2Txt(x, "position", false), twTs2Txt(x, "position", true)])[en ? 1 : 0]].filter(Boolean).join(" · ")),
             h(TwTs2Kennzeichen, { p: x })),
           h("span", { className: "tw-ts2-nm tw-ts2-m2" }, [x.team ? clubName(x.team) : "", x.liga].filter(Boolean).join(" · ")),
-          h("span", { className: "tw-ts2-nm tw-ts2-m2" }, (TW_TS2_GRUPPE[x.gruppe] || [x.position || "", x.position || ""])[en ? 1 : 0]),
+          h("span", { className: "tw-ts2-nm tw-ts2-m2" }, (TW_TS2_GRUPPE[x.gruppe] || [twTs2Txt(x, "position", false), twTs2Txt(x, "position", true)])[en ? 1 : 0]),
           h("span", null, h(TwTs2Stufe, { e: x.einstufung, quelle: x.einstufung_quelle })),
           h("span", null, h(TwTs2Wert, { v: x.gesamt }))))),
       liste.length < anzahl ? h("button", { type: "button", className: "tw-spn-mehr", disabled: lade, onClick: () => setOffset(liste.length), style: { marginTop: 12 } }, (en ? "Load more (" : "Mehr laden (") + liste.length + (en ? " of " : " von ") + Number(anzahl).toLocaleString(en ? "en-GB" : "de-DE") + ")") : null);
@@ -9068,7 +9071,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261115-englisch-notizen";
+const VS_VERSION = "20261116-talente-en";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
