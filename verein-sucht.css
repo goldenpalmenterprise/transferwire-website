@@ -544,3 +544,18 @@ html.tw-dark .vs-wurzel{--vsv2-hi-bg:#dcf5e7;--vsv2-hi:#0f7a43;--vsv2-gut-bg:#e3
 .vsv2-angebot-punkte small{font-size:10.5px;color:var(--t2)}
 .vsv2-angebot>.vs-ik{width:16px;height:16px;flex:0 0 auto;color:var(--t3)}
 @media (max-width:560px){.vsv2-angebot{padding:8px 9px;gap:8px}.vsv2-angebot-punkte b{font-size:15px}.vsv2-angebot-text small{white-space:normal}}
+/* 15.11.2026 OP 584 / 29/57 / 533: Stand-Zeile je Abschnitt (wie im Spielerprofil) und junge Talente */
+.vsv2-stand{margin:8px 0 0;font-size:11.5px;line-height:1.4;color:var(--t3)}
+.vsv2-fussnote+.vsv2-stand{margin-top:6px}
+.vsv2-talent-platz:empty{display:none}
+.vsv2-talente{display:grid;gap:8px}
+.vsv2-talent{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:8px 11px;border-radius:9px;background:var(--k3n-innen)}
+.vsv2-talent-mitte{display:flex;flex-direction:column;gap:2px;min-width:0}
+.vsv2-talent-mitte b{font-size:13.5px;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vsv2-talent-mitte span{font-size:12px;color:var(--t2)}
+.vsv2-talent-mitte small{font-size:11.5px;color:var(--t3)}
+.vsv2-talent-r{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.vsv2-talent-r small{font-size:11px;color:var(--t3)}
+.vsv2-tstufe{display:inline-flex;align-items:center;height:21px;padding:0 9px;border-radius:999px;border:1px solid transparent;background:var(--teal-bg);color:var(--teal);font-size:11.5px;font-weight:700;white-space:nowrap}
+.vsv2-tstufe.ist-hoch{border-color:var(--gold-rand);background:var(--gold-bg);color:var(--gold-text)}
+.vsv2-tag.ist-talent{background:var(--gold-bg);color:var(--gold-text)}

@@ -9068,7 +9068,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261115-ws3-workspace";
+const VS_VERSION = "20261115-englisch-notizen";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -11557,7 +11557,7 @@ function VereinGeprueft({ pid }) {
   const h = React.createElement; const en = LANG === "en";
   const [info, setInfo] = useState(null);
   const [hist, setHist] = useState([]);
-  useEffect(() => { if (!pid) return; let ok = true; fetch("/db/players?player_id=eq." + encodeURIComponent(pid) + "&select=team,team_source,team_updated_at,letzter_verein,contract_source,foot,tm_joined,tm_team,tm_updated_at", { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(rows => { if (ok && Array.isArray(rows) && rows[0]) setInfo(rows[0]); }).catch(() => {});
+  useEffect(() => { if (!pid) return; let ok = true; fetch("/db/players?player_id=eq." + encodeURIComponent(pid) + "&select=team,team_source,team_updated_at,letzter_verein,foot,tm_joined,tm_team,tm_updated_at", { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(rows => { if (ok && Array.isArray(rows) && rows[0]) setInfo(rows[0]); }).catch(() => {});
     fetch("/db/spieler_aenderungen_web?player_id=eq." + encodeURIComponent(pid) + "&select=feld,alt,neu,quelle,created_at&order=created_at.desc&limit=3", { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(rows => { if (ok && Array.isArray(rows)) setHist(rows.filter(x => x && !/^(tm_contract_until|contract_until|contract_source|vertrag_bis|berater)$/.test(String(x.feld)))); }).catch(() => {}); return () => { ok = false; }; }, [pid]);
   if (!info && !hist.length) return null;
   const q = info ? ({ Spiel: en ? "last match" : "letztes Spiel", Kader: en ? "squad list" : "Kaderliste", Meldung: en ? "confirmed transfer report" : "best\u00e4tigte Transfermeldung", "TM-Kader": en ? "squad list" : "Kaderliste" }[info.team_source] || info.team_source || "") : "";
@@ -17510,6 +17510,80 @@ function TwPpVideos({ d, plExtra, plVidLoading, ladeExtra }) {
         !plVidLoading ? h("div", { style: { display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" } }, h("button", { type: "button", className: "tw-pp-knopf", onClick: () => ladeExtra(d.pid, d.name, d.team, true) }, t("px_vid_btn")),
           h("a", { href: "https://www.youtube.com/results?search_query=" + encodeURIComponent(d.name + " highlights"), target: "_blank", rel: "noreferrer", style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 700, color: "var(--t1)", textDecoration: "underline" } }, t("px_yt"))) : null));
 }
+/* OP 632 (15.11.2026, Boss 19:01): Notizen im Spielerprofil - Kasten "Deine Notizen zu diesem Spieler" mit "Notiz anlegen"; der Spieler ist gleich verknuepft.
+   Daten aus dem Workspace (ws.api3: notizen, notiz_speichern), nur Pro; Notizen bleiben persoenlich. */
+function twPpnCss() {
+  if (typeof document === "undefined" || document.getElementById("tw-ppn-css")) return;
+  const st = document.createElement("style"); st.id = "tw-ppn-css";
+  st.textContent = ".tw-ppn-liste{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:10px}"
+    + ".tw-ppn-notiz{padding:10px 12px;border-radius:10px;border:1px solid var(--linie)}"
+    + ".tw-ppn-notiz.fix{border-color:var(--gold)}"
+    + ".tw-ppn-zeit{display:flex;align-items:center;gap:8px;margin-bottom:4px;font:600 11.5px Inter,system-ui,sans-serif;color:var(--t3)}"
+    + ".tw-ppn-fix{color:var(--gold-text);font-weight:800}"
+    + ".tw-ppn-text{margin:0;font:400 13.5px/1.5 Inter,system-ui,sans-serif;color:var(--t1);white-space:pre-wrap;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}"
+    + ".tw-ppn-leer{margin:0 0 14px;font:400 13px/1.5 Inter,system-ui,sans-serif;color:var(--t2)}"
+    + ".tw-ppn-editor{display:grid;gap:10px}"
+    + ".tw-ppn-editor textarea{width:100%;box-sizing:border-box;min-height:96px;resize:vertical;padding:10px 12px;border-radius:10px;border:1px solid var(--linie2);background:var(--karte);color:var(--t1);font:400 13.5px/1.5 Inter,system-ui,sans-serif}"
+    + ".tw-ppn-editor textarea:focus-visible{outline:2px solid var(--gold);outline-offset:1px}"
+    + ".tw-ppn-knoepfe{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}"
+    + ".tw-ppn-gold{cursor:pointer;display:inline-flex;align-items:center;height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--gold);background:var(--gold);color:var(--gold-schrift);font:700 13px Inter,system-ui,sans-serif}"
+    + ".tw-ppn-gold:hover{background:var(--gold-glanz);border-color:var(--gold-glanz)}.tw-ppn-gold:disabled{opacity:.6;cursor:default}"
+    + ".tw-ppn-gold:focus-visible,.tw-ppn-link:focus-visible{outline:2px solid var(--gold);outline-offset:2px}"
+    + ".tw-ppn-link{cursor:pointer;background:none;border:0;padding:4px 2px;color:var(--gold-text);font:700 13px Inter,system-ui,sans-serif;text-decoration:underline;text-underline-offset:3px}"
+    + ".tw-ppn-fehler{font:600 12.5px Inter,system-ui,sans-serif;color:var(--sc-schwach-text)}"
+    + ".tw-ppn-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}";
+  document.head.appendChild(st);
+}
+function TwPpNotizen({ pid, d, onSchliessen }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, x) => (en ? x : de); twPpnCss();
+  const account = typeof wsKonto === "function" ? wsKonto() : null;
+  const pro = !!(account && account.email && typeof twHatSitzung === "function" && twHatSitzung(account) && typeof twIstPremium === "function" && twIstPremium());
+  useWs(account);
+  const [offen, setOffen] = React.useState(false); const [text, setText] = React.useState(""); const [busy, setBusy] = React.useState(false); const [fehler, setFehler] = React.useState("");
+  const ta = React.useRef(null);
+  React.useEffect(() => { setOffen(false); setText(""); setFehler(""); }, [pid]);
+  React.useEffect(() => { if (pro && WS.email && !WS.notizen && !WS.nLaedt) wsNotizenLaden(account); }, [pro, WS.email]);
+  React.useEffect(() => { if (offen && ta.current) { try { ta.current.focus(); } catch (e) { } } }, [offen]);
+  if (!pro || !pid) return null;
+  const norm = x => (typeof ws3Norm === "function" ? ws3Norm(x) : String(x || "").toLowerCase());
+  const name = norm(d && d.name);
+  const liste = (WS.notizen || []).filter(n => n && ((n.spieler || []).some(c => c && c.pid != null && String(c.pid) === String(pid)) || (name.length >= 5 && norm(n.text).indexOf(name) >= 0)));
+  const laedt = !WS.notizen && !WS.nFehler;
+  const speichern = () => {
+    const t = text.trim();
+    if (!t) { setFehler(wsGrund("notiz_leer")); return; }
+    if (t.length > 4000) { setFehler(wsGrund("text_notiz")); return; }
+    setBusy(true); setFehler("");
+    wsRuf(account, "notiz_speichern", { text: t, spieler: [{ pid: Number(pid) }], angeheftet: false }).then(r => {
+      setBusy(false);
+      if (r && r.ok) { wsNotizSetzen(r.notiz); wsMeldung(L("Notiz angelegt.", "Note added.")); setText(""); setOffen(false); }
+      else setFehler(wsGrund(r && r.grund, r));
+    });
+  };
+  const abbrechen = () => { setOffen(false); setFehler(""); };
+  const zumWorkspace = () => { try { if (typeof onSchliessen === "function") onSchliessen(); if (typeof window.twNzNavigieren === "function") window.twNzNavigieren("ws_notizen"); } catch (e) { } };
+  const zeit = n => (typeof wsZeit === "function" ? wsZeit(n.geaendert || n.erstellt) : "");
+  const inhalt = laedt ? h("p", { className: "tw-ppn-leer" }, L("Deine Notizen werden geladen …", "Loading your notes …"))
+    : (!WS.notizen && WS.nFehler) ? h("p", { className: "tw-ppn-leer" }, wsGrund(WS.nFehler))
+    : liste.length ? h("ul", { className: "tw-ppn-liste", "aria-label": L("Notizen zu diesem Spieler", "Notes on this player") }, liste.slice(0, 3).map(n => h("li", { key: n.id, className: "tw-ppn-notiz" + (n.angeheftet ? " fix" : "") },
+        h("div", { className: "tw-ppn-zeit" }, zeit(n), n.angeheftet ? h("span", { className: "tw-ppn-fix" }, L("Oben fixiert", "Pinned")) : null),
+        h("p", { className: "tw-ppn-text" }, String(n.text || "")))))
+    : h("p", { className: "tw-ppn-leer" }, L("Noch keine Notiz zu diesem Spieler. Eine neue Notiz ist gleich mit ihm verknüpft und steht auch in deinem Workspace.", "No notes on this player yet. A new note is linked to him right away and also appears in your workspace."));
+  const editor = h("div", { className: "tw-ppn-editor" },
+    h("label", { className: "tw-ppn-sr", htmlFor: "tw-ppn-text-" + pid }, L("Neue Notiz zu diesem Spieler", "New note on this player")),
+    h("textarea", { id: "tw-ppn-text-" + pid, ref: ta, value: text, maxLength: 4000, rows: 4, placeholder: L("Was du zu diesem Spieler festhalten willst …", "What you want to note about this player …"),
+      onChange: e => setText(e.target.value), onKeyDown: e => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); speichern(); } else if (e.key === "Escape") { e.stopPropagation(); abbrechen(); } } }),
+    fehler ? h("div", { className: "tw-ppn-fehler", role: "alert" }, fehler) : null,
+    h("div", { className: "tw-ppn-knoepfe" },
+      h("button", { type: "button", className: "tw-ppn-gold", disabled: busy, onClick: speichern }, busy ? L("Wird gespeichert …", "Saving …") : L("Notiz speichern", "Save note")),
+      h("button", { type: "button", className: "tw-pp-knopf", disabled: busy, onClick: abbrechen }, L("Abbrechen", "Cancel"))));
+  const knoepfe = h("div", { className: "tw-ppn-knoepfe" },
+    h("button", { type: "button", className: "tw-pp-knopf", onClick: () => setOffen(true), "data-tw-ppn-neu": pid }, "+ " + L("Notiz anlegen", "Add note")),
+    liste.length ? h("button", { type: "button", className: "tw-ppn-link", onClick: zumWorkspace }, liste.length > 3 ? L("Alle " + liste.length + " im Workspace", "All " + liste.length + " in your workspace") : L("Im Workspace öffnen", "Open in workspace")) : null);
+  return h("div", { className: "tw-pp-karte tw-ppn", "data-tw-ppn": pid },
+    h("div", { className: "tw-pp-h3" }, L("Deine Notizen zu diesem Spieler", "Your notes on this player"), liste.length ? h("small", null, liste.length === 1 ? L("1 Notiz", "1 note") : L(liste.length + " Notizen", liste.length + " notes")) : null),
+    inhalt, offen ? editor : knoepfe);
+}
 const TW_PP_ABSCHNITTE = [["profil", "Profil", "Profile"], ["statistik", "Spielstatistiken", "Match statistics"], ["leistung", "Spieler-Performance", "Player performance"], ["news", "News", "News"], ["aehnlich", "Ähnliche Spieler", "Similar players"]];
 function TwSpielerSeite({ plDetail, laedt, plTab, plExtra, plVidLoading, ladeExtra, watch, addWatch, removeWatch, onSchliessen, onZurueck, zurueckMitPerf, onAehnlich, onOpenPlayer, onWatchNews }) {
   const h = React.createElement; const en = LANG === "en"; twPpCss();
@@ -17573,7 +17647,7 @@ function TwSpielerSeite({ plDetail, laedt, plTab, plExtra, plVidLoading, ladeExt
       h("section", { id: "tw-pp-profil", className: "tw-pp-abschnitt", "aria-label": en ? "Profile" : "Profil" }, held1,
         h("div", { className: "tw-pp-raster" },
           h(TwPpDaten, { d: d, pid: pid, profil: plDetail.profil, plDetail: plDetail }),
-          h("div", { className: "tw-pp-spalte" }, h(TwPpGesundheit, { plDetail: plDetail, plExtra: plExtra, d: d }), h(TwPpVereine, { vereine: plDetail.vereine }))),
+          h("div", { className: "tw-pp-spalte" }, h(TwPpGesundheit, { plDetail: plDetail, plExtra: plExtra, d: d }), h(TwPpVereine, { vereine: plDetail.vereine }), h(TwPpNotizen, { pid: pid, d: d, onSchliessen: onSchliessen }))),
         h("div", { style: { marginTop: 20 } }, h(TwPpVideos, { d: d, plExtra: plExtra, plVidLoading: plVidLoading, ladeExtra: ladeExtra }))),
       abschnitt("statistik", en ? "Match statistics" : "Spielstatistiken", en ? "Season values by competition and the latest matches with their key figures." : "Saisonwerte je Wettbewerb und die letzten Spiele mit ihren wichtigsten Werten.",
         h("div", { className: "tw-pp-spalte" }, pp ? h(TwPpSaison, { pp: pp }) : h("div", { className: "tw-pp-karte" }, h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), en ? "Loading season values …" : "Saisonwerte werden geladen …")),
