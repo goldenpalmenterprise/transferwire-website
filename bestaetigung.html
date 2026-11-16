@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Vertretung bestätigen – TransferWire</title>
+<link rel="icon" href="/favicon.ico">
+<style>
+  /* Bestätigung der Vertretung durch den Spieler (NZ3, 16.11.2026). Keine fremden Inhalte, keine Schriften von außen: der Link bleibt bei uns. */
+  :root { --seite:#14171c; --karte:#1c2027; --linie:#2c323c; --t1:#f2f4f7; --t2:#aeb6c2; --gold:#c8a355; --gold-schrift:#17130a; --rot:#f1a4a4; --gruen:#7fd6a4; }
+  @media (prefers-color-scheme: light) { :root { --seite:#f4f5f7; --karte:#ffffff; --linie:#dfe3e8; --t1:#14181d; --t2:#566070; --gold:#a9822f; --gold-schrift:#ffffff; --rot:#b42318; --gruen:#17804a; } }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--seite); color: var(--t1); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+  main { max-width: 560px; margin: 0 auto; padding: 28px max(16px, env(safe-area-inset-right, 0px)) 40px max(16px, env(safe-area-inset-left, 0px)); }
+  .marke { font: 800 20px/1 "Arial Narrow", Arial, sans-serif; letter-spacing: .08em; margin: 0 0 22px; }
+  .marke span { color: var(--gold); }
+  .karte { background: var(--karte); border: 1px solid var(--linie); border-radius: 16px; padding: 22px 20px; display: grid; gap: 14px; }
+  h1 { font-size: 24px; line-height: 1.25; margin: 0; text-wrap: balance; }
+  p { margin: 0; }
+  .angabe { border: 1px solid var(--linie); border-radius: 12px; padding: 12px 14px; display: grid; gap: 4px; }
+  .angabe b { font-size: 17px; }
+  .angabe span { color: var(--t2); font-size: 14px; }
+  .knoepfe { display: grid; gap: 10px; }
+  button { font: 700 16px/1.2 inherit; font-family: inherit; min-height: 48px; border-radius: 12px; border: 1px solid var(--linie); background: transparent; color: var(--t1); cursor: pointer; padding: 0 16px; }
+  button.ja { background: var(--gold); border-color: var(--gold); color: var(--gold-schrift); }
+  button:disabled { opacity: .55; cursor: default; }
+  button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .klein { color: var(--t2); font-size: 14px; }
+  .ok { color: var(--gruen); font-weight: 700; }
+  .fehler { color: var(--rot); font-weight: 700; }
+  a { color: inherit; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <p class="marke">TRANSFER<span>WIRE</span></p>
+  <div class="karte" id="karte" aria-live="polite">
+    <h1 id="titel">Einen Moment …</h1>
+    <p id="text"></p>
+    <div class="angabe" id="angabe" hidden><b id="wer"></b><span id="was"></span></div>
+    <div class="knoepfe" id="knoepfe" hidden>
+      <button type="button" class="ja" id="ja"></button>
+      <button type="button" id="nein"></button>
+    </div>
+    <p class="klein" id="hinweis"></p>
+  </div>
+  <p class="klein" style="margin-top:16px" id="fuss"></p>
+</main>
+<script>
+(function () {
+  "use strict";
+  var EN = !/^de\b/i.test(navigator.language || "de");
+  try { document.documentElement.lang = EN ? "en" : "de"; document.title = EN ? "Confirm representation – TransferWire" : "Vertretung bestätigen – TransferWire"; } catch (e) {}
+  var L = function (de, en) { return EN ? en : de; };
+  var $ = function (id) { return document.getElementById(id); };
+  var token = String(location.hash || "").replace(/^#/, "").trim().toLowerCase();
+  var datum = function (v) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(v || "")); return m ? (EN ? m[3] + "/" + m[2] + "/" + m[1] : m[3] + "." + m[2] + "." + m[1]) : ""; };
+  $("fuss").innerHTML = L('TransferWire ist ein Dienst der RATH ENTERPRISES. Deine Antwort wird nur für die Prüfung dieser Vertretung gespeichert. <a href="/app.html#datenschutz">Datenschutz</a>',
+    'TransferWire is a service of RATH ENTERPRISES. Your answer is stored only to check this representation. <a href="/app.html#datenschutz">Privacy</a>');
+  function zeig(titel, text, klasse) { $("titel").textContent = titel; $("text").textContent = text || ""; $("text").className = klasse || ""; }
+  function ruf(antwort) {
+    return fetch("/api/tw-vereinsanfrage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ aktion: "vertretung", token: token, antwort: antwort || "" }), cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer" })
+      .then(function (r) { return r.json(); }).catch(function () { return { ok: false, grund: "netz" }; });
+  }
+  function fertig(d) {
+    $("knoepfe").hidden = true;
+    if (d.antwort === "ja") { zeig(L("Danke – bestätigt", "Thank you – confirmed"), L("Du hast bestätigt, dass " + d.berater + " dich vertritt.", "You have confirmed that " + d.berater + " represents you."), "ok"); $("hinweis").textContent = L("Du kannst diese Seite schließen.", "You can close this page."); }
+    else { zeig(L("Danke – wir prüfen das", "Thank you – we will check this"), L("Du hast angegeben, dass diese Vertretung nicht stimmt. Bis zur Klärung wird niemand als dein Berater angezeigt. Unser Prüfteam kümmert sich darum.", "You have stated that this representation is not correct. Until this is resolved, nobody is shown as your adviser. Our review team will take care of it."), ""); $("hinweis").textContent = L("Du kannst diese Seite schließen.", "You can close this page."); }
+  }
+  function zeigeFrage(d) {
+    zeig(L("Stimmt diese Vertretung?", "Is this representation correct?"), L("Hallo" + (d.spieler ? " " + d.spieler : "") + ", auf TransferWire gibt ein Berater an, dich zu vertreten. Bitte bestätige das mit einem Klick – du brauchst kein Konto.", "Hello" + (d.spieler ? " " + d.spieler : "") + ", on TransferWire an adviser states that he or she represents you. Please confirm with one click – you do not need an account."));
+    $("wer").textContent = d.berater + (d.agentur ? " · " + d.agentur : "");
+    $("was").textContent = L("vertritt " + (d.spieler || "dich") + (d.vertretung_bis ? " – Vereinbarung gültig bis " + datum(d.vertretung_bis) : ""), "represents " + (d.spieler || "you") + (d.vertretung_bis ? " – agreement valid until " + datum(d.vertretung_bis) : ""));
+    $("angabe").hidden = false;
+    $("ja").textContent = L("Ja, das stimmt", "Yes, that is correct"); $("nein").textContent = L("Nein, das stimmt nicht", "No, that is not correct");
+    $("knoepfe").hidden = false;
+    $("hinweis").innerHTML = L('Nach der Bestätigung steht dieser Berater in deinem Spielerprofil auf TransferWire als offizieller Berater. Du kannst das jederzeit widerrufen – eine kurze Nachricht an uns genügt (<a href="/app.html#impressum">Kontakt im Impressum</a>).', 'After confirmation, this adviser is shown in your player profile on TransferWire as your official adviser. You can withdraw this at any time – a short message to us is enough (<a href="/app.html#impressum">contact in the imprint</a>).');
+    var senden = function (a) { $("ja").disabled = true; $("nein").disabled = true; ruf(a).then(function (r) { if (r && r.ok && r.antwort) fertig(r); else { $("ja").disabled = false; $("nein").disabled = false; $("hinweis").textContent = L("Das hat gerade nicht geklappt. Bitte versuche es noch einmal.", "That did not work just now. Please try again."); $("hinweis").className = "klein fehler"; } }); };
+    $("ja").onclick = function () { senden("ja"); }; $("nein").onclick = function () { senden("nein"); };
+  }
+  if (!/^[0-9a-f]{48}$/.test(token)) { zeig(L("Dieser Link ist nicht vollständig", "This link is not complete"), L("Bitte öffne den Link genau so, wie du ihn bekommen hast.", "Please open the link exactly as you received it.")); return; }
+  try { history.replaceState(null, "", location.pathname); } catch (e) {}   // Link nicht in der Adresszeile stehen lassen
+  ruf("").then(function (d) {
+    if (!d || !d.ok) { zeig(d && d.grund === "netz" ? L("Keine Verbindung", "No connection") : L("Dieser Link gilt nicht mehr", "This link is no longer valid"), d && d.grund === "netz" ? L("Bitte versuche es später noch einmal.", "Please try again later.") : L("Der Link ist abgelaufen oder wurde ersetzt. Bitte deinen Berater um einen neuen Link.", "The link has expired or has been replaced. Please ask your adviser for a new link.")); return; }
+    if (d.antwort) { $("wer").textContent = d.berater + (d.agentur ? " · " + d.agentur : ""); fertig(d); return; }
+    zeigeFrage(d);
+  });
+})();
+</script>
+</body>
+</html>
