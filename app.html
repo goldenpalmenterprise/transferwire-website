@@ -1790,21 +1790,27 @@ html body .tw-mw .tw-mwd-block.tw-mwd-gold { border-color: var(--gold-rand); bac
 <body>
 <script>
 /* FW Abmelden (16.11.2026, OP 655): Link aus den Benachrichtigungs-Mails https://transferwire.de/app#abmelden=<Kennung>.
-   Eigene Ebene ohne Anmeldung; prüft über /api/tw-vereinsanfrage (aktion „abmelden“ → fw.abmelden) und bestellt erst nach Klick ab. Die Kennung wird sofort aus der Adresszeile entfernt. */
+   Eigene Ebene ohne Anmeldung; prüft über /api/tw-vereinsanfrage (aktion „abmelden“ → fw.abmelden) und bestellt erst nach Klick ab. Die Kennung wird sofort aus der Adresszeile entfernt.
+   Schliff 17.11.2026: Farben und Schrift der App (dunkel/hell wie eingestellt), Hauptknopf statt Textlink, Text ohne falsches Fürwort. */
 (function () {
   var m = /^#abmelden=([0-9a-f]{64})$/.exec(location.hash || ""); if (!m) return;
   var t = m[1]; window.__twAbmeldenSeite = true;
   try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
   var sp = "de"; try { sp = localStorage.getItem("tw_lang") || ((navigator.language || "de").slice(0, 2) === "de" ? "de" : "en"); } catch (e) {}
-  var css = "#tw-abm{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:24px 16px;box-sizing:border-box;background:#f6f5f1;color:#17150f;font:15px/1.55 Inter,system-ui,-apple-system,'Segoe UI',Arial,sans-serif;overflow:auto}" +
-    "#tw-abm .k{background:#fff;border:1px solid #e3dfd4;border-radius:16px;max-width:460px;width:100%;padding:28px 26px;box-sizing:border-box}" +
-    "#tw-abm .m{font-weight:800;letter-spacing:.5px;font-size:13px}#tw-abm .m b{color:#c8a355}#tw-abm h1{font:700 22px/1.25 Inter,system-ui,sans-serif;margin:18px 0 8px}#tw-abm p{margin:0 0 20px;color:#55524a}" +
-    "#tw-abm .a{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center}#tw-abm button{cursor:pointer;font:800 14px Inter,system-ui,sans-serif;border-radius:10px;padding:11px 18px;border:0;background:#c8a355;color:#1a1306}" +
-    "#tw-abm button.l{background:transparent;color:inherit;padding:11px 2px;text-decoration:underline;font-weight:700}#tw-abm button:disabled{opacity:.6;cursor:default}" +
-    "#tw-abm button:focus-visible{outline:2px solid #c8a355;outline-offset:2px}" +
-    "@media (prefers-color-scheme:dark){#tw-abm{background:#121211;color:#f2efe8}#tw-abm .k{background:#1c1c1a;border-color:#2e2d29}#tw-abm p{color:#b3ada1}}";
+  try { if (localStorage.getItem("tw_dark") === "1") document.documentElement.classList.add("tw-dark"); } catch (e) {}
+  var css = "#tw-abm{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:24px 16px;box-sizing:border-box;background:var(--seite,#171819);color:var(--t1,#EDEDED);font:15px/1.55 Inter,system-ui,-apple-system,'Segoe UI',Arial,sans-serif;overflow:auto}" +
+    "#tw-abm:focus{outline:none}" +
+    "#tw-abm .k{background:var(--karte,#1e1f21);border:1px solid var(--linie,#2a2b2d);border-radius:16px;max-width:460px;width:100%;padding:28px 26px;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,.18)}" +
+    "#tw-abm .m{font:700 17px/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.06em}#tw-abm .m b{color:var(--gold,#C8A355);font-weight:700}" +
+    "#tw-abm h1{font:700 28px/1.15 'Barlow Condensed','Arial Narrow',sans-serif;margin:18px 0 8px;overflow-wrap:anywhere}#tw-abm p{margin:0 0 22px;color:var(--t2,#A8A8A8)}" +
+    "#tw-abm .a{display:flex;flex-wrap:wrap;gap:10px;align-items:center}" +
+    "#tw-abm button{cursor:pointer;font:800 14px Inter,system-ui,sans-serif;border-radius:10px;padding:0 18px;min-height:44px;border:1px solid var(--linie2,#2f3236);background:var(--karte2,#26282b);color:var(--t1,#EDEDED)}" +
+    "#tw-abm button.h{background:var(--gold,#C8A355);border-color:var(--gold,#C8A355);color:var(--gold-schrift,#1A1306)}" +
+    "#tw-abm button:disabled{opacity:.6;cursor:default}" +
+    "#tw-abm button:focus-visible{outline:2px solid var(--gold,#C8A355);outline-offset:2px}" +
+    "@media(max-width:480px){#tw-abm .k{padding:22px 18px}#tw-abm .a button{flex:1 1 auto}}";
   var st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
-  var box = document.createElement("div"); box.id = "tw-abm"; box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true"); box.setAttribute("aria-labelledby", "tw-abm-t");
+  var box = document.createElement("div"); box.id = "tw-abm"; box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true"); box.setAttribute("aria-labelledby", "tw-abm-t"); box.setAttribute("tabindex", "-1");
   document.body.appendChild(box);
   var T = function (de, en) { return sp === "en" ? en : de; };
   var B = { sofort: [["Sofort-Meldungen", "die Sofort-Meldungen"], ["Instant alerts", "instant alerts"]], briefing: [["Morgen-Briefing", "das Morgen-Briefing"], ["Morning briefing", "the morning briefing"]], report: [["Wochenreport", "den Wochenreport"], ["Weekly report", "the weekly report"]] };
@@ -1815,27 +1821,27 @@ html body .tw-mw .tw-mwd-block.tw-mwd-gold { border-color: var(--gold-rand); bac
     var h = document.createElement("h1"); h.id = "tw-abm-t"; h.textContent = titel; k.appendChild(h);
     var p = document.createElement("p"); p.textContent = text; k.appendChild(p);
     var a = document.createElement("div"); a.className = "a";
-    (knoepfe || []).forEach(function (x) { var b = document.createElement("button"); b.type = "button"; b.textContent = x[0]; if (x[2]) b.className = "l"; b.onclick = x[1]; if (x[3]) b.setAttribute(x[3], "1"); a.appendChild(b); });
-    k.appendChild(a); box.appendChild(k); var f = box.querySelector("button"); if (f) try { f.focus(); } catch (e) {}
+    (knoepfe || []).forEach(function (x) { var b = document.createElement("button"); b.type = "button"; b.textContent = x[0]; if (x[2]) b.className = "h"; b.onclick = x[1]; if (x[3]) b.setAttribute(x[3], "1"); a.appendChild(b); });
+    k.appendChild(a); box.appendChild(k); try { box.focus({ preventScroll: true }); } catch (e) {}
   };
   var ruf = function (aus) {
     return fetch("/api/tw-vereinsanfrage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ aktion: "abmelden", t: t, ausfuehren: !!aus }) })
       .then(function (r) { return r.json(); }).catch(function () { return { ok: false, grund: "netz" }; });
   };
-  var wieder = function () { return T("Wieder einschalten kannst du sie jederzeit in TransferWire: Glocke oben rechts → Benachrichtigungen.", "You can switch them back on at any time in TransferWire: bell at the top right → Notifications."); };
-  var oeffnen = [T("TransferWire öffnen", "Open TransferWire"), weiter, true, "data-abm-weiter"];
+  var wieder = function () { return T("Wieder einschalten geht jederzeit in TransferWire: Glocke oben rechts → Benachrichtigungen.", "You can switch this back on at any time in TransferWire: bell at the top right → Notifications."); };
+  var oeffnen = function (haupt) { return [T("TransferWire öffnen", "Open TransferWire"), weiter, !!haupt, "data-abm-weiter"]; };
   var ergebnis = function (d) {
     if (d && d.sprache) sp = d.sprache === "en" ? "en" : "de";
     var bn = (B[d && d.bereich] || B.sofort)[sp === "en" ? 1 : 0];
     if (!d || !d.ok) {
-      if (d && d.grund === "netz") zeige(T("Keine Verbindung", "No connection"), T("Bitte prüfe deine Internetverbindung und versuche es erneut.", "Please check your connection and try again."), [[T("Erneut versuchen", "Try again"), start], oeffnen]);
-      else zeige(T("Dieser Link gilt nicht mehr", "This link is no longer valid"), T("Der Abmeldelink ist abgelaufen oder unvollständig. Abbestellen kannst du jederzeit in TransferWire: Glocke oben rechts → Benachrichtigungen.", "The unsubscribe link has expired or is incomplete. You can unsubscribe at any time in TransferWire: bell at the top right → Notifications."), [oeffnen]);
+      if (d && d.grund === "netz") zeige(T("Keine Verbindung", "No connection"), T("Bitte prüfe deine Internetverbindung und versuche es erneut.", "Please check your connection and try again."), [[T("Erneut versuchen", "Try again"), start, true], oeffnen(false)]);
+      else zeige(T("Dieser Link gilt nicht mehr", "This link is no longer valid"), T("Der Abmeldelink ist abgelaufen oder unvollständig. Abbestellen kannst du jederzeit in TransferWire: Glocke oben rechts → Benachrichtigungen.", "The unsubscribe link has expired or is incomplete. You can unsubscribe at any time in TransferWire: bell at the top right → Notifications."), [oeffnen(true)]);
     } else if (d.jetzt || d.erledigt) {
-      zeige(d.jetzt ? T("Abbestellt", "Unsubscribed") : T("Schon abbestellt", "Already unsubscribed"), T("Du bekommst " + bn[1] + " nicht mehr per E-Mail. ", "You will no longer receive " + bn[1] + " by email. ") + wieder(), [oeffnen]);
+      zeige(d.jetzt ? T("Abbestellt", "Unsubscribed") : T("Schon abbestellt", "Already unsubscribed"), T("Du bekommst " + bn[1] + " nicht mehr per E-Mail. ", "You will no longer receive " + bn[1] + " by email. ") + wieder(), [oeffnen(true)]);
       box.setAttribute("data-abm", d.jetzt ? "fertig" : "schon");
     } else {
       zeige(T(bn[0] + " abbestellen?", "Unsubscribe from " + bn[1] + "?"), T("Du bekommst " + bn[1] + " dann nicht mehr per E-Mail. ", "You will then no longer receive " + bn[1] + " by email. ") + wieder(),
-        [[T("Abbestellen", "Unsubscribe"), function () { var b = box.querySelector("button"); if (b) { b.disabled = true; b.textContent = T("Wird abbestellt …", "Unsubscribing …"); } ruf(true).then(ergebnis); }, false, "data-abm-ja"], oeffnen]);
+        [[T("Abbestellen", "Unsubscribe"), function () { var b = box.querySelector("button"); if (b) { b.disabled = true; b.textContent = T("Wird abbestellt …", "Unsubscribing …"); } ruf(true).then(ergebnis); }, true, "data-abm-ja"], oeffnen(false)]);
       box.setAttribute("data-abm", "frage");
     }
   };
@@ -4564,7 +4570,8 @@ function NxProfilVertretungen({ account, email, openPlayer, schliessen }) {
    Die Glocke öffnet eine ganze Seite mit vier Bereichen: Neuigkeiten · Morgen-Briefing · Wochenreport · Spieler und Vereine.
    Ein Knopf „Folgen“ (Spielerprofil, Datenbank, Meine Spieler, Vereinsseite) ersetzt Beobachten, Glocke und Profil-Knopf.
    Alle Regeln (Tarif, Grenzen, Auslöser, Versand) liegen in der Datenbank (fw.api über /api/tw-nz); die App zeigt an und reicht durch.
-   Ist die Erweiterung für ein Konto nicht an (fw_status), bleibt alles wie bisher (altes Glocken-Fenster, Beobachten-Knöpfe). ── */
+   Ist die Erweiterung für ein Konto nicht an (fw_status), bleibt alles wie bisher (altes Glocken-Fenster, Beobachten-Knöpfe).
+   Schliff 17.11.2026 (Boss 01:24): Handy – alle vier Bereiche sichtbar, Kopf in einer Zeile, Tippflächen ab 40 px; Merkliste und Workspace-Kästen zeigen mit der Erweiterung auf „Folgen“. ── */
 const FW = { an: null, email: "", laedt: null, st: null, konto: null, folgen: {}, liste: null, listeLaedt: null, neu: 0, bereich: "neu", auswahl: null, auswahlLaedt: null };
 const FW_TYPEN = {   // Spiegel von fw.typen() – nur für Beschriftungen; die Datenbank prüft selbst
   spieler: [["verletzung", "Verletzung", "Injury", 1], ["rueckkehr", "Rückkehr nach Verletzung", "Return from injury", 2], ["wechsel", "Vereinswechsel", "Club change", 1], ["geruecht", "Gerüchte", "Rumours", 2], ["form_tief", "Formknick", "Drop in form", 2], ["form_hoch", "Formhoch", "Rise in form", 2], ["spielzeit", "Weniger Spielzeit", "Less playing time", 2], ["marktwert", "Marktwert-Sprung", "Market value jump", 2], ["trainer", "Trainerwechsel beim Verein", "Coach change at the club", 2], ["nationalteam", "Nationalmannschaft", "National team", 2]],
@@ -4581,6 +4588,8 @@ const FW_CSS = [
   "@media(max-width:760px){.fw-innen{padding:calc(14px + env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) 48px max(14px,env(safe-area-inset-left,0px));gap:14px}}",
   ".fw-kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-bottom:16px;border-bottom:1px solid var(--linie)}",
   ".fw-kopf>div:first-child{min-width:0;flex:1 1 320px}",
+  ".fw-kopf-kn{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.fw-kopf-kn .ik{display:none}.fw-kopf-kn .ik svg{width:18px;height:18px;display:block}",
+  "@media(max-width:760px){.fw-kopf{flex-wrap:nowrap;align-items:center;padding-bottom:12px}.fw-kopf>div:first-child{flex:1 1 auto}.fw-kopf .tw-seitentitel{margin:0!important}.fw-kopf .tw-seitentext{display:none}.fw-kopf-kn{flex-wrap:nowrap;flex:none}.fw-kopf-kn .tw-k{width:42px!important;height:42px!important;min-height:42px!important;padding:0!important}.fw-kopf-kn .lang{display:none}.fw-kopf-kn .ik{display:inline-flex}}",
   ".fw-raster{display:grid;grid-template-columns:232px minmax(0,1fr);gap:24px;align-items:start}",
   "@media(max-width:900px){.fw-raster{grid-template-columns:minmax(0,1fr);gap:12px}}",
   /* Navigation: senkrechte Liste, am Handy waagerechte Reiter */
@@ -4593,9 +4602,10 @@ const FW_CSS = [
   ".fw-nav small{grid-column:1;font-size:12.5px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
   ".fw-nav button.an small{color:var(--t2)}",
   ".fw-nav .zahl{grid-column:2;grid-row:1 / span 2;min-width:22px;height:22px;border-radius:999px;background:var(--gold);color:var(--gold-schrift);font:800 11.5px Inter,system-ui,sans-serif;display:inline-flex;align-items:center;justify-content:center;padding:0 7px;box-sizing:border-box}",
-  "@media(max-width:900px){.fw-nav{position:static;flex-direction:row;overflow-x:auto;scrollbar-width:none;gap:2px;border-bottom:1px solid var(--linie)}.fw-nav::-webkit-scrollbar{display:none}",
-  ".fw-nav button{display:inline-flex;gap:8px;border-radius:8px 8px 0 0;padding:11px 14px 9px;white-space:nowrap;min-height:44px;flex:none;border-bottom:3px solid transparent;margin-bottom:-1px}",
-  ".fw-nav button.an{background:none;box-shadow:none;border-bottom-color:var(--gold);color:var(--gold-text)}.fw-nav small{display:none}.fw-nav b{font-size:14.5px}}",
+  "@media(max-width:900px){.fw-nav{position:static;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}",
+  ".fw-nav button{display:flex;justify-content:center;gap:8px;border:1px solid var(--linie);border-radius:10px;background:var(--karte);padding:0 10px;min-height:44px}",
+  ".fw-nav button.an{background:var(--gold-tint);box-shadow:none;border-color:var(--gold-rand);color:var(--gold-text)}.fw-nav small{display:none}.fw-nav b{font-size:14px;min-width:0}.fw-nav .zahl{flex:none}}",
+  "@media(max-width:720px){.fw-nav{grid-template-columns:repeat(2,minmax(0,1fr))}.fw-nav button{justify-content:space-between;padding:0 12px}}",
   ".fw-inhalt{min-width:0;display:grid;gap:16px;align-content:start}",
   ".fw-h2{font:700 24px/1.15 'Barlow Condensed','Arial Narrow',sans-serif;margin:0;color:var(--t1)}",
   ".fw-lead{margin:4px 0 0;font-size:14px;line-height:1.5;color:var(--t2);max-width:68ch}",
@@ -4603,6 +4613,8 @@ const FW_CSS = [
   "@media(max-width:560px){.fw-karte{padding:14px}}",
   ".fw-karte h3{margin:0;font:800 15px Inter,system-ui,sans-serif;color:var(--t1);display:flex;align-items:baseline;gap:8px}",
   ".fw-karte h3 small{font-weight:600;font-size:12.5px;color:var(--t3)}",
+  ".fw-karte-kopf{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;flex-wrap:wrap}",
+  ".fw-einst-an{display:grid;gap:10px;justify-items:start}.fw-einst-an~*{display:none!important}",
   ".fw-unter{margin:-6px 0 0;font-size:13px;line-height:1.5;color:var(--t2)}",
   ".fw-zwei{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}@media(max-width:1100px){.fw-zwei{grid-template-columns:minmax(0,1fr)}}",
   /* Schalter */
@@ -4677,6 +4689,7 @@ const FW_CSS = [
   ".fw-folge-kopf .name:hover{color:var(--gold-text);text-decoration:underline}.fw-folge-kopf .name:focus-visible{outline:2px solid var(--gold);outline-offset:2px}",
   ".fw-folge-kopf small{font-size:12.5px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
   ".fw-ev-zeile{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.fw-ev-text{flex:1 1 200px;min-width:0;font-size:13px;color:var(--t1)}.fw-ev-text .fw-lab{font-weight:600}",
+  ".fw-ev-text{line-height:1.45}",
   ".fw-zuletzt{font-size:12.5px;color:var(--t3);line-height:1.45}",
   ".fw-grenze{font-size:12.5px;font-weight:700;color:var(--t2)}",
   ".fw-balken{height:5px;border-radius:3px;background:var(--linie2);overflow:hidden}.fw-balken i{display:block;height:100%;background:var(--gold);border-radius:3px}",
@@ -4691,6 +4704,7 @@ const FW_CSS = [
   ".fw-fk.quick{font-size:13px;padding:11px 14px;border-radius:10px;border:1px solid var(--linie2);background:var(--karte2);color:var(--t1)}",
   ".fw-fk.klein{min-height:36px;min-width:36px;padding:6px 9px;border-radius:10px;border:1px solid var(--linie2);background:var(--karte);color:var(--t2);font-size:12px}",
   ".fw-fk.verein{font-size:13px;padding:8px 12px;min-height:38px;border:1px solid var(--linie);border-radius:9px;background:var(--karte);color:var(--t1);flex:none}",
+  ".fw-fk.merk{font-size:11.5px;padding:5px 9px;border-radius:8px;border:1px solid var(--linie);background:var(--karte);color:var(--t2)}.fw-fk.merk svg{width:13px;height:13px}",
   ".fw-fk.an{background:var(--gold-tint);border-color:var(--gold-rand);color:var(--gold-text)}",
   ".fw-fk:hover{border-color:var(--gold-rand)}.fw-fk:focus-visible{outline:2px solid var(--gold);outline-offset:2px}.fw-fk:disabled{opacity:.6;cursor:default}",
   ".fw-menue-grund{position:fixed;inset:0;z-index:100003;background:transparent}",
@@ -4704,6 +4718,7 @@ const FW_CSS = [
   ".fw-glocke-zahl{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;border-radius:999px;background:var(--gold);color:var(--gold-schrift);font:800 11px Inter,system-ui,sans-serif;display:inline-flex;align-items:center;justify-content:center;padding:0 5px;box-sizing:border-box;border:2px solid var(--seite);pointer-events:none}",
   ".fw-leer{display:grid;gap:10px;justify-items:start;background:var(--karte);border:1px dashed var(--linie2);border-radius:14px;padding:22px 20px}",
   ".fw-leer b{font-size:15px}.fw-leer p{margin:0;font-size:13.5px;line-height:1.5;color:var(--t2);max-width:62ch}",
+  "@media(pointer:coarse){.fw-seg button{min-height:42px}.fw-wahl,.fw-wahl.klein{min-height:40px}.fw-marke{min-height:42px}.fw-marke button{width:40px;height:40px}.fw-folge-kopf .name{padding:11px 0;margin:-11px 0}.fw-seite .nx-knopf.klein,.fw-menue .nx-knopf.klein,.fw-einst-an .nx-knopf.klein{min-height:40px}.fw-fk.klein{min-height:40px;min-width:40px}.fw-fk.quick,.fw-fk.verein{min-height:40px}.fw-fk.merk{min-height:40px;padding:0 12px}.fw-select{min-height:42px}.fw-seite .nz-glocke-hw{min-height:42px}}",
   "@media (prefers-reduced-motion: no-preference){.fw-e,.fw-wahl,.fw-nav button{transition:background .12s ease,border-color .12s ease,color .12s ease}.fw-menue{animation:fwAuf .14s ease-out}@keyframes fwAuf{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}}",
   "@media (prefers-reduced-motion: reduce){.fw-schalter .bahn,.fw-schalter .bahn i,.fw-auf svg{transition:none}}"
 ].join("");
@@ -4714,7 +4729,8 @@ const FW_IK = {
   haken: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>',
   runter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>',
   mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>',
-  stern: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>'
+  stern: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>',
+  zahnrad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>'
 };
 function fwIk(k) { return React.createElement("span", { style: { display: "inline-flex" }, "aria-hidden": "true", dangerouslySetInnerHTML: { __html: FW_IK[k] || "" } }); }
 function fwEn() { return LANG === "en"; }
@@ -4722,6 +4738,11 @@ function fwL(de, en) { return LANG === "en" ? en : de; }
 function fwMelde() { try { window.dispatchEvent(new CustomEvent("fw-stand")); } catch (e) {} }
 function fwRuf(aktion, body) { return FW.konto ? nzRuf(FW.konto, aktion, body || {}) : Promise.resolve({ ok: false, grund: "auth" }); }
 function fwSchluessel(art, kennung) { return art + "|" + (art === "verein" ? String(kennung == null ? "" : kennung).trim().toLowerCase() : String(kennung == null ? "" : kennung).trim()); }
+function fwFinde(art, kennung, kennung2) {
+  const f = FW.folgen[fwSchluessel(art, kennung)] || (kennung2 ? FW.folgen[fwSchluessel(art, kennung2)] : null); if (f || art !== "verein") return f || null;
+  const n = [kennung, kennung2].filter(Boolean).map(x => String(x).trim().toLowerCase());
+  return (FW.liste || []).find(x => x.eigen && x.art === "verein" && n.indexOf(String(x.name || "").trim().toLowerCase()) >= 0) || null;
+}
 const FW_TYP_EINZEL = { geruecht: ["Gerücht", "Rumour"], transfer: ["Zu- oder Abgang", "Arrival or departure"], bedarf: ["Neuer Bedarf", "New need"] };
 function fwTypText(art, typ, einzel) { if (einzel && FW_TYP_EINZEL[typ]) return fwEn() ? FW_TYP_EINZEL[typ][1] : FW_TYP_EINZEL[typ][0]; const x = (FW_TYPEN[art] || []).find(y => y[0] === typ); return x ? (fwEn() ? x[2] : x[1]) : typ; }
 function fwStatus(account, neu) {   // ist die Erweiterung für dieses Konto an? (ein Aufruf je Konto, neu = erzwingen)
@@ -4847,7 +4868,7 @@ function FwFolgenKnopf({ art, kennung, kennung2, name, team, stil, quelle, alt, 
   const [menue, setMenue] = React.useState(null);   // null | { neu: bool, fehler: obj }
   const [busy, setBusy] = React.useState(false);
   if (FW.an !== true || !kennung) return alt === undefined ? null : alt;
-  const f = FW.folgen[fwSchluessel(art, kennung)] || (kennung2 ? FW.folgen[fwSchluessel(art, kennung2)] : null);
+  const f = fwFinde(art, kennung, kennung2);
   const an = !!f;
   const klick = e => {
     if (e) e.stopPropagation();
@@ -4928,13 +4949,52 @@ function FwWsKasten({ alt }) {
     h("p", { className: "ws2-sub", style: { margin: 0 } }, fwL("Folge Spielern und Vereinen mit dem Glocken-Knopf. Bei Verletzung, Wechsel, Formknick oder einer neuen Chance schreiben wir dir – sofort oder gesammelt im Morgen-Briefing.", "Follow players and clubs with the bell button. When there's an injury, a transfer, a drop in form or a new opportunity, we e-mail you – straight away or in the morning briefing.")),
     h("button", { type: "button", className: "nx-knopf klein", onClick: () => fwOeffnen("folgen") }, fwL("Benachrichtigungen öffnen", "Open notifications")));
 }
+/* ── Schliff 17.11.2026: Kasten „Wochenbericht“ im Workspace – Stand und Weg zur Einstellung statt des alten Umschalters (der kannte nur „montags“) ── */
+function FwWsBericht({ alt }) {
+  useFwStand(); const h = React.createElement;
+  if (FW.an !== true || !FW.st) return alt;
+  const st = FW.st; const rep = (st.einstellung && st.einstellung.report) || {}; const tagT = FW_TAGE.find(t => t[0] === Number(rep.tag || 1)) || FW_TAGE[0];
+  return h("div", { style: { display: "grid", gap: 10, justifyItems: "start", marginTop: 10 }, "data-fw-ws-bericht": st.report_an ? "an" : "aus" },
+    h("span", { className: "nx-chip" + (st.report_an ? " gold" : "") }, st.report_an ? fwL("An · " + tagT[3], "On · " + tagT[4]) : fwL("Aus", "Off")),
+    h("p", { className: "ws2-sub", style: { margin: 0 } }, fwL("Einmal pro Woche per E-Mail. Wochentag, Umfang und Themen wählst du in den Benachrichtigungen.", "Once a week by e-mail. Choose the day, length and topics in your notifications.")),
+    h("button", { type: "button", className: "nx-knopf klein", onClick: () => fwOeffnen("report") }, fwL("Wochenreport einstellen", "Set up weekly report")));
+}
+/* ── Schliff 17.11.2026: Knopf oben im Workspace – öffnet die Benachrichtigungen statt des alten Fensters ── */
+function FwWsChip({ alt }) {
+  useFwStand(); const h = React.createElement;
+  if (FW.an !== true || !FW.st) return alt;
+  const an = !!(FW.st.sofort_an || FW.st.briefing_an || FW.st.report_an);
+  return h("button", { type: "button", className: "ws2-alertchip" + (an ? " an" : ""), title: fwL("Benachrichtigungen öffnen", "Open notifications"), onClick: () => fwOeffnen("folgen"), "data-fw-ws-chip": an ? "an" : "aus" },
+    h("span", { style: { display: "inline-flex" }, "aria-hidden": "true", dangerouslySetInnerHTML: { __html: an ? FW_IK.glockeAn : FW_IK.glocke } }),
+    h("span", null, an ? fwL("E-Mail-Benachrichtigungen an", "E-mail notifications on") : fwL("E-Mail-Benachrichtigungen aus", "E-mail notifications off")));
+}
+/* ── Schliff 17.11.2026: Merkliste – „Folgen“ statt der alten Glocke bei Spielern und Vereinen (die alte Glocke hatte seit dem Umstieg keinen Versand mehr) ── */
+function FwMerkKnopf({ art, kennung, kennung2, name, team, alt }) {
+  useFwStand(); const h = React.createElement;
+  if (FW.an !== true) return alt;
+  if (!kennung) return null;
+  return h(FwFolgenKnopf, { art: art, kennung: kennung, kennung2: kennung2, name: name, team: team, stil: "merk", quelle: "merkliste", alt: null });
+}
+function FwMerkKasten({ alt, kasten }) {
+  useFwStand(); const h = React.createElement; const en = fwEn();
+  if (FW.an !== true) return alt;
+  const fl = (FW.st && FW.st.folgen) || { spieler: 0, vereine: 0 }; const n = (fl.spieler || 0) + (fl.vereine || 0);
+  const zahl = en ? fl.spieler + (fl.spieler === 1 ? " player" : " players") + " · " + fl.vereine + (fl.vereine === 1 ? " club" : " clubs") : fl.spieler + " Spieler · " + fl.vereine + (fl.vereine === 1 ? " Verein" : " Vereine");
+  return kasten([
+    h("div", { key: "t", style: { font: "800 14.5px Inter,system-ui,sans-serif", marginBottom: 8, color: "var(--t1)" } }, fwL("Benachrichtigungen", "Notifications")),
+    h("div", { key: "s", style: { font: "800 13px Inter,system-ui,sans-serif", color: n ? "var(--gold-text)" : "var(--t1)", marginBottom: 6 }, "data-fw-merk-kasten": n }, n ? fwL("Du folgst: ", "You follow: ") + zahl : fwL("Du folgst noch niemandem", "You don't follow anyone yet")),
+    h("div", { key: "x", style: { font: "400 12.5px/1.5 Inter,system-ui,sans-serif", color: "var(--t2)", marginBottom: 10 } }, fwL("Mit „Folgen“ bei einem Spieler oder Verein schreiben wir dir bei Verletzung, Wechsel, Gerüchten und Formknick.", "With “Follow” on a player or club we e-mail you about injuries, transfers, rumours and drops in form.")),
+    h("button", { key: "b", type: "button", className: "nx-knopf haupt", style: { width: "100%" }, onClick: () => fwOeffnen("folgen") }, fwL("Benachrichtigungen öffnen", "Open notifications"))]);
+}
 /* ── Hinweis in den Einstellungen ── */
 function FwEinstHinweis() {
   useFwStand(); const h = React.createElement;
   if (FW.an !== true) return null;
-  return h("div", { className: "nx-hinweis gold", style: { display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginBottom: 12 } },
-    h("span", { style: { flex: "1 1 220px" } }, fwL("Alle Benachrichtigungen – Folgen, Morgen-Briefing und Wochenreport nach deiner Auswahl – stellst du jetzt auf einer eigenen Seite ein.", "Set up all notifications – following, morning briefing and weekly report – on their own page.")),
-    h("button", { type: "button", className: "nx-knopf haupt klein", onClick: () => fwOeffnen("neu") }, fwL("Benachrichtigungen öffnen", "Open notifications")));
+  // Schliff 17.11.2026: ersetzt die bisherigen Kästchen (E-Mail-Alerts, Morgen-Briefing, Adresse) – sie stehen in derselben Karte dahinter und werden über .fw-einst-an ~ * ausgeblendet
+  return h("div", { className: "fw-einst-an", "data-fw-einst": "1" },
+    h("div", { style: { font: "700 16px Inter,system-ui,sans-serif", color: "var(--t1)" } }, fwL("Benachrichtigungen", "Notifications")),
+    h("p", { style: { margin: 0, font: "400 13.5px/1.5 Inter,system-ui,sans-serif", color: "var(--t2)", maxWidth: "62ch" } }, fwL("Wem du folgst, Sofort-Mails, Morgen-Briefing, Wochenreport und die E-Mail-Adresse dafür stellst du auf einer eigenen Seite ein.", "Who you follow, instant e-mails, morning briefing, weekly report and the e-mail address for them are set up on their own page.")),
+    h("button", { type: "button", className: "nx-knopf klein", onClick: () => fwOeffnen("neu") }, fwL("Benachrichtigungen öffnen", "Open notifications")));
 }
 /* ── FW: die ganze Seite „Benachrichtigungen“ hinter der Glocke ── */
 function FwSeite({ account, onClose, nzHinweise, onNetzwerk, openPlayer, openVerein, onPro, onEinstellungen }) {
@@ -4966,9 +5026,9 @@ function FwSeite({ account, onClose, nzHinweise, onNetzwerk, openPlayer, openVer
       h("header", { className: "fw-kopf" },
         h("div", null, h("h1", { id: "fw-titel", className: "tw-seitentitel", style: { margin: 0 } }, fwL("Benachrichtigungen", "Notifications")),
           h("p", { className: "tw-seitentext", style: { margin: "4px 0 0" } }, fwL("Was bei deinen Spielern und Vereinen passiert – und wann wir dir schreiben.", "What happens to your players and clubs – and when we e-mail you."))),
-        h("div", { style: { display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" } },
-          onEinstellungen ? h("button", { type: "button", className: "tw-k tw-k-s tw-einst-zu", onClick: onEinstellungen }, fwL("Konto-Einstellungen", "Account settings")) : null,
-          h("button", { type: "button", onClick: onClose, className: "tw-k tw-k-s tw-einst-zu", "aria-label": fwL("Benachrichtigungen schließen", "Close notifications"), "data-fw-zu": "1" }, h(X, { size: 15 }), h("span", null, fwL("Schließen", "Close"))))),
+        h("div", { className: "fw-kopf-kn" },
+          onEinstellungen ? h("button", { type: "button", className: "tw-k tw-k-s tw-einst-zu", onClick: onEinstellungen, "aria-label": fwL("Konto-Einstellungen", "Account settings"), title: fwL("Konto-Einstellungen", "Account settings") }, h("span", { className: "ik", "aria-hidden": "true", dangerouslySetInnerHTML: { __html: FW_IK.zahnrad } }), h("span", { className: "lang" }, fwL("Konto-Einstellungen", "Account settings"))) : null,
+          h("button", { type: "button", onClick: onClose, className: "tw-k tw-k-s tw-einst-zu", "aria-label": fwL("Benachrichtigungen schließen", "Close notifications"), title: fwL("Schließen", "Close"), "data-fw-zu": "1" }, h(X, { size: 15 }), h("span", { className: "lang" }, fwL("Schließen", "Close"))))),
       st.an && !st.versand ? h("div", { className: "nx-hinweis", "data-fw-vorschau": "1" }, h("b", { style: { color: "var(--t1)" } }, fwL("Vorschau: ", "Preview: ")), fwL("Die Seite zeigt schon, was wir erkennen. Mails im neuen Format gehen erst nach der Freigabe raus – die Schalter An/Aus gelten schon jetzt für die bisherigen Mails.", "This page already shows what we detect. E-mails in the new format will only go out after release – the on/off switches already apply to the current e-mails.")) : null,
       h("div", { className: "fw-raster" },
         h("nav", { className: "fw-nav", "aria-label": fwL("Bereiche", "Sections") },
@@ -5156,8 +5216,8 @@ function FwFolgenBereich({ st, g, free, openPlayer, openVerein, onPro }) {
                 h("button", { type: "button", className: "fw-fk quick" + (drin ? " an" : ""), style: { padding: "8px 12px" }, disabled: drin || busy === t.art + t.ref, onClick: () => folge(t) }, fwIk(drin ? "glockeAn" : "glocke"), h("span", null, drin ? fwL("Du folgst", "Following") : fwL("Folgen", "Follow")))); }))
               : tr && !tr.length ? h("p", { className: "nx-leer" }, art === "spieler" ? fwL("Kein Spieler gefunden.", "No player found.") : fwL("Kein Verein gefunden.", "No club found.")) : null)),
         h("div", { className: "fw-karte" },
-          h("h3", null, fwL("Spieler", "Players"), h("small", null, grenzeText("spieler"))),
-          h("div", { style: { margin: "-2px 0 12px" } }, h(ImWerkzeug, { ziel: "folgen" })),
+          h("div", { className: "fw-karte-kopf" }, h("h3", null, fwL("Spieler", "Players"), h("small", null, grenzeText("spieler"))),
+            typeof ImWerkzeug === "function" ? h(ImWerkzeug, { ziel: "folgen" }) : null),
           free ? h("div", { className: "fw-balken", "aria-hidden": "true" }, h("i", { style: { width: Math.min(100, Math.round(sp.length / Math.max(1, g.spieler) * 100)) + "%" } })) : null,
           liste === null ? h("p", { className: "nx-leer" }, fwL("Wird geladen …", "Loading …")) : !sp.length ? h("p", { className: "nx-leer" }, fwL("Du folgst noch keinem Spieler. Suche oben nach einem Namen.", "You don't follow any players yet. Search for a name above.")) :
             h("div", null, sp.map(f => h(FwFolgeZeile, { key: f.id, f: f, g: g, free: free, openPlayer: openPlayer, openVerein: openVerein })))),
@@ -5173,7 +5233,7 @@ function FwFolgeZeile({ f, g, free, openPlayer, openVerein, nurLesen }) {
   const h = React.createElement; const en = fwEn();
   const [busy, setBusy] = React.useState(false); const [meld, setMeld] = React.useState(null); const [offen, setOffen] = React.useState(false);
   const ev = f.ereignisse || []; const typen = FW_TYPEN[f.art] || [];
-  const evText = ev.length >= typen.length ? fwL("Alle " + typen.length + " Ereignisse", "All " + typen.length + " events") : typen.filter(t => ev.indexOf(t[0]) >= 0).slice(0, 3).map(t => en ? t[2] : t[1]).join(", ") + (ev.length > 3 ? " +" + (ev.length - 3) : "");
+  const evText = ev.length >= typen.length ? fwL("Alle " + typen.length + " Ereignisse", "All " + typen.length + " events") : typen.filter(t => ev.indexOf(t[0]) >= 0).slice(0, 3).map(t => en ? t[2] : t[1]).join(", ") + (ev.length > 3 ? "\u00a0+" + (ev.length - 3) : "");
   const setz = p => { setBusy(true); setMeld(null); fwSetzen(f, p).then(d => { setBusy(false); if (!d || !d.ok) setMeld(fwGrund(d && d.grund, d)); }); };
   const umschalten = t => { const n = ev.indexOf(t) >= 0 ? ev.filter(x => x !== t) : ev.concat([t]); if (!n.length) { setMeld(fwGrund("leer")); return; } setz({ ereignisse: n }); };
   const oeffne = () => { if (f.art === "spieler") openPlayer(Number(f.ref), f.name, f.team || ""); else openVerein(f.name); };
@@ -5488,6 +5548,7 @@ const IM_CSS = [
   ".im-fuss .links{margin-right:auto;font-size:12.5px;color:var(--t2)}",
   ".im-textknopf{appearance:none;border:0;background:none;color:var(--t2);font:700 13px Inter,system-ui,sans-serif;cursor:pointer;padding:8px 6px;border-radius:8px;min-height:38px}",
   ".im-textknopf:hover{color:var(--t1);text-decoration:underline}.im-textknopf:focus-visible{outline:2px solid var(--gold)}",
+  ".im-textknopf.eng{padding:0;min-height:0}.im-textknopf.eng.zeile{justify-self:start;padding:2px 0}.im-textknopf.eng.rand{padding:0 6px}",
   ".im-fehler{background:var(--sc-schwach-bg);border:1px solid var(--sc-schwach-rand);color:var(--sc-schwach-text);border-radius:10px;padding:9px 12px;font-size:13px;line-height:1.45;margin:0 0 12px}",
   ".im-hinweis{background:var(--gold-tint);border:1px solid var(--gold-rand);border-radius:10px;padding:9px 12px;font-size:13px;line-height:1.45;color:var(--t1);margin:0 0 12px}",
   ".im-spalten{font-size:12.5px;line-height:1.5;color:var(--t3)}",
@@ -5516,22 +5577,23 @@ const IM_CSS = [
   ".im-liste{display:grid;border:1px solid var(--linie);border-radius:12px;overflow:hidden;max-height:min(56vh,620px);overflow-y:auto;overscroll-behavior:contain}",
   ".im-z{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:4px 10px;align-items:start;padding:11px 12px;border-top:1px solid var(--linie);background:var(--karte)}",
   ".im-z:first-child{border-top:0}.im-z.aus{background:var(--seite)}.im-z.aus .im-z-name{color:var(--t2)}",
-  ".im-z input[type=checkbox]{width:18px;height:18px;margin:2px 0 0;accent-color:var(--gold);cursor:pointer}",
-  ".im-z-name{font:800 14px Inter,system-ui,sans-serif;color:var(--t1);overflow-wrap:anywhere}",
-  ".im-z-meta{font-size:12.5px;color:var(--t2);line-height:1.45;overflow-wrap:anywhere}",
-  ".im-z-mehr{grid-column:2 / -1;display:grid;gap:6px}",
+  ".im-z input[type=checkbox]{width:18px;height:18px;margin:2px 0 0;accent-color:var(--gold);cursor:pointer}.im-z input[type=checkbox]:disabled{opacity:.35!important;cursor:default}",
+  ".im-z-kopf{display:block;min-width:0;cursor:pointer}.im-z input[type=checkbox]:disabled+.im-z-kopf{cursor:default}",
+  ".im-z-name{display:block;font:800 14px Inter,system-ui,sans-serif;color:var(--t1);overflow-wrap:anywhere}",
+  ".im-z-meta{display:block;font-size:12.5px;color:var(--t2);line-height:1.45;overflow-wrap:anywhere}",
+  ".im-z-mehr{grid-column:2 / -1;display:grid;grid-template-columns:minmax(0,1fr);gap:6px}",
   ".im-marke{font:800 11.5px Inter,system-ui,sans-serif;border-radius:999px;padding:3px 9px;white-space:nowrap;border:1px solid var(--linie2);color:var(--t2);background:var(--karte2)}",
   ".im-marke.sicher{color:var(--sc-gut-text);border-color:var(--sc-gut-rand);background:var(--sc-gut-bg)}",
   ".im-marke.unsicher{color:var(--gold-text);border-color:var(--gold-rand);background:var(--gold-tint)}",
   ".im-marke.neu{color:var(--t1);border-color:var(--gold-rand);background:transparent}",
   ".im-marke.unvollstaendig,.im-marke.fehler{color:var(--sc-schwach-text);border-color:var(--sc-schwach-rand);background:var(--sc-schwach-bg)}",
   ".im-marke.ok{color:var(--sc-gut-text);border-color:var(--sc-gut-rand);background:var(--sc-gut-bg)}",
-  ".im-treffer{font-size:13px;color:var(--t1);display:flex;gap:6px;align-items:center;flex-wrap:wrap}.im-treffer small{color:var(--t3)}",
+  ".im-treffer{font-size:13px;line-height:1.45;color:var(--t1);display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 6px;align-items:start}.im-treffer .tx{min-width:0;overflow-wrap:anywhere}.im-treffer small{color:var(--t3);font-size:12px}.im-treffer .im-textknopf{padding:0 6px;min-height:0;margin-top:-1px}",
   ".im-kand{display:grid;gap:4px}",
   ".im-kand label{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.4;color:var(--t1);cursor:pointer;padding:6px 8px;border-radius:8px;border:1px solid transparent}",
   ".im-kand label:hover{background:var(--hover)}.im-kand label.an{border-color:var(--gold-rand);background:var(--gold-tint)}",
-  ".im-kand input{accent-color:var(--gold);margin-top:2px}.im-kand small{color:var(--t3);font-variant-numeric:tabular-nums}",
-  ".im-felder{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;max-width:640px}",
+  ".im-kand input{accent-color:var(--gold);margin-top:2px}.im-kand small{color:var(--t3);font-size:12px;font-variant-numeric:tabular-nums}",
+  ".im-felder{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;max-width:640px;min-width:0}",
   ".im-felder label{display:grid;gap:3px;font-size:12px;color:var(--t2)}",
   ".im-felder input,.im-felder select{font:400 14px Inter,system-ui,sans-serif;color:var(--t1);background:var(--seite);border:1px solid var(--linie2);border-radius:8px;padding:7px 9px;min-height:36px;width:100%;box-sizing:border-box}",
   ".im-felder input:focus,.im-felder select:focus{outline:2px solid var(--gold);outline-offset:1px}",
@@ -5541,7 +5603,9 @@ const IM_CSS = [
   ".im-erg{display:grid;gap:12px;padding:6px 0 4px}",
   ".im-erg-zahl{font:700 46px/1 'Barlow Condensed','Arial Narrow',sans-serif;color:var(--t1);font-variant-numeric:tabular-nums}",
   ".im-erg ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:13.5px;color:var(--t2)}",
-  "@media(max-width:600px){.im-z{grid-template-columns:24px minmax(0,1fr)}.im-z>.im-marke{grid-column:2;justify-self:start}.im-wahl{grid-template-columns:minmax(0,1fr)}.im-liste{max-height:none}}"
+  "@media(max-width:600px){.im-z{grid-template-columns:24px minmax(0,1fr)}.im-z>.im-marke{grid-column:2;justify-self:start}.im-wahl{grid-template-columns:minmax(0,1fr)}.im-liste{max-height:none}.im-fuss .links{flex:1 1 100%;margin:0}.im-fuss .ws2-btn.gold{flex:1 1 auto}.im-opt{min-height:0}}",
+  "@media(pointer:coarse){.im-werkzeug .ws2-btn.klein,.im-box .ws2-btn.klein{min-height:40px}.im-textknopf{min-height:40px}.im-treffer .im-textknopf{min-height:40px;padding:0 8px;margin:-11px 0 -9px}.im-filter button{min-height:40px}.im-box .nz-x{min-width:40px;min-height:40px}.im-z input[type=checkbox]{width:22px;height:22px;margin-top:9px}.im-z-kopf{display:flex;flex-direction:column;justify-content:center;min-height:40px;margin-left:-38px;padding-left:38px}.im-textknopf.eng{min-height:40px;margin-top:-12px;margin-bottom:-12px}.im-textknopf.eng.zeile{padding:0;margin-top:-10px;margin-bottom:-10px}.im-felder input,.im-felder select{min-height:42px}.im-kand label{padding:11px 8px}}",
+  "@media(pointer:coarse) and (max-width:600px){.im-z-kopf{margin-left:-34px;padding-left:34px}}"
 ].join("\n");
 (function () { try { if (!document.getElementById("im-css")) { const st = document.createElement("style"); st.id = "im-css"; st.textContent = IM_CSS; document.head.appendChild(st); } } catch (e) {} })();
 const IM_IK = {
@@ -5733,10 +5797,10 @@ function ImImport({ ziel, holeWatch, onUpdateWatch, account, schliessen }) {
     fehler ? h("div", { key: "e", className: "im-fehler", role: "alert", "data-im-fehler": "1" }, fehler) : null,
     offen && offen.id ? h("div", { key: "o", className: "im-offen", "data-im-offen": "1" }, h("span", null, imL("Noch nicht abgeschlossen: ", "Not finished yet: "), h("b", null, offen.dateiname || imL("Liste", "List"))), h("button", { type: "button", className: "ws2-btn klein", onClick: weiter, disabled: busy }, imL("Weiter prüfen", "Continue checking"))) : null,
     h("div", { key: "z", className: "im-abschnitt" }, h("span", { className: "im-lab", id: "im-z" }, imL("Übernehmen in", "Add to")),
-      ziele.length > 1 ? h("div", { className: "im-wahl", role: "radiogroup", "aria-labelledby": "im-z" }, ziele.map(([k, t]) => h(ImOpt, { key: k, an: z === k, onClick: () => setZ(k), titel: t, daten: { "data-im-ziel": k } })))
+      ziele.length > 1 ? h("div", { className: "im-wahl", role: "radiogroup", "aria-labelledby": "im-z" }, ziele.map(([k, t]) => h(ImOpt, { key: k, an: z === k, onClick: () => setZ(k), titel: t, text: k === "meine_spieler" ? imL("Betreute und gescoutete Spieler", "Players you represent or scout") : k === "merkliste" ? imL("Vormerken, ohne Profil", "Bookmark, no profile") : imL("Mit Benachrichtigungen", "With notifications"), daten: { "data-im-ziel": k } })))
         : h("b", { className: "im-ein-ziel", "data-im-ziel-fest": z }, (ziele[0] || [0, ""])[1]),
       h("span", { className: "im-hilfe" }, zielText),
-      !pro ? h("span", { className: "im-hilfe", "data-im-free": "1" }, imL("Meine Spieler und die Merkliste gibt es mit Pro. ", "My players and the watchlist come with Pro. "), h("button", { type: "button", className: "im-textknopf", style: { padding: 0, minHeight: 0 }, onClick: () => { zu(); twZuPro(); } }, imL("Pro ansehen", "See Pro"))) : null),
+      !pro ? h("span", { className: "im-hilfe", "data-im-free": "1" }, imL("Meine Spieler und die Merkliste gibt es mit Pro. ", "My players and the watchlist come with Pro. "), h("button", { type: "button", className: "im-textknopf eng", onClick: () => { zu(); twZuPro(); } }, imL("Pro ansehen", "See Pro"))) : null),
     h("label", { key: "a", className: "im-ablage" + (ueber ? " ueber" : ""), "data-im-ablage": "1", onDragOver: ev => { ev.preventDefault(); setUeber(true); }, onDragLeave: () => setUeber(false), onDrop: ev => { ev.preventDefault(); setUeber(false); datei(ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0]); } },
       imIk("datei"), h("b", null, busy ? imL("Wird vorbereitet …", "Preparing …") : imL("Datei hierher ziehen oder auswählen", "Drop a file here or choose one")),
       h("small", null, imL("Excel, CSV, OpenDocument oder PDF · bis " + maxMb + " MB · bis " + maxZ + " Spieler", "Excel, CSV, OpenDocument or PDF · up to " + maxMb + " MB · up to " + maxZ + " players")),
@@ -5781,7 +5845,7 @@ function ImImport({ ziel, holeWatch, onUpdateWatch, account, schliessen }) {
       h("ul", null, e.vorhanden ? h("li", null, imL(e.vorhanden + " waren schon vorhanden", e.vorhanden + " were already there")) : null,
         e.limit ? h("li", null, imL(e.limit + " nicht übernommen – die Grenze deiner Liste ist erreicht", e.limit + " not added – your list has reached its limit")) : null,
         fehlerZ.filter(x => x.status_text !== "limit").length ? h("li", null, imL(fehlerZ.filter(x => x.status_text !== "limit").length + " nicht übernommen: ", fehlerZ.filter(x => x.status_text !== "limit").length + " not added: ") + fehlerZ.filter(x => x.status_text !== "limit").slice(0, 5).map(x => x.name + " (" + imGrund(x.status_text).replace(/\.$/, "") + ")").join(", ")) : null,
-        !pro && e.limit ? h("li", null, h("button", { type: "button", className: "im-textknopf", style: { padding: 0, minHeight: 0 }, onClick: () => { zu(); twZuPro(); } }, imL("Mit Pro folgst du bis zu 200 Spielern", "Follow up to 200 players with Pro"))) : null,
+        !pro && e.limit ? h("li", null, h("button", { type: "button", className: "im-textknopf eng", onClick: () => { zu(); twZuPro(); } }, imL("Mit Pro folgst du bis zu 200 Spielern", "Follow up to 200 players with Pro"))) : null,
         ok && (z === "meine_spieler" || (auftrag.zeilen || []).some(x => x.status === "uebernommen" && !x.player_id)) ? h("li", null, imL("Passende Vereine werden im Hintergrund berechnet.", "Matching clubs are calculated in the background.")) : null)),
       h("div", { key: "f", className: "im-fuss" }, h("button", { type: "button", className: "ws2-btn gold", onClick: zu }, imL("Fertig", "Done")))];
   }
@@ -5808,23 +5872,23 @@ function ImZeile({ zl, aendern, nurDb }) {
   let mehr = null;
   if (!fertig && zl.ergebnis !== "vorhanden") {
     const teile = []; const zeigeKand = kand.length > 0 && (zl.ergebnis === "unsicher" || auf);
-    if (zl.player_id && treffer && !zeigeKand) teile.push(h("div", { key: "t", className: "im-treffer" }, "→ ", h("b", null, treffer.name), h("small", null, kandZeile(treffer)), h("button", { type: "button", className: "im-textknopf", onClick: () => setAuf(true), "data-im-aendern": zl.id }, imL("Ändern", "Change"))));
+    if (zl.player_id && treffer && !zeigeKand) teile.push(h("div", { key: "t", className: "im-treffer" }, h("span", { "aria-hidden": "true" }, "→"), h("span", { className: "tx" }, h("b", null, treffer.name), " ", h("small", null, kandZeile(treffer))), h("button", { type: "button", className: "im-textknopf", onClick: () => setAuf(true), "data-im-aendern": zl.id, "aria-label": imL("Zuordnung ändern: ", "Change match: ") + zl.name }, imL("Ändern", "Change"))));
     if (zeigeKand) teile.push(h("div", { key: "k", className: "im-kand", role: "radiogroup", "aria-label": imL("Welcher Spieler ist gemeint?", "Which player is meant?") },
       h("span", { className: "im-hilfe" }, imL("Welcher Spieler ist gemeint?", "Which player is meant?")),
       kand.map(k => h("label", { key: k.pid, className: pidJetzt != null && Number(pidJetzt) === Number(k.pid) ? "an" : "" }, h("input", { type: "radio", name: "im-k-" + zl.id, checked: pidJetzt != null && Number(pidJetzt) === Number(k.pid), disabled: busy, onChange: () => senden({ player_id: k.pid }), "data-im-kand": k.pid }),
         h("span", null, h("b", null, k.name), " ", h("small", null, kandZeile(k) + " · " + imL("Übereinstimmung ", "match ") + k.punkte + " %")))),
       h("label", { className: !pidJetzt ? "an" : "" }, h("input", { type: "radio", name: "im-k-" + zl.id, checked: !pidJetzt, disabled: busy, onChange: () => senden({ player_id: null }), "data-im-kand": "neu" }), h("span", null, nurDb ? imL("Keiner davon", "None of these") : imL("Keiner davon – als neuen Spieler anlegen", "None of these – create as new player")))));
     if (!zl.player_id && nurDb) {
-      if (kand.length && !zeigeKand) teile.push(h("button", { key: "a", type: "button", className: "im-textknopf", style: { justifySelf: "start", padding: "2px 0", minHeight: 0 }, onClick: () => setAuf(true) }, kand.length === 1 ? imL("1 ähnlicher Spieler in der Datenbank", "1 similar player in the database") : imL(kand.length + " ähnliche Spieler in der Datenbank", kand.length + " similar players in the database")));
+      if (kand.length && !zeigeKand) teile.push(h("button", { key: "a", type: "button", className: "im-textknopf eng zeile", onClick: () => setAuf(true) }, kand.length === 1 ? imL("1 ähnlicher Spieler in der Datenbank", "1 similar player in the database") : imL(kand.length + " ähnliche Spieler in der Datenbank", kand.length + " similar players in the database")));
       teile.push(h("span", { key: "h", className: "im-hilfe", "data-im-nurdb": zl.id }, imL("Nicht in der Datenbank – mit Free kannst du nur Spielern aus der Datenbank folgen.", "Not in the database – with Free you can only follow players from the database.")));
     } else if (!zl.player_id) {
       const fehlt = zl.fehlend || []; const fehltOhnePos = fehlt.filter(x => x !== "position");
-      if (kand.length && !zeigeKand) teile.push(h("button", { key: "a", type: "button", className: "im-textknopf", style: { justifySelf: "start", padding: "2px 0", minHeight: 0 }, onClick: () => setAuf(true) }, kand.length === 1 ? imL("1 ähnlicher Spieler in der Datenbank", "1 similar player in the database") : imL(kand.length + " ähnliche Spieler in der Datenbank", kand.length + " similar players in the database")));
+      if (kand.length && !zeigeKand) teile.push(h("button", { key: "a", type: "button", className: "im-textknopf eng zeile", onClick: () => setAuf(true) }, kand.length === 1 ? imL("1 ähnlicher Spieler in der Datenbank", "1 similar player in the database") : imL(kand.length + " ähnliche Spieler in der Datenbank", kand.length + " similar players in the database")));
       const posName = zl.ws_pos ? (en ? ((typeof WS_POS !== "undefined" ? WS_POS : []).find(o => o[0] === zl.ws_pos) || [0, zl.ws_pos])[1] : zl.ws_pos) : "";
       const zeigePos = !zl.ws_pos || posAuf || zl.ergebnis === "unvollstaendig";
       teile.push(h("span", { key: "h", className: "im-hilfe" }, fehltOhnePos.length ? imL("Für ein neues Profil fehlen: ", "A new profile still needs: ") + fehltOhnePos.map(x => en ? IM_FELD[x][1] : IM_FELD[x][0]).join(", ")
         : (zl.ws_pos ? imL("Wird als eigenes Profil in „Meine Spieler“ angelegt – Position " + posName + ".", "Will be created as your own profile in “My players” – position " + posName + ".") : imL("Wird als eigenes Profil in „Meine Spieler“ angelegt.", "Will be created as your own profile in “My players”.")),
-        zl.ws_pos && !zeigePos ? h("button", { type: "button", className: "im-textknopf", style: { padding: "0 6px", minHeight: 0 }, onClick: () => setPosAuf(true), "data-im-posaendern": zl.id }, imL("Position ändern", "Change position")) : null));
+        zl.ws_pos && !zeigePos ? h("button", { type: "button", className: "im-textknopf eng rand", onClick: () => setPosAuf(true), "data-im-posaendern": zl.id }, imL("Position ändern", "Change position")) : null));
       teile.push(h("div", { key: "f", className: "im-felder" },
         fehlt.indexOf("geburtsdatum") >= 0 || zl.ergebnis === "unvollstaendig" ? h("label", { className: fehlt.indexOf("geburtsdatum") >= 0 ? "fehlt" : "" }, imL("Geburtsdatum", "Date of birth"), h("input", { type: "text", inputMode: "numeric", placeholder: imL("TT.MM.JJJJ", "DD.MM.YYYY"), value: w.geburtsdatum, disabled: busy, onChange: ev => { const v = ev.target.value; setW(x => Object.assign({}, x, { geburtsdatum: v })); }, onBlur: () => feldSpeichern("geburtsdatum"), onKeyDown: ev => { if (ev.key === "Enter") ev.target.blur(); }, "data-im-geb": zl.id })) : null,
         fehlt.indexOf("verein") >= 0 || zl.ergebnis === "unvollstaendig" ? h("label", { className: fehlt.indexOf("verein") >= 0 ? "fehlt" : "" }, imL("Verein", "Club"), h("input", { type: "text", value: w.verein, maxLength: 80, disabled: busy, onChange: ev => { const v = ev.target.value; setW(x => Object.assign({}, x, { verein: v })); }, onBlur: () => feldSpeichern("verein"), onKeyDown: ev => { if (ev.key === "Enter") ev.target.blur(); }, "data-im-verein": zl.id })) : null,
@@ -5833,8 +5897,8 @@ function ImZeile({ zl, aendern, nurDb }) {
     mehr = teile.length ? teile : null;
   }
   return h("div", { className: "im-z" + ((zl.wahl !== "uebernehmen" && !fertig) || zl.ergebnis === "vorhanden" ? " aus" : ""), "data-im-zeile": zl.id, "data-im-ergebnis": zl.ergebnis },
-    h("input", { type: "checkbox", checked: !fertig && wahlJetzt === "uebernehmen" && zl.ergebnis !== "vorhanden", disabled: fertig || busy || zl.ergebnis === "vorhanden" || zl.ergebnis === "unvollstaendig" || (nurDb && !pidJetzt), onChange: ev => senden({ wahl: ev.target.checked ? "uebernehmen" : "ueberspringen" }), "aria-label": imL("Übernehmen: ", "Add: ") + zl.name, "data-im-wahl": zl.id }),
-    h("div", { style: { minWidth: 0 } }, h("div", { className: "im-z-name" }, zl.name), meta ? h("div", { className: "im-z-meta" }, meta) : null),
+    h("input", { type: "checkbox", checked: !fertig && wahlJetzt === "uebernehmen" && zl.ergebnis !== "vorhanden", disabled: fertig || busy || zl.ergebnis === "vorhanden" || zl.ergebnis === "unvollstaendig" || (nurDb && !pidJetzt), onChange: ev => senden({ wahl: ev.target.checked ? "uebernehmen" : "ueberspringen" }), id: "im-w-" + zl.id, "aria-label": imL("Übernehmen: ", "Add: ") + zl.name, "data-im-wahl": zl.id }),
+    h("label", { htmlFor: "im-w-" + zl.id, className: "im-z-kopf" }, h("span", { className: "im-z-name" }, zl.name), meta ? h("span", { className: "im-z-meta" }, meta) : null),
     h("span", { className: "im-marke " + marke[0] }, marke[1]),
     mehr || fehler ? h("div", { className: "im-z-mehr" }, mehr, fehler ? h("span", { className: "im-fehler", style: { margin: 0 }, role: "alert" }, fehler) : null) : null);
 }
@@ -11556,7 +11620,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261117-fw-imp-live";
+const VS_VERSION = "20261117-fw-imp-schliff";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -12792,9 +12856,9 @@ function WsKopf({ view, onNav, watch, profiles }) {   // NZ3 (16.11.2026): vier 
         h("span", null, lab), n != null ? h("span", { className: "n" }, n) : null,
         neu > 0 ? h("span", { className: "neu", "data-nx-reiter-neu": neu }, neu > 99 ? "99+" : neu, h("span", { className: "tw-sr-nur" }, en ? " unread" : " ungelesen")) : null,
         !prem && (k === "ws_spieler" || k === "watch") ? h("span", { className: "tw-sn-pro" }, "PRO") : null))),
-      mitGlocke ? h("button", { type: "button", className: "ws2-alertchip" + (alerts && gl ? " an" : ""), title: en ? "Manage e-mail notifications" : "E-Mail-Benachrichtigungen verwalten", onClick: () => { if (typeof window.twWatchDlg === "function") window.twWatchDlg(); } },
+      mitGlocke ? h(FwWsChip, { alt: h("button", { type: "button", className: "ws2-alertchip" + (alerts && gl ? " an" : ""), title: en ? "Manage e-mail notifications" : "E-Mail-Benachrichtigungen verwalten", onClick: () => { if (typeof window.twWatchDlg === "function") window.twWatchDlg(); } },
         h("span", { dangerouslySetInnerHTML: { __html: alerts ? WS_GLOCKE_SVG : WS_GLOCKE_AUS_SVG } }),
-        h("span", null, alerts ? (gl ? (en ? "E-mail on · " + gl + (gl === 1 ? " bell" : " bells") : "E-Mail an · " + gl + (gl === 1 ? " Glocke" : " Glocken")) : (en ? "E-mail on · no bell on yet" : "E-Mail an · noch keine Glocke an")) : (en ? "E-mail notifications off" : "E-Mail-Benachrichtigungen aus"))) : null),
+        h("span", null, alerts ? (gl ? (en ? "E-mail on · " + gl + (gl === 1 ? " bell" : " bells") : "E-Mail an · " + gl + (gl === 1 ? " Glocke" : " Glocken")) : (en ? "E-mail on · no bell on yet" : "E-Mail an · noch keine Glocke an")) : (en ? "E-mail notifications off" : "E-Mail-Benachrichtigungen aus"))) }) : null),
     krume ? h("div", { className: "nx-krume", "data-nx-krume": view }, h("button", { type: "button", onClick: () => onNav("ws_uebersicht") }, en ? "‹ Overview" : "‹ Übersicht"), h("span", { "aria-hidden": "true" }, "/"), h("span", { "aria-current": "page" }, krume)) : null);
 }
 function WsSuche({ account, voll, lim, onAnlegen }) {
@@ -13612,7 +13676,7 @@ function WsAside({ d, liste, account, wr, setWochenreport }) {
   const kasten = (titel, kinder, key) => h("section", { key: key, className: "ws2-kasten", "data-ws-kasten": key }, h("h3", null, titel), kinder);
   return h("aside", { className: "ws2-aside" },
     h(WsTransferfenster, { key: "fristen", fr: d.fristen }),
-    kasten(L("Wochenbericht", "Weekly report"), [h("p", { key: "t", className: "ws2-sub", style: { marginBottom: 8 } }, L("Mit eigenem Abschnitt „Deine Spieler“: Form, Minuten, neue passende Vereine und Fristen.", "With its own section “Your players”: form, minutes, new matching clubs and deadlines.")), h(TwWochenreportSchalter, { key: "s", wr: wr, onChange: setWochenreport, angemeldet: !!(account && account.email), eingebettet: true })], "wochenbericht"),
+    kasten(L("Wochenbericht", "Weekly report"), [h("p", { key: "t", className: "ws2-sub", style: { marginBottom: 8 } }, L("Mit eigenem Abschnitt „Deine Spieler“: Form, Minuten, neue passende Vereine und Fristen.", "With its own section “Your players”: form, minutes, new matching clubs and deadlines.")), h(FwWsBericht, { key: "s", alt: h(TwWochenreportSchalter, { key: "s", wr: wr, onChange: setWochenreport, angemeldet: !!(account && account.email), eingebettet: true }) })], "wochenbericht"),
     kasten(L("Benachrichtigungen", "Notifications"), h(FwWsKasten, { alt: h("p", { className: "ws2-sub" }, L("Alles startet ohne Benachrichtigung. Mit der Glocke an einem Spieler, einer Karte oder einem Angebot bekommst du eine E-Mail, sobald sich etwas ändert (Einsatzzeit, Form, Verletzung, neue passende Vereine, Meldungen).", "Everything starts without notification. With the bell on a player, card or offer you get an e-mail as soon as something changes (playing time, form, injury, new matching clubs, reports).")) }), "glocken"),
     team.ist_team ? kasten("Team", h("div", null, (team.mitglieder || []).map(m => h("div", { key: m.email, className: "ws2-frist" }, h("span", null, (m.name || "") + (m.ich ? L(" (du)", " (you)") : "")), h("b", { style: { fontWeight: 600, color: "var(--t3)" } }, m.eigner ? L("Inhaber", "Owner") : L("Mitglied", "Member")))), h("p", { className: "ws2-sub", style: { marginTop: 8 } }, L("Alle sehen dieselben Spieler, Zuständigkeiten und Kommentare.", "Everyone sees the same players, responsibilities and comments."))), "team") : null,
     kasten(L("Exposé-Einstellungen", "Exposé settings"), h(WsEinstellung, { account: account, d: d }), "expose"));
@@ -13721,7 +13785,7 @@ function MerkSpielerZeile({ item, news, onOpen, onRemove, onAlert, onVergleich, 
   const aktionen = h("div", { style: { display: "flex", gap: 5, flexWrap: "wrap" } },
     knopf(en ? "Open profile" : "Profil \u00f6ffnen", () => d && d.ok && onOpen(d.pid, item.w, d.team), false, "o"),
     knopf(note ? (en ? "Edit note" : "Notiz bearbeiten") : (en ? "Add note" : "Notiz hinzuf\u00fcgen"), () => onNote(item), !!note, "n"),
-    knopf(alertAn ? (en ? "Notification on" : "Benachrichtigung an") : (en ? "Notification off" : "Benachrichtigung aus"), () => onAlert(item), alertAn, "a"),
+    h(FwMerkKnopf, { key: "a", art: "spieler", kennung: d && d.ok && d.pid ? String(d.pid) : "", name: item.w, team: d && d.ok ? d.team : "", alt: knopf(alertAn ? (en ? "Notification on" : "Benachrichtigung an") : (en ? "Notification off" : "Benachrichtigung aus"), () => onAlert(item), alertAn, "a") }),
     wsMeineKnopf(d, item, knopf),
     knopf(imScout ? (en ? "On scouting list" : "Auf Scouting-Liste") : (en ? "Add to scouting list" : "Zu Scouting-Liste hinzuf\u00fcgen"), () => d && d.ok && onScout({ pid: d.pid, name: item.w, team: d.team }), imScout, "s"),
     knopf(imVgl ? (en ? "In comparison" : "Im Vergleich") : (en ? "Compare" : "Vergleichen"), () => d && d.ok && onVergleich({ pid: d.pid, name: item.w, team: d.team, pos: d.pos, age: d.age, photo: d.photo }), imVgl, "v"),
@@ -13780,7 +13844,7 @@ function MerkVue({ watch, watchList, profiles, onOpen, onRemove, onUpdateWatch, 
   const spielerTab = spieler.length ? h("div", { style: { display: "flex", flexDirection: "column", gap: mobil ? 8 : 0, background: mobil ? "none" : "#fff", border: mobil ? "none" : "1px solid " + HAIR, borderRadius: 14, overflow: "hidden" } }, mobil ? null : kopfZeile, spieler.map(it => h(MerkSpielerZeile, { key: it.w, item: it, news: watchList, onOpen: onOpen, onRemove: it2 => onRemove(it2.t, it2.w), onAlert: onAlert, onVergleich: onVergleich, onScout: onScout, imScout: false, imVgl: false, note: notes["spieler:" + it.w] || "", onNote: onNote, mobil: mobil }))) : hinweis(en ? "No players on the watchlist yet \u2014 use \u201cWatch\u201d on a player or a report." : "Noch keine Spieler auf der Merkliste \u2014 nutze \u201eBeobachten\u201c bei einem Spieler oder einer Meldung.");
   const vereinZeile = it => { const tr = (watchList || []).filter(n => ((n.toClub || "") + " " + (n.fromClub || "") + " " + (n.headline || "")).toLowerCase().indexOf(String(it.w).toLowerCase()) >= 0); const neu = tr.filter(n => { const t = zeitVonItem(n); return t && Date.now() - t <= 7 * 86400000; }).length; const letzte = tr.length ? Math.max.apply(null, tr.map(zeitVonItem)) : 0; const alertAn = wsGlockeIst(it.t, it.w);
     return h("div", { key: it.w, className: "tw-mkrow" }, h("div", { style: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" } }, h(ClubLogo, { name: it.w, size: 26 }), h("span", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, flex: 1, minWidth: 120 } }, clubName(it.w)), h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: neu ? "var(--gold-text)" : "var(--t2)", fontWeight: neu ? 800 : 500 } }, neu ? neu + (en ? " new reports" : " neue Meldungen") : tr.length + (en ? " reports" : " Meldungen")), h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED } }, letzte ? mkRel(new Date(letzte).toISOString()) : "\u2013"),
-      h("span", { style: { display: "flex", gap: 5 } }, h("button", { onClick: () => onAlert(it), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, padding: "5px 9px", borderRadius: 8, border: "1px solid " + (alertAn ? "var(--gold-rand)" : HAIR), background: alertAn ? "var(--gold-tint)" : "#fff", color: alertAn ? "var(--gold-text)" : "var(--t2)" } }, alertAn ? (en ? "Notification on" : "Benachrichtigung an") : (en ? "Notification off" : "Benachrichtigung aus")), h("button", { onClick: () => onRemove(it.t, it.w), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, padding: "5px 9px", borderRadius: 8, border: "1px solid " + HAIR, background: "var(--karte)", color: "var(--t2)" } }, en ? "Remove" : "Entfernen")))); };
+      h("span", { style: { display: "flex", gap: 5 } }, h(FwMerkKnopf, { art: "verein", kennung: it.w, kennung2: clubName(it.w), name: clubName(it.w), alt: h("button", { onClick: () => onAlert(it), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, padding: "5px 9px", borderRadius: 8, border: "1px solid " + (alertAn ? "var(--gold-rand)" : HAIR), background: alertAn ? "var(--gold-tint)" : "#fff", color: alertAn ? "var(--gold-text)" : "var(--t2)" } }, alertAn ? (en ? "Notification on" : "Benachrichtigung an") : (en ? "Notification off" : "Benachrichtigung aus")) }), h("button", { onClick: () => onRemove(it.t, it.w), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, padding: "5px 9px", borderRadius: 8, border: "1px solid " + HAIR, background: "var(--karte)", color: "var(--t2)" } }, en ? "Remove" : "Entfernen")))); };
   const vereineTab = vereine.length || positionen.length ? h("div", { style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, overflow: "hidden" } }, vereine.map(vereinZeile), positionen.map(it => h("div", { key: "pos" + it.w, className: "tw-mkrow" }, h("div", { style: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: .8, textTransform: "uppercase", color: MUTED } }, "Position"), h("span", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, flex: 1 } }, it.w), h(WsGlocke, { art: it.t, wert: it.w, watch: watch, onUpdateWatch: onUpdateWatch, klein: true }), h("button", { onClick: () => onRemove(it.t, it.w), style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 11.5, fontWeight: 800, padding: "5px 9px", borderRadius: 8, border: "1px solid " + HAIR, background: "var(--karte)", color: "var(--t2)" } }, en ? "Remove" : "Entfernen"))))) : hinweis(en ? "No clubs or positions watched yet \u2014 use \u201cWatch club\u201d in the matching or the transfer feed." : "Noch keine Vereine oder Positionen beobachtet \u2014 nutze \u201eVerein beobachten\u201c im Matching oder bei Meldungen.");
   const meldungenTab = h("div", { style: { fontFamily: FONT_BODY, fontSize: 13, color: MUTED, background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 12, padding: "12px 16px" } }, (watchList || []).length ? (en ? (watchList.length + " reports match your watches \u2014 the list follows below.") : (watchList.length + " Meldungen passen zu deinen Beobachtungen \u2014 die Liste folgt unten.")) : t("watch_nohits"));
   const profileTab = (profiles || []).length ? h("div", { style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, overflow: "hidden" } }, profiles.map(p => h("div", { key: p.raw, className: "tw-mkrow" }, h("div", { style: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" } }, h("span", { style: { fontFamily: FONT_BODY, fontSize: 14, fontWeight: 800, color: INK, flex: 1, minWidth: 140 } }, p.n || p.l || p.p), h("span", { style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED } }, [p.l || p.p, p.a1 && p.a2 ? (p.a1 === p.a2 ? p.a1 : p.a1 + "\u2013" + p.a2) + (en ? " yrs" : " Jahre") : "", p.s ? (en ? "strengths: " : "St\u00e4rken: ") + p.s : ""].filter(Boolean).join(" \u00b7 ")), h("span", { style: { display: "flex", gap: 5 } }, btn(en ? "Show matches" : "Matches ansehen", () => { onMatchProfil(p); onNav("gesucht"); }, true, "m"), h(WsGlocke, { art: "profil", wert: p.raw, watch: watch, onUpdateWatch: onUpdateWatch, klein: true }), btn(en ? "Remove" : "Entfernen", () => onRemove("profil", p.raw), false, "r")))))) : hinweis(en ? "No player profiles yet \u2014 create one under \u201cClub needs & player matching\u201d." : "Noch keine Spielerprofile \u2014 lege eines unter \u201eVereinsbedarf & Spieler-Matching\u201c an.");
@@ -13808,10 +13872,10 @@ function MerkAside({ watch, onAlertDialog, onOpen }) {
   const zuletzt = mkLese(MK_RECENT_KEY, []).slice(0, 6);
   const kasten = (kinder) => h("div", { style: { background: "var(--karte)", border: "1px solid " + HAIR, borderRadius: 14, padding: "14px 16px", marginBottom: 12 } }, kinder);
   return h("div", { className: "tw-mkaside" },
-    kasten([h("div", { key: "t", style: { fontFamily: FONT_BODY, fontWeight: 800, fontSize: 14.5, marginBottom: 8, color: INK } }, en ? "Your alerts" : "Deine Alerts"),
+    h(FwMerkKasten, { key: "fw", kasten: kasten, alt: kasten([h("div", { key: "t", style: { fontFamily: FONT_BODY, fontWeight: 800, fontSize: 14.5, marginBottom: 8, color: INK } }, en ? "Your alerts" : "Deine Alerts"),
       h("div", { key: "s", style: { fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, color: aktiv ? "var(--gold-text)" : INK, marginBottom: 6 } }, aktiv ? (en ? "Active: e-mail alerts for " + items.length + " watch" + (items.length === 1 ? "" : "es") : "Aktiv: E-Mail-Alerts f\u00fcr " + items.length + " Beobachtung" + (items.length === 1 ? "" : "en")) + (stumm ? (en ? " (" + stumm + " muted)" : " (" + stumm + " stumm)") : "") : (en ? "No active alerts" : "Keine aktiven Alerts")),
       h("div", { key: "x", style: { fontFamily: FONT_BODY, fontSize: 12.5, color: MUTED, lineHeight: 1.5, marginBottom: 10 } }, en ? "Get notified about new transfer reports, contract changes, injuries and changes of the TW score." : "Erhalte Benachrichtigungen bei neuen Transfermeldungen, Vertrags\u00e4nderungen, Verletzungen und Ver\u00e4nderungen des TW-Scores."),
-      h("button", { key: "b", onClick: onAlertDialog, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "9px 14px", borderRadius: 10, border: "none", background: "var(--gold)", color: "var(--gold-schrift)", width: "100%" } }, aktiv ? (en ? "Manage alerts" : "Alerts verwalten") : (en ? "Create alert" : "Alert erstellen"))]),
+      h("button", { key: "b", onClick: onAlertDialog, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, padding: "9px 14px", borderRadius: 10, border: "none", background: "var(--gold)", color: "var(--gold-schrift)", width: "100%" } }, aktiv ? (en ? "Manage alerts" : "Alerts verwalten") : (en ? "Create alert" : "Alert erstellen"))]) }),
     kasten([h("div", { key: "t", style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", color: "var(--t3)", marginBottom: 8 } }, en ? "Recently viewed" : "Zuletzt angesehen"),
       zuletzt.length ? h("div", { key: "l", style: { display: "flex", flexDirection: "column", gap: 2 } }, zuletzt.map(z => h("button", { key: z.pid, onClick: () => onOpen(z.pid, z.name, z.team), style: { display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", border: "none", background: "none", cursor: "pointer", padding: "5px 4px", borderRadius: 8 } }, h(ClubLogo, { name: z.team, size: 16 }), h("span", { style: { flex: 1, fontFamily: FONT_BODY, fontSize: 13, fontWeight: 700, color: "var(--t1)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, z.name), h("span", { style: { fontFamily: FONT_BODY, fontSize: 11, color: "var(--t3)", whiteSpace: "nowrap" } }, mkRel(new Date(z.ts).toISOString())))))
         : h("div", { key: "e", style: { fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t3)" } }, en ? "Player profiles you open appear here." : "Ge\u00f6ffnete Spielerprofile erscheinen hier.")]));
@@ -21842,7 +21906,7 @@ function TransferApp({
   }), " ", t("settings")), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       setMenuOpen(false);
-      setNotifyMode("alerts");
+      if (fwAn) { FW.bereich = "folgen"; setFwOffen(true); } else setNotifyMode("alerts");
     },
     style: {
       display: "flex",
@@ -21878,7 +21942,7 @@ function TransferApp({
   }, t("state_on"))), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       setMenuOpen(false);
-      setNotifyMode("digest");
+      if (fwAn) { FW.bereich = "briefing"; setFwOffen(true); } else setNotifyMode("digest");
     },
     style: {
       display: "flex",
