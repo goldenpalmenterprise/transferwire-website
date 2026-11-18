@@ -3404,7 +3404,7 @@ function NzNachrichtenSeite({ account, setView, admin, openPlayer, openVerein, k
   React.useEffect(() => { const f = (e) => { const d = (e && e.detail) || {}; const l = listeRef.current; if ((d.geaendert || []).length || !l || Number(d.ungelesen) !== Number(l.ungelesen) || Number(d.anfragen) !== (l.anfragen || []).length) ladeListe(); }; window.addEventListener("nz-neu", f); return () => window.removeEventListener("nz-neu", f); }, [ladeListe]);
   React.useEffect(() => { const f = (e) => { if (e && e.detail) setZiel(e.detail); }; window.addEventListener("nz-ziel", f); return () => window.removeEventListener("nz-ziel", f); }, []);
   const q = suche.trim().toLowerCase();
-  const passt = g => !q || ((g.partner && (g.partner.name || "")) + " " + (g.vorschau || "")).toLowerCase().indexOf(q) >= 0;
+  const passt = twSuchPraedikat(q, liste ? (liste.anfragen || []).concat(liste.gespraeche || []) : [], g => [g.partner && g.partner.name, g.vorschau]);
   const aktivId = ziel && ziel.gespraech ? String(ziel.gespraech) : "";
   const eintrag = (g, anfrage) => h("button", { key: g.id, type: "button", className: "nz-ng" + (String(g.id) === aktivId ? " aktiv" : "") + (g.ungelesen > 0 ? " ungelesen" : ""), "data-nz-ng": g.id, onClick: () => setZiel({ gespraech: g.id, name: g.partner && g.partner.name }) },
     h(NzAvatar, { account: account, email: g.partner && g.partner.email, name: g.partner && g.partner.name, hatFoto: !!(g.partner && g.partner.foto), groesse: "klein" }),
@@ -3762,7 +3762,7 @@ function NxAnhangSuche({ account, art, onWahl, schliessen }) {
     const timer = setTimeout(() => { (art === "trainer" ? nzRuf(account, "trainer_suchen", { text: t }) : nzRuf(account, "anhang_suchen", { typ: "spieler", text: t })).then(d => { if (!alive) return; setLaedt(false); setTreffer(d && d.ok ? (d.treffer || []) : []); }); }, 250);
     return () => { alive = false; clearTimeout(timer); };
   }, [art, txt]);
-  const eigene = art === "expose" ? ((ws && ws.spieler) || []).filter(s => !txt.trim() || String(s.name || "").toLowerCase().indexOf(txt.trim().toLowerCase()) >= 0) : null;
+  const eigene = art === "expose" ? twSuchFilter((ws && ws.spieler) || [], txt, s => s.name) : null;
   return h("div", { className: "nz-wahl", "data-nx-suche": art },
     h("div", { style: { display: "flex", alignItems: "center", gap: 8 } }, h("b", { style: { fontSize: 13 } }, art === "trainer" ? L("Trainer anhängen", "Attach a coach") : art === "expose" ? L("Exposé aus „Meine Spieler“", "Exposé from “My players”") : L("Spieler anhängen", "Attach a player")),
       h("button", { type: "button", className: "nx-x", style: { minWidth: 32, minHeight: 32, fontSize: 22 }, "aria-label": L("Schließen", "Close"), onClick: schliessen }, "×")),
@@ -3920,7 +3920,7 @@ function NxSpielerWahl({ account, wert, onWahl }) {
   }, [txt]);
   if (wert) return h("div", { className: "nx-bezug", "data-nx-spieler": "1" }, h("span", { className: "typ" }, L("Spieler", "Player")), h("span", { className: "t" }, h("b", null, wert.titel), wert.unter ? " · " + nxUnter(wert.unter) : ""), h("button", { type: "button", className: "nx-knopf klein text", style: { marginLeft: "auto" }, onClick: () => onWahl(null) }, L("Ändern", "Change")));
   const q = txt.trim().toLowerCase();
-  const eigene = ((ws && ws.spieler) || []).filter(s => !q || String(s.name || "").toLowerCase().indexOf(q) >= 0).slice(0, 6);
+  const eigene = twSuchFilter((ws && ws.spieler) || [], q, s => s.name).slice(0, 6);
   const zeile = (key, titel, unter, bild, kuerzel, fn) => h("button", { key: key, type: "button", onClick: fn }, bild ? h("img", { src: bild, alt: "", loading: "lazy" }) : h("span", { className: "nz-anhang-platz", style: { width: 34, height: 34 } }, kuerzel), h("span", { style: { minWidth: 0 } }, h("div", { style: { fontWeight: 800, fontSize: 13.5 } }, titel), unter ? h("div", { className: "nz-sub", style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, unter) : null));
   return h("div", { className: "nz-wahl", "data-nx-spielerwahl": "1" },
     h("input", { value: txt, onChange: e => setTxt(e.target.value), placeholder: L("Spieler suchen oder Namen eingeben …", "Search a player or type a name …"), "aria-label": L("Spieler", "Player") }),
@@ -4245,9 +4245,9 @@ function NxPostfach({ account, setView, openPlayer, openVerein, kopf }) {
   }, [laden]);
   const pinnen = (body, an, ev) => { if (ev) { ev.stopPropagation(); ev.preventDefault(); } nzRuf(account, "pin", Object.assign({ an: an }, body)).then(d => { if (d && d.ok) laden(); else wsMeldung(d && d.grund === "pin_limit" ? L("Höchstens 30 angepinnte Einträge.", "At most 30 pinned entries.") : nxGrund(d && d.grund, d)); }); };
   const q = suche.trim().toLowerCase();
-  const passtG = g => !q || ((g.partner && (g.partner.name || "")) + " " + (g.vorschau || "")).toLowerCase().indexOf(q) >= 0;
-  const passtA = a => !q || (((a.eigene ? a.an : a.von) || {}).name + " " + (a.betreff || "") + " " + (a.vorschau || "")).toLowerCase().indexOf(q) >= 0;
-  const passtK = c => !q || ((c.name || "") + " " + (c.firma || "")).toLowerCase().indexOf(q) >= 0;
+  const passtG = twSuchPraedikat(q, ((pf && pf.gespraeche) || []).concat((pf && pf.alt_anfragen) || []), g => [g.partner && g.partner.name, g.vorschau]);
+  const passtA = twSuchPraedikat(q, ((pf && pf.anfragen && pf.anfragen.eingang) || []).concat((pf && pf.anfragen && pf.anfragen.gesendet) || []), a => [((a.eigene ? a.an : a.von) || {}).name, a.betreff, a.vorschau]);
+  const passtK = twSuchPraedikat(q, (pf && pf.kontakte) || [], c => [c.name, c.firma]);
   const sortG = l => { const x = l.slice(); if (sort === "name") x.sort((a, b) => String((a.partner && a.partner.name) || "").localeCompare(String((b.partner && b.partner.name) || ""), en ? "en" : "de")); else if (sort === "ungelesen") x.sort((a, b) => ((b.ungelesen > 0 ? 1 : 0) - (a.ungelesen > 0 ? 1 : 0)) || (new Date(b.letzte_am) - new Date(a.letzte_am))); else x.sort((a, b) => new Date(b.letzte_am) - new Date(a.letzte_am)); return x; };
   const sortA = l => { const x = l.slice(); if (sort === "name") x.sort((a, b) => String(((a.eigene ? a.an : a.von) || {}).name || "").localeCompare(String(((b.eigene ? b.an : b.von) || {}).name || ""), en ? "en" : "de")); else if (sort === "ungelesen") x.sort((a, b) => ((b.ungelesen ? 1 : 0) - (a.ungelesen ? 1 : 0)) || (new Date(b.erstellt_am) - new Date(a.erstellt_am))); return x; };
   const aktivG = ziel && ziel.gespraech ? String(ziel.gespraech) : ""; const aktivA = ziel && ziel.anfrage ? String(ziel.anfrage) : ""; const aktivP = ziel && ziel.profil && !ziel.gespraech ? String(ziel.profil) : "";
@@ -5138,7 +5138,8 @@ function FwAuswahlFeld({ wert, onChange, gesperrt }) {
   const landKlick = l => { if (hatLand(l.land)) setz({ laender: w.laender.filter(x => x !== l.land) }); else setz({ laender: w.laender.concat([l.land]), ligen: w.ligen.filter(x => (l.ligen || []).indexOf(x) < 0) }); };
   const ligaKlick = lg => setz({ ligen: hatLiga(lg) ? w.ligen.filter(x => x !== lg) : w.ligen.concat([lg]) });
   const s = q.trim().toLowerCase();
-  const sichtbar = s ? laender.filter(l => l.land.toLowerCase().indexOf(s) >= 0 || (l.ligen || []).some(x => String(x).toLowerCase().indexOf(s) >= 0)) : (alle ? laender : laender.slice(0, 10));
+  const m18Land = twSuchPraedikat(s, laender, l => [l.land].concat(l.ligen || [])); const m18Liga = twSuchPraedikat(s, laender.reduce((a, l) => a.concat(l.ligen || []), []), x => x);
+  const sichtbar = s ? laender.filter(m18Land) : (alle ? laender : laender.slice(0, 10));
   const nichts = !w.laender.length && !w.ligen.length && !w.vereine.length;
   return h("div", { style: { display: "grid", gap: 14 } },
     h("div", { className: "fw-auswahl-teil" },
@@ -5149,7 +5150,7 @@ function FwAuswahlFeld({ wert, onChange, gesperrt }) {
       h("input", { type: "search", className: "fw-suchfeld", placeholder: fwL("Land oder Liga suchen", "Search country or league"), value: q, onChange: e => setQ(e.target.value), "aria-label": fwL("Land oder Liga suchen", "Search country or league"), disabled: gesperrt }),
       !laender.length ? h("p", { className: "nx-leer" }, fwL("Länder werden geladen …", "Loading countries …")) :
       h("div", { className: "fw-laender" }, sichtbar.map(l => {
-        const ganz = hatLand(l.land); const n = (l.ligen || []).length; const ist = !!auf[l.land] || (s && (l.ligen || []).some(x => String(x).toLowerCase().indexOf(s) >= 0));
+        const ganz = hatLand(l.land); const n = (l.ligen || []).length; const ist = !!auf[l.land] || (s && (l.ligen || []).some(m18Liga));
         const teil = !ganz && (l.ligen || []).some(hatLiga);
         return h("div", { key: l.land, className: "fw-land" },
           h("div", { className: "fw-land-kopf" },
@@ -8670,7 +8671,8 @@ function TopTalenteLand({ onOpen, onAnalyse }) {
   const sortiertName = l => l.slice().sort((a, b) => a.name.localeCompare(b.name, en ? "en" : "de"));
   const mitDaten = laender.filter(l => l.n > 0).sort((a, b) => b.n - a.n || a.name.localeCompare(b.name, en ? "en" : "de"));
   const qn = ttNorm(q);
-  const treffer = qn ? laender.filter(l => { const a = ttNorm(l.name), b = ttNorm(ttLandName(l.code, !en)); return a.indexOf(qn) >= 0 || b.indexOf(qn) >= 0 || (qn.length === 2 && l.code === qn); }).sort((a, b) => (b.n > 0) - (a.n > 0) || ((ttNorm(b.name).indexOf(qn) === 0) - (ttNorm(a.name).indexOf(qn) === 0)) || a.name.localeCompare(b.name, en ? "en" : "de")) : null;
+  const m18Tt = twSuchPraedikat(q, laender, l => [l.name, ttLandName(l.code, !en)]);
+  const treffer = qn ? laender.filter(l => { if (m18Tt(l)) return true; const a = ttNorm(l.name), b = ttNorm(ttLandName(l.code, !en)); return a.indexOf(qn) >= 0 || b.indexOf(qn) >= 0 || (qn.length === 2 && l.code === qn); }).sort((a, b) => (b.n > 0) - (a.n > 0) || ((ttNorm(b.name).indexOf(qn) === 0) - (ttNorm(a.name).indexOf(qn) === 0)) || a.name.localeCompare(b.name, en ? "en" : "de")) : null;
   const landObj = land ? (laender.find(l => l.code === land) || { code: land, n: 0, name: ttLandName(land, en) }) : null;
   const liste = land && auf ? (auf.proLand[land] || []).slice(0, 50) : [];
   const zaehl = n => n === 0 ? (en ? "no data yet" : "noch keine Daten") : n + (en ? (n === 1 ? " talent" : " talents") : (n === 1 ? " Talent" : " Talente"));
@@ -8934,7 +8936,10 @@ const cmtyNorm = s => String(s || "").toLowerCase().replace(/\u00df/g, "ss").nor
 const cmtyFilter = (posts, q) => {
   const w = cmtyNorm(q).split(/\s+/).filter(Boolean);
   if (!w.length) return posts;
-  return posts.filter(p => { const t = cmtyNorm((p.body || "") + " " + (p.author_name || "") + " " + (p.author_rolle || "") + " " + (p.agent_headline || "")); return w.every(x => t.indexOf(x) >= 0); });
+  const m18Txt = p => (p.body || "") + " " + (p.author_name || "") + " " + (p.author_rolle || "") + " " + (p.agent_headline || "");
+  const genau = posts.filter(p => { const t = cmtyNorm(m18Txt(p)); return w.every(x => t.indexOf(x) >= 0); });
+  if (genau.length || !w.some(x => x.length >= 4)) return genau;
+  return posts.filter(p => twSuchPunkte(q, m18Txt(p)) > 0);  // M18: ohne genauen Treffer ähnliche Schreibweisen
 };
 function KiSuchePanel({ schliessen, msgs, busy, treffer, frage, setFrage, senden }) {
   const en = LANG === "en";
@@ -10582,7 +10587,8 @@ function SpielStatistik({ x, name, spiele, onZurueck, onSchliessen, onAnalyse, a
   const schmal = breite < 1000;
   const wettbewerbe = Array.from(new Set(alle.filter((s) => !saison || s.saison === saison).map((s) => s.league).filter(Boolean)));
   const q = suche.trim().toLowerCase();
-  const liste = alle.filter((s) => (!saison || s.saison === saison) && (!wettbewerb || s.league === wettbewerb) && (!ort || (ort === "H" ? s.heim === true : s.heim === false)) && (!q || [s.gegner, s.league, s.wettbewerb_typ, s.datum ? dbDatum(s.datum) : "", s.datum].join(" ").toLowerCase().indexOf(q) >= 0));
+  const m18Sp = twSuchPraedikat(q, alle, s => [s.gegner, s.league, s.wettbewerb_typ, s.datum ? dbDatum(s.datum) : "", s.datum]);
+  const liste = alle.filter((s) => (!saison || s.saison === saison) && (!wettbewerb || s.league === wettbewerb) && (!ort || (ort === "H" ? s.heim === true : s.heim === false)) && (!q || m18Sp(s)));
   const n = (v) => (v == null || v === "" || isNaN(Number(v)) ? null : Number(v));
   const sum = (k) => liste.reduce((a, s) => a + (n(s[k]) || 0), 0);
   const avg = (k, d) => { const w = liste.map((s) => n(s[k])).filter((v) => v != null); return w.length ? pkZahl(w.reduce((a, b) => a + b, 0) / w.length, d) : "\u2013"; };
@@ -10861,13 +10867,14 @@ function GerVue({ alle, onWatch, onOpen, updatedAt, watch, onSide, apply }) {
   const feldSp = it => String((it.player && it.player.name) || it.player || "");
   const zeitVon = it => { const t = it.published ? new Date(it.published).getTime() : NaN; return isNaN(t) || !t ? relToTime(it.publishedAt) : t; };
   const beobClubs = useMemo(() => { const s = new Set(); (watch || []).forEach(w => gerClubs(w).forEach(c => s.add(c))); return s; }, [watch]);
+  const m18Ger = twSuchPraedikat(f.verein, alle || [], it => [feldVon(it), feldZu(it), feldSp(it), seekingClubSafe(it)]);
   const basis = useMemo(() => (alle || []).filter(it => {
     const typ = it.type || "";
     if (typ === "verein_sucht") return false;
     const liga = it.league || "";
     if (f.liga && liga !== f.liga) return false;
     if (!f.liga && f.land && ligen.indexOf(liga) < 0) return false;
-    if (f.verein) { const v = f.verein.toLowerCase(); if ((feldVon(it) + " " + feldZu(it) + " " + feldSp(it) + " " + seekingClubSafe(it)).toLowerCase().indexOf(v) < 0) return false; }
+    if (f.verein && !m18Ger(it)) return false;
     if (f.pos && !gerPosMatch(it, f.pos)) return false;
     if (f.zeit && gerZeitFenster[f.zeit]) { const t = zeitVon(it); if (!t || Date.now() - t > gerZeitFenster[f.zeit] * 86400000) return false; }
     if (f.qv && (Number(it.reliability) || 0) < Number(f.qv)) return false;
@@ -11674,7 +11681,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261117-nacht-ws";
+const VS_VERSION = "20261118-liga-suche";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -12164,7 +12171,8 @@ function PerfVue({ perf, perfLoading, q, lg, pos, st, sw, watch, onWatchToggle, 
   useEffect(() => { const f = () => setPortrait(window.innerWidth <= 700); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);
   const q2 = String(q || "").toLowerCase().trim();
   const basis = (perf || []).filter(x => q2 ? true : (Number(x.min) || 0) >= 30);
-  const gefiltert = basis.filter(x => (!q2 || (x.name + " " + x.team).toLowerCase().indexOf(q2) >= 0) && (!lg || x.league === lg) && (!pos || x.pos === pos) && (!st || (x.stt || "").indexOf(st) >= 0) && (!sw || (x.swt || "").indexOf(sw) >= 0));
+  const m18Perf = twSuchPraedikat(q2, basis, x => [x.name, x.team]);
+  const gefiltert = basis.filter(x => (!q2 || m18Perf(x)) && (!lg || x.league === lg) && (!pos || x.pos === pos) && (!st || (x.stt || "").indexOf(st) >= 0) && (!sw || (x.swt || "").indexOf(sw) >= 0));
   const filterAktiv = !!(q2 || lg || pos || st || sw);
   const elf = useMemo(() => perfElf(basis.filter(x => (Number(x.min) || 0) >= 45)), [perf]);
   const topP = basis.filter(x => (Number(x.min) || 0) >= 45).slice().sort((a, b) => (b.score || 0) - (a.score || 0))[0] || basis.slice().sort((a, b) => (b.score || 0) - (a.score || 0))[0] || null;
@@ -12453,12 +12461,12 @@ function VertragTabelle({ radar, onOpen }) {
     const rang = r => r.frei ? -1e9 : (r.ende ? r.ende.getTime() : 9e15);
     return out.filter(r => r.frei || !r.ende || vtTage(r.ende) >= 0).sort((a, b) => rang(a) - rang(b) || vtScore(b) - vtScore(a));
   }, [radar, db, anreich]);
-  const ligen = useMemo(() => Array.from(new Set(rows.map(r => r.league).filter(Boolean))).sort(), [rows]);
+  const ligen = useMemo(() => Array.from(new Set(rows.map(r => r.league).filter(Boolean))).sort(twLigaLandVergleich), [rows]);
   const quellen = useMemo(() => Array.from(new Set(rows.map(r => r.quelle).filter(Boolean))).sort(), [rows]);
   const gefiltert = useMemo(() => {
-    const q = fl.q.trim().toLowerCase();
+    const q = fl.q.trim().toLowerCase(); const m18Vt = twSuchPraedikat(q, rows, r => [r.name, r.team]);
     const liste = rows.filter(r => {
-      if (q && (String(r.name || "") + " " + String(r.team || "")).toLowerCase().indexOf(q) < 0) return false;
+      if (q && !m18Vt(r)) return false;
       const tg = r.frei ? -1 : vtTage(r.ende);
       if (fl.status === "frei" && !r.frei) return false;
       if (fl.status === "30" && (r.frei || tg === null || tg >= 30)) return false;
@@ -12489,7 +12497,7 @@ function VertragTabelle({ radar, onOpen }) {
       h("input", { value: fl.q, onChange: e => setFl(Object.assign({}, fl, { q: e.target.value })), placeholder: en ? "Search player or club \u2026" : "Spieler oder Verein suchen \u2026", style: { fontFamily: FONT_BODY, fontSize: 13, color: INK, border: "1px solid " + (fl.q ? "var(--dunkel)" : HAIR), borderRadius: 10, padding: "0 12px", height: 40, background: "var(--karte)", flex: "1 1 220px", minWidth: 0, maxWidth: 320 } }),
       sel("status", [["alle", en ? "All statuses" : "Alle Status"], ["frei", en ? "Available now" : "Sofort verf\u00fcgbar"], ["30", en ? "Ends within 30 days" : "Endet in 30 Tagen"], ["180", en ? "Ends within 6 months" : "Endet in 6 Monaten"], ["365", en ? "Contract until (12 months)" : "Vertrag bis (12 Monate)"]], "Status"),
       sel("pos", [["", en ? "All positions" : "Alle Positionen"], ["Torwart", "Torwart"], ["Abwehr", "Abwehr"], ["Mittelfeld", "Mittelfeld"], ["Sturm", "Sturm"]], "Position"),
-      sel("liga", [["", en ? "All leagues" : "Alle Ligen"]].concat(ligen.map(l => [l, l])), "Liga"),
+      sel("liga", [["", en ? "All leagues" : "Alle Ligen"]].concat(ligen.map(l => [l, twLigaMitLand(l, en)])), "Liga"),
       sel("alter", [["", en ? "All ages" : "Alle Altersklassen"], ["21", "U21"], ["23", "U23"], ["25", "U25"], ["30", "U30"]], "Alter"),
       sel("mw", [["", en ? "All market values" : "Alle Marktwerte"], ["vorhanden", en ? "With market value" : "Mit Marktwert"], ["1m", en ? "Above \u20ac1m" : "\u00fcber 1 Mio. \u20ac"], ["5m", en ? "Above \u20ac5m" : "\u00fcber 5 Mio. \u20ac"]], "Marktwert"),
       sel("quelle", [["", en ? "All sources" : "Alle Quellen"]].concat(quellen.map(q2 => [q2, q2])), "Quelle")),
@@ -13505,9 +13513,9 @@ function WsAngeboteVue({ account, openPlayer, setView, watch, profiles }) {
   if (!liste) return h("div", { className: "ws2", "data-ws-seite": "angebote" }, kopf, h("div", { className: "ws2-leer" }, WS.aFehler ? [h("span", { key: "f", className: "ws2-fehler" }, wsGrund(WS.aFehler)), h("div", { key: "b", className: "ws2-knoepfe" }, h("button", { type: "button", className: "ws2-btn", onClick: () => { WS.aFehler = ""; wsAngeboteLaden(account); wsNeu(); } }, L("Erneut laden", "Reload")))] : L("Deine Angebote werden geladen …", "Loading your offers …")));
   const istOffen = a => WS3_OFFEN.indexOf(a.status) >= 0;
   const nOffen = liste.filter(istOffen).length, nZu = liste.length - nOffen, nNeu = liste.filter(a => !a.gelesen).length;
-  const t = ws3Norm(q.trim());
+  const t = ws3Norm(q.trim()); const m18An = twSuchPraedikat(q, liste, a => [a.spieler, a.titel, a.von, a.verein, a.konditionen, a.notiz, a.team]);
   const sicht = liste.filter(a => (filter === "alle" || (filter === "offen" ? istOffen(a) : !istOffen(a))) && (!art || a.art === art)
-    && (!t || ws3Norm([a.spieler, a.titel, a.von, a.verein, a.konditionen, a.notiz, a.team].join(" ")).indexOf(t) >= 0));
+    && (!t || m18An(a)));
   const alleGelesen = () => { WS.angebote = liste.map(a => Object.assign({}, a, { gelesen: true })); wsANeuSetzen(0, true); wsNeu(); wsRuf(account, "angebot_gelesen", { alle: true }).then(r => { if (r && r.ok) wsANeuSetzen(r.angebote_neu, true); }); };
   return h("div", { className: "ws2", "data-ws-seite": "angebote" }, kopf,
     h("div", { className: "ws2-raster" },
@@ -13595,7 +13603,7 @@ function WsNotizEditor({ account, kand, edit, onFertig }) {
   const qn = men ? men.q.trim() : "";
   const db = useWs3Suche(account, men && qn.length >= 2 ? qn : "");
   const vorschlagAus = (q, dbt) => {
-    const nq = ws3Norm(q); const lokal = q ? kand.filter(c => (c.pid || c.wid) && ws3Norm(c.name).indexOf(nq) >= 0).slice(0, 5) : [];
+    const lokal = q ? twSuchRang(kand.filter(c => c.pid || c.wid), q, c => c.name).slice(0, 5) : [];
     const dbl = (dbt || []).map(t => ({ pid: Number(t.pid), name: t.name, team: t.team, liga: t.liga, position: t.position, foto: t.foto }));
     const erg = []; const seen = {}; lokal.concat(dbl).forEach(c => { const k = ws3Key(c); if (!seen[k]) { seen[k] = true; erg.push(c); } });
     return erg.slice(0, 8);
@@ -13710,8 +13718,8 @@ function WsNotizenVue({ account, openPlayer, setView, watch, profiles }) {
   const proNotiz = liste.map(n => ({ n: n, sp: spielerVon(n) }));
   const zaehler = {}; proNotiz.forEach(x => Object.keys(x.sp).forEach(k => { if (!zaehler[k]) zaehler[k] = { c: x.sp[k], n: 0 }; zaehler[k].n++; }));
   const spListe = Object.keys(zaehler).map(k => zaehler[k]).sort((a, b) => b.n - a.n || String(a.c.name).localeCompare(String(b.c.name), en ? "en" : "de")).slice(0, 15);
-  const t = ws3Norm(q.trim());
-  const sicht = proNotiz.filter(x => (!spf || x.sp[spf.k]) && (!t || ws3Norm(x.n.text + " " + Object.keys(x.sp).map(k => x.sp[k].name).join(" ")).indexOf(t) >= 0)).map(x => x.n);
+  const t = ws3Norm(q.trim()); const m18No = twSuchPraedikat(q, proNotiz, x => x.n.text + " " + Object.keys(x.sp).map(k => x.sp[k].name).join(" "));
+  const sicht = proNotiz.filter(x => (!spf || x.sp[spf.k]) && (!t || m18No(x))).map(x => x.n);
   return h("div", { className: "ws2", "data-ws-seite": "notizen" }, kopf,
     h("div", { className: "ws2-raster" },
       h("div", { className: "ws2-haupt" },
@@ -17303,7 +17311,7 @@ function KontakteVue({ isPrem, authQ, openVerein, account, setView }) {
   React.useEffect(() => { const mails = (Array.isArray(kont) ? kont : []).map(c => String(c.email || "").toLowerCase().trim()).filter(m => m && m !== "tbd" && m.indexOf("@") > 0); if (!mails.length || !account || !twHatSitzung(account)) { setTwKonten({}); return undefined; } let alive = true; nzRuf(account, "kontakte_plattform", { emails: mails }).then(d => { if (!alive) return; const m = {}; ((d && d.treffer) || []).forEach(t => { m[String(t.email || "").toLowerCase()] = t; }); setTwKonten(m); }).catch(() => {}); return () => { alive = false; }; }, [kont, account && account.email]);
   React.useEffect(() => { fetch("/api/tw-vereine", { cache: "default" }).then(r => r.json()).then(d => setVereine(d && Array.isArray(d.vereine) ? d.vereine : [])).catch(() => {}); }, []);
   const norm = x => String(x || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  const vorschlaege = useMemo(() => { const k = norm(q.trim()); if (!k) return []; const hits = vereine.filter(v => norm(v.t).indexOf(k) >= 0); hits.sort(twVereinSort(k, v => v.t, v => v.l)); return hits.slice(0, 8); }, [q, vereine]);
+  const vorschlaege = useMemo(() => { const k = norm(q.trim()); if (!k) return []; const hits = twSuchFilter(vereine, q, v => v.t); hits.sort(twVereinSort(k, v => v.t, v => v.l)); return hits.slice(0, 8); }, [q, vereine]);
   const laender = useMemo(() => twLaenderListe(vereine, en), [vereine]);
   const landObj = laender.find(l => l.key === land) || null;
   const landVon = lg => twLandVonLiga(lg) || "Sonstige";
@@ -18342,12 +18350,12 @@ function tkFiltern(items, f, beob) {
   const land = (f.land && typeof LAND_LIGEN !== "undefined") ? LAND_LIGEN.find(x => x.de === f.land) : null; const landLigen = land && Array.isArray(land.ligen) ? land.ligen : null;
   const tage = f.zeit ? (typeof gerZeitFenster !== "undefined" && gerZeitFenster[f.zeit]) || TK_ZEIT[f.zeit] || 0 : 0;
   let grenze = ""; if (tage) { const g = new Date(); g.setDate(g.getDate() - tage); grenze = g.toISOString().slice(0, 10); }
-  const v = (f.verein || "").trim().toLowerCase();
+  const v = (f.verein || "").trim().toLowerCase(); const m18Tk = twSuchPraedikat(v, liste, x => [x.name, x.to_club, x.from_club]);
   return liste.filter(x => {
     if (grenze && (x.datum || "") < grenze) return false;
     if (f.liga && x.to_liga !== f.liga && x.from_liga !== f.liga) return false;
     if (!f.liga && landLigen && landLigen.indexOf(x.to_liga) < 0 && landLigen.indexOf(x.from_liga) < 0) return false;
-    if (v && ((x.name || "") + " " + (x.to_club || "") + " " + (x.from_club || "")).toLowerCase().indexOf(v) < 0) return false;
+    if (v && !m18Tk(x)) return false;
     if (f.pos && !tkPosMatch(x.position, f.pos)) return false;
     const alter = Number(x.alter) || 0;
     if (f.alterVon && (!alter || alter < Number(f.alterVon))) return false;
@@ -18503,17 +18511,17 @@ function VereineDbVue({ onOpen }) {
     return () => { aktiv = false; };
   }, []);
   const laender = useMemo(() => { const s = {}; (items || []).forEach(x => { if (x.land) s[x.land] = (s[x.land] || 0) + 1; }); return Object.keys(s).sort((a, b) => a.localeCompare(b)); }, [items]);
-  const ligen = useMemo(() => { const s = {}; (items || []).forEach(x => { if (x.liga && (!land || x.land === land)) s[x.liga] = (s[x.liga] || 0) + 1; }); return Object.keys(s).sort((a, b) => (a.localeCompare(b))); }, [items, land]);
+  const ligen = useMemo(() => { const s = {}; (items || []).forEach(x => { if (x.liga && (!land || x.land === land)) s[x.liga] = (s[x.liga] || 0) + 1; }); return Object.keys(s).sort(land ? twLigaVergleich : twLigaLandVergleich); }, [items, land]);
   const liste = useMemo(() => {
     if (!items) return [];
-    const toks = q.toLowerCase().split(/\s+/).map(t => t.trim()).filter(Boolean);
+    const toks = q.toLowerCase().split(/\s+/).map(t => t.trim()).filter(Boolean); const m18Vdb = twSuchPraedikat(q, items, x => [x.suche, x.name]);
     let out = items.filter(x => {
       if (!reserve && x.reserve && !toks.length) return false;
       if (land && x.land !== land) return false;
       if (liga && x.liga !== liga) return false;
       if (lage === "abstieg" && !x.abstieg) return false; if (lage === "titel" && !x.titel) return false; if (lage === "druck" && !x.druck) return false;
       if (bedarf === "rot" && !(Number(x.rot) > 0)) return false; if (bedarf === "gelb" && !(Number(x.gelb) > 0)) return false; if (bedarf === "kein" && (Number(x.rot) > 0 || Number(x.gelb) > 0)) return false;
-      if (toks.length) { const s = x.suche || x.name.toLowerCase(); if (!toks.every(t => s.indexOf(t) >= 0)) return false; }
+      if (toks.length && !m18Vdb(x)) return false;
       return true;
     });
     const num = (v, d) => v == null || v === "" ? d : Number(v);
@@ -18550,7 +18558,7 @@ function VereineDbVue({ onOpen }) {
     h("div", { style: { display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 } },
       h("input", { value: q, onChange: e => setQ(e.target.value), placeholder: vdbT("suche"), "aria-label": vdbT("suche"), style: { flex: "1 1 240px", fontFamily: FONT_BODY, fontSize: 16, padding: "10px 12px", border: "1px solid var(--linie)", borderRadius: 9, boxSizing: "border-box", background: "var(--karte)", color: "var(--t1)" } }),
       h("select", { value: land, onChange: e => { setLand(e.target.value); setLiga(""); }, style: vdbSel }, h("option", { value: "" }, vdbT("land")), laender.map(l => h("option", { key: l, value: l }, landName(l)))),
-      h("select", { value: liga, onChange: e => setLiga(e.target.value), style: Object.assign({ maxWidth: 200 }, vdbSel) }, h("option", { value: "" }, vdbT("liga")), ligen.map(l => h("option", { key: l, value: l }, l))),
+      h("select", { value: liga, onChange: e => setLiga(e.target.value), style: Object.assign({ maxWidth: 200 }, vdbSel) }, h("option", { value: "" }, vdbT("liga")), ligen.map(l => h("option", { key: l, value: l }, land ? l : twLigaMitLand(l, en)))),
       h("select", { value: lage, onChange: e => setLage(e.target.value), style: vdbSel }, h("option", { value: "" }, vdbT("lage_alle")), h("option", { value: "abstieg" }, vdbT("abstieg")), h("option", { value: "titel" }, vdbT("titel_r")), h("option", { value: "druck" }, vdbT("druck"))),
       h("select", { value: bedarf, onChange: e => setBedarf(e.target.value), style: vdbSel }, h("option", { value: "" }, vdbT("bedarf_alle")), h("option", { value: "rot" }, vdbT("rot")), h("option", { value: "gelb" }, vdbT("gelb")), h("option", { value: "kein" }, vdbT("kein")))),
     h("div", { style: { display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", marginBottom: 14, fontFamily: FONT_BODY, fontSize: 13, color: "var(--t2)" } },
@@ -18763,11 +18771,108 @@ function twXgAusStatistik(stat, sh, sg) {
 const TW_BEREICH_EN = { "Abschluss": "Finishing", "Chancenkreation": "Chance creation", "Ballführung": "Ball carrying", "Ballsicherheit": "Ball security", "Defensive": "Defending", "Schussabwehr": "Shot stopping", "Strafraum": "Box control", "Spielaufbau": "Build-up" };
 function twBereichName(x, en) { const t = String(x || "").trim(); return en ? (TW_BEREICH_EN[t] || t) : t; }
 /* A97 (01.11.2026): Vereinssuche - ganzes Wort vor Namensanfang vor Wortanfang vor Teilstring, bei Gleichstand hoehere Liga zuerst (VfB oder Stuttgart -> VfB Stuttgart) */
-function twSuchNorm(x) { return String(x || "").toLowerCase().replace(/\u00df/g, "ss").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim(); }
+/* M18 (18.11.2026, Boss 05:46): eine Suche fuer alle Suchfelder - Wortreihenfolge egal (Oh Hyeon-gyu = Hyeon-gyu Oh), Akzente/Bindestriche egal, deutsche Umschrift (Mueller = Müller),
+   Tippfehler und Buchstabendreher werden toleriert. Spieler und Vereine aus der Datenbank laufen ueber den Such-Kern des Servers (public.tw_such_spieler / tw_such_vereine);
+   lokale Listen filtern mit twSuchPraedikat: zuerst genaue Treffer, nur wenn es keine gibt, aehnliche Schreibweisen. */
+const TW_SUCH_ERSATZ = { "ß": "ss", "ø": "o", "ł": "l", "đ": "d", "ð": "d", "þ": "th", "æ": "ae", "œ": "oe", "ı": "i" };
+function twSuchNorm(x) { return String(x || "").toLowerCase().replace(/[ßøłđðþæœı]/g, c => TW_SUCH_ERSATZ[c] || c).normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, " ").trim(); }
+const TW_SUCH_N = new Map();
+function twSuchNormC(x) { const s = String(x == null ? "" : x); let n = TW_SUCH_N.get(s); if (n === undefined) { if (TW_SUCH_N.size > 30000) TW_SUCH_N.clear(); n = twSuchNorm(s); TW_SUCH_N.set(s, n); } return n; }
+function twSuchWoerter(q) { const n = twSuchNorm(q); return n ? n.split(" ").slice(0, 6) : []; }
+function twSuchSkelett(w) { return w.charAt(0) + w.slice(1).replace(/ph/g, "f").replace(/ck/g, "k").replace(/w/g, "v").replace(/z/g, "s").replace(/[aeiou]+/g, "").replace(/(.)\1+/g, "$1"); }
+function twSuchTri(w) { const s = "  " + w + " ", o = {}; for (let i = 0; i + 3 <= s.length; i++) o[s.substr(i, 3)] = 1; return o; }
+function twSuchAehnlich(a, b) { const x = twSuchTri(a), y = twSuchTri(b); let g = 0, n = 0; for (const k in x) { n++; if (y[k]) g++; } for (const k in y) if (!x[k]) n++; return n ? g / n : 0; }
+/* Abstand in Tippfehlern (ein Buchstabe falsch, zu viel, zu wenig oder zwei vertauscht = 1); bricht ab, sobald max ueberschritten ist */
+function twSuchAbstand(a, b, max) {
+  const la = a.length, lb = b.length; if (Math.abs(la - lb) > max) return max + 1;
+  let v0 = new Array(lb + 1), v1 = new Array(lb + 1), v2 = new Array(lb + 1);
+  for (let j = 0; j <= lb; j++) v1[j] = j;
+  for (let i = 1; i <= la; i++) {
+    v2[0] = i; let mn = i;
+    for (let j = 1; j <= lb; j++) {
+      let d = Math.min(v1[j] + 1, v2[j - 1] + 1, v1[j - 1] + (a.charCodeAt(i - 1) === b.charCodeAt(j - 1) ? 0 : 1));
+      if (i > 1 && j > 1 && a.charCodeAt(i - 1) === b.charCodeAt(j - 2) && a.charCodeAt(i - 2) === b.charCodeAt(j - 1)) d = Math.min(d, v0[j - 2] + 1);
+      v2[j] = d; if (d < mn) mn = d;
+    }
+    if (mn > max) return max + 1;
+    const t = v0; v0 = v1; v1 = v2; v2 = t;
+  }
+  return v1[lb];
+}
+/* 0..100: wie gut passt das Suchwort t auf das Wort w (beide schon normalisiert) */
+function twSuchWortPunkte(t, w) {
+  if (w === t) return 100; const lt = t.length, lw = w.length; if (!lt || !lw) return 0;
+  if (lt < lw && w.indexOf(t) === 0) return 70 + 25 * lt / lw;
+  if (lt >= 5) { const tv = t.replace(/ue/g, "u").replace(/oe/g, "o").replace(/ae/g, "a"); if (tv !== t && tv.length >= 4) { if (w === tv) return 95; if (w.indexOf(tv) === 0) return 66 + 25 * tv.length / lw; } }
+  if (lt >= 3 && w.indexOf(t) >= 0) return 50;
+  if (lt < 4 || lw < 3) return 0;
+  const max = lt >= 8 ? 2 : 1; const d = twSuchAbstand(t, w, max); if (d <= max) return d <= 1 ? 62 : 48;
+  if (lt >= 5 && lw > lt && twSuchAbstand(t, w.slice(0, lt), 1) <= 1) return 40;
+  if (Math.abs(lw - lt) <= 2 && twSuchSkelett(t) === twSuchSkelett(w) && twSuchAehnlich(t, w) >= 0.2) return 52;
+  return 0;
+}
+/* 0 = passt nicht. Sonst Mittel der besten Wort-Punkte je Suchwort (jedes Suchwort muss irgendwo passen); n = normalisierter Text */
+function twSuchPunkteN(toks, n) {
+  if (!toks.length || !n) return 0; const ws = n.split(" "); let sum = 0;
+  for (let i = 0; i < toks.length; i++) { const t = toks[i]; let best = 0; for (let j = 0; j < ws.length && best < 100; j++) { const p = twSuchWortPunkte(t, ws[j]); if (p > best) best = p; } if (!best) return 0; sum += best; }
+  return sum / toks.length + (n.indexOf(toks.join(" ")) === 0 ? 3 : 0);
+}
+function twSuchPunkte(q, text) { return twSuchPunkteN(twSuchWoerter(q), twSuchNormC(text)); }
+function twSuchGenau(toks, n) { for (let i = 0; i < toks.length; i++) if (n.indexOf(toks[i]) < 0) return false; return true; }
+/* Filter fuer lokale Listen. Liefert eine Funktion (eintrag) => passt. textVon(eintrag) gibt den durchsuchten Text (oder mehrere Texte als Liste).
+   Erst genaue Treffer: jedes Suchwort kommt vor, Reihenfolge und Akzente egal. Hat die Liste keinen genauen Treffer, gelten aehnliche Schreibweisen (ab vier Buchstaben). */
+function twSuchPraedikat(q, liste, textVon) {
+  const roh = String(q == null ? "" : q).trim().toLowerCase(); if (!roh) return () => true;
+  const tv = typeof textVon === "function" ? textVon : (x => x);
+  const txt = x => { const v = tv(x); return Array.isArray(v) ? v.join(" ") : v; };
+  const toks = twSuchWoerter(roh);
+  if (!toks.length) return x => String(txt(x) || "").toLowerCase().indexOf(roh) >= 0;
+  const genau = x => twSuchGenau(toks, twSuchNormC(txt(x)));
+  const l = Array.isArray(liste) ? liste : [];
+  if (!l.length || !toks.some(t => t.length >= 4) || l.some(genau)) return genau;
+  return x => twSuchPunkteN(toks, twSuchNormC(txt(x))) > 0;
+}
+function twSuchFilter(liste, q, textVon) { const l = Array.isArray(liste) ? liste : []; return l.filter(twSuchPraedikat(q, l, textVon)); }
+/* wie twSuchFilter, aber nach Guete sortiert (beste zuerst, bei Gleichstand bisherige Reihenfolge) - fuer Vorschlagslisten */
+function twSuchRang(liste, q, textVon) {
+  const l = Array.isArray(liste) ? liste : []; const toks = twSuchWoerter(q); if (!toks.length) return twSuchFilter(l, q, textVon);
+  const tv = typeof textVon === "function" ? textVon : (x => x); const txt = x => { const v = tv(x); return Array.isArray(v) ? v.join(" ") : v; };
+  return twSuchFilter(l, q, textVon).map((x, i) => [x, i, twSuchPunkteN(toks, twSuchNormC(txt(x)))]).sort((a, b) => Math.floor(b[2] / 12) - Math.floor(a[2] / 12) || a[1] - b[1]).map(z => z[0]);
+}
+/* Spieler aus der Datenbank ueber den Such-Kern (Name oder Verein). Liefert [{ pid, name, team, liga, pos, alter, foto }] in der Reihenfolge des Servers */
+function twSuchSpieler(q, n, signal) {
+  const s = String(q || "").trim().slice(0, 60); if (s.length < 2) return Promise.resolve([]);
+  return fetch("/db/rpc/tw_suche_vorschlaege?q=" + encodeURIComponent(s) + "&n=" + (n || 8), { credentials: "omit", signal: signal || undefined }).then(r => r.ok ? r.json() : null).then(d => (d && Array.isArray(d.spieler) ? d.spieler : [])).catch(() => []);
+}
+/* PostgREST-Bedingung: jedes Suchwort in einer der Spalten (Reihenfolge egal); spalten z. B. ["search_name", "search_team"] */
+function twSuchBedingung(q, spalten) {
+  const toks = twSuchWoerter(q).slice(0, 4); if (!toks.length) return "";
+  return "&and=(" + toks.map(w => { const n = encodeURIComponent("*" + w + "*"); return spalten.length > 1 ? "or(" + spalten.map(sp => sp + ".ilike." + n).join(",") + ")" : spalten[0] + ".ilike." + n; }).join(",") + ")";
+}
+/* M18 (18.11.2026, Boss 05:46): Ligen eines Landes immer von oben nach unten (1 = hoechste Liga), nie alphabetisch - sonst steht "2. Bundesliga" vor "Bundesliga".
+   Ebene aus mw.liga (Stand 18.11.2026); die Marktwert-Sicht liefert liga_ebene mit, die Tabelle hier ist der Rueckfall und gilt fuer alle uebrigen Auswahllisten. */
+const TW_LIGA_EBENE = { "Bundesliga": 1, "2. Bundesliga": 2, "3. Liga": 3, "Regionalliga Bayern": 4, "Regionalliga Nord": 4, "Regionalliga Nordost": 4, "Regionalliga Südwest": 4, "Regionalliga West": 4,
+  "Premier League": 1, "Championship": 2, "LaLiga": 1, "La Liga": 1, "LaLiga 2": 2, "La Liga 2": 2, "Serie A": 1, "Serie B": 2, "Ligue 1": 1, "Ligue 2": 2, "Eredivisie": 1, "Eerste Divisie": 2,
+  "Liga Portugal": 1, "Primeira Liga": 1, "Liga Portugal 2": 2, "Jupiler Pro League": 1, "Pro League": 1, "Challenger Pro League": 2,
+  "Bundesliga (Österreich)": 1, "2. Liga (Österreich)": 2, "Regionalliga Nord (Österreich)": 3, "Super League (Schweiz)": 1, "Challenge League (Schweiz)": 2,
+  "Süper Lig": 1, "1. Lig (Türkei)": 2, "Scottish Premiership": 1, "Premiership": 1, "Superligaen": 1, "Superliga": 1, "1. Division (Dänemark)": 2, "Eliteserien": 1,
+  "Allsvenskan": 1, "Superettan (Schweden)": 2, "Ekstraklasa": 1, "1. Liga (Polen)": 2, "Super Liga (Serbien)": 1, "HNL (Kroatien)": 1, "MLS": 1, "Chinese Super League": 1,
+  "Liga Profesional (Argentinien)": 1, "Série A (Brasilien)": 1, "Parva Liga (Bulgarien)": 1, "1. Division (Zypern)": 1, "Chance Liga (Tschechien)": 1, "NB I (Ungarn)": 1,
+  "Ligat HaAl (Israel)": 1, "J1 League (Japan)": 1, "Superliga (Rumänien)": 1, "Saudi Pro League": 1, "Niké Liga (Slowakei)": 1, "K League 1 (Südkorea)": 1 };
+function twLigaEbene(lg, srv) {
+  const n = Number(srv); if (srv !== null && srv !== undefined && srv !== "" && n > 0) return n;
+  const l = String(lg || "").trim(); if (!l) return 99; if (TW_LIGA_EBENE[l] != null) return TW_LIGA_EBENE[l];
+  try { for (const z of LAND_LIGEN) { const i = z.ligen.indexOf(l); if (i >= 0) return i + 1; } } catch (e) { }
+  return 50;
+}
+function twLigaLand(lg) { try { return (typeof LIGA_LAND === "object" && LIGA_LAND && LIGA_LAND[lg]) || (typeof twLandVonLiga === "function" ? twLandVonLiga(lg) : "") || ""; } catch (e) { return ""; } }
+function twLigaVergleich(a, b) { return twLigaEbene(a) - twLigaEbene(b) || String(a).localeCompare(String(b), "de"); }
+function twLigaLandVergleich(a, b) { return String(twLigaLand(a) || "￿").localeCompare(String(twLigaLand(b) || "￿"), "de") || twLigaVergleich(a, b); }
+function twLigaMitLand(lg, en) { const land = twLigaLand(lg); if (!land) return lg; return lg + " · " + ((en && typeof TW_LAND_EN === "object" && TW_LAND_EN && TW_LAND_EN[land]) || land); }
 function twVereinTreffer(name, q) { if (Array.isArray(name)) return name.reduce((m, n) => Math.min(m, twVereinTreffer(n, q)), 9); const n = twSuchNorm(name), k = twSuchNorm(q); if (!k || !n) return 9; if (n === k) return 0; const w = n.split(" "), kw = k.split(" "); if ((" " + n + " ").indexOf(" " + k + " ") >= 0 || kw.every(x => w.indexOf(x) >= 0)) return 1; if (n.indexOf(k) === 0) return 2; if (kw.every(x => w.some(y => y.indexOf(x) === 0))) return 3; return n.indexOf(k) >= 0 ? 4 : 9; }
-function twLigaStufe(lg) { const l = String(lg || "").trim(); if (!l) return 99; try { for (const z of LAND_LIGEN) { const i = z.ligen.indexOf(l); if (i >= 0) return i; } } catch (e) { } return 50; }
+function twLigaStufe(lg) { const l = String(lg || "").trim(); if (!l) return 99; return twLigaEbene(l); }
 function twVereinSort(q, nameVon, ligaVon) { return (a, b) => twVereinTreffer(nameVon(a), q) - twVereinTreffer(nameVon(b), q) || twLigaStufe(ligaVon(a)) - twLigaStufe(ligaVon(b)) || String(a.t || a.name || "").localeCompare(String(b.t || b.name || "")); }
-function twGsBester(liste, q) { if (!Array.isArray(liste) || !liste.length) return null; let best = null, br = 9; liste.forEach(v => { if (!v || (v.art !== "spieler" && v.art !== "verein")) return; const r = twVereinTreffer(v.name, q); if (r < br) { br = r; best = v; } }); return br <= 3 ? best : null; }
+function twGsBester(liste, q) { if (!Array.isArray(liste) || !liste.length) return null; let best = null, br = 9; liste.forEach(v => { if (!v || (v.art !== "spieler" && v.art !== "verein")) return; const r = twVereinTreffer(v.name, q); if (r < br) { br = r; best = v; } }); if (br <= 3) return best; return liste.find(v => v && (v.art === "spieler" || v.art === "verein") && Number(v.pk) >= 55) || null; }
 /* Punkt 16 (08.10.2026): Vorschlagsliste unter dem Kopfsuchfeld (Spieler, Vereine, Ligen; tippfehlertolerant ueber pg_trgm, /db/rpc/tw_suche_vorschlaege) */
 function GsVorschlaege({ liste, idx, waehlen, setIdx, offen }) {
   const h = React.createElement; const en = typeof LANG !== "undefined" && LANG === "en";
@@ -19500,9 +19605,8 @@ function AehnlicheSpielerSeite({ ausgang, onOpen, onZurueck }) {
 /* Punkt 59: Seite "Spielervergleich" – zwei Spieler auswaehlen, ausfuehrlich vergleichen (Grunddaten, Saison, je 90 Minuten, TW Score, Faehigkeiten, Staerken/Schwaechen), PDF */
 const TW40_FARBEN = ["#C8A355", "#4C7BD9"];
 function tw40Suche(q) {
-  const norm = s => s.toLowerCase().replace(/ß/g, "ss").replace(/ı/g, "i").replace(/æ/g, "ae").replace(/œ/g, "oe").normalize("NFD").replace(/[̀-ͯ]/g, "");
-  const grps = q.split(/\s+/).filter(Boolean).slice(0, 4).map(w => { const n = encodeURIComponent("*" + norm(w) + "*"); return "or(search_name.ilike." + n + ",search_team.ilike." + n + ")"; });
-  return fetch("/db/players?select=player_id,name,team,league,position,age,photo,minutes&limit=8&order=minutes.desc.nullslast&and=(" + grps.join(",") + ")", { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(r => Array.isArray(r) ? r : []).catch(() => []);
+  // M18: Such-Kern des Servers (Name oder Verein, Wortreihenfolge egal, Tippfehler toleriert)
+  return twSuchSpieler(q, 8).then(l => l.map(x => ({ player_id: x.pid, name: x.name, team: x.team, league: x.liga, position: x.pos, age: x.alter, photo: x.foto })));
 }
 function tw40LadeVergleich(pid) {
   const eins = u => fetch(u, { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(r => Array.isArray(r) ? (r[0] || null) : null).catch(() => null);
@@ -20343,7 +20447,7 @@ function twLaenderListe(vereine, en) {
   const m = new Map(); const set = new Set((vereine || []).map(v => v.l).filter(Boolean));
   set.forEach(lg => { const land = twLandVonLiga(lg) || "Sonstige"; if (!m.has(land)) m.set(land, []); m.get(land).push(lg); });
   const rang = land => { const i = LAND_LIGEN.findIndex(z => z.de === land); return i >= 0 ? i : (land === "Sonstige" ? 999 : 500); };
-  const ligaRang = (land, lg) => { const x = LAND_LIGEN.find(z => z.de === land); const i = x ? x.ligen.indexOf(lg) : -1; return i >= 0 ? i : 99; };
+  const ligaRang = (land, lg) => twLigaEbene(lg);
   return Array.from(m.entries()).map(([land, ligen]) => ({ key: land, name: en ? (TW_LAND_EN[land] || land) : land, ligen: ligen.slice().sort((a, b) => ligaRang(land, a) - ligaRang(land, b) || a.localeCompare(b)), anzahl: (vereine || []).filter(v => ligen.indexOf(v.l) >= 0).length }))
     .sort((a, b) => rang(a.key) - rang(b.key) || a.name.localeCompare(b.name, en ? "en" : "de"));
 }
@@ -20800,7 +20904,7 @@ function MarktwertDetail({ sp, zurueck, openPlayer, zurueckText }) {
   const [zielLand, setZielLand] = useState(""); const [zielLiga, setZielLiga] = useState("");
   useEffect(() => {
     let aktiv = true; setLigen(null); setFehler(""); setZielLand(""); setZielLiga("");
-    fetch("/db/mw_web_liga?player_id=eq." + encodeURIComponent(sp.player_id) + "&select=liga,land,land_code,liga_typ,ist_heimat,kaufpreis_eur,marktwert_danach_eur,hinweis_art,stand&order=kaufpreis_eur.desc.nullslast,liga.asc", { credentials: "omit", cache: "no-store" })
+    fetch("/db/mw_web_liga?player_id=eq." + encodeURIComponent(sp.player_id) + "&select=liga,land,land_code,liga_typ,ist_heimat,kaufpreis_eur,marktwert_danach_eur,hinweis_art,stand,liga_ebene&order=kaufpreis_eur.desc.nullslast,liga.asc", { credentials: "omit", cache: "no-store" })
       .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
       .then(d => { if (!aktiv) return; const l = Array.isArray(d) ? d : []; setLigen(l);
         const heim = l.find(x => x.ist_heimat); const erste = l.find(x => !x.ist_heimat && x.kaufpreis_eur);
@@ -20812,9 +20916,10 @@ function MarktwertDetail({ sp, zurueck, openPlayer, zurueckText }) {
   const heim = (ligen || []).find(x => x.ist_heimat) || null;
   const laender = []; (ligen || []).forEach(x => { const k = x.land_code || x.land || ""; if (!laender.some(y => y.k === k)) laender.push({ k: k, name: twMwLand(x.liga, x.land), code: x.land_code }); });
   laender.sort((a, b) => a.name.localeCompare(b.name, en ? "en" : "de"));
-  const ligenImLand = (ligen || []).filter(x => (x.land_code || x.land || "") === zielLand).sort((a, b) => a.liga.localeCompare(b.liga, "de"));
+  const mwLigaSort = (a, b) => twLigaEbene(a.liga, a.liga_ebene) - twLigaEbene(b.liga, b.liga_ebene) || a.liga.localeCompare(b.liga, "de");  // M18: höchste Liga zuerst
+  const ligenImLand = (ligen || []).filter(x => (x.land_code || x.land || "") === zielLand).sort(mwLigaSort);
   const ziel = (ligen || []).find(x => x.liga === zielLiga) || null;
-  const waehleLand = k => { setZielLand(k); const erste = (ligen || []).filter(x => (x.land_code || x.land || "") === k).sort((a, b) => (Number(b.kaufpreis_eur) || 0) - (Number(a.kaufpreis_eur) || 0))[0]; setZielLiga(erste ? erste.liga : ""); };
+  const waehleLand = k => { setZielLand(k); const imLand = (ligen || []).filter(x => (x.land_code || x.land || "") === k).sort(mwLigaSort); const erste = imLand.find(x => Number(x.kaufpreis_eur) > 0) || imLand[0]; setZielLiga(erste ? erste.liga : ""); };
   const hinweisText = a => a === "kein_kaeuferkreis" ? (en ? "No realistic buyer market in this league (wage level)." : "In dieser Liga gibt es keinen realistischen Käuferkreis (Gehaltsniveau).") : a === "gedeckelt" ? (en ? "Capped at the league's record fee." : "Gedeckelt an der Rekordablöse der Liga.") : a === "untergrenze" ? (en ? "Floor: league with the same price level." : "Untergrenze: gleich teure Liga.") : "";
   const statusTxt = sp.status === "indikativ" ? (en ? "indicative" : "indikativ") : sp.status === "grob" ? (en ? "rough estimate" : "grobe Schätzung") : (en ? "limited" : "eingeschränkt");
   const klasseTxt = { K1: en ? "World class" : "Weltklasse", K2: en ? "Top class" : "Spitzenklasse", K3: en ? "Top-league regular" : "Stamm Top-Liga", K4: en ? "Average" : "Durchschnitt", K5: en ? "Depth" : "Breite" }[sp.klasse] || sp.klasse || "";
@@ -20930,13 +21035,17 @@ function MarktwertVue({ openPlayer, openVerein, start }) {
   }, [wahl && wahl.t]);
   // Suche oben: Vereine aus der Vereinsliste, Spieler aus mw_web_spieler (ab 2 Zeichen, verzoegert)
   const norm = x => String(x || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-  const vVorschlaege = useMemo(() => { const k = norm(q.trim()); if (!k) return []; const hits = vereine.filter(v => norm(v.t).indexOf(k) >= 0 || norm(clubName(v.t)).indexOf(k) >= 0); hits.sort(twVereinSort(k, v => [v.t, clubName(v.t)], v => v.l)); return hits.slice(0, 5); }, [q, vereine]);
+  const vVorschlaege = useMemo(() => { const k = norm(q.trim()); if (!k) return []; const hits = twSuchFilter(vereine, q, v => [v.t, clubName(v.t)]); hits.sort(twVereinSort(k, v => [v.t, clubName(v.t)], v => v.l)); return hits.slice(0, 5); }, [q, vereine]);
   useEffect(() => {
     const s = q.trim(); if (s.length < 2) { setSpTreffer([]); return; } let aktiv = true;
     const t = setTimeout(() => {
-      const c = s.replace(/[*,()"]/g, " ").trim(); const n = norm(c);
-      fetch("/db/mw_web_spieler?select=" + SEL + "&or=(name.ilike." + encodeURIComponent("*" + c + "*") + ",search_name.ilike." + encodeURIComponent("*" + n + "*") + ")&order=weltmarkt_eur.desc.nullslast&limit=8", { credentials: "omit", cache: "no-store" })
-        .then(r => r.ok ? r.json() : []).then(d => { if (aktiv) setSpTreffer(Array.isArray(d) ? d : []); }).catch(() => {});
+      // M18: jedes Suchwort in Name oder Verein (Reihenfolge egal); ohne Treffer ähnliche Schreibweisen über den Such-Kern
+      const bed = twSuchBedingung(s, ["search_name", "team"]); if (!bed) { setSpTreffer([]); return; }
+      const hol = u => fetch(u, { credentials: "omit", cache: "no-store" }).then(r => r.ok ? r.json() : []).then(d => Array.isArray(d) ? d : []);
+      hol("/db/mw_web_spieler?select=" + SEL + bed + "&order=weltmarkt_eur.desc.nullslast&limit=8")
+        .then(d => d.length ? d : twSuchSpieler(s, 25).then(l => { const ids = l.map(x => Number(x.pid)).filter(Boolean); if (!ids.length) return []; const pos = {}; ids.forEach((id, i) => { pos[id] = i; });
+          return hol("/db/mw_web_spieler?select=" + SEL + "&player_id=in.(" + ids.join(",") + ")&limit=25").then(z => z.sort((a, b) => pos[a.player_id] - pos[b.player_id]).slice(0, 8)); }))
+        .then(d => { if (aktiv) setSpTreffer(d); }).catch(() => {});
     }, 300);
     return () => { aktiv = false; clearTimeout(t); };
   }, [q]);
@@ -20950,7 +21059,7 @@ function MarktwertVue({ openPlayer, openVerein, start }) {
   const zurueck = () => { if (wahl) { setWahl(null); return; } if (liga) { setLiga(""); return; } if (land) { setLand(""); return; } };
   const stufe = wahl ? 3 : liga ? 2 : land ? 1 : 0;
   const pfad = []; if (landObj) pfad.push(landObj.name); if (liga) pfad.push(liga); if (wahl) pfad.push(clubName(wahl.t));
-  const ligen = Object.keys(typeof LIGA_LAND === "object" && LIGA_LAND ? LIGA_LAND : {}).filter(l => l !== "La Liga").sort((a, b) => (String(LIGA_LAND[a]).localeCompare(String(LIGA_LAND[b]), "de") || a.localeCompare(b, "de")));
+  const ligen = Object.keys(typeof LIGA_LAND === "object" && LIGA_LAND ? LIGA_LAND : {}).filter(l => l !== "La Liga").sort((a, b) => (String(LIGA_LAND[a]).localeCompare(String(LIGA_LAND[b]), "de") || twLigaVergleich(a, b)));
   const POS = [["", en ? "All positions" : "Alle Positionen"], ["Torwart", en ? "Goalkeeper" : "Torwart"], ["Abwehr", en ? "Defence" : "Abwehr"], ["Mittelfeld", en ? "Midfield" : "Mittelfeld"], ["Sturm", en ? "Attack" : "Sturm"]];
   const ALTER = [["", en ? "All ages" : "Alle Altersklassen"], ["u21", en ? "21 and younger" : "21 und jünger"], ["u23", en ? "23 and younger" : "23 und jünger"], ["24-29", "24–29"], ["30", en ? "30 and older" : "30 und älter"]];
   const posTxt = (p) => { const f = POS.find(x => x[0] === p); return f && p ? f[1] : (p || ""); };
@@ -21169,7 +21278,8 @@ function TransferApp({
       else if (landLigen.length) url += "&league=in.(" + landLigen.map(l => encodeURIComponent('"' + l + '"')).join(",") + ")";
       if (plTeam) url += "&team=eq." + encodeURIComponent(plTeam);
       if (plPos) url += "&position=eq." + encodeURIComponent(plPos);
-      fetch(url, { credentials: "omit", cache: "no-store" }).then(r => r.json()).then(rows => {
+      const hol = u => fetch(u, { credentials: "omit", cache: "no-store" }).then(r => r.json());
+      hol(url).then(rows => (q && Array.isArray(rows) && !rows.length) ? twSuchSpieler(q, 25).then(l => { const ids = l.map(x => Number(x.pid)).filter(Boolean); return ids.length ? hol(url.replace(/&and=\([^&]*\)/, "") + "&player_id=in.(" + ids.join(",") + ")") : rows; }) : rows).then(rows => {
         if (!alive) return;
         const arr = Array.isArray(rows) ? rows : [];
         setPlItems(arr.map(p => ({ pid: p.player_id, name: p.name, team: p.team, league: p.league, pos: p.position, age: p.age, nat: p.nationality, photo: p.photo, apps: p.apps, min: p.minutes, rating: p.rating, goals: p.goals, assists: p.assists, mw: p.tm_value_text, vertrag: null })));
