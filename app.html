@@ -4051,6 +4051,19 @@ function NxGespraech({ account, ziel, setView, onAenderung, onZurueck, onZiel, s
   const [text, setText] = React.useState(""); const [anhang, setAnhang] = React.useState(null); const [menue, setMenue] = React.useState(""); const [dialog, setDialog] = React.useState(null); const [sendet, setSendet] = React.useState(false); const [sendeFehler, setSendeFehler] = React.useState("");
   const [melden, setMelden] = React.useState(false); const [meldeGrund, setMeldeGrund] = React.useState(""); const [meldeOk, setMeldeOk] = React.useState(""); const [loeschFrage, setLoeschFrage] = React.useState(false); const [busy, setBusy] = React.useState(false); const [hinweis, setHinweis] = React.useState("");
   const [deals, setDeals] = React.useState([]); const [details, setDetails] = React.useState(false); const [mehrMenue, setMehrMenue] = React.useState(false);
+  /* OP 677: Übersetzung einzelner Nachrichten (nur auf Knopfdruck, nichts wird gespeichert) */
+  const [uebM, setUebM] = React.useState({});
+  const uebSetz = (id, w) => setUebM(u => Object.assign({}, u, { [id]: w }));
+  const uebHolen = m => { const zs = SPR; uebSetz(m.id, { laeuft: true });
+    fetch("/api/tw-ueb", { method: "POST", headers: { "Content-Type": "application/json" }, cache: "no-store", credentials: "omit", body: JSON.stringify({ code: (account && (account.code || account.sitzung)) || "", email: (account && account.email) || "", text: String(m.text || "").slice(0, 3000), ziel: zs }) })
+      .then(r => r.json()).then(d => uebSetz(m.id, d && d.ok && d.gleich ? { gleich: true } : d && d.ok && typeof d.text === "string" && d.text ? { text: d.text, aus: String(d.aus || ""), nach: zs, zeigt: true } : { fehler: true }))
+      .catch(() => uebSetz(m.id, { fehler: true })); };
+  const uebTeil = m => { const ue = uebM[m.id]; const L2 = (de, e) => (LANG === "en" ? e : de);
+    if (ue && ue.laeuft) return h("div", { className: "nx-ueb", style: { marginTop: 4 } }, L2("Wird übersetzt …", "Translating …"));
+    if (ue && ue.gleich) return h("div", { className: "nx-ueb", style: { marginTop: 4 } }, L2("Schon in deiner Sprache", "Already in your language"));
+    if (ue && ue.text) return h("div", { className: "nx-ueb", style: { marginTop: 4 } }, ue.zeigt ? L2("Automatisch übersetzt", "Translated automatically") + (ue.aus ? " (" + ue.aus.toUpperCase() + " → " + String(ue.nach || "").toUpperCase() + ")" : "") : L2("Original", "Original"),
+      h("button", { type: "button", className: "nx-knopf klein text", onClick: () => uebSetz(m.id, Object.assign({}, ue, { zeigt: !ue.zeigt })) }, ue.zeigt ? L2("Original zeigen", "Show original") : L2("Übersetzung zeigen", "Show translation")));
+    return h("div", { className: "nx-ueb", style: { marginTop: 2 } }, h("button", { type: "button", className: "nx-knopf klein text", "data-nx-uebersetzen": m.id, onClick: () => uebHolen(m) }, ue && ue.fehler ? L2("Übersetzung gerade nicht möglich – erneut versuchen", "Translation not available right now – try again") : L2("Übersetzen", "Translate"))); };
   const verlauf = React.useRef(null); const gidRef = React.useRef((ziel && ziel.gespraech) || null); const dateiRef = React.useRef(null);
   const zielKey = [ziel && ziel.gespraech, ziel && ziel.profil, ziel && ziel.post].join("|");
   const nachUnten = () => { setTimeout(() => { if (verlauf.current) verlauf.current.scrollTop = verlauf.current.scrollHeight; }, 0); };
@@ -4144,7 +4157,8 @@ function NxGespraech({ account, ziel, setView, onAenderung, onZurueck, onZiel, s
     else if (a && a.typ === "anfrage") karte = h("div", { className: "nz-anhang", style: { gridTemplateColumns: "auto minmax(0,1fr)" } }, h("span", { className: "nz-anhang-platz", style: { color: "var(--gold-text)" } }, nxIk("brief")), h("div", { style: { minWidth: 0 } }, h("div", { className: "nz-anhang-typ" }, L("Anfrage", "Request")), h("div", { className: "nz-anhang-titel" }, nxArt(a.titel))));
     else if (a) karte = h(NxAnhang, { account: account, a: a, openPlayer: openPlayer, openVerein: openVerein, setView: setView });
     verlaufKinder.push(h("div", { key: m.id, className: "nz-blase" + (m.eigene ? " eigene" : ""), "data-nz-nachricht": m.id }, karte,
-      m.text && !(a && a.typ === "video" && m.text === a.url) ? h("div", { className: "nz-blase-text", "data-nx-roh": "1" }, nxRoh(m.text)) : null,
+      m.text && !(a && a.typ === "video" && m.text === a.url) ? h("div", { className: "nz-blase-text", "data-nx-roh": "1" }, nxRoh(uebM[m.id] && uebM[m.id].zeigt && uebM[m.id].text ? uebM[m.id].text : m.text)) : null,
+      NX.ueb && !m.eigene && m.text && !(a && a.typ === "video" && m.text === a.url) ? uebTeil(m) : null,
       h("span", { className: "nz-blase-zeit" }, nz3Zeit(m.gesendet_am))));
     if (m.eigene) verlaufKinder.push(h("div", { key: "s" + m.id, className: "nx-status" + (m.gelesen_am ? " gesehen" : ""), "data-nx-status": m.gelesen_am ? "gesehen" : "gesendet", title: m.gelesen_am ? L("Gesehen ", "Seen ") + nz3Zeit(m.gelesen_am) : "" }, m.gelesen_am ? L("Gesehen", "Seen") : L("Gesendet", "Sent")));
   });
@@ -5114,8 +5128,8 @@ function FwEintrag({ x, onGelesen, openPlayer, openVerein }) {
   const oeffne = e => { if (e) e.stopPropagation(); onGelesen(); if (x.art === "spieler" && /^\d+$/.test(String(x.ref || ""))) openPlayer(Number(x.ref), x.name, x.team || ""); else if (x.team || x.name) openVerein(x.team || x.name); };
   return h("li", { className: "fw-e" + (x.gelesen ? "" : " neu"), "data-ton": ton, "data-fw-eintrag": x.id, onClick: onGelesen },
     h("div", { className: "fw-e-kopf" }, h("span", { className: "typ" }, typ), h("span", { className: "zeit" }, fwZeit(x.erkannt_am)), !x.gelesen ? h("span", { className: "neu-chip" }, fwL("neu", "new")) : null),
-    h("p", { className: "fw-e-titel", "data-nx-roh": "1" }, nxRoh(x.titel || x.name || "")),
-    x.text ? h("p", { className: "fw-e-text", "data-nx-roh": "1" }, nxRoh(x.text)) : null,
+    h("p", { className: "fw-e-titel", "data-nx-roh": "1" }, nxRoh(twXDyn(x.titel || x.name || ""))),
+    x.text ? h("p", { className: "fw-e-text", "data-nx-roh": "1" }, nxRoh(twXDyn(x.text))) : null,
     passend.length ? h("div", { className: "fw-passt" }, h("span", { style: { color: "var(--gold-text)", marginTop: 1 } }, fwIk("stern")),
       h("span", null, h("b", null, passend.length === 1 ? fwL("Passt zu deinem Spieler: ", "Fits your player: ") : fwL("Passt zu " + passend.length + " deiner Spieler: ", "Fits " + passend.length + " of your players: ")), h("span", { "data-nx-roh": "1" }, nxRoh(passText)))) : null,
     h("div", { className: "fw-e-fuss" },
@@ -5288,7 +5302,7 @@ function FwFolgeZeile({ f, g, free, openPlayer, openVerein, nurLesen }) {
     nurLesen ? null : h("div", { style: { display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" } },
       free ? h("span", { className: "fw-kanal" }, fwIk("mail"), fwL("Im Wochenreport", "In the weekly report")) : h(FwSeg, { label: fwL("Zustellung", "Delivery"), wert: f.weg, gesperrt: busy, onChange: v => setz({ weg: v }), optionen: [["sofort", fwL("Wichtiges sofort", "Important: instantly")], ["briefing", fwL("Alles im Briefing", "All in the briefing")]] }),
       g.team ? h(FwWahl, { klein: true, an: !!f.fuer_team, gesperrt: busy, text: fwL("Mit Team teilen", "Share with team"), onClick: () => setz({ fuer_team: !f.fuer_team }) }) : null),
-    f.zuletzt ? h("div", { className: "fw-zuletzt" }, fwL("Zuletzt: ", "Latest: "), h("span", { "data-nx-roh": "1" }, nxRoh(en ? (f.zuletzt.titel_en || f.zuletzt.titel) : f.zuletzt.titel)), " · " + fwDatumKurz(f.zuletzt.erkannt_am)) : h("div", { className: "fw-zuletzt" }, fwL("Bisher keine Meldung.", "No updates so far.")),
+    f.zuletzt ? h("div", { className: "fw-zuletzt" }, fwL("Zuletzt: ", "Latest: "), h("span", { "data-nx-roh": "1" }, nxRoh(en ? twXDyn(f.zuletzt.titel_en || f.zuletzt.titel) : f.zuletzt.titel)), " · " + fwDatumKurz(f.zuletzt.erkannt_am)) : h("div", { className: "fw-zuletzt" }, fwL("Bisher keine Meldung.", "No updates so far.")),
     meld ? h("div", { className: "nx-fehler", role: "alert" }, meld) : null);
 }
 function FwVersand({ st, g, onPro }) {
@@ -7089,6 +7103,7 @@ function twSprWechsel(ziel, setzen, auto) {
 }
 /* Beim Start: Liste prüfen, beim ersten Besuch die Browser-Sprache nehmen, Wörterbuch nachladen */
 function twXStart(lang, setzen, malen) {
+  TWXI.malen = malen;   /* M20 */
   twXListe().then(() => {
     const z = twSprZiel();
     if (z !== lang) { twSprWechsel(z, setzen, !twSprGewaehlt()); return; }
@@ -7109,12 +7124,50 @@ function twXKern(k, o) {
 function twX(s, o) {
   if (SPR === "de" || SPR === "en" || typeof s !== "string" || s.length < 2 || TWX.spr !== SPR || !TWX.w) return s;
   const d = TWX.w[s]; if (typeof d === "string" && !(o && TWX.aus.has(s))) return d;
-  if (s.length > 600) return s;
+  if (s.length > 600) return twXDyn(s);   /* M20 */
   const m0 = s.match(/^(\s*)([\s\S]*?)(\s*)$/); const k = m0 ? m0[2] : ""; if (k.length < 2) return s;
   let h = twXKern(k, o);
   if (h === undefined) { const e = k.match(/^([\s\S]*?)(\s?…|\.\.\.|[:.!?])$/); if (e && e[1].length > 1) { const h2 = twXKern(e[1], o); if (h2 !== undefined) h = h2 + (SPR === "fr" && /^[:!?]$/.test(e[2]) ? " " : "") + e[2]; } }
   if (h === undefined && k.indexOf(" · ") > 0) { let ge = false; const t = k.split(" · ").map(x => { const y = twXKern(x, o); if (y !== undefined && y !== x) { ge = true; return y; } return x; }).join(" · "); if (ge) h = t; }
+  if (h === undefined) { const y = twXInh(k.replace(/\s+/g, " ")); if (y !== undefined) h = y; }   /* M20: laufender Inhalt */
   return h === undefined ? s : m0[1] + h + m0[3];
+}
+/* ===== M20 (19.11.2026, OP 676): laufende Inhalte in den weiteren Sprachen.
+   Meldungen, Kartentexte und Ereignisse liegen auf dem Server übersetzt vor (i18n.inhalt). Die App fragt mit einem Kurzschlüssel
+   über den englischen Text nach (nie mit dem Text selbst); was es noch nicht gibt, bleibt englisch und wird später erneut gefragt. ===== */
+const TWXI = { spr: "", t: {}, f: {}, aus: new Set(), q: new Set(), timer: null, laeuft: false, malen: null };
+function twXH(str) { let h1 = 0xdeadbeef, h2 = 0x41c6ce57; for (let i = 0, ch; i < str.length; i++) { ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); } h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507); h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909); h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507); h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909); return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16); }
+/* Kommt der Text als laufender Inhalt in Frage? Mindestens zwei Wörter, eines davon klein geschrieben (also kein bloßer Name), keine kurzen Zahlenangaben */
+function twXInhKand(k) { return k.length >= 8 && k.length <= 1500 && /\s\p{Ll}/u.test(k) && !(k.length < 30 && /\d/.test(k)); }
+function twXInh(k) {
+  if (TWXI.spr !== SPR) { TWXI.spr = SPR; TWXI.t = {}; TWXI.f = {}; TWXI.aus = new Set(); TWXI.q.clear(); }
+  const y = TWXI.t[k]; if (typeof y === "string") return y;
+  if (TWXI.aus.has(k) || !twXInhKand(k)) return undefined;
+  const f = TWXI.f[k]; if (f && Date.now() - f < 900000) return undefined;   // vor kurzem gefragt: noch nicht übersetzt
+  if (TWXI.q.size < 800) { TWXI.q.add(k); if (!TWXI.timer) TWXI.timer = setTimeout(twXInhHolen, 400); }
+  return undefined;
+}
+function twXInhHolen() {
+  TWXI.timer = null;
+  if (TWXI.laeuft) { TWXI.timer = setTimeout(twXInhHolen, 600); return; }
+  const spr = SPR; if (!twSprNeu(spr) || TWX.spr !== spr || TWXI.spr !== spr) { TWXI.q.clear(); return; }
+  const teil = Array.from(TWXI.q).slice(0, 100); if (!teil.length) return;
+  const nachH = {}; teil.forEach(k => { TWXI.q.delete(k); nachH[twXH(k)] = k; });
+  TWXI.laeuft = true;
+  fetch("/api/tw-i18n?l=" + encodeURIComponent(spr) + "&h=" + Object.keys(nachH).join(",") + (twXVorschau() ? "&vorschau=1" : ""), { credentials: "omit" }).then(r => r.json()).then(d => {
+    if (TWXI.spr !== spr) return;
+    const t = d && d.ok && d.t && typeof d.t === "object" ? d.t : {}; const jetzt = Date.now(); let neu = false;
+    for (const h in nachH) { const k = nachH[h]; const v = t[h]; if (typeof v === "string" && v) { TWXI.t[k] = v; TWXI.aus.add(v); neu = true; } else TWXI.f[k] = jetzt; }
+    if (neu && TWXI.malen) TWXI.malen();
+  }).catch(() => { const jetzt = Date.now(); for (const h in nachH) TWXI.f[nachH[h]] = jetzt; }).then(() => { TWXI.laeuft = false; if (TWXI.q.size && !TWXI.timer) TWXI.timer = setTimeout(twXInhHolen, 400); });
+}
+/* Wörter mit zwei Bedeutungen: eigener Schlüssel im Wörterbuch (z. B. „Cards (bookings)“ = Gelbe/Rote Karten); ohne Eintrag bleibt der Text */
+function twXA(text, schluessel) { if (SPR === "de" || SPR === "en" || TWX.spr !== SPR || !TWX.w) return text; const y = TWX.w[schluessel]; if (typeof y !== "string") return text; TWX.aus.add(y); return y; }
+/* Für Texte, die die App sonst roh zeigt (Ereignisse der Benachrichtigungen): Übersetzung, wenn es sie gibt, sonst der Text selbst */
+function twXDyn(s) {
+  if (typeof s !== "string" || SPR === "de" || SPR === "en" || TWX.spr !== SPR || !TWX.w) return s;
+  const k = s.replace(/\s+/g, " ").trim(); if (k.length < 8) return s;
+  const y = twXInh(k); return y === undefined ? s : y;
 }
 /* Texte in Listen von Kind-Elementen (dort greift die Übersetzung beim Zeichnen sonst nicht) */
 function twXFeld(a) {
@@ -7538,13 +7591,13 @@ window.twDossierPdf = async function (x, vorhanden) {
   };
   /* M19: danach in die gewählte Sprache; der Urtext wird gemerkt, damit ein Sprachwechsel ihn zurückholen kann */
   const urtext = new WeakMap();
-  const tr = (t) => { const a = trEn(t); if (SPR === "de" || SPR === "en") return a; const b = a == null ? t : a; const c = twX(b, true); return c !== b ? c : a; };
+  const tr = (t) => { const a = t.length <= 160 ? trEn(t) : null; if (SPR === "de" || SPR === "en") return a; const b = a == null ? t : a; const c = twX(b, true); return c !== b ? c : a; };
   const setz = (k, v, u) => { if (SPR !== "de" && SPR !== "en") urtext.set(k, [v, u]); k.nodeValue = u; };
   const lauf = (wurzel) => {
     if (LANG !== "en" || !wurzel) return;
-    if (wurzel.nodeType === 3) { const pe = wurzel.parentElement; if (pe && pe.closest && pe.closest("[data-nx-roh]")) return; const v = wurzel.nodeValue; const u = v && v.length <= 160 ? tr(v) : null; if (u != null && u !== v) setz(wurzel, v, u); return; }
+    if (wurzel.nodeType === 3) { const pe = wurzel.parentElement; if (pe && pe.closest && pe.closest("[data-nx-roh]")) return; const v = wurzel.nodeValue; const u = v && v.length <= (SPR !== "de" && SPR !== "en" ? 1500 : 160) ? tr(v) : null; if (u != null && u !== v) setz(wurzel, v, u); return; }
     const w = document.createTreeWalker(wurzel, 4); const liste = []; let n; while ((n = w.nextNode())) liste.push(n);
-    for (const k of liste) { const p = k.parentNode; if (!p || /^(SCRIPT|STYLE|TEXTAREA|INPUT)$/.test(p.nodeName) || (p.closest && p.closest("[data-nx-roh]"))) continue; const v = k.nodeValue; if (!v || v.length > 160 || !/[A-Za-zÄÖÜäöüß]/.test(v)) continue; const u = tr(v); if (u != null && u !== v) setz(k, v, u); }
+    for (const k of liste) { const p = k.parentNode; if (!p || /^(SCRIPT|STYLE|TEXTAREA|INPUT)$/.test(p.nodeName) || (p.closest && p.closest("[data-nx-roh]"))) continue; const v = k.nodeValue; if (!v || v.length > (SPR !== "de" && SPR !== "en" ? 1500 : 160) || !/[A-Za-zÄÖÜäöüß]/.test(v)) continue; const u = tr(v); if (u != null && u !== v) setz(k, v, u); }
   };
   window.__twXLauf = () => { try { if (!document.body) return; const w = document.createTreeWalker(document.body, 4); let n; while ((n = w.nextNode())) { const e = urtext.get(n); if (e) { urtext.delete(n); if (n.nodeValue === e[1]) n.nodeValue = e[0]; } } lauf(document.body); } catch (e) { } };
   let offen = new Set(); let geplant = false;
@@ -10755,7 +10808,7 @@ function SpielStatistik({ x, name, spiele, onZurueck, onSchliessen, onAnalyse, a
   const karten = (s) => h("span", { style: { display: "inline-flex", gap: 4, alignItems: "center", justifyContent: "center" } }, n(s.gelb) ? h("span", { style: { display: "inline-flex", alignItems: "center", gap: 2, fontSize: 11.5, fontWeight: 800 } }, h("span", { style: { width: 8, height: 12, borderRadius: 2, background: "#e8c100" } }), n(s.gelb) > 1 ? z(s.gelb) : "") : null, n(s.rot) ? h("span", { style: { width: 8, height: 12, borderRadius: 2, background: "#c0392b" } }) : null, !n(s.gelb) && !n(s.rot) ? h("span", { style: { color: "var(--t3)" } }, "\u2013") : null);
   const zweiZeilig = (a, b, p) => (n(b) > 0 ? h("span", { style: { display: "inline-flex", flexDirection: "column", alignItems: "flex-end", lineHeight: 1.15 } }, h("span", null, z(a) + "/" + z(b)), h("span", { style: { fontSize: 11, color: "var(--t3)" } }, p + " %")) : (n(a) != null ? z(a) : "\u2013"));
   const SP = [
-    [en ? "Date" : "Datum", "l", 8, en ? "Date / competition" : "Datum / Wettbewerb"], [en ? "Opponent" : "Gegner", "l", 12.5, en ? "Opponent (H = home, A = away)" : "Gegner (H = Heim, A = Ausw\u00e4rts)"], [en ? "Res." : "Erg.", "c", 4, en ? "Result" : "Ergebnis"], ["Pos.", "c", 3.6, "Position"], ["Min.", "r", 3.8, en ? "Minutes (* = substitute)" : "Minuten (* = eingewechselt)"], [en ? "G" : "T", "r", 2.6, en ? "Goals" : "Tore"], [en ? "A" : "V", "r", 2.6, en ? "Assists" : "Vorlagen"], [en ? "Sh." : "Sch.", "r", 3.2, en ? "Shots" : "Sch\u00fcsse"], [en ? "Passes" : "P\u00e4sse", "r", 5.4, en ? "Passes (accurate)" : "P\u00e4sse (angekommen)"], [en ? "Pass%" : "Pass%", "r", 4.2, en ? "Pass accuracy" : "Passquote"], [en ? "Drib." : "Drib.", "r", 4.6, en ? "Dribbles successful/attempted" : "Dribblings erfolgreich/versucht"], [en ? "Duels" : "Zwk.", "r", 4.6, en ? "Duels won/total" : "Zweik\u00e4mpfe gewonnen/gesamt"], [en ? "Tkl." : "Tackl.", "r", 3.6, en ? "Tackles" : "Tacklings"], [en ? "Int." : "Abf.", "r", 3.6, en ? "Interceptions" : "Abgefangene B\u00e4lle"], ["Fouls", "r", 3.6, "Fouls"], [en ? "Cards" : "Karten", "c", 4, en ? "Cards" : "Karten"], [en ? "Rtg." : "Bew.", "r", 3.6, en ? "Rating" : "Bewertung"], ["TW", "c", 4.2, "TW Performance Score"], ["", "c", 7.6, en ? "Match analysis" : "Spielanalyse"]];
+    [en ? "Date" : "Datum", "l", 8, en ? "Date / competition" : "Datum / Wettbewerb"], [en ? "Opponent" : "Gegner", "l", 12.5, en ? "Opponent (H = home, A = away)" : "Gegner (H = Heim, A = Ausw\u00e4rts)"], [en ? "Res." : "Erg.", "c", 4, en ? "Result" : "Ergebnis"], ["Pos.", "c", 3.6, "Position"], ["Min.", "r", 3.8, en ? "Minutes (* = substitute)" : "Minuten (* = eingewechselt)"], [en ? "G" : "T", "r", 2.6, en ? "Goals" : "Tore"], [en ? "A" : "V", "r", 2.6, en ? "Assists" : "Vorlagen"], [en ? "Sh." : "Sch.", "r", 3.2, en ? "Shots" : "Sch\u00fcsse"], [en ? "Passes" : "P\u00e4sse", "r", 5.4, en ? "Passes (accurate)" : "P\u00e4sse (angekommen)"], [en ? "Pass%" : "Pass%", "r", 4.2, en ? "Pass accuracy" : "Passquote"], [en ? "Drib." : "Drib.", "r", 4.6, en ? "Dribbles successful/attempted" : "Dribblings erfolgreich/versucht"], [en ? "Duels" : "Zwk.", "r", 4.6, en ? "Duels won/total" : "Zweik\u00e4mpfe gewonnen/gesamt"], [en ? "Tkl." : "Tackl.", "r", 3.6, en ? "Tackles" : "Tacklings"], [en ? "Int." : "Abf.", "r", 3.6, en ? "Interceptions" : "Abgefangene B\u00e4lle"], ["Fouls", "r", 3.6, "Fouls"], [en ? twXA("Cards", "Cards (bookings)") : "Karten", "c", 4, en ? twXA("Cards", "Cards (bookings)") : "Karten"], [en ? "Rtg." : "Bew.", "r", 3.6, en ? "Rating" : "Bewertung"], ["TW", "c", 4.2, "TW Performance Score"], ["", "c", 7.6, en ? "Match analysis" : "Spielanalyse"]];
   const summeSp = SP.reduce((a, c) => a + c[2], 0);
   const th = (t, i) => h("th", { key: i, title: t[3], style: { position: "sticky", top: 0, zIndex: 1, background: "var(--karte2)", borderBottom: "1px solid " + HAIR, padding: "8px 4px", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 900, letterSpacing: .4, textTransform: "uppercase", color: "var(--t3)", textAlign: t[1] === "r" ? "right" : t[1] === "c" ? "center" : "left", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, t[0]);
   const td = (inhalt, ausr, extra) => h("td", { style: Object.assign({ padding: "7px 4px", borderBottom: "1px solid " + HAIR, fontFamily: FONT_BODY, fontSize: 12.5, color: "var(--t1)", textAlign: ausr === "r" ? "right" : ausr === "c" ? "center" : "left", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", verticalAlign: "middle" }, extra || {}) }, inhalt);
@@ -10785,7 +10838,7 @@ function SpielStatistik({ x, name, spiele, onZurueck, onSchliessen, onAnalyse, a
     h("div", { style: { display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 6 } },
       chip(en ? "Minutes" : "Minuten", z(s.minutes) + (s.starter === false ? "*" : "")), chip(en ? "G / A" : "T / V", z(s.tore) + " / " + z(s.vorlagen)), chip(en ? "Shots" : "Sch\u00fcsse", z(s.schuesse)), chip(en ? "Passes" : "P\u00e4sse", n(s.paesse) != null ? z(s.paesse) + (n(s.paesse_genau) != null ? " (" + z(s.paesse_genau) + ")" : "") : "\u2013"),
       chip(en ? "Pass acc." : "Passquote", pq != null ? pq + " %" : "\u2013"), chip(en ? "Dribbles" : "Dribblings", n(s.drib_a) > 0 ? z(s.drib_s) + "/" + z(s.drib_a) : z(s.drib_s)), chip(en ? "Duels" : "Zweik\u00e4mpfe", n(s.duelle) > 0 ? z(s.duelle_gew) + "/" + z(s.duelle) : z(s.duelle_gew)), chip(en ? "Tackles" : "Tacklings", z(s.tackles)),
-      chip(en ? "Interceptions" : "Abgefangen", z(s.interceptions)), chip("Fouls", z(s.fouls)), chip(en ? "Cards" : "Karten", (n(s.gelb) || 0) + " / " + (n(s.rot) || 0)), chip(en ? "Rating" : "Bewertung", n(s.rating) != null ? pkZahl(s.rating, 2) : "\u2013")),
+      chip(en ? "Interceptions" : "Abgefangen", z(s.interceptions)), chip("Fouls", z(s.fouls)), chip(en ? twXA("Cards", "Cards (bookings)") : "Karten", (n(s.gelb) || 0) + " / " + (n(s.rot) || 0)), chip(en ? "Rating" : "Bewertung", n(s.rating) != null ? pkZahl(s.rating, 2) : "\u2013")),
     h("button", { type: "button", className: "tw-analyse-knopf", onClick: (e) => { e.stopPropagation(); onAnalyse(s); }, style: { cursor: "pointer", width: "100%", minHeight: 42, borderRadius: 10, border: "none", background: "var(--gold)", color: "var(--gold-schrift)", fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800 } }, en ? "Open match analysis" : "Spielanalyse \u00f6ffnen")); }));
   return ReactDOM.createPortal(h("div", { className: "tw-mv-ebene", style: { position: "fixed", inset: 0, zIndex: 1300 } },
     h("div", { onClick: onZurueck, style: { position: "absolute", inset: 0, background: "rgba(0,0,0,.74)", touchAction: "none" } }),
@@ -10936,7 +10989,7 @@ function PerfKarte({ x, onClose, onProfil, watched, onWatchToggle }) {
         h("div", { style: { borderRight: "1px solid " + HAIR } }, info(en ? "Avg. rating" : "Ø Bewertung", d.rating ? pkZahl(d.rating, 2) : "")),
         h("div", { style: { borderRight: "1px solid " + HAIR } }, info(en ? "Pass accuracy" : "Passquote", d.pass_acc ? d.pass_acc + " %" : "")),
         h("div", { style: { borderRight: "1px solid " + HAIR } }, info(en ? "Duel success" : "Zweikampfquote", d.duels_pct ? d.duels_pct + " %" : "")),
-        h("div", { style: { padding: "0 14px" } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t3)" } }, en ? "Cards" : "Karten"), h("div", { style: { display: "flex", gap: 12, marginTop: 5, fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, color: "var(--t1)" } }, h("span", { style: { display: "inline-flex", alignItems: "center", gap: 5 } }, h("span", { style: { width: 11, height: 15, borderRadius: 2, background: "#e8c100" } }), pkZahl(d.yellow || 0, 0)), h("span", { style: { display: "inline-flex", alignItems: "center", gap: 5 } }, h("span", { style: { width: 11, height: 15, borderRadius: 2, background: "#c0392b" } }), pkZahl(d.red || 0, 0))))),
+        h("div", { style: { padding: "0 14px" } }, h("div", { style: { fontFamily: FONT_BODY, fontSize: 11.5, color: "var(--t3)" } }, en ? twXA("Cards", "Cards (bookings)") : "Karten"), h("div", { style: { display: "flex", gap: 12, marginTop: 5, fontFamily: FONT_BODY, fontSize: 13.5, fontWeight: 800, color: "var(--t1)" } }, h("span", { style: { display: "inline-flex", alignItems: "center", gap: 5 } }, h("span", { style: { width: 11, height: 15, borderRadius: 2, background: "#e8c100" } }), pkZahl(d.yellow || 0, 0)), h("span", { style: { display: "inline-flex", alignItems: "center", gap: 5 } }, h("span", { style: { width: 11, height: 15, borderRadius: 2, background: "#c0392b" } }), pkZahl(d.red || 0, 0))))),
       h("div", { style: { marginTop: 12 } }, pkKnopf(h, [en ? "Open match statistics" : "Spielstatistiken öffnen", h("span", { key: "a", style: { display: "inline-flex" } }, tkIcon("arrow", 14)), h("span", { key: "n", style: { fontWeight: 600, color: "var(--t3)" } }, spiele ? "(" + spiele.length + (en ? " matches)" : " Spiele)") : "")], () => setStatistik(true), false, { width: "100%", justifyContent: "center" })),
       titel(en ? "Recent matches" : "Letzte Einsätze", h("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: "var(--t3)", display: "inline-flex", alignItems: "center", gap: 4 } }, "TW Performance Score", h(ScoreInfo, { kind: "performance", size: 13 }))),
       form.length ? h("div", { style: { border: "1px solid " + HAIR, borderRadius: 14, overflow: "hidden" } }, form.map((f, i) => h("div", { key: i, style: { display: "grid", gridTemplateColumns: "92px minmax(0, 1fr) auto", alignItems: "center", gap: 10, padding: "10px 12px", borderTop: i ? "1px solid " + HAIR : "none", fontFamily: FONT_BODY, fontSize: 13 } }, h("span", { style: { color: "var(--t2)" } }, f.date ? dbDatum(f.date) : ""), h("div", { style: { minWidth: 0 } }, h("b", { style: { color: "var(--t1)" } }, f.gegner || ""), h("div", { style: { fontSize: 11.5, color: "var(--t3)" } }, [pkZahl(f.min, 0) + " Min.", f.tore ? f.tore + (en ? " goal" : " Tor") + (f.tore > 1 ? "e" : "") : "", f.vorlagen ? f.vorlagen + (en ? " assist" : " Vorlage") + (f.vorlagen > 1 ? (en ? "s" : "n") : "") : "", f.sub ? (en ? "sub" : "eingewechselt") : ""].filter(Boolean).join(" \u00b7 "))), h(PkScore, { wert: f.score })))) : h("div", { style: { padding: "16px", textAlign: "center", color: "var(--t3)", fontFamily: FONT_BODY, fontSize: 13, border: "1px dashed " + HAIR, borderRadius: 14 } }, det ? (en ? "No TW match ratings this season yet." : "Noch keine TW-Spielbewertungen in dieser Saison.") : (en ? "Loading \u2026" : "Wird geladen \u2026")),
@@ -10965,7 +11018,7 @@ window.twPerformancePdf = async function (x, det, spiele) {
     const kachel = (lab, val) => "<div class=\"kachel\"><b>" + esc(val) + "</b><span>" + esc(lab) + "</span></div>";
     const kopf = "<div class=\"kopf\"><div class=\"marke\">Transfer<span>Wire</span></div><div class=\"art\">" + L("Performance-Bericht", "Performance report") + "<br>" + L("Stand: ", "As of: ") + (en ? new Date().toISOString().slice(0, 10) : new Date().toLocaleDateString("de-DE")) + "</div></div>";
     const fotoU = await pkFotoUrl(name, d.photo); const steck = pkFotoKopf(name, fotoU, "<h1>" + esc(name) + "</h1>", "<div class=\"unter\">" + esc([d.pos, d.team, d.league, d.age ? d.age + L(" J.", " yrs") : "", d.nat].filter(Boolean).join(" · ")) + "</div>");
-    const saison = "<h3>" + L("Saisonübersicht", "Season overview") + (d.season ? " " + esc(d.season) : "") + "</h3><div class=\"kacheln\">" + [kachel(L("Spiele", "Games"), z(d.apps, 0)), kachel(L("Minuten", "Minutes"), z(d.min, 0)), kachel(L("Tore", "Goals"), z(d.goals, 0)), kachel(L("Vorlagen", "Assists"), z(d.assists, 0)), kachel(L("Ø Bewertung", "Avg. rating"), d.rating ? z(d.rating, 2) : "–"), kachel(L("Passquote", "Pass acc."), d.pass_acc ? d.pass_acc + " %" : "–"), kachel(L("Zweikämpfe", "Duels won"), d.duels_pct ? d.duels_pct + " %" : "–"), kachel(L("Karten", "Cards"), z(d.yellow || 0, 0) + " / " + z(d.red || 0, 0))].join("") + "</div>";
+    const saison = "<h3>" + L("Saisonübersicht", "Season overview") + (d.season ? " " + esc(d.season) : "") + "</h3><div class=\"kacheln\">" + [kachel(L("Spiele", "Games"), z(d.apps, 0)), kachel(L("Minuten", "Minutes"), z(d.min, 0)), kachel(L("Tore", "Goals"), z(d.goals, 0)), kachel(L("Vorlagen", "Assists"), z(d.assists, 0)), kachel(L("Ø Bewertung", "Avg. rating"), d.rating ? z(d.rating, 2) : "–"), kachel(L("Passquote", "Pass acc."), d.pass_acc ? d.pass_acc + " %" : "–"), kachel(L("Zweikämpfe", "Duels won"), d.duels_pct ? d.duels_pct + " %" : "–"), kachel(LANG === "en" ? twXA("Cards", "Cards (bookings)") : L("Karten", "Cards"), z(d.yellow || 0, 0) + " / " + z(d.red || 0, 0))].join("") + "</div>";
     const protokoll = "<h3>" + L("Spielprotokoll", "Match log") + " (" + liste.length + ")</h3>" + (liste.length ? "<p class=\"klein\">" + L("Ø TW-Score: ", "Avg. TW score: ") + (schnitt != null ? schnitt : "–") + " · " + L("Minuten gesamt: ", "Total minutes: ") + z(sum("minutes"), 0) + " · " + L("Tore: ", "Goals: ") + z(sum("tore"), 0) + " · " + L("Vorlagen: ", "Assists: ") + z(sum("vorlagen"), 0) + "</p><table><tr><th>" + L("Datum", "Date") + "</th><th>" + L("Wettbewerb", "Competition") + "</th><th>" + L("Gegner", "Opponent") + "</th><th>" + L("Erg.", "Res.") + "</th><th class=\"r\">Min.</th><th class=\"r\">" + L("T/V", "G/A") + "</th><th class=\"r\">" + L("Pässe", "Passes") + "</th><th class=\"r\">" + L("Zweik.", "Duels") + "</th><th class=\"r\">" + L("Schüsse", "Shots") + "</th><th class=\"r\">" + L("Bew.", "Rating") + "</th><th class=\"r\">TW</th></tr>"
       + liste.map(s => { const erg = (s.tore_heim != null && s.tore_gast != null) ? ((s.heim ? s.tore_heim : s.tore_gast) + ":" + (s.heim ? s.tore_gast : s.tore_heim)) : (s.ergebnis || "–"); const sc = s.score_v2 != null ? s.score_v2 : s.tw_score; return "<tr><td>" + datum(s.datum) + "</td><td>" + esc(s.league || "") + "</td><td>" + (s.heim ? "" : "@ ") + esc(s.gegner || "") + "</td><td>" + esc(erg) + "</td><td class=\"r\">" + z(s.minutes, 0) + (s.starter === false ? "*" : "") + "</td><td class=\"r\">" + z(s.tore || 0, 0) + "/" + z(s.vorlagen || 0, 0) + "</td><td class=\"r\">" + z(s.paesse, 0) + " (" + (s.pass_q != null ? Math.round(s.pass_q) + " %" : "–") + ")</td><td class=\"r\">" + z(s.duelle_gew, 0) + "/" + z(s.duelle, 0) + "</td><td class=\"r\">" + z(s.schuesse, 0) + "</td><td class=\"r\">" + z(s.rating, 2) + "</td><td class=\"r\"><b>" + (sc != null ? Math.round(Number(sc)) : "–") + "</b></td></tr>"; }).join("") + "</table><p class=\"klein\">* " + L("eingewechselt", "substitute") + " · TW = " + L("TW Performance Score 0–100", "TW performance score 0–100") + "</p>" : "<p class=\"klein\">" + L("Keine Spiel-für-Spiel-Daten erfasst.", "No match-by-match data recorded.") + "</p>");
     const css = "*{box-sizing:border-box}body{margin:0;font-family:\"Liberation Sans\",Arial,Helvetica,sans-serif;font-size:9.3pt;line-height:1.42;color:#111827}.kopf{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #111827;padding-bottom:6px;margin-bottom:12px}.marke{font-weight:700;font-size:14pt}.marke span{color:#A27D2D}.art{font-size:8.4pt;color:#4b5563;text-align:right}h1{font-size:19pt;margin:0 0 2px}.unter{color:#374151;font-size:10pt;margin-bottom:8px}h3{font-size:10pt;margin:14px 0 6px;text-transform:uppercase;letter-spacing:.45px;border-bottom:1px solid #d1d5db;padding-bottom:3px}.kacheln{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}.kachel{border:1px solid #e5e7eb;border-radius:8px;padding:6px 4px;text-align:center}.kachel b{display:block;font-size:12pt}.kachel span{font-size:7.6pt;color:#4b5563}table{width:100%;border-collapse:collapse;font-size:8.4pt}th{text-align:left;font-size:7.6pt;color:#4b5563;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid #d1d5db;padding:3px 4px}td{padding:3px 4px;border-bottom:1px solid #f0f1f3;vertical-align:top}.r{text-align:right}.klein{font-size:8.2pt;color:#4b5563;margin:4px 0}.hinweis{margin-top:16px;font-size:7.8pt;color:#6b7280;border-top:1px solid #e5e7eb;padding-top:6px}";
@@ -11832,7 +11885,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261119-sprachen";
+const VS_VERSION = "20261119-inhalte";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
