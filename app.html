@@ -4647,13 +4647,13 @@ const FW_TAGE = [[1, "Mo", "Mon", "montags", "on Mondays"], [2, "Di", "Tue", "di
 const FW_CSS = [
   ".fw-seite{position:fixed;inset:0;z-index:1400;background:var(--seite);color:var(--t1);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;font-family:Inter,system-ui,-apple-system,sans-serif}",
   ".fw-seite:focus{outline:none}",
-  ".fw-innen{max-width:1180px;margin:0 auto;padding:28px 32px 64px;box-sizing:border-box;display:grid;gap:18px}",
+  ".fw-innen{max-width:none;margin:0;padding:28px clamp(24px,3vw,56px) 64px;box-sizing:border-box;display:grid;gap:18px}",
   "@media(max-width:760px){.fw-innen{padding:calc(14px + env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) 48px max(14px,env(safe-area-inset-left,0px));gap:14px}}",
   ".fw-kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-bottom:16px;border-bottom:1px solid var(--linie)}",
   ".fw-kopf>div:first-child{min-width:0;flex:1 1 320px}",
   ".fw-kopf-kn{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.fw-kopf-kn .ik{display:none}.fw-kopf-kn .ik svg{width:18px;height:18px;display:block}",
   "@media(max-width:760px){.fw-kopf{flex-wrap:nowrap;align-items:center;padding-bottom:12px}.fw-kopf>div:first-child{flex:1 1 auto}.fw-kopf .tw-seitentitel{margin:0!important}.fw-kopf .tw-seitentext{display:none}.fw-kopf-kn{flex-wrap:nowrap;flex:none}.fw-kopf-kn .tw-k{width:42px!important;height:42px!important;min-height:42px!important;padding:0!important}.fw-kopf-kn .lang{display:none}.fw-kopf-kn .ik{display:inline-flex}}",
-  ".fw-raster{display:grid;grid-template-columns:232px minmax(0,1fr);gap:24px;align-items:start}",
+  ".fw-raster{display:grid;grid-template-columns:260px minmax(0,1fr);gap:32px;align-items:start}",
   "@media(max-width:900px){.fw-raster{grid-template-columns:minmax(0,1fr);gap:12px}}",
   /* Navigation: senkrechte Liste, am Handy waagerechte Reiter */
   ".fw-nav{position:sticky;top:12px;display:flex;flex-direction:column;gap:2px}",
@@ -12098,7 +12098,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261119-p1-app-w28-p2-p3";
+const VS_VERSION = "20261119-volle-breite";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -21396,7 +21396,7 @@ function TwSoGehts({ kurz, lang, label }) {
       ".tw-sn-ws-logo svg{width:16px;height:16px;display:block}",
       /* Einstellungen als ganze Seite */
       ".tw-einst:focus{outline:none}",
-      ".tw-einst-innen{max-width:1180px;margin:0 auto;padding:28px 32px 56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px;align-items:start;box-sizing:border-box}",
+      ".tw-einst-innen{max-width:none;margin:0;padding:28px clamp(24px,3vw,56px) 56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:16px;align-items:start;box-sizing:border-box}",
       ".tw-einst-innen>*{margin:0!important;min-width:0}",
       ".tw-einst-kopf{grid-column:1/-1;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-bottom:16px;border-bottom:1px solid var(--linie)}",
       ".tw-einst-kopftext{min-width:0;flex:1 1 320px}",
