@@ -6988,6 +6988,151 @@ function twZusatzKonto(konto) {
   } catch (e) {}
 })();
 let LANG = "de";
+/* ===== M19 (18.11.2026): weitere Sprachen (Español, Français, Italiano, Português, Türkçe).
+   LANG bleibt „de“ oder „en“ – danach richtet sich die ganze App. SPR ist die gewählte Sprache.
+   Für die neuen Sprachen läuft die App im englischen Zweig; twX übersetzt die englischen Texte mit dem Wörterbuch der Sprache
+   (vom Server über /api/tw-i18n, im Browser zwischengespeichert). Fehlt ein Text im Wörterbuch, bleibt er englisch.
+   Welche Sprachen angeboten werden, sagt der Server (i18n.sprache.an) – ohne Freigabe dort gibt es nur Deutsch und Englisch.
+   Speicher: tw_spr = bewusst gewählte Sprache; tw_lang bleibt „de“/„en“ (so lesen es ältere Teile wie „Verein sucht“); tw_lang_auto = tw_lang kommt aus der Browser-Sprache. ===== */
+let SPR = "de";
+const TW_SPRACHEN = [["en", "English"], ["de", "Deutsch"], ["es", "Español"], ["fr", "Français"], ["it", "Italiano"], ["pt", "Português"], ["tr", "Türkçe"]];
+const TW_SPR_CODES = TW_SPRACHEN.map(x => x[0]);
+const TW_SPR_HTML = { pt: "pt-BR" };
+const TW_I18N_OFFEN = true;   /* erst true, wenn die Zugangsprüfung /api/tw-i18n ohne Anmeldung erlaubt (OFFEN in tw-auth) – bis dahin holen nur angemeldete Nutzer die Wörterbücher */
+const TWX = { w: null, aus: null, regeln: [], spr: "", wStand: "", liste: [], stand: {}, listeT: 0, listeP: null, laedt: {} };
+function twSprNeu(c) { return c !== "de" && c !== "en"; }
+function twSprName(c) { const x = TW_SPRACHEN.filter(y => y[0] === c)[0]; return x ? x[1] : c; }
+function twXDarf() { if (TW_I18N_OFFEN) return true; try { const a = loadAccount() || {}; return !!(a.sitzung || a.code || a.zugangscode); } catch (e) { return false; } }
+function twXVorschau() { try { return store.getItem("tw_i18n_vorschau") === "1"; } catch (e) { return false; } }
+(function () { try {
+  if (/^#sprachvorschau$/.test(location.hash || "")) { store.setItem("tw_i18n_vorschau", "1"); }
+  if (/^#sprachvorschau-aus$/.test(location.hash || "")) { store.removeItem("tw_i18n_vorschau"); store.removeItem("tw_i18n_liste"); }
+  const c = JSON.parse(store.getItem("tw_i18n_liste") || "null");
+  if (c && Array.isArray(c.liste) && !!c.v === twXVorschau()) { TWX.liste = c.liste.filter(x => TW_SPR_CODES.indexOf(x) >= 0); TWX.stand = c.stand || {}; TWX.listeT = Number(c.t) || 0; }
+} catch (e) { } })();
+function twSprErlaubt(c) { return c === "de" || c === "en" || (TW_SPR_CODES.indexOf(c) >= 0 && TWX.liste.indexOf(c) >= 0); }
+/* Sprache des Browsers: die erste aus seiner Liste, die es hier gibt; sonst Englisch */
+function twSprBrowser() {
+  try {
+    const ls = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || "en"];
+    for (const l of ls) { const c = String(l || "").slice(0, 2).toLowerCase(); if (twSprErlaubt(c)) return c; }
+  } catch (e) { }
+  return "en";
+}
+function twSprGewaehlt() {
+  try {
+    const s = store.getItem("tw_spr"); if (TW_SPR_CODES.indexOf(s) >= 0) return s;
+    const v = store.getItem("tw_lang"); if ((v === "de" || v === "en") && store.getItem("tw_lang_auto") !== "1") return v;
+  } catch (e) { }
+  return null;
+}
+/* Zielsprache: die bewusst gewählte (solange es sie gibt), sonst die des Browsers */
+function twSprZiel() { const g = twSprGewaehlt(); if (g) return twSprErlaubt(g) ? g : (g === "de" ? "de" : "en"); return twSprBrowser(); }
+/* Sprache beim ersten Bild: eine neue Sprache nur, wenn ihr Wörterbuch schon im Browser liegt – sonst erst Englisch, dann umschalten */
+function twSprStart() { try { const z = twSprZiel(); if (!twSprNeu(z)) return z; return twXCache(z) ? z : "en"; } catch (e) { return "en"; } }
+function twSprMerken(n, auto) {
+  try {
+    if (!auto) { store.setItem("tw_spr", n); store.setItem("tw_lang", n === "de" ? "de" : "en"); store.removeItem("tw_lang_auto"); return; }
+    if (!twSprNeu(n)) { if (store.getItem("tw_lang_auto") === "1") { store.removeItem("tw_lang"); store.removeItem("tw_lang_auto"); } return; }
+    store.setItem("tw_lang", "en"); store.setItem("tw_lang_auto", "1");
+  } catch (e) { }
+}
+/* Liste der freigegebenen Sprachen: höchstens alle sechs Stunden neu holen */
+function twXListe() {
+  if (TWX.listeP) return TWX.listeP;
+  if (TWX.listeT && Date.now() - TWX.listeT < 21600000) return (TWX.listeP = Promise.resolve(true));
+  if (!twXDarf()) return Promise.resolve(false);
+  const v = twXVorschau();
+  TWX.listeP = fetch("/api/tw-i18n" + (v ? "?vorschau=1" : ""), { credentials: "omit" }).then(r => r.json()).then(d => {
+    if (!d || !d.ok || !Array.isArray(d.sprachen)) return false;
+    TWX.liste = d.sprachen.map(x => x.code).filter(x => TW_SPR_CODES.indexOf(x) >= 0); TWX.stand = {}; d.sprachen.forEach(x => { TWX.stand[x.code] = x.stand || ""; }); TWX.listeT = Date.now();
+    try { store.setItem("tw_i18n_liste", JSON.stringify({ t: TWX.listeT, v: v, liste: TWX.liste, stand: TWX.stand })); } catch (e) { }
+    return true;
+  }).catch(() => false);
+  TWX.listeP.then(ok => { if (!ok) TWX.listeP = null; });   // bei Fehlschlag später noch einmal versuchen
+  return TWX.listeP;
+}
+function twXSetzen(spr, woerter, stand) {
+  const regeln = []; const aus = new Set();
+  for (const k in woerter) { const v = woerter[k]; if (typeof v !== "string") continue; if (k.charCodeAt(0) === 126 && k.charAt(1) === "/" && k.charAt(k.length - 1) === "/") { try { regeln.push([new RegExp(k.slice(2, -1)), v]); } catch (e) { } } else aus.add(v); }
+  TWX.w = woerter; TWX.aus = aus; TWX.regeln = regeln; TWX.spr = spr; TWX.wStand = stand || "";
+}
+/* Wörterbuch aus dem Zwischenspeicher des Browsers (sofort, ohne Netz) */
+function twXCache(spr) {
+  if (!twSprNeu(spr)) return false;
+  if (TWX.spr === spr && TWX.w) return true;
+  try { const c = JSON.parse(store.getItem("tw_i18n_" + spr) || "null"); if (c && c.woerter && typeof c.woerter === "object") { twXSetzen(spr, c.woerter, c.stand); return true; } } catch (e) { }
+  return false;
+}
+/* Wörterbuch holen; liefert true, wenn danach eines für diese Sprache bereitliegt */
+function twXLaden(spr) {
+  if (!twSprNeu(spr)) return Promise.resolve(false);
+  const da = twXCache(spr);
+  if (da && TWX.wStand && TWX.wStand === (TWX.stand[spr] || TWX.wStand)) return Promise.resolve(true);   // Zwischenspeicher ist aktuell
+  if (TWX.laedt[spr]) return TWX.laedt[spr];
+  if (!twXDarf()) return Promise.resolve(da);
+  TWX.laedt[spr] = fetch("/api/tw-i18n?l=" + encodeURIComponent(spr) + "&s=" + encodeURIComponent(TWX.stand[spr] || "") + (twXVorschau() ? "&vorschau=1" : ""), { credentials: "omit" }).then(r => r.json()).then(d => {
+    delete TWX.laedt[spr];
+    if (!d || !d.ok || !d.woerter || typeof d.woerter !== "object") return da;
+    twXSetzen(spr, d.woerter, d.stand);
+    try { store.setItem("tw_i18n_" + spr, JSON.stringify({ stand: d.stand || "", woerter: d.woerter })); } catch (e) { }
+    return true;
+  }).catch(() => { delete TWX.laedt[spr]; return da; });
+  return TWX.laedt[spr];
+}
+/* Sprache wechseln: bewusst (aus dem Menü) oder still (Browser-Sprache). Eine neue Sprache wird erst gezeigt, wenn ihr Wörterbuch da ist. */
+function twSprWechsel(ziel, setzen, auto) {
+  const n = twSprErlaubt(ziel) ? ziel : "en";
+  twSprMerken(n, !!auto);
+  if (!twSprNeu(n)) { setzen(n); return; }
+  twXLaden(n).then(ok => { if (twSprZiel() !== n) return; setzen(ok && TWX.spr === n ? n : "en"); });
+}
+/* Beim Start: Liste prüfen, beim ersten Besuch die Browser-Sprache nehmen, Wörterbuch nachladen */
+function twXStart(lang, setzen, malen) {
+  twXListe().then(() => {
+    const z = twSprZiel();
+    if (z !== lang) { twSprWechsel(z, setzen, !twSprGewaehlt()); return; }
+    if (twSprNeu(z)) { const alt = TWX.wStand; twXLaden(z).then(() => { if (TWX.spr === z && TWX.wStand !== alt) malen(); }); }
+  });
+}
+function twXKern(k, o) {
+  if (o && TWX.aus.has(k)) return undefined;   // steht schon in der Zielsprache (Texte außerhalb von React laufen mehrfach durch)
+  const w = TWX.w; let h = w[k]; if (typeof h === "string") return h;
+  if (/\d/.test(k)) {   // Zahlen als Platzhalter: „Show 6 more“ steht im Wörterbuch als „Show # more“
+    const z = []; const k2 = k.replace(/\d+(?:[.,]\d+)*/g, m => { z.push(m); return "#"; }); h = w[k2];
+    if (typeof h === "string") { let i = 0; return h.replace(/#/g, () => (i < z.length ? z[i++] : "#")); }
+  }
+  const r = TWX.regeln;
+  for (let i = 0; i < r.length; i++) { const m = k.match(r[i][0]); if (m) return r[i][1].replace(/([$%])(\d)/g, (a, art, n) => { const g = m[+n]; if (g == null) return ""; if (art === "%") { const y = twXKern(g, o); return y === undefined ? g : y; } return g; }); }   // Muster: $1 übernimmt den Fund, %1 übersetzt ihn zusätzlich
+  return undefined;
+}
+function twX(s, o) {
+  if (SPR === "de" || SPR === "en" || typeof s !== "string" || s.length < 2 || TWX.spr !== SPR || !TWX.w) return s;
+  const d = TWX.w[s]; if (typeof d === "string" && !(o && TWX.aus.has(s))) return d;
+  if (s.length > 600) return s;
+  const m0 = s.match(/^(\s*)([\s\S]*?)(\s*)$/); const k = m0 ? m0[2] : ""; if (k.length < 2) return s;
+  let h = twXKern(k, o);
+  if (h === undefined) { const e = k.match(/^([\s\S]*?)(\s?…|\.\.\.|[:.!?])$/); if (e && e[1].length > 1) { const h2 = twXKern(e[1], o); if (h2 !== undefined) h = h2 + (SPR === "fr" && /^[:!?]$/.test(e[2]) ? " " : "") + e[2]; } }
+  if (h === undefined && k.indexOf(" · ") > 0) { let ge = false; const t = k.split(" · ").map(x => { const y = twXKern(x, o); if (y !== undefined && y !== x) { ge = true; return y; } return x; }).join(" · "); if (ge) h = t; }
+  return h === undefined ? s : m0[1] + h + m0[3];
+}
+/* Texte in Listen von Kind-Elementen (dort greift die Übersetzung beim Zeichnen sonst nicht) */
+function twXFeld(a) {
+  let neu = null;
+  for (let i = 0; i < a.length; i++) if (typeof a[i] === "string") { const y = twX(twEn(a[i])); if (y !== a[i]) { if (!neu) neu = a.slice(); neu[i] = y; } }
+  return neu || a;
+}
+/* Kleine Flaggen für das Sprachmenü (18 × 12) */
+function twSprFlaggeTeile(o) {
+  const h = React.createElement; const r = (k, x, y, w, ho, f) => h("rect", { key: k, x: x, y: y, width: w, height: ho, fill: f });
+  if (o === "es") return [r("a", 0, 0, 18, 12, "#AA151B"), r("b", 0, 3, 18, 6, "#F1BF00")];
+  if (o === "it") return [r("a", 0, 0, 6, 12, "#009246"), r("b", 6, 0, 6, 12, "#FFFFFF"), r("c", 12, 0, 6, 12, "#CE2B37")];
+  if (o === "fr") return [r("a", 0, 0, 6, 12, "#0055A4"), r("b", 6, 0, 6, 12, "#FFFFFF"), r("c", 12, 0, 6, 12, "#EF4135")];
+  if (o === "pt") return [r("a", 0, 0, 18, 12, "#009C3B"), h("polygon", { key: "b", points: "9,1.4 16.2,6 9,10.6 1.8,6", fill: "#FFDF00" }), h("circle", { key: "c", cx: 9, cy: 6, r: 2.5, fill: "#002776" })];
+  if (o === "tr") return [r("a", 0, 0, 18, 12, "#E30A17"), h("circle", { key: "b", cx: 6.3, cy: 6, r: 3, fill: "#FFFFFF" }), h("circle", { key: "c", cx: 7.1, cy: 6, r: 2.4, fill: "#E30A17" }),
+    h("polygon", { key: "d", points: "8.7,6 9.71,5.65 9.74,4.57 10.39,5.43 11.41,5.12 10.8,6 11.41,6.88 10.39,6.57 9.74,7.43 9.71,6.35", fill: "#FFFFFF" })];
+  return null;
+}
 /* ── TransferWire EN-Übersetzungsschicht (DE→EN zur Laufzeit) ─────────────────── */
 const EN_MAP = {
 "Unbest\u00e4tigt": "Unconfirmed",
@@ -7383,7 +7528,7 @@ window.twDossierPdf = async function (x, vorhanden) {
   if (typeof EN_MAP === "undefined") return;
   const ZUSATZ = { "Signal wird gesucht": "Searching for signals", "Signal wird gesucht …": "Searching for signals …", "Signal wird gesucht...": "Searching for signals..." };
   Object.keys(ZUSATZ).forEach((k) => { if (!EN_MAP[k]) EN_MAP[k] = ZUSATZ[k]; });
-  const tr = (t) => {
+  const trEn = (t) => {
     const m = t.match(/^(\s*)([\s\S]*?)(\s*)$/); const kern = m ? m[2] : ""; if (!kern) return null;
     const direkt = EN_MAP[kern]; if (direkt && direkt !== kern) return m[1] + direkt + m[3];
     let neu = kern, geaendert = false;
@@ -7391,19 +7536,24 @@ window.twDossierPdf = async function (x, vorhanden) {
     neu = neu.replace(/\(([^()]{3,40})\)/g, (a, x) => { const y = EN_MAP[x]; if (y && y !== x) { geaendert = true; return "(" + y + ")"; } return a; });
     return geaendert ? m[1] + neu + m[3] : null;
   };
+  /* M19: danach in die gewählte Sprache; der Urtext wird gemerkt, damit ein Sprachwechsel ihn zurückholen kann */
+  const urtext = new WeakMap();
+  const tr = (t) => { const a = trEn(t); if (SPR === "de" || SPR === "en") return a; const b = a == null ? t : a; const c = twX(b, true); return c !== b ? c : a; };
+  const setz = (k, v, u) => { if (SPR !== "de" && SPR !== "en") urtext.set(k, [v, u]); k.nodeValue = u; };
   const lauf = (wurzel) => {
     if (LANG !== "en" || !wurzel) return;
-    if (wurzel.nodeType === 3) { const pe = wurzel.parentElement; if (pe && pe.closest && pe.closest("[data-nx-roh]")) return; const v = wurzel.nodeValue; const u = v && v.length <= 160 ? tr(v) : null; if (u != null && u !== v) wurzel.nodeValue = u; return; }
+    if (wurzel.nodeType === 3) { const pe = wurzel.parentElement; if (pe && pe.closest && pe.closest("[data-nx-roh]")) return; const v = wurzel.nodeValue; const u = v && v.length <= 160 ? tr(v) : null; if (u != null && u !== v) setz(wurzel, v, u); return; }
     const w = document.createTreeWalker(wurzel, 4); const liste = []; let n; while ((n = w.nextNode())) liste.push(n);
-    for (const k of liste) { const p = k.parentNode; if (!p || /^(SCRIPT|STYLE|TEXTAREA|INPUT)$/.test(p.nodeName) || (p.closest && p.closest("[data-nx-roh]"))) continue; const v = k.nodeValue; if (!v || v.length > 160 || !/[A-Za-zÄÖÜäöüß]/.test(v)) continue; const u = tr(v); if (u != null && u !== v) k.nodeValue = u; }
+    for (const k of liste) { const p = k.parentNode; if (!p || /^(SCRIPT|STYLE|TEXTAREA|INPUT)$/.test(p.nodeName) || (p.closest && p.closest("[data-nx-roh]"))) continue; const v = k.nodeValue; if (!v || v.length > 160 || !/[A-Za-zÄÖÜäöüß]/.test(v)) continue; const u = tr(v); if (u != null && u !== v) setz(k, v, u); }
   };
+  window.__twXLauf = () => { try { if (!document.body) return; const w = document.createTreeWalker(document.body, 4); let n; while ((n = w.nextNode())) { const e = urtext.get(n); if (e) { urtext.delete(n); if (n.nodeValue === e[1]) n.nodeValue = e[0]; } } lauf(document.body); } catch (e) { } };
   let offen = new Set(); let geplant = false;
   const mo = new MutationObserver((recs) => {
     if (LANG !== "en") return;
-    for (const r of recs) for (const n of r.addedNodes) { if (n.nodeType === 1 || n.nodeType === 3) offen.add(n); }
+    for (const r of recs) { if (r.type === "characterData") { if (SPR !== "de" && SPR !== "en") offen.add(r.target); continue; } for (const n of r.addedNodes) { if (n.nodeType === 1 || n.nodeType === 3) offen.add(n); } }
     if (!geplant) { geplant = true; requestAnimationFrame(() => { geplant = false; const s = offen; offen = new Set(); s.forEach((x) => { try { if (x && x.isConnected) lauf(x); } catch (e) { } }); }); }
   });
-  const start = () => { try { mo.observe(document.body, { childList: true, subtree: true }); lauf(document.body); } catch (e) { } };
+  const start = () => { try { mo.observe(document.body, { childList: true, subtree: true, characterData: true }); lauf(document.body); } catch (e) { } };
   if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
 } catch (e) { } })();
 
@@ -7471,11 +7621,12 @@ window.twDossierPdf = async function (x, vorhanden) {
   React.createElement = function (type, props) {
     let args = Array.prototype.slice.call(arguments, 2);
     if (LANG === "en" && typeof type === "string") {
-      for (let i = 0; i < args.length; i++) if (typeof args[i] === "string") args[i] = twEn(args[i]);
+      const x = SPR !== "en" && TWX.spr === SPR && type !== "style" && type !== "script" && !(props && props["data-nx-roh"] != null);   /* M19: weitere Sprachen */
+      for (let i = 0; i < args.length; i++) { if (typeof args[i] === "string") args[i] = x ? twX(twEn(args[i])) : twEn(args[i]); else if (x && Array.isArray(args[i])) args[i] = twXFeld(args[i]); }
       if (props && typeof props === "object") {
         const p2 = {};
         let ge = false;
-        for (const k of ["placeholder", "title", "aria-label"]) if (typeof props[k] === "string") { p2[k] = twEn(props[k]); ge = true; }
+        for (const k of ["placeholder", "title", "aria-label"]) if (typeof props[k] === "string") { p2[k] = x ? twX(twEn(props[k])) : twEn(props[k]); ge = true; }
         if (ge) props = Object.assign({}, props, p2);
       }
     }
@@ -8330,19 +8481,19 @@ function LangSwitch({ dark }) {
   const flagge = o => React.createElement("svg", { className: "tw-lang-flagge", width: 18, height: 12, viewBox: "0 0 18 12", "aria-hidden": "true", focusable: "false", style: { display: "block", flex: "0 0 auto", borderRadius: 2, overflow: "hidden", boxShadow: "0 0 0 1px var(--linie2)" } },
     o === "de"
       ? [React.createElement("rect", { key: "s", x: 0, y: 0, width: 18, height: 4, fill: "#000000" }), React.createElement("rect", { key: "r", x: 0, y: 4, width: 18, height: 4, fill: "#DD0000" }), React.createElement("rect", { key: "g", x: 0, y: 8, width: 18, height: 4, fill: "#FFCC00" })]
-      : [React.createElement("rect", { key: "w", x: 0, y: 0, width: 18, height: 12, fill: "#FFFFFF" }), React.createElement("rect", { key: "v", x: 7.6, y: 0, width: 2.8, height: 12, fill: "#CE1124" }), React.createElement("rect", { key: "h", x: 0, y: 4.6, width: 18, height: 2.8, fill: "#CE1124" })]);
+      : twSprFlaggeTeile(o) || [React.createElement("rect", { key: "w", x: 0, y: 0, width: 18, height: 12, fill: "#FFFFFF" }), React.createElement("rect", { key: "v", x: 7.6, y: 0, width: 2.8, height: 12, fill: "#CE1124" }), React.createElement("rect", { key: "h", x: 0, y: 4.6, width: 18, height: 2.8, fill: "#CE1124" })]);
   const rahmen = "1px solid var(--linie2)";
   const waehle = o => { setOpen(false); if (__twToggleLang) __twToggleLang(o); };
-  const eintrag = (o, label) => React.createElement("button", { key: o, role: "menuitem", onClick: () => waehle(o), style: { display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", gap: 12, cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: LANG === o ? 800 : 600, padding: "9px 12px", border: "none", borderRadius: 8, background: "transparent", color: INK, textAlign: "left" } }, React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 9 } }, flagge(o), label), LANG === o ? React.createElement("span", { style: { color: "var(--gold-text)", fontWeight: 800 } }, "\u2713") : null);
+  const eintrag = (o, label) => React.createElement("button", { key: o, role: "menuitem", onClick: () => waehle(o), style: { display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", gap: 12, cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: SPR === o ? 800 : 600, padding: "9px 12px", border: "none", borderRadius: 8, background: "transparent", color: INK, textAlign: "left" } }, React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 9 } }, flagge(o), React.createElement("span", { "data-nx-roh": "1", lang: TW_SPR_HTML[o] || o }, label)), SPR === o ? React.createElement("span", { style: { color: "var(--gold-text)", fontWeight: 800 } }, "\u2713") : null);
   return React.createElement("div", { className: "tw-lang", style: { display: "inline-flex", alignItems: "center", gap: 8 } },
     React.createElement("div", { ref: boxRef, style: { position: "relative" } },
-      React.createElement("button", { type: "button", "aria-haspopup": "menu", "aria-expanded": open ? "true" : "false", onClick: () => setOpen(o => !o), title: en ? "Change language (current: English)" : "Sprache \u00e4ndern (aktuell: Deutsch)", style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, letterSpacing: .3, padding: "6px 10px", borderRadius: 9, border: rahmen, background: "var(--karte2)", color: "var(--t1)", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: 7 } },
-        flagge(en ? "en" : "de"),
+      React.createElement("button", { type: "button", "aria-haspopup": "menu", "aria-expanded": open ? "true" : "false", onClick: () => setOpen(o => !o), title: twSprNeu(SPR) ? twX("Change language") + " (" + twSprName(SPR) + ")" : en ? "Change language (current: English)" : "Sprache \u00e4ndern (aktuell: Deutsch)", style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, letterSpacing: .3, padding: "6px 10px", borderRadius: 9, border: rahmen, background: "var(--karte2)", color: "var(--t1)", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: 7 } },
+        flagge(SPR),
         React.createElement("span", { className: "tw-lang-text" }, en ? "Change language" : "Sprache \u00e4ndern"),
-        React.createElement("span", { className: "tw-lang-kurz" }, LANG.toUpperCase()),
+        React.createElement("span", { className: "tw-lang-kurz" }, SPR.toUpperCase()),
         React.createElement("span", { style: { fontSize: 11, opacity: .7 } }, "\u25BE")),
-      open ? React.createElement("div", { role: "menu", style: { position: "absolute", top: "calc(100% + 6px)", right: 0, minWidth: 172, background: CARD, border: "1px solid " + HAIR, borderRadius: 12, boxShadow: "0 12px 32px rgba(0,0,0,.16)", padding: 6, zIndex: 80 } },
-        eintrag("en", "English"), eintrag("de", "Deutsch")) : null),
+      open ? React.createElement("div", { role: "menu", style: { position: "absolute", top: "calc(100% + 6px)", right: 0, minWidth: 172, maxHeight: "72vh", overflowY: "auto", background: CARD, border: "1px solid " + HAIR, borderRadius: 12, boxShadow: "0 12px 32px rgba(0,0,0,.16)", padding: 6, zIndex: 80 } },
+        TW_SPRACHEN.filter(x => twSprErlaubt(x[0])).map(x => eintrag(x[0], x[1]))) : null),
     React.createElement("button", { onClick: () => setDk(d => !d), "aria-label": "Design hell/dunkel", title: dk ? "Helles Design" : "Dunkles Design", style: { cursor: "pointer", width: 30, height: 30, borderRadius: 9, border: "1px solid var(--linie2)", background: "var(--karte2)", color: "var(--t1)", fontSize: 14, lineHeight: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", padding: 0 } }, dk ? "\u2600" : "\u263E"));
 }
 const fmtDate = t => { if (t == null || t === "") return ""; const d = new Date(t); if (isNaN(d.getTime())) return typeof t === "string" && /vor|ago|eben|now|heute|gestern/i.test(t) ? t : ""; return d.toLocaleDateString(LANG === "en" ? "en-GB" : "de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }); };
@@ -11681,7 +11832,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261118-liga-suche";
+const VS_VERSION = "20261119-sprachen";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -12976,6 +13127,236 @@ function WsChance({ sp, f, account }) {
       daumen(1, WS_DAUMEN_HOCH, en ? "Good fit" : "Passt"), daumen(-1, WS_DAUMEN_RUNTER, en ? "Not a fit" : "Passt nicht")),
     (f.hin || []).length ? h("div", { className: "ws2-fit-hin" }, f.hin.map((x, i) => h("span", { key: i }, h("b", null, en ? "Note: " : "Hinweis: "), (en ? (x.te || x.t) : x.t) + (x.q ? " (" + x.q + (x.d ? ", " + wsDatum(x.d) : "") + ")" : "")))) : null);
 }
+/* ===== OP 672 (18.11.2026): Player-Fitting und Gehaltsspanne. Reiter „Fitting & Gehalt“ in „Meine Spieler“ (nur Pro), Etikett „Niveau“ in der Liste,
+   Abschnitt „Passt zu“ im Spielerprofil (ohne Gehalt). Der Schalter liegt am Server (fit.parameter fit_an): solange „laden“ fit=false liefert, zeigt die App nichts davon.
+   Opta-Werte erscheinen nicht: gezeigt wird nur die Stufe einer Liga (1–4). Gehälter sind Schätzungen und kommen nur für eigene Spieler vom Server. ===== */
+const WSF = { niveau: null, nLaedt: false, cache: {}, an: null, anLaedt: null };
+const WSF_CSS = ""
+  + ".wsf-chip{font:800 11px Inter,system-ui,sans-serif;padding:3px 9px;border-radius:999px;border:1px solid var(--gold-rand);background:var(--gold-tint);color:var(--gold-text);white-space:nowrap}"
+  + ".wsf-reiter{display:flex;gap:2px;border-bottom:1px solid var(--linie);margin:0 -16px;padding:0 10px;overflow-x:auto}"
+  + ".wsf-reiter button{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;min-height:44px;padding:0 12px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--t2);font:800 13px Inter,system-ui,sans-serif;cursor:pointer}"
+  + ".wsf-reiter button.aktiv{color:var(--t1);border-bottom-color:var(--gold)}.wsf-reiter button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}"
+  + ".wsf-pro{padding:1px 5px;border-radius:3px;background:var(--gold);color:var(--gold-schrift);font:900 10px/1.4 Inter,system-ui,sans-serif;letter-spacing:.6px}"
+  + ".wsf{display:flex;flex-direction:column;gap:14px;min-width:0}.wsf-oben{display:flex;flex-wrap:wrap;gap:14px;align-items:stretch}"
+  + ".wsf-kasten{box-sizing:border-box;min-width:0;background:var(--karte2);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:12px}"
+  + ".wsf-oben .wsf-a{flex:2 1 320px}.wsf-oben .wsf-b{flex:3 1 400px}"
+  + ".wsf-et{margin:0;font:900 11px Inter,system-ui,sans-serif;letter-spacing:1.2px;text-transform:uppercase;color:var(--t2)}"
+  + ".wsf-gross{font:700 40px/44px 'Barlow Condensed','Arial Narrow',sans-serif;color:var(--gold-text);overflow-wrap:anywhere}.wsf-satz{font:400 13px/1.5 Inter,system-ui,sans-serif;color:var(--t2)}"
+  + ".wsf-stufen{display:flex;gap:4px}.wsf-stufen span{flex:1 1 0;height:28px;border-radius:6px;background:var(--karte);color:var(--t3);display:flex;align-items:center;justify-content:center;font:700 16px 'Barlow Condensed','Arial Narrow',sans-serif}"
+  + ".wsf-stufen span.an{background:var(--gold);color:var(--gold-schrift)}.wsf-klein{margin:0;font:400 12px/1.5 Inter,system-ui,sans-serif;color:var(--t3)}"
+  + ".wsf-unter{font:700 12.5px Inter,system-ui,sans-serif;color:var(--t2)}.wsf-chips{display:flex;flex-wrap:wrap;gap:6px}"
+  + ".wsf-liga{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid var(--linie2);background:var(--karte);color:var(--t1);font:600 12.5px Inter,system-ui,sans-serif}"
+  + ".wsf-liga.duenn{border-style:dashed}.wsf-liga.eigene{border-color:var(--gold-rand);background:var(--gold-tint);color:var(--gold-text)}"
+  + ".wsf-trenn{display:flex;flex-direction:column;gap:8px;padding-top:12px;border-top:1px solid var(--linie2)}"
+  + ".wsf-bel{padding:2px 10px;border-radius:999px;border:1px solid var(--linie2);background:var(--karte);color:var(--t1);font:800 12px Inter,system-ui,sans-serif}"
+  + ".wsf-bel.mittel{border-color:var(--sc-mittel-rand);background:var(--sc-mittel-bg);color:var(--sc-mittel-text)}.wsf-bel.hoch{border-color:var(--sc-gut-rand);background:var(--sc-gut-bg);color:var(--sc-gut-text)}"
+  + ".wsf-fakten{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}.wsf-fakten li{display:flex;justify-content:space-between;gap:12px;font:400 12.5px/1.5 Inter,system-ui,sans-serif;color:var(--t2)}"
+  + ".wsf-fakten b{color:var(--t1);font-weight:700;font-variant-numeric:tabular-nums;text-align:right}"
+  + ".wsf-gruppe{display:flex;flex-direction:column;gap:8px}.wsf-gkopf{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px}.wsf-gkopf h4{margin:0;font:800 14px Inter,system-ui,sans-serif;color:var(--t1)}"
+  + ".wsf-zahl{font:700 15px 'Barlow Condensed','Arial Narrow',sans-serif;color:var(--t2)}"
+  + ".wsf-spalten{display:flex;flex-wrap:wrap;gap:18px 28px}.wsf-sp1{flex:3 1 400px;min-width:0;display:flex;flex-direction:column;gap:4px}.wsf-sp2{flex:2 1 280px;min-width:0;display:flex;flex-direction:column;gap:4px}"
+  + ".wsf-liste{margin:0;padding:0;list-style:none;display:flex;flex-direction:column}.wsf-liste>li{padding:10px 0;border-top:1px solid var(--linie2)}"
+  + ".wsf-zeile{display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px 14px}.wsf-wer{flex:1 1 190px;min-width:0;display:flex;flex-direction:column}"
+  + ".wsf-wer b{font:800 14px/1.35 Inter,system-ui,sans-serif;color:var(--t1)}.wsf-wer span{font:500 12.5px/1.45 Inter,system-ui,sans-serif;color:var(--t2)}"
+  + ".wsf-was{flex:2 1 240px;min-width:0;display:flex;flex-direction:column;gap:4px}.wsf-tags{display:flex;flex-wrap:wrap;gap:6px}"
+  + ".wsf-tag{padding:1px 8px;border-radius:8px;border:1px solid var(--linie2);background:var(--karte);color:var(--t1);font:800 11.5px/1.6 Inter,system-ui,sans-serif;white-space:nowrap}"
+  + ".wsf-tag.gold{border-color:var(--gold-rand);background:var(--gold-tint);color:var(--gold-text)}.wsf-tag.warn{border-color:var(--sc-mittel-rand);background:var(--sc-mittel-bg);color:var(--sc-mittel-text)}"
+  + ".wsf-mehr{align-self:flex-start;cursor:pointer;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--linie2);background:transparent;color:var(--t1);font:800 13px Inter,system-ui,sans-serif}"
+  + ".wsf-textknopf{cursor:pointer;min-height:44px;padding:0 4px;border:0;background:transparent;color:var(--gold-text);font:800 12.5px Inter,system-ui,sans-serif}"
+  + ".wsf-akt{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;font:400 13px/1.5 Inter,system-ui,sans-serif;color:var(--t2)}.wsf-akt b{font:700 30px/34px 'Barlow Condensed','Arial Narrow',sans-serif;color:var(--gold-text)}"
+  + ".wsf-legende{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;font:400 12.5px Inter,system-ui,sans-serif;color:var(--t2)}.wsf-legende span{display:inline-flex;align-items:center;gap:6px}"
+  + ".wsf-legende i{display:inline-block;width:18px;height:8px;border-radius:4px}.wsf-legende i.st,.wsf-bar.st{background:var(--wsf-stamm)}.wsf-legende i.ro,.wsf-bar.ro{background:var(--wsf-rot)}.wsf-legende i.mi{width:2px;height:12px;border-radius:0;background:var(--t1)}"
+  + ".wsf{--wsf-stamm:#c8a355;--wsf-rot:#6f7680;--wsf-spur:#1a1b1d}html.tw-dark .wsf{--wsf-stamm:#a9822f;--wsf-rot:#4f5864;--wsf-spur:#dde1e6}"
+  + ".wsf-achse{display:flex;justify-content:space-between;padding-bottom:6px;font:400 11.5px Inter,system-ui,sans-serif;font-variant-numeric:tabular-nums;color:var(--t3)}"
+  + ".wsf-spur{position:relative;height:8px;border-radius:4px;background:var(--wsf-spur)}.wsf-bar{position:absolute;top:0;height:8px;border-radius:4px}.wsf-mitte{position:absolute;top:-2px;height:12px;width:2px;background:var(--t1)}"
+  + ".wsf-g{display:flex;flex-direction:column;gap:6px}.wsf-gspuren{display:flex;flex-direction:column;gap:3px}.wsf-gtext{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px;font:400 12.5px/1.5 Inter,system-ui,sans-serif;font-variant-numeric:tabular-nums}"
+  + ".wsf-gtext b{flex:1 1 180px;min-width:0;font:800 14px/1.35 Inter,system-ui,sans-serif;color:var(--t1)}.wsf-gtext b.eigene{color:var(--gold-text)}.wsf-gtext .st{color:var(--t1)}.wsf-gtext .ro{color:var(--t2)}.wsf-gtext .be{color:var(--t3);font-size:12px}"
+  + ".wsf-hinweis{margin:0;padding:12px 14px;border-radius:12px;border:1px solid var(--sc-mittel-rand);background:var(--sc-mittel-bg);color:var(--t1);font:400 13px/1.5 Inter,system-ui,sans-serif;max-width:900px}"
+  + ".wsf-fuss{display:flex;flex-direction:column;gap:4px;max-width:900px}"
+  + "@media (max-width:760px){.wsf-reiter{margin:0 -12px}.wsf-gross{font-size:34px;line-height:38px}}";
+function wsfCss() { try { if (document.getElementById("wsf-css")) return; const s = document.createElement("style"); s.id = "wsf-css"; s.textContent = WSF_CSS; document.head.appendChild(s); } catch (e) { } }
+function wsfAn() { return !!(WS.daten && WS.daten.fit === true); }
+function wsfNiveauLaden(neu) {
+  if (!wsfAn() || WSF.nLaedt || (WSF.niveau && !neu)) return;
+  WSF.nLaedt = true;
+  wsRuf(WS.account, "fitting_liste", {}).then(r => { WSF.nLaedt = false; WSF.niveau = (r && r.ok && r.niveau) || {}; wsNeu(); });
+}
+/* Spielerprofil: einmal je Sitzung fragen, ob das Fitting für dieses Konto an ist */
+function wsfAnPruefen() {
+  if (WS.daten) return Promise.resolve(wsfAn());
+  if (WSF.an !== null) return Promise.resolve(WSF.an);
+  if (!twIstPremium()) { WSF.an = false; return Promise.resolve(false); }
+  try { const v = sessionStorage.getItem("tw_fit_an"); if (v === "1" || v === "0") { WSF.an = v === "1"; return Promise.resolve(WSF.an); } } catch (e) { }
+  if (!WSF.anLaedt) WSF.anLaedt = wsRuf(null, "fit_an", {}).then(r => { WSF.an = !!(r && r.ok && r.fit); try { sessionStorage.setItem("tw_fit_an", WSF.an ? "1" : "0"); } catch (e) { } return WSF.an; });
+  return WSF.anLaedt;
+}
+function useWsfAn() { const [an, setAn] = React.useState(() => WS.daten ? wsfAn() : WSF.an === true); React.useEffect(() => { let ok = true; wsfAnPruefen().then(v => { if (ok) setAn(!!v); }); return () => { ok = false; }; }, []); return an; }
+function wsfZahl(v, en) { const s = String(Math.round(v / 10000) / 100); return en ? s : s.replace(".", ","); }
+function wsfBetrag(v, en) { v = Number(v) || 0; return v >= 1000000 ? (en ? "€" + wsfZahl(v, en) + "m" : wsfZahl(v, en) + " Mio. €") : (en ? "€" + Math.round(v / 1000) + "k" : Math.round(v / 1000) + " Tsd. €"); }
+function wsfSpanne(a, b, en) { a = Number(a) || 0; b = Number(b) || 0; return b >= 1000000 ? (en ? "€" + wsfZahl(a, en) + "–" + wsfZahl(b, en) + "m" : wsfZahl(a, en) + "–" + wsfZahl(b, en) + " Mio. €") : (en ? "€" + Math.round(a / 1000) + "–" + Math.round(b / 1000) + "k" : Math.round(a / 1000) + "–" + Math.round(b / 1000) + " Tsd. €"); }
+const WSF_ROLLE = { stamm: ["Stammspieler", "Regular starter", "als Stammspieler", "as a regular starter"], traeger: ["Leistungsträger", "Key player", "als Leistungsträger", "as a key player"], rotation: ["Rotation", "Rotation", "als Rotationsspieler", "as a rotation player"] };
+function wsfRolle(k, en, als) { const x = WSF_ROLLE[k]; return x ? x[(als ? 2 : 0) + (en ? 1 : 0)] : ""; }
+const WSF_BEL = { gering: ["gering", "low"], mittel: ["mittel", "medium"], hoch: ["hoch", "high"] };
+function wsfBel(k, en) { const x = WSF_BEL[k]; return x ? x[en ? 1 : 0] : (k || ""); }
+function wsfLigaChip(l, extra) { const h = React.createElement; return h("span", { key: l.liga, className: "wsf-liga" + (l.daten === "duenn" ? " duenn" : "") + (l.eigene ? " eigene" : ""), title: extra || "" }, twMwFlagge(l.land_code, 16), l.liga); }
+
+/* a) Aktuelles Liganiveau mit Vergleichsligen und Belastbarkeit */
+function wsfTeilNiveau(r, en) {
+  const h = React.createElement; const nv = r.niveau || {}; const sp = r.spieler || {}; const bel = r.belastbar || {}; const ausDb = r.quelle === "datenbank";
+  const fakten = ausDb
+    ? [["TW Score", sp.tw_score != null ? String(Math.round(Number(sp.tw_score))) : "–"], [en ? "Minutes played in 12 months" : "Einsatzminuten in 12 Monaten", sp.minuten_12m != null ? String(sp.minuten_12m) : "–"]]
+    : [[en ? "Based on" : "Grundlage", r.quelle === "liga_position" ? (en ? "league and position" : "Liga und Position") : (en ? "your entries" : "deine Angaben")], [en ? "Assumption" : "Annahme", en ? "typical starter in his league" : "üblicher Stammspieler seiner Liga"]];
+  const einsatz = { stamm: ["Stammspieler", "Regular starter"], rotation: ["Rotation", "Rotation"], rand: ["Ergänzungsspieler", "Squad player"] }[bel.einsatz];
+  if (ausDb && einsatz) fakten.push([en ? "Role at his club" : "Einsatz im Verein", einsatz[en ? 1 : 0]]);
+  fakten.push([en ? "League strength" : "Liga-Stärke", nv.eigene_stufe ? (en ? "Tier " : "Stufe ") + nv.eigene_stufe : "–"]);
+  const hinweis = !ausDb ? (en ? "Without match data this stays a rough placement." : "Ohne Spieldaten bleibt das eine grobe Einordnung.")
+    : bel.stufe === "gering" ? (en ? "Few minutes played: the assessment can change a lot with more matches." : "Wenige Einsatzminuten: Mit mehr Spielen kann sich die Einschätzung deutlich ändern.")
+    : bel.stufe === "mittel" ? (en ? "Solid data; individual leagues can still differ." : "Solide Datenlage; einzelne Ligen können trotzdem abweichen.")
+    : (en ? "Many minutes played and a settled level value." : "Viele Einsatzminuten und ein gefestigter Niveau-Wert.");
+  return h("section", { className: "wsf-kasten wsf-a", "data-wsf": "niveau" },
+    h("h3", { className: "wsf-et" }, en ? "Current level" : "Aktuelles Niveau"),
+    h("div", null, h("div", { className: "wsf-gross" }, nv.liga || "–"),
+      h("div", { className: "wsf-satz" }, nv.liga ? (en ? "Tier " + nv.stufe + " of 4 – he would be a regular starter in this league." : "Stufe " + nv.stufe + " von 4 – in dieser Liga wäre er Stammspieler.") : (en ? "No league found in which he would be a regular starter." : "Keine Liga gefunden, in der er Stammspieler wäre."))),
+    nv.stufe ? h("div", null, h("div", { className: "wsf-stufen", role: "img", "aria-label": en ? "League tier " + nv.stufe + " of 4" : "Liga-Stufe " + nv.stufe + " von 4" }, [1, 2, 3, 4].map(n => h("span", { key: n, className: n === Number(nv.stufe) ? "an" : "" }, n))),
+      h("p", { className: "wsf-klein", style: { marginTop: 6 } }, en ? "Tier 1 are the strongest leagues." : "Stufe 1 sind die stärksten Ligen.")) : null,
+    (nv.vergleich || []).length ? h("div", { style: { display: "flex", flexDirection: "column", gap: 6 } }, h("span", { className: "wsf-unter" }, en ? "Comparable leagues" : "Vergleichbare Ligen"),
+      h("div", { className: "wsf-chips" }, nv.vergleich.map(n => h("span", { key: n, className: "wsf-liga" }, n)))) : null,
+    nv.eigene_liga && nv.eigene_rolle ? h("p", { className: "wsf-satz", style: { margin: 0 } }, (en ? "In his league (" : "In seiner Liga (") + nv.eigene_liga + "): ",
+      h("b", { style: { color: "var(--t1)", fontWeight: 800 } }, nv.eigene_rolle === "hoch" ? (en ? "below the rotation level" : "unter dem Niveau der Rotation") : wsfRolle(nv.eigene_rolle, en))) : null,
+    h("div", { className: "wsf-trenn" },
+      h("div", { style: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 } }, h("span", { className: "wsf-unter" }, en ? "Reliability" : "Belastbarkeit"), h("span", { className: "wsf-bel " + (bel.stufe || "") }, wsfBel(bel.stufe, en))),
+      h("ul", { className: "wsf-fakten" }, fakten.map(f => h("li", { key: f[0] }, h("span", null, f[0]), h("b", null, f[1])))),
+      h("p", { className: "wsf-klein" }, hinweis),
+      bel.anker ? h("p", { className: "wsf-klein", "data-wsf": "anker" }, en ? "Because he plays regularly at his club, his level is set at least to that role in his league." : "Weil er in seinem Verein regelmäßig spielt, setzen wir sein Niveau mindestens auf diese Rolle in seiner Liga.") : null));
+}
+/* b) Passende Ligen und Länder mit erwarteter Rolle */
+function WsfLigen({ r, en }) {
+  const h = React.createElement; const [unter, setUnter] = React.useState(false); const nv = r.niveau || {};
+  const alle = r.ligen || []; const nah = alle.filter(l => !l.unter); const fern = alle.filter(l => l.unter);
+  const gruppe = (k, hinweis) => { const xs = nah.filter(l => l.rolle === k); return xs.length ? h("div", { key: k, className: "wsf-gruppe", "data-wsf-gruppe": k },
+    h("div", { className: "wsf-gkopf" }, h("h4", null, wsfRolle(k, en)), h("span", { className: "wsf-zahl" }, xs.length), h("span", { className: "wsf-klein" }, hinweis)),
+    h("div", { className: "wsf-chips" }, xs.map(l => wsfLigaChip(l)))) : null; };
+  const hoch = Number(nv.ligen_hoch) || 0; const naechste = (nv.hoch_naechste || []).join(", ");
+  return h("section", { className: "wsf-kasten wsf-b", "data-wsf": "ligen" },
+    h("h3", { className: "wsf-et" }, en ? "Suitable leagues and countries" : "Passende Ligen und Länder"),
+    gruppe("stamm", en ? "at the level of the starters" : "auf dem Niveau der Stammspieler"),
+    gruppe("traeger", en ? "clearly above the level of the starters" : "klar über dem Niveau der Stammspieler"),
+    gruppe("rotation", en ? "at the level of the rotation players" : "auf dem Niveau der Rotationsspieler"),
+    !nah.length ? h("p", { className: "wsf-satz", style: { margin: 0 } }, en ? "No suitable league found." : "Keine passende Liga gefunden.") : null,
+    h("div", { className: "wsf-trenn" },
+      hoch ? h("p", { className: "wsf-satz", style: { margin: 0 } }, (en ? "Still too strong (" + hoch + (hoch === 1 ? " league" : " leagues") + ")" : "Noch zu stark (" + hoch + (hoch === 1 ? " Liga" : " Ligen") + ")") + (naechste ? (en ? ", closest: " : ", am nächsten: ") + naechste : "") + ".") : null,
+      fern.length ? h("div", { style: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "4px 10px" } },
+        h("p", { className: "wsf-satz", style: { margin: 0 } }, en ? fern.length + " more leagues are well below his level." : fern.length + " weitere Ligen liegen deutlich unter seinem Niveau."),
+        h("button", { type: "button", className: "wsf-textknopf", "aria-expanded": unter, onClick: () => setUnter(!unter) }, unter ? (en ? "Hide" : "Ausblenden") : (en ? "Show" : "Anzeigen"))) : null,
+      unter && fern.length ? h("div", { className: "wsf-chips" }, fern.map(l => wsfLigaChip(l))) : null,
+      alle.some(l => l.daten === "duenn") ? h("p", { className: "wsf-klein" }, en ? "Dashed outline: thin data, less reliable." : "Gestrichelter Rand: dünne Datenlage, weniger belastbar.") : null));
+}
+/* c) Passende Vereine: zuerst Vereine, die gerade seine Position suchen (mit Quelle und Datum), dann Vereine mit passendem Profil.
+      Chancen aus „Passende Vereine“ (Status, Daumen) bleiben erhalten und stehen hier an ihrer Karte. */
+function WsfVereine({ r, en, sp, account }) {
+  const h = React.createElement; const [mehr, setMehr] = React.useState(false);
+  const bedarf = r.bedarf || []; const profil = r.profil || []; const zeige = mehr ? bedarf : bedarf.slice(0, 6);
+  const chancen = sp ? (sp.fits || []).concat(sp.fits_mehr || []) : []; const drin = {}; bedarf.forEach(b => { drin[b.id] = true; });
+  const rest = chancen.filter(f => !drin[f.karte]);
+  const art = b => b.art === "gemeldet" ? (en ? "Reported" : "Gemeldet") : b.art === "pruefer" ? (en ? "Needs checker" : "Bedarfs-Prüfer") : (en ? "Squad gap" : "Kaderlücke");
+  const zeile = b => { const f = chancen.find(x => x.karte === b.id); const st = wsStufe(b.stufe);
+    return h("li", { key: b.id, "data-wsf-bedarf": b.id },
+      h("div", { className: "wsf-zeile" },
+        h("div", { className: "wsf-wer" }, h("b", null, twMwFlagge(b.land_code, 16), " ", b.verein), h("span", null, [b.liga, wsfRolle(b.rolle, en, true)].filter(Boolean).join(" · "))),
+        h("div", { className: "wsf-was" },
+          h("div", { className: "wsf-tags" }, h("span", { className: "wsf-tag" }, art(b)), b.stufe ? h("span", { className: "ws2-stufe " + st[0] }, st[1]) : null, b.passung ? h("span", { className: "wsf-tag gold" }, en ? "profile match" : "passt laut Profil") : null),
+          h("span", { className: "wsf-klein" }, (b.quelle ? (en ? "Source: " : "Quelle: ") + b.quelle + " · " : "") + (b.datum ? wsDatum(b.datum) : "")))),
+      f ? h("div", { style: { marginTop: 8 } }, h(WsChance, { sp: sp, f: f, account: account })) : null); };
+  return h("section", { className: "wsf-kasten", "data-wsf": "vereine" },
+    h("h3", { className: "wsf-et" }, en ? "Suitable clubs" : "Passende Vereine"),
+    h("div", { className: "wsf-spalten" },
+      h("div", { className: "wsf-sp1" },
+        h("div", { className: "wsf-gkopf" }, h("h4", null, en ? "Currently looking for his position" : "Suchen gerade seine Position"), h("span", { className: "wsf-zahl" }, bedarf.length)),
+        h("p", { className: "wsf-klein", style: { marginBottom: 6 } }, en ? "From “Club seeks”, squad gaps and the needs checker – with source and date." : "Aus „Verein sucht“, Kaderlücken und Bedarfs-Prüfer – mit Quelle und Datum."),
+        bedarf.length ? h("ul", { className: "wsf-liste" }, zeige.map(zeile)) : h("p", { className: "wsf-satz", style: { margin: 0 } }, en ? "No club in a suitable league is currently looking for his position." : "Gerade sucht kein Verein einer passenden Liga seine Position."),
+        bedarf.length > 6 ? h("button", { type: "button", className: "wsf-mehr", "aria-expanded": mehr, onClick: () => setMehr(!mehr) }, mehr ? (en ? "Show fewer" : "Weniger anzeigen") : (en ? "Show " + (bedarf.length - 6) + " more" : (bedarf.length - 6) + " weitere anzeigen")) : null,
+        Number(r.bedarf_hoch) ? h("p", { className: "wsf-klein" }, en ? r.bedarf_hoch + " more clubs are looking in leagues that are still too strong for him." : r.bedarf_hoch + " weitere Vereine suchen in Ligen, die für ihn noch zu stark sind.") : null,
+        rest.length ? h("div", { style: { display: "flex", flexDirection: "column", gap: 7, marginTop: 8 } }, h("span", { className: "wsf-unter" }, en ? "More opportunities from “Club seeks”" : "Weitere Chancen aus „Verein sucht“"),
+          rest.map(f => h(WsChance, { key: f.karte, sp: sp, f: f, account: account }))) : null),
+      h("div", { className: "wsf-sp2" },
+        h("div", { className: "wsf-gkopf" }, h("h4", null, en ? "Matching profile" : "Passendes Profil"), h("span", { className: "wsf-zahl" }, profil.length)),
+        h("p", { className: "wsf-klein", style: { marginBottom: 6 } }, en ? "Clubs in suitable leagues where he would rank first by level." : "Vereine in passenden Ligen, bei denen er nach Niveau vorn wäre."),
+        profil.length ? h("ul", { className: "wsf-liste" }, profil.map(p => h("li", { key: p.verein + "|" + p.liga, style: { padding: "8px 0" } },
+          h("div", { className: "wsf-wer" }, h("b", null, twMwFlagge(p.land_code, 16), " ", p.verein), h("span", null, p.liga + " · " + (en ? "would rank no. " + p.rang + " of " + p.von + " in his position" : "wäre Nr. " + p.rang + " von " + p.von + " auf seiner Position"))))))
+          : h("p", { className: "wsf-satz", style: { margin: 0 } }, en ? "No club with a matching profile found." : "Kein Verein mit passendem Profil gefunden."))));
+}
+/* d) Gehaltsspanne brutto/Jahr je passender Liga (Stammspieler/Rotation) – nur für eigene Spieler, immer als Schätzung gekennzeichnet */
+function WsfGehalt({ r, en }) {
+  const h = React.createElement; const [mehr, setMehr] = React.useState(false);
+  const liste = r.gehalt || []; const akt = r.gehalt_aktuell; const guete = r.gehalt_guete || {};
+  let max = 0; liste.forEach(g => { [g.stamm, g.rotation].forEach(x => { if (x && Number(x.bis) > max) max = Number(x.bis); }); }); if (akt && Number(akt.bis) > max) max = Number(akt.bis);
+  const schritt = [100000, 250000, 500000, 1000000, 2500000, 5000000, 10000000].find(s => max / s <= 4) || 10000000; const MAX = Math.max(schritt, Math.ceil(max / schritt) * schritt);
+  const pz = v => (Math.round(Math.min(Number(v) || 0, MAX) / MAX * 1000) / 10) + "%";
+  const achse = []; for (let v = 0; v <= MAX + 1; v += schritt) achse.push(v);
+  const spur = (x, kl, name) => x ? h("div", { className: "wsf-spur", title: name + ": " + wsfSpanne(x.von, x.bis, en) + (en ? ", mid " : ", Mitte ") + wsfBetrag(x.mitte, en) + (x.n ? (en ? ", " + x.n + " comparable players" : ", " + x.n + " Vergleichsspieler") : "") },
+    h("div", { className: "wsf-bar " + kl, style: { left: pz(x.von), width: pz(Number(x.bis) - Number(x.von)) } }), h("div", { className: "wsf-mitte", style: { left: pz(x.mitte) } })) : null;
+  const zeige = mehr ? liste : liste.slice(0, 8);
+  const von = guete.streuung_von != null ? Math.round((1 - Number(guete.streuung_von)) * 100) : null, bis = guete.streuung_bis != null ? Math.round((Number(guete.streuung_bis) - 1) * 100) : null;
+  return h("section", { className: "wsf-kasten", "data-wsf": "gehalt" },
+    h("div", { style: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px 12px" } }, h("h3", { className: "wsf-et" }, en ? "Salary range" : "Gehaltsspanne"), h("span", { className: "wsf-satz" }, en ? "gross per year, per suitable league" : "brutto pro Jahr, je passender Liga"), h("span", { className: "wsf-tag warn" }, en ? "Estimate" : "Schätzung")),
+    akt ? h("div", { className: "wsf-akt", "data-wsf-aktuell": "1" }, h("span", null, (en ? "Currently at " : "Aktuell bei ") + (akt.verein || "") + " (" + (akt.liga || "") + (en ? "): around" : "): rund")), h("b", null, wsfBetrag(akt.mitte, en)), h("span", null, (en ? "range " : "Spanne ") + wsfSpanne(akt.von, akt.bis, en))) : null,
+    liste.length ? h(React.Fragment, null,
+      h("div", { className: "wsf-legende" }, h("span", null, h("i", { className: "st", "aria-hidden": "true" }), wsfRolle("stamm", en)), h("span", null, h("i", { className: "ro", "aria-hidden": "true" }), wsfRolle("rotation", en)), h("span", null, h("i", { className: "mi", "aria-hidden": "true" }), en ? "Middle of the range" : "Mitte der Spanne")),
+      h("div", null,
+        h("div", { className: "wsf-achse", "aria-hidden": "true" }, achse.map(v => h("span", { key: v }, v === 0 ? (en ? "€0" : "0 €") : wsfBetrag(v, en)))),
+        h("ul", { className: "wsf-liste" }, zeige.map(g => h("li", { key: g.liga, className: "wsf-g", "data-wsf-gehalt": g.liga },
+          h("div", { className: "wsf-gspuren" }, spur(g.stamm, "st", wsfRolle("stamm", en)), spur(g.rotation, "ro", wsfRolle("rotation", en))),
+          h("div", { className: "wsf-gtext" }, h("b", { className: g.eigene ? "eigene" : "" }, twMwFlagge(g.land_code, 16), " ", g.liga),
+            g.stamm ? h("span", { className: "st" }, wsfRolle("stamm", en) + " " + wsfSpanne(g.stamm.von, g.stamm.bis, en)) : null,
+            g.rotation ? h("span", { className: "ro" }, wsfRolle("rotation", en) + " " + wsfSpanne(g.rotation.von, g.rotation.bis, en)) : null,
+            h("span", { className: "be" }, (en ? "Reliability " : "Belastbarkeit ") + wsfBel(g.belastbar, en))))))),
+      liste.length > 8 ? h("button", { type: "button", className: "wsf-mehr", "aria-expanded": mehr, onClick: () => setMehr(!mehr) }, mehr ? (en ? "Show fewer" : "Weniger anzeigen") : (en ? "Show " + (liste.length - 8) + " more leagues" : (liste.length - 8) + " weitere Ligen anzeigen")) : null)
+      : h("p", { className: "wsf-satz", style: { margin: 0 } }, en ? "No salary range available for the suitable leagues." : "Für die passenden Ligen liegt keine Gehaltsspanne vor."),
+    h("div", { className: "wsf-fuss" },
+      h("p", { className: "wsf-klein" }, en ? "Compared with players in the same position group and at a similar level in each league." : "Verglichen wird mit Spielern gleicher Positionsgruppe und ähnlichem Niveau in der jeweiligen Liga."),
+      guete.faelle ? h("p", { className: "wsf-klein" }, en ? "Based on the salary part of the market value model, calibrated with " + guete.faelle + " documented salaries from " + guete.vereine + " clubs." + (von != null && bis != null ? " For these, half were between " + von + "% below and " + bis + "% above the estimate." : "")
+        : "Grundlage ist der Gehaltsteil des Marktwert-Modells, geeicht mit " + guete.faelle + " belegten Gehältern aus " + guete.vereine + " Vereinen." + (von != null && bis != null ? " Bei diesen lag die Hälfte zwischen " + von + " % unter und " + bis + " % über der Schätzung." : "")) : null,
+      h("p", { className: "wsf-klein" }, en ? "You only see salaries for your own players." : "Gehälter siehst du nur bei deinen eigenen Spielern.")));
+}
+function wsfStand(r, en) { const h = React.createElement; return r.stand ? h("p", { className: "wsf-klein" }, (en ? "As of " : "Stand ") + wsDatum(r.stand) + (en ? " – recalculated every night." : " – wird jede Nacht neu berechnet.")) : null; }
+function wsfBanner(r, en) {
+  const h = React.createElement; if (r.quelle === "datenbank") return null;
+  const t = r.verknuepfung === "name_passt_nicht" ? (en ? "The link to the database does not match this player's name. The assessment is therefore based only on your entries (league, position) and assumes a typical regular starter in his league. Link the player again to see the exact assessment." : "Die Verknüpfung mit der Datenbank passt nicht zum Namen dieses Spielers. Die Einschätzung stammt deshalb nur aus deinen Angaben (Liga, Position) und nimmt einen üblichen Stammspieler seiner Liga an. Verknüpfe den Spieler neu, um die genaue Einschätzung zu sehen.")
+    : r.quelle === "liga_position" || r.verknuepfung === "ohne_niveau" ? (en ? "There are not yet enough appearances for this player's own level value. The assessment assumes a typical regular starter in his league and position. It is less reliable." : "Für diesen Spieler gibt es noch zu wenige Einsätze für einen eigenen Niveau-Wert. Die Einschätzung nimmt einen üblichen Stammspieler seiner Liga und Position an. Sie ist weniger belastbar.")
+    : (en ? "This player is not in the database. The assessment is based only on your entries (league, position) and assumes a typical regular starter in his league. It is less reliable." : "Dieser Spieler ist nicht in der Datenbank. Die Einschätzung stammt nur aus deinen Angaben (Liga, Position) und nimmt einen üblichen Stammspieler seiner Liga an. Sie ist weniger belastbar.");
+  return h("p", { className: "wsf-hinweis", "data-wsf": "banner" }, t);
+}
+function wsfLeer(grund, en) {
+  return grund === "liga_unbekannt" ? (en ? "No assessment is available for this league yet. Enter a league from the list to see level, leagues and clubs." : "Für diese Liga liegt noch keine Einschätzung vor. Trage eine Liga aus der Liste ein, dann siehst du Niveau, Ligen und Vereine.")
+    : grund === "position_unbekannt" ? (en ? "Enter the player's position to see level, leagues and clubs." : "Trage die Position des Spielers ein, dann siehst du Niveau, Ligen und Vereine.")
+    : (en ? "There is not enough data for an assessment of this player yet." : "Für diesen Spieler reichen die Daten noch nicht für eine Einschätzung.");
+}
+/* Reiter „Fitting & Gehalt“ einer Spielerkarte in „Meine Spieler“ */
+function WsFitting({ sp, account }) {
+  const h = React.createElement; const en = wsEn(); wsfCss();
+  const frisch = () => { const c = WSF.cache[sp.id]; return c && Date.now() - c.t < 600000 ? c.r : null; };
+  const [r, setR] = React.useState(frisch); const [n, setN] = React.useState(0);
+  React.useEffect(() => { if (frisch()) return; let ok = true; setR(null); wsRuf(account, "fitting", { id: sp.id }).then(x => { if (!ok) return; if (x && x.ok) WSF.cache[sp.id] = { t: Date.now(), r: x }; setR(x || { ok: false, grund: "antwort" }); }); return () => { ok = false; }; }, [sp.id, n]);
+  if (!r) return h("div", { className: "tw-lade", "data-ws-fitting": sp.id }, h("span", { className: "tw-spin" }), en ? "Calculating fitting …" : "Fitting wird berechnet …");
+  if (!r.ok) return h("div", { className: "wsf", "data-ws-fitting": sp.id }, h("p", { className: "wsf-hinweis" }, en ? "The fitting could not be loaded. Check your connection and try again." : "Das Fitting konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut."),
+    h("button", { type: "button", className: "wsf-mehr", onClick: () => { delete WSF.cache[sp.id]; setN(n + 1); } }, en ? "Try again" : "Erneut versuchen"));
+  if (!r.daten) return h("div", { className: "wsf", "data-ws-fitting": sp.id }, h("p", { className: "wsf-hinweis" }, wsfLeer(r.grund, en)));
+  return h("div", { className: "wsf", "data-ws-fitting": sp.id }, wsfBanner(r, en),
+    h("div", { className: "wsf-oben" }, wsfTeilNiveau(r, en), h(WsfLigen, { r: r, en: en })),
+    h(WsfVereine, { r: r, en: en, sp: sp, account: account }),
+    r.gehalt_erlaubt === false ? h("section", { className: "wsf-kasten", "data-wsf": "gehalt-aus" }, h("h3", { className: "wsf-et" }, en ? "Salary range" : "Gehaltsspanne"),
+      h("p", { className: "wsf-satz", style: { margin: 0 } }, en ? "Salary ranges are shown only for players who are under contract with you. Set the status to “Under contract” if he is your player." : "Gehaltsspannen zeigen wir nur für Spieler, die bei dir unter Vertrag stehen. Stelle den Status auf „Unter Vertrag“, wenn er dein Spieler ist."))
+      : h(WsfGehalt, { r: r, en: en }),
+    wsfStand(r, en));
+}
+/* Spielerprofil: Abschnitt „Passt zu“ neben „Ähnliche Spieler“ – Niveau, passende Ligen und Vereine, ohne Gehalt */
+function TwPpPasstZu({ pid }) {
+  const h = React.createElement; const en = LANG === "en"; wsfCss(); const [r, setR] = React.useState(null);
+  React.useEffect(() => { let ok = true; setR(null); wsRuf(null, "passt_zu", { pid: pid }).then(x => { if (ok) setR(x || { ok: false }); }); return () => { ok = false; }; }, [pid]);
+  if (!r) return h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), en ? "Calculating fitting …" : "Fitting wird berechnet …");
+  if (!r.ok || !r.daten) return h("div", { className: "tw-pp-karte tw-pp-leer" }, !r.ok ? (en ? "The fitting could not be loaded." : "Das Fitting konnte nicht geladen werden.") : wsfLeer(r.grund, en));
+  return h("div", { className: "wsf", "data-wsf": "passt-zu" }, wsfBanner(r, en), h("div", { className: "wsf-oben" }, wsfTeilNiveau(r, en), h(WsfLigen, { r: r, en: en })), h(WsfVereine, { r: r, en: en, sp: null, account: null }), wsfStand(r, en));
+}
 function wsStufe(s) { const x = WS_STUFE[s]; return x ? [x[0], wsEn() ? x[1] : s] : ["", s || ""]; }
 function WsSpielerKarte({ sp, d, account, openPlayer, setView, watch, onUpdateWatch, onBearbeiten }) {
   const h = React.createElement; const en = wsEn();
@@ -12997,6 +13378,11 @@ function WsSpielerKarte({ sp, d, account, openPlayer, setView, watch, onUpdateWa
   const wert = (lab, v, kl, titel) => h("div", { className: "ws2-wert" + (kl ? " " + kl : ""), title: titel || "" }, h("span", null, lab), h("b", null, v));
   const einsatz = sp.spiele3 ? (en ? (sp.einsaetze3 || 0) + " of " + sp.spiele3 + " · " + (sp.min3 || 0) + " min" : (sp.einsaetze3 || 0) + " von " + sp.spiele3 + " · " + (sp.min3 || 0) + " Min.") : "–";
   const fits = sp.fits || []; const fitsMehr = sp.fits_mehr || [];
+  /* OP 672: Reiter „Fitting & Gehalt“ und Etikett „Niveau“ – nur wenn der Server das Fitting für dieses Konto freigibt */
+  const fitAn = wsfAn(); const [reiter, setReiter] = React.useState("ueber"); const imFit = fitAn && reiter === "fit";
+  React.useEffect(() => { if (fitAn) { wsfCss(); wsfNiveauLaden(); } }, [fitAn]);
+  const fitNv = fitAn && WSF.niveau ? WSF.niveau[String(sp.id)] : null;
+  const fitTab = (k, lab, pro) => h("button", { type: "button", role: "tab", "aria-selected": reiter === k, className: reiter === k ? "aktiv" : "", onClick: () => setReiter(k), "data-ws-reiter": k }, lab, pro ? h("span", { className: "wsf-pro" }, "PRO") : null);
   return h("article", { className: "ws2-karte", "data-ws-spieler": sp.id },
     h("div", { className: "ws2-k-kopf" },
       h("span", { className: "ws2-k-foto" + (sp.pid ? " link" : ""), onClick: sp.pid ? oeffne : undefined }, h(DbFoto, { x: { name: sp.name, photo: sp.foto }, size: 46 })),
@@ -13004,28 +13390,32 @@ function WsSpielerKarte({ sp, d, account, openPlayer, setView, watch, onUpdateWa
         h("div", { className: "ws2-k-zeile1" },
           sp.pid ? h("button", { type: "button", className: "ws2-name link", onClick: oeffne, title: en ? "Open player profile" : "Spielerprofil öffnen" }, sp.name) : h("span", { className: "ws2-name" }, sp.name),
           h("span", { className: "ws2-status " + (sp.status === "vertrag" ? "vertrag" : "scouting") }, sp.status === "vertrag" ? (en ? "Under contract" : "Unter Vertrag") : (en ? "Scouting" : "Im Scouting")),
-          sp.quelle === "frei" ? h("span", { className: "ws2-chip" }, en ? "own profile" : "eigenes Profil") : null, h(NxVtMarke, { sp: sp, account: account })),
+          sp.quelle === "frei" ? h("span", { className: "ws2-chip" }, en ? "own profile" : "eigenes Profil") : null,
+          fitNv ? h("span", { className: "wsf-chip", "data-ws-niveau": sp.id, title: en ? "Strongest league in which he would be a regular starter" : "Stärkste Liga, in der er Stammspieler wäre" }, (en ? "Level: " : "Niveau: ") + fitNv.liga) : null,
+          h(NxVtMarke, { sp: sp, account: account })),
         h("div", { className: "ws2-k-sub" }, kopfInfo || "–")),
       h(FwFolgenKnopf, { art: "spieler", kennung: sp.pid ? String(sp.pid) : "", name: sp.name, team: sp.team, stil: "klein", quelle: "meine_spieler", alt: h(WsGlocke, { art: "meinspieler", wert: String(sp.id), watch: watch, onUpdateWatch: onUpdateWatch, text: false }) })),
-    h("div", { className: "ws2-k-werte" },
+    fitAn ? h("div", { className: "wsf-reiter", role: "tablist", "aria-label": en ? "Player sections" : "Bereiche des Spielers" }, fitTab("ueber", en ? "Overview" : "Überblick"), fitTab("fit", en ? "Fitting & salary" : "Fitting & Gehalt", true)) : null,
+    imFit ? h(WsFitting, { sp: sp, account: account }) : null,
+    imFit ? null : h("div", { className: "ws2-k-werte" },
       wert(en ? "Market value" : "Marktwert", sp.mw_text || "–", "gold", sp.quelle === "frei" ? (en ? "your own entry" : "eigene Angabe") : (en ? "TransferWire estimate" : "Schätzung TransferWire")),
       wert(en ? "League" : "Liga", sp.liga || "–"),
       wert("TW Score", sp.score != null ? String(Math.round(Number(sp.score))) : "–"),
       wert(en ? "Last matches" : "Letzte Spiele", einsatz, null, en ? "Appearances in the team's last matches and minutes played" : "Einsätze in den letzten Spielen der Mannschaft und Minuten")),
-    noten.length ? h("div", { className: "ws2-form" },
+    !imFit && noten.length ? h("div", { className: "ws2-form" },
       h("div", { className: "ws2-label" }, en ? "Form · match ratings (0–100)" : "Form · Spielnoten (0–100)"),
       h("div", { className: "ws2-balken", role: "img", "aria-label": (en ? "Ratings of the last matches: " : "Noten der letzten Spiele: ") + noten.map(s => s.n == null ? "–" : twLkNoteKurz(s.n)).join(", ") },
         noten.map((s, i) => h("span", { key: i, className: "ws2-bar " + (s.n == null ? "leer" : scoreBand(Number(s.n))), style: { height: (s.n == null ? 8 : Math.max(12, Math.min(100, Math.round((Number(s.n) - 25) / 75 * 100)))) + "%" }, title: wsDatum(s.d) + (s.g ? " " + (s.h ? (en ? "vs " : "gegen ") : (en ? "at " : "bei ")) + s.g : "") + " · " + (s.m || 0) + (en ? " min" : " Min.") + (s.n != null ? " · " + (en ? "rating " : "Note ") + twLkNoteKurz(s.n) : "") }))),
       sp.note3 != null ? h("span", { className: "ws2-form-n" }, (en ? "Avg. last 3: " : "Ø letzte 3: ") + Math.round(Number(sp.note3))) : null) : null,
-    (sp.hinweise || []).length ? h("div", { className: "ws2-hinweise" }, sp.hinweise.map(x => h("span", { key: x.k, className: "ws2-hinweis " + x.k, title: x.info || "" }, en ? (x.te || x.t) : x.t))) : null,
-    h("div", { className: "ws2-fits" },
+    !imFit && (sp.hinweise || []).length ? h("div", { className: "ws2-hinweise" }, sp.hinweise.map(x => h("span", { key: x.k, className: "ws2-hinweis " + x.k, title: x.info || "" }, en ? (x.te || x.t) : x.t))) : null,
+    imFit ? null : fitAn ? h("div", { className: "ws2-fits" }, h("button", { type: "button", className: "ws2-link", onClick: () => setReiter("fit"), "data-ws-zu-fit": sp.id }, (en ? "Matching clubs" : "Passende Vereine") + (sp.fits_n ? " (" + sp.fits_n + ")" : "") + (en ? " – now under “Fitting & salary”" : " – jetzt unter „Fitting & Gehalt“"))) : h("div", { className: "ws2-fits" },
       h("div", { className: "ws2-label" }, (en ? "Matching clubs" : "Passende Vereine") + (sp.fits_n ? " (" + sp.fits_n + ")" : "")),
       fits.length ? h("div", { className: "ws2-fit-liste" }, fits.map(f => h(WsChance, { key: f.karte, sp: sp, f: f, account: account })))
         : h("p", { className: "ws2-sub" }, en ? "No matching club need yet – calculated daily from “Club seeks”." : "Noch kein passender Vereinsbedarf – wird täglich aus „Verein sucht“ berechnet."),
       sp.fits_n > fits.length ? h("button", { type: "button", className: "ws2-link", onClick: () => setView("gesucht") }, en ? "Show all in “Club seeks”" : "Alle in „Verein sucht“ ansehen") : null,
       fitsMehr.length ? h("button", { type: "button", className: "ws2-link", onClick: () => setMehr(!mehr), "aria-expanded": mehr, "data-ws-chance-mehr": sp.id }, (mehr ? (en ? "Hide closed and dismissed" : "Abgeschlossene und aussortierte ausblenden") : (en ? "Show closed and dismissed" : "Abgeschlossene und aussortierte anzeigen")) + " (" + fitsMehr.length + ")") : null,
       mehr && fitsMehr.length ? h("div", { className: "ws2-fit-liste" }, fitsMehr.map(f => h(WsChance, { key: f.karte, sp: sp, f: f, account: account }))) : null),
-    sp.notizen ? h("div", { className: "ws2-notiz" }, sp.notizen) : null,
+    !imFit && sp.notizen ? h("div", { className: "ws2-notiz" }, sp.notizen) : null,
     istTeam ? h("div", { className: "ws2-team" },
       h("label", { className: "ws2-zust" }, h("span", null, en ? "Responsible" : "Zuständig"), h("select", { value: (sp.zustaendig && sp.zustaendig.email) || "", onChange: e => aendern({ zustaendig: e.target.value }), "data-ws-zustaendig": sp.id }, h("option", { value: "" }, en ? "nobody" : "niemand"), (team.mitglieder || []).map(m => h("option", { key: m.email, value: m.email }, (m.name || "") + (m.ich ? (en ? " (you)" : " (du)") : ""))))),
       h("button", { type: "button", className: "ws2-btn klein", onClick: () => setOffen(!offen), "aria-expanded": offen }, (en ? "Comments" : "Kommentare") + " (" + (sp.kommentare || 0) + ")")) : null,
@@ -20330,6 +20720,7 @@ function TwSpielerSeite({ plDetail, laedt, plTab, plExtra, plVidLoading, ladeExt
   const ebene = React.useRef(null), kopf = React.useRef(null), held = React.useRef(null);
   const [aktiv, setAktiv] = React.useState("profil"); const [kompakt, setKompakt] = React.useState(false);
   const [pp, setPp] = React.useState(null); const [statistikVoll, setStatistikVoll] = React.useState(false);
+  const fitAn = useWsfAn(); const ppAbschn = fitAn ? TW_PP_ABSCHNITTE.concat([["passtzu", "Passt zu", "Fits"]]) : TW_PP_ABSCHNITTE;   /* OP 672 */
   const d = (plDetail && plDetail.detail) || {}; const pid = (plDetail && plDetail.pid) || d.player_id || d.pid;
   const zielGesetzt = React.useRef(false);
   React.useEffect(() => { let ok = true; setPp(null); if (pid && !laedt) twPpLaden(pid).then(x => { if (ok) setPp(x && x.ok ? x : { ok: false, saison: [] }); }); return () => { ok = false; }; }, [pid, laedt]);
@@ -20346,8 +20737,8 @@ function TwSpielerSeite({ plDetail, laedt, plTab, plExtra, plVidLoading, ladeExt
     const el = ebene.current; if (!el) return; const kh = (kopf.current && kopf.current.offsetHeight) || 110;
     const hb = held.current ? held.current.offsetTop + held.current.offsetHeight - kh : 260; setKompakt(el.scrollTop > hb);
     let akt = "profil"; const basis = el.getBoundingClientRect().top + kh + 40;
-    TW_PP_ABSCHNITTE.forEach(([k]) => { const s = document.getElementById("tw-pp-" + k); if (s && s.getBoundingClientRect().top <= basis) akt = k; });
-    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 4) akt = TW_PP_ABSCHNITTE[TW_PP_ABSCHNITTE.length - 1][0];
+    ppAbschn.forEach(([k]) => { const s = document.getElementById("tw-pp-" + k); if (s && s.getBoundingClientRect().top <= basis) akt = k; });
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 4) akt = ppAbschn[ppAbschn.length - 1][0];
     setAktiv(a => a === akt ? a : akt);
   };
   const on = (watch && watch.items || []).some(w => w.t === "spieler" && w.w === d.name);
@@ -20363,7 +20754,7 @@ function TwSpielerSeite({ plDetail, laedt, plTab, plExtra, plVidLoading, ladeExt
         !laedt ? h("button", { type: "button", className: "tw-pp-knopf", onClick: pdf, title: en ? "Download the player profile as PDF" : "Spielerprofil als PDF herunterladen" }, h("span", { className: "kurz" }, "PDF"), h("span", { className: "lang" }, en ? "Profile as PDF" : "Profil als PDF")) : null,
         h("button", { type: "button", className: "tw-pp-knopf tw-pp-zu" + (zurueckMitPerf ? "" : " tw-mv-nurdesk"), onClick: onSchliessen, "aria-label": en ? "Close" : "Schließen" }, "✕")),
       h("nav", { className: "tw-pp-reiter", role: "tablist", "aria-label": en ? "Sections of the player profile" : "Bereiche des Spielerprofils" },
-        TW_PP_ABSCHNITTE.map(([k, de, e]) => h("button", { key: k, type: "button", role: "tab", "aria-selected": aktiv === k, className: aktiv === k ? "aktiv" : "", onClick: () => springe(k, true) }, en ? e : de)))));
+        ppAbschn.map(([k, de, e]) => h("button", { key: k, type: "button", role: "tab", "aria-selected": aktiv === k, className: aktiv === k ? "aktiv" : "", onClick: () => springe(k, true) }, en ? e : de)))));
   if (laedt) return h("div", { className: "tw-pp-ebene tw-pp-seite", role: "dialog", "aria-modal": "true", ref: ebene }, kopfLeiste,
     h("main", { className: "tw-pp-breite tw-pp-inhalt" }, h("div", { className: "tw-lade" }, h("span", { className: "tw-spin" }), en ? "Loading profile …" : "Profil wird geladen …")));
   const pos = d.pos ? (en ? ({ Torwart: "Goalkeeper", Abwehr: "Defender", Mittelfeld: "Midfielder", Sturm: "Forward" })[d.pos] || d.pos : d.pos) : "";
@@ -20402,6 +20793,7 @@ function TwSpielerSeite({ plDetail, laedt, plTab, plExtra, plVidLoading, ladeExt
         h("div", { className: "tw-pp-karte" }, h(SpielerNewsListe, { pid: pid, name: d.name, onWatch: onWatchNews }))),
       abschnitt("aehnlich", en ? "Similar players" : "Ähnliche Spieler", en ? "Players with a comparable profile: position, age, league level, TW Score and abilities." : "Spieler mit vergleichbarem Profil: Position, Alter, Liganiveau, TW Score und Fähigkeiten.",
         h(TwPpAehnliche, { pid: pid, d: d, onOpenPlayer: onOpenPlayer, onAlle: () => onAehnlich({ pid: pid, name: d.name, team: d.team, photo: d.photo }) })),
+      fitAn && pid ? abschnitt("passtzu", en ? "Fits" : "Passt zu", en ? "Level, suitable leagues and clubs for this player – an estimate from performance data, playing time and league strength." : "Niveau, passende Ligen und Vereine für diesen Spieler – eine Schätzung aus Leistungsdaten, Einsatzzeit und Liga-Stärke.", h(TwPpPasstZu, { pid: pid })) : null,
       h("div", { className: "tw-pp-ende" }, h(PdfKnopf, { onClick: pdf, label: en ? "Profile as PDF" : "Profil als PDF", titel: en ? "Download the player profile as PDF" : "Spielerprofil als PDF herunterladen", primaer: true }),
         h("button", { type: "button", className: "tw-pp-knopf", onClick: onSchliessen }, t("watch_close")))),
     statistikVoll && pid ? h(TwProfilStatistik, { pid: pid, d: d, onClose: () => setStatistikVoll(false) }) : null);
@@ -24468,25 +24860,23 @@ function GoHome() {
 function TransferWire() {
   const [lang, setLangState] = useState(() => {
     try {
-      const v = store.getItem("tw_lang"); return ["de", "en"].indexOf(v) >= 0 ? v : "en";
+      return twSprStart();   /* M19: bewusst gewählte Sprache, sonst die des Browsers */
     } catch (e) {
       return "en";
     }
   });
-  LANG = lang;
+  SPR = lang; LANG = lang === "de" ? "de" : "en";
+  const [twXMal, setTwXMal] = useState(0);
   useEffect(() => {
     try {
-      document.documentElement.lang = lang;
-      document.title = lang === "en" ? "TransferWire — Transfer news & club needs" : "TransferWire — Transfermeldungen & Vereinsbedarfe";
+      document.documentElement.lang = TW_SPR_HTML[lang] || lang;
+      document.title = twX(lang !== "de" ? "TransferWire — Transfer news & club needs" : "TransferWire — Transfermeldungen & Vereinsbedarfe");
+      if (window.__twXLauf) window.__twXLauf();
     } catch (e) {}
-  }, [lang]);
+  }, [lang, twXMal]);
   useEffect(() => {
     __twToggleLang = ziel => {
-      const n = ["de", "en"].indexOf(ziel) >= 0 ? ziel : "en";
-      try {
-        store.setItem("tw_lang", n);
-      } catch (e) {}
-      setLangState(n);
+      twSprWechsel(ziel, n => setLangState(n), false);   /* M19 */
     };
     return () => {
       __twToggleLang = null;
@@ -24495,6 +24885,7 @@ function TransferWire() {
   const [account, setAccountState] = useState(() => loadAccount());
   const [page, setPage] = useState(() => { var h = (location.hash || "").replace("#", ""); var a = loadAccount(); if (h === "cancel") return "cancel"; if (h === "abo" || h.indexOf("abo-") === 0) return "subscribe"; if (a) return twHatSitzung(a) ? "app" : "pruefen"; if (h === "login") return "login"; if (h === "test") return "register"; return "landing"; });
   useEffect(() => { window.__twSeite = (p) => setPage(p); return () => { window.__twSeite = null; }; }, []);
+  useEffect(() => { twXStart(SPR, n => setLangState(n), () => setTwXMal(x => x + 1)); }, [page, !!account]);   /* M19 */
   const [pubLegal, setPubLegal] = useState(() => { var h = (location.hash || "").replace("#", ""); return (h === "impressum" || h === "datenschutz" || h === "agb") ? h : null; });
   const twSeiteErst = React.useRef(true);
   useEffect(() => {   // Punkt 9 (Auftrag 41): nach der Anmeldung bzw. einem Seitenwechsel oben beginnen; am Handy blieb sonst die Scrollposition des Anmeldeformulars erhalten und man landete mitten im Newsfeed (beim ersten Laden/Neuladen bleibt das Verhalten des Browsers unveraendert)
