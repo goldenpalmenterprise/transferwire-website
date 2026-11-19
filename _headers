@@ -5,3 +5,6 @@
   Cache-Control: public, max-age=31536000, immutable
 /verein-sucht.css
   Cache-Control: public, max-age=31536000, immutable
+# PWA (19.11.2026): Manifest mit dem richtigen Typ ausliefern (vorher application/octet-stream)
+/manifest.webmanifest
+  Content-Type: application/manifest+json; charset=utf-8
