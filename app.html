@@ -12098,7 +12098,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261119-volle-breite";
+const VS_VERSION = "20261120-einfuehrungstour";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -16402,6 +16402,498 @@ function TwPwaLogin() {
   if (art === "mac") return h("p", { className: "tw-pwa-hinweis", "data-tw-pwa": "login-mac" }, twPwaBild(), h("span", null, en ? "Use as an app: Share → Add to Dock" : "Als App nutzen: Teilen → Zum Dock hinzufügen"));
   return null;
 }
+/* ===== Einführungstour (20.11.2026, Boss 20.11. 01:20): Haupttour und Detailtouren, je eine Fassung für Berater und für Vereine.
+   Startet von selbst nur bei neuen Konten (angelegt ab 20.11.2026; Auskunft über /api/tw-tour), sonst über Einstellungen → Einführung.
+   Handy: dieselben Schritte, die Erklärung erscheint als Karte am unteren oder oberen Rand. Texte Deutsch/Englisch hier, weitere Sprachen über das Wörterbuch. ===== */
+const TWT_CSS = [
+  ".twt-sperre{position:fixed;inset:0;z-index:5000;background:transparent;cursor:default}",
+  ".twt-ring{position:fixed;z-index:5001;pointer-events:none;border-radius:12px;border:2px solid var(--gold);box-shadow:0 0 0 9999px rgba(7,10,17,.62),0 0 0 6px rgba(200,163,85,.16),0 0 28px rgba(200,163,85,.28);top:0;left:0;width:0;height:0;opacity:0;transition:opacity .26s ease}",
+  ".twt-ring.an{opacity:1}",
+  ".twt-ring.gleitet{transition:top .44s cubic-bezier(.2,.8,.2,1),left .44s cubic-bezier(.2,.8,.2,1),width .44s cubic-bezier(.2,.8,.2,1),height .44s cubic-bezier(.2,.8,.2,1),border-radius .44s ease,opacity .26s ease}",
+  ".twt-ring.leer{border-color:transparent;box-shadow:0 0 0 9999px rgba(7,10,17,.62)}",
+  ".twt-ring::after{content:'';position:absolute;inset:-2px;border-radius:inherit;border:2px solid var(--gold);opacity:0}",
+  ".twt-ring.puls::after{animation:twt-puls .9s cubic-bezier(.2,.7,.3,1) 1}",
+  "@keyframes twt-puls{0%{opacity:.85;transform:scale(1)}100%{opacity:0;transform:scale(1.08)}}",
+  ".twt-blase{position:fixed;z-index:5002;top:0;left:0;width:min(360px,calc(100vw - 32px));box-sizing:border-box;background:var(--karte);color:var(--t1);border:1px solid var(--linie2);border-radius:16px;box-shadow:0 22px 60px rgba(0,0,0,.42),0 2px 0 rgba(200,163,85,.0);padding:18px 18px 16px;font-family:Inter,system-ui,sans-serif;opacity:0}",
+  ".twt-blase.an{opacity:1;transition:opacity .22s ease}",
+  ".twt-blase.wartet{opacity:0 !important;pointer-events:none}",
+  ".twt-blase.gleitet{transition:transform .44s cubic-bezier(.2,.8,.2,1),opacity .22s ease}",
+  ".twt-blase.blatt{left:12px;right:12px;width:auto;border-radius:18px;padding:16px 16px 14px}",
+  ".twt-inhalt{animation:twt-rein .3s cubic-bezier(.2,.8,.2,1) both}",
+  "@keyframes twt-rein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}",
+  ".twt-kopf{display:flex;align-items:center;gap:10px;margin-bottom:12px}",
+  ".twt-balken{flex:1;display:flex;gap:3px;min-width:0}",
+  ".twt-balken span{flex:1;height:3px;border-radius:2px;background:var(--linie2);transition:background .3s ease}",
+  ".twt-balken span.ja{background:var(--gold)}",
+  ".twt-zahl{font:600 12px/1 Inter,system-ui,sans-serif;color:var(--t2);font-variant-numeric:tabular-nums;white-space:nowrap}",
+  ".twt-x{width:32px;height:32px;margin:-6px -6px -6px 0;border:0;border-radius:9px;background:transparent;color:var(--t2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}",
+  ".twt-x:hover{background:var(--hover);color:var(--t1)}",
+  ".twt-gruppe{font:600 12px/1.2 Inter,system-ui,sans-serif;color:var(--gold-text);margin:0 0 4px}",
+  ".twt-titel{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:25px;line-height:1.08;letter-spacing:.2px;margin:0 0 8px;color:var(--t1);text-wrap:balance}",
+  ".twt-text{font-size:14px;line-height:1.55;color:var(--t1);opacity:.9;margin:0}",
+  ".twt-pro{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font:700 12px/1 Inter,system-ui,sans-serif;color:var(--gold-text);background:var(--gold-tint);border:1px solid var(--gold-rand);border-radius:999px;padding:6px 10px}",
+  ".twt-mehr{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:0;border:0;background:none;cursor:pointer;font:600 13px/1.3 Inter,system-ui,sans-serif;color:var(--gold-text);text-align:left}",
+  ".twt-mehr:hover{text-decoration:underline;text-underline-offset:3px}",
+  ".twt-fuss{display:flex;align-items:center;gap:8px;margin-top:16px}",
+  ".twt-k{min-height:40px;padding:0 16px;border-radius:10px;font:700 14px/1 Inter,system-ui,sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:background .15s ease,border-color .15s ease,transform .12s ease}",
+  ".twt-k:active{transform:scale(.98)}",
+  ".twt-k.gold{background:var(--gold);color:var(--gold-schrift);border:1px solid var(--gold)}",
+  ".twt-k.gold:hover{filter:brightness(1.06)}",
+  ".twt-k.rand{background:transparent;color:var(--t1);border:1px solid var(--linie2)}",
+  ".twt-k.rand:hover{border-color:var(--gold-rand);background:var(--hover)}",
+  ".twt-k.text{background:none;border:0;color:var(--t2);padding:0 6px;font-weight:600}",
+  ".twt-k.text:hover{color:var(--t1)}",
+  ".twt-k:focus-visible,.twt-x:focus-visible,.twt-mehr:focus-visible,.twt-chip:focus-visible{outline:2px solid var(--gold);outline-offset:2px}",
+  ".twt-fuss .twt-k.gold{margin-left:auto}",
+  ".twt-modal{position:fixed;inset:0;z-index:5003;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(7,10,17,.62);animation:twt-ein .26s ease both;font-family:Inter,system-ui,sans-serif}",
+  "@keyframes twt-ein{from{opacity:0}to{opacity:1}}",
+  ".twt-fenster{width:min(460px,100%);max-height:calc(100vh - 40px);overflow:auto;box-sizing:border-box;background:var(--karte);color:var(--t1);border:1px solid var(--linie2);border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,.5);padding:28px 26px 22px;text-align:center;animation:twt-hoch .42s cubic-bezier(.2,.8,.2,1) both}",
+  "@keyframes twt-hoch{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}",
+  ".twt-marke{position:relative;width:84px;height:84px;margin:0 auto 16px}",
+  ".twt-marke > svg{position:absolute;inset:0;width:84px;height:84px;transform:rotate(-90deg)}",
+  ".twt-blase:focus,.twt-fenster:focus{outline:none}",
+  ".twt-marke circle{fill:none;stroke:var(--gold);stroke-width:2;stroke-linecap:round;stroke-dasharray:239;stroke-dashoffset:239;animation:twt-zeichnen 1s cubic-bezier(.6,.1,.2,1) .15s forwards}",
+  ".twt-marke circle.grund{stroke:var(--linie2);stroke-dashoffset:0;animation:none}",
+  "@keyframes twt-zeichnen{to{stroke-dashoffset:0}}",
+  ".twt-marke img,.twt-marke .twt-haken{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:13px;animation:twt-auf .5s cubic-bezier(.2,.8,.2,1) .35s both}",
+  ".twt-marke .twt-haken{display:flex;align-items:center;justify-content:center;background:var(--gold-tint);color:var(--gold-text);border:1px solid var(--gold-rand)}",
+  "@keyframes twt-auf{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}",
+  ".twt-fenster h2{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:32px;line-height:1.05;margin:0 0 10px;color:var(--t1);text-wrap:balance}",
+  ".twt-fenster p{font-size:15px;line-height:1.55;color:var(--t1);opacity:.88;margin:0 auto;max-width:36ch}",
+  ".twt-wahl{display:flex;flex-direction:column;gap:10px;margin:22px 0 4px}",
+  ".twt-wahl .twt-k{min-height:46px;width:100%}",
+  ".twt-k .twt-unter{font-weight:500;font-size:12px;color:inherit;opacity:.72}",
+  ".twt-notiz{font-size:12px !important;color:var(--t2) !important;opacity:1 !important;margin-top:14px !important}",
+  ".twt-chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:8px;margin:20px 0 6px;text-align:left}",
+  ".twt-chip{display:flex;flex-direction:column;gap:4px;padding:12px 12px 11px;border-radius:12px;border:1px solid var(--linie2);background:transparent;color:var(--t1);cursor:pointer;font:700 14px/1.2 Inter,system-ui,sans-serif;text-align:left;transition:border-color .15s ease,background .15s ease,transform .12s ease}",
+  ".twt-chip:hover{border-color:var(--gold-rand);background:var(--gold-tint)}",
+  ".twt-chip:active{transform:scale(.98)}",
+  ".twt-chip span{font-weight:500;font-size:12px;line-height:1.35;color:var(--t2)}",
+  ".tw-tour-einst .twt-reihe{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}",
+  ".tw-tour-einst p{font:400 13px/1.5 Inter,system-ui,sans-serif;color:var(--t2);margin:0}",
+  ".tw-tour-einst .twt-klein{font:600 12px/1.3 Inter,system-ui,sans-serif;color:var(--t2);margin:16px 0 0}",
+  ".tw-tour-einst .twt-chips{margin:8px 0 0;grid-template-columns:repeat(auto-fit,minmax(116px,1fr))}",
+  "@media (max-width:639px){.twt-titel{font-size:23px}.twt-fenster{padding:24px 18px 18px;border-radius:18px}.twt-fenster h2{font-size:28px}.twt-k{min-height:44px}.twt-x{width:44px;height:44px;margin:-10px -10px -10px 0}}",
+  "@media (prefers-reduced-motion:reduce){.twt-ring,.twt-ring.gleitet,.twt-blase,.twt-blase.gleitet{transition:none !important}.twt-ring.puls::after,.twt-inhalt,.twt-modal,.twt-fenster,.twt-marke circle,.twt-marke img,.twt-marke .twt-haken{animation:none !important}.twt-marke circle{stroke-dashoffset:0}}"
+].join("\n");
+function twtCss() { try { if (document.getElementById("twt-css")) return; const s = document.createElement("style"); s.id = "twt-css"; s.textContent = TWT_CSS; document.head.appendChild(s); } catch (e) { } }
+
+/* Ziele: Text = erster sichtbarer Treffer; {s, i} = i-ter sichtbarer Treffer; Liste = Rahmen um alle */
+const TWT_SEITE = ".tw-main h1.tw-seitentitel";
+const TWT_SN = i => ({ s: ".tw-tabbar .tw-sn-menue > .tw-sn-punkt", i: i });
+const TWT_GR = i => ({ s: ".tw-tabbar .tw-sn-gruppe", i: i });
+const TWT_KOPF = ["[data-fw-glocke]", "[data-tw-zahnrad]"];
+function twtSichtbar(e) { try { const r = e.getBoundingClientRect(); return r.width > 2 && r.height > 2; } catch (x) { return false; } }
+function twtEl(z) {
+  try {
+    if (!z) return null;
+    if (typeof z === "string") { const l = document.querySelectorAll(z); for (let i = 0; i < l.length; i++) if (twtSichtbar(l[i])) return l[i]; return null; }
+    if (z.s) { const l = Array.prototype.filter.call(document.querySelectorAll(z.s), twtSichtbar); return l[z.i || 0] || null; }
+  } catch (e) { }
+  return null;
+}
+function twtEls(z) { return (Array.isArray(z) ? z : [z]).map(twtEl).filter(Boolean); }
+function twtGesperrt() { const e = document.querySelector(".tw-pro-seite"); return !!(e && twtSichtbar(e)); }
+function twtLeiste() { const e = document.querySelector(".tw-tabbar .tw-sn"); return !!(e && twtSichtbar(e)); }
+
+/* Schritte: v = Seite, d = Ziel am Computer (Leiste sichtbar), m = Ziel ohne Leiste (Handy), z = Ziel überall, alt = Ersatzziel,
+   t = Titel [de, en], x = Text [de, en], xm = Text ohne Leiste, det = Detailtour zu diesem Bereich, opt = ohne Ziel überspringen */
+const TWT_LEISTE = { id: "leiste", d: ".tw-tabbar .tw-sn", m: ".tw-burger", t: ["Deine Navigation", "Your navigation"],
+  x: ["Links findest du alle Bereiche von TransferWire. Wir gehen sie einmal von oben nach unten durch.", "All areas of TransferWire are on the left. We'll go through them once, top to bottom."],
+  xm: ["Über dieses Menü erreichst du alle Bereiche von TransferWire. Wir gehen sie einmal der Reihe nach durch.", "This menu takes you to every area of TransferWire. We'll go through them once, in order."] };
+const TWT_GLOCKE = { id: "glocke", d: TWT_KOPF, m: TWT_KOPF, t: ["Benachrichtigungen und Einstellungen", "Notifications and settings"],
+  x: ["Die Glocke sammelt alles Neue. Über das Zahnrad erreichst du Einstellungen, Benachrichtigungen und das Morgen-Briefing – dort startest du diese Tour auch jederzeit neu.", "The bell collects everything new. The gear opens settings, notifications and the morning briefing – you can restart this tour there at any time."] };
+const TWT_MERK_X = ["Alles, was du beobachtest: Spieler, Karten aus „Verein sucht“, Angebote aus dem Spieler-Markt und Vereine. Für jeden Eintrag kannst du Benachrichtigungen einschalten.", "Everything you follow: players, “Club seeks” cards, Player Market offers and clubs. You can switch on notifications for each entry."];
+const TWT_AKT_X = ["Meldungen, Transfers und der Spieltag. Jede Meldung trägt eine Bewertung, wie verlässlich sie ist.", "News, transfers and the matchday. Every report carries a rating of how reliable it is."];
+const TWT_HAUPT = {
+  berater: [
+    TWT_LEISTE,
+    { id: "ki", v: "assistent", d: ".tw-tabbar .tw-sn-ki", m: ".tw-assist textarea", t: ["KI-Assistent", "AI assistant"],
+      x: ["Frag in ganzen Sätzen, zum Beispiel: „Linksfuß, Innenverteidiger, unter 23“. Der Assistent sucht Spieler, vergleicht sie und beantwortet Fragen zum Markt.", "Ask in full sentences, for example: “left-footed centre-back, under 23”. The assistant finds players, compares them and answers questions about the market."] },
+    { id: "ws", v: "ws_uebersicht", d: ".tw-tabbar .tw-sn-ws", m: ".nx-reiter", det: "ws", t: ["Mein Workspace", "My workspace"],
+      x: ["Dein Arbeitsplatz. Die Übersicht zeigt, was heute ansteht: neue Nachrichten, offene Anfragen, Angebote und laufende Deals.", "Your workplace. The overview shows what's on today: new messages, open requests, offers and ongoing deals."] },
+    { id: "nachrichten", v: "nz_nachrichten", d: ".nx-nl", m: ".nx-filter", t: ["Nachrichten", "Messages"],
+      x: ["Alle Gespräche mit Vereinen und Beratern. Mit den Filtern trennst du Anfragen und Gesendetes.", "All conversations with clubs and agents. Use the filters to separate requests and sent messages."] },
+    { id: "spieler", v: "ws_spieler", z: "[data-im-werkzeug=meine_spieler]", alt: "[data-ws-anlegen]", t: ["Meine Spieler", "My players"],
+      x: ["Deine Spieler mit Vertrag, Vertretung und Notizen. „Importieren“ übernimmt eine bestehende Liste aus Excel, CSV oder PDF, „Exportieren“ gibt sie als Excel oder CSV aus.", "Your players with contract, representation and notes. “Import” takes over an existing list from Excel, CSV or PDF; “Export” saves it as Excel or CSV."] },
+    { id: "merkliste", v: "watch", z: ".tw-mktabs", t: ["Merkliste", "Watchlist"], x: TWT_MERK_X },
+    { id: "kontakte", v: "kontakte", d: TWT_SN(0), m: "main input", t: ["Vereinskontakte", "Club contacts"],
+      x: ["Ansprechpartner von Vereinen: Sportdirektoren, Kaderplaner und Scouts. Suche nach Verein, Liga oder Land.", "Contacts at clubs: sporting directors, squad planners and scouts. Search by club, league or country."] },
+    { id: "vs", v: "gesucht", d: TWT_SN(1), m: ".vs-unterseiten", det: "vs", t: ["Verein sucht", "Club seeks"],
+      x: ["Welche Vereine welche Position suchen – aus Meldungen, Kaderanalysen und direkt von Vereinen. Hier findest du Abnehmer für deine Spieler.", "Which clubs are looking for which position – from reports, squad analyses and directly from clubs. This is where you find buyers for your players."] },
+    { id: "markt", v: "nz_markt", d: TWT_SN(2), m: ".nz-tabs", t: ["Spieler-Markt", "Player Market"],
+      x: ["Biete Spieler an – zum Verkauf, zur Leihe, ablösefrei oder zum Probetraining – und sieh, was andere anbieten. „Passende Vereine“ zeigt, wer zu deinem Angebot passt.", "Offer players – for transfer, loan, free transfer or trial – and see what others offer. “Matching clubs” shows who fits your offer."] },
+    { id: "aktuell", v: "feed", d: TWT_GR(0), m: ".tw-nl", det: "ak", t: ["Aktuell", "Latest"], x: TWT_AKT_X },
+    { id: "analyse", v: "ranking", d: TWT_GR(1), m: TWT_SEITE, t: ["Analyse", "Analysis"],
+      x: ["Leistungsnoten nach jedem Spieltag, Marktwerte, die Spielerdatenbank und Scouting mit Talenten.", "Performance ratings after every matchday, market values, the player database and scouting with talents."] },
+    { id: "netzwerk", v: "community", d: TWT_GR(2), m: TWT_SEITE, t: ["Netzwerk", "Network"],
+      x: ["Teile Transferhinweise mit anderen Mitgliedern, finde Berater und Vereine und pflege dein Profil.", "Share transfer tips with other members, find agents and clubs, and keep your profile up to date."] },
+    TWT_GLOCKE
+  ],
+  verein: [
+    TWT_LEISTE,
+    { id: "ki", v: "assistent", d: ".tw-tabbar .tw-sn-ki", m: ".tw-assist textarea", t: ["KI-Assistent", "AI assistant"],
+      x: ["Frag nach Spielern für euren Kader, zum Beispiel: „Rechtsverteidiger, schnell, bis 24, ablösefrei“. Der Assistent sucht, vergleicht und fasst zusammen.", "Ask for players for your squad, for example: “right-back, quick, up to 24, free transfer”. The assistant searches, compares and sums up."] },
+    { id: "ws", v: "ws_uebersicht", d: ".tw-tabbar .tw-sn-ws", m: ".nx-reiter", det: "vws", t: ["Mein Workspace", "My workspace"],
+      x: ["Dein Arbeitsplatz: Nachrichten von Beratern, eingegangene Spielerangebote und deine Merkliste an einem Ort.", "Your workplace: messages from agents, incoming player offers and your watchlist in one place."] },
+    { id: "nachrichten", v: "nz_nachrichten", d: ".nx-nl", m: ".nx-filter", t: ["Nachrichten", "Messages"],
+      x: ["Hier landen Spielerangebote und Anfragen von Beratern – mit Spielerkarte, Exposé und Video im Anhang.", "Player offers and requests from agents land here – with player card, exposé and video attached."] },
+    { id: "merkliste", v: "watch", z: ".tw-mktabs", t: ["Merkliste", "Watchlist"], x: TWT_MERK_X },
+    { id: "markt", v: "nz_markt", d: TWT_SN(2), m: ".nz-tabs", det: "vmk", t: ["Spieler-Markt", "Player Market"],
+      x: ["Hier bieten Berater ihre Spieler an – zum Verkauf, zur Leihe, ablösefrei oder zum Probetraining. Öffne ein Angebot und melde dich direkt.", "Agents offer their players here – for transfer, loan, free transfer or trial. Open an offer and get in touch directly."] },
+    { id: "vs", v: "gesucht", d: TWT_SN(1), m: ".vs-unterseiten", t: ["Verein sucht", "Club seeks"],
+      x: ["Hier stehen die Bedarfe der Vereine – auch eure. Berater sehen, welche Position ihr sucht, und schicken passende Spieler.", "This is where clubs' needs are listed – yours too. Agents see which position you are looking for and send suitable players."] },
+    { id: "bedarf", v: "nz_profil", z: "[data-nz7-neu]", alt: ["[data-nz7-bedarfe]", "[data-nz7-vereinsprofil]"], det: "vbd", t: ["Bedarf melden", "Report a need"],
+      x: ["Mit „Bedarf melden“ steht euer Bedarf sofort als Karte in „Verein sucht“. Passende Angebote aus dem Spieler-Markt erscheinen hier – das Abgleichen läuft alle 15 Minuten.", "With “Report a need”, your need appears immediately as a card in “Club seeks”. Matching offers from the Player Market show up here – matching runs every 15 minutes."] },
+    { id: "netzwerk", v: "community", d: TWT_GR(2), m: TWT_SEITE, t: ["Netzwerk und Profil", "Network and profile"],
+      x: ["Pflege euer Vereinsprofil, finde Berater und teile Hinweise mit anderen Mitgliedern.", "Keep your club profile up to date, find agents and share tips with other members."] },
+    { id: "analyse", v: "ranking", d: TWT_GR(1), m: TWT_SEITE, t: ["Analyse", "Analysis"],
+      x: ["Leistungsnoten nach jedem Spieltag, Marktwerte und die Spielerdatenbank – für Scouting und Kaderplanung.", "Performance ratings after every matchday, market values and the player database – for scouting and squad planning."] },
+    { id: "aktuell", v: "feed", d: TWT_GR(0), m: ".tw-nl", t: ["Aktuell", "Latest"], x: TWT_AKT_X },
+    TWT_GLOCKE
+  ]
+};
+const TWT_NACHR = { t: ["Ungelesene Nachrichten", "Unread messages"], x: ["Die neuesten Nachrichten auf einen Blick. Ein Klick öffnet das Gespräch.", "The latest messages at a glance. One click opens the conversation."] };
+const TWT_MKT = { t: ["Merkliste ordnen", "Organise your watchlist"], x: ["Jede Art hat ihren eigenen Reiter – Spieler, Karten, Angebote, Vereine und Positionen.", "Each type has its own tab – players, cards, offers, clubs and positions."] };
+const TWT_DETAIL = {
+  ws: { n: ["Workspace", "Workspace"], u: ["Übersicht, Nachrichten, Spieler, Merkliste", "Overview, messages, players, watchlist"], s: [
+    Object.assign({ v: "ws_uebersicht", z: "[data-nx-kasten=nachrichten]" }, TWT_NACHR),
+    { v: "ws_uebersicht", z: "[data-nx-kasten=anfragen]", t: ["Offene Anfragen", "Open requests"], x: ["Anfragen von Vereinen und Beratern, die noch auf deine Antwort warten.", "Requests from clubs and agents that are still waiting for your reply."] },
+    { v: "ws_uebersicht", z: "[data-nx-kasten=angebote]", t: ["Angebote", "Offers"], x: ["Angebote zu deinen Spielern, aus Nachrichten und dem Spieler-Markt. Jedes hat einen Status von „Neu“ bis „Angenommen“.", "Offers for your players, from messages and the Player Market. Each one has a status from “New” to “Accepted”."] },
+    { v: "ws_uebersicht", z: "[data-nx-kasten=deals]", opt: 1, t: ["Laufende Deals", "Ongoing deals"], x: ["Verhandlungen, die schon laufen – mit Stand und Frist.", "Negotiations already under way – with status and deadline."] },
+    { v: "ws_uebersicht", z: "[data-ws-kasten=wochenbericht]", opt: 1, t: ["Wochenbericht", "Weekly report"], x: ["Was sich in der Woche bei deinen Spielern getan hat.", "What happened with your players this week."] },
+    { v: "nz_nachrichten", z: ".nx-filter", t: ["Filter", "Filters"], x: ["Wechsle zwischen allen Gesprächen, Anfragen und Gesendetem.", "Switch between all conversations, requests and sent messages."] },
+    { v: "ws_spieler", z: "[data-ws-anlegen]", t: ["Spieler anlegen", "Add a player"], x: ["Lege eigene Spieler an – auch solche, die noch nicht in der Datenbank stehen.", "Add your own players – including ones not yet in the database."] },
+    { v: "ws_spieler", z: "[data-im-werkzeug=meine_spieler]", t: ["Import und Export", "Import and export"], x: ["Übernimm Listen aus Excel, ODS, CSV oder PDF oder füge eine Liste einfach ein. Export als Excel oder CSV.", "Bring in lists from Excel, ODS, CSV or PDF, or simply paste a list. Export as Excel or CSV."] },
+    { v: "ws_spieler", z: ".ws2-karte .ws2-aktionen", opt: 1, t: ["Aktionen je Spieler", "Actions per player"], x: ["Erstelle ein Exposé oder biete den Spieler direkt an – beides an der Karte.", "Create an exposé or offer the player directly – both right on the card."] },
+    { v: "ws_spieler", z: "[data-nx-vt-knopf]", opt: 1, t: ["Vertretung verifizieren", "Verify representation"], x: ["Lade deine Vertretungsvereinbarung hoch. Nach der Prüfung stehst du im Spielerprofil als offizieller Berater.", "Upload your representation agreement. Once it's checked, you appear in the player profile as the official agent."] },
+    Object.assign({ v: "watch", z: ".tw-mktabs" }, TWT_MKT)
+  ] },
+  vs: { n: ["Verein sucht", "Club seeks"], u: ["Die vier Ansichten", "The four views"], s: [
+    { v: "gesucht", z: ".vs-unterseiten", t: ["Vier Ansichten", "Four views"], x: ["„Verein sucht“ hat vier Ansichten. Wir zeigen dir kurz jede.", "“Club seeks” has four views. We'll show you each one briefly."] },
+    { v: "gesucht", z: { s: ".vs-useite", i: 0 }, opt: 1, t: ["Nach Position", "By position"], x: ["Welche Vereine gerade welche Position suchen – filterbar nach Liga, Land und Position.", "Which clubs are currently looking for which position – filter by league, country and position."] },
+    { v: "gesucht", z: { s: ".vs-useite", i: 1 }, opt: 1, t: ["Spieler-Matching", "Player matching"], x: ["Wähle einen deiner Spieler und sieh, bei welchen Vereinen er ins Profil passt.", "Pick one of your players and see which clubs he fits."] },
+    { v: "gesucht", z: { s: ".vs-useite", i: 2 }, opt: 1, t: ["Vereinsansicht", "Club view"], x: ["Alle Bedarfe eines Vereins auf einer Seite.", "All needs of one club on a single page."] },
+    { v: "gesucht", z: { s: ".vs-useite", i: 3 }, opt: 1, t: ["Beobachtet", "Watched"], x: ["Deine beobachteten Vereine und was sich dort Neues tut.", "The clubs you watch and what's new there."] }
+  ] },
+  ak: { n: ["Aktuell", "Latest"], u: ["Ticker, Filter, Transfers, Spieltag", "Ticker, filters, transfers, matchday"], s: [
+    { v: "feed", z: ".tw-nl", t: ["Live-Ticker", "Live ticker"], x: ["Die wichtigsten Meldungen laufen hier durch. Mit der Pause-Taste hältst du den Ticker an.", "The most important reports run through here. Use the pause button to stop the ticker."] },
+    { v: "feed", z: ".tw-feedchips", opt: 1, t: ["Meldungen filtern", "Filter reports"], x: ["Wähle, was du sehen willst: Spielerwechsel, Gerüchte, Leihen, Verletzungen und mehr.", "Choose what you want to see: transfers, rumours, loans, injuries and more."] },
+    { v: "feed", z: ".tw-feedfilter", opt: 1, t: ["Meistdiskutierte Vereine", "Most discussed clubs"], x: ["Über welche Vereine gerade am meisten berichtet wird.", "Which clubs are being reported on the most right now."] },
+    { v: "geruechte", z: ".tw-scout", t: ["TW Scout", "TW Scout"], x: ["Frag den Scout nach Transfers, etwa „vertragslose U23-Spieler“ – oder nimm einen der Vorschläge.", "Ask the scout about transfers, such as “U23 players without a contract” – or pick one of the suggestions."] },
+    { v: "geruechte", z: ".tw-gchips", opt: 1, t: ["Transfers und Gerüchte", "Transfers and rumours"], x: ["Fixe Deals, Gerüchte und der Transferticker – getrennt oder alle zusammen.", "Confirmed deals, rumours and the transfer ticker – separately or all together."] },
+    { v: "spieltag", z: ".tw-sp2-leiste", t: ["Spieltag", "Matchday"], x: ["Ergebnisse und Spiele nach Wettbewerb. Wähle hier Liga oder Pokal.", "Results and fixtures by competition. Choose a league or cup here."] },
+    { v: "spieltag", z: ".tw-sp2-tage", opt: 1, t: ["Tage und Kalender", "Days and calendar"], x: ["Blättere durch die Tage oder öffne den Kalender.", "Browse through the days or open the calendar."] }
+  ] },
+  vws: { n: ["Workspace", "Workspace"], u: ["Nachrichten, Angebote, Merkliste", "Messages, offers, watchlist"], s: [
+    Object.assign({ v: "ws_uebersicht", z: "[data-nx-kasten=nachrichten]" }, TWT_NACHR),
+    { v: "ws_uebersicht", z: "[data-nx-kasten=angebote]", t: ["Eingegangene Angebote", "Incoming offers"], x: ["Spielerangebote von Beratern mit Status von „Neu“ bis „Angenommen“.", "Player offers from agents, with a status from “New” to “Accepted”."] },
+    Object.assign({ v: "watch", z: ".tw-mktabs" }, TWT_MKT)
+  ] },
+  vmk: { n: ["Spieler-Markt", "Player Market"], u: ["Angebote finden und einstellen", "Find and post offers"], s: [
+    { v: "nz_markt", z: ".nz-tabs", t: ["Reiter im Markt", "Market tabs"], x: ["Alle Angebote, deine eigenen und die passenden – jeweils in einem eigenen Reiter.", "All offers, your own and the matching ones – each in its own tab."] },
+    { v: "nz_markt", z: "[data-nz6-tab=passend]", opt: 1, t: ["Was zusammenpasst", "What fits together"], x: ["Hier zeigt TransferWire, welche Angebote und Vereine zusammenpassen.", "This is where TransferWire shows which offers and clubs fit together."] },
+    { v: "nz_markt", z: "[data-nz6-neu]", opt: 1, t: ["Spieler anbieten", "Offer a player"], x: ["Auch Vereine bieten hier Spieler an – zum Verkauf, zur Leihe oder ablösefrei.", "Clubs can offer players here too – for transfer, loan or on a free."] }
+  ] },
+  vbd: { n: ["Bedarfe", "Needs"], u: ["Bedarf melden und pflegen", "Report and manage needs"], s: [
+    { v: "nz_profil", z: "[data-nz7-neu]", alt: ["[data-nz7-bedarfe]", "[data-nz7-vereinsprofil]"], t: ["Bedarf melden", "Report a need"], x: ["Ein Klick, ein kurzes Formular – und der Bedarf steht sofort in „Verein sucht“.", "One click, a short form – and the need appears in “Club seeks” straight away."] },
+    { v: "nz_profil", z: "[data-nz7-bedarfe]", opt: 1, t: ["Eure Bedarfe", "Your needs"], x: ["Alle Bedarfe eures Vereins auf einen Blick, jeweils mit passenden Angeboten aus dem Spieler-Markt.", "All of your club's needs at a glance, each with matching offers from the Player Market."] },
+    { v: "gesucht", z: { s: ".vs-useite", i: 2 }, opt: 1, t: ["So sehen Berater euch", "How agents see you"], x: ["In der Vereinsansicht sehen Berater alle Bedarfe eines Vereins – auch eure.", "In the club view, agents see all of a club's needs – yours included."] }
+  ] }
+};
+const TWT_DET_ART = { berater: ["ws", "vs", "ak"], verein: ["vws", "vmk", "vbd"] };
+
+/* Folge bauen: jeder Eintrag {s: Schritt, g: Gruppe ("haupt" oder Detailschlüssel), n: Nummer in der Gruppe, von: Anzahl, k: Index des Hauptschritts} */
+function twtFolge(art, modus, bereich) {
+  const haupt = TWT_HAUPT[art] || TWT_HAUPT.berater; const f = [];
+  const det = (key, k) => { const d = TWT_DETAIL[key]; if (!d) return; d.s.forEach((s, i) => f.push({ s: s, g: key, n: i + 1, von: d.s.length, k: k })); };
+  if (modus === "bereich") { det(bereich, -1); return f; }
+  if (modus === "details") { (TWT_DET_ART[art] || []).forEach(k => det(k, -1)); return f; }
+  haupt.forEach((s, i) => { f.push({ s: s, g: "haupt", n: i + 1, von: haupt.length, k: i }); if (modus === "komplett" && s.det) det(s.det, i); });
+  return f;
+}
+function twtApi(account, aktion, art) {
+  try {
+    return fetch("/api/tw-tour", { method: "POST", headers: { "Content-Type": "application/json" }, cache: "no-store", credentials: "omit", body: JSON.stringify({ code: (account && (account.code || account.sitzung)) || "", email: (account && account.email) || "", aktion: aktion, art: art || "berater" }) })
+      .then(r => (r.ok ? r.json() : null)).catch(() => null);
+  } catch (e) { return Promise.resolve(null); }
+}
+function twtVerein(account) {
+  try {
+    const k = typeof NZ !== "undefined" ? NZ.konto : null; const pro = typeof isPremiumPlan === "function" ? isPremiumPlan(String((account && account.plan) || "")) : false;
+    return pro && k && k.ok && k.verein && typeof k.verein === "object" && k.verein.name ? String(k.verein.name) : "";
+  } catch (e) { return ""; }
+}
+function twtArt(account) {   // wartet kurz auf das Netzwerk-Konto (Vereinskonto ja/nein)
+  return new Promise(res => {
+    let fertig = false; const ende = () => { if (fertig) return; fertig = true; window.removeEventListener("nz-konto", ende); const v = twtVerein(account); res({ art: v ? "verein" : "berater", verein: v }); };
+    try { if (typeof NZ !== "undefined" && NZ.konto) return ende(); window.addEventListener("nz-konto", ende); if (typeof NZ !== "undefined" && !NZ.laedt && typeof nzKontoLaden === "function") nzKontoLaden(account); } catch (e) { }
+    setTimeout(ende, 5000);
+  });
+}
+const TWT_X_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+const TWT_HAKEN_SVG = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+
+function TwTourHost({ account }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de); const T = a => (a ? (en ? a[1] : a[0]) : "");
+  const [st, setSt] = React.useState(null);   // {phase: "start"|"lauf"|"ende", art, verein, quelle, folge, i, zurueck, rueckDialog}
+  const ring = React.useRef(null); const blase = React.useRef(null); const weiterK = React.useRef(null); const fenster = React.useRef(null);
+  const lage = React.useRef({ els: [], gleit: 0, mitte: false, pro: false, raf: 0, tast: false });
+  const [ziel, setZiel] = React.useState({ i: -1, ok: false, pro: false });
+  const stRef = React.useRef(null); stRef.current = st;
+  const setze = n => { stRef.current = n; setSt(n); };
+  twtCss();
+  const angemeldet = !!(account && account.email && (typeof twHatSitzung !== "function" || twHatSitzung(account)));
+  const merkSchluessel = account && account.email ? "tw_tour2_" + String(account.email).toLowerCase() : "";
+  const merken = w => { try { if (merkSchluessel) localStorage.setItem(merkSchluessel, w); } catch (e) { } };
+
+  /* Neue Konten: einmal fragen, dann Startfenster */
+  React.useEffect(() => {
+    if (!angemeldet) return;
+    let wert = null; try { wert = localStorage.getItem(merkSchluessel); } catch (e) { }
+    if (wert) return;
+    let aus = false;
+    const t = setTimeout(() => {
+      twtApi(account, "status").then(d => {
+        if (aus || !d || d.ok !== true) return;
+        if (d.status || !d.neu) { merken(d.status ? "fertig" : "alt"); return; }
+        twtArt(account).then(a => {
+          let n = 0;
+          const warte = () => { if (aus) return; const frei = !document.querySelector('[aria-modal="true"]') && !document.getElementById("tw-premium-hinweis"); if (frei || n++ > 30) { if (!stRef.current) setze({ phase: "start", art: a.art, verein: a.verein, quelle: "auto" }); } else setTimeout(warte, 600); };
+          warte();
+        });
+      });
+    }, 1600);
+    return () => { aus = true; clearTimeout(t); };
+  }, [account && account.email]);
+
+  /* Start aus den Einstellungen */
+  React.useEffect(() => {
+    const f = ev => {
+      const d = (ev && ev.detail) || {}; const v = twtVerein(account); const art = d.art || (v ? "verein" : "berater");
+      const modus = d.modus === "bereich" ? "bereich" : d.modus === "komplett" ? "komplett" : "haupt";
+      const folge = twtFolge(art, modus, d.bereich);
+      if (!folge.length) return;
+      setze({ phase: "lauf", art: art, verein: v, quelle: "einst", modus: modus, folge: folge, i: 0, zurueck: window.TW_VIEW || "" });
+    };
+    window.addEventListener("tw-tour-start", f);
+    return () => window.removeEventListener("tw-tour-start", f);
+  }, [account && account.email]);
+
+  const starten = (modus) => { const x = stRef.current; if (!x) return; setze({ phase: "lauf", art: x.art, verein: x.verein, quelle: x.quelle, modus: modus, folge: twtFolge(x.art, modus), i: 0, zurueck: window.TW_VIEW || "" }); };
+  const zurStartseite = (x) => { try { if (x && x.zurueck && window.TW_VIEW !== x.zurueck && typeof window.twNzNavigieren === "function") { window.twNzNavigieren(x.zurueck); window.scrollTo(0, 0); } } catch (e) { } };
+  const schliessen = (grund) => {
+    const x = stRef.current; if (!x) return;
+    if (x.quelle === "auto") { twtApi(account, grund === "fertig" ? "gesehen" : "uebersprungen", x.art); merken("fertig"); }
+    if (grund === "fertig") zurStartseite(x);
+    setze(null);
+  };
+  const weiter = () => {
+    const x = stRef.current; if (!x || x.phase !== "lauf") return;
+    const i = x.i + 1;
+    if (i < x.folge.length) { setze(Object.assign({}, x, { i: i, richtung: 1 })); return; }
+    if (x.modus === "haupt" || x.modus === "komplett") { if (x.quelle === "auto") { twtApi(account, "gesehen", x.art); merken("fertig"); } setze(Object.assign({}, x, { phase: "ende", quelle: "fertig" })); return; }
+    if (x.rueckDialog) { setze(Object.assign({}, x, { phase: "ende" })); return; }
+    zurStartseite(x); setze(null);
+  };
+  const zurueck = () => { const x = stRef.current; if (x && x.phase === "lauf" && x.i > 0) setze(Object.assign({}, x, { i: x.i - 1, richtung: -1 })); };
+  const genauer = () => {
+    const x = stRef.current; if (!x || x.phase !== "lauf") return; const e = x.folge[x.i]; const d = e && e.g === "haupt" && e.s.det && TWT_DETAIL[e.s.det];
+    if (!d || x.folge.some(y => y.g === e.s.det && y.k === e.k)) return;
+    const neu = d.s.map((s, j) => ({ s: s, g: e.s.det, n: j + 1, von: d.s.length, k: e.k }));
+    setze(Object.assign({}, x, { folge: x.folge.slice(0, x.i + 1).concat(neu, x.folge.slice(x.i + 1)), i: x.i + 1, richtung: 1 }));
+  };
+  const detailAusEnde = (bereich) => { const x = stRef.current; if (!x) return; const modus = bereich ? "bereich" : "details"; const f = twtFolge(x.art, modus, bereich); if (f.length) setze(Object.assign({}, x, { phase: "lauf", modus: modus, folge: f, i: 0, rueckDialog: true, richtung: 1 })); };
+
+  /* Schritt vorbereiten: Seite wechseln, auf das Ziel warten, ins Bild holen */
+  const lauf = st && st.phase === "lauf"; const eintrag = lauf ? st.folge[st.i] : null;
+  React.useEffect(() => {
+    if (!eintrag) return;
+    let aus = false; const s = eintrag.s; const mitLeiste = twtLeiste();
+    if (s.v && window.TW_VIEW !== s.v && typeof window.twNzNavigieren === "function") { try { window.twNzNavigieren(s.v); window.scrollTo(0, 0); } catch (e) { } }
+    const spez = s.z || (mitLeiste ? s.d : s.m) || s.d;
+    let n = 0; let gefunden = false; lage.current.bereit = false; lage.current.zeigAb = Date.now() + 700;
+    const leeren = setTimeout(() => { if (!gefunden && !aus) { lage.current.els = []; lage.current.mitte = true; } }, 420);   // altes Ziel nicht länger als nötig zeigen
+    const alts = s.alt ? (Array.isArray(s.alt) ? s.alt : [s.alt]) : [];
+    const such = () => {
+      if (aus) return;
+      let els = twtEls(spez);
+      if (!els.length && n >= 10) for (let j = 0; j < alts.length && !els.length; j++) els = twtEls(alts[j]);   // Ersatzziele erst nach einer Sekunde
+      const gesperrt = !els.length && n >= 3 && twtGesperrt();   // Pro-Bereich ohne Zugang: nicht weiter warten
+      if (!els.length && !gesperrt && n++ < (s.opt ? 9 : 26)) { setTimeout(such, 100); return; }
+      n++; gefunden = true;
+      if (!els.length && s.opt) {   // Schritt ohne Ziel überspringen; im gesperrten Pro-Bereich gleich alle weiteren dieser Seite
+        const x = stRef.current; if (!x || x.phase !== "lauf" || x.folge[x.i] !== eintrag) return;
+        const dir = x.richtung < 0 && x.i > 0 ? -1 : 1; let j = x.i;
+        if (gesperrt) while (x.folge[j + dir] && x.folge[j + dir].s.opt && x.folge[j + dir].s.v === s.v && j + dir > 0) j += dir;
+        if (j !== x.i) stRef.current = Object.assign({}, x, { i: j });
+        if (dir < 0) zurueck(); else weiter(); return;
+      }
+      const pro = !!s.v && twtGesperrt();
+      if (pro && !els.length) els = twtEls(".tw-pro-karte h2");
+      lage.current.els = els; lage.current.mitte = !els.length; lage.current.pro = pro;
+      if (els.length) {
+        const r = els[0].getBoundingClientRect(); const vh = window.innerHeight;
+        const oben = s.id === "leiste" || s.id === "glocke";
+        if (!oben && (r.top < 70 || r.bottom > vh - 20) && r.height < vh * 0.8) { try { els[0].scrollIntoView({ block: "center", behavior: "auto" }); } catch (e) { } }
+      }
+      lage.current.gleit = Date.now(); lage.current.bereit = true;
+      setZiel({ ok: els.length > 0, pro: pro, e: eintrag });
+    };
+    const t = setTimeout(such, s.v ? 160 : 30);
+    return () => { aus = true; clearTimeout(t); clearTimeout(leeren); };
+  }, [eintrag]);
+
+  /* Ring und Blase jedem Bild nachführen */
+  React.useEffect(() => {
+    if (!lauf) return;
+    let alt = "";
+    const takt = () => {
+      lage.current.raf = requestAnimationFrame(takt);
+      const R = ring.current, B = blase.current; if (!R || !B) return;
+      const vw = window.innerWidth, vh = window.innerHeight; const blatt = vw < 640;
+      let x = 0, y = 0, w = 0, hh = 0;
+      const els = lage.current.els.filter(e => e.isConnected);
+      if (els.length && !lage.current.mitte) {
+        let l = 1e9, t = 1e9, r = -1e9, b = -1e9;
+        els.forEach(e => { const q = e.getBoundingClientRect(); l = Math.min(l, q.left); t = Math.min(t, q.top); r = Math.max(r, q.right); b = Math.max(b, q.bottom); });
+        const p = 6; x = Math.max(4, l - p); y = Math.max(4, t - p); w = Math.min(vw - 4, r + p) - x; hh = Math.min(vh - 4, b + p) - y;
+        if (w < 8 || hh < 8) { x = vw / 2; y = vh / 2; w = 0; hh = 0; }
+      } else { x = vw / 2; y = vh / 2; w = 0; hh = 0; }
+      const gl = Date.now() - lage.current.gleit < 470;
+      R.classList.toggle("gleitet", gl); B.classList.toggle("gleitet", gl); R.classList.toggle("leer", w === 0);
+      B.classList.toggle("wartet", !lage.current.bereit && Date.now() < lage.current.zeigAb);
+      const bw = B.offsetWidth, bh = B.offsetHeight; let bx, by;
+      if (blatt) {
+        const sicher = 12; const mitteY = y + hh / 2;
+        by = (w > 0 && mitteY > vh * 0.52) ? sicher : vh - bh - sicher; if (by < sicher) by = sicher; bx = 0;
+      } else if (w === 0) { bx = (vw - bw) / 2; by = (vh - bh) / 2; }
+      else {
+        const g = 16; const breitZ = w > vw * 0.5; const hochZ = hh > vh * 0.5;
+        const v = [];
+        const rechts = () => (x + w + g + bw <= vw - g ? [x + w + g, Math.min(Math.max(y, g), vh - bh - g)] : null);
+        const links = () => (x - g - bw >= g ? [x - g - bw, Math.min(Math.max(y, g), vh - bh - g)] : null);
+        const unten = () => (y + hh + g + bh <= vh - g ? [Math.min(Math.max(x, g), vw - bw - g), y + hh + g] : null);
+        const oben = () => (y - g - bh >= g ? [Math.min(Math.max(x, g), vw - bw - g), y - g - bh] : null);
+        (breitZ ? [unten, oben, rechts, links] : hochZ ? [rechts, links, unten, oben] : [rechts, unten, links, oben]).some(f => { const z = f(); if (z) v.push(z); return !!z; });
+        const z = v[0] || [vw - bw - 24, vh - bh - 24]; bx = z[0]; by = z[1];
+      }
+      const neu = [x, y, w, hh, bx, by, blatt].map(n => (typeof n === "number" ? Math.round(n) : n)).join(",");
+      if (neu === alt) return; alt = neu;
+      R.style.left = Math.round(x) + "px"; R.style.top = Math.round(y) + "px"; R.style.width = Math.round(w) + "px"; R.style.height = Math.round(hh) + "px";
+      R.style.borderRadius = (w === 0 ? 999 : Math.min(14, Math.max(8, Math.min(w, hh) / 4))) + "px";
+      B.classList.toggle("blatt", blatt);
+      B.style.transform = "translate(" + Math.round(bx) + "px," + Math.round(by) + "px)";
+      R.classList.add("an"); B.classList.add("an");
+    };
+    lage.current.raf = requestAnimationFrame(takt);
+    return () => cancelAnimationFrame(lage.current.raf);
+  }, [lauf]);
+
+  /* Ankunft: einmal aufleuchten, Fokus auf „Weiter“ */
+  React.useEffect(() => {
+    if (!lauf || ziel.e !== eintrag) return;
+    const R = ring.current; let t = 0;
+    if (R && ziel.ok) { R.classList.remove("puls"); t = setTimeout(() => { R.classList.add("puls"); }, 460); }
+    try { if (lage.current.tast && weiterK.current) weiterK.current.focus({ preventScroll: true }); else if (blase.current) blase.current.focus({ preventScroll: true }); } catch (e) { }
+    return () => clearTimeout(t);
+  }, [ziel]);
+  /* Start- und Abschlussfenster: Fokus ins Fenster (mit Tastatur auf den Hauptknopf) */
+  React.useEffect(() => {
+    if (!st || (st.phase !== "start" && st.phase !== "ende") || !fenster.current) return;
+    try { const b = fenster.current.querySelector(".twt-k.gold"); if (lage.current.tast && b) b.focus({ preventScroll: true }); else fenster.current.focus({ preventScroll: true }); } catch (e) { }
+  }, [st && st.phase]);
+
+  /* Tastatur: Esc beendet, Pfeile blättern */
+  React.useEffect(() => {
+    if (!st) return;
+    const k = e => {
+      const x = stRef.current; if (!x) return; lage.current.tast = true;
+      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); if (x.phase === "ende") schliessen("fertig"); else schliessen("abbruch"); return; }
+      if (x.phase !== "lauf") return;
+      const tag = String((e.target && e.target.tagName) || "").toLowerCase();
+      if (e.key === "ArrowRight") { e.preventDefault(); e.stopPropagation(); weiter(); }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); e.stopPropagation(); zurueck(); }
+      else if (e.key === "Enter" && tag !== "button") { e.preventDefault(); weiter(); }
+    };
+    const zeiger = () => { lage.current.tast = false; };
+    document.addEventListener("keydown", k, true); document.addEventListener("pointerdown", zeiger, true);
+    return () => { document.removeEventListener("keydown", k, true); document.removeEventListener("pointerdown", zeiger, true); };
+  }, [!!st]);
+
+  if (!st || !angemeldet) return null;
+  const istVerein = st.art === "verein";
+  const marke = (haken) => h("div", { className: "twt-marke", "aria-hidden": "true" },
+    h("svg", { viewBox: "0 0 84 84" }, h("circle", { className: "grund", cx: 42, cy: 42, r: 38 }), h("circle", { cx: 42, cy: 42, r: 38 })),
+    haken ? h("span", { className: "twt-haken", dangerouslySetInnerHTML: { __html: TWT_HAKEN_SVG } }) : (typeof TW_PWA_BILD !== "undefined" ? h("img", { src: TW_PWA_BILD, alt: "" }) : h("span", { className: "twt-haken", dangerouslySetInnerHTML: { __html: TWT_HAKEN_SVG } })));
+
+  if (st.phase === "start") {
+    return ReactDOM.createPortal(h("div", { className: "twt-modal", role: "dialog", "aria-modal": "true", "aria-labelledby": "twt-start-titel", "data-twt": "start" },
+      h("div", { className: "twt-fenster", ref: fenster, tabIndex: -1 }, marke(false),
+        istVerein && st.verein ? h("h2", { id: "twt-start-titel" }, h("span", null, L("Willkommen,", "Welcome,")), " ", h("span", { "data-nx-roh": "1" }, st.verein))
+          : h("h2", { id: "twt-start-titel" }, L("Willkommen bei TransferWire", "Welcome to TransferWire")),
+        h("p", null, istVerein ? L("In zwei Minuten zeigen wir dir, wie ihr Spieler findet, Angebote prüft und eure Bedarfe meldet.", "In two minutes we'll show you how to find players, review offers and report your needs.")
+          : L("In zwei Minuten zeigen wir dir, wo du was findest – vom KI-Assistenten bis zu deinem Workspace.", "In two minutes we'll show you where everything is – from the AI assistant to your workspace.")),
+        h("div", { className: "twt-wahl" },
+          h("button", { type: "button", className: "twt-k gold", onClick: () => starten("haupt"), "data-twt-k": "haupt" }, L("Tour starten", "Start the tour")),
+          h("button", { type: "button", className: "twt-k rand", onClick: () => starten("komplett"), "data-twt-k": "komplett" }, h("span", null, L("Ausführliche Tour", "Detailed tour")), h("span", { className: "twt-unter" }, L("rund fünf Minuten", "about five minutes"))),
+          h("button", { type: "button", className: "twt-k text", onClick: () => schliessen("abbruch"), "data-twt-k": "ueberspringen" }, L("Überspringen", "Skip"))),
+        h("p", { className: "twt-notiz" }, L("Du kannst die Tour jederzeit in den Einstellungen starten.", "You can start the tour any time in Settings.")))), document.body);
+  }
+  if (st.phase === "ende") {
+    const keys = TWT_DET_ART[st.art] || TWT_DET_ART.berater;
+    return ReactDOM.createPortal(h("div", { className: "twt-modal", role: "dialog", "aria-modal": "true", "aria-labelledby": "twt-ende-titel", "data-twt": "ende" },
+      h("div", { className: "twt-fenster", ref: fenster, tabIndex: -1 }, marke(true),
+        h("h2", { id: "twt-ende-titel" }, L("Das waren die Grundlagen", "That's the basics")),
+        h("p", null, L("Möchtest du einen Bereich genauer kennenlernen?", "Would you like a closer look at one area?")),
+        h("div", { className: "twt-chips" }, keys.map(k => h("button", { key: k, type: "button", className: "twt-chip", onClick: () => detailAusEnde(k), "data-twt-detail": k }, T(TWT_DETAIL[k].n), h("span", null, T(TWT_DETAIL[k].u))))),
+        h("div", { className: "twt-wahl" },
+          h("button", { type: "button", className: "twt-k gold", onClick: () => schliessen("fertig"), "data-twt-k": "los" }, L("Los geht’s", "Let’s go")),
+          h("button", { type: "button", className: "twt-k rand", onClick: () => detailAusEnde(""), "data-twt-k": "alle-details" }, L("Komplette Detailtour", "Full detailed tour"))),
+        h("p", { className: "twt-notiz" }, L("Die Tour findest du jederzeit unter Einstellungen → Einführung.", "You can find the tour any time under Settings → Introduction.")))), document.body);
+  }
+  /* Lauf */
+  const e = eintrag; const s = e.s; const mitLeiste = twtLeiste();
+  const hauptListe = st.folge.filter(y => y.g === "haupt"); const gruppe = e.g === "haupt" ? null : TWT_DETAIL[e.g];
+  const nr = e.n, von = e.von;
+  const kannGenauer = e.g === "haupt" && s.det && TWT_DETAIL[s.det] && !st.folge.some(y => y.g === s.det && y.k === e.k) && !(ziel.e === e && ziel.pro);
+  const letzter = st.i === st.folge.length - 1;
+  const text = !mitLeiste && s.xm ? T(s.xm) : T(s.x);
+  const zeigeInhalt = ziel.e === e;
+  return ReactDOM.createPortal(h("div", { "data-twt": "lauf", "data-twt-schritt": (e.g === "haupt" ? s.id : e.g + "-" + nr) },
+    h("div", { className: "twt-sperre", onClick: ev => { ev.stopPropagation(); }, onMouseDown: ev => ev.preventDefault() }),
+    h("div", { className: "twt-ring", ref: ring, "aria-hidden": "true" }),
+    h("div", { className: "twt-blase", ref: blase, tabIndex: -1, role: "dialog", "aria-modal": "true", "aria-labelledby": "twt-titel", "aria-describedby": "twt-text" },
+      h("div", { className: "twt-inhalt", key: st.i },
+        h("div", { className: "twt-kopf" },
+          h("div", { className: "twt-balken", "aria-hidden": "true" }, Array.from({ length: von }).map((_, j) => h("span", { key: j, className: j < nr ? "ja" : "" }))),
+          h("span", { className: "twt-zahl", "data-nx-roh": "1", "aria-label": (en ? "Step " : "Schritt ") + nr + (en ? " of " : " von ") + von }, nr + " / " + von),
+          h("button", { type: "button", className: "twt-x", onClick: () => schliessen("abbruch"), "aria-label": L("Tour beenden", "End tour"), title: L("Tour beenden", "End tour"), dangerouslySetInnerHTML: { __html: TWT_X_SVG } })),
+        gruppe ? h("div", { className: "twt-gruppe" }, T(gruppe.n)) : null,
+        h("h3", { className: "twt-titel", id: "twt-titel" }, T(s.t)),
+        h("p", { className: "twt-text", id: "twt-text" }, text),
+        zeigeInhalt && ziel.pro ? h("div", { className: "twt-pro" }, L("In Pro enthalten", "Included in Pro")) : null,
+        kannGenauer ? h("button", { type: "button", className: "twt-mehr", onClick: genauer, "data-twt-k": "genauer" }, L("Diesen Bereich genauer erklären", "Explain this area in detail")) : null,
+        h("div", { className: "twt-fuss" },
+          st.i > 0 ? h("button", { type: "button", className: "twt-k rand", onClick: zurueck, "data-twt-k": "zurueck" }, L("Zurück", "Back")) : null,
+          h("button", { type: "button", className: "twt-k gold", ref: weiterK, onClick: weiter, "data-twt-k": "weiter" }, letzter ? L("Fertig", "Done") : L("Weiter", "Next")))))), document.body);
+}
+
+/* Einstellungen: Punkt „Einführung“ für alle Konten */
+function TwTourEinst({ onClose, verein }) {
+  const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de); twtCss();
+  const art = verein ? "verein" : "berater";
+  const los = (modus, bereich) => { try { if (typeof onClose === "function") onClose(); } catch (e) { } setTimeout(() => { try { window.dispatchEvent(new CustomEvent("tw-tour-start", { detail: { modus: modus, bereich: bereich || "", art: art } })); } catch (e) { } }, 160); };
+  return h("div", { className: "tw-einst-benach tw-tour-einst", "data-tw-tour-karte": art },
+    h("div", { style: { fontFamily: FONT_BODY, fontSize: 16, fontWeight: 700, color: INK, marginBottom: 10 } }, L("Einführung", "Introduction")),
+    h("p", null, L("Lerne TransferWire Schritt für Schritt kennen. Die kurze Tour dauert rund zwei Minuten.", "Get to know TransferWire step by step. The short tour takes about two minutes.")),
+    h("div", { className: "twt-reihe" },
+      h("button", { type: "button", className: "twt-k gold", onClick: () => los("haupt"), "data-tw-tour-start": "haupt" }, L("Kurze Tour starten", "Start short tour")),
+      h("button", { type: "button", className: "twt-k rand", onClick: () => los("komplett"), "data-tw-tour-start": "komplett" }, L("Komplette Führung", "Full guided tour"))),
+    h("div", { className: "twt-klein" }, L("Einen Bereich genauer erklären", "Explain one area in detail")),
+    h("div", { className: "twt-chips" }, (TWT_DET_ART[art] || []).map(k => h("button", { key: k, type: "button", className: "twt-chip", onClick: () => los("bereich", k), "data-tw-tour-start": k }, en ? TWT_DETAIL[k].n[1] : TWT_DETAIL[k].n[0], h("span", null, en ? TWT_DETAIL[k].u[1] : TWT_DETAIL[k].u[0])))));
+}
+
 /* Einstellungen: eigener Punkt "Desktop-App" */
 function TwPwaEinst() {
   const art = useTwPwa(); const en = LANG === "en"; twPwaCss(); const h = React.createElement;
@@ -17401,7 +17893,7 @@ function SettingsOverlay({
       fontSize: 11,
       color: MUTED
     }
-  }, (watch && watch.items || []).length, " ", t("set_watch_count"), " · ", t("set_watch_hint"))), React.createElement(TwPwaEinst, null), /*#__PURE__*/React.createElement("button", {
+  }, (watch && watch.items || []).length, " ", t("set_watch_count"), " · ", t("set_watch_hint"))), React.createElement(TwPwaEinst, null), React.createElement(TwTourEinst, { onClose: onClose, verein: istVerein }), /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "tw-einst-abmelden",
     onClick: onLogout,
@@ -18181,7 +18673,7 @@ function SeitenleisteNeu({ view, setView, news, needsBySport, onNavigate, onScou
   React.useEffect(() => { const f = () => setVsZahl(Number(window.VS_ZAHL) || 0); window.addEventListener("vs-zahl", f); if (VS_NEU && !(Number(window.VS_ZAHL) || 0)) { try { const a = JSON.parse(localStorage.getItem("tw_account") || "{}"); const code = a.zugangscode || a.code; if (code && a.email) fetch("/api/verein-sucht?was=liste&gruppe=TW&limit=1&code=" + encodeURIComponent(code) + "&email=" + encodeURIComponent(a.email)).then(r => r.ok ? r.json() : null).then(d => { if (d && d.meta && Array.isArray(d.meta.gruppen)) { const n = d.meta.gruppen.reduce((s, g) => s + (g.konkret != null ? (Number(g.konkret) || 0) : (Number(g.n) || 0)), 0); if (n > 0) { window.VS_ZAHL = n; setVsZahl(n); } } }).catch(() => {}); } catch (e) {} } return () => window.removeEventListener("vs-zahl", f); }, []);
   let feedBadge = 0, gesuchtBadge = 0; try { feedBadge = (Array.isArray(news) ? news : []).filter(n => Date.now() - new Date(n.published_at || n.created_at || n.createdAt || 0).getTime() < 864e5).length; gesuchtBadge = (VS_NEU && vsZahl) ? vsZahl : (Array.isArray(needsBySport) ? needsBySport.length : 0); } catch (e) {}
   const aktiv = k => view === k || (k === "community" && (view === "moderation" || view === "nz_beitraege" || view === "networking")) || (k === "talente" && (view === "listen" || view === "suche" || view === "nachwuchs" || view === "akquise" || view === "talent2")) || (k === "players" && (view === "spielervergleich" || view === "aehnlich"));
-  const WS_K = ["ws_uebersicht", "nz_nachrichten", "ws_spieler", "watch", "ws_beob", "ws_angebote", "ws_notizen"]; const wsAktiv = WS_K.indexOf(view) >= 0; const wsNeuGes = (prem ? wsANeu : 0) + nzUngelesen;   // Seitenleiste neu (09.11.2026)
+  window.TW_VIEW = view; const WS_K = ["ws_uebersicht", "nz_nachrichten", "ws_spieler", "watch", "ws_beob", "ws_angebote", "ws_notizen"]; const wsAktiv = WS_K.indexOf(view) >= 0; const wsNeuGes = (prem ? wsANeu : 0) + nzUngelesen;   // Seitenleiste neu (09.11.2026)
   React.useEffect(() => { if (WS_K.indexOf(view) >= 0) { try { localStorage.setItem("tw_ws_reiter", view); } catch (e) {} } }, [view]);
   const wsZiel = () => "ws_uebersicht";   // NZ3: der Workspace öffnet mit der Übersicht
   let wsEnt = false; try { const a = (typeof loadAccount === "function" ? loadAccount() : JSON.parse(localStorage.getItem("tw_account") || "null")) || {}; wsEnt = a.plan_roh === "enterprise"; } catch (e) {}
@@ -21984,7 +22476,7 @@ function TransferApp({
   const [notifyMode, setNotifyMode] = useState(null);
   const [tourStep, setTourStep] = useState(() => {
     try {
-      return localStorage.getItem("tw_tour") ? 0 : 1;
+      return 0;   /* Einführungstour (20.11.2026) ersetzt das alte Willkommensfenster */
     } catch (e) {
       return 0;
     }
@@ -22793,7 +23285,7 @@ function TransferApp({
     style: {
       position: "relative"
     }
-  }, React.createElement("button", { type: "button", className: "tw-kopf-suche", "data-tw-kopf-suche": "1", onClick: () => { setGlockeOffen(false); setMenuOpen(false); try { const el = document.getElementById("tw-gsuche"); if (el) el.focus(); } catch (e) {} setKiOffen(true); }, "aria-label": LANG === "en" ? "Search" : "Suche", title: LANG === "en" ? "Search players, clubs or ask the scout" : "Spieler, Verein oder Frage an den Scout", style: { alignItems: "center", justifyContent: "center", cursor: "pointer", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.16)", borderRadius: 10, color: "var(--t1)" } }, React.createElement(Search, { size: 20, strokeWidth: 2 })), React.createElement(NzBriefKnopf, { account: account, aktiv: view === "nz_nachrichten", onClick: () => { setGlockeOffen(false); setMenuOpen(false); setView("nz_nachrichten"); } }), /*#__PURE__*/React.createElement("button", { type: "button", onClick: () => { setMenuOpen(false); if (fwAn) { setGlockeOffen(false); FW.bereich = "neu"; setFwOffen(true); } else setGlockeOffen(!glockeOffen); }, "aria-label": "Benachrichtigungen", "data-fw-glocke": fwAn ? "1" : "0", title: LANG === "en" ? "Notifications" : "Benachrichtigungen", style: { position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.16)", borderRadius: 10, padding: "10px 11px", marginRight: 8, color: "var(--t1)" } }, /*#__PURE__*/React.createElement("span", { style: { width: 20, height: 20, display: "inline-flex" }, dangerouslySetInnerHTML: { __html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>' } }), fwAn ? React.createElement(FwGlockeZahl, { extra: nzHinweise }) : ((watch && (watch.alerts || watch.digest)) || wr.an === true || nzHinweise > 0) ? /*#__PURE__*/React.createElement("span", { style: { position: "absolute", top: 7, right: 8, width: 8, height: 8, borderRadius: 99, background: "var(--gold)", border: "2px solid var(--seite)" } }) : null), glockeOffen && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", { onClick: () => setGlockeOffen(false), style: { position: "fixed", inset: 0, zIndex: 1100 } }), /*#__PURE__*/React.createElement("div", { ref: twImBild, "data-tw-dd": "glocke", style: { position: "absolute", right: 52, top: "calc(100% + 8px)", zIndex: 1110, background: CARD, border: `1px solid ${HAIR}`, borderRadius: 12, boxShadow: "0 14px 38px rgba(0,0,0,.45)", minWidth: 300, padding: "12px 14px" } }, React.createElement(NzGlockeHinweise, { n: nzHinweise, onOeffnen: () => { setGlockeOffen(false); setMenuOpen(false); setView("nz_beitraege"); } }), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: MUTED, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 } }, t("set_notif"), isPrem ? "" : " \u00b7 Pro"), /*#__PURE__*/React.createElement("label", { style: { display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 13, color: INK, marginBottom: 8, cursor: "pointer" } }, /*#__PURE__*/React.createElement("input", { type: "checkbox", checked: !!(watch && watch.alerts), onChange: e => updateWatch(Object.assign({}, watch, { alerts: e.target.checked, asked: true })) }), /*#__PURE__*/React.createElement("span", null, t("set_alerts"))), /*#__PURE__*/React.createElement("label", { style: { display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 13, color: INK, marginBottom: 10, cursor: "pointer" } }, /*#__PURE__*/React.createElement("input", { type: "checkbox", checked: !!(watch && watch.digest), onChange: e => updateWatch(Object.assign({}, watch, { digest: e.target.checked, asked: true })) }), /*#__PURE__*/React.createElement("span", null, t("set_digest"))), (isPrem ? React.createElement(TwWochenreportSchalter, { wr: wr, onChange: setWochenreport, angemeldet: !!(account && account.email) }) : React.createElement("button", { type: "button", className: "tw-glocke-pro", onClick: () => { setGlockeOffen(false); twZuPro(); }, style: { display: "block", width: "100%", textAlign: "left", cursor: "pointer", borderTop: "1px solid " + HAIR, borderLeft: "none", borderRight: "none", borderBottom: "none", background: "none", padding: "10px 0 0", marginBottom: 10, fontFamily: FONT_BODY, fontSize: 12, lineHeight: 1.5, color: "var(--t2)" } }, LANG === "en" ? "E-mail alerts, morning briefing and the weekly report are part of Pro. " : "E-Mail-Alerts, Morgen-Briefing und der wöchentliche Report gehören zu Pro. ", React.createElement("b", { style: { color: "var(--gold-text)" } }, LANG === "en" ? "View Pro \u2192" : "Pro ansehen \u2192"))), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, (watch && watch.alertEmail) || (account && account.email) || ""), /*#__PURE__*/React.createElement("button", { type: "button", onClick: () => { setGlockeOffen(false); setShowSettings(true); }, style: { marginTop: 10, cursor: "pointer", background: "none", border: "none", padding: 0, fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: "var(--gold-text)" } }, LANG === "en" ? "All settings \u2192" : "Alle Einstellungen \u2192"))), /*#__PURE__*/React.createElement("button", { onClick: () => { setMenuOpen(!menuOpen); setGlockeOffen(false); }, "aria-label": "Men\u00fc", title: LANG === "en" ? "Settings" : "Einstellungen", style: { display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.16)", borderRadius: 10, padding: "10px 11px", color: "var(--t1)" } }, /*#__PURE__*/React.createElement("span", { style: { width: 20, height: 20, display: "inline-flex" }, dangerouslySetInnerHTML: { __html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>' } })), menuOpen && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, React.createElement("button", { type: "button", className: "tw-kopf-suche", "data-tw-kopf-suche": "1", onClick: () => { setGlockeOffen(false); setMenuOpen(false); try { const el = document.getElementById("tw-gsuche"); if (el) el.focus(); } catch (e) {} setKiOffen(true); }, "aria-label": LANG === "en" ? "Search" : "Suche", title: LANG === "en" ? "Search players, clubs or ask the scout" : "Spieler, Verein oder Frage an den Scout", style: { alignItems: "center", justifyContent: "center", cursor: "pointer", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.16)", borderRadius: 10, color: "var(--t1)" } }, React.createElement(Search, { size: 20, strokeWidth: 2 })), React.createElement(NzBriefKnopf, { account: account, aktiv: view === "nz_nachrichten", onClick: () => { setGlockeOffen(false); setMenuOpen(false); setView("nz_nachrichten"); } }), /*#__PURE__*/React.createElement("button", { type: "button", onClick: () => { setMenuOpen(false); if (fwAn) { setGlockeOffen(false); FW.bereich = "neu"; setFwOffen(true); } else setGlockeOffen(!glockeOffen); }, "aria-label": "Benachrichtigungen", "data-fw-glocke": fwAn ? "1" : "0", title: LANG === "en" ? "Notifications" : "Benachrichtigungen", style: { position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.16)", borderRadius: 10, padding: "10px 11px", marginRight: 8, color: "var(--t1)" } }, /*#__PURE__*/React.createElement("span", { style: { width: 20, height: 20, display: "inline-flex" }, dangerouslySetInnerHTML: { __html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>' } }), fwAn ? React.createElement(FwGlockeZahl, { extra: nzHinweise }) : ((watch && (watch.alerts || watch.digest)) || wr.an === true || nzHinweise > 0) ? /*#__PURE__*/React.createElement("span", { style: { position: "absolute", top: 7, right: 8, width: 8, height: 8, borderRadius: 99, background: "var(--gold)", border: "2px solid var(--seite)" } }) : null), glockeOffen && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", { onClick: () => setGlockeOffen(false), style: { position: "fixed", inset: 0, zIndex: 1100 } }), /*#__PURE__*/React.createElement("div", { ref: twImBild, "data-tw-dd": "glocke", style: { position: "absolute", right: 52, top: "calc(100% + 8px)", zIndex: 1110, background: CARD, border: `1px solid ${HAIR}`, borderRadius: 12, boxShadow: "0 14px 38px rgba(0,0,0,.45)", minWidth: 300, padding: "12px 14px" } }, React.createElement(NzGlockeHinweise, { n: nzHinweise, onOeffnen: () => { setGlockeOffen(false); setMenuOpen(false); setView("nz_beitraege"); } }), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, fontWeight: 800, color: MUTED, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 } }, t("set_notif"), isPrem ? "" : " \u00b7 Pro"), /*#__PURE__*/React.createElement("label", { style: { display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 13, color: INK, marginBottom: 8, cursor: "pointer" } }, /*#__PURE__*/React.createElement("input", { type: "checkbox", checked: !!(watch && watch.alerts), onChange: e => updateWatch(Object.assign({}, watch, { alerts: e.target.checked, asked: true })) }), /*#__PURE__*/React.createElement("span", null, t("set_alerts"))), /*#__PURE__*/React.createElement("label", { style: { display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_BODY, fontSize: 13, color: INK, marginBottom: 10, cursor: "pointer" } }, /*#__PURE__*/React.createElement("input", { type: "checkbox", checked: !!(watch && watch.digest), onChange: e => updateWatch(Object.assign({}, watch, { digest: e.target.checked, asked: true })) }), /*#__PURE__*/React.createElement("span", null, t("set_digest"))), (isPrem ? React.createElement(TwWochenreportSchalter, { wr: wr, onChange: setWochenreport, angemeldet: !!(account && account.email) }) : React.createElement("button", { type: "button", className: "tw-glocke-pro", onClick: () => { setGlockeOffen(false); twZuPro(); }, style: { display: "block", width: "100%", textAlign: "left", cursor: "pointer", borderTop: "1px solid " + HAIR, borderLeft: "none", borderRight: "none", borderBottom: "none", background: "none", padding: "10px 0 0", marginBottom: 10, fontFamily: FONT_BODY, fontSize: 12, lineHeight: 1.5, color: "var(--t2)" } }, LANG === "en" ? "E-mail alerts, morning briefing and the weekly report are part of Pro. " : "E-Mail-Alerts, Morgen-Briefing und der wöchentliche Report gehören zu Pro. ", React.createElement("b", { style: { color: "var(--gold-text)" } }, LANG === "en" ? "View Pro \u2192" : "Pro ansehen \u2192"))), /*#__PURE__*/React.createElement("div", { style: { fontFamily: FONT_BODY, fontSize: 11, color: MUTED } }, (watch && watch.alertEmail) || (account && account.email) || ""), /*#__PURE__*/React.createElement("button", { type: "button", onClick: () => { setGlockeOffen(false); setShowSettings(true); }, style: { marginTop: 10, cursor: "pointer", background: "none", border: "none", padding: 0, fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, color: "var(--gold-text)" } }, LANG === "en" ? "All settings \u2192" : "Alle Einstellungen \u2192"))), /*#__PURE__*/React.createElement("button", { onClick: () => { setMenuOpen(!menuOpen); setGlockeOffen(false); }, "data-tw-zahnrad": "1", "aria-label": "Men\u00fc", title: LANG === "en" ? "Settings" : "Einstellungen", style: { display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.16)", borderRadius: 10, padding: "10px 11px", color: "var(--t1)" } }, /*#__PURE__*/React.createElement("span", { style: { width: 20, height: 20, display: "inline-flex" }, dangerouslySetInnerHTML: { __html: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>' } })), menuOpen && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     onClick: () => setMenuOpen(false),
     style: {
       position: "fixed",
@@ -24566,7 +25058,7 @@ function TransferApp({
       color: MUTED,
       textDecoration: "underline"
     }
-  }, t("tour_skip")))), React.createElement(NxHost, { key: "nx-host", account: account, setView: v => { setPlDetail(null); setView(v); }, openPlayer: openPlayer, openVerein: openVerein }), plDetail && React.createElement(TwSpielerSeite, { plDetail: plDetail, laedt: !!(plDetailLoading || plDetail.lade), plTab: plTab, plExtra: plExtra, plVidLoading: plVidLoading, ladeExtra: ladeExtra, watch: watch, addWatch: addWatch, removeWatch: removeWatch, onSchliessen: () => setPlDetail(null), onZurueck: () => { const z = perfZurueck; setPlDetail(null); if (z) setTimeout(() => setPerfKarte(z), 0); }, zurueckMitPerf: !!perfZurueck, onAehnlich: sp => oeffneAehnlich(sp), onOpenPlayer: (p, n, tm) => openPlayer(p, n, tm), onWatchNews: it => { setPlDetail(null); setAddSheet(it); } }), notifyMode && /*#__PURE__*/React.createElement("div", {
+  }, t("tour_skip")))), React.createElement(TwTourHost, { key: "tw-tour", account: account }), React.createElement(NxHost, { key: "nx-host", account: account, setView: v => { setPlDetail(null); setView(v); }, openPlayer: openPlayer, openVerein: openVerein }), plDetail && React.createElement(TwSpielerSeite, { plDetail: plDetail, laedt: !!(plDetailLoading || plDetail.lade), plTab: plTab, plExtra: plExtra, plVidLoading: plVidLoading, ladeExtra: ladeExtra, watch: watch, addWatch: addWatch, removeWatch: removeWatch, onSchliessen: () => setPlDetail(null), onZurueck: () => { const z = perfZurueck; setPlDetail(null); if (z) setTimeout(() => setPerfKarte(z), 0); }, zurueckMitPerf: !!perfZurueck, onAehnlich: sp => oeffneAehnlich(sp), onOpenPlayer: (p, n, tm) => openPlayer(p, n, tm), onWatchNews: it => { setPlDetail(null); setAddSheet(it); } }), notifyMode && /*#__PURE__*/React.createElement("div", {
     onClick: () => setNotifyMode(null),
     style: {
       position: "fixed",
