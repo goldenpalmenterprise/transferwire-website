@@ -559,3 +559,35 @@ html.tw-dark .vs-wurzel{--vsv2-hi-bg:#dcf5e7;--vsv2-hi:#0f7a43;--vsv2-gut-bg:#e3
 .vsv2-tstufe{display:inline-flex;align-items:center;height:21px;padding:0 9px;border-radius:999px;border:1px solid transparent;background:var(--teal-bg);color:var(--teal);font-size:11.5px;font-weight:700;white-space:nowrap}
 .vsv2-tstufe.ist-hoch{border-color:var(--gold-rand);background:var(--gold-bg);color:var(--gold-text)}
 .vsv2-tag.ist-talent{background:var(--gold-bg);color:var(--gold-text)}
+
+/* Gratis 2.0 (20.11.2026): durchsichtiges Schloss in „Verein sucht“ */
+.vsf-zone{position:relative;isolation:isolate;margin:2px 0}
+.vsf-innen{pointer-events:none;user-select:none;filter:blur(1.2px) saturate(.7);opacity:.75}
+.vsf-karten{margin-top:14px}
+.vsf-pos .vs-posknopf em{visibility:hidden}
+.vsf-pos .vs-posknopf.ist-leer{opacity:1}
+.vsf-filter .vs-zaehlzeile>div:first-child{visibility:hidden}
+.vsf-karten .vsf-innen{filter:blur(7px) saturate(.55);opacity:.9}
+.vsf-deckel{position:absolute;inset:-6px;z-index:2;display:flex;align-items:center;justify-content:center;padding:12px;border-radius:16px;border:1px dashed var(--gold-rand,rgba(200,163,85,.5));cursor:pointer;font:inherit;color:inherit;background-color:rgba(10,14,22,.18);background-image:repeating-linear-gradient(135deg,rgba(200,163,85,.08) 0 1px,transparent 1px 9px)}
+html.tw-dark .vsf-deckel{background-color:rgba(255,255,255,.22)}
+.vsf-deckel:focus-visible{outline:2px solid var(--gold,#C8A355);outline-offset:3px}
+.vsf-deckel:hover .vsf-marke{border-color:var(--gold,#C8A355)}
+.vsf-marke{display:inline-flex;align-items:center;gap:12px;max-width:100%;padding:8px 8px 8px 9px;border-radius:999px;background:var(--karte,#151b26);border:1px solid var(--gold-rand,rgba(200,163,85,.5));box-shadow:0 10px 28px rgba(0,0,0,.28);font:600 13px/1.3 Inter,system-ui,sans-serif;color:var(--t1,#e8ecf3);text-align:left}
+.vsf-text{min-width:0}
+.vsf-siegel{position:relative;display:grid;place-items:center;flex:0 0 auto;width:34px;height:34px;border-radius:50%;color:var(--gold-text,#C8A355);background:var(--gold-tint,rgba(200,163,85,.14));border:1px solid var(--gold-rand,rgba(200,163,85,.5))}
+.vsf-siegel::after{content:'';position:absolute;inset:-5px;border-radius:50%;border:1px dashed var(--gold-rand,rgba(200,163,85,.5));opacity:.7}
+.vsf-siegel i{display:block;width:58%;height:58%}
+.vsf-siegel.offen::after{border-style:solid;opacity:.45}
+.vsf-knopf{flex:0 0 auto;display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border-radius:999px;background:var(--gold,#C8A355);color:var(--gold-schrift,#1A1306);font:800 12.5px/1 Inter,system-ui,sans-serif;white-space:nowrap}
+.vsf-heute{display:flex;align-items:center;gap:14px;margin:6px 0 12px;padding:2px 2px 2px 6px}
+.vsf-heute b{display:block;font:700 14px/1.3 Inter,system-ui,sans-serif;color:var(--t1,#e8ecf3)}
+.vsf-heute small{display:block;font:500 12.5px/1.4 Inter,system-ui,sans-serif;color:var(--t2,#a9b2c3)}
+.vsf-platz{display:grid;gap:12px;padding:16px;min-height:150px}
+.vsf-platz i{display:block;border-radius:6px;background:var(--linie2,var(--linie,#2a3242))}
+.vsf-p-kopf{display:flex;align-items:center;gap:10px}.vsf-p-kopf span{display:grid;gap:6px;flex:1}
+.vsf-p-wappen{width:36px;height:36px;border-radius:9px!important;flex:0 0 auto}
+.vsf-p-pill{width:56px;height:22px;border-radius:999px!important}
+.vsf-p-wert{display:flex;align-items:center;gap:10px}.vsf-p-gross{width:64px;height:28px}
+.vsf-p-zeilen{display:grid;gap:7px}
+.vsf-p-z{height:10px}.vsf-p-z.w90{width:90%}.vsf-p-z.w75{width:75%}.vsf-p-z.w60{width:60%}.vsf-p-z.w50{width:50%}.vsf-p-z.w40{width:40%}
+@media (max-width:640px){.vsf-marke{gap:8px;padding:6px 6px 6px 7px;font-size:12px;border-radius:16px}.vsf-siegel{width:30px;height:30px}.vsf-heute{gap:12px}}
