@@ -12098,7 +12098,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261120-einfuehrungstour";
+const VS_VERSION = "tour2";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -16402,19 +16402,27 @@ function TwPwaLogin() {
   if (art === "mac") return h("p", { className: "tw-pwa-hinweis", "data-tw-pwa": "login-mac" }, twPwaBild(), h("span", null, en ? "Use as an app: Share → Add to Dock" : "Als App nutzen: Teilen → Zum Dock hinzufügen"));
   return null;
 }
-/* ===== Einführungstour (20.11.2026, Boss 20.11. 01:20): Haupttour und Detailtouren, je eine Fassung für Berater und für Vereine.
-   Startet von selbst nur bei neuen Konten (angelegt ab 20.11.2026; Auskunft über /api/tw-tour), sonst über Einstellungen → Einführung.
-   Handy: dieselben Schritte, die Erklärung erscheint als Karte am unteren oder oberen Rand. Texte Deutsch/Englisch hier, weitere Sprachen über das Wörterbuch. ===== */
+/* ===== Einführungstour (20.11.2026, Boss 20.11. 01:20; Fassung 2 nach Boss 20.11. 03:53): jeder Punkt der Leiste einzeln, auf jeder Seite
+   ein bis drei Erklärkarten, mehrere Bereiche gleichzeitig gold markiert, Unterseiten und Karten öffnen sich im Hintergrund.
+   Je eine Fassung für Berater und für Vereine (gleich ausführlich). Startet von selbst nur bei neuen Konten (Auskunft über /api/tw-tour),
+   sonst über Einstellungen → Einführung. Handy: dieselben Schritte ohne die Leistenschritte, Erklärung als Karte oben oder unten. ===== */
 const TWT_CSS = [
   ".twt-sperre{position:fixed;inset:0;z-index:5000;background:transparent;cursor:default}",
-  ".twt-ring{position:fixed;z-index:5001;pointer-events:none;border-radius:12px;border:2px solid var(--gold);box-shadow:0 0 0 9999px rgba(7,10,17,.62),0 0 0 6px rgba(200,163,85,.16),0 0 28px rgba(200,163,85,.28);top:0;left:0;width:0;height:0;opacity:0;transition:opacity .26s ease}",
+  ".twt-dunkel{position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:5001;pointer-events:none;opacity:0;transition:opacity .26s ease}",
+  ".twt-dunkel.an{opacity:1}",
+  ".twt-dunkel path{fill:rgba(7,10,17,.62)}",
+  ".twt-ring{position:fixed;z-index:5002;pointer-events:none;border-radius:12px;border:2px solid var(--gold);box-shadow:0 0 0 6px rgba(200,163,85,.16),0 0 28px rgba(200,163,85,.28);top:0;left:0;width:0;height:0;opacity:0;transition:opacity .26s ease}",
   ".twt-ring.an{opacity:1}",
-  ".twt-ring.gleitet{transition:top .44s cubic-bezier(.2,.8,.2,1),left .44s cubic-bezier(.2,.8,.2,1),width .44s cubic-bezier(.2,.8,.2,1),height .44s cubic-bezier(.2,.8,.2,1),border-radius .44s ease,opacity .26s ease}",
-  ".twt-ring.leer{border-color:transparent;box-shadow:0 0 0 9999px rgba(7,10,17,.62)}",
+  ".twt-ring.leer{opacity:0 !important}",
+  ".twt-ring.still{border-color:transparent;box-shadow:none}",
+  ".twt-ring.still::after{display:none}",
   ".twt-ring::after{content:'';position:absolute;inset:-2px;border-radius:inherit;border:2px solid var(--gold);opacity:0}",
   ".twt-ring.puls::after{animation:twt-puls .9s cubic-bezier(.2,.7,.3,1) 1}",
   "@keyframes twt-puls{0%{opacity:.85;transform:scale(1)}100%{opacity:0;transform:scale(1.08)}}",
-  ".twt-blase{position:fixed;z-index:5002;top:0;left:0;width:min(360px,calc(100vw - 32px));box-sizing:border-box;background:var(--karte);color:var(--t1);border:1px solid var(--linie2);border-radius:16px;box-shadow:0 22px 60px rgba(0,0,0,.42),0 2px 0 rgba(200,163,85,.0);padding:18px 18px 16px;font-family:Inter,system-ui,sans-serif;opacity:0}",
+  ".twt-mark{position:fixed;z-index:5002;pointer-events:none;border-radius:10px;border:2px solid var(--gold);box-shadow:0 0 0 4px rgba(200,163,85,.14),0 0 18px rgba(200,163,85,.24);opacity:0;transform:scale(.97);transition:opacity .3s ease,transform .3s cubic-bezier(.2,.8,.2,1)}",
+  ".twt-mark.an{opacity:1;transform:none}",
+  ".twt-mark.weg{opacity:0 !important}",
+  ".twt-blase{position:fixed;z-index:5003;top:0;left:0;width:min(360px,calc(100vw - 32px));box-sizing:border-box;background:var(--karte);color:var(--t1);border:1px solid var(--linie2);border-radius:16px;box-shadow:0 22px 60px rgba(0,0,0,.42);padding:18px 18px 16px;font-family:Inter,system-ui,sans-serif;opacity:0}",
   ".twt-blase.an{opacity:1;transition:opacity .22s ease}",
   ".twt-blase.wartet{opacity:0 !important;pointer-events:none}",
   ".twt-blase.gleitet{transition:transform .44s cubic-bezier(.2,.8,.2,1),opacity .22s ease}",
@@ -16425,6 +16433,8 @@ const TWT_CSS = [
   ".twt-balken{flex:1;display:flex;gap:3px;min-width:0}",
   ".twt-balken span{flex:1;height:3px;border-radius:2px;background:var(--linie2);transition:background .3s ease}",
   ".twt-balken span.ja{background:var(--gold)}",
+  ".twt-balken.durch{display:block;height:3px;border-radius:2px;background:var(--linie2);overflow:hidden}",
+  ".twt-balken.durch i{display:block;height:100%;border-radius:2px;background:var(--gold);transition:width .4s cubic-bezier(.2,.8,.2,1)}",
   ".twt-zahl{font:600 12px/1 Inter,system-ui,sans-serif;color:var(--t2);font-variant-numeric:tabular-nums;white-space:nowrap}",
   ".twt-x{width:32px;height:32px;margin:-6px -6px -6px 0;border:0;border-radius:9px;background:transparent;color:var(--t2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}",
   ".twt-x:hover{background:var(--hover);color:var(--t1)}",
@@ -16434,6 +16444,8 @@ const TWT_CSS = [
   ".twt-pro{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font:700 12px/1 Inter,system-ui,sans-serif;color:var(--gold-text);background:var(--gold-tint);border:1px solid var(--gold-rand);border-radius:999px;padding:6px 10px}",
   ".twt-mehr{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:0;border:0;background:none;cursor:pointer;font:600 13px/1.3 Inter,system-ui,sans-serif;color:var(--gold-text);text-align:left}",
   ".twt-mehr:hover{text-decoration:underline;text-underline-offset:3px}",
+  ".twt-mehr.leise{color:var(--t2);font-weight:500}",
+  ".twt-mehr.leise:hover{color:var(--t1)}",
   ".twt-fuss{display:flex;align-items:center;gap:8px;margin-top:16px}",
   ".twt-k{min-height:40px;padding:0 16px;border-radius:10px;font:700 14px/1 Inter,system-ui,sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:background .15s ease,border-color .15s ease,transform .12s ease}",
   ".twt-k:active{transform:scale(.98)}",
@@ -16445,9 +16457,10 @@ const TWT_CSS = [
   ".twt-k.text:hover{color:var(--t1)}",
   ".twt-k:focus-visible,.twt-x:focus-visible,.twt-mehr:focus-visible,.twt-chip:focus-visible{outline:2px solid var(--gold);outline-offset:2px}",
   ".twt-fuss .twt-k.gold{margin-left:auto}",
-  ".twt-modal{position:fixed;inset:0;z-index:5003;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(7,10,17,.62);animation:twt-ein .26s ease both;font-family:Inter,system-ui,sans-serif}",
+  ".twt-modal{position:fixed;inset:0;z-index:5004;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(7,10,17,.62);animation:twt-ein .26s ease both;font-family:Inter,system-ui,sans-serif}",
   "@keyframes twt-ein{from{opacity:0}to{opacity:1}}",
   ".twt-fenster{width:min(460px,100%);max-height:calc(100vh - 40px);overflow:auto;box-sizing:border-box;background:var(--karte);color:var(--t1);border:1px solid var(--linie2);border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,.5);padding:28px 26px 22px;text-align:center;animation:twt-hoch .42s cubic-bezier(.2,.8,.2,1) both}",
+  ".twt-fenster.breit{width:min(560px,100%)}",
   "@keyframes twt-hoch{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}",
   ".twt-marke{position:relative;width:84px;height:84px;margin:0 auto 16px}",
   ".twt-marke > svg{position:absolute;inset:0;width:84px;height:84px;transform:rotate(-90deg)}",
@@ -16459,52 +16472,151 @@ const TWT_CSS = [
   ".twt-marke .twt-haken{display:flex;align-items:center;justify-content:center;background:var(--gold-tint);color:var(--gold-text);border:1px solid var(--gold-rand)}",
   "@keyframes twt-auf{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}",
   ".twt-fenster h2{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:32px;line-height:1.05;margin:0 0 10px;color:var(--t1);text-wrap:balance}",
-  ".twt-fenster p{font-size:15px;line-height:1.55;color:var(--t1);opacity:.88;margin:0 auto;max-width:36ch}",
+  ".twt-fenster p{font-size:15px;line-height:1.55;color:var(--t1);opacity:.88;margin:0 auto;max-width:38ch}",
   ".twt-wahl{display:flex;flex-direction:column;gap:10px;margin:22px 0 4px}",
   ".twt-wahl .twt-k{min-height:46px;width:100%}",
   ".twt-k .twt-unter{font-weight:500;font-size:12px;color:inherit;opacity:.72}",
   ".twt-notiz{font-size:12px !important;color:var(--t2) !important;opacity:1 !important;margin-top:14px !important}",
-  ".twt-chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:8px;margin:20px 0 6px;text-align:left}",
-  ".twt-chip{display:flex;flex-direction:column;gap:4px;padding:12px 12px 11px;border-radius:12px;border:1px solid var(--linie2);background:transparent;color:var(--t1);cursor:pointer;font:700 14px/1.2 Inter,system-ui,sans-serif;text-align:left;transition:border-color .15s ease,background .15s ease,transform .12s ease}",
+  ".twt-chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:20px 0 6px;text-align:left}",
+  ".twt-chip{display:flex;flex-direction:column;gap:4px;padding:11px 12px 10px;border-radius:12px;border:1px solid var(--linie2);background:transparent;color:var(--t1);cursor:pointer;font:700 14px/1.2 Inter,system-ui,sans-serif;text-align:left;transition:border-color .15s ease,background .15s ease,transform .12s ease}",
   ".twt-chip:hover{border-color:var(--gold-rand);background:var(--gold-tint)}",
   ".twt-chip:active{transform:scale(.98)}",
   ".twt-chip span{font-weight:500;font-size:12px;line-height:1.35;color:var(--t2)}",
   ".tw-tour-einst .twt-reihe{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}",
   ".tw-tour-einst p{font:400 13px/1.5 Inter,system-ui,sans-serif;color:var(--t2);margin:0}",
   ".tw-tour-einst .twt-klein{font:600 12px/1.3 Inter,system-ui,sans-serif;color:var(--t2);margin:16px 0 0}",
-  ".tw-tour-einst .twt-chips{margin:8px 0 0;grid-template-columns:repeat(auto-fit,minmax(116px,1fr))}",
-  "@media (max-width:639px){.twt-titel{font-size:23px}.twt-fenster{padding:24px 18px 18px;border-radius:18px}.twt-fenster h2{font-size:28px}.twt-k{min-height:44px}.twt-x{width:44px;height:44px;margin:-10px -10px -10px 0}}",
-  "@media (prefers-reduced-motion:reduce){.twt-ring,.twt-ring.gleitet,.twt-blase,.twt-blase.gleitet{transition:none !important}.twt-ring.puls::after,.twt-inhalt,.twt-modal,.twt-fenster,.twt-marke circle,.twt-marke img,.twt-marke .twt-haken{animation:none !important}.twt-marke circle{stroke-dashoffset:0}}"
+  ".tw-tour-einst .twt-chips{margin:8px 0 0;grid-template-columns:repeat(auto-fit,minmax(132px,1fr))}",
+  "@media (max-width:639px){.twt-titel{font-size:23px}.twt-fenster{padding:24px 18px 18px;border-radius:18px}.twt-fenster h2{font-size:28px}.twt-k{min-height:44px}.twt-x{width:44px;height:44px;margin:-10px -10px -10px 0}.twt-chips{grid-template-columns:1fr 1fr}}",
+  "@media (prefers-reduced-motion:reduce){.twt-ring,.twt-blase,.twt-blase.gleitet,.twt-mark,.twt-dunkel{transition:none !important}.twt-ring.puls::after,.twt-inhalt,.twt-modal,.twt-fenster,.twt-marke circle,.twt-marke img,.twt-marke .twt-haken{animation:none !important}.twt-marke circle{stroke-dashoffset:0}}"
 ].join("\n");
-function twtCss() { try { if (document.getElementById("twt-css")) return; const s = document.createElement("style"); s.id = "twt-css"; s.textContent = TWT_CSS; document.head.appendChild(s); } catch (e) { } }
+function twtCss() { try { if (document.getElementById("twt-css")) { if (document.getElementById("twt-css").getAttribute("data-v") === "2") return; document.getElementById("twt-css").remove(); } const s = document.createElement("style"); s.id = "twt-css"; s.setAttribute("data-v", "2"); s.textContent = TWT_CSS; document.head.appendChild(s); } catch (e) { } }
 
-/* Ziele: Text = erster sichtbarer Treffer; {s, i} = i-ter sichtbarer Treffer; Liste = Rahmen um alle */
-const TWT_SEITE = ".tw-main h1.tw-seitentitel";
+/* Ziele: Text = erster sichtbarer Treffer; {s, i} = i-ter sichtbarer Treffer; {s, i, c, ci} = darin das ci-te sichtbare Kind c;
+   {s, hoch: n} = n Ebenen darüber; {s, alle: 1} = alle sichtbaren Treffer; Liste = mehrere Ziele (Rahmen um alle) */
+const TWT_SEITE = ".tw-main h1.tw-seitentitel, .tw-main .nz-seite > h1, .tw-main .nz-b-kopfzeile h1";
 const TWT_SN = i => ({ s: ".tw-tabbar .tw-sn-menue > .tw-sn-punkt", i: i });
 const TWT_GR = i => ({ s: ".tw-tabbar .tw-sn-gruppe", i: i });
+const TWT_UN = (g, i) => ({ s: ".tw-tabbar .tw-sn-gruppe", i: g, c: ".tw-sn-unter", ci: i });
+const TWT_AUF = g => ({ ls: 1, k: { s: ".tw-tabbar .tw-sn-gruppe > .tw-sn-kopf", i: g }, nur: TWT_UN(g, 0) });   // Gruppe in der Leiste aufklappen, falls zu
 const TWT_KOPF = ["[data-fw-glocke]", "[data-tw-zahnrad]"];
 function twtSichtbar(e) { try { const r = e.getBoundingClientRect(); return r.width > 2 && r.height > 2; } catch (x) { return false; } }
-function twtEl(z) {
+function twtAlle(z) {
   try {
-    if (!z) return null;
-    if (typeof z === "string") { const l = document.querySelectorAll(z); for (let i = 0; i < l.length; i++) if (twtSichtbar(l[i])) return l[i]; return null; }
-    if (z.s) { const l = Array.prototype.filter.call(document.querySelectorAll(z.s), twtSichtbar); return l[z.i || 0] || null; }
+    if (!z) return [];
+    if (typeof z === "string") { const l = document.querySelectorAll(z); for (let i = 0; i < l.length; i++) if (twtSichtbar(l[i])) return [l[i]]; return []; }
+    if (z.s) {
+      const l = Array.prototype.filter.call(document.querySelectorAll(z.s), twtSichtbar);
+      if (z.alle) return l;
+      let e = l[z.i || 0] || null;
+      if (e && z.c) { const k = Array.prototype.filter.call(e.querySelectorAll(z.c), twtSichtbar); e = k[z.ci || 0] || null; }
+      for (let j = 0; e && j < (z.hoch || 0); j++) e = e.parentElement;
+      return e && twtSichtbar(e) ? [e] : [];
+    }
   } catch (e) { }
-  return null;
+  return [];
 }
-function twtEls(z) { return (Array.isArray(z) ? z : [z]).map(twtEl).filter(Boolean); }
+function twtEl(z) { return twtAlle(z)[0] || null; }
+function twtEls(z) { const o = []; (Array.isArray(z) ? z : [z]).forEach(x => twtAlle(x).forEach(e => { if (o.indexOf(e) < 0) o.push(e); })); return o; }
+function twtKlick(z) { const l = Array.isArray(z) ? z : [z]; for (let i = 0; i < l.length; i++) { const e = twtEl(l[i]); if (e) { try { e.click(); } catch (x) { } return true; } } return false; }
 function twtGesperrt() { const e = document.querySelector(".tw-pro-seite"); return !!(e && twtSichtbar(e)); }
 function twtLeiste() { const e = document.querySelector(".tw-tabbar .tw-sn"); return !!(e && twtSichtbar(e)); }
+/* Ebenen, die die Tour öffnet: Spielerprofil (pp) und Transferdetails (mv). Schritte ohne „offen“ schließen sie wieder. */
+const TWT_EBENEN = {
+  pp: { offen: ".tw-pp-ebene", zu: [".tw-pp-ebene .tw-pp-zu", ".tw-pp-ebene .tw-pp-leiste > button"] },
+  mv: { offen: ".tw-mv-voll", zu: [".tw-mv-voll .tw-mv-kopfpad button", ".tw-mv-voll button[aria-label]"] }
+};
+function twtAufraeumen(behalten) {
+  let zu = false;
+  Object.keys(TWT_EBENEN).forEach(k => { if (behalten && behalten.indexOf(k) >= 0) return; const E = TWT_EBENEN[k]; if (twtEl(E.offen)) { if (twtKlick(E.zu)) zu = true; } });
+  return zu;
+}
+/* Ziel ins Bild holen: kurze Ziele mittig, hohe Ziele mit dem oberen Rand nach oben; im passenden Scroll-Bereich (Seite oder Ebene) */
+function twtRolle(e, kappe, nachOben) {
+  try {
+    const r = e.getBoundingClientRect(); const vh = window.innerHeight; const hoehe = kappe ? Math.min(r.height, kappe) : r.height;
+    const handy = window.innerWidth < 640;   // Handy: Ziel nach oben, die Erklärkarte liegt dann unten
+    if (nachOben && !handy) { if (r.top >= 90 && r.top <= 150) return; } else if (handy ? (r.top >= 56 && r.top + hoehe <= vh * 0.56) || (r.top >= 56 && hoehe > vh * 0.56 && r.top <= 90) : (r.top >= 70 && r.top + hoehe <= vh - 20)) return;
+    const d = handy ? r.top - 66 : nachOben ? r.top - 110 : hoehe < vh * 0.7 ? r.top - (vh - hoehe) / 2 : r.top - 120;
+    let p = e.parentElement;
+    while (p && p !== document.body && p !== document.documentElement) {
+      const cs = getComputedStyle(p);
+      if (/(auto|scroll)/.test(cs.overflowY) && p.scrollHeight > p.clientHeight + 4) { p.scrollTop += d; return; }
+      p = p.parentElement;
+    }
+    window.scrollBy(0, d);
+  } catch (x) { }
+}
+function twtRundRechteck(x, y, w, h, r) { r = Math.max(0, Math.min(r, w / 2, h / 2)); return "M" + (x + r) + " " + y + "H" + (x + w - r) + "A" + r + " " + r + " 0 0 1 " + (x + w) + " " + (y + r) + "V" + (y + h - r) + "A" + r + " " + r + " 0 0 1 " + (x + w - r) + " " + (y + h) + "H" + (x + r) + "A" + r + " " + r + " 0 0 1 " + x + " " + (y + h - r) + "V" + (y + r) + "A" + r + " " + r + " 0 0 1 " + (x + r) + " " + y + "Z"; }
 
 /* Schritte: v = Seite, d = Ziel am Computer (Leiste sichtbar), m = Ziel ohne Leiste (Handy), z = Ziel überall, alt = Ersatzziel,
-   t = Titel [de, en], x = Text [de, en], xm = Text ohne Leiste, det = Detailtour zu diesem Bereich, opt = ohne Ziel überspringen */
+   mk = weitere Bereiche mit Goldrahmen, hell = Bereiche ohne Abdunkelung, a = Handgriffe vorher ({k: anklicken, nur: nur wenn das noch fehlt}),
+   offen = geöffnete Ebenen behalten, kappe = Rahmen höchstens so hoch, ls = nur mit Leiste (Handy: weglassen),
+   t = Titel [de, en], x = Text [de, en], det = Detailtour zu diesem Bereich, opt = ohne Ziel überspringen */
+const TWT_VS_TAB = i => ({ s: ".vs-unterseiten .vs-useite", i: i });
+const TWT_VS_AKTIV = i => ".vs-unterseiten .vs-useite:nth-child(" + (i + 1) + ").ist-aktiv";
+const TWT_VS_ANS = i => ({ k: TWT_VS_TAB(i), nur: TWT_VS_AKTIV(i) });
+const TWT_VS_ZU = { k: ".k3-liste article.ist-offen .k3-mehr" };
+const TWT_VS_AUF = { k: ".k3-liste article.k3 .k3-mehr", nur: ".k3-liste article.ist-offen", w: 700 };
+const TWT_VS_KTAB = i => ({ k: { s: ".k3-liste article.ist-offen .k3n-reiter [role=tab]", i: i }, nur: ".k3-liste article.ist-offen .k3n-reiter [role=tab]:nth-child(" + (i + 1) + ").ist-an" });
+const TWT_MW_AUF = { k: ".tw-mw2-rliste .tw-mw-zeile", nur: ".tw-mwd", w: 600 };
+const TWT_PP_AUF = { k: [".tw-dbtable tbody tr .tw-dbact button", ".tw-db .tw-dbact button"], nur: ".tw-pp-ebene", w: 900 };
+const TWT_PP_TAB = i => ({ k: { s: ".tw-pp-ebene .tw-pp-reiter [role=tab]", i: i }, w: 750 });
+const TWT_SC_TAB = i => ({ s: ".tw-main .tw-k.tw-k-p", i: i });
+
 const TWT_LEISTE = { id: "leiste", d: ".tw-tabbar .tw-sn", m: ".tw-burger", t: ["Deine Navigation", "Your navigation"],
-  x: ["Links findest du alle Bereiche von TransferWire. Wir gehen sie einmal von oben nach unten durch.", "All areas of TransferWire are on the left. We'll go through them once, top to bottom."],
+  x: ["Links findest du alle Bereiche von TransferWire. Wir gehen sie einmal von oben nach unten durch – jeden Punkt einzeln.", "All areas of TransferWire are on the left. We'll go through them once, top to bottom – one item at a time."],
   xm: ["Über dieses Menü erreichst du alle Bereiche von TransferWire. Wir gehen sie einmal der Reihe nach durch.", "This menu takes you to every area of TransferWire. We'll go through them once, in order."] };
 const TWT_GLOCKE = { id: "glocke", d: TWT_KOPF, m: TWT_KOPF, t: ["Benachrichtigungen und Einstellungen", "Notifications and settings"],
   x: ["Die Glocke sammelt alles Neue. Über das Zahnrad erreichst du Einstellungen, Benachrichtigungen und das Morgen-Briefing – dort startest du diese Tour auch jederzeit neu.", "The bell collects everything new. The gear opens settings, notifications and the morning briefing – you can restart this tour there at any time."] };
 const TWT_MERK_X = ["Alles, was du beobachtest: Spieler, Karten aus „Verein sucht“, Angebote aus dem Spieler-Markt und Vereine. Für jeden Eintrag kannst du Benachrichtigungen einschalten.", "Everything you follow: players, “Club seeks” cards, Player Market offers and clubs. You can switch on notifications for each entry."];
-const TWT_AKT_X = ["Meldungen, Transfers und der Spieltag. Jede Meldung trägt eine Bewertung, wie verlässlich sie ist.", "News, transfers and the matchday. Every report carries a rating of how reliable it is."];
+const TWT_AKT_X = ["Meldungen, Transfers und der Spieltag. Jede Meldung trägt eine Bewertung, wie verlässlich sie ist. Wir sehen uns die drei Seiten einzeln an.", "News, transfers and the matchday. Every report carries a rating of how reliable it is. We'll look at the three pages one by one."];
+
+/* Gemeinsame Seiten-Schritte (Berater und Vereine) */
+const TWT_S = {
+  vs_pos: { id: "vs_pos", v: "gesucht", a: [TWT_VS_ANS(0), TWT_VS_ZU], z: ".vs-poswahl", opt: 1, t: ["Position wählen", "Choose a position"],
+    x: ["Wähle die Position, die dich interessiert. Die Zahl zeigt, wie viele Vereine gerade genau diese Position suchen.", "Choose the position you're interested in. The number shows how many clubs are currently looking for exactly that position."] },
+  vs_karte: { id: "vs_karte", v: "gesucht", a: [TWT_VS_ANS(0), TWT_VS_ZU], z: ".k3-liste article.k3", mk: [".k3-liste article.k3 .k3n-wertzeile"], opt: 1, det: "vs", t: ["Eine Bedarfskarte", "A demand card"],
+    x: ["Jede Karte zeigt Verein, gesuchte Position und Zeitfenster. Die Prozentzahl ist die TransferWire-Prognose: wie wahrscheinlich der Verein auf dieser Position im nächsten Transferfenster verpflichtet. Sie verbindet Kaderanalyse, Medienberichte und unsere KI-Prüfung der Belege.", "Each card shows the club, the position it's looking for and the time window. The percentage is the TransferWire forecast: how likely the club is to sign a player for this position in the next transfer window. It combines squad analysis, media reports and our AI review of the evidence."] },
+  aktuell: { id: "aktuell", v: "feed", d: TWT_GR(0), ls: 1, t: ["Aktuell", "Latest"], x: TWT_AKT_X },
+  feed: { id: "feed", v: "feed", z: [".tw-nl", ".mu-top"], zm: ".tw-nl", mk: [TWT_UN(0, 0)], a: [TWT_AUF(0)], opt: 1, det: "ak", t: ["Newsfeed", "News feed"],
+    x: ["Oben läuft der Live-Ticker, darunter stehen die wichtigsten Meldungen des Tages. Weiter unten filterst du, was du sehen willst – Wechsel, Gerüchte, Verletzungen und mehr.", "The live ticker runs at the top, below it are the day's most important reports. Further down you filter what you want to see – transfers, rumours, injuries and more."] },
+  transfers: { id: "transfers", v: "geruechte", d: TWT_UN(0, 1), m: TWT_SEITE, a: [TWT_AUF(0)], t: ["Transfers", "Transfers"],
+    x: ["Bestätigte Wechsel, Gerüchte und Bedarfsmeldungen – jede mit Quelle und einer Einschätzung, wie sicher sie ist.", "Confirmed moves, rumours and reports of club needs – each with its source and an assessment of how certain it is."] },
+  tr_oben: { id: "tr_oben", v: "geruechte", z: [".tw-scout", ".tw-gfilter-row", ".tw-gchips-rahmen"], opt: 1, t: ["Suchen und filtern", "Search and filter"],
+    x: ["Frag den TW Scout in eigenen Worten, zum Beispiel „vertragslose U23-Spieler“. Darunter filterst du nach Liga, Position, Zeitraum und Art der Meldung.", "Ask the TW Scout in your own words, for example “U23 players without a contract”. Below that you filter by league, position, period and type of report."] },
+  tr_karte: { id: "tr_karte", v: "geruechte", z: ".tw-feedlist article.tw-tk3", opt: 1, det: "tr", t: ["Transferkarten", "Transfer cards"],
+    x: ["Jede Karte zeigt den Spieler, beide Vereine, die Ablöse und wie verlässlich die Meldung ist. Ein Klick öffnet alle Details mit Quellen.", "Each card shows the player, both clubs, the fee and how reliable the report is. One click opens all details with sources."] },
+  spieltag: { id: "spieltag", v: "spieltag", d: TWT_UN(0, 2), m: TWT_SEITE, a: [TWT_AUF(0)], t: ["Spieltag", "Matchday"],
+    x: ["Ergebnisse, Spiele und Tabellen aus allen Wettbewerben, die wir abdecken.", "Results, fixtures and tables from all the competitions we cover."] },
+  sp_karte: { id: "sp_karte", v: "spieltag", z: [{ s: ".tw-sp2-gruppenkopf", i: 0 }, { s: ".tw-sp-karte", i: 0 }], mk: [".tw-sp2-leiste", ".tw-sp2-tage"], opt: 1, det: "sp", t: ["Spiele des Tages", "Today's matches"],
+    x: ["Die Spiele sind nach Wettbewerb sortiert. Oben wählst du Liga oder Pokal und blätterst durch die Tage; ein Klick auf ein Spiel zeigt die Einzelheiten.", "Matches are sorted by competition. At the top you choose a league or cup and browse through the days; click a match to see the details."] },
+  perf: { id: "perf", v: "ranking", d: TWT_UN(1, 0), m: TWT_SEITE, a: [TWT_AUF(1)], t: ["Performance", "Performance"],
+    x: ["Jedes Spiel wird bewertet – innerhalb der eigenen Liga und Position. Daraus entstehen jede Woche das Team der Woche und eine Rangliste.", "Every match is rated – within the player's own league and position. That produces the team of the week and a ranking every week."] },
+  perf_tdw: { id: "perf_tdw", v: "ranking", z: { s: ".tw-lk-main .tw-card", i: 0 }, mk: [".tw-lk-karte"], opt: 1, t: ["Team der Woche", "Team of the week"],
+    x: ["Die beste Elf der Woche nach Noten, daneben der Spieler der Woche. Ein Klick auf einen Spieler öffnet seine Leistungsdaten.", "The best eleven of the week by rating, next to it the player of the week. Click a player to open his performance data."] },
+  perf_rang: { id: "perf_rang", v: "ranking", z: ".tw-lk-tab", kappe: 300, mk: [".tw-lk-filter"], opt: 1, det: "pf", t: ["Rangliste", "Ranking"],
+    x: ["Alle bewerteten Spieler der Woche mit Note. Oben wählst du Woche, Liga, Position und Notenbereich.", "All rated players of the week with their rating. At the top you choose the week, league, position and rating range."] },
+  mw: { id: "mw", v: "marktwert", d: TWT_UN(1, 1), m: TWT_SEITE, a: [TWT_AUF(1)], t: ["Marktwert", "Market value"],
+    x: ["Hier siehst du den richtig kalkulierten Marktwert jedes Spielers – berechnet von unserem eigenen Modell: Formeln aus Leistung, Alter, Spielzeit, Liga und Vergütung, dazu eine eigens dafür programmierte KI-Bewertung.", "This is where you see the properly calculated market value of every player – worked out by our own model: formulas based on performance, age, playing time, league and pay, plus an AI assessment built specifically for this."] },
+  mw_werte: { id: "mw_werte", v: "marktwert", a: [TWT_MW_AUF], z: [".tw-mwd-block.tw-mwd-gold", { s: ".tw-mwd-block", i: 1 }], opt: 1, t: ["Weltmarktwert und Leistungsmarktwert", "World market value and performance value"],
+    x: ["Als Beispiel ein Spieler aus der Rangliste. Der Weltmarktwert ist sein Wert in der aktuellen Liga, wenn Käufer aus jeder Liga mitbieten. Der Leistungsmarktwert bewertet nur die spielerische Leistung – so lassen sich Spieler über alle Ligen hinweg vergleichen.", "Here's a player from the ranking as an example. The world market value is his value in his current league with buyers from every league bidding. The performance value rates only his football – so players can be compared across all leagues."] },
+  mw_ziel: { id: "mw_ziel", v: "marktwert", a: [TWT_MW_AUF], z: { s: ".tw-mwd-block", i: 2 }, opt: 1, det: "mw", t: ["Zielmarkt", "Target market"],
+    x: ["Hier rechnet TransferWire den Marktwert auf eine andere Liga um. Wähle einen Zielmarkt und sieh, was der Spieler dort wert wäre – etwa in der Bundesliga oder in der Premier League.", "Here TransferWire converts the market value to another league. Choose a target market and see what the player would be worth there – in the Bundesliga or the Premier League, for example."] },
+  db: { id: "db", v: "players", d: TWT_UN(1, 2), m: TWT_SEITE, a: [TWT_AUF(1)], t: ["Datenbank", "Database"],
+    x: ["Alle Kader unserer Ligen mit Saisonwerten, Marktwert, Form und Verletzungsstatus. Suche nach Namen oder filtere nach Land, Liga, Verein und Position.", "Every squad in our leagues with season stats, market value, form and injury status. Search by name or filter by country, league, club and position."] },
+  db_profil: { id: "db_profil", v: "players", a: [TWT_PP_AUF], offen: ["pp"], z: [{ s: ".tw-pp-ebene .tw-pp-raster .tw-pp-karte", i: 0 }, ".tw-pp-ebene .tw-pp-mw"], mk: [".tw-pp-ebene .tw-pp-held"], opt: 1, t: ["Das Spielerprofil", "The player profile"],
+    x: ["Ein Klick auf einen Spieler öffnet sein Profil: oben Verein, Position und der TW Performance Score, darunter die Spielerdaten und sein TW-Marktwert mit dem Weg zur Marktwertanalyse.", "Clicking a player opens his profile: club, position and the TW Performance Score at the top, below that his player data and TW market value with the way into the market value analysis."] },
+  db_reiter: { id: "db_reiter", v: "players", a: [TWT_PP_AUF], offen: ["pp"], z: ".tw-pp-ebene .tw-pp-reiter", mk: [".tw-pp-ebene [data-fw-folgen]"], opt: 1, det: "db", t: ["Alles zum Spieler", "Everything about the player"],
+    x: ["Über diese Reiter springst du zu Spielstatistiken, Performance, News und ähnlichen Spielern. Oben rechts folgst du dem Spieler oder lädst sein Profil als PDF.", "Use these tabs to jump to match statistics, performance, news and similar players. At the top right you follow the player or download his profile as a PDF."] },
+  sc: { id: "sc", v: "talente", d: TWT_UN(1, 3), m: TWT_SEITE, a: [TWT_AUF(1)], t: ["Scouting", "Scouting"],
+    x: ["Talente von U17 bis U21, eigene Scouting-Listen und die Suche nach Fähigkeiten.", "Talents from U17 to U21, your own scouting lists and the search by skills."] },
+  sc_seite: { id: "sc_seite", v: "talente", z: [TWT_SC_TAB(0), TWT_SC_TAB(1), TWT_SC_TAB(2), TWT_SC_TAB(3)], opt: 1, det: "sc", t: ["Vier Werkzeuge", "Four tools"],
+    x: ["Talent-Rankings zeigen die besten jungen Spieler nach Leistung und Entwicklung. In Scouting-Listen sammelst du Spieler, die Fähigkeiten-Suche findet Spieler nach Stärken, und unter Nachwuchsligen siehst du, woher die Daten kommen.", "Talent rankings show the best young players by performance and development. Scouting lists collect players, the skills search finds players by their strengths, and youth leagues shows where the data comes from."] },
+  nw_beitraege: { id: "nw_beitraege", v: "community", z: { s: ".tw-cmgrid .tw-card", i: 0 }, mk: [".nx-schalter", TWT_UN(2, 0)], a: [TWT_AUF(2)], opt: 1, t: ["Beiträge", "Posts"],
+    x: ["Teile einen Transferhinweis aus deinem Netzwerk – mit „Hinweis erstellen“. Jeder Hinweis wird geprüft, bevor er stärker zählt. Unter „Fragen & Gesuche“ stellst du Fragen an andere Mitglieder.", "Share a transfer tip from your network with “Create tip”. Every tip is checked before it carries more weight. Under “Questions & requests” you ask other members questions."] },
+  nw_mitglieder: { id: "nw_mitglieder", v: "nz_kontakte", z: ".nz-filter", mk: [".nz-tabs", TWT_UN(2, 1)], a: [TWT_AUF(2)], opt: 1, t: ["Mitglieder finden", "Find members"],
+    x: ["Finde Scouts, Berater und Vereinsmitarbeiter nach Rolle, Land, Liga oder Sprache. Unter „Meine Kontakte“ stehen alle, mit denen du verbunden bist.", "Find scouts, agents and club staff by role, country, league or language. “My contacts” lists everyone you're connected with."] }
+};
 const TWT_HAUPT = {
   berater: [
     TWT_LEISTE,
@@ -16517,17 +16629,26 @@ const TWT_HAUPT = {
     { id: "spieler", v: "ws_spieler", z: "[data-im-werkzeug=meine_spieler]", alt: "[data-ws-anlegen]", t: ["Meine Spieler", "My players"],
       x: ["Deine Spieler mit Vertrag, Vertretung und Notizen. „Importieren“ übernimmt eine bestehende Liste aus Excel, CSV oder PDF, „Exportieren“ gibt sie als Excel oder CSV aus.", "Your players with contract, representation and notes. “Import” takes over an existing list from Excel, CSV or PDF; “Export” saves it as Excel or CSV."] },
     { id: "merkliste", v: "watch", z: ".tw-mktabs", t: ["Merkliste", "Watchlist"], x: TWT_MERK_X },
-    { id: "kontakte", v: "kontakte", d: TWT_SN(0), m: "main input", t: ["Vereinskontakte", "Club contacts"],
-      x: ["Ansprechpartner von Vereinen: Sportdirektoren, Kaderplaner und Scouts. Suche nach Verein, Liga oder Land.", "Contacts at clubs: sporting directors, squad planners and scouts. Search by club, league or country."] },
-    { id: "vs", v: "gesucht", d: TWT_SN(1), m: ".vs-unterseiten", det: "vs", t: ["Verein sucht", "Club seeks"],
+    { id: "kontakte", v: "kontakte", d: TWT_SN(0), m: TWT_SEITE, t: ["Vereinskontakte", "Club contacts"],
+      x: ["Ansprechpartner von Vereinen: Sportdirektoren, Kaderplaner und Scouts.", "Contacts at clubs: sporting directors, squad planners and scouts."] },
+    { id: "kontakte_seite", v: "kontakte", z: ".tw-main input", opt: 1, t: ["Verein suchen", "Search for a club"],
+      x: ["Tippe einen Verein ein oder wähle darunter ein Land. Jeder Verein zeigt seine Ansprechpartner.", "Type in a club or choose a country below. Every club shows its contacts."] },
+    { id: "vs", v: "gesucht", d: TWT_SN(1), m: TWT_SEITE, a: [TWT_VS_ANS(0), TWT_VS_ZU], t: ["Verein sucht", "Club seeks"],
       x: ["Welche Vereine welche Position suchen – aus Meldungen, Kaderanalysen und direkt von Vereinen. Hier findest du Abnehmer für deine Spieler.", "Which clubs are looking for which position – from reports, squad analyses and directly from clubs. This is where you find buyers for your players."] },
-    { id: "markt", v: "nz_markt", d: TWT_SN(2), m: ".nz-tabs", t: ["Spieler-Markt", "Player Market"],
-      x: ["Biete Spieler an – zum Verkauf, zur Leihe, ablösefrei oder zum Probetraining – und sieh, was andere anbieten. „Passende Vereine“ zeigt, wer zu deinem Angebot passt.", "Offer players – for transfer, loan, free transfer or trial – and see what others offer. “Matching clubs” shows who fits your offer."] },
-    { id: "aktuell", v: "feed", d: TWT_GR(0), m: ".tw-nl", det: "ak", t: ["Aktuell", "Latest"], x: TWT_AKT_X },
-    { id: "analyse", v: "ranking", d: TWT_GR(1), m: TWT_SEITE, t: ["Analyse", "Analysis"],
-      x: ["Leistungsnoten nach jedem Spieltag, Marktwerte, die Spielerdatenbank und Scouting mit Talenten.", "Performance ratings after every matchday, market values, the player database and scouting with talents."] },
-    { id: "netzwerk", v: "community", d: TWT_GR(2), m: TWT_SEITE, t: ["Netzwerk", "Network"],
+    TWT_S.vs_pos, TWT_S.vs_karte,
+    { id: "markt", v: "nz_markt", d: TWT_SN(2), m: TWT_SEITE, t: ["Spieler-Markt", "Player Market"],
+      x: ["Biete Spieler an – zum Verkauf, zur Leihe, ablösefrei oder zum Probetraining – und sieh, was andere anbieten.", "Offer players – for transfer, loan, free transfer or trial – and see what others offer."] },
+    { id: "markt_seite", v: "nz_markt", z: "[data-nz6-angebot]", mk: [".nz-tabs", "[data-nz6-neu]"], opt: 1, det: "mk", t: ["Angebote im Überblick", "Offers at a glance"],
+      x: ["Jede Karte ist ein Angebot mit Position, Alter, Art des Wechsels und Marktwert. Über die Reiter kommst du zu deinen eigenen Angeboten und zu den passenden Vereinen; „Spieler anbieten“ stellt ein neues Angebot ein.", "Each card is an offer with position, age, type of move and market value. The tabs take you to your own offers and to matching clubs; “Offer a player” posts a new offer."] },
+    TWT_S.aktuell, TWT_S.feed, TWT_S.transfers, TWT_S.tr_oben, TWT_S.tr_karte, TWT_S.spieltag, TWT_S.sp_karte,
+    { id: "analyse", v: "ranking", d: TWT_GR(1), ls: 1, t: ["Analyse", "Analysis"],
+      x: ["Vier Werkzeuge für die Bewertung von Spielern: Performance, Marktwert, Datenbank und Scouting. Wir sehen sie uns einzeln an.", "Four tools for assessing players: performance, market value, database and scouting. We'll look at them one by one."] },
+    TWT_S.perf, TWT_S.perf_tdw, TWT_S.perf_rang, TWT_S.mw, TWT_S.mw_werte, TWT_S.mw_ziel, TWT_S.db, TWT_S.db_profil, TWT_S.db_reiter, TWT_S.sc, TWT_S.sc_seite,
+    { id: "netzwerk", v: "community", d: TWT_GR(2), ls: 1, t: ["Netzwerk", "Network"],
       x: ["Teile Transferhinweise mit anderen Mitgliedern, finde Berater und Vereine und pflege dein Profil.", "Share transfer tips with other members, find agents and clubs, and keep your profile up to date."] },
+    TWT_S.nw_beitraege, TWT_S.nw_mitglieder,
+    { id: "nw_profil", v: "nz_profil", z: ".nz-status", mk: [TWT_UN(2, 2)], a: [TWT_AUF(2)], opt: 1, det: "nw", t: ["Mein Profil", "My profile"],
+      x: ["So sehen dich andere im Netzwerk. Hier schaltest du dein Profil sichtbar, lädst ein Foto hoch und lässt deine Rolle verifizieren.", "This is how others see you in the network. Here you make your profile visible, upload a photo and get your role verified."] },
     TWT_GLOCKE
   ],
   verein: [
@@ -16539,17 +16660,30 @@ const TWT_HAUPT = {
     { id: "nachrichten", v: "nz_nachrichten", d: ".nx-nl", m: ".nx-filter", t: ["Nachrichten", "Messages"],
       x: ["Hier landen Spielerangebote und Anfragen von Beratern – mit Spielerkarte, Exposé und Video im Anhang.", "Player offers and requests from agents land here – with player card, exposé and video attached."] },
     { id: "merkliste", v: "watch", z: ".tw-mktabs", t: ["Merkliste", "Watchlist"], x: TWT_MERK_X },
-    { id: "markt", v: "nz_markt", d: TWT_SN(2), m: ".nz-tabs", det: "vmk", t: ["Spieler-Markt", "Player Market"],
-      x: ["Hier bieten Berater ihre Spieler an – zum Verkauf, zur Leihe, ablösefrei oder zum Probetraining. Öffne ein Angebot und melde dich direkt.", "Agents offer their players here – for transfer, loan, free transfer or trial. Open an offer and get in touch directly."] },
-    { id: "vs", v: "gesucht", d: TWT_SN(1), m: ".vs-unterseiten", t: ["Verein sucht", "Club seeks"],
+    { id: "kontakte", v: "kontakte", d: TWT_SN(0), m: TWT_SEITE, t: ["Vereinskontakte", "Club contacts"],
+      x: ["Ansprechpartner anderer Vereine: Sportdirektoren, Kaderplaner und Scouts – für Leihen, Verkäufe und Absprachen.", "Contacts at other clubs: sporting directors, squad planners and scouts – for loans, sales and arrangements."] },
+    { id: "kontakte_seite", v: "kontakte", z: ".tw-main input", opt: 1, t: ["Verein suchen", "Search for a club"],
+      x: ["Tippe einen Verein ein oder wähle darunter ein Land. Jeder Verein zeigt seine Ansprechpartner.", "Type in a club or choose a country below. Every club shows its contacts."] },
+    { id: "vs", v: "gesucht", d: TWT_SN(1), m: TWT_SEITE, a: [TWT_VS_ANS(0), TWT_VS_ZU], t: ["Verein sucht", "Club seeks"],
       x: ["Hier stehen die Bedarfe der Vereine – auch eure. Berater sehen, welche Position ihr sucht, und schicken passende Spieler.", "This is where clubs' needs are listed – yours too. Agents see which position you are looking for and send suitable players."] },
+    TWT_S.vs_pos, TWT_S.vs_karte,
+    { id: "markt", v: "nz_markt", d: TWT_SN(2), m: TWT_SEITE, t: ["Spieler-Markt", "Player Market"],
+      x: ["Hier bieten Berater ihre Spieler an – zum Verkauf, zur Leihe, ablösefrei oder zum Probetraining.", "Agents offer their players here – for transfer, loan, free transfer or trial."] },
+    { id: "markt_seite", v: "nz_markt", z: "[data-nz6-angebot]", mk: [".nz-tabs"], opt: 1, det: "vmk", t: ["Angebote im Überblick", "Offers at a glance"],
+      x: ["Jede Karte ist ein Spielerangebot mit Position, Alter, Art des Wechsels und Marktwert. Öffne ein Angebot und melde dich direkt beim Berater.", "Each card is a player offer with position, age, type of move and market value. Open an offer and contact the agent directly."] },
     { id: "bedarf", v: "nz_profil", z: "[data-nz7-neu]", alt: ["[data-nz7-bedarfe]", "[data-nz7-vereinsprofil]"], det: "vbd", t: ["Bedarf melden", "Report a need"],
       x: ["Mit „Bedarf melden“ steht euer Bedarf sofort als Karte in „Verein sucht“. Passende Angebote aus dem Spieler-Markt erscheinen hier – das Abgleichen läuft alle 15 Minuten.", "With “Report a need”, your need appears immediately as a card in “Club seeks”. Matching offers from the Player Market show up here – matching runs every 15 minutes."] },
-    { id: "netzwerk", v: "community", d: TWT_GR(2), m: TWT_SEITE, t: ["Netzwerk und Profil", "Network and profile"],
+    TWT_S.aktuell, TWT_S.feed, TWT_S.transfers, TWT_S.tr_oben, TWT_S.tr_karte, TWT_S.spieltag, TWT_S.sp_karte,
+    { id: "analyse", v: "ranking", d: TWT_GR(1), ls: 1, t: ["Analyse", "Analysis"],
+      x: ["Vier Werkzeuge für Scouting und Kaderplanung: Performance, Marktwert, Datenbank und Scouting. Wir sehen sie uns einzeln an.", "Four tools for scouting and squad planning: performance, market value, database and scouting. We'll look at them one by one."] },
+    TWT_S.perf, TWT_S.perf_tdw, TWT_S.perf_rang, TWT_S.mw, TWT_S.mw_werte, TWT_S.mw_ziel, TWT_S.db, TWT_S.db_profil, TWT_S.db_reiter, TWT_S.sc, TWT_S.sc_seite,
+    { id: "netzwerk", v: "community", d: TWT_GR(2), ls: 1, t: ["Netzwerk und Profil", "Network and profile"],
       x: ["Pflege euer Vereinsprofil, finde Berater und teile Hinweise mit anderen Mitgliedern.", "Keep your club profile up to date, find agents and share tips with other members."] },
-    { id: "analyse", v: "ranking", d: TWT_GR(1), m: TWT_SEITE, t: ["Analyse", "Analysis"],
-      x: ["Leistungsnoten nach jedem Spieltag, Marktwerte und die Spielerdatenbank – für Scouting und Kaderplanung.", "Performance ratings after every matchday, market values and the player database – for scouting and squad planning."] },
-    { id: "aktuell", v: "feed", d: TWT_GR(0), m: ".tw-nl", t: ["Aktuell", "Latest"], x: TWT_AKT_X },
+    TWT_S.nw_beitraege,
+    { id: "nw_mitglieder", v: "nz_kontakte", z: ".nz-filter", mk: [".nz-tabs", TWT_UN(2, 1)], a: [TWT_AUF(2)], opt: 1, t: ["Mitglieder finden", "Find members"],
+      x: ["Finde Berater, Scouts und Mitarbeiter anderer Vereine nach Rolle, Land, Liga oder Sprache. Unter „Meine Kontakte“ stehen alle, mit denen ihr verbunden seid.", "Find agents, scouts and staff at other clubs by role, country, league or language. “My contacts” lists everyone you're connected with."] },
+    { id: "nw_profil", v: "nz_profil", z: "[data-nz7-vereinsprofil]", alt: ".nz-status", mk: [TWT_UN(2, 2)], a: [TWT_AUF(2)], opt: 1, det: "nw", t: ["Euer Vereinsprofil", "Your club profile"],
+      x: ["So sehen Berater euren Verein: Wappen, Liga, Ansprechpartner und eure Bedarfe. Je vollständiger das Profil, desto passender die Angebote.", "This is how agents see your club: crest, league, contacts and your needs. The more complete the profile, the better the offers fit."] },
     TWT_GLOCKE
   ]
 };
@@ -16569,21 +16703,79 @@ const TWT_DETAIL = {
     { v: "ws_spieler", z: "[data-nx-vt-knopf]", opt: 1, t: ["Vertretung verifizieren", "Verify representation"], x: ["Lade deine Vertretungsvereinbarung hoch. Nach der Prüfung stehst du im Spielerprofil als offizieller Berater.", "Upload your representation agreement. Once it's checked, you appear in the player profile as the official agent."] },
     Object.assign({ v: "watch", z: ".tw-mktabs" }, TWT_MKT)
   ] },
-  vs: { n: ["Verein sucht", "Club seeks"], u: ["Die vier Ansichten", "The four views"], s: [
-    { v: "gesucht", z: ".vs-unterseiten", t: ["Vier Ansichten", "Four views"], x: ["„Verein sucht“ hat vier Ansichten. Wir zeigen dir kurz jede.", "“Club seeks” has four views. We'll show you each one briefly."] },
-    { v: "gesucht", z: { s: ".vs-useite", i: 0 }, opt: 1, t: ["Nach Position", "By position"], x: ["Welche Vereine gerade welche Position suchen – filterbar nach Liga, Land und Position.", "Which clubs are currently looking for which position – filter by league, country and position."] },
-    { v: "gesucht", z: { s: ".vs-useite", i: 1 }, opt: 1, t: ["Spieler-Matching", "Player matching"], x: ["Wähle einen deiner Spieler und sieh, bei welchen Vereinen er ins Profil passt.", "Pick one of your players and see which clubs he fits."] },
-    { v: "gesucht", z: { s: ".vs-useite", i: 2 }, opt: 1, t: ["Vereinsansicht", "Club view"], x: ["Alle Bedarfe eines Vereins auf einer Seite.", "All needs of one club on a single page."] },
-    { v: "gesucht", z: { s: ".vs-useite", i: 3 }, opt: 1, t: ["Beobachtet", "Watched"], x: ["Deine beobachteten Vereine und was sich dort Neues tut.", "The clubs you watch and what's new there."] }
+  vs: { n: ["Verein sucht", "Club seeks"], u: ["Vier Ansichten, eine Karte geöffnet", "Four views, one card opened"], s: [
+    { v: "gesucht", a: [TWT_VS_ANS(0), TWT_VS_ZU], z: ".vs-unterseiten", still: 1, mk: [{ s: ".vs-unterseiten .vs-useite", alle: 1 }], t: ["Vier Ansichten", "Four views"],
+      x: ["„Verein sucht“ hat vier Ansichten. Wir zeigen dir jede einmal kurz.", "“Club seeks” has four views. We'll show you each one briefly."] },
+    { v: "gesucht", a: [TWT_VS_ANS(0), TWT_VS_ZU], z: TWT_VS_TAB(0), hell: [".vs-wurzel .vs-app"], t: ["Nach Position", "By position"],
+      x: ["Welche Vereine gerade welche Position suchen. Wähle eine Position und filtere nach Land, Liga oder Dringlichkeit.", "Which clubs are currently looking for which position. Choose a position and filter by country, league or urgency."] },
+    { v: "gesucht", a: [TWT_VS_ANS(1)], z: TWT_VS_TAB(1), hell: [".vs-wurzel .vs-app"], t: ["Spieler-Matching", "Player matching"],
+      x: ["Hier matchst du ausgewählte Spieler: Lege ein Spielerprofil an oder übernimm einen Spieler aus der Datenbank – TransferWire zeigt die Vereine, deren Bedarf zu Position, Alter, Stärken und Marktwert passt.", "This is where you match selected players: create a player profile or take one from the database – TransferWire shows the clubs whose needs fit position, age, strengths and market value."] },
+    { v: "gesucht", a: [TWT_VS_ANS(2)], z: TWT_VS_TAB(2), hell: [".vs-wurzel .vs-app"], t: ["Vereinsansicht", "Club view"],
+      x: ["Wähle einen Verein und sieh alle seine Bedarfe auf einer Seite – mit Kader und Tabellenlage.", "Choose a club and see all its needs on one page – with squad and league position."] },
+    { v: "gesucht", a: [TWT_VS_ANS(3)], z: TWT_VS_TAB(3), hell: [".vs-wurzel .vs-app"], t: ["Beobachtet", "Watched"],
+      x: ["Die Vereine, denen du folgst. Sobald dort ein neuer Bedarf auftaucht, siehst du ihn hier.", "The clubs you follow. As soon as a new need appears there, you'll see it here."] },
+    { v: "gesucht", a: [TWT_VS_ANS(0), TWT_VS_AUF], z: ".k3-liste article.ist-offen .k3n-kopf", oben: 1, mk: [".k3-liste article.ist-offen .vsv2-kopfwert"], opt: 1, t: ["Eine Karte geöffnet", "A card opened"],
+      x: ["So sieht eine geöffnete Bedarfskarte aus. Oben stehen Verein, Position, Stufe und die TransferWire-Prognose in Prozent.", "This is what an opened demand card looks like. At the top: club, position, level and the TransferWire forecast in per cent."] },
+    { v: "gesucht", a: [TWT_VS_ANS(0), TWT_VS_AUF, TWT_VS_KTAB(0)], z: { s: ".k3-liste article.ist-offen .k3n-reiter [role=tab]", i: 0 }, oben: 1, hell: [".k3-liste article.ist-offen .k3n-inhalt"], opt: 1, t: ["Gründe", "Reasons"],
+      x: ["Warum der Verein sucht: unsere Prognose, die Belege aus Medien und Prüfer-Recherche und die Lage im Kader.", "Why the club is searching: our forecast, the evidence from media and our research, and the squad situation."] },
+    { v: "gesucht", a: [TWT_VS_ANS(0), TWT_VS_AUF, TWT_VS_KTAB(1)], z: { s: ".k3-liste article.ist-offen .k3n-reiter [role=tab]", i: 1 }, oben: 1, hell: [".k3-liste article.ist-offen .k3n-inhalt"], opt: 1, t: ["Wunschprofil", "Target profile"],
+      x: ["Welcher Spielertyp gesucht wird – Rolle, Alter, Stärken, Zeitfenster und Preisrahmen, jeweils mit der Herkunft der Angabe.", "Which type of player is wanted – role, age, strengths, time window and price range, each with where the information comes from."] },
+    { v: "gesucht", a: [TWT_VS_ANS(0), TWT_VS_AUF, TWT_VS_KTAB(2)], z: { s: ".k3-liste article.ist-offen .k3n-reiter [role=tab]", i: 2 }, oben: 1, hell: [".k3-liste article.ist-offen .k3n-inhalt"], opt: 1, t: ["Spieler", "Players"],
+      x: ["Spieler aus unserer Datenbank, die zum Wunschprofil passen. Unten an der Karte erreichst du den Verein über „Kontakt“ oder speicherst die Karte als PDF.", "Players from our database who fit the target profile. At the bottom of the card you reach the club via “Contact” or save the card as a PDF."] }
   ] },
-  ak: { n: ["Aktuell", "Latest"], u: ["Ticker, Filter, Transfers, Spieltag", "Ticker, filters, transfers, matchday"], s: [
+  mk: { n: ["Spieler-Markt", "Player Market"], u: ["Reiter, Filter, Spieler anbieten", "Tabs, filters, offering players"], s: [
+    { v: "nz_markt", z: ".nz-tabs", t: ["Drei Reiter", "Three tabs"], x: ["„Angebote“ zeigt alle Angebote, „Meine Angebote“ deine eigenen und „Passende Vereine“, wer zu deinen Angeboten passt.", "“Offers” shows all offers, “My offers” your own and “Matching clubs” who fits your offers."] },
+    { v: "nz_markt", z: ".nz-filter", opt: 1, t: ["Filter", "Filters"], x: ["Grenze nach Position, Art des Wechsels, Alter, Liga, Zielland und Marktwert ein.", "Narrow down by position, type of move, age, league, target country and market value."] },
+    { v: "nz_markt", z: "[data-nz6-neu]", opt: 1, t: ["Spieler anbieten", "Offer a player"], x: ["Stelle einen Spieler ein – zum Verkauf, zur Leihe, ablösefrei oder zum Probetraining.", "Post a player – for transfer, loan, free transfer or trial."] },
+    { v: "nz_markt", z: "[data-nz6-tab=passend]", opt: 1, t: ["Passende Vereine", "Matching clubs"], x: ["Hier zeigt TransferWire, welche Vereine zu deinen Angeboten passen – das Abgleichen läuft alle 15 Minuten.", "This is where TransferWire shows which clubs fit your offers – matching runs every 15 minutes."] }
+  ] },
+  ak: { n: ["Newsfeed", "News feed"], u: ["Ticker, Filter, Vereine", "Ticker, filters, clubs"], s: [
     { v: "feed", z: ".tw-nl", t: ["Live-Ticker", "Live ticker"], x: ["Die wichtigsten Meldungen laufen hier durch. Mit der Pause-Taste hältst du den Ticker an.", "The most important reports run through here. Use the pause button to stop the ticker."] },
     { v: "feed", z: ".tw-feedchips", opt: 1, t: ["Meldungen filtern", "Filter reports"], x: ["Wähle, was du sehen willst: Spielerwechsel, Gerüchte, Leihen, Verletzungen und mehr.", "Choose what you want to see: transfers, rumours, loans, injuries and more."] },
-    { v: "feed", z: ".tw-feedfilter", opt: 1, t: ["Meistdiskutierte Vereine", "Most discussed clubs"], x: ["Über welche Vereine gerade am meisten berichtet wird.", "Which clubs are being reported on the most right now."] },
+    { v: "feed", z: ".tw-feedfilter", opt: 1, t: ["Meistdiskutierte Vereine", "Most discussed clubs"], x: ["Über welche Vereine gerade am meisten berichtet wird. Ein Klick zeigt nur noch Meldungen zu diesem Verein; deine Auswahl kannst du speichern.", "Which clubs are being reported on the most right now. One click shows only reports about that club; you can save your selection."] }
+  ] },
+  tr: { n: ["Transfers", "Transfers"], u: ["Scout, Filter, eine Karte geöffnet", "Scout, filters, one card opened"], s: [
     { v: "geruechte", z: ".tw-scout", t: ["TW Scout", "TW Scout"], x: ["Frag den Scout nach Transfers, etwa „vertragslose U23-Spieler“ – oder nimm einen der Vorschläge.", "Ask the scout about transfers, such as “U23 players without a contract” – or pick one of the suggestions."] },
-    { v: "geruechte", z: ".tw-gchips", opt: 1, t: ["Transfers und Gerüchte", "Transfers and rumours"], x: ["Fixe Deals, Gerüchte und der Transferticker – getrennt oder alle zusammen.", "Confirmed deals, rumours and the transfer ticker – separately or all together."] },
-    { v: "spieltag", z: ".tw-sp2-leiste", t: ["Spieltag", "Matchday"], x: ["Ergebnisse und Spiele nach Wettbewerb. Wähle hier Liga oder Pokal.", "Results and fixtures by competition. Choose a league or cup here."] },
+    { v: "geruechte", z: ".tw-gchips-rahmen", opt: 1, t: ["Transfers und Gerüchte", "Transfers and rumours"], x: ["Fixe Deals, Gerüchte und der Transferticker – getrennt oder alle zusammen.", "Confirmed deals, rumours and the transfer ticker – separately or all together."] },
+    { v: "geruechte", a: [{ k: ".tw-feedlist article.tw-tk3", nur: ".tw-mv-voll", w: 700 }], offen: ["mv"], z: [".tw-mv-voll .tw-tp-kopf", ".tw-mv-voll .tw-tp-vereine"], opt: 1, t: ["Eine Karte geöffnet", "A card opened"],
+      x: ["Die Einzelheiten zum Wechsel: Spieler, beide Vereine, Ablöse und wie wahrscheinlich der Wechsel ist.", "The details of the move: player, both clubs, fee and how likely the move is."] },
+    { v: "geruechte", a: [{ k: ".tw-feedlist article.tw-tk3", nur: ".tw-mv-voll", w: 700 }], offen: ["mv"], z: { s: ".tw-mv-voll a", hoch: 2 }, alt: ".tw-mv-voll .tw-mv-fusspad", opt: 1, t: ["Quelle und Einordnung", "Source and rating"],
+      x: ["Jede Meldung nennt ihre Quellen. Die Einordnung zeigt, wie verlässlich der Wechsel ist. Mit „Merken“ landet er in deiner Merkliste.", "Every report names its sources. The rating shows how reliable the move is. “Save” adds it to your watchlist."] }
+  ] },
+  sp: { n: ["Spieltag", "Matchday"], u: ["Wettbewerb und Tage", "Competition and days"], s: [
+    { v: "spieltag", z: ".tw-sp2-suche", opt: 1, t: ["Wettbewerb suchen", "Search for a competition"], x: ["Tippe eine Liga oder einen Pokal ein – oder wähle aus der Schnellwahl darunter.", "Type in a league or cup – or pick one from the quick selection below."] },
     { v: "spieltag", z: ".tw-sp2-tage", opt: 1, t: ["Tage und Kalender", "Days and calendar"], x: ["Blättere durch die Tage oder öffne den Kalender.", "Browse through the days or open the calendar."] }
+  ] },
+  pf: { n: ["Performance", "Performance"], u: ["Filter, Spieler der Woche, Noten", "Filters, player of the week, ratings"], s: [
+    { v: "ranking", z: ".tw-lk-filter", opt: 1, t: ["Woche, Liga, Position", "Week, league, position"], x: ["Wähle die Woche und grenze nach Liga, Position und Notenbereich ein. Gezählt wird von Montag bis Sonntag.", "Choose the week and narrow down by league, position and rating range. A week runs from Monday to Sunday."] },
+    { v: "ranking", z: ".tw-lk-karte", opt: 1, t: ["Spieler der Woche", "Player of the week"], x: ["Der beste Spieler der Woche mit seiner Note. „Spielerperformance“ öffnet alle seine Spiele.", "The best player of the week with his rating. “Player performance” opens all his matches."] },
+    { v: "ranking", z: { s: ".tw-lk-tab .tw-lk-row[role=button]", i: 0 }, opt: 1, t: ["So liest du die Note", "How to read the rating"], x: ["50 ist der Durchschnitt, 70 ein guter Stammspieler, 80 gehört zu den besten 10 Prozent. Ein Klick auf die Zeile öffnet die Leistungsdaten.", "50 is average, 70 a good regular, 80 is among the best 10 per cent. Click the row to open the performance data."] }
+  ] },
+  mw: { n: ["Marktwert", "Market value"], u: ["Profil, Suche, Rangliste", "Profile, search, ranking"], s: [
+    { v: "marktwert", a: [TWT_MW_AUF], z: ".tw-mwd-kopf", opt: 1, t: ["Zum Spielerprofil", "To the player profile"], x: ["Von hier springst du ins vollständige Spielerprofil oder zurück zur Rangliste.", "From here you jump to the full player profile or back to the ranking."] },
+    { v: "marktwert", a: [{ k: ".tw-mwd-zurueck", w: 500 }], z: [".tw-mw2-such", ".tw-mw2-pfad"], opt: 1, t: ["Suchen und stöbern", "Search and browse"], x: ["Suche einen Spieler oder Verein – oder geh über Land, Liga und Verein: Jeder Verein zeigt seine Spieler mit Marktwert.", "Search for a player or club – or go via country, league and club: every club shows its players with market value."] },
+    { v: "marktwert", a: [{ k: ".tw-mwd-zurueck", w: 500 }], z: "aside.tw-mw2-rechts", kappe: 420, opt: 1, t: ["Rangliste weltweit", "Worldwide ranking"], x: ["Die wertvollsten Spieler nach TW-Marktwert. Filtere nach Liga, Position und Altersklasse; rechts steht, wie sicher ein Wert ist.", "The most valuable players by TW market value. Filter by league, position and age group; on the right you see how certain a value is."] },
+    { v: "marktwert", z: ".tw-sogehts .tw-textlink", opt: 1, t: ["So funktioniert’s", "How it works"], x: ["Hier erklären wir, wie die TW-Marktwerte entstehen und was die Stufen bedeuten.", "Here we explain how TW market values are calculated and what the levels mean."] }
+  ] },
+  db: { n: ["Datenbank", "Database"], u: ["Filter, Ansichten, Spielerprofil", "Filters, views, player profile"], s: [
+    { v: "players", z: ".tw-main div[role=tablist]", opt: 1, t: ["Spieler und Vereine", "Players and clubs"], x: ["Wechsle zwischen der Spielerdatenbank und der Vereinsdatenbank.", "Switch between the player database and the club database."] },
+    { v: "players", z: ".tw-dbfilter", opt: 1, t: ["Suchen und filtern", "Search and filter"], x: ["Suche nach Namen oder Verein und filtere nach Land, Liga, Verein und Position.", "Search by name or club and filter by country, league, club and position."] },
+    { v: "players", z: { s: ".tw-db [role=group]", hoch: 1 }, opt: 1, t: ["Ansicht anpassen", "Adjust the view"], x: ["Wähle Tabelle oder Karten, ordne die Spalten, speichere deine Ansicht oder vergleiche Spieler direkt miteinander.", "Choose table or cards, arrange the columns, save your view or compare players side by side."] },
+    { v: "players", a: [TWT_PP_AUF], offen: ["pp"], z: [".tw-pp-ebene .tw-pp-gesund", ".tw-pp-ebene .tw-ppn"], opt: 1, t: ["Fitness und Notizen", "Fitness and notes"], x: ["Verletzungen und Ausfälle auf einen Blick. Daneben deine eigenen Notizen zum Spieler.", "Injuries and absences at a glance. Next to them, your own notes on the player."] },
+    { v: "players", a: [TWT_PP_AUF, TWT_PP_TAB(1)], offen: ["pp"], z: "#tw-pp-statistik", kappe: 320, opt: 1, t: ["Spielstatistiken", "Match statistics"], x: ["Saisonwerte je Wettbewerb und die letzten Spiele mit Note.", "Season stats per competition and the latest matches with ratings."] },
+    { v: "players", a: [TWT_PP_AUF, TWT_PP_TAB(4)], offen: ["pp"], z: "#tw-pp-aehnlich", kappe: 320, opt: 1, t: ["Ähnliche Spieler", "Similar players"], x: ["Spieler mit ähnlichem Profil – praktisch, wenn du Alternativen suchst.", "Players with a similar profile – useful when you're looking for alternatives."] }
+  ] },
+  sc: { n: ["Scouting", "Scouting"], u: ["Die vier Reiter", "The four tabs"], s: [
+    { v: "talente", a: [{ k: TWT_SC_TAB(0), w: 500 }], z: TWT_SC_TAB(0), opt: 1, t: ["Talent-Rankings", "Talent rankings"], x: ["U17- bis U21-Spieler nach Leistung, Entwicklung und Einsatzzeit, bewertet mit dem TW Talent Score von 0 bis 100. Wähle Kategorie und Land.", "U17 to U21 players by performance, development and playing time, rated with the TW Talent Score from 0 to 100. Choose a category and country."] },
+    { v: "talente", a: [{ k: TWT_SC_TAB(1), w: 500 }], z: TWT_SC_TAB(1), opt: 1, t: ["Scouting-Listen", "Scouting lists"], x: ["Eigene Listen für deine Beobachtungen. Spieler fügst du aus der Datenbank oder dem Profil hinzu.", "Your own lists for the players you're watching. You add players from the database or their profile."] },
+    { v: "talente", a: [{ k: TWT_SC_TAB(2), w: 500 }], z: TWT_SC_TAB(2), opt: 1, t: ["Fähigkeiten-Suche", "Skills search"], x: ["Beschreibe den gesuchten Spieler mit seinen Stärken – die Suche findet passende junge Spieler.", "Describe the player you're looking for by his strengths – the search finds young players who fit."] },
+    { v: "talente", a: [{ k: TWT_SC_TAB(3), w: 500 }], z: TWT_SC_TAB(3), opt: 1, t: ["Nachwuchsligen und Quellen", "Youth leagues and sources"], x: ["Welche Nachwuchsligen wir auswerten und woher die Daten stammen.", "Which youth leagues we analyse and where the data comes from."] }
+  ] },
+  nw: { n: ["Netzwerk", "Network"], u: ["Hinweise, Kontakte, Profil", "Tips, contacts, profile"], s: [
+    { v: "community", z: ".nx-schalter", opt: 1, t: ["Hinweise und Fragen", "Tips and questions"], x: ["„Transferhinweise“ sind Tipps aus dem Netzwerk, „Fragen & Gesuche“ sind offene Fragen an andere Mitglieder.", "“Transfer tips” are tips from the network, “Questions & requests” are open questions to other members."] },
+    { v: "community", z: ".tw-cmaside", kappe: 420, opt: 1, t: ["Prüfung und Regeln", "Checks and rules"], x: ["Jeder Hinweis wird geprüft, bevor er stärker zählt. Rechts siehst du den Prüfstatus und die Regeln der Community.", "Every tip is checked before it carries more weight. On the right you see the review status and the community rules."] },
+    { v: "nz_kontakte", z: { s: ".nz-tabs .nz-tab", i: 1 }, opt: 1, t: ["Meine Kontakte", "My contacts"], x: ["Hier stehen alle Mitglieder, mit denen du verbunden bist – mit direktem Weg zur Nachricht.", "This lists all members you're connected with – with a direct way to send a message."] },
+    { v: "nz_profil", z: ".nz-leiste", opt: 1, t: ["Verifizierung", "Verification"], x: ["Hier siehst du, als was du verifiziert bist. Unter „Details“ stehen die Nachweise.", "Here you see what you're verified as. “Details” shows the evidence."] }
   ] },
   vws: { n: ["Workspace", "Workspace"], u: ["Nachrichten, Angebote, Merkliste", "Messages, offers, watchlist"], s: [
     Object.assign({ v: "ws_uebersicht", z: "[data-nx-kasten=nachrichten]" }, TWT_NACHR),
@@ -16598,14 +16790,14 @@ const TWT_DETAIL = {
   vbd: { n: ["Bedarfe", "Needs"], u: ["Bedarf melden und pflegen", "Report and manage needs"], s: [
     { v: "nz_profil", z: "[data-nz7-neu]", alt: ["[data-nz7-bedarfe]", "[data-nz7-vereinsprofil]"], t: ["Bedarf melden", "Report a need"], x: ["Ein Klick, ein kurzes Formular – und der Bedarf steht sofort in „Verein sucht“.", "One click, a short form – and the need appears in “Club seeks” straight away."] },
     { v: "nz_profil", z: "[data-nz7-bedarfe]", opt: 1, t: ["Eure Bedarfe", "Your needs"], x: ["Alle Bedarfe eures Vereins auf einen Blick, jeweils mit passenden Angeboten aus dem Spieler-Markt.", "All of your club's needs at a glance, each with matching offers from the Player Market."] },
-    { v: "gesucht", z: { s: ".vs-useite", i: 2 }, opt: 1, t: ["So sehen Berater euch", "How agents see you"], x: ["In der Vereinsansicht sehen Berater alle Bedarfe eines Vereins – auch eure.", "In the club view, agents see all of a club's needs – yours included."] }
-  ] }
-};
-const TWT_DET_ART = { berater: ["ws", "vs", "ak"], verein: ["vws", "vmk", "vbd"] };
+    { v: "gesucht", a: [TWT_VS_ANS(2)], z: TWT_VS_TAB(2), hell: [".vs-wurzel .vs-app"], opt: 1, t: ["So sehen Berater euch", "How agents see you"], x: ["In der Vereinsansicht sehen Berater alle Bedarfe eines Vereins – auch eure.", "In the club view, agents see all of a club's needs – yours included."] }
+  ] }};
+const TWT_DET_ART = { berater: ["ws", "vs", "mk", "ak", "tr", "sp", "pf", "mw", "db", "sc", "nw"], verein: ["vws", "vs", "vmk", "vbd", "ak", "tr", "sp", "pf", "mw", "db", "sc", "nw"] };
+const TWT_DET_CHIPS = { berater: ["ws", "vs", "mk", "tr", "pf", "mw", "db", "sc", "nw"], verein: ["vws", "vs", "vmk", "vbd", "tr", "pf", "mw", "db", "sc", "nw"] };
 
-/* Folge bauen: jeder Eintrag {s: Schritt, g: Gruppe ("haupt" oder Detailschlüssel), n: Nummer in der Gruppe, von: Anzahl, k: Index des Hauptschritts} */
-function twtFolge(art, modus, bereich) {
-  const haupt = TWT_HAUPT[art] || TWT_HAUPT.berater; const f = [];
+/* Folge bauen: jeder Eintrag {s: Schritt, g: Gruppe ("haupt" oder Detailschlüssel), n: Nummer in der Gruppe, von: Anzahl, k: Index des Hauptschritts, ein: eingeschoben} */
+function twtFolge(art, modus, bereich, mitLeiste) {
+  const haupt = (TWT_HAUPT[art] || TWT_HAUPT.berater).filter(s => mitLeiste || !s.ls); const f = [];
   const det = (key, k) => { const d = TWT_DETAIL[key]; if (!d) return; d.s.forEach((s, i) => f.push({ s: s, g: key, n: i + 1, von: d.s.length, k: k })); };
   if (modus === "bereich") { det(bereich, -1); return f; }
   if (modus === "details") { (TWT_DET_ART[art] || []).forEach(k => det(k, -1)); return f; }
@@ -16633,12 +16825,18 @@ function twtArt(account) {   // wartet kurz auf das Netzwerk-Konto (Vereinskonto
 }
 const TWT_X_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 const TWT_HAKEN_SVG = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+function twtRect(e, pad, kappe) {
+  const q = e.getBoundingClientRect(); const b = kappe ? Math.min(q.bottom, q.top + kappe) : q.bottom;
+  return { l: q.left - pad, t: q.top - pad, r: q.right + pad, b: b + pad };
+}
+function twtKlemmen(o, vw, vh) { const x = Math.max(4, o.l), y = Math.max(4, o.t); const w = Math.min(vw - 4, o.r) - x, h = Math.min(vh - 4, o.b) - y; return w >= 8 && h >= 8 ? { x: x, y: y, w: w, h: h } : null; }
 
 function TwTourHost({ account }) {
   const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de); const T = a => (a ? (en ? a[1] : a[0]) : "");
-  const [st, setSt] = React.useState(null);   // {phase: "start"|"lauf"|"ende", art, verein, quelle, folge, i, zurueck, rueckDialog}
+  const [st, setSt] = React.useState(null);   // {phase: "start"|"lauf"|"ende", art, verein, quelle, modus, folge, i, zurueck, rueckDialog, richtung}
   const ring = React.useRef(null); const blase = React.useRef(null); const weiterK = React.useRef(null); const fenster = React.useRef(null);
-  const lage = React.useRef({ els: [], gleit: 0, mitte: false, pro: false, raf: 0, tast: false });
+  const dunkel = React.useRef(null); const loecher = React.useRef(null); const marken = React.useRef(null);
+  const lage = React.useRef({ els: [], mks: [], hell: [], gleit: 0, mitte: false, pro: false, raf: 0, tast: false });
   const [ziel, setZiel] = React.useState({ i: -1, ok: false, pro: false });
   const stRef = React.useRef(null); stRef.current = st;
   const setze = n => { stRef.current = n; setSt(n); };
@@ -16672,7 +16870,7 @@ function TwTourHost({ account }) {
     const f = ev => {
       const d = (ev && ev.detail) || {}; const v = twtVerein(account); const art = d.art || (v ? "verein" : "berater");
       const modus = d.modus === "bereich" ? "bereich" : d.modus === "komplett" ? "komplett" : "haupt";
-      const folge = twtFolge(art, modus, d.bereich);
+      const folge = twtFolge(art, modus, d.bereich, twtLeiste());
       if (!folge.length) return;
       setze({ phase: "lauf", art: art, verein: v, quelle: "einst", modus: modus, folge: folge, i: 0, zurueck: window.TW_VIEW || "" });
     };
@@ -16680,47 +16878,80 @@ function TwTourHost({ account }) {
     return () => window.removeEventListener("tw-tour-start", f);
   }, [account && account.email]);
 
-  const starten = (modus) => { const x = stRef.current; if (!x) return; setze({ phase: "lauf", art: x.art, verein: x.verein, quelle: x.quelle, modus: modus, folge: twtFolge(x.art, modus), i: 0, zurueck: window.TW_VIEW || "" }); };
+  const starten = (modus) => { const x = stRef.current; if (!x) return; setze({ phase: "lauf", art: x.art, verein: x.verein, quelle: x.quelle, modus: modus, folge: twtFolge(x.art, modus, "", twtLeiste()), i: 0, zurueck: window.TW_VIEW || "" }); };
   const zurStartseite = (x) => { try { if (x && x.zurueck && window.TW_VIEW !== x.zurueck && typeof window.twNzNavigieren === "function") { window.twNzNavigieren(x.zurueck); window.scrollTo(0, 0); } } catch (e) { } };
+  const aufraeumen = () => { if (lage.current.geoeffnet) { lage.current.geoeffnet = false; twtAufraeumen([]); } };
   const schliessen = (grund) => {
     const x = stRef.current; if (!x) return;
     if (x.quelle === "auto") { twtApi(account, grund === "fertig" ? "gesehen" : "uebersprungen", x.art); merken("fertig"); }
-    if (grund === "fertig") zurStartseite(x);
+    aufraeumen();
+    if (grund === "fertig") setTimeout(() => zurStartseite(x), 120);
     setze(null);
+  };
+  const fertigWeiter = (x) => {   // nach dem letzten Schritt
+    if (x.modus === "haupt" || x.modus === "komplett") { if (x.quelle === "auto") { twtApi(account, "gesehen", x.art); merken("fertig"); } aufraeumen(); setze(Object.assign({}, x, { phase: "ende", quelle: "fertig" })); return; }
+    aufraeumen();
+    if (x.rueckDialog) { setze(Object.assign({}, x, { phase: "ende" })); return; }
+    setTimeout(() => zurStartseite(x), 120); setze(null);
   };
   const weiter = () => {
     const x = stRef.current; if (!x || x.phase !== "lauf") return;
     const i = x.i + 1;
     if (i < x.folge.length) { setze(Object.assign({}, x, { i: i, richtung: 1 })); return; }
-    if (x.modus === "haupt" || x.modus === "komplett") { if (x.quelle === "auto") { twtApi(account, "gesehen", x.art); merken("fertig"); } setze(Object.assign({}, x, { phase: "ende", quelle: "fertig" })); return; }
-    if (x.rueckDialog) { setze(Object.assign({}, x, { phase: "ende" })); return; }
-    zurStartseite(x); setze(null);
+    fertigWeiter(x);
   };
-  const zurueck = () => { const x = stRef.current; if (x && x.phase === "lauf" && x.i > 0) setze(Object.assign({}, x, { i: x.i - 1, richtung: -1 })); };
+  const zurueck = () => {
+    const x = stRef.current; if (!x || x.phase !== "lauf" || x.i <= 0) return; const e = x.folge[x.i];
+    if (e && e.ein && e.n === 1) {   // aus einer eingeschobenen Detailtour zurück: Detail wieder herausnehmen, „Genauer erklären“ ist wieder frei
+      const neu = x.folge.filter(y => !(y.ein && y.g === e.g && y.k === e.k)); setze(Object.assign({}, x, { folge: neu, i: x.i - 1, richtung: -1 })); return;
+    }
+    setze(Object.assign({}, x, { i: x.i - 1, richtung: -1 }));
+  };
   const genauer = () => {
     const x = stRef.current; if (!x || x.phase !== "lauf") return; const e = x.folge[x.i]; const d = e && e.g === "haupt" && e.s.det && TWT_DETAIL[e.s.det];
     if (!d || x.folge.some(y => y.g === e.s.det && y.k === e.k)) return;
-    const neu = d.s.map((s, j) => ({ s: s, g: e.s.det, n: j + 1, von: d.s.length, k: e.k }));
+    const neu = d.s.map((s, j) => ({ s: s, g: e.s.det, n: j + 1, von: d.s.length, k: e.k, ein: true }));
     setze(Object.assign({}, x, { folge: x.folge.slice(0, x.i + 1).concat(neu, x.folge.slice(x.i + 1)), i: x.i + 1, richtung: 1 }));
   };
-  const detailAusEnde = (bereich) => { const x = stRef.current; if (!x) return; const modus = bereich ? "bereich" : "details"; const f = twtFolge(x.art, modus, bereich); if (f.length) setze(Object.assign({}, x, { phase: "lauf", modus: modus, folge: f, i: 0, rueckDialog: true, richtung: 1 })); };
+  const detailRaus = () => {   // Detailtour verlassen: weiter mit dem nächsten Punkt der Haupttour
+    const x = stRef.current; if (!x || x.phase !== "lauf") return; const e = x.folge[x.i]; if (!e || e.g === "haupt") return;
+    let neu = x.folge, j;
+    if (e.ein) { neu = x.folge.filter(y => !(y.ein && y.g === e.g && y.k === e.k)); j = neu.findIndex(y => y.g === "haupt" && y.k === e.k) + 1; }
+    else { j = x.i + 1; while (j < neu.length && neu[j].g === e.g && neu[j].k === e.k) j++; }
+    if (j <= 0 || j >= neu.length) { fertigWeiter(Object.assign({}, x, { folge: neu })); return; }
+    setze(Object.assign({}, x, { folge: neu, i: j, richtung: 1 }));
+  };
+  const detailAusEnde = (bereich) => { const x = stRef.current; if (!x) return; const modus = bereich ? "bereich" : "details"; const f = twtFolge(x.art, modus, bereich, twtLeiste()); if (f.length) setze(Object.assign({}, x, { phase: "lauf", modus: modus, folge: f, i: 0, rueckDialog: true, richtung: 1 })); };
 
-  /* Schritt vorbereiten: Seite wechseln, auf das Ziel warten, ins Bild holen */
+  /* Schritt vorbereiten: geöffnete Ebenen schließen, Seite wechseln, Handgriffe ausführen, auf das Ziel warten, ins Bild holen */
   const lauf = st && st.phase === "lauf"; const eintrag = lauf ? st.folge[st.i] : null;
   React.useEffect(() => {
     if (!eintrag) return;
     let aus = false; const s = eintrag.s; const mitLeiste = twtLeiste();
-    if (s.v && window.TW_VIEW !== s.v && typeof window.twNzNavigieren === "function") { try { window.twNzNavigieren(s.v); window.scrollTo(0, 0); } catch (e) { } }
-    const spez = s.z || (mitLeiste ? s.d : s.m) || s.d;
-    let n = 0; let gefunden = false; lage.current.bereit = false; lage.current.zeigAb = Date.now() + 700;
-    const leeren = setTimeout(() => { if (!gefunden && !aus) { lage.current.els = []; lage.current.mitte = true; } }, 420);   // altes Ziel nicht länger als nötig zeigen
+    const zuGemacht = twtAufraeumen(s.offen);
+    const spez0 = (!mitLeiste && s.zm) || s.z || (mitLeiste ? s.d : s.m) || s.d;
+    const akt = (s.a || []).filter(a => !a.ls || mitLeiste);
+    let ai = 0, an = 0, n = 0, warteBis = 0, gefunden = false, navigiert = false;
+    const L = lage.current; L.bereit = false; L.zeigAb = Date.now() + 700;
+    const leeren = setTimeout(() => { if (!gefunden && !aus) { L.els = []; L.mks = []; L.hell = []; L.spez = null; L.mkSpez = null; L.hellSpez = null; L.mitte = true; } }, 420);   // altes Ziel nicht länger als nötig zeigen
     const alts = s.alt ? (Array.isArray(s.alt) ? s.alt : [s.alt]) : [];
     const such = () => {
       if (aus) return;
-      let els = twtEls(spez);
-      if (!els.length && n >= 10) for (let j = 0; j < alts.length && !els.length; j++) els = twtEls(alts[j]);   // Ersatzziele erst nach einer Sekunde
+      if (Date.now() < warteBis) { setTimeout(such, 60); return; }
+      if (ai < akt.length) {
+        if (twtGesperrt()) ai = akt.length;
+        else {
+          const a = akt[ai];
+          if (a.nur && twtEl(a.nur)) { ai++; an = 0; setTimeout(such, 0); return; }
+          if (twtKlick(a.k)) { L.geoeffnet = true; ai++; an = 0; warteBis = Date.now() + (a.w || 450); setTimeout(such, 60); return; }
+          if (an++ < (a.nur ? 40 : 3)) { setTimeout(such, 100); return; }
+          ai++; an = 0; setTimeout(such, 0); return;
+        }
+      }
+      let spez = spez0; let els = twtEls(spez);
+      if (!els.length && n >= 10) for (let j = 0; j < alts.length && !els.length; j++) { els = twtEls(alts[j]); if (els.length) spez = alts[j]; }   // Ersatzziele erst nach einer Sekunde
       const gesperrt = !els.length && n >= 3 && twtGesperrt();   // Pro-Bereich ohne Zugang: nicht weiter warten
-      if (!els.length && !gesperrt && n++ < (s.opt ? 9 : 26)) { setTimeout(such, 100); return; }
+      if (!els.length && !gesperrt && n++ < (navigiert ? 45 : s.opt ? 12 : 26)) { setTimeout(such, 100); return; }   // nach einem Seitenwechsel länger warten (Daten laden)
       n++; gefunden = true;
       if (!els.length && s.opt) {   // Schritt ohne Ziel überspringen; im gesperrten Pro-Bereich gleich alle weiteren dieser Seite
         const x = stRef.current; if (!x || x.phase !== "lauf" || x.folge[x.i] !== eintrag) return;
@@ -16730,58 +16961,98 @@ function TwTourHost({ account }) {
         if (dir < 0) zurueck(); else weiter(); return;
       }
       const pro = !!s.v && twtGesperrt();
-      if (pro && !els.length) els = twtEls(".tw-pro-karte h2");
-      lage.current.els = els; lage.current.mitte = !els.length; lage.current.pro = pro;
-      if (els.length) {
-        const r = els[0].getBoundingClientRect(); const vh = window.innerHeight;
-        const oben = s.id === "leiste" || s.id === "glocke";
-        if (!oben && (r.top < 70 || r.bottom > vh - 20) && r.height < vh * 0.8) { try { els[0].scrollIntoView({ block: "center", behavior: "auto" }); } catch (e) { } }
-      }
-      lage.current.gleit = Date.now(); lage.current.bereit = true;
+      if (pro && !els.length) { spez = ".tw-pro-karte h2"; els = twtEls(spez); }
+      L.von = L.cur ? Object.assign({}, L.cur) : null;
+      L.els = els; L.spez = els.length ? spez : null; L.mkSpez = s.mk || null; L.hellSpez = s.hell || null;
+      L.mks = s.mk ? twtEls(s.mk).filter(e => els.indexOf(e) < 0) : []; L.hell = s.hell ? twtEls(s.hell) : [];
+      L.kappe = s.kappe || 0; L.mitte = !els.length; L.pro = pro; L.schritt = eintrag; L.neuGesucht = Date.now();
+      if (els.length && s.id !== "leiste" && s.id !== "glocke" && !els[0].closest(".tw-tabbar, .tw-mobnav")) twtRolle(els[0], s.kappe, !!s.oben);
+      L.gleit = Date.now(); L.bereit = true;
       setZiel({ ok: els.length > 0, pro: pro, e: eintrag });
     };
-    const t = setTimeout(such, s.v ? 160 : 30);
+    const los = () => {
+      if (aus) return;
+      if (s.v && window.TW_VIEW !== s.v && typeof window.twNzNavigieren === "function") { navigiert = true; try { window.twNzNavigieren(s.v); window.scrollTo(0, 0); } catch (e) { } }
+      setTimeout(such, s.v ? 160 : 30);
+    };
+    const t = setTimeout(los, zuGemacht ? 280 : 0);
     return () => { aus = true; clearTimeout(t); clearTimeout(leeren); };
   }, [eintrag]);
 
-  /* Ring und Blase jedem Bild nachführen */
+  /* Rahmen, Abdunkelung, Goldmarken und Erklärkarte jedem Bild nachführen */
   React.useEffect(() => {
     if (!lauf) return;
-    let alt = "";
+    let alt = "", altLoch = "", markSchritt = null;
+    const ruhig = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const takt = () => {
       lage.current.raf = requestAnimationFrame(takt);
-      const R = ring.current, B = blase.current; if (!R || !B) return;
+      const R = ring.current, B = blase.current, G = loecher.current, M = marken.current, D = dunkel.current; if (!R || !B || !G || !M || !D) return;
+      const Lg = lage.current; const jetzt = Date.now();
+      if (Lg.bereit && jetzt - (Lg.neuGesucht || 0) > 350) {   // Ziele frisch holen (die Seite zeichnet Elemente neu)
+        Lg.neuGesucht = jetzt;
+        if (Lg.spez) { const e = twtEls(Lg.spez); if (e.length) Lg.els = e; }
+        if (Lg.mkSpez) Lg.mks = twtEls(Lg.mkSpez).filter(e => Lg.els.indexOf(e) < 0);
+        if (Lg.hellSpez) Lg.hell = twtEls(Lg.hellSpez);
+      }
       const vw = window.innerWidth, vh = window.innerHeight; const blatt = vw < 640;
-      let x = 0, y = 0, w = 0, hh = 0;
-      const els = lage.current.els.filter(e => e.isConnected);
-      if (els.length && !lage.current.mitte) {
-        let l = 1e9, t = 1e9, r = -1e9, b = -1e9;
-        els.forEach(e => { const q = e.getBoundingClientRect(); l = Math.min(l, q.left); t = Math.min(t, q.top); r = Math.max(r, q.right); b = Math.max(b, q.bottom); });
-        const p = 6; x = Math.max(4, l - p); y = Math.max(4, t - p); w = Math.min(vw - 4, r + p) - x; hh = Math.min(vh - 4, b + p) - y;
-        if (w < 8 || hh < 8) { x = vw / 2; y = vh / 2; w = 0; hh = 0; }
-      } else { x = vw / 2; y = vh / 2; w = 0; hh = 0; }
-      const gl = Date.now() - lage.current.gleit < 470;
-      R.classList.toggle("gleitet", gl); B.classList.toggle("gleitet", gl); R.classList.toggle("leer", w === 0);
-      B.classList.toggle("wartet", !lage.current.bereit && Date.now() < lage.current.zeigAb);
+      let Z = null;
+      const els = Lg.els.filter(e => e.isConnected);
+      if (els.length && !Lg.mitte) {
+        let o = null; els.forEach(e => { const q = twtRect(e, 6, Lg.kappe); o = o ? { l: Math.min(o.l, q.l), t: Math.min(o.t, q.t), r: Math.max(o.r, q.r), b: Math.max(o.b, q.b) } : q; });
+        Z = twtKlemmen(o, vw, vh);
+      }
+      let C = Z;
+      if (Z && Lg.von && Lg.von.w > 0 && !ruhig) { const p = Math.min(1, (jetzt - Lg.gleit) / 440); if (p < 1) { const e = 1 - Math.pow(1 - p, 3); C = { x: Lg.von.x + (Z.x - Lg.von.x) * e, y: Lg.von.y + (Z.y - Lg.von.y) * e, w: Lg.von.w + (Z.w - Lg.von.w) * e, h: Lg.von.h + (Z.h - Lg.von.h) * e }; } }
+      Lg.cur = C;
+      const imRing = q => C && q.x >= C.x - 2 && q.y >= C.y - 2 && q.x + q.w <= C.x + C.w + 2 && q.y + q.h <= C.y + C.h + 2;
+      const schneidet = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+      const mr = Lg.bereit ? Lg.mks.filter(e => e.isConnected).map(e => twtKlemmen(twtRect(e, 4, 0), vw, vh)) : [];
+      const hr = Lg.bereit ? Lg.hell.filter(e => e.isConnected).map(e => twtKlemmen(twtRect(e, 0, 0), vw, vh)).filter(Boolean) : [];
+      /* Löcher in der Abdunkelung: Rahmen, Goldmarken außerhalb des Rahmens, helle Bereiche */
+      const rad = q => Math.min(14, Math.max(8, Math.min(q.w, q.h) / 4));
+      let loch = "";
+      if (C) loch += '<rect x="' + Math.round(C.x) + '" y="' + Math.round(C.y) + '" width="' + Math.round(C.w) + '" height="' + Math.round(C.h) + '" rx="' + Math.round(rad(C)) + '" fill="black"/>';
+      mr.concat(hr).forEach(q => { if (q && !imRing(q)) loch += '<rect x="' + Math.round(q.x) + '" y="' + Math.round(q.y) + '" width="' + Math.round(q.w) + '" height="' + Math.round(q.h) + '" rx="' + Math.round(Math.min(10, rad(q))) + '" fill="black"/>'; });
+      if (loch !== altLoch) { altLoch = loch; G.innerHTML = loch; }
+      D.classList.add("an");
+      /* Goldmarken */
+      if (markSchritt !== Lg.schritt || M.children.length !== mr.length) {
+        markSchritt = Lg.schritt; M.innerHTML = "";
+        mr.forEach((q, i) => { const d = document.createElement("div"); d.className = "twt-mark"; d.style.transitionDelay = (ruhig ? 0 : 120 + i * 70) + "ms"; M.appendChild(d); setTimeout(() => d.classList.add("an"), 30); });
+      }
+      mr.forEach((q, i) => { const d = M.children[i]; if (!d) return; if (!q) { d.classList.add("weg"); return; } d.classList.remove("weg"); d.style.left = Math.round(q.x) + "px"; d.style.top = Math.round(q.y) + "px"; d.style.width = Math.round(q.w) + "px"; d.style.height = Math.round(q.h) + "px"; d.style.borderRadius = Math.round(Math.min(10, rad(q))) + "px"; });
+      /* Erklärkarte */
+      const x = C ? C.x : vw / 2, y = C ? C.y : vh / 2, w = C ? C.w : 0, hh = C ? C.h : 0;
+      const gl = jetzt - Lg.gleit < 470;
+      B.classList.toggle("gleitet", gl); R.classList.toggle("leer", !C); R.classList.toggle("still", !!(Lg.schritt && Lg.schritt.s.still));
+      B.classList.toggle("wartet", !Lg.bereit && jetzt < Lg.zeigAb);
       const bw = B.offsetWidth, bh = B.offsetHeight; let bx, by;
+      const Zb = Z || C;   // Platz für die Karte am Endziel ausrichten
+      const zx = Zb ? Zb.x : x, zy = Zb ? Zb.y : y, zw = Zb ? Zb.w : w, zh = Zb ? Zb.h : hh;
       if (blatt) {
-        const sicher = 12; const mitteY = y + hh / 2;
-        by = (w > 0 && mitteY > vh * 0.52) ? sicher : vh - bh - sicher; if (by < sicher) by = sicher; bx = 0;
-      } else if (w === 0) { bx = (vw - bw) / 2; by = (vh - bh) / 2; }
+        const sicher = 12; const mitteY = zy + zh / 2;
+        by = (zw > 0 && mitteY > vh * 0.52) ? sicher : vh - bh - sicher; if (by < sicher) by = sicher; bx = 0;
+      } else if (zw === 0) { bx = (vw - bw) / 2; by = (vh - bh) / 2; }
       else {
-        const g = 16; const breitZ = w > vw * 0.5; const hochZ = hh > vh * 0.5;
-        const v = [];
-        const rechts = () => (x + w + g + bw <= vw - g ? [x + w + g, Math.min(Math.max(y, g), vh - bh - g)] : null);
-        const links = () => (x - g - bw >= g ? [x - g - bw, Math.min(Math.max(y, g), vh - bh - g)] : null);
-        const unten = () => (y + hh + g + bh <= vh - g ? [Math.min(Math.max(x, g), vw - bw - g), y + hh + g] : null);
-        const oben = () => (y - g - bh >= g ? [Math.min(Math.max(x, g), vw - bw - g), y - g - bh] : null);
-        (breitZ ? [unten, oben, rechts, links] : hochZ ? [rechts, links, unten, oben] : [rechts, unten, links, oben]).some(f => { const z = f(); if (z) v.push(z); return !!z; });
-        const z = v[0] || [vw - bw - 24, vh - bh - 24]; bx = z[0]; by = z[1];
+        const g = 16; const breitZ = zw > vw * 0.5; const hochZ = zh > vh * 0.5;
+        const flaeche = (ax, ay, q) => Math.max(0, Math.min(ax + bw, q.x + q.w) - Math.max(ax, q.x)) * Math.max(0, Math.min(ay + bh, q.y + q.h) - Math.max(ay, q.y));
+        const deckt = (ax, ay) => mr.concat(hr).reduce((f, q) => f + (q ? flaeche(ax, ay, q) : 0), 0);   // Goldmarken und helle Bereiche möglichst frei lassen
+        const rechts = () => (zx + zw + g + bw <= vw - g ? [zx + zw + g, Math.min(Math.max(zy, g), vh - bh - g)] : null);
+        const links = () => (zx - g - bw >= g ? [zx - g - bw, Math.min(Math.max(zy, g), vh - bh - g)] : null);
+        const unten = () => (zy + zh + g + bh <= vh - g ? [Math.min(Math.max(zx, g), vw - bw - g), zy + zh + g] : null);
+        const oben = () => (zy - g - bh >= g ? [Math.min(Math.max(zx, g), vw - bw - g), zy - g - bh] : null);
+        const frei = (breitZ ? [unten, oben, rechts, links] : hochZ ? [rechts, links, unten, oben] : [rechts, unten, links, oben]).map(f => f()).filter(Boolean);
+        let z = null, zf = 1e12;
+        frei.forEach(c => { const f = deckt(c[0], c[1]); if (f < zf - 1) { z = c; zf = f; } });
+        if (!z) {   // kein freier Platz neben dem Ziel: die Ecke nehmen, die Ziel und Goldmarken am wenigsten verdeckt
+          const Zq = { x: zx, y: zy, w: zw, h: zh };
+          [[vw - bw - g, vh - bh - g], [g, vh - bh - g], [vw - bw - g, g + 60], [g, g + 60], [(vw - bw) / 2, vh - bh - g]].forEach(c => { const f = flaeche(c[0], c[1], Zq) * 2 + deckt(c[0], c[1]); if (f < zf - 1) { z = c; zf = f; } });
+        }
+        bx = z[0]; by = z[1];
       }
       const neu = [x, y, w, hh, bx, by, blatt].map(n => (typeof n === "number" ? Math.round(n) : n)).join(",");
       if (neu === alt) return; alt = neu;
-      R.style.left = Math.round(x) + "px"; R.style.top = Math.round(y) + "px"; R.style.width = Math.round(w) + "px"; R.style.height = Math.round(hh) + "px";
-      R.style.borderRadius = (w === 0 ? 999 : Math.min(14, Math.max(8, Math.min(w, hh) / 4))) + "px";
+      if (C) { R.style.left = Math.round(x) + "px"; R.style.top = Math.round(y) + "px"; R.style.width = Math.round(w) + "px"; R.style.height = Math.round(hh) + "px"; R.style.borderRadius = Math.round(rad(C)) + "px"; }
       B.classList.toggle("blatt", blatt);
       B.style.transform = "translate(" + Math.round(bx) + "px," + Math.round(by) + "px)";
       R.classList.add("an"); B.classList.add("an");
@@ -16804,11 +17075,11 @@ function TwTourHost({ account }) {
     try { const b = fenster.current.querySelector(".twt-k.gold"); if (lage.current.tast && b) b.focus({ preventScroll: true }); else fenster.current.focus({ preventScroll: true }); } catch (e) { }
   }, [st && st.phase]);
 
-  /* Tastatur: Esc beendet, Pfeile blättern */
+  /* Tastatur: Esc beendet, Pfeile blättern (nur echte Tastendrücke) */
   React.useEffect(() => {
     if (!st) return;
     const k = e => {
-      const x = stRef.current; if (!x) return; lage.current.tast = true;
+      const x = stRef.current; if (!x || !e.isTrusted) return; lage.current.tast = true;
       if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); if (x.phase === "ende") schliessen("fertig"); else schliessen("abbruch"); return; }
       if (x.phase !== "lauf") return;
       const tag = String((e.target && e.target.tagName) || "").toLowerCase();
@@ -16832,19 +17103,19 @@ function TwTourHost({ account }) {
       h("div", { className: "twt-fenster", ref: fenster, tabIndex: -1 }, marke(false),
         istVerein && st.verein ? h("h2", { id: "twt-start-titel" }, h("span", null, L("Willkommen,", "Welcome,")), " ", h("span", { "data-nx-roh": "1" }, st.verein))
           : h("h2", { id: "twt-start-titel" }, L("Willkommen bei TransferWire", "Welcome to TransferWire")),
-        h("p", null, istVerein ? L("In zwei Minuten zeigen wir dir, wie ihr Spieler findet, Angebote prüft und eure Bedarfe meldet.", "In two minutes we'll show you how to find players, review offers and report your needs.")
-          : L("In zwei Minuten zeigen wir dir, wo du was findest – vom KI-Assistenten bis zu deinem Workspace.", "In two minutes we'll show you where everything is – from the AI assistant to your workspace.")),
+        h("p", null, istVerein ? L("Wir zeigen dir jeden Bereich einmal kurz – wie ihr Spieler findet, Angebote prüft und eure Bedarfe meldet.", "We'll show you every area briefly – how to find players, review offers and report your needs.")
+          : L("Wir zeigen dir jeden Bereich einmal kurz – vom KI-Assistenten bis zu deinem Profil.", "We'll show you every area briefly – from the AI assistant to your profile.")),
         h("div", { className: "twt-wahl" },
-          h("button", { type: "button", className: "twt-k gold", onClick: () => starten("haupt"), "data-twt-k": "haupt" }, L("Tour starten", "Start the tour")),
-          h("button", { type: "button", className: "twt-k rand", onClick: () => starten("komplett"), "data-twt-k": "komplett" }, h("span", null, L("Ausführliche Tour", "Detailed tour")), h("span", { className: "twt-unter" }, L("rund fünf Minuten", "about five minutes"))),
+          h("button", { type: "button", className: "twt-k gold", onClick: () => starten("haupt"), "data-twt-k": "haupt" }, h("span", null, L("Tour starten", "Start the tour")), h("span", { className: "twt-unter" }, L("rund vier Minuten", "about four minutes"))),
+          h("button", { type: "button", className: "twt-k rand", onClick: () => starten("komplett"), "data-twt-k": "komplett" }, h("span", null, L("Komplette Führung", "Full guided tour")), h("span", { className: "twt-unter" }, L("mit allen Details, rund zehn Minuten", "with every detail, about ten minutes"))),
           h("button", { type: "button", className: "twt-k text", onClick: () => schliessen("abbruch"), "data-twt-k": "ueberspringen" }, L("Überspringen", "Skip"))),
         h("p", { className: "twt-notiz" }, L("Du kannst die Tour jederzeit in den Einstellungen starten.", "You can start the tour any time in Settings.")))), document.body);
   }
   if (st.phase === "ende") {
-    const keys = TWT_DET_ART[st.art] || TWT_DET_ART.berater;
+    const keys = TWT_DET_CHIPS[st.art] || TWT_DET_CHIPS.berater;
     return ReactDOM.createPortal(h("div", { className: "twt-modal", role: "dialog", "aria-modal": "true", "aria-labelledby": "twt-ende-titel", "data-twt": "ende" },
-      h("div", { className: "twt-fenster", ref: fenster, tabIndex: -1 }, marke(true),
-        h("h2", { id: "twt-ende-titel" }, L("Das waren die Grundlagen", "That's the basics")),
+      h("div", { className: "twt-fenster breit", ref: fenster, tabIndex: -1 }, marke(true),
+        h("h2", { id: "twt-ende-titel" }, L("Das war der Rundgang", "That's the tour")),
         h("p", null, L("Möchtest du einen Bereich genauer kennenlernen?", "Would you like a closer look at one area?")),
         h("div", { className: "twt-chips" }, keys.map(k => h("button", { key: k, type: "button", className: "twt-chip", onClick: () => detailAusEnde(k), "data-twt-detail": k }, T(TWT_DETAIL[k].n), h("span", null, T(TWT_DETAIL[k].u))))),
         h("div", { className: "twt-wahl" },
@@ -16854,19 +17125,25 @@ function TwTourHost({ account }) {
   }
   /* Lauf */
   const e = eintrag; const s = e.s; const mitLeiste = twtLeiste();
-  const hauptListe = st.folge.filter(y => y.g === "haupt"); const gruppe = e.g === "haupt" ? null : TWT_DETAIL[e.g];
+  const gruppe = e.g === "haupt" ? null : TWT_DETAIL[e.g];
   const nr = e.n, von = e.von;
   const kannGenauer = e.g === "haupt" && s.det && TWT_DETAIL[s.det] && !st.folge.some(y => y.g === s.det && y.k === e.k) && !(ziel.e === e && ziel.pro);
+  const kannRaus = e.g !== "haupt" && e.k >= 0;
   const letzter = st.i === st.folge.length - 1;
   const text = !mitLeiste && s.xm ? T(s.xm) : T(s.x);
   const zeigeInhalt = ziel.e === e;
   return ReactDOM.createPortal(h("div", { "data-twt": "lauf", "data-twt-schritt": (e.g === "haupt" ? s.id : e.g + "-" + nr) },
     h("div", { className: "twt-sperre", onClick: ev => { ev.stopPropagation(); }, onMouseDown: ev => ev.preventDefault() }),
+    h("svg", { className: "twt-dunkel", ref: dunkel, "aria-hidden": "true", focusable: "false" },
+      h("defs", null, h("mask", { id: "twt-maske" }, h("rect", { x: 0, y: 0, width: "100%", height: "100%", fill: "white" }), h("g", { ref: loecher }))),
+      h("rect", { x: 0, y: 0, width: "100%", height: "100%", mask: "url(#twt-maske)", style: { fill: "rgba(7,10,17,.62)" } })),
     h("div", { className: "twt-ring", ref: ring, "aria-hidden": "true" }),
+    h("div", { className: "twt-marken", ref: marken, "aria-hidden": "true" }),
     h("div", { className: "twt-blase", ref: blase, tabIndex: -1, role: "dialog", "aria-modal": "true", "aria-labelledby": "twt-titel", "aria-describedby": "twt-text" },
       h("div", { className: "twt-inhalt", key: st.i },
         h("div", { className: "twt-kopf" },
-          h("div", { className: "twt-balken", "aria-hidden": "true" }, Array.from({ length: von }).map((_, j) => h("span", { key: j, className: j < nr ? "ja" : "" }))),
+          von > 14 ? h("div", { className: "twt-balken durch", "aria-hidden": "true" }, h("i", { style: { width: Math.round(nr / von * 100) + "%" } }))
+            : h("div", { className: "twt-balken", "aria-hidden": "true" }, Array.from({ length: von }).map((_, j) => h("span", { key: j, className: j < nr ? "ja" : "" }))),
           h("span", { className: "twt-zahl", "data-nx-roh": "1", "aria-label": (en ? "Step " : "Schritt ") + nr + (en ? " of " : " von ") + von }, nr + " / " + von),
           h("button", { type: "button", className: "twt-x", onClick: () => schliessen("abbruch"), "aria-label": L("Tour beenden", "End tour"), title: L("Tour beenden", "End tour"), dangerouslySetInnerHTML: { __html: TWT_X_SVG } })),
         gruppe ? h("div", { className: "twt-gruppe" }, T(gruppe.n)) : null,
@@ -16874,6 +17151,7 @@ function TwTourHost({ account }) {
         h("p", { className: "twt-text", id: "twt-text" }, text),
         zeigeInhalt && ziel.pro ? h("div", { className: "twt-pro" }, L("In Pro enthalten", "Included in Pro")) : null,
         kannGenauer ? h("button", { type: "button", className: "twt-mehr", onClick: genauer, "data-twt-k": "genauer" }, L("Diesen Bereich genauer erklären", "Explain this area in detail")) : null,
+        kannRaus ? h("button", { type: "button", className: "twt-mehr leise", onClick: detailRaus, "data-twt-k": "raus" }, e.ein ? L("Zurück zur Haupttour", "Back to the main tour") : L("Diesen Bereich überspringen", "Skip this area")) : null,
         h("div", { className: "twt-fuss" },
           st.i > 0 ? h("button", { type: "button", className: "twt-k rand", onClick: zurueck, "data-twt-k": "zurueck" }, L("Zurück", "Back")) : null,
           h("button", { type: "button", className: "twt-k gold", ref: weiterK, onClick: weiter, "data-twt-k": "weiter" }, letzter ? L("Fertig", "Done") : L("Weiter", "Next")))))), document.body);
@@ -16886,14 +17164,13 @@ function TwTourEinst({ onClose, verein }) {
   const los = (modus, bereich) => { try { if (typeof onClose === "function") onClose(); } catch (e) { } setTimeout(() => { try { window.dispatchEvent(new CustomEvent("tw-tour-start", { detail: { modus: modus, bereich: bereich || "", art: art } })); } catch (e) { } }, 160); };
   return h("div", { className: "tw-einst-benach tw-tour-einst", "data-tw-tour-karte": art },
     h("div", { style: { fontFamily: FONT_BODY, fontSize: 16, fontWeight: 700, color: INK, marginBottom: 10 } }, L("Einführung", "Introduction")),
-    h("p", null, L("Lerne TransferWire Schritt für Schritt kennen. Die kurze Tour dauert rund zwei Minuten.", "Get to know TransferWire step by step. The short tour takes about two minutes.")),
+    h("p", null, L("Lerne TransferWire Schritt für Schritt kennen. Die Tour dauert rund vier Minuten, die komplette Führung mit allen Details rund zehn.", "Get to know TransferWire step by step. The tour takes about four minutes, the full guided tour with every detail about ten.")),
     h("div", { className: "twt-reihe" },
-      h("button", { type: "button", className: "twt-k gold", onClick: () => los("haupt"), "data-tw-tour-start": "haupt" }, L("Kurze Tour starten", "Start short tour")),
+      h("button", { type: "button", className: "twt-k gold", onClick: () => los("haupt"), "data-tw-tour-start": "haupt" }, L("Tour starten", "Start the tour")),
       h("button", { type: "button", className: "twt-k rand", onClick: () => los("komplett"), "data-tw-tour-start": "komplett" }, L("Komplette Führung", "Full guided tour"))),
     h("div", { className: "twt-klein" }, L("Einen Bereich genauer erklären", "Explain one area in detail")),
-    h("div", { className: "twt-chips" }, (TWT_DET_ART[art] || []).map(k => h("button", { key: k, type: "button", className: "twt-chip", onClick: () => los("bereich", k), "data-tw-tour-start": k }, en ? TWT_DETAIL[k].n[1] : TWT_DETAIL[k].n[0], h("span", null, en ? TWT_DETAIL[k].u[1] : TWT_DETAIL[k].u[0])))));
+    h("div", { className: "twt-chips" }, (TWT_DET_CHIPS[art] || []).map(k => h("button", { key: k, type: "button", className: "twt-chip", onClick: () => los("bereich", k), "data-tw-tour-start": k }, en ? TWT_DETAIL[k].n[1] : TWT_DETAIL[k].n[0], h("span", null, en ? TWT_DETAIL[k].u[1] : TWT_DETAIL[k].u[0])))));
 }
-
 /* Einstellungen: eigener Punkt "Desktop-App" */
 function TwPwaEinst() {
   const art = useTwPwa(); const en = LANG === "en"; twPwaCss(); const h = React.createElement;
