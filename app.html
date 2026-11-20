@@ -12100,7 +12100,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261120-frei2";
+const VS_VERSION = "20261120-tourpro";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -16912,6 +16912,10 @@ function twtRect(e, pad, kappe) {
 }
 function twtKlemmen(o, vw, vh) { const x = Math.max(4, o.l), y = Math.max(4, o.t); const w = Math.min(vw - 4, o.r) - x, h = Math.min(vh - 4, o.b) - y; return w >= 8 && h >= 8 ? { x: x, y: y, w: w, h: h } : null; }
 
+/* Tour: Pro ansehen und zurück (20.11.2026, Boss 18:05): Stelle der Führung merken, „Zurück“ auf der Abo-Seite setzt sie fort */
+function twtMerkeFuerPro(st, account) {
+  try { if (st) window.__twtFortsetzen = { st: Object.assign({}, st), email: String((account && account.email) || "").toLowerCase(), view: window.TW_VIEW || "", am: Date.now(), zurueckAm: 0 }; } catch (e) { }
+}
 function TwTourHost({ account }) {
   const h = React.createElement; const en = LANG === "en"; const L = (de, e) => (en ? e : de); const T = a => (a ? (en ? a[1] : a[0]) : "");
   const [st, setSt] = React.useState(null);   // {phase: "start"|"lauf"|"ende", art, verein, quelle, modus, folge, i, zurueck, rueckDialog, richtung}
@@ -16959,6 +16963,19 @@ function TwTourHost({ account }) {
     return () => window.removeEventListener("tw-tour-start", f);
   }, [account && account.email]);
 
+  /* Rückkehr von der Abo-Seite („Zurück“): an derselben Stelle weiter */
+  React.useEffect(() => {
+    const f = window.__twtFortsetzen; const em = String((account && account.email) || "").toLowerCase();
+    if (!f || !em) return;
+    if (!f.zurueckAm || f.email !== em || Date.now() - f.zurueckAm > 60000 || Date.now() - f.am > 3600000) { window.__twtFortsetzen = null; return; }
+    let aus = false;
+    const t = setTimeout(() => {
+      if (aus || stRef.current) return; window.__twtFortsetzen = null;
+      try { const e0 = f.st.phase === "lauf" && f.st.folge ? f.st.folge[f.st.i] : null; if (f.view && !(e0 && e0.s && e0.s.v) && window.TW_VIEW !== f.view && typeof window.twNzNavigieren === "function") window.twNzNavigieren(f.view); } catch (e) { }
+      setze(Object.assign({}, f.st, { richtung: 1 }));
+    }, 450);
+    return () => { aus = true; clearTimeout(t); };
+  }, [account && account.email]);
   const starten = (modus) => { const x = stRef.current; if (!x) return; setze({ phase: "lauf", art: x.art, verein: x.verein, quelle: x.quelle, modus: modus, folge: twtFolge(x.art, modus, "", twtLeiste()), i: 0, zurueck: window.TW_VIEW || "" }); };
   const zurStartseite = (x) => { try { if (x && x.zurueck && window.TW_VIEW !== x.zurueck && typeof window.twNzNavigieren === "function") { window.twNzNavigieren(x.zurueck); window.scrollTo(0, 0); } } catch (e) { } };
   const aufraeumen = () => { if (lage.current.geoeffnet) { lage.current.geoeffnet = false; twtAufraeumen([]); } };
@@ -17199,7 +17216,7 @@ function TwTourHost({ account }) {
         h("h2", { id: "twt-ende-titel" }, L("Das war der Rundgang", "That's the tour")),
         twtFrei() ? h("div", { className: "twt-probox", "data-twt-probox": "1" }, h("div", { className: "twt-probox-kopf" }, typeof TwSiegel === "function" ? h(TwSiegel, null) : null, h("span", null, L("Das bekommst du mit Pro", "What you get with Pro"))),
           h("ul", null, [["Alle Bedarfe in „Verein sucht“ mit Prognose", "Every need in “Club seeks” with forecast"], ["Spieler-Markt: Spieler anbieten und finden", "Player Market: offer and find players"], ["Vereinskontakte zu Sportdirektoren und Scouting-Leitern", "Club contacts to sporting directors and heads of scouting"], ["Scouting mit Talent-Rankings und Listen", "Scouting with talent rankings and lists"]].map((x, j) => h("li", { key: j }, L(x[0], x[1])))),
-          h("button", { type: "button", className: "twt-k rand", onClick: () => { schliessen("fertig"); twZuPro("monat"); }, "data-twt-k": "pro-ende" }, L("Pro ansehen", "See Pro"))) : null,
+          h("button", { type: "button", className: "twt-k rand", onClick: () => { twtMerkeFuerPro(stRef.current, account); schliessen("fertig"); twZuPro("monat"); }, "data-twt-k": "pro-ende" }, L("Pro ansehen", "See Pro"))) : null,
         h("p", null, L("Möchtest du einen Bereich genauer kennenlernen?", "Would you like a closer look at one area?")),
         h("div", { className: "twt-chips" }, keys.map(k => h("button", { key: k, type: "button", className: "twt-chip", onClick: () => detailAusEnde(k), "data-twt-detail": k }, T(TWT_DETAIL[k].n), h("span", null, T(TWT_DETAIL[k].u))))),
         h("div", { className: "twt-wahl" },
@@ -17234,7 +17251,7 @@ function TwTourHost({ account }) {
         h("h3", { className: "twt-titel", id: "twt-titel" }, T(frei && s.tf ? s.tf : s.t)),
         h("p", { className: "twt-text", id: "twt-text" }, text),
         zeigeInhalt && ziel.pro && s.pv ? h("div", { dangerouslySetInnerHTML: { __html: twtVorschau(s.pv) } }) : null,
-        zeigeInhalt && (ziel.pro || (frei && s.prob)) ? h("div", { className: "twt-proreihe" }, h("div", { className: "twt-pro" }, L("In Pro enthalten", "Included in Pro")), frei ? h("button", { type: "button", className: "twt-prolink", onClick: () => { schliessen("abbruch"); twZuPro("monat"); }, "data-twt-k": "pro" }, L("Pro ansehen", "See Pro")) : null) : null,
+        zeigeInhalt && (ziel.pro || (frei && s.prob)) ? h("div", { className: "twt-proreihe" }, h("div", { className: "twt-pro" }, L("In Pro enthalten", "Included in Pro")), frei ? h("button", { type: "button", className: "twt-prolink", onClick: () => { twtMerkeFuerPro(stRef.current, account); schliessen("abbruch"); twZuPro("monat"); }, "data-twt-k": "pro" }, L("Pro ansehen", "See Pro")) : null) : null,
         kannGenauer ? h("button", { type: "button", className: "twt-mehr", onClick: genauer, "data-twt-k": "genauer" }, L("Diesen Bereich genauer erklären", "Explain this area in detail")) : null,
         kannRaus ? h("button", { type: "button", className: "twt-mehr leise", onClick: detailRaus, "data-twt-k": "raus" }, e.ein ? L("Zurück zur Haupttour", "Back to the main tour") : L("Diesen Bereich überspringen", "Skip this area")) : null,
         h("div", { className: "twt-fuss" },
@@ -17428,6 +17445,7 @@ function SubscribePage({
   onBack,
   onLegal
 }) {
+  const [twtAusTour] = useState(() => !!(window.__twtFortsetzen && !window.__twtFortsetzen.zurueckAm)); useTwZurueck(twtAusTour, onBack);   /* Tour: Pro ansehen und zurück */
   const [name, setName] = useState("");
   const [email, setEmail] = useState(presetEmail || "");
   const [legalOk, setLegalOk] = useState(false);
@@ -26310,7 +26328,7 @@ function TransferWire() {
       setAccount(a);
       setPage("app");
     },
-    onBack: () => setPage(account && active ? "app" : "landing"),
+    onBack: () => { try { if (window.__twtFortsetzen) window.__twtFortsetzen.zurueckAm = Date.now(); } catch (e) { } setPage(account && active ? "app" : "landing"); },
     onLegal: setPubLegal
   });else if (page === "cancel") content = /*#__PURE__*/React.createElement(CancelPage, {
     presetEmail: account ? account.email : "",
