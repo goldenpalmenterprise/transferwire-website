@@ -12100,7 +12100,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261120-tourpro";
+const VS_VERSION = "20261120-hsort";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -14755,7 +14755,14 @@ function cm5Status(p, aehnlich) {
   const d = CM5_STATUS[k];
   return { lab: en ? d[1] : d[0], bg: d[2], fg: d[3], stufe: d[4], k: d[5] };
 }
-const CM5_FILTER_LEER = { art: "", liga: "", land: "", verif: false, karte: false };
+const CM5_FILTER_LEER = { art: "", liga: "", land: "", verif: false, karte: false, sort: "neu" };   /* Transferhinweise: Sortierung (20.11.2026, Boss 19:44) */
+function cm5Rang(x, n) {   // verlässlich zuerst: Prüfstand, Verlässlichkeit der Feed-Karte, verifizierter Autor, dann neueste
+  const p = x.p; const hw = (p && p.hinweis) || {}; const st = cm5Status(p, n);
+  return [Number(st.stufe) || 0, hw.karte_news_id ? (Number(hw.verlaesslichkeit) || 2) : 0, ((hw.autor && hw.autor.haken) || p.author_haken) ? 1 : 0, new Date(p.created_at).getTime() || 0];
+}
+(function () { try { if (document.getElementById("tw-cm5-sort-stil")) return; const st = document.createElement("style"); st.id = "tw-cm5-sort-stil";   // Filterzeile am Handy ohne Überstand
+  st.textContent = ".tw-cm5-filter>select{min-width:0;flex:0 1 auto}@media (max-width:640px){.tw-cm5-filter>select{flex:1 1 calc(50% - 6px);max-width:none!important}.tw-cm5-filter>label{flex:1 1 calc(50% - 6px);min-width:0}}";
+  (document.head || document.documentElement).appendChild(st); } catch (e) { } })();
 function cm5Passt(p, fl) {
   const hw = (p && p.hinweis) || {};
   if (fl.art && hw.hinweis_art !== fl.art) return false;
@@ -14807,6 +14814,8 @@ function CommunityVue({ posts, suche, onSubmit, busy, msg, account, onMelden, on
   const geparst = useMemo(() => (posts || []).map(p => Object.assign({ p: p }, cmParse(p))), [posts]);
   const aehnlich = x => { const hw = x.p.hinweis; if (hw && hw.mehrfach === true) return Math.max(1, geparst.filter(y => y.p.id !== x.p.id && y.p.hinweis && y.p.hinweis.mehrfach === true && cmNorm(y.verein) === cmNorm(x.verein)).length); const v = cmNorm(x.verein), pos = cmNorm(x.position); if (!v) return 0; return geparst.filter(y => y.p.id !== x.p.id && cmNorm(y.verein) === v && (!pos || !cmNorm(y.position) || cmNorm(y.position) === pos)).length; };
   const sichtbar = geparst.filter(x => cmtyFilter([x.p], suche).length && cm5Passt(x.p, fl));
+  if (fl.sort === "verl") { const r = new Map(sichtbar.map(x => [x, cm5Rang(x, aehnlich(x))])); sichtbar.sort((a, b) => { const A = r.get(a), B = r.get(b); for (let i = 0; i < A.length; i++) if (A[i] !== B[i]) return B[i] - A[i]; return 0; }); }
+  else sichtbar.sort((a, b) => (new Date(b.p.created_at).getTime() || 0) - (new Date(a.p.created_at).getTime() || 0));
   const filterAktiv = !!(fl.art || fl.liga || fl.land || fl.verif || fl.karte);
   const speichernToggle = id => { const n = gespeichert.indexOf(id) >= 0 ? gespeichert.filter(i => i !== id) : [...gespeichert, id]; setGespeichert(n); mkSchreib(CM_SAVED_KEY, n); };
   const ergaenzen = x => { setVorlage({ art: x.meta ? x.meta.art : CM_ARTEN[0], verein: x.verein, spieler: x.position, zeitraum: CM_ZEITRAEUME.indexOf(x.zeitraum) >= 0 ? x.zeitraum : CM_ZEITRAEUME[0], liga: x.meta ? x.meta.liga : "" }); setPanel(true); };
@@ -14850,7 +14859,9 @@ function CommunityVue({ posts, suche, onSubmit, busy, msg, account, onMelden, on
   const filterZeile = geparst.length ? h("div", { className: "tw-cm5-filter", "data-cm5-filterzeile": "1", style: { display: "flex", alignItems: "center", gap: "8px 12px", flexWrap: "wrap", fontFamily: FONT_BODY } },
     sel("art", "hinweis_art", en ? "All types" : "Alle Arten", cm5ArtText), sel("liga", "liga", en ? "All leagues" : "Alle Ligen"), sel("land", "land", en ? "All countries" : "Alle L\u00e4nder"),
     kreuz("verif", en ? "verified authors only" : "nur verifizierte Autoren"), kreuz("karte", en ? "in the feed only" : "nur mit Karte im Feed"),
-    filterAktiv ? h("button", { type: "button", onClick: () => setFl(CM5_FILTER_LEER), "data-cm5-filter": "reset", style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, padding: "6px 11px", borderRadius: 8, border: "1px solid " + HAIR, background: "#fff", color: "var(--t2)" } }, en ? "Reset filters" : "Filter zur\u00fccksetzen") : null,
+    h("select", { key: "sort", value: fl.sort || "neu", onChange: e => setFl(Object.assign({}, fl, { sort: e.target.value })), "aria-label": en ? "Sort order" : "Sortierung", "data-cm5-filter": "sort", style: selStil },
+      h("option", { value: "neu" }, en ? "Newest first" : "Neueste zuerst"), h("option", { value: "verl" }, en ? "Most reliable first" : "Verlässlichste zuerst")),
+    filterAktiv ? h("button", { type: "button", onClick: () => setFl(CM5_FILTER_LEER), "data-cm5-filter": "reset", style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 800, padding: "6px 11px", borderRadius: 8, border: "1px solid " + HAIR, background: "var(--karte)", color: "var(--t2)" } }, en ? "Reset filters" : "Filter zur\u00fccksetzen") : null,
     h("span", { style: { marginLeft: "auto", fontFamily: FONT_BODY, fontSize: 12, fontWeight: 700, color: MUTED, whiteSpace: "nowrap" }, "data-cm5-treffer": sichtbar.length }, filterAktiv ? sichtbar.length + " " + (en ? "of" : "von") + " " + geparst.length : "")) : null;
   const inhalt = h("div", { style: { display: "grid", gap: 12 } }, composer, filterZeile, sichtbar.length ? sichtbar.map(karte) : leerZustand);
   return h(React.Fragment, null, banner, h("div", { className: "tw-cmgrid", style: { display: "grid", gridTemplateColumns: breit ? "minmax(0, 1fr) 300px" : "minmax(0, 1fr)", gap: 14, alignItems: "start" } }, inhalt, aside), h(CommunityPanel, { offen: panel, onClose: () => setPanel(false), onSubmit: onSubmit, busy: busy, msg: msg, account: account, vorlage: vorlage }));
