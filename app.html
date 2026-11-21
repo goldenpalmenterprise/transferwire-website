@@ -12100,7 +12100,7 @@ function PitchIcon({ pos, color }) {
 }
 // ===== Verein sucht (neue Ansicht, Phase 1) – nur mit Schalter ?vs=neu bzw. tw_vs_neu =====
 const VS_NEU = true; // 07.10.2026: offizieller Release der Ansicht "Verein sucht" (Phase 2), alte Ansicht entfernt
-const VS_VERSION = "20261120-hrot";
+const VS_VERSION = "20261121-einst";
 let vsLadePromise = null;
 const ladeVereinSucht = () => {
   if (window.VS) return Promise.resolve(window.VS);
@@ -18056,6 +18056,8 @@ function TeamEinladung({ account }) {
               h(PBtn, { kind: "green", onClick: () => { if (!busy) einloesen(); } }, busy ? "…" : (en ? "Unlock access" : "Zugang freischalten")),
               h("button", { type: "button", onClick: () => schliessen(false), style: { cursor: "pointer", background: "transparent", color: INK, border: `1px solid ${HAIR}`, borderRadius: 10, padding: "12px 20px", fontFamily: FONT_BODY, fontSize: 14, fontWeight: 700 } }, en ? "Later" : "Sp\u00e4ter")))));
 }
+/* Einstellungen: festes Raster (21.11.2026, Boss 20.11. 23:58) */
+(function () { try { if (document.getElementById("tw-einst-raster")) return; const st = document.createElement("style"); st.id = "tw-einst-raster"; st.textContent = ".tw-einst-innen{grid-template-columns:repeat(12,minmax(0,1fr))!important;align-items:stretch!important}.tw-einst-innen>*{grid-column:1/-1}.tw-einst-zelle{display:flex;min-width:0}.tw-einst-zelle:empty{display:none}.tw-einst-zelle>*{flex:1 1 auto;margin:0!important;min-width:0;box-sizing:border-box}.tw-einst-karte{display:flex;flex-direction:column;box-sizing:border-box}.tw-einst-konto>:last-child{margin-top:auto!important;padding-top:14px}.tw-einst-konto.frei>:last-child{display:none!important}.tw-einst-abo>:last-child:not(p):not(:nth-child(2)){margin-top:auto!important}.tw-einst-team .tw-team-karte{display:flex;flex-direction:column;padding:18px 20px!important}.tw-einst-team .tw-team-karte>div:first-child{font-size:16px!important;margin-bottom:8px!important}.tw-einst-team .tw-team-karte>div:nth-child(3):last-child{margin-top:auto}@media (min-width:760px){.tw-einst-konto,.tw-einst-abo,.tw-einst-team,.tw-einst-fw{grid-column:span 6}.tw-einst-pwa{grid-column:1/-1}.tw-einst-innen:not(:has(.tw-einst-team>*)) .tw-einst-pwa{grid-column:span 6}.tw-einst-einf{grid-column:1/-1}}@media (min-width:1200px){.tw-einst-konto,.tw-einst-abo,.tw-einst-team{grid-column:span 4}.tw-einst-innen:not(:has(.tw-einst-team>*)) .tw-einst-konto,.tw-einst-innen:not(:has(.tw-einst-team>*)) .tw-einst-abo{grid-column:span 6}.tw-einst-fw,.tw-einst-pwa,.tw-einst-innen:not(:has(.tw-einst-team>*)) .tw-einst-pwa{grid-column:span 6}.tw-einst-einf .tw-tour-einst{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);column-gap:32px;align-content:start}.tw-einst-einf .tw-tour-einst>:nth-child(1){grid-column:1;grid-row:1}.tw-einst-einf .tw-tour-einst>:nth-child(2){grid-column:1;grid-row:2}.tw-einst-einf .tw-tour-einst>:nth-child(3){grid-column:1;grid-row:3;align-self:start}.tw-einst-einf .tw-tour-einst>.twt-klein{grid-column:2;grid-row:1;margin:0 0 10px;align-self:end}.tw-einst-einf .tw-tour-einst>.twt-chips{grid-column:2;grid-row:2/span 3;margin:0;align-self:start;grid-template-columns:repeat(3,minmax(0,1fr))}.tw-einst-einf .tw-tour-einst>.twt-chips:has(>:nth-child(10)){grid-template-columns:repeat(5,minmax(0,1fr))}}"; (document.head || document.documentElement).appendChild(st); } catch (e) { } })();
 function SettingsOverlay({
   account,
   onClose,
@@ -18125,6 +18127,7 @@ function SettingsOverlay({
   }, /*#__PURE__*/React.createElement(X, {
     size: 15
   }), React.createElement("span", null, LANG === "en" ? "Close" : "Schließen")))), /*#__PURE__*/React.createElement("div", {
+    className: "tw-einst-karte tw-einst-konto" + (istPro ? "" : " frei"),
     style: {
       background: CARD,
       border: `1px solid ${HAIR}`,
@@ -18150,6 +18153,7 @@ function SettingsOverlay({
     k: t("st_role"),
     v: nzRolleText(account.rolle)
   }) : null, React.createElement(NzVerifLeiste, { account: account, kompakt: true }), /*#__PURE__*/React.createElement(Row, { k: t("st_plan"), v: istVerein ? (LANG === "en" ? "Clubs" : "Vereine") + " \u00b7 " + nzVk.name : istEnt ? "Enterprise" : istPro ? "Pro" : t("st_plan_test") }), /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginTop: 12, flexWrap: "wrap" } }, /*#__PURE__*/React.createElement("button", { type: "button", onClick: onSubscribe, style: { cursor: "pointer", fontFamily: FONT_BODY, fontSize: 13, fontWeight: 800, color: "var(--gold-schrift)", background: "var(--gold)", border: "1px solid var(--gold)", borderRadius: 10, padding: "10px 14px" }, className: "tw-gold-knopf" }, istVerein ? (LANG === "en" ? "View plan" : "Tarif ansehen") : istPro ? (LANG === "en" ? "Plans & seats" : "Tarif & Nutzer") : (LANG === "en" ? "Upgrade to Pro" : "Auf Pro upgraden")), /*#__PURE__*/React.createElement("span", { style: { fontFamily: FONT_BODY, fontSize: 12, color: MUTED } }, istVerein ? (LANG === "en" ? "\u201cClubs\u201d plan: billing by agreement with your club." : "Tarif \u201eVereine\u201c: Abrechnung nach Vereinbarung mit deinem Verein.") : istPro ? (LANG === "en" ? "Enterprise: all Pro features for the whole team, 5 seats included." : "Enterprise: alle Pro-Funktionen f\u00fcrs ganze Team, 5 Nutzer inklusive.") : (LANG === "en" ? "Pro adds Club seeks, club contacts, network, workspace and scouting." : "Pro bringt Verein sucht, Vereinskontakte, Netzwerk, Workspace und Scouting.")))), /*#__PURE__*/React.createElement("div", {
+    className: "tw-einst-karte tw-einst-abo",
     style: {
       background: CARD,
       border: `1px solid ${HAIR}`,
@@ -18207,8 +18211,8 @@ function SettingsOverlay({
     onClick: onCancel,
     kind: "ghost",
     full: true
-  }, t("st_form_cancel")))), React.createElement(TeamKarte, { account: account, info: teamInfo }), /*#__PURE__*/React.createElement("div", {
-    className: "tw-einst-benach"
+  }, t("st_form_cancel")))), React.createElement("div", { className: "tw-einst-zelle tw-einst-team" }, React.createElement(TeamKarte, { account: account, info: teamInfo })), /*#__PURE__*/React.createElement("div", {
+    className: "tw-einst-benach tw-einst-fw"
   }, React.createElement(FwEinstHinweis, null), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_BODY,
@@ -18284,7 +18288,7 @@ function SettingsOverlay({
       fontSize: 11,
       color: MUTED
     }
-  }, (watch && watch.items || []).length, " ", t("set_watch_count"), " · ", t("set_watch_hint"))), React.createElement(TwPwaEinst, null), React.createElement(TwTourEinst, { onClose: onClose, verein: istVerein }), /*#__PURE__*/React.createElement("button", {
+  }, (watch && watch.items || []).length, " ", t("set_watch_count"), " · ", t("set_watch_hint"))), React.createElement("div", { className: "tw-einst-zelle tw-einst-pwa" }, React.createElement(TwPwaEinst, null)), React.createElement("div", { className: "tw-einst-zelle tw-einst-einf" }, React.createElement(TwTourEinst, { onClose: onClose, verein: istVerein })), /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "tw-einst-abmelden",
     onClick: onLogout,
